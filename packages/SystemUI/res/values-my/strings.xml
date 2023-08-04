@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"အထောက်အထားစိစစ်ပြီးပြီ"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်ရန်"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ပင်နံပါတ်သုံးရန်"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ပုံစံကို သုံးရန်"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"စကားဝှက် သုံးရန်"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ပြန်ထည့်ရန် သင်၏ လက်ရှိ မျက်နှာနမူနာကို ဖျက်လိုက်ပါမည်။\n\nဖုန်းလော့ခ်ဖွင့်ရန်အတွက် သင့်မျက်နှာသုံးရန် ဤတူးလ်ကို စနစ်ပြန်ထည့်ရမည်။"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို စနစ်ထည့်သွင်း၍မရပါ။ ဆက်တင်များသို့သွားပြီး ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"မျက်နှာကို မမှတ်မိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"မျက်နှာဖြင့် ဖွင့်လိုက်သည်"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"မျက်နှာ မှတ်မိသည်"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ထပ်စမ်းရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ဤစက်ကို <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> က ပိုင်ဆိုင်သည်"</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"နောက်ပင်နံပါတ်တစ်ခု စမ်းကြည့်ရန်"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> အတွက် အပြောင်းအလဲကို အတည်ပြုပါ"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုကြည့်ရန် ပွတ်ဆွဲပါ"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"မျက်နှာ အထောက်အထားစိစစ်ခြင်းကို ထပ်စမ်းရန်"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် ဤမီဒီယာထိန်းချုပ်မှု ဖျောက်ထားမလား။"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant နားထောင်နေသည်"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ဆက်တင်များတွင် မူရင်းမှတ်စုများအက်ပ် သတ်မှတ်ပါ"</string>
     <string name="install_app" msgid="5066668100199613936">"အက်ပ် ထည့်သွင်းရန်"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"မိုက်ခရိုဖုန်းနှင့် ကင်မရာ"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"လတ်တလော အက်ပ်အသုံးပြုမှု"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"လတ်တလောအသုံးပြုမှုကို ကြည့်ရန်"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"ပြီးပြီ"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"ရွေးစရာများကို ချဲ့ပြပါ"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"လျှော့ပြပါ"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"ဤအက်ပ်ကို ပိတ်ရန်"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ပိတ်ထားသည်"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"ဝန်ဆောင်မှုကို စီမံရန်"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"သုံးခွင့် စီမံရန်"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"ဖုန်းခေါ်ဆိုမှုက သုံးနေသည်"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"ဖုန်းခေါ်ဆိုမှုတွင် လတ်တလောသုံးထားသည်"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> က သုံးနေသည်"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"<xliff:g id="APP_NAME">%1$s</xliff:g> က လတ်တလောသုံးထားသည်"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) က သုံးနေသည်"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) က လတ်တလောသုံးထားသည်"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) က သုံးနေသည်"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) က လတ်တလောသုံးထားသည်"</string>
 </resources>
