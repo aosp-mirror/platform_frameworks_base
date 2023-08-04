@@ -121,6 +121,9 @@
     <dimen name="navigation_edge_cancelled_arrow_height">0dp</dimen>
     <dimen name="navigation_edge_cancelled_edge_corners">6dp</dimen>
 
+    <!-- Height of the system icons container view in the status bar -->
+    <dimen name="status_bar_system_icons_height">@dimen/status_bar_icon_size_sp</dimen>
+
     <!-- New sp height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size_sp">@*android:dimen/status_bar_icon_size_sp</dimen>
     <!-- Original dp height of notification icons in the status bar -->
@@ -162,13 +165,21 @@
 
     <!-- Size of the view displaying the wifi inout icon in the status bar. -->
     <dimen name="status_bar_wifi_inout_container_size">17sp</dimen>
-    <!-- Size of the view displaying the wifi signal icon in the status bar. -->
-    <dimen name="status_bar_wifi_signal_size">13sp</dimen>
+    <!-- Size of the view displaying the wifi signal icon in the status bar. This value should
+        match the core/status_bar_system_icon_size and change to sp unit -->
+    <dimen name="status_bar_wifi_signal_size">15sp</dimen>
 
     <!-- Size of the view displaying the mobile inout icon in the status bar. -->
     <dimen name="status_bar_mobile_inout_container_size">17sp</dimen>
-    <!-- Size of the view displaying the mobile signal icon in the status bar. -->
-    <dimen name="status_bar_mobile_signal_size">13sp</dimen>
+    <!-- Size of the view displaying the mobile signal icon in the status bar. This value should
+        match the core/status_bar_system_icon_size and change to sp unit -->
+    <dimen name="status_bar_mobile_signal_size">15sp</dimen>
+    <!-- Size of the view displaying the mobile signal icon in the status bar. This value should
+        match the viewport height of mobile signal drawables such as ic_lte_mobiledata -->
+    <dimen name="status_bar_mobile_type_size">16sp</dimen>
+    <!-- Size of the view displaying the mobile roam icon in the status bar. This value should
+        match the viewport size of drawable stat_sys_roaming -->
+    <dimen name="status_bar_mobile_roam_size">8sp</dimen>
 
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
     <dimen name="status_bar_airplane_spacer_width">4sp</dimen>
@@ -343,8 +354,8 @@
     <dimen name="status_bar_icons_padding_start">11dp</dimen>
 
     <dimen name="status_bar_icons_padding_end">0dp</dimen>
-    <dimen name="status_bar_icons_padding_bottom">8dp</dimen>
-    <dimen name="status_bar_icons_padding_top">8dp</dimen>
+    <dimen name="status_bar_icons_padding_bottom">0dp</dimen>
+    <dimen name="status_bar_icons_padding_top">0dp</dimen>
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_horizontal_margin">0sp</dimen>
