@@ -48,8 +48,8 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
-import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -63,6 +63,7 @@ import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -223,9 +224,7 @@ public final class MovePackageHelper {
         }
 
         try {
-            for (int index = 0; index < installedUserIds.length; index++) {
-                prepareUserDataForVolumeIfRequired(volumeUuid, installedUserIds[index], storage);
-            }
+            prepareUserStorageForMove(currentVolumeUuid, volumeUuid, installedUserIds);
         } catch (RuntimeException e) {
             freezer.close();
             throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
@@ -380,27 +379,20 @@ public final class MovePackageHelper {
         return true;
     }
 
-    private void prepareUserDataForVolumeIfRequired(String volumeUuid, int userId,
-            StorageManager storageManager) {
-        if (TextUtils.isEmpty(volumeUuid)
-                || doesDataDirectoryExistForUser(volumeUuid, userId)) {
-            return;
-        }
+    private void prepareUserStorageForMove(String fromVolumeUuid, String toVolumeUuid,
+            int[] userIds) {
         if (DEBUG_INSTALL) {
-            Slog.d(TAG, "Preparing user directories for user u" + userId + " for UUID "
-                    + volumeUuid);
+            Slog.d(TAG, "Preparing user directories before moving app, from UUID " + fromVolumeUuid
+                    + " to UUID " + toVolumeUuid);
         }
-        final UserInfo user = mPm.mUserManager.getUserInfo(userId);
-        if (user == null) return;
-        // This call is same as StorageEventHelper#loadPrivatePackagesInner which prepares
-        // the storage before reconciling apps
-        storageManager.prepareUserStorage(volumeUuid, user.id, user.serialNumber,
-                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-    }
-
-    private boolean doesDataDirectoryExistForUser(String uuid, int userId) {
-        final File userDirectoryFile = Environment.getDataUserCeDirectory(uuid, userId);
-        return userDirectoryFile != null && userDirectoryFile.exists();
+        final StorageManagerInternal smInternal =
+                mPm.mInjector.getLocalService(StorageManagerInternal.class);
+        final ArrayList<UserInfo> users = new ArrayList<>();
+        for (int userId : userIds) {
+            final UserInfo user = mPm.mUserManager.getUserInfo(userId);
+            users.add(user);
+        }
+        smInternal.prepareUserStorageForMove(fromVolumeUuid, toVolumeUuid, users);
     }
 
     public static class MoveCallbacks extends Handler {
