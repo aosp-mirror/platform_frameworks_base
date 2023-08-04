@@ -22,6 +22,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.am.OomAdjusterModernImpl.ProcessRecordNode.NUM_NODE_TYPE;
 
 import static java.util.Objects.requireNonNull;
 
@@ -63,6 +64,7 @@ import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
 import com.android.server.FgThread;
+import com.android.server.am.OomAdjusterModernImpl.ProcessRecordNode;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -433,6 +435,8 @@ class ProcessRecord implements WindowProcessListener {
      * Whether or not we should skip the process group creation.
      */
     volatile boolean mSkipProcessGroupCreation;
+
+    final ProcessRecordNode[] mLinkedNodes = new ProcessRecordNode[NUM_NODE_TYPE];
 
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
@@ -1114,6 +1118,7 @@ class ProcessRecord implements WindowProcessListener {
         mState.onCleanupApplicationRecordLSP();
         mServices.onCleanupApplicationRecordLocked();
         mReceivers.onCleanupApplicationRecordLocked();
+        mService.mOomAdjuster.onProcessEndLocked(this);
 
         return mProviders.onCleanupApplicationRecordLocked(allowRestart);
     }
