@@ -448,7 +448,7 @@ class UserUsageStatsService {
      */
     @Nullable
     private <T> List<T> queryStats(int intervalType, final long beginTime, final long endTime,
-            StatCombiner<T> combiner) {
+            StatCombiner<T> combiner, boolean skipEvents) {
         if (intervalType == INTERVAL_BEST) {
             intervalType = mDatabase.findBestFitBucket(beginTime, endTime);
             if (intervalType < 0) {
@@ -488,7 +488,7 @@ class UserUsageStatsService {
 
         // Get the stats from disk.
         List<T> results = mDatabase.queryUsageStats(intervalType, beginTime,
-                truncatedEndTime, combiner);
+                truncatedEndTime, combiner, skipEvents);
         if (DEBUG) {
             Slog.d(TAG, "Got " + (results != null ? results.size() : 0) + " results from disk");
             Slog.d(TAG, "Current stats beginTime=" + currentStats.beginTime +
@@ -518,21 +518,21 @@ class UserUsageStatsService {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sUsageStatsCombiner, true);
     }
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner, true);
     }
 
     List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
         if (!validRange(checkAndGetTimeLocked(), beginTime, endTime)) {
             return null;
         }
-        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
+        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner, true);
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime, int flags) {
@@ -587,7 +587,7 @@ class UserUsageStatsService {
                         }
                         return true;
                     }
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -637,7 +637,7 @@ class UserUsageStatsService {
                         }
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -684,7 +684,7 @@ class UserUsageStatsService {
                         accumulatedResult.add(event);
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -770,7 +770,7 @@ class UserUsageStatsService {
                         }
                     }
                     return true;
-                });
+                }, false);
 
         if (results == null || results.isEmpty()) {
             // There won't be any new events added earlier than endTime, so we can use endTime to
@@ -1059,7 +1059,7 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
-    void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
+    static void printEvent(IndentingPrintWriter pw, Event event, boolean prettyDates) {
         pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
         pw.printPair("type", eventToString(event.mEventType));
         pw.printPair("package", event.mPackage);
@@ -1124,7 +1124,7 @@ class UserUsageStatsService {
                         }
                         return true;
                     }
-                });
+                }, false);
 
         pw.print("Last 24 hour events (");
         if (prettyDates) {

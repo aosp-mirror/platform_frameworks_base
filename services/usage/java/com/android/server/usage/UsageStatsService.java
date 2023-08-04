@@ -1886,6 +1886,18 @@ public class UsageStatsService extends SystemService implements
                         mUserState.valueAt(i).dump(idpw, pkgs, compact);
                         idpw.println();
                     }
+                } else {
+                    final LinkedList<Event> pendingEvents = mReportedEvents.get(userId);
+                    if (pendingEvents != null && !pendingEvents.isEmpty()) {
+                        final int eventCount = pendingEvents.size();
+                        idpw.println("Pending events: count=" + eventCount);
+                        idpw.increaseIndent();
+                        for (int idx = 0; idx < eventCount; idx++) {
+                            UserUsageStatsService.printEvent(idpw, pendingEvents.get(idx), true);
+                        }
+                        idpw.decreaseIndent();
+                        idpw.println();
+                    }
                 }
                 idpw.decreaseIndent();
             }
