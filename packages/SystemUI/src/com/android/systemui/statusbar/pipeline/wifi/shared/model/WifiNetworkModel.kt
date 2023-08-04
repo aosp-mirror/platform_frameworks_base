@@ -314,11 +314,15 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         }
 
         companion object {
+            // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX] instead
+            // once the migration to WifiTrackerLib is complete.
             @VisibleForTesting internal const val MAX_VALID_LEVEL = 4
         }
     }
 
     companion object {
+        // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN] instead
+        // once the migration to WifiTrackerLib is complete.
         @VisibleForTesting internal const val MIN_VALID_LEVEL = 0
     }
 

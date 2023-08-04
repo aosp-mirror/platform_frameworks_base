@@ -43,6 +43,9 @@ import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -300,6 +303,88 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(latestActive.isPasspointAccessPoint).isFalse()
             assertThat(latestActive.isOnlineSignUpForPasspointAccessPoint).isFalse()
             assertThat(latestActive.passpointProviderFriendlyName).isNull()
+        }
+
+    @Test
+    fun wifiNetwork_unreachableLevel_inactiveNetwork() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_UNREACHABLE)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+        }
+
+    @Test
+    fun wifiNetwork_levelTooHigh_inactiveNetwork() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_MAX + 1)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+        }
+
+    @Test
+    fun wifiNetwork_levelTooLow_inactiveNetwork() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_MIN - 1)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isEqualTo(WifiNetworkModel.Inactive)
+        }
+
+    @Test
+    fun wifiNetwork_levelIsMax_activeNetworkWithMaxLevel() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_MAX)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Active::class.java)
+            assertThat((latest as WifiNetworkModel.Active).level).isEqualTo(WIFI_LEVEL_MAX)
+        }
+
+    @Test
+    fun wifiNetwork_levelIsMin_activeNetworkWithMinLevel() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(WIFI_LEVEL_MIN)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isInstanceOf(WifiNetworkModel.Active::class.java)
+            assertThat((latest as WifiNetworkModel.Active).level).isEqualTo(WIFI_LEVEL_MIN)
         }
 
     @Test

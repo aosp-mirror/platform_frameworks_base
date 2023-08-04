@@ -45,6 +45,9 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkMode
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN
+import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -204,6 +207,12 @@ constructor(
     }
 
     private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
+        if (this.level == WIFI_LEVEL_UNREACHABLE || this.level !in WIFI_LEVEL_MIN..WIFI_LEVEL_MAX) {
+            // If our level means the network is unreachable or the level is otherwise invalid, we
+            // don't have an active network.
+            return WifiNetworkModel.Inactive
+        }
+
         val hotspotDeviceType =
             if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
                 this.deviceType.toHotspotDeviceType()
