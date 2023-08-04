@@ -9,7 +9,12 @@
       ]
     },
     {
-      "name": "CtsPackageManagerIncrementalStatsHostTestCases"
+      "name": "CtsPackageManagerIncrementalStatsHostTestCases",
+      "options": [
+        {
+          "exclude-annotation": "android.platform.test.annotations.LargeTest"
+        }
+      ]
     },
     {
       "name": "CtsIncrementalInstallHostTestCases"
@@ -41,6 +46,16 @@
   "kernel-presubmit": [
     {
       "name": "CtsIncrementalInstallHostTestCases"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsPackageManagerIncrementalStatsHostTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.LargeTest"
+        }
+      ]
     }
   ]
 }
