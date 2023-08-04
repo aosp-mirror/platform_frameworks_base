@@ -335,7 +335,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
             }
         });
 
-        in.setAlpha(0);
         in.setVisibility(View.VISIBLE);
         mClockInAnim = new AnimatorSet();
         mClockInAnim.setDuration(CLOCK_IN_MILLIS);
