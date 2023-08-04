@@ -22,9 +22,9 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags

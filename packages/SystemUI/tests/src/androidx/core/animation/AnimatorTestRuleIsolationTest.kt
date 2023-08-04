@@ -31,7 +31,7 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 class AnimatorTestRuleIsolationTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
