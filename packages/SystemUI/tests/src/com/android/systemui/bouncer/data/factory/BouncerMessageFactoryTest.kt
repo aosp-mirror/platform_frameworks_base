@@ -24,13 +24,12 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Password
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Pattern
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEFAULT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.StringSubject
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,13 +38,12 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BouncerMessageFactoryTest : SysuiTestCase() {
     private lateinit var underTest: BouncerMessageFactory
 
-    @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     @Mock private lateinit var securityModel: KeyguardSecurityModel
 
@@ -55,7 +53,8 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
-        underTest = BouncerMessageFactory(updateMonitor, securityModel)
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
+        underTest = BouncerMessageFactory(biometricSettingsRepository, securityModel)
     }
 
     @Test
@@ -167,7 +166,7 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
         secondaryMessageOverride: String? = null,
     ): BouncerMessageModel? {
         whenever(securityModel.getSecurityMode(0)).thenReturn(mode)
-        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(fpAuthAllowed)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(fpAuthAllowed)
 
         return underTest.createFromPromptReason(
             reason,
