@@ -1230,10 +1230,16 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.print(prefix); pw.println("TaskOrganizerController:");
-        for (final TaskOrganizerState state : mTaskOrganizerStates.values()) {
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        for (ITaskOrganizer organizer : mTaskOrganizers) {
+            final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
             final ArrayList<Task> tasks = state.mOrganizedTasks;
             pw.print(innerPrefix + "  ");
-            pw.println(state.mOrganizer.mTaskOrganizer + " uid=" + state.mUid + ":");
+            pw.print(state.mOrganizer.mTaskOrganizer + " uid=" + state.mUid);
+            if (lastOrganizer == organizer) {
+                pw.print(" (active)");
+            }
+            pw.println(':');
             for (int k = 0; k < tasks.size(); k++) {
                 final Task task = tasks.get(k);
                 final int mode = task.getWindowingMode();
