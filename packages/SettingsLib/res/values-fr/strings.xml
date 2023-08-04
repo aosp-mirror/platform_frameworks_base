@@ -555,7 +555,7 @@
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à niveau le compte pour changer"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Impossible de lire les téléchargements ici"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Réessayez après l\'annonce"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activez l\'appareil pour lire du contenu ici"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activez l\'appareil pour y lire du contenu"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Appareil non autorisé à lire du contenu"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossible de lire ce contenu multimédia ici"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteignez l\'appareil, puis rallumez-le"</string>
@@ -692,12 +692,8 @@
     <item msgid="324200556467459329">"Déplacer vers le haut"</item>
   </string-array>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
-    <!-- no translation found for not_specified (5423502443185110328) -->
-    <skip />
-    <!-- no translation found for neuter (2075249330106127310) -->
-    <skip />
-    <!-- no translation found for feminine (1529155595310784757) -->
-    <skip />
-    <!-- no translation found for masculine (4653978041013996303) -->
-    <skip />
+    <string name="not_specified" msgid="5423502443185110328">"Non défini"</string>
+    <string name="neuter" msgid="2075249330106127310">"Neutre"</string>
+    <string name="feminine" msgid="1529155595310784757">"Féminin"</string>
+    <string name="masculine" msgid="4653978041013996303">"Masculin"</string>
 </resources>
