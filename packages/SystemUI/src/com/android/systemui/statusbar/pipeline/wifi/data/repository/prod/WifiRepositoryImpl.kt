@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.CARRIER_MERGED_INVALID_SUB_ID_REASON
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
@@ -277,9 +278,6 @@ constructor(
                 .addTransportType(TRANSPORT_WIFI)
                 .addTransportType(TRANSPORT_CELLULAR)
                 .build()
-
-        private const val CARRIER_MERGED_INVALID_SUB_ID_REASON =
-            "Wifi network was carrier merged but had invalid sub ID"
     }
 
     @SysUISingleton

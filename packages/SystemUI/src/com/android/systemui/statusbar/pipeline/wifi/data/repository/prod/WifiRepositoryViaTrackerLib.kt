@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
 import android.net.wifi.WifiManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.dagger.WifiTrackerLibInputLog
 import com.android.systemui.statusbar.pipeline.dagger.WifiTrackerLibTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.CARRIER_MERGED_INVALID_SUB_ID_REASON
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryViaTrackerLibDagger
@@ -178,39 +180,50 @@ constructor(
             return WIFI_NETWORK_DEFAULT
         }
         return if (this is MergedCarrierEntry) {
+            this.convertCarrierMergedToModel()
+        } else {
+            this.convertNormalToModel()
+        }
+    }
+
+    private fun MergedCarrierEntry.convertCarrierMergedToModel(): WifiNetworkModel {
+        return if (this.subscriptionId == INVALID_SUBSCRIPTION_ID) {
+            WifiNetworkModel.Invalid(CARRIER_MERGED_INVALID_SUB_ID_REASON)
+        } else {
             WifiNetworkModel.CarrierMerged(
                 networkId = NETWORK_ID,
-                // TODO(b/292534484): Fetch the real subscription ID from [MergedCarrierEntry].
-                subscriptionId = TEMP_SUB_ID,
+                subscriptionId = this.subscriptionId,
                 level = this.level,
                 // WifiManager APIs to calculate the signal level start from 0, so
                 // maxSignalLevel + 1 represents the total level buckets count.
                 numberOfLevels = wifiManager.maxSignalLevel + 1,
             )
-        } else {
-            val hotspotDeviceType =
-                if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
-                    this.deviceType.toHotspotDeviceType()
-                } else {
-                    WifiNetworkModel.HotspotDeviceType.NONE
-                }
-
-            WifiNetworkModel.Active(
-                networkId = NETWORK_ID,
-                isValidated = this.hasInternetAccess(),
-                level = this.level,
-                ssid = this.title,
-                hotspotDeviceType = hotspotDeviceType,
-                // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
-                // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
-                // always be false/null in this repository.
-                // TODO(b/292534484): Remove these fields from the wifi network model once this
-                //  repository is fully enabled.
-                isPasspointAccessPoint = false,
-                isOnlineSignUpForPasspointAccessPoint = false,
-                passpointProviderFriendlyName = null,
-            )
         }
+    }
+
+    private fun WifiEntry.convertNormalToModel(): WifiNetworkModel {
+        val hotspotDeviceType =
+            if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
+                this.deviceType.toHotspotDeviceType()
+            } else {
+                WifiNetworkModel.HotspotDeviceType.NONE
+            }
+
+        return WifiNetworkModel.Active(
+            networkId = NETWORK_ID,
+            isValidated = this.hasInternetAccess(),
+            level = this.level,
+            ssid = this.title,
+            hotspotDeviceType = hotspotDeviceType,
+            // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
+            // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
+            // always be false/null in this repository.
+            // TODO(b/292534484): Remove these fields from the wifi network model once this
+            //  repository is fully enabled.
+            isPasspointAccessPoint = false,
+            isOnlineSignUpForPasspointAccessPoint = false,
+            passpointProviderFriendlyName = null,
+        )
     }
 
     override val isWifiDefault: StateFlow<Boolean> =
@@ -310,13 +323,5 @@ constructor(
          * to [WifiRepositoryViaTrackerLib].
          */
         private const val NETWORK_ID = -1
-
-        /**
-         * A temporary subscription ID until WifiTrackerLib exposes a method to fetch the
-         * subscription ID.
-         *
-         * Use -2 because [SubscriptionManager.INVALID_SUBSCRIPTION_ID] is -1.
-         */
-        private const val TEMP_SUB_ID = -2
     }
 }

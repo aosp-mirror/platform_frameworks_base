@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -431,6 +432,7 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
                 mock<MergedCarrierEntry>().apply {
                     whenever(this.isPrimaryNetwork).thenReturn(true)
                     whenever(this.level).thenReturn(3)
+                    whenever(this.subscriptionId).thenReturn(567)
                 }
             whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
             getCallback().onWifiEntriesChanged()
@@ -438,7 +440,7 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(latest is WifiNetworkModel.CarrierMerged).isTrue()
             val latestMerged = latest as WifiNetworkModel.CarrierMerged
             assertThat(latestMerged.level).isEqualTo(3)
-            // numberOfLevels = maxSignalLevel + 1
+            assertThat(latestMerged.subscriptionId).isEqualTo(567)
         }
 
     @Test
@@ -461,29 +463,22 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(latestMerged.numberOfLevels).isEqualTo(6)
         }
 
-    /* TODO(b/292534484): Re-enable this test once WifiTrackerLib gives us the subscription ID.
     @Test
     fun wifiNetwork_carrierMergedButInvalidSubId_flowHasInvalid() =
         testScope.runTest {
             val latest by collectLastValue(underTest.wifiNetwork)
 
-            val wifiInfo =
-                mock<WifiInfo>().apply {
-                    whenever(this.isPrimary).thenReturn(true)
-                    whenever(this.isCarrierMerged).thenReturn(true)
+            val wifiEntry =
+                mock<MergedCarrierEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
                     whenever(this.subscriptionId).thenReturn(INVALID_SUBSCRIPTION_ID)
                 }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
 
-            getNetworkCallback()
-                .onCapabilitiesChanged(
-                    NETWORK,
-                    createWifiNetworkCapabilities(wifiInfo),
-                )
+            getCallback().onWifiEntriesChanged()
 
             assertThat(latest).isInstanceOf(WifiNetworkModel.Invalid::class.java)
         }
-
-     */
 
     @Test
     fun wifiNetwork_notValidated_networkNotValidated() =
@@ -714,30 +709,22 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
 
-    /* TODO(b/292534484): Re-enable this test once WifiTrackerLib gives us the subscription ID.
-       @Test
-       fun isWifiConnectedWithValidSsid_invalidNetwork_false() =
-       testScope.runTest {
-           collectLastValue(underTest.wifiNetwork)
+    @Test
+    fun isWifiConnectedWithValidSsid_invalidNetwork_false() =
+        testScope.runTest {
+            collectLastValue(underTest.wifiNetwork)
 
-           val wifiInfo =
-               mock<WifiInfo>().apply {
-                   whenever(this.isPrimary).thenReturn(true)
-                   whenever(this.isCarrierMerged).thenReturn(true)
-                   whenever(this.subscriptionId).thenReturn(INVALID_SUBSCRIPTION_ID)
-               }
+            val wifiEntry =
+                mock<MergedCarrierEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.subscriptionId).thenReturn(INVALID_SUBSCRIPTION_ID)
+                }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+            testScope.runCurrent()
 
-           getNetworkCallback()
-               .onCapabilitiesChanged(
-                   NETWORK,
-                   createWifiNetworkCapabilities(wifiInfo),
-               )
-           testScope.runCurrent()
-
-           assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
-       }
-
-    */
+            assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
+        }
 
     @Test
     fun isWifiConnectedWithValidSsid_activeNetwork_nullTitle_false() =
