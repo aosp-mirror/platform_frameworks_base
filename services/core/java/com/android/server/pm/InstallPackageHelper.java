@@ -110,6 +110,7 @@ import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderType;
@@ -119,7 +120,6 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -166,6 +166,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.SystemConfig;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
@@ -184,7 +185,9 @@ import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedLibraryWrapper;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionGroup;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
@@ -207,6 +210,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -227,6 +231,7 @@ final class InstallPackageHelper {
     private final ViewCompiler mViewCompiler;
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
+    private final UpdateOwnershipHelper mUpdateOwnershipHelper;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
@@ -244,6 +249,7 @@ final class InstallPackageHelper {
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
+        mUpdateOwnershipHelper = pm.mInjector.getUpdateOwnershipHelper();
     }
 
     InstallPackageHelper(PackageManagerService pm) {
@@ -329,6 +335,8 @@ final class InstallPackageHelper {
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
                 : mPm.mInjector.getSystemConfig().getSystemAppUpdateOwnerPackageName(
                         parsedPackage.getPackageName());
+        final boolean isUpdateOwnershipDenylisted =
+                mUpdateOwnershipHelper.isUpdateOwnershipDenylisted(parsedPackage.getPackageName());
         final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
 
         // For standard install (install via session), the installSource isn't null.
@@ -364,6 +372,9 @@ final class InstallPackageHelper {
                         & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
                 final boolean isSameUpdateOwner =
                         TextUtils.equals(oldUpdateOwner, installSource.mInstallerPackageName);
+                final boolean isInstallerUpdateOwnerDenylistProvider =
+                        mUpdateOwnershipHelper.isUpdateOwnershipDenyListProvider(
+                                installSource.mUpdateOwnerPackageName);
 
                 // Here we handle the update owner for the package, and the rules are:
                 // -. Only enabling update ownership enforcement on initial installation if the
@@ -371,13 +382,16 @@ final class InstallPackageHelper {
                 // -. Once the installer changes and users agree to proceed, clear the update
                 //    owner (package state in other users are taken into account as well).
                 if (!isUpdate) {
-                    if (!isRequestUpdateOwnership) {
+                    if (!isRequestUpdateOwnership
+                            || isUpdateOwnershipDenylisted
+                            || isInstallerUpdateOwnerDenylistProvider) {
                         installSource = installSource.setUpdateOwnerPackageName(null);
                     } else if ((!isUpdateOwnershipEnabled && pkgAlreadyExists)
                             || (isUpdateOwnershipEnabled && !isSameUpdateOwner)) {
                         installSource = installSource.setUpdateOwnerPackageName(null);
                     }
-                } else if (!isSameUpdateOwner || !isUpdateOwnershipEnabled) {
+                } else if (!isSameUpdateOwner
+                        || !isUpdateOwnershipEnabled) {
                     installSource = installSource.setUpdateOwnerPackageName(null);
                 }
             }
@@ -468,6 +482,19 @@ final class InstallPackageHelper {
 
         if (!IncrementalManager.isIncrementalPath(pkgSetting.getPathString())) {
             pkgSetting.setLoadingProgress(1f);
+        }
+
+        ArraySet<String> listItems = mUpdateOwnershipHelper.readUpdateOwnerDenyList(pkgSetting);
+        if (listItems != null && !listItems.isEmpty()) {
+            mUpdateOwnershipHelper.addToUpdateOwnerDenyList(pkgSetting.getPackageName(), listItems);
+            for (String unownedPackage : listItems) {
+                PackageSetting unownedSetting = mPm.mSettings.getPackageLPr(unownedPackage);
+                SystemConfig config = SystemConfig.getInstance();
+                if (unownedSetting != null
+                        && config.getSystemAppUpdateOwnerPackageName(unownedPackage) == null) {
+                    unownedSetting.setUpdateOwnerPackage(null);
+                }
+            }
         }
 
         return pkg;
@@ -3925,23 +3952,6 @@ final class InstallPackageHelper {
             }
         }
 
-        // If this is a system app we hadn't seen before, and this is a first boot or OTA,
-        // we need to unstop it if it doesn't have a launcher entry.
-        if (mPm.mShouldStopSystemPackagesByDefault && scanResult.mRequest.mPkgSetting == null
-                && ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0)
-                && ((scanFlags & SCAN_AS_SYSTEM) != 0)) {
-            final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
-            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            launcherIntent.setPackage(parsedPackage.getPackageName());
-            final List<ResolveInfo> launcherActivities =
-                    mPm.snapshotComputer().queryIntentActivitiesInternal(launcherIntent, null,
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
-            if (launcherActivities.isEmpty()) {
-                scanResult.mPkgSetting.setStopped(false, 0);
-            }
-        }
-
         if (mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
             if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isLoading()) {
                 // Continue monitoring loading progress of active incremental packages
@@ -4314,6 +4324,8 @@ final class InstallPackageHelper {
         //   - It's an APEX or overlay package since stopped state does not affect them.
         //   - It is enumerated with a <initial-package-state> tag having the stopped attribute
         //     set to false
+        //   - It doesn't have an enabled and exported launcher activity, which means the user
+        //     wouldn't have a way to un-stop it
         final boolean isApexPkg = (scanFlags & SCAN_AS_APEX) != 0;
         if (mPm.mShouldStopSystemPackagesByDefault
                 && scanSystemPartition
@@ -4322,8 +4334,9 @@ final class InstallPackageHelper {
                 && !parsedPackage.isOverlayIsStatic()
         ) {
             String packageName = parsedPackage.getPackageName();
-            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)
-                    && !"android".contentEquals(packageName)) {
+            if (!"android".contentEquals(packageName)
+                    && !mPm.mInitialNonStoppedSystemPackages.contains(packageName)
+                    && hasLauncherEntry(parsedPackage)) {
                 scanFlags |= SCAN_AS_STOPPED_SYSTEM_APP;
             }
         }
@@ -4331,6 +4344,26 @@ final class InstallPackageHelper {
         final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
                 scanFlags | SCAN_UPDATE_SIGNATURE, 0 /* currentTime */, user, null);
         return new Pair<>(scanResult, shouldHideSystemApp);
+    }
+
+    private static boolean hasLauncherEntry(ParsedPackage parsedPackage) {
+        final HashSet<String> categories = new HashSet<>();
+        categories.add(Intent.CATEGORY_LAUNCHER);
+        final List<ParsedActivity> activities = parsedPackage.getActivities();
+        for (int indexActivity = 0; indexActivity < activities.size(); indexActivity++) {
+            final ParsedActivity activity = activities.get(indexActivity);
+            if (!activity.isEnabled() || !activity.isExported()) {
+                continue;
+            }
+            final List<ParsedIntentInfo> intents = activity.getIntents();
+            for (int indexIntent = 0; indexIntent < intents.size(); indexIntent++) {
+                final IntentFilter intentFilter = intents.get(indexIntent).getIntentFilter();
+                if (intentFilter != null && intentFilter.matchCategories(categories) == null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
