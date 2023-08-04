@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -117,6 +118,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
+    private val notificationExpansionRepository = NotificationExpansionRepository()
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -175,6 +177,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
+                notificationExpansionRepository,
                 featureFlags,
                 FakeSystemClock(),
                 BouncerMessageInteractor(
