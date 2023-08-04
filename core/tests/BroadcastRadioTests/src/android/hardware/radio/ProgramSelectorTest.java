@@ -437,8 +437,8 @@ public final class ProgramSelectorTest {
 
     @Test
     public void writeToParcel_forProgramSelector() {
-        ProgramSelector selectorExpected =
-                getFmSelector(/* secondaryIds= */ null, /* vendorIds= */ null);
+        ProgramSelector selectorExpected = getDabSelector(new ProgramSelector.Identifier[]{
+                DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER}, /* vendorIds= */ null);
         Parcel parcel = Parcel.obtain();
 
         selectorExpected.writeToParcel(parcel, /* flags= */ 0);
