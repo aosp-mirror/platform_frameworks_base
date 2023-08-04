@@ -130,28 +130,3 @@ The Oom Adjuster maintains a global sequence ID `mAdjSeq` to track the current O
   * Iterate the processes from least important to most important ones.
   * A maximum retries of 10 is enforced, while in practice, the maximum retries could reach only 2 to 3.
 
-## The Modern Implementation
-
-As aforementioned, the OomAdjuster makes the computation in a recursive way, while this is inefficient in dealing with the cycles. The overall code complexity should be around **O((1 + num(retries)) * num(procs) * num(binding connections))**. In addition, depending on the ordering of the input, the algorithm may produce different results and sometimes it's wrong.
-
-The new "Modern Implementation" is based on the rationale that, apps can't promote the service/provider it connects to, to a higher bucket than itself. We are introducing a bucket based, breadth first search algorithm, as illustrated below:
-
-```
-for all processes in the process list
-  compute the state of each process, but, excluding its clients
-  put each process to the corresponding bucket according to the state value
-done
-
-for each bucket, starting from the top most to the bottom most
-  for each process in the bucket
-     for each process it binds to
-           if the state of the bindee process could be elevated because of the binding; then
-              move the bindee process to the higher bucket
-           fi
-      done
-  done
-done
-```
-
-The overall code complexity should be around **O(num(procs) * num(binding connections))**, which saves the retry time from the existing algorithm.
-
