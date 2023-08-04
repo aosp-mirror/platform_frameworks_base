@@ -30,6 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -63,26 +64,40 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class BackupManagerMonitorEventSenderTest {
     @Mock private IBackupManagerMonitor mMonitorMock;
+    @Mock private BackupManagerMonitorDumpsysUtils mBackupManagerMonitorDumpsysUtilsMock;
 
     private BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(mMonitorMock);
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(mMonitorMock,
+                mBackupManagerMonitorDumpsysUtilsMock);
     }
 
     @Test
-    public void monitorEvent_monitorIsNull_returnsNull() throws Exception {
-        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(/* monitor */ null);
+    public void monitorEvent_monitorIsNull_sendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.RESTORE);
+        mBackupManagerMonitorEventSender.setMonitor(null);
+        mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, extras);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock).parseBackupManagerMonitorRestoreEventForDumpsys(any(
+                Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_monitorIsNull_doNotCallOnEvent() throws Exception {
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(null);
         mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, null);
         IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
-        assertThat(monitor).isNull();
+        verify(mMonitorMock, never()).onEvent(any(Bundle.class));
     }
 
     @Test
-    public void monitorEvent_monitorOnEventThrows_returnsNull() throws Exception {
+    public void monitorEvent_monitorOnEventThrows_setsMonitorToNull() throws Exception {
         doThrow(new RemoteException()).when(mMonitorMock).onEvent(any(Bundle.class));
 
         mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, null);
@@ -90,6 +105,14 @@ public class BackupManagerMonitorEventSenderTest {
 
         verify(mMonitorMock).onEvent(any(Bundle.class));
         assertThat(monitor).isNull();
+    }
+
+    @Test
+    public void monitorEvent_extrasAreNull_doNotSendBundleToDumpsys() throws Exception {
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, null);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
     }
 
     @Test
@@ -159,6 +182,36 @@ public class BackupManagerMonitorEventSenderTest {
                 (10L << 32) | 3);
         assertThat(eventBundle.getInt("key1")).isEqualTo(4);
         assertThat(eventBundle.getString("key2")).isEqualTo("value2");
+    }
+
+    @Test
+    public void monitorEvent_eventOpTypeIsRestore_sendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.RESTORE);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock).parseBackupManagerMonitorRestoreEventForDumpsys(any(
+                Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_eventOpTypeIsBackup_doNotSendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.BACKUP);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_eventOpTypeIsUnknown_doNotSendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.UNKNOWN);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
     }
 
     @Test
