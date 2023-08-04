@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.core.animation
+package android.animation
 
 import com.android.systemui.util.test.TestExceptionDeferrer
 import org.junit.rules.TestRule
@@ -23,16 +23,20 @@ import org.junit.runners.model.Statement
 
 /**
  * This rule is used by [com.android.systemui.SysuiTestCase] to fail any test which attempts to
- * start an AndroidX [Animator] without using [androidx.core.animation.AnimatorTestRule].
+ * start a Platform [Animator] without using [android.animation.AnimatorTestRule].
+ *
+ * TODO(b/291645410): enable this; currently this causes hundreds of test failures.
  */
-class AndroidXAnimatorIsolationRule : TestRule {
+class PlatformAnimatorIsolationRule : TestRule {
 
-    private class IsolatingAnimationHandler(ruleThread: Thread) : AnimationHandler(null) {
+    private class IsolatingAnimationHandler(ruleThread: Thread) : AnimationHandler() {
         private val exceptionDeferrer = TestExceptionDeferrer(TAG, ruleThread)
-        override fun addAnimationFrameCallback(callback: AnimationFrameCallback?) = onError()
+        override fun addOneShotCommitCallback(callback: AnimationFrameCallback?) = onError()
         override fun removeCallback(callback: AnimationFrameCallback?) = onError()
-        override fun onAnimationFrame(frameTime: Long) = onError()
-        override fun setFrameDelay(frameDelay: Long) = onError()
+        override fun setProvider(provider: AnimationFrameCallbackProvider?) = onError()
+        override fun autoCancelBasedOn(objectAnimator: ObjectAnimator?) = onError()
+        override fun addAnimationFrameCallback(callback: AnimationFrameCallback?, delay: Long) =
+            onError()
 
         private fun onError() =
             exceptionDeferrer.fail(
@@ -48,11 +52,14 @@ class AndroidXAnimatorIsolationRule : TestRule {
             @Throws(Throwable::class)
             override fun evaluate() {
                 val isolationHandler = IsolatingAnimationHandler(Thread.currentThread())
-                AnimationHandler.setTestHandler(isolationHandler)
+                val originalHandler = AnimationHandler.setTestHandler(isolationHandler)
                 try {
                     base.evaluate()
                 } finally {
-                    AnimationHandler.setTestHandler(null)
+                    val handlerAtEnd = AnimationHandler.setTestHandler(originalHandler)
+                    check(isolationHandler == handlerAtEnd) {
+                        "Test handler was altered: expected=$isolationHandler actual=$handlerAtEnd"
+                    }
                     // Pass or fail, a deferred exception should be the failure reason
                     isolationHandler.throwDeferred()
                 }
@@ -60,7 +67,10 @@ class AndroidXAnimatorIsolationRule : TestRule {
         }
     }
 
-    private companion object {
-        private const val TAG = "AndroidXAnimatorIsolationRule"
+    companion object {
+        private const val TAG = "PlatformAnimatorIsolationRule"
+
+        fun isIsolatingHandler(handler: AnimationHandler?): Boolean =
+            handler is IsolatingAnimationHandler
     }
 }
