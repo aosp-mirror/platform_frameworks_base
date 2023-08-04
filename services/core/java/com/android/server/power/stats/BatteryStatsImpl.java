@@ -78,6 +78,7 @@ import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.ServiceState.RegState;
 import android.telephony.SignalStrength;
@@ -181,7 +182,7 @@ public class BatteryStatsImpl extends BatteryStats {
     // TODO: remove "tcp" from network methods, since we measure total stats.
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    public static final int VERSION = 212;
+    public static final int VERSION = 213;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1040,6 +1041,9 @@ public class BatteryStatsImpl extends BatteryStats {
     int mPhoneDataConnectionType = -1;
     final StopwatchTimer[] mPhoneDataConnectionsTimer =
             new StopwatchTimer[NUM_DATA_CONNECTION_TYPES];
+
+    int mNrState = -1;
+    StopwatchTimer mNrNsaTimer;
 
     @RadioAccessTechnology
     int mActiveRat = RADIO_ACCESS_TECHNOLOGY_OTHER;
@@ -6092,15 +6096,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     public void notePhoneDataConnectionStateLocked(@NetworkType int dataType, boolean hasData,
-            @RegState int serviceType, @ServiceState.FrequencyRange int nrFrequency) {
-        notePhoneDataConnectionStateLocked(dataType, hasData, serviceType, nrFrequency,
+            @RegState int serviceType, @NetworkRegistrationInfo.NRState int nrState,
+            @ServiceState.FrequencyRange int nrFrequency) {
+        notePhoneDataConnectionStateLocked(dataType, hasData, serviceType, nrState, nrFrequency,
                 mClock.elapsedRealtime(), mClock.uptimeMillis());
     }
 
     @GuardedBy("this")
     public void notePhoneDataConnectionStateLocked(@NetworkType int dataType, boolean hasData,
-            @RegState int serviceType, @ServiceState.FrequencyRange int nrFrequency,
-            long elapsedRealtimeMs, long uptimeMs) {
+            @RegState int serviceType, @NetworkRegistrationInfo.NRState int nrState,
+            @ServiceState.FrequencyRange int nrFrequency, long elapsedRealtimeMs, long uptimeMs) {
         // BatteryStats uses 0 to represent no network type.
         // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
         // Unknown is included in DATA_CONNECTION_OTHER.
@@ -6123,11 +6128,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        final int newRat = mapNetworkTypeToRadioAccessTechnology(bin);
-        if (newRat == RADIO_ACCESS_TECHNOLOGY_NR) {
-            // Note possible frequency change for the NR RAT.
-            getRatBatteryStatsLocked(newRat).noteFrequencyRange(nrFrequency, elapsedRealtimeMs);
-        }
+
 
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
         if (mPhoneDataConnectionType != bin) {
@@ -6138,18 +6139,54 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             mPhoneDataConnectionType = bin;
             mPhoneDataConnectionsTimer[bin].startRunningLocked(elapsedRealtimeMs);
-
-            if (mActiveRat != newRat) {
-                getRatBatteryStatsLocked(mActiveRat).noteActive(false, elapsedRealtimeMs);
-                mActiveRat = newRat;
-            }
-            final boolean modemActive = mMobileRadioActiveTimer.isRunningLocked();
-            getRatBatteryStatsLocked(newRat).noteActive(modemActive, elapsedRealtimeMs);
         }
+
+        if (mNrState != nrState) {
+            mHistory.recordNrStateChangeEvent(elapsedRealtimeMs, uptimeMs, nrState);
+            mNrState = nrState;
+        }
+
+        final boolean newNrNsaActive = isNrNsa(bin, nrState);
+        final boolean nrNsaActive = mNrNsaTimer.isRunningLocked();
+        if (newNrNsaActive != nrNsaActive) {
+            if (newNrNsaActive) {
+                mNrNsaTimer.startRunningLocked(elapsedRealtimeMs);
+            } else {
+                mNrNsaTimer.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        final int newRat = mapNetworkTypeToRadioAccessTechnology(bin, nrState);
+        if (newRat == RADIO_ACCESS_TECHNOLOGY_NR) {
+            // Note possible frequency change for the NR RAT.
+            getRatBatteryStatsLocked(newRat).noteFrequencyRange(nrFrequency, elapsedRealtimeMs);
+        }
+        if (mActiveRat != newRat) {
+            getRatBatteryStatsLocked(mActiveRat).noteActive(false, elapsedRealtimeMs);
+            mActiveRat = newRat;
+        }
+        final boolean modemActive = mMobileRadioActiveTimer.isRunningLocked();
+        getRatBatteryStatsLocked(newRat).noteActive(modemActive, elapsedRealtimeMs);
+    }
+
+    /**
+     * Non-standalone (NSA) mode for 5G NR will have an LTE network type. If NR state is
+     * connected while on an LTE network, the device is in NR NSA mode.
+     */
+    private static boolean isNrNsa(@NetworkType int dataType,
+            @NetworkRegistrationInfo.NRState int nrState) {
+        return dataType == TelephonyManager.NETWORK_TYPE_LTE
+                && nrState == NetworkRegistrationInfo.NR_STATE_CONNECTED;
     }
 
     @RadioAccessTechnology
-    private static int mapNetworkTypeToRadioAccessTechnology(@NetworkType int dataType) {
+    private static int mapNetworkTypeToRadioAccessTechnology(@NetworkType int dataType,
+            @NetworkRegistrationInfo.NRState int nrState) {
+        if (isNrNsa(dataType, nrState)) {
+            // Treat an NR NSA connection as RADIO_ACCESS_TECHNOLOGY_NR
+            return RADIO_ACCESS_TECHNOLOGY_NR;
+        }
+
         switch (dataType) {
             case TelephonyManager.NETWORK_TYPE_NR:
                 return RADIO_ACCESS_TECHNOLOGY_NR;
@@ -7320,6 +7357,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public Timer getPhoneDataConnectionTimer(int dataType) {
         return mPhoneDataConnectionsTimer[dataType];
+    }
+
+    @Override public long getNrNsaTime(long elapsedRealtimeUs) {
+        return mNrNsaTimer.getTotalTimeLocked(elapsedRealtimeUs, STATS_SINCE_CHARGED);
     }
 
     @Override public long getActiveRadioDurationMs(@RadioAccessTechnology int rat,
@@ -10955,6 +10996,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mPhoneDataConnectionsTimer[i] = new StopwatchTimer(mClock, null, -300 - i, null,
                     mOnBatteryTimeBase);
         }
+        mNrNsaTimer = new StopwatchTimer(mClock, null, -200 + 2, null, mOnBatteryTimeBase);
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
             mNetworkPacketActivityCounters[i] = new LongSamplingCounter(mOnBatteryTimeBase);
@@ -11578,6 +11620,7 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].reset(false, elapsedRealtimeUs);
         }
+        mNrNsaTimer.reset(false, elapsedRealtimeUs);
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].reset(false, elapsedRealtimeUs);
             mNetworkPacketActivityCounters[i].reset(false, elapsedRealtimeUs);
@@ -15892,6 +15935,7 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].readSummaryFromParcelLocked(in);
         }
+        mNrNsaTimer.readSummaryFromParcelLocked(in);
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].readSummaryFromParcelLocked(in);
             mNetworkPacketActivityCounters[i].readSummaryFromParcelLocked(in);
@@ -16395,6 +16439,7 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_DATA_CONNECTION_TYPES; i++) {
             mPhoneDataConnectionsTimer[i].writeSummaryFromParcelLocked(out, nowRealtime);
         }
+        mNrNsaTimer.writeSummaryFromParcelLocked(out, nowRealtime);
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].writeSummaryFromParcelLocked(out);
             mNetworkPacketActivityCounters[i].writeSummaryFromParcelLocked(out);

@@ -30,6 +30,7 @@ import android.os.BatteryStats.CpuUsageDetails;
 import android.os.BatteryStats.EnergyConsumerDetails;
 import android.os.BatteryStats.HistoryItem;
 import android.os.Parcel;
+import android.telephony.NetworkRegistrationInfo;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -66,6 +67,7 @@ public class BatteryStatsHistoryTest {
     private File mHistoryDir;
     private final Clock mClock = new MockClock();
     private BatteryStatsHistory mHistory;
+    private BatteryStats.HistoryPrinter mHistoryPrinter;
     @Mock
     private BatteryStatsHistory.TraceDelegate mTracer;
     @Mock
@@ -89,6 +91,9 @@ public class BatteryStatsHistoryTest {
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
+
+
+        mHistoryPrinter = new BatteryStats.HistoryPrinter();
     }
 
     @Test
@@ -379,11 +384,112 @@ public class BatteryStatsHistoryTest {
         assertThat(checkin).contains("XC,10321,400,500,600");
     }
 
+    @Test
+    public void testNrState_dump() {
+        mHistory.forceRecordAllHistory();
+        mHistory.startRecordingHistory(0, 0, /* reset */ true);
+        mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
+                1234);
+
+        mHistory.recordNrStateChangeEvent(200, 200,
+                NetworkRegistrationInfo.NR_STATE_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(300, 300,
+                NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(400, 400,
+                NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        mHistory.recordNrStateChangeEvent(500, 500,
+                NetworkRegistrationInfo.NR_STATE_NONE);
+
+        BatteryStatsHistoryIterator iterator = mHistory.iterate();
+        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
+
+        assertThat(item = iterator.next()).isNotNull();
+        String dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("nr_state=restricted");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+300ms");
+        assertThat(dump).contains("nr_state=not_restricted");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+400ms");
+        assertThat(dump).contains("nr_state=connected");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+500ms");
+        assertThat(dump).contains("nr_state=none");
+    }
+
+    @Test
+    public void testNrState_checkin() {
+        mHistory.forceRecordAllHistory();
+        mHistory.startRecordingHistory(0, 0, /* reset */ true);
+        mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
+                1234);
+
+        mHistory.recordNrStateChangeEvent(200, 200,
+                NetworkRegistrationInfo.NR_STATE_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(300, 300,
+                NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(400, 400,
+                NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        mHistory.recordNrStateChangeEvent(500, 500,
+                NetworkRegistrationInfo.NR_STATE_NONE);
+
+        BatteryStatsHistoryIterator iterator = mHistory.iterate();
+        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
+
+        assertThat(item = iterator.next()).isNotNull();
+        String dump = toString(item, /* checkin */ true);
+        assertThat(dump).contains("nrs=1");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ true);
+        assertThat(dump).contains("nrs=2");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ true);
+        assertThat(dump).contains("nrs=3");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ true);
+        assertThat(dump).contains("nrs=0");
+    }
+
+    @Test
+    public void testNrState_aTrace() {
+        InOrder inOrder = Mockito.inOrder(mTracer);
+        Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
+
+        mHistory.recordNrStateChangeEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                NetworkRegistrationInfo.NR_STATE_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
+        mHistory.recordNrStateChangeEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        mHistory.recordNrStateChangeEvent(mClock.elapsedRealtime(), mClock.uptimeMillis(),
+                NetworkRegistrationInfo.NR_STATE_NONE);
+
+        inOrder.verify(mTracer).traceCounter("battery_stats.nr_state",
+                NetworkRegistrationInfo.NR_STATE_RESTRICTED);
+        inOrder.verify(mTracer).traceCounter("battery_stats.nr_state",
+                NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
+        inOrder.verify(mTracer).traceCounter("battery_stats.nr_state",
+                NetworkRegistrationInfo.NR_STATE_CONNECTED);
+        inOrder.verify(mTracer).traceCounter("battery_stats.nr_state",
+                NetworkRegistrationInfo.NR_STATE_NONE);
+    }
+
     private String toString(BatteryStats.HistoryItem item, boolean checkin) {
-        BatteryStats.HistoryPrinter printer = new BatteryStats.HistoryPrinter();
         StringWriter writer = new StringWriter();
         PrintWriter pw = new PrintWriter(writer);
-        printer.printNextItem(pw, item, 0, checkin, /* verbose */ true);
+        mHistoryPrinter.printNextItem(pw, item, 0, checkin, /* verbose */ true);
         pw.flush();
         return writer.toString();
     }
