@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -124,6 +125,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final INotificationManager mNotificationManager;
     private final NotificationEntryManager mNotificationEntryManager;
     private final PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
+
+    private final UserManager mUserManager;
+
     private final LauncherApps mLauncherApps;
     private final ShortcutManager mShortcutManager;
     private final UserContextProvider mContextTracker;
@@ -142,6 +146,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
             NotificationEntryManager notificationEntryManager,
+            UserManager userManager,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             LauncherApps launcherApps,
             ShortcutManager shortcutManager,
@@ -160,6 +165,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mHighPriorityProvider = highPriorityProvider;
         mNotificationManager = notificationManager;
         mNotificationEntryManager = notificationEntryManager;
+        mUserManager = userManager;
         mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
         mLauncherApps = launcherApps;
         mShortcutManager = shortcutManager;
@@ -482,6 +488,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 notificationInfoView.getSelectedAction(),
                 mShortcutManager,
                 pmUser,
+                mUserManager,
                 mPeopleSpaceWidgetManager,
                 mNotificationManager,
                 mOnUserInteractionCallback,
