@@ -54,6 +54,7 @@ import android.content.pm.ShortcutManager;
 import android.graphics.Color;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -139,6 +140,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
 
+    @Mock private UserManager mUserManager;
+
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
@@ -157,6 +160,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mGutsManager = new NotificationGutsManager(mContext,
                 () -> Optional.of(mCentralSurfaces), mHandler, mHandler, mAccessibilityManager,
                 mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
+                mUserManager,
                 mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
                 Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
