@@ -40,6 +40,8 @@ import java.util.Optional;
  */
 public class BatteryStatus {
     private static final int LOW_BATTERY_THRESHOLD = 20;
+    private static final int SEVERE_LOW_BATTERY_THRESHOLD = 10;
+    private static final int EXTREME_LOW_BATTERY_THRESHOLD = 3;
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
     public static final int CHARGING_UNKNOWN = -1;
@@ -140,15 +142,15 @@ public class BatteryStatus {
 
     /** Whether battery is low and needs to be charged. */
     public boolean isBatteryLow() {
-        return level < LOW_BATTERY_THRESHOLD;
+        return isLowBattery(level);
     }
 
     /** Whether battery defender is enabled. */
     public boolean isBatteryDefender() {
-        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+        return isBatteryDefender(chargingStatus);
     }
 
-    /** Return current chargin speed is fast, slow or normal. */
+    /** Return current charging speed is fast, slow or normal. */
     public final int getChargingSpeed(Context context) {
         final int slowThreshold = context.getResources().getInteger(
                 R.integer.config_chargingSlowlyThreshold);
@@ -217,5 +219,75 @@ public class BatteryStatus {
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB
                 || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS
                 || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+    }
+
+    /**
+     * Whether the battery is low or not.
+     *
+     * @param batteryChangedIntent the {@link ACTION_BATTERY_CHANGED} intent
+     * @return {@code true} if the battery level is less or equal to {@link LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isLowBattery(Intent batteryChangedIntent) {
+        int level = getBatteryLevel(batteryChangedIntent);
+        return isLowBattery(level);
+    }
+
+    /**
+     * Whether the battery is low or not.
+     *
+     * @param batteryLevel the battery level
+     * @return {@code true} if the battery level is less or equal to {@link LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isLowBattery(int batteryLevel) {
+        return batteryLevel <= LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery is severe low or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery level is less or equal to {@link
+     *     SEVERE_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isSevereLowBattery(Intent batteryChangedIntent) {
+        int level = getBatteryLevel(batteryChangedIntent);
+        return level <= SEVERE_LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery is extreme low or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery level is less or equal to {@link
+     *     EXTREME_LOW_BATTERY_THRESHOLD}
+     */
+    public static boolean isExtremeLowBattery(Intent batteryChangedIntent) {
+        int level = getBatteryLevel(batteryChangedIntent);
+        return level <= EXTREME_LOW_BATTERY_THRESHOLD;
+    }
+
+    /**
+     * Whether the battery defender is enabled or not.
+     *
+     * @param batteryChangedIntent the ACTION_BATTERY_CHANGED intent
+     * @return {@code true} if the battery defender is enabled. It could be dock defend, dwell
+     *     defend, or temp defend
+     */
+    public static boolean isBatteryDefender(Intent batteryChangedIntent) {
+        int chargingStatus =
+                batteryChangedIntent.getIntExtra(EXTRA_CHARGING_STATUS, CHARGING_POLICY_DEFAULT);
+        return isBatteryDefender(chargingStatus);
+    }
+
+    /**
+     * Whether the battery defender is enabled or not.
+     *
+     * @param chargingStatus for {@link EXTRA_CHARGING_STATUS} field in the ACTION_BATTERY_CHANGED
+     *     intent
+     * @return {@code true} if the battery defender is enabled. It could be dock defend, dwell
+     *     defend, or temp defend
+     */
+    public static boolean isBatteryDefender(int chargingStatus) {
+        return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
     }
 }
