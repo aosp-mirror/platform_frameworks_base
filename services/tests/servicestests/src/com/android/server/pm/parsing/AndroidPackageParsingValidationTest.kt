@@ -138,6 +138,17 @@ class AndroidPackageParsingValidationTest {
             R.styleable.AndroidManifestApplication_taskAffinity,
             1024
         )
+        validateTagAttr(
+            tag,
+            "zygotePreloadName",
+            R.styleable.AndroidManifestApplication_zygotePreloadName,
+            1024
+        )
+        validateTagAttrComponentName(
+            tag,
+            "zygotePreloadName",
+            R.styleable.AndroidManifestApplication_zygotePreloadName
+        )
         validateTagCount("profileable", 100, tag)
         validateTagCount("uses-native-library", 100, tag)
         validateTagCount("receiver", 1000, tag)
