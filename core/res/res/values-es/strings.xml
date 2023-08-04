@@ -1555,7 +1555,7 @@
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Compartir con"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Compartir con <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="982510275422590757">"Mantén pulsado el icono de desbloqueo y deslízalo."</string>
-    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza el dedo para desbloquear."</string>
+    <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Desliza para desbloquear"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Ir al escritorio"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Más opciones"</string>

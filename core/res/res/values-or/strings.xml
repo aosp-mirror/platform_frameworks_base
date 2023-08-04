@@ -703,8 +703,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"ନୂତନ ଦୂରସଂଚାର ସଂଯୋଗକୁ ନଥିଭୁକ୍ତ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"ଟେଲିକମ୍ ସଂଯୋଗ ପରିଚାଳିତ କରନ୍ତୁ"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"ଦୁରସଂଚାର ସଂଯୋଗ ପ୍ରବନ୍ଧିତ କରିବାକୁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ଇନ୍ କଲ୍ ସ୍କ୍ରୀନ୍‍‌ ସହିତ ସଂଯୋଗ କରନ୍ତୁ"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ୟୁଜର୍‍ କଲ୍ ଇନ୍ ସ୍କ୍ରୀନ୍‍‌ କେବେ ଓ କିପରି ଦେଖୁଛି, ତାହାକୁ ନିୟନ୍ତ୍ରିତ କରିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ଇନ କଲ ସ୍କ୍ରିନ ସହିତ ଇଣ୍ଟରାକ୍ଟ କରନ୍ତୁ"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ୟୁଜର ଇନ-କଲ ସ୍କ୍ରିନ କେବେ ଓ କିପରି ଦେଖୁଛନ୍ତି, ତାହାକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"ଟେଲିଫୋନୀ ସେବା ସହିତ ସଂଯୋଗ କରନ୍ତୁ"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"ଆପ୍‌କୁ କଲ୍ କରିବା ଏବଂ ପ୍ରାପ୍ତ କରିବା ପାଇଁ ଟେଲିଫୋନୀ ସେବା ସହିତ ସଂଯୋଗ କରିବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ଏକ କଲ୍ ୟୁଜର୍‍ ଅନୁଭବ ପ୍ରଦାନ କରିଥାଏ"</string>

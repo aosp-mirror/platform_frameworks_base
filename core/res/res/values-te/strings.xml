@@ -703,8 +703,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"టెలికామ్ కనెక్షన్‌లను మేనేజ్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో ఇంటరాక్ట్ చేయగలదు"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"యూజర్‌కి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"కాల్స్‌ చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
