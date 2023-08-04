@@ -3212,8 +3212,9 @@
 
     <!-- Component name of the activity used to ask a user to confirm system language change after
          receiving <Set Menu Language> CEC message. -->
-    <string name="config_hdmiCecSetMenuLanguageActivity"
-            >com.android.systemui/com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity</string>
+    <string name="config_hdmiCecSetMenuLanguageActivity">
+        com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecSetMenuLanguageActivity
+    </string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
