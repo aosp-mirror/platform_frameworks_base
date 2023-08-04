@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Kasvot tunnistettu. Jatka painamalla."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Kasvot tunnistettu. Jatka lukituksen avauskuvakkeella."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Todennettu"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Peruuta todennus"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Käytä PIN-koodia"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Käytä kuviota"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Käytä salasanaa"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Jos haluat ottaa kasvojentunnistusavauksen uudelleen käyttöön, nykyinen kasvomalli poistetaan.\n\nJos haluat avata puhelimen lukituksen kasvoilla, sinun on otettava ominaisuus uudelleen käyttöön."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kasvojentunnistusavauksen käyttöönotto epäonnistui. Siirry asetuksiin ja yritä uudelleen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Kosketa sormenjälkitunnistinta"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Jatka lukituksen avauskuvakkeella"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Kasvoja ei voi tunnistaa. Käytä sormenjälkeä."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Avattu kasvojen avulla"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Kasvot tunnistettu"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Yritä uudelleen pyyhkäisemällä ylös"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Pyyhkäise ylös ja kokeile kasvojentunnistusavausta uudelleen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Avaa lukitus, jotta voit käyttää NFC:tä"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Organisaatiosi omistaa tämän laitteen"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> omistaa tämän laitteen"</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Kokeile toista PIN-koodia"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Vahvista muutos: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pyyhkäise nähdäksesi lisää"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Kokeile kasvojentunnistusta uudelleen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Ladataan suosituksia"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Piilotetaanko mediaohjain (<xliff:g id="APP_NAME">%1$s</xliff:g>)?"</string>
@@ -1158,7 +1156,7 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Vaihda työprofiiliin"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Asenna työpuhelinsovellus"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Peruuta"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Customize lukitusnäyttöä"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Muokkaa lukitusnäyttöä"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Avaa lukitus muokataksesi lukitusnäyttöä"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi-yhteys ei ole käytettävissä"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera estetty"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant on aktiivinen"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Aseta oletusmuistiinpanosovellus Asetuksista"</string>
     <string name="install_app" msgid="5066668100199613936">"Asenna sovellus"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofoni ja kamera"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Sovellusten viimeaikainen käyttö"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Katso viimeaikainen käyttö"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Valmis"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Laajenna ja näytä vaihtoehdot"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Tiivistä"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Sulje tämä sovellus"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> suljettu"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Ylläpidä palvelua"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Hallinnoi pääsyä"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Puhelun käytössä"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Käytetty äskettäin puhelussa"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Tämän käytössä: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"<xliff:g id="APP_NAME">%1$s</xliff:g> käytti tätä äskettäin"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Tämän käytössä: <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> käytti tätä äskettäin (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Tämän käytössä: <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> käytti tätä äskettäin (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

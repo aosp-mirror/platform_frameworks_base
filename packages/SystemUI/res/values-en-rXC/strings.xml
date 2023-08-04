@@ -184,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‏‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‎‎‎‎‎‏‏‎‏‏‏‏‎To set up Face Unlock again, your current face model will be deleted.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Youll need to set up this feature again to use your face to unlock your phone.‎‏‎‎‏‎"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‏‎‏‏‏‎‏‏‎‏‎‏‏‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‏‎‏‏‎‏‏‎‎‎‏‏‏‎Couldn’t set up face unlock. Go to Settings to try again.‎‏‎‎‏‎"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‎‏‎‏‎‏‏‏‏‏‏‏‎‏‏‏‏‏‎Touch the fingerprint sensor‎‏‎‎‏‎"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‎‏‎‎‎‏‏‎‎‏‎‎‎‏‏‎‎‏‏‎‎‏‏‏‏‎‏‏‎‏‏‏‎‎‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‏‎‎Press the unlock icon to continue‎‏‎‎‏‎"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‎‏‎‎‎Can’t recognize face. Use fingerprint instead.‎‏‎‎‏‎"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

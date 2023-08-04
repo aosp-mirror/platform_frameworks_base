@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Overené"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Zrušiť overenie"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Použiť PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Použiť vzor"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Použiť heslo"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Odomknutie tvárou môžete znova nastaviť, ale aktuálny model tváre bude odstránený.\n\nAk chcete telefón odomykať tvárou, budete musieť túto funkciu znova nastaviť."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Odomknutie tvárou sa nepodarilo nastaviť. Prejdite do Nastavení a skúste to znova."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotknite sa senzora odtlačkov prstov"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Pokračujte stlačením ikony odomknutia"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tvár sa nedá rozpoznať. Použite odtlačok prsta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Odomknuté tvárou"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Tvár bola rozpoznaná"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Potiahnite nahor a zopakujte odomknutie tvárou"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zariadení patrí organizácii <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
