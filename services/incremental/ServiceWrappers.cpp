@@ -315,11 +315,22 @@ private:
         std::unique_lock lock(mMutex);
         for (;;) {
             const TimePoint nextJobTs = mJobs.empty() ? kInfinityTs : mJobs.begin()->when;
-            mCondition.wait_until(lock, nextJobTs, [this, oldNextJobTs = nextJobTs]() {
+            auto conditionPredicate = [this, oldNextJobTs = nextJobTs]() {
                 const auto now = Clock::now();
                 const auto newFirstJobTs = !mJobs.empty() ? mJobs.begin()->when : kInfinityTs;
                 return newFirstJobTs <= now || newFirstJobTs < oldNextJobTs || !mRunning;
-            });
+            };
+            // libcxx's implementation of wait_until() recalculates the 'until' time into
+            // the wait duration and then goes back to the absolute timestamp when calling
+            // pthread_cond_timedwait(); this back-and-forth calculation sometimes loses
+            // the 'infinity' value because enough time passes in between, and instead
+            // passes incorrect timestamp into the syscall, causing a crash.
+            // Mitigating it by explicitly calling the non-timed wait here.
+            if (mJobs.empty()) {
+                mCondition.wait(lock, conditionPredicate);
+            } else {
+                mCondition.wait_until(lock, nextJobTs, conditionPredicate);
+            }
             if (!mRunning) {
                 return;
             }
