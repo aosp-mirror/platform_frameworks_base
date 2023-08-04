@@ -30,6 +30,9 @@ import android.view.SurfaceControl.TrustedPresentationThresholds;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,6 +62,11 @@ public class TrustedPresentationCallbackTest {
     @Before
     public void setup() {
         mActivityRule.getScenario().onActivity(activity -> mActivity = activity);
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @Test
