@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "Minikin"
-
 #include "Font.h"
 #include "SkData.h"
 #include "SkFont.h"

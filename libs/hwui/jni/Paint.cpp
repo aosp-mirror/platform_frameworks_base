@@ -15,9 +15,6 @@
 ** limitations under the License.
 */
 
-#undef LOG_TAG
-#define LOG_TAG "Paint"
-
 #include <hwui/BlurDrawLooper.h>
 #include <hwui/MinikinSkia.h>
 #include <hwui/MinikinUtils.h>

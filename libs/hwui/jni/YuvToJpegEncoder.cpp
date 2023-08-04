@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "YuvToJpegEncoder"
-
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "SkStream.h"
 #include "YuvToJpegEncoder.h"

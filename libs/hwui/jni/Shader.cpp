@@ -1,6 +1,3 @@
-#undef LOG_TAG
-#define LOG_TAG "ShaderJNI"
-
 #include <vector>
 
 #include "Gainmap.h"

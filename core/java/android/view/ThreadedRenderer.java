@@ -815,7 +815,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
         int syncResult = syncAndDrawFrame(frameInfo);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
-            Log.w("OpenGLRenderer", "Surface lost, forcing relayout");
+            Log.w("HWUI", "Surface lost, forcing relayout");
             // We lost our surface. For a relayout next frame which should give us a new
             // surface from WindowManager, which hopefully will work.
             attachInfo.mViewRootImpl.mForceNextWindowRelayout = true;

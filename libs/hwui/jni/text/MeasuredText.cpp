@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "MeasuredText"
-
 #include "GraphicsJNI.h"
 #include "utils/misc.h"
 #include "utils/Log.h"

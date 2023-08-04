@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "LineBreaker"
-
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include "graphics_jni_helpers.h"

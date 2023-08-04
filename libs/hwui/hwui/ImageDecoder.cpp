@@ -43,9 +43,6 @@
 
 #include <memory>
 
-#undef LOG_TAG
-#define LOG_TAG "ImageDecoder"
-
 using namespace android;
 
 sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
