@@ -76,7 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN is required after lockdown"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Password is required after lockdown"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Pattern is required after lockdown"</string>
-    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Update will install during inactive hours"</string>
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update will install when device not in use"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Added security required. PIN not used for a while."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Added security required. Password not used for a while."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Added security required. Pattern not used for a while."</string>
