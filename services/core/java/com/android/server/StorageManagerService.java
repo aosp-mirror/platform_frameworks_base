@@ -1357,6 +1357,21 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    /**
+     * This method checks if the volume is public and the volume is visible and the volume it is
+     * trying to mount doesn't have the same mount user id as the current user being maintained by
+     * StorageManagerService and change the mount Id. The checks are same as
+     * {@link StorageManagerService#maybeRemountVolumes(int)}
+     * @param VolumeInfo object to consider for changing the mountId
+     */
+    private void updateVolumeMountIdIfRequired(VolumeInfo vol) {
+        synchronized (mLock) {
+            if (!vol.isPrimary() && vol.isVisible() && vol.getMountUserId() != mCurrentUserId) {
+                vol.mountUserId = mCurrentUserId;
+            }
+        }
+    }
+
     private boolean supportsBlockCheckpoint() throws RemoteException {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.supportsBlockCheckpoint();
@@ -1468,13 +1483,14 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void onVolumeStateChanged(String volId, final int newState) {
+        public void onVolumeStateChanged(String volId, final int newState, final int userId) {
             synchronized (mLock) {
                 final VolumeInfo vol = mVolumes.get(volId);
                 if (vol != null) {
                     final int oldState = vol.state;
                     vol.state = newState;
                     final VolumeInfo vInfo = new VolumeInfo(vol);
+                    vInfo.mountUserId = userId;
                     final SomeArgs args = SomeArgs.obtain();
                     args.arg1 = vInfo;
                     args.argi1 = oldState;
@@ -2322,7 +2338,7 @@ class StorageManagerService extends IStorageManager.Stub
         if (isMountDisallowed(vol)) {
             throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
-
+        updateVolumeMountIdIfRequired(vol);
         mount(vol);
     }
 

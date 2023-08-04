@@ -167,7 +167,9 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
         while (i < segmentCount) {
             VibrationEffectSegment segment = segments.get(i);
             if (!(segment instanceof StepSegment)
-                    || ((StepSegment) segment).getAmplitude() == 0) {
+                    // play() will ignore segments with zero duration, so it's important that
+                    // zero-duration segments don't affect this method.
+                    || (segment.getDuration() > 0 && ((StepSegment) segment).getAmplitude() == 0)) {
                 break;
             }
             timing += segment.getDuration();

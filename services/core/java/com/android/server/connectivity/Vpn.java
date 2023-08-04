@@ -3346,7 +3346,7 @@ public class Vpn {
                 // Transforms do not need to be persisted; the IkeSession will keep
                 // them alive for us
                 mIpSecManager.applyTunnelModeTransform(mTunnelIface, direction, transform);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 Log.d(TAG, "Transform application failed for token " + token, e);
                 onSessionLost(token, e);
             }
@@ -3440,7 +3440,7 @@ public class Vpn {
                         mTunnelIface, IpSecManager.DIRECTION_IN, inTransform);
                 mIpSecManager.applyTunnelModeTransform(
                         mTunnelIface, IpSecManager.DIRECTION_OUT, outTransform);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 Log.d(TAG, "Transform application failed for token " + token, e);
                 onSessionLost(token, e);
             }

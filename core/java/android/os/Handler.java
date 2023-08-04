@@ -119,7 +119,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper())} to make it clear to readers.
      *
@@ -144,7 +144,7 @@ public class Handler {
      *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
      *   conditions, where the thread a handler is associated with is not what the author
      *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
-     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   explicitly, using {@link Looper#getMainLooper}, {@link android.view.View#getHandler}, or
      *   similar. If the implicit thread local behavior is required for compatibility, use
      *   {@code new Handler(Looper.myLooper(), callback)} to make it clear to readers.
      */

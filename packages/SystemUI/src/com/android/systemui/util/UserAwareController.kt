@@ -23,7 +23,6 @@ import android.os.UserHandle
  * changes.
  */
 interface UserAwareController {
-    @JvmDefault
     fun changeUser(newUser: UserHandle) {}
 
     val currentUserId: Int
