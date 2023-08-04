@@ -38,6 +38,7 @@ import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
+import com.android.settingslib.spa.widget.ui.AnnotatedText
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.IPackageManagers
 import com.android.settingslib.spaprivileged.model.app.PackageManagers
@@ -140,8 +141,7 @@ internal fun TogglePermissionAppListModel<out AppRecord>.TogglePermissionAppInfo
         title = stringResource(pageTitleResId),
         packageName = packageName,
         userId = userId,
-        footerText = stringResource(footerResId),
-        footerContent = footerContent(),
+        footerContent = { AnnotatedText(footerResId) },
         packageManagers = packageManagers,
     ) {
         val model = createSwitchModel(applicationInfo)
