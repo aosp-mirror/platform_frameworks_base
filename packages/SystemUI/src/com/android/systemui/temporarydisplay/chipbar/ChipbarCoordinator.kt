@@ -48,6 +48,8 @@ import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -94,6 +96,7 @@ constructor(
     wakeLockBuilder: WakeLock.Builder,
     systemClock: SystemClock,
     tempViewUiEventLogger: TemporaryViewUiEventLogger,
+    private val featureFlags: FeatureFlags,
 ) :
     TemporaryViewDisplayController<ChipbarInfo, ChipbarLogger>(
         context,
@@ -231,14 +234,18 @@ constructor(
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
-        newInfo.vibrationEffect?.let {
-            vibratorHelper.vibrate(
-                Process.myUid(),
-                context.getApplicationContext().getPackageName(),
-                it,
-                newInfo.windowTitle,
-                VIBRATION_ATTRIBUTES,
-            )
+        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            vibratorHelper.performHapticFeedback(parent, newInfo.vibrationConstant)
+        } else {
+            newInfo.vibrationEffect?.let {
+                vibratorHelper.vibrate(
+                    Process.myUid(),
+                    context.getApplicationContext().getPackageName(),
+                    it,
+                    newInfo.windowTitle,
+                    VIBRATION_ATTRIBUTES,
+                )
+            }
         }
     }
 
