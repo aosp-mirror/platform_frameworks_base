@@ -32,6 +32,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Trace;
@@ -71,6 +72,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
     private Interpolator mLinearOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
     private DisappearAnimationListener mDisappearAnimationListener;
+    private static final int[] DISABLE_STATE_SET = {-android.R.attr.state_enabled};
+    private static final int[] ENABLE_STATE_SET = {android.R.attr.state_enabled};
 
     public KeyguardPasswordView(Context context) {
         this(context, null);
@@ -148,7 +151,10 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
     @Override
     protected void setPasswordEntryEnabled(boolean enabled) {
-        mPasswordEntry.setEnabled(enabled);
+        int color = mPasswordEntry.getTextColors().getColorForState(
+                enabled ? ENABLE_STATE_SET : DISABLE_STATE_SET, 0);
+        mPasswordEntry.setBackgroundTintList(ColorStateList.valueOf(color));
+        mPasswordEntry.setCursorVisible(enabled);
     }
 
     @Override
