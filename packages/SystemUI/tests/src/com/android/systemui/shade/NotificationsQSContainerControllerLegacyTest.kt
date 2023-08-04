@@ -144,27 +144,52 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
     @Test
     fun testSmallScreen_updateResources_splitShadeHeightIsSet() {
         overrideResource(R.bool.config_use_large_screen_shade_header, false)
-        overrideResource(R.dimen.qs_header_height, 1)
-        overrideResource(R.dimen.large_screen_shade_header_height, 2)
+        overrideResource(R.dimen.qs_header_height, 10)
+        overrideResource(R.dimen.large_screen_shade_header_height, 20)
+
+        // ensure the estimated height (would be 3 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 1)
 
         underTest.updateResources()
 
         val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
         verify(view).applyConstraints(capture(captor))
-        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(1)
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(10)
     }
 
     @Test
     fun testLargeScreen_updateResources_splitShadeHeightIsSet() {
         overrideResource(R.bool.config_use_large_screen_shade_header, true)
-        overrideResource(R.dimen.qs_header_height, 1)
-        overrideResource(R.dimen.large_screen_shade_header_height, 2)
+        overrideResource(R.dimen.qs_header_height, 10)
+        overrideResource(R.dimen.large_screen_shade_header_height, 20)
+
+        // ensure the estimated height (would be 3 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 1)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 1)
 
         underTest.updateResources()
 
         val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
         verify(view).applyConstraints(capture(captor))
-        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(2)
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(20)
+    }
+
+    @Test
+    fun testSmallScreen_estimatedHeightIsLargerThanDimenValue_shadeHeightIsSetToEstimatedHeight() {
+        overrideResource(R.bool.config_use_large_screen_shade_header, false)
+        overrideResource(R.dimen.qs_header_height, 10)
+        overrideResource(R.dimen.large_screen_shade_header_height, 20)
+
+        // make the estimated height (would be 15 here) larger than qs_header_height
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 5)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 5)
+
+        underTest.updateResources()
+
+        val captor = ArgumentCaptor.forClass(ConstraintSet::class.java)
+        verify(view).applyConstraints(capture(captor))
+        assertThat(captor.value.getHeight(R.id.split_shade_status_bar)).isEqualTo(15)
     }
 
     @Test
@@ -387,6 +412,10 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         setLargeScreen()
         val largeScreenHeaderHeight = 100
         overrideResource(R.dimen.large_screen_shade_header_height, largeScreenHeaderHeight)
+
+        // ensure the estimated height (would be 30 here) wouldn't impact this test case
+        overrideResource(R.dimen.large_screen_shade_header_min_height, 10)
+        overrideResource(R.dimen.new_qs_header_non_clickable_element_height, 10)
 
         underTest.updateResources()
 
