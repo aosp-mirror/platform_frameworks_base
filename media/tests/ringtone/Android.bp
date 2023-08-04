@@ -1,0 +1,30 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "MediaRingtoneTests",
+
+    srcs: ["src/**/*.java"],
+
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+
+    static_libs: [
+        "androidx.test.rules",
+        "testng",
+        "androidx.test.ext.truth",
+        "frameworks-base-testutils",
+    ],
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    platform_apis: true,
+    certificate: "platform",
+}
