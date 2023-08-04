@@ -15,10 +15,9 @@
  *
  */
 
-package com.android.systemui.keyguard.ui.view.layout
+package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.graphics.Point
-import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
@@ -26,9 +25,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -40,45 +36,36 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(JUnit4::class)
 @SmallTest
-class DefaultLockscreenLayoutTest : SysuiTestCase() {
-    private lateinit var defaultLockscreenLayout: DefaultLockscreenLayout
-    private lateinit var rootView: KeyguardRootView
+class DefaultLockIconSectionTest : SysuiTestCase() {
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
-
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    private lateinit var underTest: DefaultLockIconSection
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        rootView = KeyguardRootView(context, null)
-        defaultLockscreenLayout =
-            DefaultLockscreenLayout(authController, keyguardUpdateMonitor, windowManager, context)
+        underTest =
+            DefaultLockIconSection(keyguardUpdateMonitor, authController, windowManager, context)
     }
 
     @Test
-    fun testLayoutViews_KeyguardIndicationArea() {
-        defaultLockscreenLayout.layoutViews(rootView)
-        val constraint = getViewConstraint(R.id.keyguard_indication_area)
-        assertThat(constraint.layout.bottomToBottom).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.endToEnd).isEqualTo(ConstraintSet.PARENT_ID)
-        assertThat(constraint.layout.mWidth).isEqualTo(ViewGroup.LayoutParams.MATCH_PARENT)
-        assertThat(constraint.layout.mHeight).isEqualTo(ViewGroup.LayoutParams.WRAP_CONTENT)
-    }
+    fun apply() {
+        val cs = ConstraintSet()
+        underTest.apply(cs)
 
-    @Test
-    fun testLayoutViews_lockIconView() {
-        defaultLockscreenLayout.layoutViews(rootView)
-        val constraint = getViewConstraint(R.id.lock_icon_view)
+        val constraint = cs.getConstraint(R.id.lock_icon_view)
+
         assertThat(constraint.layout.topToTop).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
     }
 
     @Test
     fun testCenterLockIcon() {
-        defaultLockscreenLayout.centerLockIcon(Point(5, 6), 1F, 5, rootView)
-        val constraint = getViewConstraint(R.id.lock_icon_view)
+        val cs = ConstraintSet()
+        underTest.centerLockIcon(Point(5, 6), 1F, 5, cs)
+
+        val constraint = cs.getConstraint(R.id.lock_icon_view)
 
         assertThat(constraint.layout.mWidth).isEqualTo(2)
         assertThat(constraint.layout.mHeight).isEqualTo(2)
@@ -86,12 +73,5 @@ class DefaultLockscreenLayoutTest : SysuiTestCase() {
         assertThat(constraint.layout.startToStart).isEqualTo(ConstraintSet.PARENT_ID)
         assertThat(constraint.layout.topMargin).isEqualTo(5)
         assertThat(constraint.layout.startMargin).isEqualTo(4)
-    }
-
-    /** Get the ConstraintLayout constraint of the view. */
-    private fun getViewConstraint(viewId: Int): ConstraintSet.Constraint {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(rootView)
-        return constraintSet.getConstraint(viewId)
     }
 }
