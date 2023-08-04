@@ -17,6 +17,7 @@ android_test {
         "services.core",
         "servicestests-utils",
         "testables",
+        "TestParameterInjector",
     ],
 
     libs: [
