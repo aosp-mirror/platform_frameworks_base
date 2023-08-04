@@ -161,6 +161,7 @@ interface MediaProjectionAppSelectorComponent {
     interface Factory {
         /** Create a factory to inject the activity into the graph */
         fun create(
+            @BindsInstance activity: MediaProjectionAppSelectorActivity,
             @BindsInstance view: MediaProjectionAppSelectorView,
             @BindsInstance resultHandler: MediaProjectionAppSelectorResultHandler,
         ): MediaProjectionAppSelectorComponent
