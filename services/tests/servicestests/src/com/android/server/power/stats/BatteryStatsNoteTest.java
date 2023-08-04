@@ -44,6 +44,7 @@ import android.telephony.Annotation;
 import android.telephony.CellSignalStrength;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -2461,14 +2462,26 @@ public class BatteryStatsNoteTest extends TestCase {
                 @BatteryStats.RadioAccessTechnology int rat) {
             currentNetworkDataType = dataType;
             currentRat = rat;
+            final int nrState;
+            if (currentNetworkDataType == TelephonyManager.NETWORK_TYPE_NR) {
+                nrState = NetworkRegistrationInfo.NR_STATE_CONNECTED;
+            } else {
+                nrState = NetworkRegistrationInfo.NR_STATE_NONE;
+            }
             mBsi.notePhoneDataConnectionStateLocked(dataType, true, ServiceState.STATE_IN_SERVICE,
-                    currentFrequencyRange);
+                    nrState, currentFrequencyRange);
         }
 
         void setFrequencyRange(@ServiceState.FrequencyRange int frequency) {
             currentFrequencyRange = frequency;
+            final int nrState;
+            if (currentNetworkDataType == TelephonyManager.NETWORK_TYPE_NR) {
+                nrState = NetworkRegistrationInfo.NR_STATE_CONNECTED;
+            } else {
+                nrState = NetworkRegistrationInfo.NR_STATE_NONE;
+            }
             mBsi.notePhoneDataConnectionStateLocked(currentNetworkDataType, true,
-                    ServiceState.STATE_IN_SERVICE, frequency);
+                    ServiceState.STATE_IN_SERVICE, nrState, frequency);
         }
 
         void setSignalStrength(@BatteryStats.RadioAccessTechnology int rat, int strength) {

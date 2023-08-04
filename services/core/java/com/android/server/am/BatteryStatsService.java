@@ -84,6 +84,7 @@ import android.power.PowerStatsInternal;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.IndentingPrintWriter;
@@ -1587,7 +1588,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     @EnforcePermission(UPDATE_DEVICE_STATS)
     public void notePhoneDataConnectionState(final int dataType, final boolean hasData,
-            final int serviceType, final int nrFrequency) {
+            final int serviceType, @NetworkRegistrationInfo.NRState final int nrState,
+            final int nrFrequency) {
         super.notePhoneDataConnectionState_enforcePermission();
 
         synchronized (mLock) {
@@ -1596,7 +1598,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 synchronized (mStats) {
                     mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType,
-                            nrFrequency, elapsedRealtime, uptime);
+                            nrState, nrFrequency, elapsedRealtime, uptime);
                 }
             });
         }
