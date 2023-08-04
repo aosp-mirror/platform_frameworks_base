@@ -408,6 +408,7 @@ android_library {
     static_libs: [
         "SystemUI-tests-base",
         "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
         "mockito-target-extended-minus-junit4",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
@@ -477,6 +478,7 @@ android_robolectric_test {
     ],
     static_libs: [
         "androidx.test.uiautomator_uiautomator",
+        "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
         "inline-mockito-robolectric-prebuilt",
     ],

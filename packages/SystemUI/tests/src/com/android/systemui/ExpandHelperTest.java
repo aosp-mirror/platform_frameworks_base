@@ -25,12 +25,12 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import androidx.core.animation.AnimatorTestRule;
 import androidx.core.animation.ObjectAnimator;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationMediaManager;

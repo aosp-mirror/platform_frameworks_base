@@ -24,9 +24,9 @@ import android.util.Pair
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider

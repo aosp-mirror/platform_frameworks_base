@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 class AnimatorTestRulePrecisionTest : SysuiTestCase() {
 
     @get:Rule val animatorTestRule = AnimatorTestRule()
