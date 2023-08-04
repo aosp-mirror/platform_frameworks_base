@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  * Setup: Launch A|B in split with B being the secondary activity. Transitions: A start C with
  * alwaysExpand=true, expect C to launch in fullscreen and cover split A|B.
  *
- * To run this test: `atest FlickerTests:MainActivityStartsSecondaryWithAlwaysExpandTest`
+ * To run this test: `atest FlickerTestsOther:MainActivityStartsSecondaryWithAlwaysExpandTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
