@@ -1509,6 +1509,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             mColors.setSupportsDarkText(
                     ColorUtils.calculateContrast(mColors.getMainColor(), Color.WHITE) > 4.5);
         }
+
+        int surface = Utils.getColorAttr(mScrimBehind.getContext(),
+                com.android.internal.R.attr.materialColorSurface).getDefaultColor();
+        for (ScrimState state : ScrimState.values()) {
+            state.setSurfaceColor(surface);
+        }
+
         mNeedsDrawableColorUpdate = true;
     }
 
