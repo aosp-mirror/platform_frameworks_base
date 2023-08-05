@@ -26,21 +26,17 @@ import com.android.systemui.R
 
 object ActionIntentCreator {
     /** @return a chooser intent to share the given URI. */
-    fun createShareIntent(uri: Uri) = createShareIntent(uri, null, null)
+    fun createShare(uri: Uri): Intent = createShare(uri, subject = null, text = null)
 
     /** @return a chooser intent to share the given URI with the optional provided subject. */
-    fun createShareIntentWithSubject(uri: Uri, subject: String?) =
-        createShareIntent(uri, subject = subject)
+    fun createShareWithSubject(uri: Uri, subject: String): Intent =
+        createShare(uri, subject = subject)
 
     /** @return a chooser intent to share the given URI with the optional provided extra text. */
-    fun createShareIntentWithExtraText(uri: Uri, extraText: String?) =
-        createShareIntent(uri, extraText = extraText)
+    fun createShareWithText(uri: Uri, extraText: String): Intent =
+        createShare(uri, text = extraText)
 
-    private fun createShareIntent(
-        uri: Uri,
-        subject: String? = null,
-        extraText: String? = null
-    ): Intent {
+    private fun createShare(uri: Uri, subject: String? = null, text: String? = null): Intent {
         // Create a share intent, this will always go through the chooser activity first
         // which should not trigger auto-enter PiP
         val sharingIntent =
@@ -56,8 +52,8 @@ object ActionIntentCreator {
                         ClipData.Item(uri)
                     )
 
-                putExtra(Intent.EXTRA_SUBJECT, subject)
-                putExtra(Intent.EXTRA_TEXT, extraText)
+                subject?.let { putExtra(Intent.EXTRA_SUBJECT, subject) }
+                text?.let { putExtra(Intent.EXTRA_TEXT, text) }
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }
@@ -75,10 +71,9 @@ object ActionIntentCreator {
     fun createEditIntent(uri: Uri, context: Context): Intent {
         val editIntent = Intent(Intent.ACTION_EDIT)
 
-        context.getString(R.string.config_screenshotEditor)?.let {
-            if (it.isNotEmpty()) {
-                editIntent.component = ComponentName.unflattenFromString(it)
-            }
+        val editor = context.getString(R.string.config_screenshotEditor)
+        if (editor.isNotEmpty()) {
+            editIntent.component = ComponentName.unflattenFromString(editor)
         }
 
         return editIntent

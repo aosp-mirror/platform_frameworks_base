@@ -184,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"За да настроите „Отключване с лице“ отново, текущият модел на лицето ви ще бъде изтрит.\n\nЩе трябва да настроите функцията отново, за да отключвате телефона си с лице."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Функцията „Отключване с лице“ не бе настроена. Отворете настройките, за да опитате отново."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Докоснете сензора за отпечатъци"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Натиснете иконата за отключване, за да продължите"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лицето не е разпознато. Използвайте отпечатък."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -938,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Опитайте с друг ПИН код"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Потвърдете промяната за <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Повторен опит за удостоверяване с лице"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване на мултимед. контрола за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -1166,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Функцията за активиране на Асистент е включена"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Задайте стандартно приложение за бележки от настройките"</string>
     <string name="install_app" msgid="5066668100199613936">"Инсталиране на приложението"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон и камера"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Скорошно използване на приложението"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Вижте скорошния достъп"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Готово"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Разгъване и показване на опциите"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свиване"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Затваряне на това приложение"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Затворихте <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Управление на услугата"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Управление на достъпа"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Използва се от телефонно обаждане"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Наскоро използвано в телефонно обаждане"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Използва се от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Използва се от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Използва се от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Наскоро използвано от <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

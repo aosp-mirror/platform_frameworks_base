@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.intentresolver.widget.ResolverDrawerLayout
+<com.android.internal.widget.ResolverDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
@@ -84,7 +84,7 @@
                 android:id="@*android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <com.android.intentresolver.ResolverViewPager
+                <com.android.internal.app.ResolverViewPager
                     android:id="@*android:id/profile_pager"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
@@ -92,4 +92,4 @@
         </LinearLayout>
     </TabHost>
 
-</com.android.intentresolver.widget.ResolverDrawerLayout>
+</com.android.internal.widget.ResolverDrawerLayout>

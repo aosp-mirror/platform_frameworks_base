@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ಪಿನ್ ಬಳಸಿ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ಪ್ಯಾಟರ್ನ್ ಬಳಸಿ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಸೆಟಪ್ ಮಾಡಲು, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ.\n\nನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವುದಕ್ಕೆ ನಿಮ್ಮ ಫೇಸ್ ಅನ್ನು ಬಳಸಲು ನೀವು ಈ ಫೀಚರ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಸೆಟಪ್ ಮಾಡುವ ಅಗತ್ಯವಿದೆ."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿರಿ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ಮುಖ ಗುರುತಿಸಲಾಗುತ್ತಿಲ್ಲ ಬದಲಿಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸಿ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ಮುಖದ ಮೂಲಕ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಪುನಃ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಗೆ ಸೇರಿದೆ"</string>

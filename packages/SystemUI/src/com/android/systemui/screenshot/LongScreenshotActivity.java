@@ -336,7 +336,7 @@ public class LongScreenshotActivity extends Activity {
             mActionExecutor.launchIntentAsync(
                     ActionIntentCreator.INSTANCE.createEditIntent(uri, this),
                     null,
-                    mScreenshotUserHandle.getIdentifier(), false);
+                    mScreenshotUserHandle, false);
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
@@ -362,9 +362,8 @@ public class LongScreenshotActivity extends Activity {
     }
 
     private void doShare(Uri uri) {
-        Intent shareIntent = ActionIntentCreator.INSTANCE.createShareIntent(uri);
-        mActionExecutor.launchIntentAsync(shareIntent, null,
-                mScreenshotUserHandle.getIdentifier(), false);
+        Intent shareIntent = ActionIntentCreator.INSTANCE.createShare(uri);
+        mActionExecutor.launchIntentAsync(shareIntent, null, mScreenshotUserHandle, false);
     }
 
     private void onClicked(View v) {
