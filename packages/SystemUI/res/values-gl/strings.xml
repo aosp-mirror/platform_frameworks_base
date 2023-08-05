@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Recoñeceuse a cara. Preme para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Recoñeceuse a cara. Preme a icona de desbloquear."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancelar a autenticación"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Usar padrón"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Usar contrasinal"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Para configurar de novo o desbloqueo facial, eliminarase o modelo facial actual.\n\nTes que volver configurar esta función se queres utilizar o recoñecemento facial para desbloquear o teléfono."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Non se puido configurar o desbloqueo facial. Para tentalo de novo, vai a Configuración."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca o sensor de impresión dixital"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Preme a icona de desbloquear para continuar"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Non se recoñeceu a cara. Usa a impresión dixital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Usouse o desbloqueo facial"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Recoñeceuse a cara"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Pasa o dedo cara arriba para tentalo de novo"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Pasa o dedo cara arriba para tentar usar o desbloqueo facial"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea o dispositivo para utilizar a NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence á túa organización."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Proba con outro PIN"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirma o cambio para <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasar o dedo para ver máis"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Tentar de novo a autenticación por recoñecemento facial"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendacións"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Contido multimedia"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Queres ocultar este control multimedia para <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"A atención do Asistente está activada"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Establece a aplicación de notas predeterminada en Configuración"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalar aplicación"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Micrófono e cámara"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Uso recente por parte de aplicacións"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Ver acceso recente"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Feito"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Despregar e mostrar opcións"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Contraer"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Pechar esta aplicación"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Pechouse <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Xestionar servizo"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Xestionar acceso"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"En uso por unha chamada telefónica"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"En uso recentemente por unha chamada telefónica"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"En uso por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"En uso recentemente por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"En uso por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"En uso recentemente por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"En uso por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"En uso recentemente por <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

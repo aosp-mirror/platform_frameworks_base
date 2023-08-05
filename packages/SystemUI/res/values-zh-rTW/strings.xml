@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"臉孔辨識完成，按下即可繼續操作。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"臉孔辨識完成，按下「解鎖」圖示即可繼續操作。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"已通過驗證"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"取消驗證"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"使用 PIN 碼"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"使用解鎖圖案"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"使用密碼"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"如要重新設定人臉解鎖功能，必須刪除目前的臉部模型。\n\n你必須重新設定這項功能，才能使用自己的臉孔解鎖手機。"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"無法設定人臉解鎖功能，請前往「設定」再試一次。"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"請輕觸指紋感應器"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"按下「解鎖」圖示即可繼續操作"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"無法辨識臉孔，請改用指紋完成驗證。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"裝置已透過你的臉解鎖"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"臉孔辨識完成"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑動即可重試"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"向上滑動即可再次執行人臉解鎖功能"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"如要使用 NFC，請先解鎖"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此裝置屬於貴機構"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"這部裝置的擁有者為「<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>」"</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"試試其他 PIN 碼"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"確認「<xliff:g id="DEVICE">%s</xliff:g>」的變更"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"滑動即可查看其他結構"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"再次進行臉部驗證"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議控制項"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒體"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"要隱藏「<xliff:g id="APP_NAME">%1$s</xliff:g>」的媒體控制選項嗎？"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Google 助理感知功能已開啟"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在「設定」中指定預設記事應用程式"</string>
     <string name="install_app" msgid="5066668100199613936">"安裝應用程式"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"麥克風和相機"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"最近曾使用感應器的應用程式"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"查看近期存取記錄"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"完成"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"展開並顯示選項"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"收合"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"關閉這個應用程式"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」已關閉"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"管理服務"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"管理存取權"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"正用於手機通話"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"最近曾用於手機通話"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"正由「<xliff:g id="APP_NAME">%1$s</xliff:g>」使用"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」最近用過這項權限"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"正由「<xliff:g id="APP_NAME">%1$s</xliff:g>」使用 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」最近用過這項權限 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"正由「<xliff:g id="APP_NAME">%1$s</xliff:g>」使用 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」最近用過這項權限 (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>
