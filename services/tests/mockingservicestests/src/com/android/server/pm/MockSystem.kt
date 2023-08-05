@@ -216,6 +216,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val handler = TestHandler(null)
         val defaultAppProvider: DefaultAppProvider = mock()
         val backgroundHandler = TestHandler(null)
+        val updateOwnershipHelper: UpdateOwnershipHelper = mock()
     }
 
     companion object {
@@ -303,6 +304,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.handler) { mocks.handler }
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
         whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
+        whenever(mocks.injector.updateOwnershipHelper) { mocks.updateOwnershipHelper }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)
