@@ -1,10 +1,26 @@
+/*
+ * Copyright (C) 2021 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.statusbar.notification
 
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.LaunchAnimator
-import com.android.systemui.shade.NotificationShadeWindowViewController
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
@@ -17,7 +33,7 @@ import kotlin.math.max
 /** A provider of [NotificationLaunchAnimatorController]. */
 @CentralSurfacesComponent.CentralSurfacesScope
 class NotificationLaunchAnimatorControllerProvider @Inject constructor(
-    private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
+    private val notificationExpansionRepository: NotificationExpansionRepository,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
     private val jankMonitor: InteractionJankMonitor
@@ -28,7 +44,7 @@ class NotificationLaunchAnimatorControllerProvider @Inject constructor(
         onFinishAnimationCallback: Runnable? = null
     ): NotificationLaunchAnimatorController {
         return NotificationLaunchAnimatorController(
-            notificationShadeWindowViewController,
+            notificationExpansionRepository,
             notificationListContainer,
             headsUpManager,
             notification,
@@ -44,7 +60,7 @@ class NotificationLaunchAnimatorControllerProvider @Inject constructor(
  * notification expanding into an opening window.
  */
 class NotificationLaunchAnimatorController(
-    private val notificationShadeWindowViewController: NotificationShadeWindowViewController,
+    private val notificationExpansionRepository: NotificationExpansionRepository,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
     private val notification: ExpandableNotificationRow,
@@ -119,7 +135,7 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onIntentStarted(willAnimate: Boolean) {
-        notificationShadeWindowViewController.setExpandAnimationRunning(willAnimate)
+        notificationExpansionRepository.setIsExpandAnimationRunning(willAnimate)
         notificationEntry.isExpandAnimationRunning = willAnimate
 
         if (!willAnimate) {
@@ -140,7 +156,7 @@ class NotificationLaunchAnimatorController(
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
-        notificationShadeWindowViewController.setExpandAnimationRunning(false)
+        notificationExpansionRepository.setIsExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         removeHun(animate = true)
         onFinishAnimationCallback?.run()
@@ -158,7 +174,7 @@ class NotificationLaunchAnimatorController(
         jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false
-        notificationShadeWindowViewController.setExpandAnimationRunning(false)
+        notificationExpansionRepository.setIsExpandAnimationRunning(false)
         notificationEntry.isExpandAnimationRunning = false
         notificationListContainer.setExpandingNotification(null)
         applyParams(null)

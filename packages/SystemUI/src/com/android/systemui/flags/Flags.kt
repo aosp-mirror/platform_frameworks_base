@@ -266,11 +266,11 @@ object Flags {
     @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
 
     // TODO(b/287268101): Tracking bug.
-    @JvmField val TRANSIT_CLOCK = unreleasedFlag(239, "lockscreen_custom_transit_clock", teamfood = true)
+    @JvmField val TRANSIT_CLOCK = releasedFlag(239, "lockscreen_custom_transit_clock")
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon", teamfood = true)
+    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")

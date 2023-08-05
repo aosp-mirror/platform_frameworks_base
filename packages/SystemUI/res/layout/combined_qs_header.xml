@@ -133,7 +133,8 @@ frame when animating QS <-> QQS transition
 
         <com.android.systemui.statusbar.phone.StatusIconContainer
             android:id="@+id/statusIcons"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:paddingEnd="@dimen/signal_cluster_battery_padding" />
 
