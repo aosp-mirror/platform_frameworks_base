@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ચહેરો ઓળખ્યો. આગળ વધવા માટે દબાવો."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ચહેરો ઓળખ્યો. આગળ વધવા \'અનલૉક કરો\' આઇકન દબાવો."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"પ્રમાણિત"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"પ્રમાણીકરણ રદ કરો"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"પિનનો ઉપયોગ કરો"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"પૅટર્નનો ઉપયોગ કરો"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"પાસવર્ડનો ઉપયોગ કરો"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરવા માટે, તમારા ચહેરાનું વર્તમાન મૉડલ ડિલીટ કરવામાં આવશે.\n\nતમારો ફોન અનલૉક કરવા તમારા ચહેરાનો ઉપયોગ કરવા માટે, તમારે આ સુવિધાનું ફરી સેટઅપ કરવું જરૂરી રહેશે."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરી શક્યા નથી. ફરી પ્રયાસ કરવા માટે સેટિંગ પર જાઓ."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ચાલુ રાખવા \'અનલૉક કરો\' આઇકન દબાવો"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ચહેરો ઓળખી શકતા નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ચહેરા દ્વારા અનલૉક કર્યું"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ચહેરો ઓળખ્યો"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ફરી પ્રયાસ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"ફેસ અનલૉક ફરીથી અજમાવવા માટે ઉપર સ્વાઇપ કરો"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCનો ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ની માલિકીનું છે"</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"બીજા પિનને અજમાવી જુઓ"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> માટે ફેરફાર કન્ફર્મ કરો"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"વધુ જોવા માટે સ્વાઇપ કરો"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"ચહેરાના પ્રમાણીકરણ માટે ફરીથી પ્રયાસ કરો"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"શું <xliff:g id="APP_NAME">%1$s</xliff:g> માટે મીડિયાના નિયંત્રણો છુપાવીએ?"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant સક્રિય છે"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"સેટિંગમાં નોંધની ડિફૉલ્ટ ઍપ સેટ કરો"</string>
     <string name="install_app" msgid="5066668100199613936">"ઍપ ઇન્સ્ટૉલ કરો"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"માઇક્રોફોન અને કૅમેરા"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"તાજેતરનો ઍપનો વપરાશ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"તાજેતરનો ઍક્સેસ મેનેજ કરો"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"થઈ ગયું"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"મોટું કરો અને વિકલ્પો બતાવો"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"નાનું કરો"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"આ ઍપ બંધ કરો"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> બંધ છે"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"સેવા મેનેજ કરો"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"ઍક્સેસ મેનેજ કરો"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"ફોન કૉલ દ્વારા ઉપયોગ ચાલુ છે"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"તાજેતરમાં ફોન કૉલમાં ઉપયોગ કરવામાં આવ્યો"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> દ્વારા ઉપયોગ ચાલુ છે"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"<xliff:g id="APP_NAME">%1$s</xliff:g> દ્વારા તાજેતરમાં ઉપયોગ કરવામાં આવ્યો"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) દ્વારા ઉપયોગ ચાલુ છે"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) દ્વારા તાજેતરમાં ઉપયોગ કરવામાં આવ્યો"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) દ્વારા ઉપયોગ ચાલુ છે"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) દ્વારા તાજેતરમાં ઉપયોગ કરવામાં આવ્યો"</string>
 </resources>

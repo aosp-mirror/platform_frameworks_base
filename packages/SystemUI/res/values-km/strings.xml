@@ -150,8 +150,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"បានស្គាល់មុខ។ សូមចុច ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"បានស្គាល់មុខ។ សូមចុចរូបដោះសោ ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"បាន​ផ្ទៀងផ្ទាត់"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"បោះបង់ការផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ប្រើកូដ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ប្រើ​លំនាំ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"ប្រើពាក្យសម្ងាត់"</string>
@@ -185,6 +184,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ដើម្បីរៀបចំ​ដោះសោតាមទម្រង់មុខ​ម្ដងទៀត គំរូមុខបច្ចុប្បន្ន​របស់អ្នក​នឹងត្រូវបានលុប។\n\nអ្នកនឹងត្រូវ​រៀបចំមុខងារនេះ​ម្ដងទៀត ដើម្បីប្រើមុខរបស់អ្នក​សម្រាប់ដោះសោទូរសព្ទរបស់អ្នក។"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"មិនអាច​រៀបចំ​ការដោះសោតាមទម្រង់មុខបានទេ។ សូមចូលទៅកាន់​ការកំណត់​ ដើម្បីព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ប៉ះ​ឧបករណ៍​ចាប់ស្នាម​ម្រាមដៃ"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"សូមចុចរូបដោះសោ ដើម្បីបន្ត"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"មិនអាចសម្គាល់មុខបានទេ។ សូមប្រើស្នាមម្រាមដៃជំនួសវិញ។"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -364,8 +364,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"បានដោះសោដោយប្រើមុខ"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"បានស្គាល់មុខ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"អូសឡើងលើ ដើម្បីសាកល្បងប្រើការដោះ​សោ​ដោយស្កេន​មុខម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ឧបករណ៍នេះ​គឺជា​កម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -940,8 +939,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"សាកល្បងប្រើ​កូដ PIN ផ្សេងទៀត"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"បញ្ជាក់​ការផ្លាស់ប្ដូរ​សម្រាប់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"អូសដើម្បី​មើលច្រើនទៀត"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"សាកល្បងការផ្ទៀងផ្ទាត់មុខម្តងទៀត"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"លាក់ផ្ទាំង​គ្រប់គ្រង​មេឌៀនេះសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
@@ -1168,40 +1166,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ភាពប្រុងប្រៀប​របស់ Google Assistant ត្រូវបានបើក"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"កំណត់កម្មវិធីកំណត់ចំណាំលំនាំដើមនៅក្នុងការកំណត់"</string>
     <string name="install_app" msgid="5066668100199613936">"ដំឡើង​កម្មវិធី"</string>
-    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
-    <skip />
-    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
-    <skip />
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"មីក្រូហ្វូន និងកាមេរ៉ា"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"ការប្រើប្រាស់កម្មវិធីថ្មីៗនេះ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"មើលការចូលប្រើនាពេលថ្មីៗនេះ"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"រួចរាល់"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"ពង្រីក និង​បង្ហាញ​ជម្រើស​នានា"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"បង្រួម"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"បិទកម្មវិធីនេះ"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> ត្រូវ​បាន​បិទ"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"គ្រប់គ្រង​សេវាកម្ម"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"គ្រប់គ្រង​សិទ្ធិចូលប្រើ"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"កំពុងប្រើដោយការហៅទូរសព្ទ"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"បានប្រើនាពេលថ្មីៗនេះនៅក្នុងការហៅទូរសព្ទ"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"កំពុងប្រើដោយ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"បានប្រើនាពេលថ្មីៗនេះដោយ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"កំពុងប្រើដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"បានប្រើនាពេលថ្មីៗនេះដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"កំពុងប្រើដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"បានប្រើនាពេលថ្មីៗនេះដោយ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>
