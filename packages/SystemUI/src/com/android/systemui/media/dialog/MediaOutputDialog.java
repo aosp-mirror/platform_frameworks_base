@@ -104,11 +104,16 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public boolean isBroadcastSupported() {
         boolean isBluetoothLeDevice = false;
+        boolean isBroadcastEnabled = false;
         if (FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST)) {
             if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
                 isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
                     mMediaOutputController.getCurrentConnectedMediaDevice());
+                // if broadcast is active, broadcast should be considered as supported
+                // there could be a valid case that broadcast is ongoing
+                // without active LEA device connected
+                isBroadcastEnabled = mMediaOutputController.isBluetoothLeBroadcastEnabled();
             }
         } else {
             // To decouple LE Audio Broadcast and Unicast, it always displays the button when there
@@ -116,7 +121,8 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
             isBluetoothLeDevice = true;
         }
 
-        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
+        return mMediaOutputController.isBroadcastSupported()
+                && (isBluetoothLeDevice || isBroadcastEnabled);
     }
 
     @Override
