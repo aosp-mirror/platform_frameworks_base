@@ -27,6 +27,8 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IWindowToken;
+import android.app.servertransaction.WindowContextInfoChangeItem;
+import android.app.servertransaction.WindowContextWindowRemovalItem;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -329,12 +331,8 @@ class WindowContextListenerController {
             mLastReportedConfig.setTo(config);
             mLastReportedDisplay = displayId;
 
-            try {
-                // TODO(b/290876897): migrate to dispatch through wpc
-                mClientToken.onConfigurationChanged(config, displayId);
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "Could not report config changes to the window token client.");
-            }
+            mWpc.scheduleClientTransactionItem(WindowContextInfoChangeItem.obtain(
+                    mClientToken.asBinder(), config, displayId));
             mHasPendingConfiguration = false;
         }
 
@@ -359,12 +357,8 @@ class WindowContextListenerController {
                 }
             }
             mDeathRecipient.unlinkToDeath();
-            try {
-                // TODO(b/290876897): migrate to dispatch through wpc
-                mClientToken.onWindowTokenRemoved();
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "Could not report token removal to the window token client.");
-            }
+            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(
+                    mClientToken.asBinder()));
             unregister();
         }
 

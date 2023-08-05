@@ -55,6 +55,7 @@ import android.app.ActivityThread;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1584,9 +1585,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         resolvedConfig.seq = newParentConfig.seq;
     }
 
-    void dispatchConfiguration(Configuration config) {
+    void dispatchConfiguration(@NonNull Configuration config) {
         mHasPendingConfigurationChange = false;
-        if (mThread == null) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
                 // TODO (b/135719017): Temporary log for debugging IME service.
                 Slog.w(TAG_CONFIGURATION, "Unable to send config for IME proc " + mName
@@ -1611,10 +1613,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config);
+        scheduleConfigurationChange(thread, config);
     }
 
-    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
+    private void scheduleConfigurationChange(@NonNull IApplicationThread thread,
+            @NonNull Configuration config) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1622,11 +1625,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
         mHasCachedConfiguration = false;
+        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
+                config, mLastTopActivityDeviceId));
+    }
+
+    @VisibleForTesting
+    void scheduleClientTransactionItem(@NonNull ClientTransactionItem transactionItem) {
+        final IApplicationThread thread = mThread;
+        if (thread == null) {
+            if (Build.IS_DEBUGGABLE) {
+                Slog.w(TAG_CONFIGURATION, "Unable to send transaction to client proc " + mName
+                        + ": no app thread");
+            }
+            return;
+        }
+        scheduleClientTransactionItem(thread, transactionItem);
+    }
+
+    private void scheduleClientTransactionItem(@NonNull IApplicationThread thread,
+            @NonNull ClientTransactionItem transactionItem) {
         try {
-            mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config, mLastTopActivityDeviceId));
+            mAtm.getLifecycleManager().scheduleTransaction(thread, transactionItem);
         } catch (Exception e) {
-            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
+            Slog.e(TAG_CONFIGURATION, "Failed to schedule ClientTransactionItem="
+                    + transactionItem + " owner=" + mOwner, e);
         }
     }
 
