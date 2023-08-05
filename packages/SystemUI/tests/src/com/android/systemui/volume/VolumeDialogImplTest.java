@@ -38,6 +38,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.AnimatorTestRule;
 import android.app.KeyguardManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
@@ -84,6 +85,7 @@ import java.util.function.Predicate;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class VolumeDialogImplTest extends SysuiTestCase {
+    private static final AnimatorTestRule sAnimatorTestRule = new AnimatorTestRule();
 
     VolumeDialogImpl mDialog;
     View mActiveRinger;
@@ -126,6 +128,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     };
 
     private FakeFeatureFlags mFeatureFlags;
+    private int mLongestHideShowAnimationDuration = 250;
 
     @Before
     public void setup() throws Exception {
@@ -137,6 +140,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         when(mPostureController.getDevicePosture())
                 .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);
+
+        int hideDialogDuration = mContext.getResources()
+                .getInteger(R.integer.config_dialogHideAnimationDurationMs);
+        int showDialogDuration = mContext.getResources()
+                .getInteger(R.integer.config_dialogShowAnimationDurationMs);
+
+        mLongestHideShowAnimationDuration = Math.max(hideDialogDuration, showDialogDuration);
 
         mOriginalOrientation = mContext.getResources().getConfiguration().orientation;
 
@@ -717,6 +727,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     public void teardown() {
         cleanUp(mDialog);
         setOrientation(mOriginalOrientation);
+        sAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
+        mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         mTestableLooper.processAllMessages();
         reset(mPostureController);
     }
