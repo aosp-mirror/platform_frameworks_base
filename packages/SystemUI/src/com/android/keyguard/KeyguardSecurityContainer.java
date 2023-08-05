@@ -786,8 +786,6 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     void reloadColors() {
         mViewMode.reloadColors();
-        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.materialColorSurface));
     }
 
     /** Handles density or font scale changes. */
