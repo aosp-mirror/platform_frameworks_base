@@ -73,7 +73,7 @@ class MediaProjectionAppSelectorActivity(
     override fun getLayoutResource() = R.layout.media_projection_app_selector
 
     public override fun onCreate(bundle: Bundle?) {
-        component = componentFactory.create(view = this, resultHandler = this)
+        component = componentFactory.create(activity = this, view = this, resultHandler = this)
         component.lifecycleObservers.forEach { lifecycle.addObserver(it) }
 
         // Create a separate configuration controller for this activity as the configuration

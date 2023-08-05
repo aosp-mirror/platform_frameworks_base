@@ -1401,7 +1401,7 @@ public class TrustManagerService extends SystemService {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
-                if (info.agent.isTrustableOrWaitingForDowngrade()) {
+                if (info.agent.isManagingTrust()) {
                     return true;
                 }
             }

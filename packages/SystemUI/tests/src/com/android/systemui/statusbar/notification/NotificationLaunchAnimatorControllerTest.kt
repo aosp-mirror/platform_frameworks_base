@@ -6,7 +6,8 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.NotificationShadeWindowViewController
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
@@ -14,6 +15,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.policy.HeadsUpUtil
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +29,6 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
-    @Mock lateinit var notificationShadeWindowViewController: NotificationShadeWindowViewController
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManagerPhone
     @Mock lateinit var jankMonitor: InteractionJankMonitor
@@ -36,6 +37,9 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     private lateinit var notificationTestHelper: NotificationTestHelper
     private lateinit var notification: ExpandableNotificationRow
     private lateinit var controller: NotificationLaunchAnimatorController
+    private val notificationExpansionRepository = NotificationExpansionRepository()
+
+    private val testScope = TestScope()
 
     private val notificationKey: String
         get() = notification.entry.sbn.key
@@ -49,7 +53,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
                 NotificationTestHelper(mContext, mDependency, TestableLooper.get(this))
         notification = notificationTestHelper.createRow()
         controller = NotificationLaunchAnimatorController(
-                notificationShadeWindowViewController,
+                notificationExpansionRepository,
                 notificationListContainer,
                 headsUpManager,
                 notification,
@@ -69,6 +73,11 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
 
         assertTrue(HeadsUpUtil.isClickedHeadsUpNotification(notification))
         assertFalse(notification.entry.isExpandAnimationRunning)
+        val isExpandAnimationRunning by testScope.collectLastValue(
+            notificationExpansionRepository.isExpandAnimationRunning
+        )
+        assertFalse(isExpandAnimationRunning!!)
+
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, true /* animate */)
         verify(onFinishAnimationCallback).run()
@@ -81,6 +90,11 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
 
         assertTrue(HeadsUpUtil.isClickedHeadsUpNotification(notification))
         assertFalse(notification.entry.isExpandAnimationRunning)
+        val isExpandAnimationRunning by testScope.collectLastValue(
+            notificationExpansionRepository.isExpandAnimationRunning
+        )
+        assertFalse(isExpandAnimationRunning!!)
+
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, true /* animate */)
         verify(onFinishAnimationCallback).run()
@@ -93,6 +107,11 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
 
         assertFalse(HeadsUpUtil.isClickedHeadsUpNotification(notification))
         assertFalse(notification.entry.isExpandAnimationRunning)
+        val isExpandAnimationRunning by testScope.collectLastValue(
+            notificationExpansionRepository.isExpandAnimationRunning
+        )
+        assertFalse(isExpandAnimationRunning!!)
+
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, false /* animate */)
         verify(onFinishAnimationCallback).run()
@@ -103,5 +122,9 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
         controller.onIntentStarted(willAnimate = true)
 
         assertTrue(notification.entry.isExpandAnimationRunning)
+        val isExpandAnimationRunning by testScope.collectLastValue(
+            notificationExpansionRepository.isExpandAnimationRunning
+        )
+        assertTrue(isExpandAnimationRunning!!)
     }
 }

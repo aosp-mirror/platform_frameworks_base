@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.phone.fragment
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule

@@ -261,7 +261,10 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             mMediaOutputController.registerLeBroadcastAssistantServiceCallback(mExecutor,
                     mBroadcastAssistantCallback);
         }
-        connectBroadcastWithActiveDevice();
+        /* Add local source broadcast to connected capable devices that may be possible receivers
+         * of stream.
+         */
+        startBroadcastWithConnectedDevices();
     }
 
     @Override
@@ -394,30 +397,26 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         }
     }
 
-    void connectBroadcastWithActiveDevice() {
+    void startBroadcastWithConnectedDevices() {
         //get the Metadata, and convert to BT QR code format.
         BluetoothLeBroadcastMetadata broadcastMetadata = getBroadcastMetadata();
         if (broadcastMetadata == null) {
             Log.e(TAG, "Error: There is no broadcastMetadata.");
             return;
         }
-        MediaDevice mediaDevice = mMediaOutputController.getCurrentConnectedMediaDevice();
-        if (mediaDevice == null || !(mediaDevice instanceof BluetoothMediaDevice)
-                || !mediaDevice.isBLEDevice()) {
-            Log.e(TAG, "Error: There is no active BT LE device.");
-            return;
-        }
-        BluetoothDevice sink = ((BluetoothMediaDevice) mediaDevice).getCachedDevice().getDevice();
-        Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
-                + ", the device: " + sink.getAnonymizedAddress());
 
-        if (mMediaOutputController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
-            Log.d(TAG, "The sink device has the broadcast source now.");
-            return;
-        }
-        if (!mMediaOutputController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(sink,
-                broadcastMetadata, /*isGroupOp=*/ true)) {
-            Log.e(TAG, "Error: Source add failed");
+        for (BluetoothDevice sink : mMediaOutputController.getConnectedBroadcastSinkDevices()) {
+            Log.d(TAG, "The broadcastMetadata broadcastId: " + broadcastMetadata.getBroadcastId()
+                    + ", the device: " + sink.getAnonymizedAddress());
+
+            if (mMediaOutputController.isThereAnyBroadcastSourceIntoSinkDevice(sink)) {
+                Log.d(TAG, "The sink device has the broadcast source now.");
+                return;
+            }
+            if (!mMediaOutputController.addSourceIntoSinkDeviceWithBluetoothLeAssistant(sink,
+                    broadcastMetadata, /*isGroupOp=*/ false)) {
+                Log.e(TAG, "Error: Source add failed");
+            }
         }
     }
 

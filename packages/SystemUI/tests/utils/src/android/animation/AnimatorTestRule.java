@@ -18,6 +18,7 @@ package android.animation;
 
 import android.animation.AnimationHandler.AnimationFrameCallback;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
@@ -31,6 +32,7 @@ import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * JUnit {@link TestRule} that can be used to run {@link Animator}s without actually waiting for the
@@ -125,13 +127,39 @@ public final class AnimatorTestRule implements TestRule {
      * @param timeDelta the amount of milliseconds to advance
      */
     public void advanceTimeBy(long timeDelta) {
+        advanceTimeBy(timeDelta, null);
+    }
+
+    /**
+     * Advances the animation clock by the given amount of delta in milliseconds. This call will
+     * produce an animation frame to all the ongoing animations. This method needs to be
+     * called on the same thread as {@link Animator#start()}.
+     * <p>
+     * This method is not for test authors, but for rule authors to ensure that multiple animators
+     * can be advanced in sync.
+     *
+     * @param timeDelta      the amount of milliseconds to advance
+     * @param preFrameAction a consumer to be passed the timeDelta following the time advancement
+     *                       but prior to the frame production.
+     */
+    public void advanceTimeBy(long timeDelta, @Nullable Consumer<Long> preFrameAction) {
         Preconditions.checkArgumentNonnegative(timeDelta, "timeDelta must not be negative");
         requireLooper("AnimationTestRule#advanceTimeBy(long)");
-        // before advancing time, start new animators with the current time
-        initNewAnimators();
+        if (timeDelta == 0) {
+            // If time is not being advanced, all animators will get a tick; don't double tick these
+            mTestHandler.mNewCallbacks.clear();
+        } else {
+            // before advancing time, start new animators with the current time
+            initNewAnimators();
+        }
         synchronized (mLock) {
             // advance time
             mTotalTimeDelta += timeDelta;
+        }
+        if (preFrameAction != null) {
+            preFrameAction.accept(timeDelta);
+            // After letting other code run, clear any new callbacks to avoid double-ticking them
+            mTestHandler.mNewCallbacks.clear();
         }
         // produce a frame
         mTestHandler.doFrame();
