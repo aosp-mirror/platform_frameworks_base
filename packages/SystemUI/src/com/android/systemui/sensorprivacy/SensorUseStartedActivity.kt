@@ -228,6 +228,8 @@ open class SensorUseStartedActivity @Inject constructor(
     }
 
     override fun onDismiss(dialog: DialogInterface?) {
-        finish()
+        if (!isChangingConfigurations) {
+            finish()
+        }
     }
 }
