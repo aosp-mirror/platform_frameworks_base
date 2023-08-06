@@ -55,6 +55,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_USER_PREFERRED_MODE_VOTE,
             Flags::enableUserPreferredModeVote);
 
+    private final FlagState mExternalDisplayLimitModeState = new FlagState(
+            Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
+            Flags::enableModeLimitForExternalDisplay);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -87,6 +91,13 @@ public class DisplayManagerFlags {
      */
     public boolean isUserPreferredModeVoteEnabled() {
         return mUserPreferredModeVoteState.isEnabled();
+    }
+
+    /**
+     * @return Whether external display mode limitation is enabled.
+     */
+    public boolean isExternalDisplayLimitModeEnabled() {
+        return mExternalDisplayLimitModeState.isEnabled();
     }
 
     private static class FlagState {

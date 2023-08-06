@@ -20,6 +20,7 @@ package com.android.server.display.mode;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
+import static com.android.server.display.mode.Vote.PRIORITY_LIMIT_MODE;
 import static com.android.server.display.mode.Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -115,6 +116,12 @@ public class DisplayObserverTest {
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResources = mock(Resources.class);
         when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
+                .thenReturn(0);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))
+                .thenReturn(0);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
+                .thenReturn(0);
 
         // Necessary configs to initialize DisplayModeDirector
         when(mResources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
@@ -205,9 +212,129 @@ public class DisplayObserverTest {
                 .isEqualTo(null);
     }
 
+    /** External display: Do not apply limit to user preferred mode */
+    @Test
+    public void testExternalDisplay_doNotApplyLimitToUserPreferredMode() {
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
+                .thenReturn(MAX_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))
+                .thenReturn(MAX_WIDTH);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
+                .thenReturn(MAX_HEIGHT);
+
+        var preferredMode = mExternalDisplayModes[5];
+        mExternalDisplayUserPreferredModeId = preferredMode.getModeId();
+        var expectedResolutionVote = Vote.forSize(preferredMode.getPhysicalWidth(),
+                preferredMode.getPhysicalHeight());
+        init();
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(expectedResolutionVote);
+
+        // Testing that the vote is removed.
+        mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+    }
+
+    /** Default display: Do not apply limit to user preferred mode */
+    @Test
+    public void testDefaultDisplayAdded_notAppliedLimitToUserPreferredMode() {
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
+                .thenReturn(MAX_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))
+                .thenReturn(MAX_WIDTH);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
+                .thenReturn(MAX_HEIGHT);
+        var preferredMode = mInternalDisplayModes[5];
+        mInternalDisplayUserPreferredModeId = preferredMode.getModeId();
+        var expectedResolutionVote = Vote.forSize(preferredMode.getPhysicalWidth(),
+                        preferredMode.getPhysicalHeight());
+        init();
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+        mObserver.onDisplayAdded(DEFAULT_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(expectedResolutionVote);
+        mObserver.onDisplayRemoved(DEFAULT_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE))
+                .isEqualTo(null);
+    }
+
+    /** Default display added, no mode limit set */
+    @Test
+    public void testDefaultDisplayAdded() {
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
+                .thenReturn(MAX_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))
+                .thenReturn(MAX_WIDTH);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
+                .thenReturn(MAX_HEIGHT);
+        init();
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        mObserver.onDisplayAdded(DEFAULT_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+    }
+
+    /** External display added, apply resolution refresh rate limit */
+    @Test
+    public void testExternalDisplayAdded_applyResolutionRefreshRateLimit() {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakRefreshRate))
+                .thenReturn(MAX_REFRESH_RATE);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakWidth))
+                .thenReturn(MAX_WIDTH);
+        when(mResources.getInteger(R.integer.config_externalDisplayPeakHeight))
+                .thenReturn(MAX_HEIGHT);
+        init();
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(
+                Vote.forSizeAndPhysicalRefreshRatesRange(0, 0,
+                        MAX_WIDTH, MAX_HEIGHT,
+                        /*minPhysicalRefreshRate=*/ 0, MAX_REFRESH_RATE));
+        mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+    }
+
+    /** External display added, disabled resolution refresh rate limit. */
+    @Test
+    public void testExternalDisplayAdded_disabledResolutionRefreshRateLimit() {
+        when(mDisplayManagerFlags.isDisplayResolutionRangeVotingEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isUserPreferredModeVoteEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isExternalDisplayLimitModeEnabled()).thenReturn(true);
+        init();
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        mObserver.onDisplayAdded(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        mObserver.onDisplayChanged(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        mObserver.onDisplayRemoved(EXTERNAL_DISPLAY);
+        assertThat(getVote(DEFAULT_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+        assertThat(getVote(EXTERNAL_DISPLAY, PRIORITY_LIMIT_MODE)).isEqualTo(null);
+    }
+
     private void init() {
         mInjector = mock(DisplayModeDirector.Injector.class);
-
         doAnswer(invocation -> {
             assertThat(mObserver).isNull();
             mObserver = invocation.getArgument(0);

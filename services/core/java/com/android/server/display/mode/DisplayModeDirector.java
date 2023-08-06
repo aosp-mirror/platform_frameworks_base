@@ -163,6 +163,11 @@ public class DisplayModeDirector {
      */
     private final boolean mIsUserPreferredModeVoteEnabled;
 
+    /**
+     * Whether limit display mode feature is enabled.
+     */
+    private final boolean mIsExternalDisplayLimitModeEnabled;
+
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
             @NonNull DisplayManagerFlags displayManagerFlags) {
         this(context, handler, new RealInjector(context), displayManagerFlags);
@@ -174,6 +179,8 @@ public class DisplayModeDirector {
         mIsDisplayResolutionRangeVotingEnabled = displayManagerFlags
                 .isDisplayResolutionRangeVotingEnabled();
         mIsUserPreferredModeVoteEnabled = displayManagerFlags.isUserPreferredModeVoteEnabled();
+        mIsExternalDisplayLimitModeEnabled =
+            displayManagerFlags.isExternalDisplayLimitModeEnabled();
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -1457,11 +1464,29 @@ public class DisplayModeDirector {
         private final Context mContext;
         private final Handler mHandler;
         private final VotesStorage mVotesStorage;
+        private int mExternalDisplayPeakWidth;
+        private int mExternalDisplayPeakHeight;
+        private int mExternalDisplayPeakRefreshRate;
 
         DisplayObserver(Context context, Handler handler, VotesStorage votesStorage) {
             mContext = context;
             mHandler = handler;
             mVotesStorage = votesStorage;
+            mExternalDisplayPeakRefreshRate = mContext.getResources().getInteger(
+                        R.integer.config_externalDisplayPeakRefreshRate);
+            mExternalDisplayPeakWidth = mContext.getResources().getInteger(
+                        R.integer.config_externalDisplayPeakWidth);
+            mExternalDisplayPeakHeight = mContext.getResources().getInteger(
+                        R.integer.config_externalDisplayPeakHeight);
+        }
+
+        private boolean isExternalDisplayLimitModeEnabled() {
+            return mExternalDisplayPeakWidth > 0
+                && mExternalDisplayPeakHeight > 0
+                && mExternalDisplayPeakRefreshRate > 0
+                && mIsExternalDisplayLimitModeEnabled
+                && mIsDisplayResolutionRangeVotingEnabled
+                && mIsUserPreferredModeVoteEnabled;
         }
 
         public void observe() {
@@ -1493,6 +1518,7 @@ public class DisplayModeDirector {
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
+            updateDisplaysPeakRefreshRateAndResolution(displayInfo);
         }
 
         @Override
@@ -1503,6 +1529,7 @@ public class DisplayModeDirector {
             }
             updateLayoutLimitedFrameRate(displayId, null);
             removeUserSettingDisplayPreferredSize(displayId);
+            removeDisplaysPeakRefreshRateAndResolution(displayId);
         }
 
         @Override
@@ -1563,6 +1590,33 @@ public class DisplayModeDirector {
                 }
             }
             return null;
+        }
+
+        private void removeDisplaysPeakRefreshRateAndResolution(int displayId) {
+            if (!isExternalDisplayLimitModeEnabled()) {
+                return;
+            }
+
+            mVotesStorage.updateVote(displayId,
+                    Vote.PRIORITY_LIMIT_MODE, null);
+        }
+
+        private void updateDisplaysPeakRefreshRateAndResolution(@Nullable final DisplayInfo info) {
+            // Only consider external display, only in case the refresh rate and resolution limits
+            // are non-zero.
+            if (info == null || info.type != Display.TYPE_EXTERNAL
+                    || !isExternalDisplayLimitModeEnabled()) {
+                return;
+            }
+
+            mVotesStorage.updateVote(info.displayId,
+                    Vote.PRIORITY_LIMIT_MODE,
+                    Vote.forSizeAndPhysicalRefreshRatesRange(
+                            /* minWidth */ 0, /* minHeight */ 0,
+                            mExternalDisplayPeakWidth,
+                            mExternalDisplayPeakHeight,
+                            /* minPhysicalRefreshRate */ 0,
+                            mExternalDisplayPeakRefreshRate));
         }
 
         private void updateDisplayModes(int displayId, @Nullable DisplayInfo info) {

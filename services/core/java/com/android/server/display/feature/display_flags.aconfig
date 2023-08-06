@@ -49,3 +49,11 @@ flag {
     bug: "297018612"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_mode_limit_for_external_display"
+    namespace: "display_manager"
+    description: "Feature limiting external display resolution and refresh rate"
+    bug: "242093547"
+    is_fixed_read_only: true
+}

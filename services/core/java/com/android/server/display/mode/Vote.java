@@ -80,33 +80,36 @@ final class Vote {
     // rest of low priority voters. It votes [0, max(PEAK, MIN)]
     static final int PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE = 8;
 
+    // Restrict displays max available resolution and refresh rates. It votes [0, LIMIT]
+    static final int PRIORITY_LIMIT_MODE = 9;
+
     // To avoid delay in switching between 60HZ -> 90HZ when activating LHBM, set refresh
     // rate to max value (same as for PRIORITY_UDFPS) on lock screen
-    static final int PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE = 9;
+    static final int PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE = 10;
 
     // For concurrent displays we want to limit refresh rate on all displays
-    static final int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 10;
+    static final int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 11;
 
     // LOW_POWER_MODE force the render frame rate to [0, 60HZ] if
     // Settings.Global.LOW_POWER_MODE is on.
-    static final int PRIORITY_LOW_POWER_MODE = 11;
+    static final int PRIORITY_LOW_POWER_MODE = 12;
 
     // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
     // higher priority voters' result is a range, it will fix the rate to a single choice.
     // It's used to avoid refresh rate switches in certain conditions which may result in the
     // user seeing the display flickering when the switches occur.
-    static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 12;
+    static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 13;
 
     // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-    static final int PRIORITY_SKIN_TEMPERATURE = 13;
+    static final int PRIORITY_SKIN_TEMPERATURE = 14;
 
     // The proximity sensor needs the refresh rate to be locked in order to function, so this is
     // set to a high priority.
-    static final int PRIORITY_PROXIMITY = 14;
+    static final int PRIORITY_PROXIMITY = 15;
 
     // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
     // to function, so this needs to be the highest priority of all votes.
-    static final int PRIORITY_UDFPS = 15;
+    static final int PRIORITY_UDFPS = 16;
 
     // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
     // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -271,6 +274,8 @@ final class Vote {
                 return "PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE";
             case PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE:
                 return "PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE";
+            case PRIORITY_LIMIT_MODE:
+                return "PRIORITY_LIMIT_MODE";
             case PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE:
                 return "PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE";
             case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
