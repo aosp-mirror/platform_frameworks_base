@@ -752,8 +752,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"एपलाई नयाँ दूरसंचार सम्पर्क दर्ता गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"दूरसंचार जडान व्यवस्थापन गर्नुहोस्"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"एपलाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न एपलाई अनुमति दिनुहोस्।"</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"इन-कल स्क्रिनसँग अन्तर्क्रिया गर्नुहोस्"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"प्रयोगकर्ताले कहिले र कसरी इन-कल स्क्रिन देख्छन् भन्ने कुरा नियन्त्रण गर्न यो एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"टेलिफोनी सेवा अन्तरक्रिया"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"एपलाई कल बनाउन/प्राप्त गर्न टेलीफोनी सेवा साथ अन्तरक्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"आउने-कल प्रयोगकर्ता अनुभव प्रदान गर्नुहोस्"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"यसले सहयोगी एपलाई ब्याकग्राउन्डमा फोरग्राउन्ड सेवाहरू चलाउने अनुमति दिन्छ।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"माइक्रोफोन अनम्युट गरिएको छ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"माइक्रोफोन म्युट गरिएको छ"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"डुअल स्क्रिन"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"डुअल स्क्रिन अन छ"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen अन छ"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले सामग्री देखाउन दुई वटै डिस्प्ले प्रयोग गरिरहेको छ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"डिभाइस ज्यादै तातेको छ"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तपाईंको फोन ज्यादै तातिरहेको हुनाले डुअल स्क्रिन उपलब्ध छैन"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तपाईंको फोन ज्यादै तातिरहेको हुनाले Dual Screen उपलब्ध छैन"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen उपलब्ध छैन"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"ब्याट्री सेभर अन भएकाले Dual Screen उपलब्ध छैन। तपाईं सेटिङमा गई यो सुविधा अफ गर्न सक्नुहुन्छ।"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिङमा जानुहोस्"</string>
