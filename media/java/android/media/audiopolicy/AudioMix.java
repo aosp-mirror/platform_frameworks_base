@@ -21,12 +21,15 @@ import static android.media.AudioSystem.isRemoteSubmixDevice;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioSystem;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -38,12 +41,12 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public class AudioMix {
+public class AudioMix implements Parcelable {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private AudioMixingRule mRule;
+    private @NonNull AudioMixingRule mRule;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private AudioFormat mFormat;
+    private @NonNull AudioFormat mFormat;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mRouteFlags;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -54,7 +57,7 @@ public class AudioMix {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     int mCallbackFlags;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    String mDeviceAddress;
+    @NonNull String mDeviceAddress;
 
     // initialized in constructor, read by AudioPolicyConfig
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -63,10 +66,11 @@ public class AudioMix {
     /**
      * All parameters are guaranteed valid through the Builder.
      */
-    private AudioMix(AudioMixingRule rule, AudioFormat format, int routeFlags, int callbackFlags,
-            int deviceType, String deviceAddress) {
-        mRule = rule;
-        mFormat = format;
+    private AudioMix(@NonNull AudioMixingRule rule, @NonNull AudioFormat format,
+            int routeFlags, int callbackFlags,
+            int deviceType, @Nullable String deviceAddress) {
+        mRule = Objects.requireNonNull(rule);
+        mFormat = Objects.requireNonNull(format);
         mRouteFlags = routeFlags;
         mMixType = rule.getTargetMixType();
         mCallbackFlags = callbackFlags;
@@ -269,6 +273,49 @@ public class AudioMix {
         return Objects.hash(mRouteFlags, mRule, mMixType, mFormat);
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        // write mix route flags
+        dest.writeInt(mRouteFlags);
+        // write callback flags
+        dest.writeInt(mCallbackFlags);
+        // write device information
+        dest.writeInt(mDeviceSystemType);
+        dest.writeString8(mDeviceAddress);
+        mFormat.writeToParcel(dest, flags);
+        mRule.writeToParcel(dest, flags);
+    }
+
+    public static final @NonNull Parcelable.Creator<AudioMix> CREATOR = new Parcelable.Creator<>() {
+        /**
+         * Rebuilds an AudioMix previously stored with writeToParcel().
+         *
+         * @param p Parcel object to read the AudioMix from
+         * @return a new AudioMix created from the data in the parcel
+         */
+        public AudioMix createFromParcel(Parcel p) {
+            final AudioMix.Builder mixBuilder = new AudioMix.Builder();
+            // read mix route flags
+            mixBuilder.setRouteFlags(p.readInt());
+            // read callback flags
+            mixBuilder.setCallbackFlags(p.readInt());
+            // read device information
+            mixBuilder.setDevice(p.readInt(), p.readString8());
+            mixBuilder.setFormat(AudioFormat.CREATOR.createFromParcel(p));
+            mixBuilder.setMixingRule(AudioMixingRule.CREATOR.createFromParcel(p));
+            return mixBuilder.build();
+        }
+
+        public AudioMix[] newArray(int size) {
+            return new AudioMix[size];
+        }
+    };
+
     /** @hide */
     @IntDef(flag = true,
             value = { ROUTE_FLAG_RENDER, ROUTE_FLAG_LOOP_BACK } )
@@ -298,7 +345,7 @@ public class AudioMix {
          * @param rule a non-null {@link AudioMixingRule} instance.
          * @throws IllegalArgumentException
          */
-        public Builder(AudioMixingRule rule)
+        public Builder(@NonNull AudioMixingRule rule)
                 throws IllegalArgumentException {
             if (rule == null) {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule argument");
@@ -313,7 +360,7 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        Builder setMixingRule(AudioMixingRule rule)
+        Builder setMixingRule(@NonNull AudioMixingRule rule)
                 throws IllegalArgumentException {
             if (rule == null) {
                 throw new IllegalArgumentException("Illegal null AudioMixingRule argument");
@@ -358,7 +405,7 @@ public class AudioMix {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder setFormat(AudioFormat format)
+        public Builder setFormat(@NonNull AudioFormat format)
                 throws IllegalArgumentException {
             if (format == null) {
                 throw new IllegalArgumentException("Illegal null AudioFormat argument");

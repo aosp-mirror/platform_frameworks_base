@@ -39,9 +39,12 @@ import static org.junit.Assert.assertThrows;
 import android.media.AudioAttributes;
 import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
+import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.google.common.testing.EqualsTester;
 
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
@@ -216,6 +219,94 @@ public class AudioMixingRuleUnitTests {
     public void audioMixingRuleWithNoRulesFails() {
         assertThrows(IllegalArgumentException.class,
                 () -> new AudioMixingRule.Builder().build());
+    }
+
+    @Test
+    public void audioMixMatchCriterion_equals_isCorrect() {
+        AudioMixMatchCriterion criterionUsage = new AudioMixMatchCriterion(
+                USAGE_MEDIA_AUDIO_ATTRIBUTES, RULE_MATCH_ATTRIBUTE_USAGE);
+        AudioMixMatchCriterion criterionExcludeUsage = new AudioMixMatchCriterion(
+                USAGE_MEDIA_AUDIO_ATTRIBUTES, RULE_EXCLUDE_ATTRIBUTE_USAGE);
+        AudioMixMatchCriterion criterionCapturePreset = new AudioMixMatchCriterion(
+                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES,
+                RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET);
+        AudioMixMatchCriterion criterionExcludeCapturePreset = new AudioMixMatchCriterion(
+                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES,
+                RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET);
+        AudioMixMatchCriterion criterionUid = new AudioMixMatchCriterion(TEST_UID, RULE_MATCH_UID);
+        AudioMixMatchCriterion criterionExcludeUid = new AudioMixMatchCriterion(TEST_UID,
+                RULE_EXCLUDE_UID);
+        AudioMixMatchCriterion criterionSessionId = new AudioMixMatchCriterion(TEST_SESSION_ID,
+                RULE_MATCH_UID);
+        AudioMixMatchCriterion criterionExcludeSessionId = new AudioMixMatchCriterion(
+                TEST_SESSION_ID, RULE_EXCLUDE_UID);
+
+        final EqualsTester equalsTester = new EqualsTester();
+        equalsTester.addEqualityGroup(criterionUsage, writeToAndFromParcel(criterionUsage));
+        equalsTester.addEqualityGroup(criterionExcludeUsage,
+                writeToAndFromParcel(criterionExcludeUsage));
+        equalsTester.addEqualityGroup(criterionCapturePreset,
+                writeToAndFromParcel(criterionCapturePreset));
+        equalsTester.addEqualityGroup(criterionExcludeCapturePreset,
+                writeToAndFromParcel(criterionExcludeCapturePreset));
+        equalsTester.addEqualityGroup(criterionUid, writeToAndFromParcel(criterionUid));
+        equalsTester.addEqualityGroup(criterionExcludeUid,
+                writeToAndFromParcel(criterionExcludeUid));
+        equalsTester.addEqualityGroup(criterionSessionId, writeToAndFromParcel(criterionSessionId));
+        equalsTester.addEqualityGroup(criterionExcludeSessionId,
+                writeToAndFromParcel(criterionExcludeSessionId));
+
+        equalsTester.testEquals();
+    }
+
+    @Test
+    public void audioMixingRule_equals_isCorrect() {
+        final EqualsTester equalsTester = new EqualsTester();
+
+        AudioMixingRule mixRule1 = new AudioMixingRule.Builder().addMixRule(
+                RULE_MATCH_AUDIO_SESSION_ID, TEST_SESSION_ID).excludeMixRule(RULE_MATCH_UID,
+                TEST_UID).build();
+        AudioMixingRule mixRule2 = new AudioMixingRule.Builder().addMixRule(
+                RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES).setTargetMixRole(
+                MIX_ROLE_INJECTOR).allowPrivilegedPlaybackCapture(true).build();
+        AudioMixingRule mixRule3 = new AudioMixingRule.Builder().addMixRule(
+                RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES).setTargetMixRole(
+                MIX_ROLE_INJECTOR).allowPrivilegedPlaybackCapture(false).build();
+        AudioMixingRule mixRule4 = new AudioMixingRule.Builder().addMixRule(
+                RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                CAPTURE_PRESET_VOICE_RECOGNITION_AUDIO_ATTRIBUTES).setTargetMixRole(
+                MIX_ROLE_INJECTOR).voiceCommunicationCaptureAllowed(true).build();
+
+        equalsTester.addEqualityGroup(mixRule1, writeToAndFromParcel(mixRule1));
+        equalsTester.addEqualityGroup(mixRule2, writeToAndFromParcel(mixRule2));
+        equalsTester.addEqualityGroup(mixRule3, writeToAndFromParcel(mixRule3));
+        equalsTester.addEqualityGroup(mixRule4, writeToAndFromParcel(mixRule4));
+
+        equalsTester.testEquals();
+    }
+
+    private static AudioMixMatchCriterion writeToAndFromParcel(AudioMixMatchCriterion criterion) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            criterion.writeToParcel(parcel, /*parcelableFlags=*/0);
+            parcel.setDataPosition(0);
+            return AudioMixMatchCriterion.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
+    }
+
+    private static AudioMixingRule writeToAndFromParcel(AudioMixingRule audioMixingRule) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            audioMixingRule.writeToParcel(parcel, /*parcelableFlags=*/0);
+            parcel.setDataPosition(0);
+            return AudioMixingRule.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
     }
 
 

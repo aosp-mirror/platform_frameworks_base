@@ -7276,8 +7276,11 @@ package android.media.audiofx {
 
 package android.media.audiopolicy {
 
-  public class AudioMix {
+  public class AudioMix implements android.os.Parcelable {
+    method public int describeContents();
     method public int getMixState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioMix> CREATOR;
     field public static final int MIX_STATE_DISABLED = -1; // 0xffffffff
     field public static final int MIX_STATE_IDLE = 0; // 0x0
     field public static final int MIX_STATE_MIXING = 1; // 0x1
@@ -7286,15 +7289,18 @@ package android.media.audiopolicy {
   }
 
   public static class AudioMix.Builder {
-    ctor public AudioMix.Builder(android.media.audiopolicy.AudioMixingRule) throws java.lang.IllegalArgumentException;
+    ctor public AudioMix.Builder(@NonNull android.media.audiopolicy.AudioMixingRule) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix build() throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix.Builder setDevice(@NonNull android.media.AudioDeviceInfo) throws java.lang.IllegalArgumentException;
-    method public android.media.audiopolicy.AudioMix.Builder setFormat(android.media.AudioFormat) throws java.lang.IllegalArgumentException;
+    method public android.media.audiopolicy.AudioMix.Builder setFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix.Builder setRouteFlags(int) throws java.lang.IllegalArgumentException;
   }
 
-  public class AudioMixingRule {
+  public class AudioMixingRule implements android.os.Parcelable {
+    method public int describeContents();
     method public int getTargetMixRole();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioMixingRule> CREATOR;
     field public static final int MIX_ROLE_INJECTOR = 1; // 0x1
     field public static final int MIX_ROLE_PLAYERS = 0; // 0x0
     field public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 2; // 0x2

@@ -31,7 +31,6 @@ import android.media.AudioFormat;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
-import android.media.audiopolicy.AudioPolicyConfig;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
@@ -41,9 +40,6 @@ import com.google.common.testing.EqualsTester;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Unit tests for AudioMix.
@@ -262,13 +258,13 @@ public class AudioMixUnitTests {
 
 
     private static AudioMix writeToAndFromParcel(AudioMix audioMix) {
-        AudioPolicyConfig apc = new AudioPolicyConfig(new ArrayList<>(List.of(audioMix)));
         Parcel parcel = Parcel.obtain();
-        apc.writeToParcel(parcel, /*flags=*/0);
-        parcel.setDataPosition(0);
-        AudioMix unmarshalledMix =
-                AudioPolicyConfig.CREATOR.createFromParcel(parcel).getMixes().get(0);
-        parcel.recycle();
-        return unmarshalledMix;
+        try {
+            audioMix.writeToParcel(parcel, /*parcelableFlags=*/0);
+            parcel.setDataPosition(0);
+            return AudioMix.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
     }
 }

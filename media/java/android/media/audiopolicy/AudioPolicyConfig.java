@@ -17,7 +17,6 @@
 package android.media.audiopolicy;
 
 import android.annotation.NonNull;
-import android.media.AudioFormat;
 import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -85,72 +84,20 @@ public class AudioPolicyConfig implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mMixes.size());
         for (AudioMix mix : mMixes) {
-            // write mix route flags
-            dest.writeInt(mix.getRouteFlags());
-            // write callback flags
-            dest.writeInt(mix.mCallbackFlags);
-            // write device information
-            dest.writeInt(mix.mDeviceSystemType);
-            dest.writeString(mix.mDeviceAddress);
-            // write mix format
-            dest.writeInt(mix.getFormat().getSampleRate());
-            dest.writeInt(mix.getFormat().getEncoding());
-            dest.writeInt(mix.getFormat().getChannelMask());
-            // write opt-out respect
-            dest.writeBoolean(mix.getRule().allowPrivilegedMediaPlaybackCapture());
-            // write voice communication capture allowed flag
-            dest.writeBoolean(mix.getRule().voiceCommunicationCaptureAllowed());
-            // write specified mix type
-            dest.writeInt(mix.getRule().getTargetMixRole());
-            // write mix rules
-            final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
-            dest.writeInt(criteria.size());
-            for (AudioMixMatchCriterion criterion : criteria) {
-                criterion.writeToParcel(dest);
-            }
+            mix.writeToParcel(dest, flags);
         }
     }
 
     private AudioPolicyConfig(Parcel in) {
-        mMixes = new ArrayList<AudioMix>();
         int nbMixes = in.readInt();
+        mMixes = new ArrayList<>(nbMixes);
         for (int i = 0 ; i < nbMixes ; i++) {
-            final AudioMix.Builder mixBuilder = new AudioMix.Builder();
-            // read mix route flags
-            int routeFlags = in.readInt();
-            mixBuilder.setRouteFlags(routeFlags);
-            // read callback flags
-            mixBuilder.setCallbackFlags(in.readInt());
-            // read device information
-            mixBuilder.setDevice(in.readInt(), in.readString());
-            // read mix format
-            int sampleRate = in.readInt();
-            int encoding = in.readInt();
-            int channelMask = in.readInt();
-            final AudioFormat format = new AudioFormat.Builder().setSampleRate(sampleRate)
-                    .setChannelMask(channelMask).setEncoding(encoding).build();
-            mixBuilder.setFormat(format);
-
-            AudioMixingRule.Builder ruleBuilder = new AudioMixingRule.Builder();
-            // read opt-out respect
-            ruleBuilder.allowPrivilegedPlaybackCapture(in.readBoolean());
-            // read voice capture allowed flag
-            ruleBuilder.voiceCommunicationCaptureAllowed(in.readBoolean());
-            // read specified mix type
-            ruleBuilder.setTargetMixRole(in.readInt());
-            // read mix rules
-            int nbRules = in.readInt();
-            for (int j = 0 ; j < nbRules ; j++) {
-                // read the matching rules
-                ruleBuilder.addRuleFromParcel(in);
-            }
-            mixBuilder.setMixingRule(ruleBuilder.build());
-            mMixes.add(mixBuilder.build());
+            mMixes.add(AudioMix.CREATOR.createFromParcel(in));
         }
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<AudioPolicyConfig> CREATOR
-            = new Parcelable.Creator<AudioPolicyConfig>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioPolicyConfig> CREATOR =
+            new Parcelable.Creator<>() {
         /**
          * Rebuilds an AudioPolicyConfig previously stored with writeToParcel().
          * @param p Parcel object to read the AudioPolicyConfig from
