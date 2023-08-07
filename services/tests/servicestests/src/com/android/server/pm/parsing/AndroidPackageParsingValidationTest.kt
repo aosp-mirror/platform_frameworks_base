@@ -518,8 +518,26 @@ class AndroidPackageParsingValidationTest {
             }
         }
 
-        val failNames = arrayOf("com.android.TestClass:", "-TestClass", "TestClass.", ".", "..")
-        for (name in failNames) {
+        val badNames = arrayOf(
+            ";",
+            ",",
+            "[",
+            "]",
+            "(",
+            ")",
+            "{",
+            "}",
+            ":",
+            "?",
+            "-",
+            "%",
+            "^",
+            "*",
+            "|",
+            "/",
+            "\\"
+        )
+        for (name in badNames) {
             val xml = "<$tag $attr=\"$name\" />"
             pullParser.setInput(ByteArrayInputStream(xml.toByteArray()), null)
             val validator = Validator()

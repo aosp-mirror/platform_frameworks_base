@@ -42,6 +42,8 @@ public class Element {
     public static final int MAX_ATTR_LEN_PATH = 4000;
     public static final int MAX_ATTR_LEN_DATA_VALUE = 4000;
 
+    private static final String BAD_COMPONENT_NAME_CHARS = ";,[](){}:?-%^*|/\\";
+
     private static final String TAG = "PackageParsing";
     protected static final String TAG_ACTION = "action";
     protected static final String TAG_ACTIVITY = "activity";
@@ -790,32 +792,12 @@ public class Element {
     }
 
     void validateComponentName(CharSequence name) {
-        int i = 0;
-        if (name.charAt(0) == '.') {
-            i = 1;
-        }
         boolean isStart = true;
-        for (; i < name.length(); i++) {
-            if (name.charAt(i) == '.') {
-                if (isStart) {
-                    break;
-                }
-                isStart = true;
-            } else {
-                if (isStart) {
-                    if (Character.isJavaIdentifierStart(name.charAt(i))) {
-                        isStart = false;
-                    } else {
-                        break;
-                    }
-                } else if (!Character.isJavaIdentifierPart(name.charAt(i))) {
-                    break;
-                }
+        for (int i = 0; i < name.length(); i++) {
+            if (BAD_COMPONENT_NAME_CHARS.indexOf(name.charAt(i)) >= 0) {
+                Slog.e(TAG, name + " is not a valid Java class name");
+                throw new SecurityException(name + " is not a valid Java class name");
             }
-        }
-        if ((i < name.length()) || (name.charAt(name.length() - 1) == '.')) {
-            Slog.e(TAG, name + " is not a valid Java class name");
-            throw new SecurityException(name + " is not a valid Java class name");
         }
     }
 
