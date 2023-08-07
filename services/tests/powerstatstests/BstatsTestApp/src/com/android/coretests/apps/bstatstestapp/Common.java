@@ -15,14 +15,14 @@
  */
 package com.android.coretests.apps.bstatstestapp;
 
-import com.android.frameworks.coretests.aidl.ICmdCallback;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.android.frameworks.coretests.aidl.ICmdCallback;
 
 public class Common {
     private static final String EXTRA_KEY_CMD_RECEIVER = "cmd_receiver";

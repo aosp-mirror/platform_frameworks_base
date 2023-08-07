@@ -99,13 +99,10 @@
         "BatteryStats[^/]*\\.java",
         "BatteryUsageStats[^/]*\\.java",
         "PowerComponents\\.java",
+        "PowerMonitor[^/]*\\.java",
         "[^/]*BatteryConsumer[^/]*\\.java"
       ],
-      "name": "FrameworksServicesTests",
-      "options": [
-        { "include-filter": "com.android.server.power.stats" },
-        { "exclude-filter": "com.android.server.power.stats.BatteryStatsTests" }
-      ]
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": [

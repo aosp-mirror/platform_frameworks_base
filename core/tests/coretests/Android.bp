@@ -91,7 +91,6 @@ android_test {
     java_resources: [":ApkVerityTestCertDer"],
 
     data: [
-        ":BstatsTestApp",
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
         ":com.android.cts.helpers.aosp",

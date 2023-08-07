@@ -1,0 +1,52 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "PowerStatsTests",
+
+    // Include all test java files.
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "services.core",
+        "coretests-aidl",
+        "platformprotosnano",
+        "junit",
+        "truth-prebuilt",
+        "androidx.test.runner",
+        "androidx.test.ext.junit",
+        "androidx.test.ext.truth",
+        "androidx.test.uiautomator_uiautomator",
+        "mockito-target-minus-junit4",
+        "servicestests-utils",
+    ],
+
+    libs: [
+        "android.test.base",
+    ],
+
+    resource_dirs: ["res/"],
+
+    data: [
+        ":BstatsTestApp",
+    ],
+
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+
+    platform_apis: true,
+
+    certificate: "platform",
+
+    dxflags: ["--multi-dex"],
+
+    optimize: {
+        enabled: false,
+    },
+}

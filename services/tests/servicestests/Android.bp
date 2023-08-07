@@ -112,7 +112,6 @@ android_test {
     },
 
     data: [
-        ":BstatsTestApp",
         ":JobTestApp",
         ":SimpleServiceTestApp1",
         ":SimpleServiceTestApp2",
