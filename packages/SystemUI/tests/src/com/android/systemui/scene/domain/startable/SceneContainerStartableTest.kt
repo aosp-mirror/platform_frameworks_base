@@ -21,6 +21,7 @@ package com.android.systemui.scene.domain.startable
 import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
@@ -245,40 +246,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchToGoneWhenDeviceSleepsUnlocked_featureEnabled() =
-        testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
-            prepareState(
-                isFeatureEnabled = true,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Shade,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-            underTest.start()
-
-            keyguardRepository.setWakefulnessModel(ASLEEP)
-
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
-        }
-
-    @Test
-    fun switchToGoneWhenDeviceSleepsUnlocked_featureDisabled() =
-        testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
-            prepareState(
-                isFeatureEnabled = false,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Shade,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-            underTest.start()
-
-            keyguardRepository.setWakefulnessModel(ASLEEP)
-
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-        }
-
-    @Test
     fun switchToLockscreenWhenDeviceSleepsLocked_featureEnabled() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
@@ -290,7 +257,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
             underTest.start()
 
-            keyguardRepository.setWakefulnessModel(ASLEEP)
+            keyguardRepository.setWakefulnessModel(STARTING_TO_SLEEP)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
@@ -307,7 +274,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
             underTest.start()
 
-            keyguardRepository.setWakefulnessModel(ASLEEP)
+            keyguardRepository.setWakefulnessModel(STARTING_TO_SLEEP)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
         }
@@ -334,22 +301,86 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 }
         }
 
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNone_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = true,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.None,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNotNone_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = true,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.Pin,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNone_featureDisabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = false,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.None,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
     private fun prepareState(
         isFeatureEnabled: Boolean = true,
         isDeviceUnlocked: Boolean = false,
         isBypassEnabled: Boolean = false,
         initialSceneKey: SceneKey? = null,
+        authenticationMethod: AuthenticationMethodModel? = null,
     ) {
         featureFlags.set(Flags.SCENE_CONTAINER, isFeatureEnabled)
         authenticationRepository.setUnlocked(isDeviceUnlocked)
         keyguardRepository.setBypassEnabled(isBypassEnabled)
         initialSceneKey?.let { sceneInteractor.setCurrentScene(SceneModel(it), "reason") }
+        authenticationMethod?.let {
+            authenticationRepository.setAuthenticationMethod(authenticationMethod)
+            authenticationRepository.setLockscreenEnabled(
+                authenticationMethod != AuthenticationMethodModel.None
+            )
+        }
     }
 
     companion object {
-        private val ASLEEP =
+        private val STARTING_TO_SLEEP =
             WakefulnessModel(
-                state = WakefulnessState.ASLEEP,
+                state = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON
+            )
+        private val STARTING_TO_WAKE =
+            WakefulnessModel(
+                state = WakefulnessState.STARTING_TO_WAKE,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
                 lastSleepReason = WakeSleepReason.POWER_BUTTON
             )

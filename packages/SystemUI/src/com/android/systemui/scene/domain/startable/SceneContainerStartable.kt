@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.startable
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
@@ -135,22 +136,27 @@ constructor(
 
         applicationScope.launch {
             keyguardInteractor.wakefulnessModel
-                .map { it.state == WakefulnessState.ASLEEP }
+                .map { wakefulnessModel -> wakefulnessModel.state }
                 .distinctUntilChanged()
-                .collect { isAsleep ->
-                    if (isAsleep) {
-                        // When the device goes to sleep, reset the current scene.
-                        val isUnlocked = authenticationInteractor.isUnlocked.value
-                        val (targetSceneKey, loggingReason) =
-                            if (isUnlocked) {
-                                SceneKey.Gone to "device is asleep while unlocked"
-                            } else {
-                                SceneKey.Lockscreen to "device is asleep while locked"
+                .collect { wakefulnessState ->
+                    when (wakefulnessState) {
+                        WakefulnessState.STARTING_TO_SLEEP -> {
+                            switchToScene(
+                                targetSceneKey = SceneKey.Lockscreen,
+                                loggingReason = "device is asleep",
+                            )
+                        }
+                        WakefulnessState.STARTING_TO_WAKE -> {
+                            val authMethod = authenticationInteractor.getAuthenticationMethod()
+                            if (authMethod == AuthenticationMethodModel.None) {
+                                switchToScene(
+                                    targetSceneKey = SceneKey.Gone,
+                                    loggingReason =
+                                        "device is starting to wake up while auth method is None",
+                                )
                             }
-                        switchToScene(
-                            targetSceneKey = targetSceneKey,
-                            loggingReason = loggingReason,
-                        )
+                        }
+                        else -> Unit
                     }
                 }
         }
