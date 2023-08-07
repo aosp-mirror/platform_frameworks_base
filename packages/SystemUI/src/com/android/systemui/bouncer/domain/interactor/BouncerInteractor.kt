@@ -116,12 +116,12 @@ constructor(
                 repository.setMessage(
                     message ?: promptMessage(authenticationInteractor.getAuthenticationMethod())
                 )
-                sceneInteractor.setCurrentScene(
+                sceneInteractor.changeScene(
                     scene = SceneModel(SceneKey.Bouncer),
                     loggingReason = "request to unlock device while authentication required",
                 )
             } else {
-                sceneInteractor.setCurrentScene(
+                sceneInteractor.changeScene(
                     scene = SceneModel(SceneKey.Gone),
                     loggingReason = "request to unlock device while authentication isn't required",
                 )
@@ -169,7 +169,7 @@ constructor(
             authenticationInteractor.authenticate(input, tryAutoConfirm) ?: return null
 
         if (isAuthenticated) {
-            sceneInteractor.setCurrentScene(
+            sceneInteractor.changeScene(
                 scene = SceneModel(SceneKey.Gone),
                 loggingReason = "successful authentication",
             )
