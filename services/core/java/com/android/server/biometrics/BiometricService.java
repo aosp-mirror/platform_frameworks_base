@@ -1308,10 +1308,13 @@ public class BiometricService extends SystemService {
                                 .getString(R.string.biometric_dialog_default_subtitle));
                     } else if (hasEligibleFingerprintSensor) {
                         promptInfo.setSubtitle(getContext()
-                                .getString(R.string.biometric_dialog_fingerprint_subtitle));
+                                .getString(R.string.fingerprint_dialog_default_subtitle));
                     } else if (hasEligibleFaceSensor) {
                         promptInfo.setSubtitle(getContext()
-                                .getString(R.string.biometric_dialog_face_subtitle));
+                                .getString(R.string.face_dialog_default_subtitle));
+                    } else {
+                        promptInfo.setSubtitle(getContext()
+                                .getString(R.string.screen_lock_dialog_default_subtitle));
                     }
                 }
 
