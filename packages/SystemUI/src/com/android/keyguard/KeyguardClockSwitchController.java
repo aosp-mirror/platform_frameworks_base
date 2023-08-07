@@ -244,23 +244,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             return;
         }
         updateAodIcons();
-
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
-
-        if (mSmartspaceController.isEnabled()) {
-            View ksv = mView.findViewById(R.id.keyguard_slice_view);
-            int viewIndex = mStatusArea.indexOfChild(ksv);
-            ksv.setVisibility(View.GONE);
-
-            // TODO(b/261757708): add content observer for the Settings toggle and add/remove
-            //  weather according to the Settings.
-            if (mSmartspaceController.isDateWeatherDecoupled()) {
-                addDateWeatherView(viewIndex);
-                viewIndex += 1;
-            }
-
-            addSmartspaceView(viewIndex);
-        }
 
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
@@ -275,13 +259,27 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 mShowWeatherObserver,
                 UserHandle.USER_ALL
         );
-
         updateDoubleLineClock();
-        setDateWeatherVisibility();
-        setWeatherVisibility();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
+
+        if (mSmartspaceController.isEnabled()) {
+            View ksv = mView.findViewById(R.id.keyguard_slice_view);
+            int viewIndex = mStatusArea.indexOfChild(ksv);
+            ksv.setVisibility(View.GONE);
+
+            mSmartspaceController.removeViewsFromParent(mStatusArea);
+            addSmartspaceView();
+            // TODO(b/261757708): add content observer for the Settings toggle and add/remove
+            //  weather according to the Settings.
+            if (mSmartspaceController.isDateWeatherDecoupled()) {
+                addDateWeatherView();
+            }
+        }
+
+        setDateWeatherVisibility();
+        setWeatherVisibility();
     }
 
     int getNotificationIconAreaHeight() {
@@ -302,29 +300,22 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     void onLocaleListChanged() {
         if (mSmartspaceController.isEnabled()) {
+            mSmartspaceController.removeViewsFromParent(mStatusArea);
+            addSmartspaceView();
             if (mSmartspaceController.isDateWeatherDecoupled()) {
                 mDateWeatherView.removeView(mWeatherView);
-                int index = mStatusArea.indexOfChild(mDateWeatherView);
-                if (index >= 0) {
-                    mStatusArea.removeView(mDateWeatherView);
-                    addDateWeatherView(index);
-                }
+                addDateWeatherView();
                 setDateWeatherVisibility();
                 setWeatherVisibility();
-            }
-            int index = mStatusArea.indexOfChild(mSmartspaceView);
-            if (index >= 0) {
-                mStatusArea.removeView(mSmartspaceView);
-                addSmartspaceView(index);
             }
         }
     }
 
-    private void addDateWeatherView(int index) {
+    private void addDateWeatherView() {
         mDateWeatherView = (ViewGroup) mSmartspaceController.buildAndConnectDateView(mView);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 MATCH_PARENT, WRAP_CONTENT);
-        mStatusArea.addView(mDateWeatherView, index, lp);
+        mStatusArea.addView(mDateWeatherView, 0, lp);
         int startPadding = getContext().getResources().getDimensionPixelSize(
                 R.dimen.below_clock_padding_start);
         int endPadding = getContext().getResources().getDimensionPixelSize(
@@ -344,11 +335,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mWeatherView.setPaddingRelative(0, 0, 4, 0);
     }
 
-    private void addSmartspaceView(int index) {
+    private void addSmartspaceView() {
         mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 MATCH_PARENT, WRAP_CONTENT);
-        mStatusArea.addView(mSmartspaceView, index, lp);
+        mStatusArea.addView(mSmartspaceView, 0, lp);
         int startPadding = getContext().getResources().getDimensionPixelSize(
                 R.dimen.below_clock_padding_start);
         int endPadding = getContext().getResources().getDimensionPixelSize(

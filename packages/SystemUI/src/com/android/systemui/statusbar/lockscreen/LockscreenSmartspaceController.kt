@@ -446,6 +446,12 @@ constructor(
         session?.requestSmartspaceUpdate()
     }
 
+    fun removeViewsFromParent(viewGroup: ViewGroup) {
+        smartspaceViews.toList().forEach {
+            viewGroup.removeView(it as View)
+        }
+    }
+
     /**
      * Disconnects the smartspace view from the smartspace service and cleans up any resources.
      */
