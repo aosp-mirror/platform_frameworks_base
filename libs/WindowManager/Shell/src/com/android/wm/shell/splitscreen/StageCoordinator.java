@@ -1494,7 +1494,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private void clearSplitPairedInRecents(@ExitReason int exitReason) {
+    void clearSplitPairedInRecents(@ExitReason int exitReason) {
         if (!shouldBreakPairedTaskInRecents(exitReason) || !mShouldUpdateRecents) return;
 
         mRecentTasks.ifPresent(recentTasks -> {
