@@ -304,7 +304,8 @@ public final class HintManagerService extends SystemService {
         return mService;
     }
 
-    private boolean checkTidValid(int uid, int tgid, int [] tids) {
+    // returns the first invalid tid or null if not found
+    private Integer checkTidValid(int uid, int tgid, int [] tids) {
         // Make sure all tids belongs to the same UID (including isolated UID),
         // tids can belong to different application processes.
         List<Integer> isolatedPids = null;
@@ -326,19 +327,24 @@ public final class HintManagerService extends SystemService {
             if (isolatedPids == null) {
                 // To avoid deadlock, do not call into AMS if the call is from system.
                 if (uid == Process.SYSTEM_UID) {
-                    return false;
+                    return threadId;
                 }
                 isolatedPids = mAmInternal.getIsolatedProcesses(uid);
                 if (isolatedPids == null) {
-                    return false;
+                    return threadId;
                 }
             }
             if (isolatedPids.contains(pidOfThreadId)) {
                 continue;
             }
-            return false;
+            return threadId;
         }
-        return true;
+        return null;
+    }
+
+    private String formatTidCheckErrMsg(int callingUid, int[] tids, Integer invalidTid) {
+        return "Tid" + invalidTid + " from list " + Arrays.toString(tids)
+                + " doesn't belong to the calling application" + callingUid;
     }
 
     @VisibleForTesting
@@ -356,8 +362,11 @@ public final class HintManagerService extends SystemService {
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (!checkTidValid(callingUid, callingTgid, tids)) {
-                    throw new SecurityException("Some tid doesn't belong to the application");
+                final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids);
+                if (invalidTid != null) {
+                    final String errMsg = formatTidCheckErrMsg(callingUid, tids, invalidTid);
+                    Slogf.w(TAG, errMsg);
+                    throw new SecurityException(errMsg);
                 }
 
                 long halSessionPtr = mNativeWrapper.halCreateHintSession(callingTgid, callingUid,
@@ -561,8 +570,11 @@ public final class HintManagerService extends SystemService {
                 final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    if (!checkTidValid(callingUid, callingTgid, tids)) {
-                        throw new SecurityException("Some tid doesn't belong to the application.");
+                    final Integer invalidTid = checkTidValid(callingUid, callingTgid, tids);
+                    if (invalidTid != null) {
+                        final String errMsg = formatTidCheckErrMsg(callingUid, tids, invalidTid);
+                        Slogf.w(TAG, errMsg);
+                        throw new SecurityException(errMsg);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(identity);

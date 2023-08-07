@@ -55,15 +55,20 @@ public final class PerformanceHintManager {
      * duration.
      *
      * @param tids The list of threads to be associated with this session. They must be part of
-     *     this process' thread group.
+     *     this process' thread group
      * @param initialTargetWorkDurationNanos The desired duration in nanoseconds for the new
-     *     session.
+     *     session
      * @return the new session if it is supported on this device, null if hint session is not
-     *     supported on this device.
+     *     supported on this device or the tid doesn't belong to the application
+     * @throws IllegalArgumentException if the thread id list is empty, or
+     *                                  initialTargetWorkDurationNanos is non-positive
      */
     @Nullable
     public Session createHintSession(@NonNull int[] tids, long initialTargetWorkDurationNanos) {
-        Preconditions.checkNotNull(tids, "tids cannot be null");
+        Objects.requireNonNull(tids, "tids cannot be null");
+        if (tids.length == 0) {
+            throw new IllegalArgumentException("thread id list can't be empty.");
+        }
         Preconditions.checkArgumentPositive(initialTargetWorkDurationNanos,
                 "the hint target duration should be positive.");
         long nativeSessionPtr = nativeCreateSession(mNativeManagerPtr, tids,
@@ -75,7 +80,7 @@ public final class PerformanceHintManager {
     /**
      * Get preferred update rate information for this device.
      *
-     * @return the preferred update rate supported by device software.
+     * @return the preferred update rate supported by device software
      */
     public long getPreferredUpdateRateNanos() {
         return nativeGetPreferredUpdateRateNanos(mNativeManagerPtr);
@@ -209,7 +214,7 @@ public final class PerformanceHintManager {
         /**
          * Sends performance hints to inform the hint session of changes in the workload.
          *
-         * @param hint The hint to send to the session.
+         * @param hint The hint to send to the session
          *
          * @hide
          */
@@ -230,11 +235,11 @@ public final class PerformanceHintManager {
          * Note that this is not an oneway method.
          *
          * @param tids The list of threads to be associated with this session. They must be
-         *     part of this app's thread group.
+         *     part of this app's thread group
          *
-         * @throws IllegalStateException if the hint session is not in the foreground.
-         * @throws IllegalArgumentException if the thread id list is empty.
-         * @throws SecurityException if any thread id doesn't belong to the application.
+         * @throws IllegalStateException if the hint session is not in the foreground
+         * @throws IllegalArgumentException if the thread id list is empty
+         * @throws SecurityException if any thread id doesn't belong to the application
          */
         public void setThreads(@NonNull int[] tids) {
             if (mNativeSessionPtr == 0) {
