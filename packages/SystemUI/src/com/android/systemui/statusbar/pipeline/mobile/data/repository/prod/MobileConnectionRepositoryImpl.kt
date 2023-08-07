@@ -59,8 +59,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -330,6 +332,9 @@ class MobileConnectionRepositoryImpl(
             .map { it.enabled }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
+
+    /** Typical mobile connections aren't available during airplane mode. */
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false).asStateFlow()
 
     class Factory
     @Inject

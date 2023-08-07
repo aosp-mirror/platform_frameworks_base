@@ -55,6 +55,8 @@ class FakeMobileConnectionRepository(
     override val networkName =
         MutableStateFlow<NetworkNameModel>(NetworkNameModel.Default("default"))
 
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
+
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled
     }

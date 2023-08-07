@@ -22,6 +22,7 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -84,7 +85,11 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         mobileRepo = FakeMobileConnectionRepository(SUB_ID, tableLogBuffer)
-        carrierMergedRepo = FakeMobileConnectionRepository(SUB_ID, tableLogBuffer)
+        carrierMergedRepo =
+            FakeMobileConnectionRepository(SUB_ID, tableLogBuffer).apply {
+                // Mimicks the real carrier merged repository
+                this.isAllowedDuringAirplaneMode.value = true
+            }
 
         whenever(
                 mobileFactory.build(
@@ -297,6 +302,24 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             nameJob.cancel()
             levelJob.cancel()
+        }
+
+    @Test
+    fun isAllowedDuringAirplaneMode_updatesWhenCarrierMergedUpdates() =
+        testScope.runTest {
+            initializeRepo(startingIsCarrierMerged = false)
+
+            val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
+
+            assertThat(latest).isFalse()
+
+            underTest.setIsCarrierMerged(true)
+
+            assertThat(latest).isTrue()
+
+            underTest.setIsCarrierMerged(false)
+
+            assertThat(latest).isFalse()
         }
 
     @Test
