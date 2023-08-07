@@ -33,7 +33,6 @@ import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.service.dreams.Sandman;
-import android.sysprop.InitProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -868,6 +867,8 @@ public final class PowerManager {
 
     /**
      * The 'reason' value used for rebooting userspace.
+     *
+     * @deprecated userspace reboot is not supported
      * @hide
      */
     @SystemApi
@@ -1824,16 +1825,18 @@ public final class PowerManager {
      * <p>This method exists solely for the sake of re-using same logic between {@code PowerManager}
      * and {@code PowerManagerService}.
      *
+     * @deprecated TODO(b/292469129): remove this method.
      * @hide
      */
     public static boolean isRebootingUserspaceSupportedImpl() {
-        return InitProperties.is_userspace_reboot_supported().orElse(false);
+        return false;
     }
 
     /**
      * Returns {@code true} if this device supports rebooting userspace.
+     *
+     * @deprecated userspace reboot is deprecated, this method always returns {@code false}.
      */
-    // TODO(b/138605180): add link to documentation once it's ready.
     public boolean isRebootingUserspaceSupported() {
         return isRebootingUserspaceSupportedImpl();
     }
