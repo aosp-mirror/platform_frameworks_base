@@ -1568,37 +1568,40 @@ public class DisplayDeviceConfig {
     public String toString() {
         return "DisplayDeviceConfig{"
                 + "mLoadedFrom=" + mLoadedFrom
-                + ", mBacklight=" + Arrays.toString(mBacklight)
+                + "\n"
+                + "mBacklight=" + Arrays.toString(mBacklight)
                 + ", mNits=" + Arrays.toString(mNits)
                 + ", mRawBacklight=" + Arrays.toString(mRawBacklight)
                 + ", mRawNits=" + Arrays.toString(mRawNits)
                 + ", mInterpolationType=" + mInterpolationType
-                + ", mBrightness=" + Arrays.toString(mBrightness)
-                + ", mBrightnessToBacklightSpline=" + mBrightnessToBacklightSpline
+                + "mBrightness=" + Arrays.toString(mBrightness)
+                + "\n"
+                + "mBrightnessToBacklightSpline=" + mBrightnessToBacklightSpline
                 + ", mBacklightToBrightnessSpline=" + mBacklightToBrightnessSpline
                 + ", mNitsToBacklightSpline=" + mNitsToBacklightSpline
                 + ", mBacklightMinimum=" + mBacklightMinimum
                 + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
-                + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
-                + ", mLuxThrottlingData=" + mLuxThrottlingData
+                + ", mIsHighBrightnessModeEnabled=" + mIsHighBrightnessModeEnabled
+                + "\n"
+                + "mLuxThrottlingData=" + mLuxThrottlingData
                 + ", mHbmData=" + mHbmData
                 + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
                 + ", mThermalBrightnessThrottlingDataMapByThrottlingId="
                 + mThermalBrightnessThrottlingDataMapByThrottlingId
                 + "\n"
-                + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
+                + "mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
                 + ", mBrightnessRampDecreaseMaxMillis=" + mBrightnessRampDecreaseMaxMillis
                 + ", mBrightnessRampIncreaseMaxMillis=" + mBrightnessRampIncreaseMaxMillis
                 + "\n"
-                + ", mAmbientHorizonLong=" + mAmbientHorizonLong
+                + "mAmbientHorizonLong=" + mAmbientHorizonLong
                 + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + "\n"
-                + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
+                + "mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
                 + ", mScreenDarkeningMinThresholdIdle=" + mScreenDarkeningMinThresholdIdle
                 + ", mScreenBrighteningMinThreshold=" + mScreenBrighteningMinThreshold
                 + ", mScreenBrighteningMinThresholdIdle=" + mScreenBrighteningMinThresholdIdle
@@ -1608,7 +1611,7 @@ public class DisplayDeviceConfig {
                 + ", mAmbientLuxBrighteningMinThresholdIdle="
                 + mAmbientLuxBrighteningMinThresholdIdle
                 + "\n"
-                + ", mScreenBrighteningLevels=" + Arrays.toString(
+                + "mScreenBrighteningLevels=" + Arrays.toString(
                 mScreenBrighteningLevels)
                 + ", mScreenBrighteningPercentages=" + Arrays.toString(
                 mScreenBrighteningPercentages)
@@ -1625,7 +1628,7 @@ public class DisplayDeviceConfig {
                 + ", mAmbientDarkeningPercentages=" + Arrays.toString(
                 mAmbientDarkeningPercentages)
                 + "\n"
-                + ", mAmbientBrighteningLevelsIdle=" + Arrays.toString(
+                + "mAmbientBrighteningLevelsIdle=" + Arrays.toString(
                 mAmbientBrighteningLevelsIdle)
                 + ", mAmbientBrighteningPercentagesIdle=" + Arrays.toString(
                 mAmbientBrighteningPercentagesIdle)
@@ -1642,7 +1645,7 @@ public class DisplayDeviceConfig {
                 + ", mScreenDarkeningPercentagesIdle=" + Arrays.toString(
                 mScreenDarkeningPercentagesIdle)
                 + "\n"
-                + ", mAmbientLightSensor=" + mAmbientLightSensor
+                + "mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mScreenOffBrightnessSensor=" + mScreenOffBrightnessSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
@@ -1656,7 +1659,7 @@ public class DisplayDeviceConfig {
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
                 + ", mAutoBrightnessAvailable= " + mAutoBrightnessAvailable
                 + "\n"
-                + ", mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
+                + "mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
                 + ", mDefaultPeakRefreshRate= " + mDefaultPeakRefreshRate
                 + ", mDefaultRefreshRate= " + mDefaultRefreshRate
@@ -1665,7 +1668,7 @@ public class DisplayDeviceConfig {
                 + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
                 + "\n"
-                + ", mLowDisplayBrightnessThresholds= "
+                + "mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
                 + ", mLowAmbientBrightnessThresholds= "
                 + Arrays.toString(mLowAmbientBrightnessThresholds)
@@ -1674,10 +1677,10 @@ public class DisplayDeviceConfig {
                 + ", mHighAmbientBrightnessThresholds= "
                 + Arrays.toString(mHighAmbientBrightnessThresholds)
                 + "\n"
-                + ", mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
+                + "mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
                 mScreenOffBrightnessSensorValueToLux)
                 + "\n"
-                + ", mUsiVersion= " + mHostUsiVersion
+                + "mUsiVersion= " + mHostUsiVersion
                 + "}";
     }
 
