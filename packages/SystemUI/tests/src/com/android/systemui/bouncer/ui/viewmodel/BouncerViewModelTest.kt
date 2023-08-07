@@ -18,8 +18,9 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -55,6 +56,7 @@ class BouncerViewModelTest : SysuiTestCase() {
     private val underTest =
         utils.bouncerViewModel(
             bouncerInteractor = bouncerInteractor,
+            authenticationInteractor = authenticationInteractor,
         )
 
     @Test
@@ -86,7 +88,8 @@ class BouncerViewModelTest : SysuiTestCase() {
     @Test
     fun authMethod_reusesInstances() =
         testScope.runTest {
-            val seen = mutableMapOf<AuthenticationMethodModel, AuthMethodBouncerViewModel>()
+            val seen =
+                mutableMapOf<DomainLayerAuthenticationMethodModel, AuthMethodBouncerViewModel>()
             val authMethodViewModel: AuthMethodBouncerViewModel? by
                 collectLastValue(underTest.authMethod)
             // First pass, populate our "seen" map:
@@ -105,7 +108,7 @@ class BouncerViewModelTest : SysuiTestCase() {
     @Test
     fun authMethodsToTest_returnsCompleteSampleOfAllAuthMethodTypes() {
         assertThat(authMethodsToTest().map { it::class }.toSet())
-            .isEqualTo(AuthenticationMethodModel::class.sealedSubclasses.toSet())
+            .isEqualTo(DomainLayerAuthenticationMethodModel::class.sealedSubclasses.toSet())
     }
 
     @Test
@@ -113,7 +116,9 @@ class BouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val message by collectLastValue(underTest.message)
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             assertThat(message?.isUpdateAnimated).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
@@ -136,7 +141,9 @@ class BouncerViewModelTest : SysuiTestCase() {
                     }
                 )
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             assertThat(isInputEnabled).isTrue()
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
@@ -153,7 +160,9 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun throttlingDialogMessage() =
         testScope.runTest {
             val throttlingDialogMessage by collectLastValue(underTest.throttlingDialogMessage)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
 
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
                 // Wrong PIN.
@@ -166,13 +175,32 @@ class BouncerViewModelTest : SysuiTestCase() {
             assertThat(throttlingDialogMessage).isNull()
         }
 
-    private fun authMethodsToTest(): List<AuthenticationMethodModel> {
+    private fun authMethodsToTest(): List<DomainLayerAuthenticationMethodModel> {
         return listOf(
-            AuthenticationMethodModel.None,
-            AuthenticationMethodModel.Swipe,
-            AuthenticationMethodModel.Pin,
-            AuthenticationMethodModel.Password,
-            AuthenticationMethodModel.Pattern,
+            DomainLayerAuthenticationMethodModel.None,
+            DomainLayerAuthenticationMethodModel.Swipe,
+            DomainLayerAuthenticationMethodModel.Pin,
+            DomainLayerAuthenticationMethodModel.Password,
+            DomainLayerAuthenticationMethodModel.Pattern,
         )
+    }
+
+    private fun FakeAuthenticationRepository.setAuthenticationMethod(
+        model: DomainLayerAuthenticationMethodModel,
+    ) {
+        setAuthenticationMethod(
+            when (model) {
+                is DomainLayerAuthenticationMethodModel.None,
+                is DomainLayerAuthenticationMethodModel.Swipe ->
+                    DataLayerAuthenticationMethodModel.None
+                is DomainLayerAuthenticationMethodModel.Pin ->
+                    DataLayerAuthenticationMethodModel.Pin
+                is DomainLayerAuthenticationMethodModel.Password ->
+                    DataLayerAuthenticationMethodModel.Password
+                is DomainLayerAuthenticationMethodModel.Pattern ->
+                    DataLayerAuthenticationMethodModel.Pattern
+            }
+        )
+        setLockscreenEnabled(model !is DomainLayerAuthenticationMethodModel.None)
     }
 }

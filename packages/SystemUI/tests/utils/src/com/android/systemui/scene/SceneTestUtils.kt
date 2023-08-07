@@ -32,7 +32,6 @@ import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
@@ -176,23 +175,14 @@ class SceneTestUtils(
 
     fun bouncerViewModel(
         bouncerInteractor: BouncerInteractor,
+        authenticationInteractor: AuthenticationInteractor,
     ): BouncerViewModel {
         return BouncerViewModel(
             applicationContext = context,
             applicationScope = applicationScope(),
-            interactor = bouncerInteractor,
-            featureFlags = featureFlags,
-        )
-    }
-
-    fun lockScreenSceneInteractor(
-        authenticationInteractor: AuthenticationInteractor,
-        bouncerInteractor: BouncerInteractor,
-    ): LockscreenSceneInteractor {
-        return LockscreenSceneInteractor(
-            applicationScope = applicationScope(),
-            authenticationInteractor = authenticationInteractor,
             bouncerInteractor = bouncerInteractor,
+            authenticationInteractor = authenticationInteractor,
+            featureFlags = featureFlags,
         )
     }
 

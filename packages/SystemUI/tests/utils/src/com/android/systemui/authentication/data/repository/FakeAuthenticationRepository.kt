@@ -20,7 +20,8 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ class FakeAuthenticationRepository(
 
     private val _authenticationMethod =
         MutableStateFlow<AuthenticationMethodModel>(DEFAULT_AUTHENTICATION_METHOD)
-    val authenticationMethod: StateFlow<AuthenticationMethodModel> =
+    override val authenticationMethod: StateFlow<AuthenticationMethodModel> =
         _authenticationMethod.asStateFlow()
 
     private var isLockscreenEnabled = true
@@ -154,13 +155,13 @@ class FakeAuthenticationRepository(
         val DEFAULT_AUTHENTICATION_METHOD = AuthenticationMethodModel.Pin
         val PATTERN =
             listOf(
-                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 0),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 1),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 2),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 0),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 1),
-                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 2),
+                AuthenticationPatternCoordinate(2, 0),
+                AuthenticationPatternCoordinate(2, 1),
+                AuthenticationPatternCoordinate(2, 2),
+                AuthenticationPatternCoordinate(1, 1),
+                AuthenticationPatternCoordinate(0, 0),
+                AuthenticationPatternCoordinate(0, 1),
+                AuthenticationPatternCoordinate(0, 2),
             )
         const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
         const val THROTTLE_DURATION_MS = 30000
@@ -172,7 +173,6 @@ class FakeAuthenticationRepository(
                 is AuthenticationMethodModel.Pin -> SecurityMode.PIN
                 is AuthenticationMethodModel.Password -> SecurityMode.Password
                 is AuthenticationMethodModel.Pattern -> SecurityMode.Pattern
-                is AuthenticationMethodModel.Swipe,
                 is AuthenticationMethodModel.None -> SecurityMode.None
             }
         }
@@ -208,8 +208,7 @@ class FakeAuthenticationRepository(
             }
         }
 
-        private fun List<AuthenticationMethodModel.Pattern.PatternCoordinate>.toCells():
-            List<LockPatternView.Cell> {
+        private fun List<AuthenticationPatternCoordinate>.toCells(): List<LockPatternView.Cell> {
             return map { coordinate -> LockPatternView.Cell.of(coordinate.y, coordinate.x) }
         }
     }

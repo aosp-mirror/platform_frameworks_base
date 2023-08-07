@@ -18,23 +18,30 @@
 
 package com.android.systemui.authentication.data.repository
 
+import android.app.admin.DevicePolicyManager
+import android.content.Intent
 import android.content.pm.UserInfo
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Function
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
@@ -43,6 +50,7 @@ import org.mockito.MockitoAnnotations
 class AuthenticationRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
+    @Mock private lateinit var getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>
 
     private val testUtils = SceneTestUtils(this)
     private val testScope = testUtils.testScope
@@ -50,22 +58,47 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: AuthenticationRepository
 
+    private var currentSecurityMode: KeyguardSecurityModel.SecurityMode =
+        KeyguardSecurityModel.SecurityMode.PIN
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         userRepository.setUserInfos(USER_INFOS)
         runBlocking { userRepository.setSelectedUserInfo(USER_INFOS[0]) }
+        whenever(getSecurityMode.apply(anyInt())).thenAnswer { currentSecurityMode }
 
         underTest =
             AuthenticationRepositoryImpl(
                 applicationScope = testScope.backgroundScope,
-                getSecurityMode = { KeyguardSecurityModel.SecurityMode.PIN },
+                getSecurityMode = getSecurityMode,
                 backgroundDispatcher = testUtils.testDispatcher,
                 userRepository = userRepository,
                 keyguardRepository = testUtils.keyguardRepository,
                 lockPatternUtils = lockPatternUtils,
+                broadcastDispatcher = fakeBroadcastDispatcher,
             )
     }
+
+    @Test
+    fun authenticationMethod() =
+        testScope.runTest {
+            val authMethod by collectLastValue(underTest.authenticationMethod)
+            runCurrent()
+            dispatchBroadcast()
+            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Pin)
+            assertThat(underTest.getAuthenticationMethod()).isEqualTo(AuthenticationMethodModel.Pin)
+
+            setSecurityModeAndDispatchBroadcast(KeyguardSecurityModel.SecurityMode.Pattern)
+            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.Pattern)
+            assertThat(underTest.getAuthenticationMethod())
+                .isEqualTo(AuthenticationMethodModel.Pattern)
+
+            setSecurityModeAndDispatchBroadcast(KeyguardSecurityModel.SecurityMode.None)
+            assertThat(authMethod).isEqualTo(AuthenticationMethodModel.None)
+            assertThat(underTest.getAuthenticationMethod())
+                .isEqualTo(AuthenticationMethodModel.None)
+        }
 
     @Test
     fun isAutoConfirmEnabled() =
@@ -94,6 +127,20 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(USER_INFOS[1])
             assertThat(values.last()).isTrue()
         }
+
+    private fun setSecurityModeAndDispatchBroadcast(
+        securityMode: KeyguardSecurityModel.SecurityMode,
+    ) {
+        currentSecurityMode = securityMode
+        dispatchBroadcast()
+    }
+
+    private fun dispatchBroadcast() {
+        fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+            context,
+            Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED)
+        )
+    }
 
     companion object {
         private val USER_INFOS =

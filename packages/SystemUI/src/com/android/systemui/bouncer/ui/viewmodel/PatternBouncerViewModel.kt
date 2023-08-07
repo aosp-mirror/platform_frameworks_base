@@ -18,7 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import kotlin.math.max
 import kotlin.math.min
@@ -193,8 +193,8 @@ data class PatternDotViewModel(
     val x: Int,
     val y: Int,
 ) {
-    fun toCoordinate(): AuthenticationMethodModel.Pattern.PatternCoordinate {
-        return AuthenticationMethodModel.Pattern.PatternCoordinate(
+    fun toCoordinate(): AuthenticationPatternCoordinate {
+        return AuthenticationPatternCoordinate(
             x = x,
             y = y,
         )
