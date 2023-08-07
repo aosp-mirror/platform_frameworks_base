@@ -19,7 +19,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -55,6 +55,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     private val bouncerViewModel =
         utils.bouncerViewModel(
             bouncerInteractor = bouncerInteractor,
+            authenticationInteractor = authenticationInteractor,
         )
     private val underTest =
         PasswordBouncerViewModel(

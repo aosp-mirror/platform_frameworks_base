@@ -18,7 +18,7 @@ package com.android.systemui.shade.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -47,14 +47,11 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         ShadeSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            lockscreenSceneInteractor =
-                utils.lockScreenSceneInteractor(
+            authenticationInteractor = authenticationInteractor,
+            bouncerInteractor =
+                utils.bouncerInteractor(
                     authenticationInteractor = authenticationInteractor,
-                    bouncerInteractor =
-                        utils.bouncerInteractor(
-                            authenticationInteractor = authenticationInteractor,
-                            sceneInteractor = sceneInteractor,
-                        ),
+                    sceneInteractor = sceneInteractor,
                 ),
         )
 

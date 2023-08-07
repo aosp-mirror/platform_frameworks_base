@@ -19,8 +19,9 @@ package com.android.systemui.bouncer.domain.interactor
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
@@ -73,6 +74,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            runCurrent()
             utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -104,6 +106,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            runCurrent()
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
@@ -140,6 +143,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            runCurrent()
             utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -170,6 +174,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
+            runCurrent()
             utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -202,6 +207,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern
             )
+            runCurrent()
             utils.authenticationRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -214,11 +220,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
             // Wrong input.
-            assertThat(
-                    underTest.authenticate(
-                        listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(1, 2))
-                    )
-                )
+            assertThat(underTest.authenticate(listOf(AuthenticationPatternCoordinate(1, 2))))
                 .isFalse()
             assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -248,7 +250,8 @@ class BouncerInteractorTest : SysuiTestCase() {
     fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setLockscreenEnabled(true)
             utils.authenticationRepository.setUnlocked(false)
 
             underTest.showOrUnlockDevice()
@@ -264,6 +267,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
+            runCurrent()
             utils.authenticationRepository.setUnlocked(false)
 
             val customMessage = "Hello there!"

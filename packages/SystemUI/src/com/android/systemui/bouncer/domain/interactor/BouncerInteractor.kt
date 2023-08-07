@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.bouncer.domain.interactor
 
 import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.dagger.SysUISingleton
@@ -35,7 +33,6 @@ import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -107,14 +104,6 @@ constructor(
     }
 
     /**
-     * Returns the currently-configured authentication method. This determines how the
-     * authentication challenge is completed in order to unlock an otherwise locked device.
-     */
-    suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
-        return authenticationInteractor.getAuthenticationMethod()
-    }
-
-    /**
      * Either shows the bouncer or unlocks the device, if the bouncer doesn't need to be shown.
      *
      * @param message An optional message to show to the user in the bouncer.
@@ -124,7 +113,9 @@ constructor(
     ) {
         applicationScope.launch {
             if (authenticationInteractor.isAuthenticationRequired()) {
-                repository.setMessage(message ?: promptMessage(getAuthenticationMethod()))
+                repository.setMessage(
+                    message ?: promptMessage(authenticationInteractor.getAuthenticationMethod())
+                )
                 sceneInteractor.setCurrentScene(
                     scene = SceneModel(SceneKey.Bouncer),
                     loggingReason = "request to unlock device while authentication required",
@@ -143,7 +134,9 @@ constructor(
      * method.
      */
     fun resetMessage() {
-        applicationScope.launch { repository.setMessage(promptMessage(getAuthenticationMethod())) }
+        applicationScope.launch {
+            repository.setMessage(promptMessage(authenticationInteractor.getAuthenticationMethod()))
+        }
     }
 
     /** Removes the user-facing message. */
@@ -181,7 +174,7 @@ constructor(
                 loggingReason = "successful authentication",
             )
         } else {
-            repository.setMessage(errorMessage(getAuthenticationMethod()))
+            repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
         }
 
         return isAuthenticated

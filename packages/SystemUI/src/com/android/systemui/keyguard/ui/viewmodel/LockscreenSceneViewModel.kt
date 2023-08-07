@@ -17,14 +17,17 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.R
+import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -36,36 +39,37 @@ class LockscreenSceneViewModel
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    private val interactor: LockscreenSceneInteractor,
+    authenticationInteractor: AuthenticationInteractor,
+    private val bouncerInteractor: BouncerInteractor,
 ) {
     /** The icon for the "lock" button on the lockscreen. */
     val lockButtonIcon: StateFlow<Icon> =
-        interactor.isDeviceLocked
-            .map { isLocked -> lockIcon(isLocked = isLocked) }
+        authenticationInteractor.isUnlocked
+            .map { isUnlocked -> lockIcon(isUnlocked = isUnlocked) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = lockIcon(isLocked = interactor.isDeviceLocked.value),
+                initialValue = lockIcon(isUnlocked = authenticationInteractor.isUnlocked.value),
             )
 
     /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: StateFlow<SceneKey> =
-        interactor.isSwipeToDismissEnabled
-            .map { isSwipeToUnlockEnabled -> upDestinationSceneKey(isSwipeToUnlockEnabled) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = upDestinationSceneKey(interactor.isSwipeToDismissEnabled.value),
-            )
+    val upDestinationSceneKey: Flow<SceneKey> =
+        authenticationInteractor.authenticationMethod.map { authenticationMethod ->
+            if (authenticationMethod is AuthenticationMethodModel.Swipe) {
+                SceneKey.Gone
+            } else {
+                SceneKey.Bouncer
+            }
+        }
 
     /** Notifies that the lock button on the lock screen was clicked. */
     fun onLockButtonClicked() {
-        interactor.dismissLockscreen()
+        bouncerInteractor.showOrUnlockDevice()
     }
 
     /** Notifies that some content on the lock screen was clicked. */
     fun onContentClicked() {
-        interactor.dismissLockscreen()
+        bouncerInteractor.showOrUnlockDevice()
     }
 
     private fun upDestinationSceneKey(
@@ -75,22 +79,22 @@ constructor(
     }
 
     private fun lockIcon(
-        isLocked: Boolean,
+        isUnlocked: Boolean,
     ): Icon {
         return Icon.Resource(
             res =
-                if (isLocked) {
-                    R.drawable.ic_device_lock_on
-                } else {
+                if (isUnlocked) {
                     R.drawable.ic_device_lock_off
+                } else {
+                    R.drawable.ic_device_lock_on
                 },
             contentDescription =
                 ContentDescription.Resource(
                     res =
-                        if (isLocked) {
-                            R.string.accessibility_lock_icon
-                        } else {
+                        if (isUnlocked) {
                             R.string.accessibility_unlock_button
+                        } else {
+                            R.string.accessibility_lock_icon
                         }
                 )
         )
