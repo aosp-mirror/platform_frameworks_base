@@ -489,6 +489,26 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun wifiNetwork_neverHasHotspot() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.ssid).thenReturn(SSID)
+                    whenever(this.isPrimary).thenReturn(true)
+                }
+            val network = mock<Network>().apply { whenever(this.getNetId()).thenReturn(NETWORK_ID) }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(network, createWifiNetworkCapabilities(wifiInfo))
+
+            assertThat(latest is WifiNetworkModel.Active).isTrue()
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.NONE)
+        }
+
+    @Test
     fun wifiNetwork_isCarrierMerged_flowHasCarrierMerged() =
         testScope.runTest {
             val latest by collectLastValue(underTest.wifiNetwork)

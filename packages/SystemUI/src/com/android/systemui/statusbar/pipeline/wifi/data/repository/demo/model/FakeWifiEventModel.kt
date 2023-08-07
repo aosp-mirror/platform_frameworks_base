@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model
 
 import android.telephony.Annotation
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 
 /**
  * Model for demo wifi commands, ported from [NetworkControllerImpl]
@@ -29,6 +30,8 @@ sealed interface FakeWifiEventModel {
         @Annotation.DataActivityType val activity: Int,
         val ssid: String?,
         val validated: Boolean?,
+        val hotspotDeviceType: WifiNetworkModel.HotspotDeviceType =
+            WifiNetworkModel.HotspotDeviceType.NONE,
     ) : FakeWifiEventModel
 
     data class CarrierMerged(
