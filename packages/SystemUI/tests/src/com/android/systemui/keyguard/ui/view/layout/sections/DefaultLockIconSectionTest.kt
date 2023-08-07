@@ -25,6 +25,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test

@@ -24,6 +24,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
+import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.LockIconView
 import com.android.systemui.R
 import com.android.systemui.animation.view.LaunchableImageView
@@ -38,6 +39,8 @@ class KeyguardRootView(
         attrs,
     ) {
 
+    private var statusView: KeyguardStatusView? = null
+
     init {
         addIndicationTextArea()
         addLockIconView()
@@ -45,6 +48,7 @@ class KeyguardRootView(
         addLeftShortcut()
         addRightShortcut()
         addSettingsPopupMenu()
+        addStatusView()
     }
 
     private fun addIndicationTextArea() {
@@ -118,5 +122,20 @@ class KeyguardRootView(
                     visibility = GONE
                 }
         addView(view)
+    }
+
+    fun addStatusView(): KeyguardStatusView {
+        // StatusView may need to be rebuilt on config changes. Remove and reinflate
+        statusView?.let { removeView(it) }
+        val view =
+            (LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, this, false)
+                    as KeyguardStatusView)
+                .apply {
+                    setClipChildren(false)
+                    statusView = this
+                }
+
+        addView(view)
+        return view
     }
 }
