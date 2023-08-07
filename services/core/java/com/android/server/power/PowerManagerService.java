@@ -18,7 +18,6 @@ package com.android.server.power;
 
 import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest.policyToString;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF;
 import static android.os.PowerManager.GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED;
 import static android.os.PowerManager.WAKE_REASON_DISPLAY_GROUP_ADDED;
@@ -1280,7 +1279,7 @@ public final class PowerManagerService extends SystemService
     @Override
     public void onStart() {
         publishBinderService(Context.POWER_SERVICE, mBinderService, /* allowIsolated= */ false,
-                DUMP_FLAG_PRIORITY_DEFAULT | DUMP_FLAG_PRIORITY_CRITICAL);
+                DUMP_FLAG_PRIORITY_CRITICAL);
         publishLocalService(PowerManagerInternal.class, mLocalService);
 
         Watchdog.getInstance().addMonitor(this);
