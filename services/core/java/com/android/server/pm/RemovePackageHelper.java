@@ -312,6 +312,7 @@ final class RemovePackageHelper {
             synchronized (mPm.mLock) {
                 mPm.mDomainVerificationManager.clearPackage(deletedPs.getPackageName());
                 mPm.mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
+                mPm.mInjector.getUpdateOwnershipHelper().removeUpdateOwnerDenyList(packageName);
                 final Computer snapshot = mPm.snapshotComputer();
                 mPm.mAppsFilter.removePackage(snapshot,
                         snapshot.getPackageStateInternal(packageName));
