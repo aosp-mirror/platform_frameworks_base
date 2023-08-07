@@ -562,7 +562,7 @@
                   android:exported="true"
                   android:launchMode="singleTop"
                   android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
-                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert.SensorPrivacy"
                   android:finishOnCloseSystemDialogs="true"
                   android:showForAllUsers="true">
         </activity>
