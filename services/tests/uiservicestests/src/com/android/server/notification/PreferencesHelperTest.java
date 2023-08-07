@@ -600,7 +600,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannel channel2 =
                 new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
         channel2.setDescription("descriptions for all");
-        channel2.setSound(SOUND_URI, mAudioAttributes);
+        channel2.setSound(CANONICAL_SOUND_URI, mAudioAttributes);
         channel2.enableLights(true);
         channel2.setBypassDnd(true);
         channel2.setLockscreenVisibility(VISIBILITY_SECRET);
@@ -1374,6 +1374,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .when(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
         doReturn(localUri)
                 .when(mTestIContentProvider).uncanonicalize(any(), eq(canonicalBasedOnLocal));
+        doReturn(canonicalBasedOnLocal)
+                .when(mTestIContentProvider).canonicalize(any(), eq(localUri));
 
         NotificationChannel channel =
                 new NotificationChannel("id", "name", IMPORTANCE_LOW);
@@ -1387,7 +1389,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         NotificationChannel actualChannel = mHelper.getNotificationChannel(
                 PKG_N_MR1, UID_N_MR1, channel.getId(), false);
-        assertEquals(localUri, actualChannel.getSound());
+        assertEquals(canonicalBasedOnLocal, actualChannel.getSound());
     }
 
     @Test
