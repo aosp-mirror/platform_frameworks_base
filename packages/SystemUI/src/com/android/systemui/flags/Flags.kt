@@ -244,10 +244,6 @@ object Flags {
 
     /** Keyguard Migration */
 
-    /** Migrate the indication area to the new keyguard root view. */
-    // TODO(b/280067944): Tracking bug.
-    @JvmField val MIGRATE_INDICATION_AREA = releasedFlag(236, "migrate_indication_area")
-
     /**
      * Migrate the bottom area to the new keyguard root view. Because there is no such thing as a
      * "bottom area" after this, this also breaks it up into many smaller, modular pieces.
