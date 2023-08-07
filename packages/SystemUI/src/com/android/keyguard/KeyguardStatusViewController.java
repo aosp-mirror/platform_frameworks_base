@@ -150,7 +150,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
-        mDumpManager.registerDumpable(this);
+
+        mDumpManager.registerDumpable(getInstanceName(), this);
         if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
             startCoroutines(EmptyCoroutineContext.INSTANCE);
         }
@@ -190,7 +191,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Called in notificationPanelViewController to avoid leak
      */
     public void onDestroy() {
-        mDumpManager.unregisterDumpable(TAG);
+        mDumpManager.unregisterDumpable(getInstanceName());
     }
 
     /**
@@ -385,7 +386,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Updates the alignment of the KeyguardStatusView and animates the transition if requested.
      */
     public void updateAlignment(
-            ConstraintLayout notifContainerParent,
+            ConstraintLayout layout,
             boolean splitShadeEnabled,
             boolean shouldBeCentered,
             boolean animate) {
@@ -395,16 +396,23 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         mStatusViewCentered = shouldBeCentered;
-        if (notifContainerParent == null) {
+        if (layout == null) {
             return;
         }
 
         ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(notifContainerParent);
-        int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
+        constraintSet.clone(layout);
+        int guideline;
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            guideline = R.id.split_shade_guideline;
+        } else {
+            guideline = R.id.qs_edge_guideline;
+        }
+
+        int statusConstraint = shouldBeCentered ? PARENT_ID : guideline;
         constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
         if (!animate) {
-            constraintSet.applyTo(notifContainerParent);
+            constraintSet.applyTo(layout);
             return;
         }
 
@@ -447,7 +455,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             // old animation rather than setting up the custom animations.
             if (clockContainerView == null || clockContainerView.getChildCount() == 0) {
                 transition.addListener(mKeyguardStatusAlignmentTransitionListener);
-                TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+                TransitionManager.beginDelayedTransition(layout, transition);
             } else {
                 View clockView = clockContainerView.getChildAt(0);
 
@@ -481,19 +489,23 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 }
 
                 set.addListener(mKeyguardStatusAlignmentTransitionListener);
-                TransitionManager.beginDelayedTransition(notifContainerParent, set);
+                TransitionManager.beginDelayedTransition(layout, set);
             }
         } else {
             transition.addListener(mKeyguardStatusAlignmentTransitionListener);
-            TransitionManager.beginDelayedTransition(notifContainerParent, transition);
+            TransitionManager.beginDelayedTransition(layout, transition);
         }
 
-        constraintSet.applyTo(notifContainerParent);
+        constraintSet.applyTo(layout);
     }
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         mView.dump(pw, args);
+    }
+
+    String getInstanceName() {
+        return TAG + "#" + hashCode();
     }
 
     @VisibleForTesting

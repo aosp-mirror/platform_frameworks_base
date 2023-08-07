@@ -146,7 +146,6 @@ class FakeKeyguardRepository : KeyguardRepository {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
 
-
     @Deprecated("Deprecated as part of b/278057014")
     override fun setBottomAreaAlpha(alpha: Float) {
         _bottomAreaAlpha.value = alpha
@@ -257,8 +256,11 @@ class FakeKeyguardRepository : KeyguardRepository {
         goingToFullShade: Boolean,
         occlusionTransitionRunning: Boolean
     ) {
-        _keyguardRootViewVisibility.value = KeyguardRootViewVisibilityState(
-            statusBarState, goingToFullShade, occlusionTransitionRunning
-        )
+        _keyguardRootViewVisibility.value =
+            KeyguardRootViewVisibilityState(
+                statusBarState,
+                goingToFullShade,
+                occlusionTransitionRunning
+            )
     }
 }

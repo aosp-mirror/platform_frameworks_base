@@ -424,6 +424,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
                 .thenReturn(mock(KeyguardStatusView.class));
+        View rootView = mock(View.class);
+        when(mView.getRootView()).thenReturn(rootView);
+        when(rootView.findViewById(R.id.keyguard_status_view))
+                .thenReturn(mock(KeyguardStatusView.class));
         mNotificationContainerParent = new NotificationsQuickSettingsContainer(getContext(), null);
         mNotificationContainerParent.addView(keyguardStatusView);
         mNotificationContainerParent.onFinishInflate();
