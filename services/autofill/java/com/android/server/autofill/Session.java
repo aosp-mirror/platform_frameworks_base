@@ -4204,7 +4204,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // We don't send an empty response to IME so that it doesn't cause UI flicker
                     // on the IME side if it arrives before the input view is finished on the IME.
                     mInlineSessionController.resetInlineFillUiLocked();
-                    mCurrentViewId = null;
+
+                    if ((viewState.getState() &
+                            ViewState.STATE_PENDING_CREATE_INLINE_REQUEST) != 0) {
+                        // View was exited before Inline Request sent back, do not set it to
+                        // null yet to let onHandleAssistData finish processing
+                    } else {
+                        mCurrentViewId = null;
+                    }
+
 
                     mPresentationStatsEventLogger.maybeSetNoPresentationEventReason(
                                 NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED);
