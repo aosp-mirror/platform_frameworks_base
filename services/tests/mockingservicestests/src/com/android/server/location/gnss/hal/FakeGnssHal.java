@@ -686,9 +686,6 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
-    protected void sendNiResponse(int notificationId, int userResponse) {}
-
-    @Override
     protected void requestPowerStats() {
         Objects.requireNonNull(mGnssNative).reportGnssPowerStats(mState.mPowerStats);
     }

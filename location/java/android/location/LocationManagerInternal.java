@@ -87,12 +87,6 @@ public abstract class LocationManagerInternal {
     public abstract boolean isProvider(@Nullable String provider, @NonNull CallerIdentity identity);
 
     /**
-     * Should only be used by GNSS code.
-     */
-    // TODO: there is no reason for this to exist as part of any API. move all the logic into gnss
-    public abstract void sendNiResponse(int notifId, int userResponse);
-
-    /**
      * Returns the GNSS provided time.
      *
      * @return LocationTime object that includes the current time, according to the GNSS location

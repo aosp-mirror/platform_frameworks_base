@@ -69,7 +69,6 @@
 
 static jclass class_gnssPowerStats;
 
-static jmethodID method_reportNiNotification;
 static jmethodID method_reportGnssPowerStats;
 static jmethodID method_reportNfwNotification;
 static jmethodID method_isInEmergencySession;
@@ -92,8 +91,6 @@ using android::hardware::hidl_death_recipient;
 using android::hardware::gnss::V1_0::GnssLocationFlags;
 using android::hardware::gnss::V1_0::IGnssNavigationMessage;
 using android::hardware::gnss::V1_0::IGnssNavigationMessageCallback;
-using android::hardware::gnss::V1_0::IGnssNi;
-using android::hardware::gnss::V1_0::IGnssNiCallback;
 using android::hardware::gnss::V1_0::IGnssXtra;
 using android::hardware::gnss::V1_0::IGnssXtraCallback;
 using android::hardware::gnss::V2_0::ElapsedRealtimeFlags;
@@ -127,7 +124,6 @@ using IGnssConfigurationAidl = android::hardware::gnss::IGnssConfiguration;
 using GnssLocationAidl = android::hardware::gnss::GnssLocation;
 using IGnssAntennaInfoAidl = android::hardware::gnss::IGnssAntennaInfo;
 
-sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 
 std::unique_ptr<android::gnss::GnssHal> gnssHal = nullptr;
@@ -195,42 +191,6 @@ Status GnssPowerIndicationCallback::gnssPowerStatsCb(const GnssPowerStats& data)
     return Status::ok();
 }
 
-/*
- * GnssNiCallback implements callback methods required by the IGnssNi interface.
- */
-struct GnssNiCallback : public IGnssNiCallback {
-    Return<void> niNotifyCb(const IGnssNiCallback::GnssNiNotification& notification)
-            override;
-};
-
-Return<void> GnssNiCallback::niNotifyCb(
-        const IGnssNiCallback::GnssNiNotification& notification) {
-    JNIEnv* env = getJniEnv();
-    jstring requestorId = env->NewStringUTF(notification.requestorId.c_str());
-    jstring text = env->NewStringUTF(notification.notificationMessage.c_str());
-
-    if (requestorId && text) {
-        env->CallVoidMethod(mCallbacksObj, method_reportNiNotification,
-                            notification.notificationId, notification.niType,
-                            notification.notifyFlags, notification.timeoutSec,
-                            notification.defaultResponse, requestorId, text,
-                            notification.requestorIdEncoding,
-                            notification.notificationIdEncoding);
-    } else {
-        ALOGE("%s: OOM Error\n", __func__);
-    }
-
-    if (requestorId) {
-        env->DeleteLocalRef(requestorId);
-    }
-
-    if (text) {
-        env->DeleteLocalRef(text);
-    }
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return Void();
-}
-
 /* Initializes the GNSS service handle. */
 static void android_location_gnss_hal_GnssNative_set_gps_service_handle() {
     gnssHal = std::make_unique<gnss::GnssHal>();
@@ -242,10 +202,6 @@ static void android_location_gnss_hal_GnssNative_class_init_once(JNIEnv* env, jc
     android_location_gnss_hal_GnssNative_set_gps_service_handle();
 
     // Cache methodIDs and class IDs.
-
-    method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
-            "(IIIIILjava/lang/String;Ljava/lang/String;II)V");
-
     method_reportNfwNotification = env->GetMethodID(clazz, "reportNfwNotification",
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
     method_reportGnssPowerStats =
@@ -305,7 +261,6 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
     gnssAntennaInfoIface = gnssHal->getGnssAntennaInfoInterface();
     gnssMeasurementCorrectionsIface = gnssHal->getMeasurementCorrectionsInterface();
     gnssDebugIface = gnssHal->getGnssDebugInterface();
-    gnssNiIface = gnssHal->getGnssNiInterface();
     gnssConfigurationIface = gnssHal->getGnssConfigurationInterface();
     gnssGeofencingIface = gnssHal->getGnssGeofenceInterface();
     gnssBatchingIface = gnssHal->getGnssBatchingInterface();
@@ -374,15 +329,6 @@ static jboolean android_location_gnss_hal_GnssNative_init(JNIEnv* /* env */, jcl
         gnssGeofencingIface->setCallback(std::make_unique<gnss::GnssGeofenceCallback>());
     } else {
         ALOGI("Unable to initialize IGnssGeofencing interface.");
-    }
-
-    // Set IGnssNi.hal callback.
-    sp<IGnssNiCallback> gnssNiCbIface = new GnssNiCallback();
-    if (gnssNiIface != nullptr) {
-        auto status = gnssNiIface->setCallback(gnssNiCbIface);
-        checkHidlReturn(status, "IGnssNi setCallback() failed.");
-    } else {
-        ALOGI("Unable to initialize IGnssNi interface.");
     }
 
     // Set IAGnssRil callback.
@@ -590,18 +536,6 @@ static void android_location_gnss_hal_GnssNative_set_agps_server(JNIEnv* env, jc
         ALOGE("%s: IAGnss interface not available.", __func__);
         return;
     }
-}
-
-static void android_location_gnss_hal_GnssNative_send_ni_response(JNIEnv* /* env */, jclass,
-                                                                  jint notifId, jint response) {
-    if (gnssNiIface == nullptr) {
-        ALOGE("%s: IGnssNi interface not available.", __func__);
-        return;
-    }
-
-    auto result = gnssNiIface->respond(notifId,
-            static_cast<IGnssNiCallback::GnssUserResponseType>(response));
-    checkHidlReturn(result, "IGnssNi respond() failed.");
 }
 
 static jstring android_location_gnss_hal_GnssNative_get_internal_state(JNIEnv* env, jclass) {
@@ -987,8 +921,6 @@ static const JNINativeMethod sLocationProviderMethods[] = {
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_set_agps_server)},
         {"native_inject_ni_supl_message_data", "([BII)V",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_inject_ni_supl_message_data)},
-        {"native_send_ni_response", "(II)V",
-         reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_send_ni_response)},
         {"native_get_internal_state", "()Ljava/lang/String;",
          reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_get_internal_state)},
         {"native_is_gnss_visibility_control_supported", "()Z",

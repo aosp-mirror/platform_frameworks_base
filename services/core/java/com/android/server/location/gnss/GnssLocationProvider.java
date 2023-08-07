@@ -62,7 +62,6 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.location.GnssCapabilities;
 import android.location.GnssStatus;
-import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -109,7 +108,6 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
-import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.HexDump;
 import com.android.server.FgThread;
@@ -396,7 +394,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mC2KServerPort = mGnssConfiguration.getC2KPort(TCP_MIN_PORT);
         mNIHandler.setEmergencyExtensionSeconds(mGnssConfiguration.getEsExtensionSec());
         mSuplEsEnabled = mGnssConfiguration.getSuplEs(0) == 1;
-        mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
         if (mGnssVisibilityControl != null) {
             mGnssVisibilityControl.onConfigurationUpdated(mGnssConfiguration);
         }
@@ -465,7 +462,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     }
                 };
         mNIHandler = new GpsNetInitiatedHandler(context,
-                mNetInitiatedListener,
                 emergencyCallCallback,
                 mSuplEsEnabled);
         // Trigger PSDS data download when the network comes up after booting.
@@ -1435,96 +1431,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         updateRequirements();
     }
 
-    //=============================================================
-    // NI Client support
-    //=============================================================
-    private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
-        // Sends a response for an NI request to HAL.
-        @Override
-        public boolean sendNiResponse(int notificationId, int userResponse) {
-            // TODO Add Permission check
-
-            if (DEBUG) {
-                Log.d(TAG, "sendNiResponse, notifId: " + notificationId
-                        + ", response: " + userResponse);
-            }
-            mGnssNative.sendNiResponse(notificationId, userResponse);
-
-            FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
-                    FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_RESPONSE,
-                    notificationId,
-                    /* niType= */ 0,
-                    /* needNotify= */ false,
-                    /* needVerify= */ false,
-                    /* privacyOverride= */ false,
-                    /* timeout= */ 0,
-                    /* defaultResponse= */ 0,
-                    /* requestorId= */ null,
-                    /* text= */ null,
-                    /* requestorIdEncoding= */ 0,
-                    /* textEncoding= */ 0,
-                    mSuplEsEnabled,
-                    isGpsEnabled(),
-                    userResponse);
-
-            return true;
-        }
-    };
-
-    public INetInitiatedListener getNetInitiatedListener() {
-        return mNetInitiatedListener;
-    }
-
-    /** Reports a NI notification. */
-    private void reportNiNotification(int notificationId, int niType, int notifyFlags, int timeout,
-            int defaultResponse, String requestorId, String text, int requestorIdEncoding,
-            int textEncoding) {
-        Log.i(TAG, "reportNiNotification: entered");
-        Log.i(TAG, "notificationId: " + notificationId
-                + ", niType: " + niType
-                + ", notifyFlags: " + notifyFlags
-                + ", timeout: " + timeout
-                + ", defaultResponse: " + defaultResponse);
-
-        Log.i(TAG, "requestorId: " + requestorId
-                + ", text: " + text
-                + ", requestorIdEncoding: " + requestorIdEncoding
-                + ", textEncoding: " + textEncoding);
-
-        GpsNiNotification notification = new GpsNiNotification();
-
-        notification.notificationId = notificationId;
-        notification.niType = niType;
-        notification.needNotify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_NOTIFY) != 0;
-        notification.needVerify = (notifyFlags & GpsNetInitiatedHandler.GPS_NI_NEED_VERIFY) != 0;
-        notification.privacyOverride =
-                (notifyFlags & GpsNetInitiatedHandler.GPS_NI_PRIVACY_OVERRIDE) != 0;
-        notification.timeout = timeout;
-        notification.defaultResponse = defaultResponse;
-        notification.requestorId = requestorId;
-        notification.text = text;
-        notification.requestorIdEncoding = requestorIdEncoding;
-        notification.textEncoding = textEncoding;
-
-        mNIHandler.handleNiNotification(notification);
-        FrameworkStatsLog.write(FrameworkStatsLog.GNSS_NI_EVENT_REPORTED,
-                FrameworkStatsLog.GNSS_NI_EVENT_REPORTED__EVENT_TYPE__NI_REQUEST,
-                notification.notificationId,
-                notification.niType,
-                notification.needNotify,
-                notification.needVerify,
-                notification.privacyOverride,
-                notification.timeout,
-                notification.defaultResponse,
-                notification.requestorId,
-                notification.text,
-                notification.requestorIdEncoding,
-                notification.textEncoding,
-                mSuplEsEnabled,
-                isGpsEnabled(),
-                /* userResponse= */ 0);
-    }
-
     private void demandUtcTimeInjection() {
         if (DEBUG) Log.d(TAG, "demandUtcTimeInjection");
         postWithWakeLockHeld(mNetworkTimeHelper::demandUtcTimeInjection);
@@ -1826,14 +1732,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     @Override
     public void onRequestPsdsDownload(int psdsType) {
         postWithWakeLockHeld(() -> handleDownloadPsdsData(psdsType));
-    }
-
-    @Override
-    public void onReportNiNotification(int notificationId, int niType, int notifyFlags,
-            int timeout, int defaultResponse, String requestorId, String text,
-            int requestorIdEncoding, int textEncoding) {
-        reportNiNotification(notificationId, niType, notifyFlags, timeout,
-                defaultResponse, requestorId, text, requestorIdEncoding, textEncoding);
     }
 
     @Override
