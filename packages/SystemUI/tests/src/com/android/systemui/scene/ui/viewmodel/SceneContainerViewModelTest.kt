@@ -69,7 +69,8 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         val currentScene by collectLastValue(underTest.currentScene)
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
+        underTest.onSceneChanged(SceneModel(SceneKey.Shade))
+
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
     }
 

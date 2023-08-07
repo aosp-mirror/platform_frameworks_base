@@ -45,15 +45,15 @@ constructor(
      */
     val allSceneKeys: List<SceneKey> = interactor.allSceneKeys()
 
-    /** The current scene. */
-    val currentScene: StateFlow<SceneModel> = interactor.currentScene
+    /** The scene that should be rendered. */
+    val currentScene: StateFlow<SceneModel> = interactor.desiredScene
 
     /** Whether the container is visible. */
     val isVisible: StateFlow<Boolean> = interactor.isVisible
 
-    /** Requests a transition to the scene with the given key. */
-    fun setCurrentScene(scene: SceneModel) {
-        interactor.setCurrentScene(
+    /** Notifies that the UI has transitioned sufficiently to the given scene. */
+    fun onSceneChanged(scene: SceneModel) {
+        interactor.onSceneChanged(
             scene = scene,
             loggingReason = SCENE_TRANSITION_LOGGING_REASON,
         )

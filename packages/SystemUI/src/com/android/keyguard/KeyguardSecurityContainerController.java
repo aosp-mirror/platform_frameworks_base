@@ -476,18 +476,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
             // When the scene framework transitions from bouncer to gone, we dismiss the keyguard.
             mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
-                mSceneInteractor.get().getTransitions(),
-                sceneTransitionModel -> {
-                    if (sceneTransitionModel != null
-                            && sceneTransitionModel.getFrom() == SceneKey.Bouncer.INSTANCE
-                            && sceneTransitionModel.getTo() == SceneKey.Gone.INSTANCE) {
-                        final int selectedUserId = mUserInteractor.getSelectedUserId();
-                        showNextSecurityScreenOrFinish(
-                                /* authenticated= */ true,
-                                selectedUserId,
-                                /* bypassSecondaryLockScreen= */ true,
-                                mSecurityModel.getSecurityMode(selectedUserId));
-                    }
+                mSceneInteractor.get().finishedSceneTransitions(
+                    /* from= */ SceneKey.Bouncer.INSTANCE,
+                    /* to= */ SceneKey.Gone.INSTANCE),
+                unused -> {
+                    final int selectedUserId = mUserInteractor.getSelectedUserId();
+                    showNextSecurityScreenOrFinish(
+                            /* authenticated= */ true,
+                            selectedUserId,
+                            /* bypassSecondaryLockScreen= */ true,
+                            mSecurityModel.getSecurityMode(selectedUserId));
                 });
         }
     }
