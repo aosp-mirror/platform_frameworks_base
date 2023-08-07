@@ -27,6 +27,7 @@ import android.testing.TestableResources
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowInsetsController
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -80,6 +81,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -771,6 +773,16 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
         }
+
+    @Test
+    fun testResetUserSwitcher() {
+        val userSwitcher = mock(View::class.java)
+        whenever(view.findViewById<View>(R.id.keyguard_bouncer_user_switcher))
+            .thenReturn(userSwitcher)
+
+        underTest.prepareToShow()
+        verify(userSwitcher).setAlpha(0f)
+    }
 
     private val registeredSwipeListener: KeyguardSecurityContainer.SwipeListener
         get() {
