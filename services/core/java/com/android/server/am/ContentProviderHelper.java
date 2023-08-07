@@ -505,12 +505,11 @@ public class ContentProviderHelper {
                                     cpr.appInfo.packageName, userId, Event.APP_COMPONENT_USED);
                         }
 
-                        // Content provider is now in use, its package can't be stopped.
                         try {
                             checkTime(startTime,
                                     "getContentProviderImpl: before set stopped state");
-                            mService.mPackageManagerInt.setPackageStoppedState(
-                                    cpr.appInfo.packageName, false, userId);
+                            mService.mPackageManagerInt.notifyComponentUsed(
+                                    cpr.appInfo.packageName, userId, callingPackage);
                             checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "

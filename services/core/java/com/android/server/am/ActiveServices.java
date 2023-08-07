@@ -5116,10 +5116,9 @@ public final class ActiveServices {
                     r.packageName, r.userId, UsageEvents.Event.APP_COMPONENT_USED);
         }
 
-        // Service is now being launched, its package can't be stopped.
         try {
-            mAm.mPackageManagerInt.setPackageStoppedState(
-                    r.packageName, false, r.userId);
+            mAm.mPackageManagerInt.notifyComponentUsed(
+                    r.packageName, r.userId, r.mRecentCallingPackage);
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + r.packageName + ": " + e);

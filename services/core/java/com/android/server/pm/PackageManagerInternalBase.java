@@ -745,6 +745,13 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         mService.setPackageStoppedState(snapshot(), packageName, stopped, userId);
     }
 
+    @Override
+    public void notifyComponentUsed(@NonNull String packageName,
+            @UserIdInt int userId, @NonNull String recentCallingPackage) {
+        mService.notifyComponentUsed(snapshot(), packageName, userId,
+                recentCallingPackage);
+    }
+
     @NonNull
     @Override
     @Deprecated

@@ -4582,6 +4582,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
+    void notifyComponentUsed(@NonNull Computer snapshot, @NonNull String packageName,
+            @UserIdInt int userId, @NonNull String recentCallingPackage) {
+        PackageManagerService.this
+                .setPackageStoppedState(snapshot, packageName, false /* stopped */,
+                        userId);
+    }
+
     public class IPackageManagerImpl extends IPackageManagerBase {
 
         public IPackageManagerImpl() {
