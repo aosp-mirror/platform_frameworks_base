@@ -83,7 +83,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Bundle;
@@ -1779,8 +1778,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTaskInfo = taskInfo;
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)
-                && mMainStage.isActive()
-                && !ENABLE_SHELL_TRANSITIONS) {
+                && mMainStage.isActive()) {
             // Clear the divider remote animating flag as the divider will be re-rendered to apply
             // the new rotation config.
             mIsDividerRemoteAnimating = false;
@@ -2216,20 +2214,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
         mDisplayController.addDisplayChangingController(this::onDisplayChange);
-    }
-
-    @Override
-    public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-        if (displayId != DEFAULT_DISPLAY) {
-            return;
-        }
-        if (mSplitLayout != null && mSplitLayout.isDensityChanged(newConfig.densityDpi)
-                && mMainStage.isActive()
-                && mSplitLayout.updateConfiguration(newConfig)
-                && ENABLE_SHELL_TRANSITIONS) {
-            mSplitLayout.update(null /* t */);
-            onLayoutSizeChanged(mSplitLayout);
-        }
     }
 
     /**
