@@ -523,13 +523,14 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
     }
 
     jclass clazz = env->FindClass(kClassPathName);
-    const char* zechars = regId.string();
-    jstring zestring = env->NewStringUTF(zechars);
+    const char *regIdString = regId.string();
+    jstring regIdJString = env->NewStringUTF(regIdString);
 
     env->CallStaticVoidMethod(clazz, gAudioPolicyEventHandlerMethods.postDynPolicyEventFromNative,
-            event, zestring, val);
+                              event, regIdJString, val);
 
-    env->ReleaseStringUTFChars(zestring, zechars);
+    const char *regIdJChars = env->GetStringUTFChars(regIdJString, NULL);
+    env->ReleaseStringUTFChars(regIdJString, regIdJChars);
     env->DeleteLocalRef(clazz);
 }
 
