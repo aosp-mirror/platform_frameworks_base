@@ -141,7 +141,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Tests for {@link com.android.server.power.PowerManagerService}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:PowerManagerServiceTest
+ *  atest PowerServiceTests:PowerManagerServiceTest
  */
 @SuppressWarnings("GuardedBy")
 @RunWith(TestParameterInjector.class)

@@ -134,7 +134,6 @@ java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/am/DeviceConfigSession.java",
-        "src/com/android/server/display/TestUtils.java",
         "src/com/android/server/pm/PackageSettingBuilder.java",
         "src/com/android/server/pm/parsing/TestPackageParser2.kt",
     ],
