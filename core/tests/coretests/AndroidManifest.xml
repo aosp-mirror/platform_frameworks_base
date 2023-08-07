@@ -231,6 +231,28 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.widget.HorizontalScrollViewActivity"
+                android:label="HorizontalScrollViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.ScrollViewActivity"
+                android:label="ScrollViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.widget.DatePickerActivity"
                 android:label="DatePickerActivity"
                 android:screenOrientation="portrait"
