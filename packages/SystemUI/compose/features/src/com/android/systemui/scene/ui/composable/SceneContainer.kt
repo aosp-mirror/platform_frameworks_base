@@ -77,7 +77,7 @@ fun SceneContainer(
 
     SceneTransitionLayout(
         currentScene = currentSceneKey.toTransitionSceneKey(),
-        onChangeScene = { sceneKey -> viewModel.setCurrentScene(sceneKey.toModel()) },
+        onChangeScene = viewModel::onSceneChanged,
         transitions = transitions {},
         state = state,
         modifier = modifier.fillMaxSize(),
@@ -153,4 +153,8 @@ private fun UserAction.toTransitionUserAction(): SceneTransitionUserAction {
             }
         is UserAction.Back -> Back
     }
+}
+
+private fun SceneContainerViewModel.onSceneChanged(sceneKey: SceneTransitionSceneKey) {
+    onSceneChanged(sceneKey.toModel())
 }

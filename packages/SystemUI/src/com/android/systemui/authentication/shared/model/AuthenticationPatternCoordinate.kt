@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.model
+package com.android.systemui.authentication.shared.model
 
-/** Models a transition between two scenes. */
-data class SceneTransitionModel(
-    /** The scene we transitioned away from. */
-    val from: SceneKey,
-    /** The scene we transitioned into. */
-    val to: SceneKey,
+data class AuthenticationPatternCoordinate(
+    val x: Int,
+    val y: Int,
 )

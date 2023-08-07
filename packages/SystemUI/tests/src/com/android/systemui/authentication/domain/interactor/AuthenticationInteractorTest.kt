@@ -19,9 +19,11 @@ package com.android.systemui.authentication.domain.interactor
 import android.app.admin.DevicePolicyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
@@ -50,42 +52,61 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         )
 
     @Test
-    fun getAuthenticationMethod() =
+    fun authenticationMethod() =
         testScope.runTest {
-            assertThat(underTest.getAuthenticationMethod()).isEqualTo(AuthenticationMethodModel.Pin)
+            val authMethod by collectLastValue(underTest.authenticationMethod)
+            runCurrent()
+            assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.Pin)
+            assertThat(underTest.getAuthenticationMethod())
+                .isEqualTo(DomainLayerAuthenticationMethodModel.Pin)
 
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
+            assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.Password)
             assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.Password)
+                .isEqualTo(DomainLayerAuthenticationMethodModel.Password)
         }
 
     @Test
-    fun getAuthenticationMethod_noneTreatedAsSwipe_whenLockscreenEnabled() =
+    fun authenticationMethod_noneTreatedAsSwipe_whenLockscreenEnabled() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            val authMethod by collectLastValue(underTest.authenticationMethod)
+            runCurrent()
+
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
             utils.authenticationRepository.setLockscreenEnabled(true)
 
+            assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.Swipe)
             assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.Swipe)
+                .isEqualTo(DomainLayerAuthenticationMethodModel.Swipe)
         }
 
     @Test
-    fun getAuthenticationMethod_none_whenLockscreenDisabled() =
+    fun authenticationMethod_none_whenLockscreenDisabled() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            val authMethod by collectLastValue(underTest.authenticationMethod)
+            runCurrent()
+
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
             utils.authenticationRepository.setLockscreenEnabled(false)
 
+            assertThat(authMethod).isEqualTo(DomainLayerAuthenticationMethodModel.None)
             assertThat(underTest.getAuthenticationMethod())
-                .isEqualTo(AuthenticationMethodModel.None)
+                .isEqualTo(DomainLayerAuthenticationMethodModel.None)
         }
 
     @Test
     fun isUnlocked_whenAuthMethodIsNoneAndLockscreenDisabled_isTrue() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
             utils.authenticationRepository.setLockscreenEnabled(false)
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
@@ -111,7 +132,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun isUnlocked_whenAuthMethodIsNoneAndLockscreenEnabled_isFalse() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
             utils.authenticationRepository.setLockscreenEnabled(true)
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
@@ -124,7 +147,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.isAuthenticationRequired()).isTrue()
@@ -135,7 +158,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
 
             assertThat(underTest.isAuthenticationRequired()).isFalse()
         }
@@ -146,7 +171,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.isAuthenticationRequired()).isFalse()
@@ -157,7 +182,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.None
+            )
 
             assertThat(underTest.isAuthenticationRequired()).isFalse()
         }
@@ -166,7 +193,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withCorrectPin_returnsTrue() =
         testScope.runTest {
             val isThrottled by collectLastValue(underTest.isThrottled)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
             assertThat(isThrottled).isFalse()
         }
@@ -174,21 +203,27 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withIncorrectPin_returnsFalse() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             assertThat(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4))).isFalse()
         }
 
     @Test(expected = IllegalArgumentException::class)
     fun authenticate_withEmptyPin_throwsException() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             underTest.authenticate(listOf())
         }
 
     @Test
     fun authenticate_withCorrectMaxLengthPin_returnsTrue() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             val pin = List(16) { 9 }
             utils.authenticationRepository.overrideCredential(pin)
             assertThat(underTest.authenticate(pin)).isTrue()
@@ -203,7 +238,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             // If the policy changes, there is work to do in SysUI.
             assertThat(DevicePolicyManager.MAX_PASSWORD_LENGTH).isLessThan(17)
 
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             assertThat(underTest.authenticate(List(17) { 9 })).isFalse()
         }
 
@@ -212,7 +249,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList())).isTrue()
@@ -223,7 +260,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withIncorrectPassword_returnsFalse() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("alohomora".toList())).isFalse()
@@ -233,7 +270,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withCorrectPattern_returnsTrue() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern
+                DataLayerAuthenticationMethodModel.Pattern
             )
 
             assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN)).isTrue()
@@ -243,21 +280,21 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withIncorrectPattern_returnsFalse() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pattern
+                DataLayerAuthenticationMethodModel.Pattern
             )
 
             assertThat(
                     underTest.authenticate(
                         listOf(
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
+                            AuthenticationPatternCoordinate(
                                 x = 2,
                                 y = 0,
                             ),
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
+                            AuthenticationPatternCoordinate(
                                 x = 2,
                                 y = 1,
                             ),
-                            AuthenticationMethodModel.Pattern.PatternCoordinate(
+                            AuthenticationPatternCoordinate(
                                 x = 2,
                                 y = 2,
                             ),
@@ -271,7 +308,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNullAndHasNoEffect() =
         testScope.runTest {
             val isThrottled by collectLastValue(underTest.isThrottled)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(
                     underTest.authenticate(
@@ -289,7 +328,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(
                     underTest.authenticate(
@@ -305,7 +346,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(
                     underTest.authenticate(
@@ -321,7 +364,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             assertThat(
                     underTest.authenticate(
@@ -337,7 +382,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(false)
             assertThat(
                     underTest.authenticate(
@@ -354,7 +401,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
+                DataLayerAuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList(), tryAutoConfirm = true)).isNull()
@@ -367,7 +414,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             val throttling by collectLastValue(underTest.throttling)
             val isThrottled by collectLastValue(underTest.isThrottled)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
             assertThat(isUnlocked).isTrue()
             assertThat(isThrottled).isFalse()
@@ -456,7 +505,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withoutAutoConfirm_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(false)
 
             assertThat(hintedPinLength).isNull()
@@ -466,7 +517,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withAutoConfirmPinTooShort_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.overrideCredential(
                 buildList {
                     repeat(utils.authenticationRepository.hintedPinLength - 1) { add(it + 1) }
@@ -481,7 +534,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withAutoConfirmPinAtRightLength_isSameLength() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.setAutoConfirmEnabled(true)
             utils.authenticationRepository.overrideCredential(
                 buildList { repeat(utils.authenticationRepository.hintedPinLength) { add(it + 1) } }
@@ -494,7 +549,9 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun hintedPinLength_withAutoConfirmPinTooLong_isNull() =
         testScope.runTest {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAuthenticationMethod(
+                DataLayerAuthenticationMethodModel.Pin
+            )
             utils.authenticationRepository.overrideCredential(
                 buildList {
                     repeat(utils.authenticationRepository.hintedPinLength + 1) { add(it + 1) }

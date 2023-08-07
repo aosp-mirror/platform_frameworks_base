@@ -16,19 +16,17 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import javax.inject.Inject
 
 /** Models UI state and handles user input for the quick settings scene. */
 @SysUISingleton
 class QuickSettingsSceneViewModel
 @Inject
-constructor(
-    private val lockscreenSceneInteractor: LockscreenSceneInteractor,
-) {
+constructor(private val bouncerInteractor: BouncerInteractor) {
     /** Notifies that some content in quick settings was clicked. */
     fun onContentClicked() {
-        lockscreenSceneInteractor.dismissLockscreen()
+        bouncerInteractor.showOrUnlockDevice()
     }
 }

@@ -94,9 +94,11 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mShellExecutor = organizer.getExecutor();
         mSyncQueue = syncQueue;
         mTaskViewTransitions = taskViewTransitions;
-        if (mTaskViewTransitions != null) {
-            mTaskViewTransitions.addTaskView(this);
-        }
+        mShellExecutor.execute(() -> {
+            if (mTaskViewTransitions != null) {
+                mTaskViewTransitions.addTaskView(this);
+            }
+        });
         mGuard.open("release");
     }
 
@@ -225,10 +227,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     private void performRelease() {
-        if (mTaskViewTransitions != null) {
-            mTaskViewTransitions.removeTaskView(this);
-        }
         mShellExecutor.execute(() -> {
+            if (mTaskViewTransitions != null) {
+                mTaskViewTransitions.removeTaskView(this);
+            }
             mTaskOrganizer.removeListener(this);
             resetTaskInfo();
         });
@@ -410,9 +412,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         if (mTaskToken == null) {
             return;
         }
-        // Sync Transactions can't operate simultaneously with shell transition collection.
+
         if (isUsingShellTransitions()) {
-            mTaskViewTransitions.setTaskBounds(this, boundsOnScreen);
+            mShellExecutor.execute(() -> {
+                // Sync Transactions can't operate simultaneously with shell transition collection.
+                mTaskViewTransitions.setTaskBounds(this, boundsOnScreen);
+            });
             return;
         }
 
@@ -430,9 +435,11 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
             return;
         }
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.removeTask(mTaskToken);
-        mTaskViewTransitions.closeTaskView(wct, this);
+        mShellExecutor.execute(() -> {
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            wct.removeTask(mTaskToken);
+            mTaskViewTransitions.closeTaskView(wct, this);
+        });
     }
 
     /**

@@ -116,15 +116,32 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isVisible_airplane_false() =
+    fun isVisible_airplaneAndNotAllowed_false() =
         testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(true)
+            interactor.isAllowedDuringAirplaneMode.value = false
             interactor.isForceHidden.value = false
 
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    /** Regression test for b/291993542. */
+    @Test
+    fun isVisible_airplaneButAllowed_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(true)
+            interactor.isAllowedDuringAirplaneMode.value = true
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isTrue()
 
             job.cancel()
         }
@@ -157,7 +174,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             airplaneModeRepository.setIsAirplaneMode(true)
             assertThat(latest).isFalse()
 
-            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isAllowedDuringAirplaneMode.value = true
             assertThat(latest).isTrue()
 
             interactor.isForceHidden.value = true

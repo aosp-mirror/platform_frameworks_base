@@ -53,6 +53,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -810,6 +811,14 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(latest).isEqualTo(DEFAULT_NUM_LEVELS)
 
             job.cancel()
+        }
+
+    @Test
+    fun isAllowedDuringAirplaneMode_alwaysFalse() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
+
+            assertThat(latest).isFalse()
         }
 
     private inline fun <reified T> getTelephonyCallbackForType(): T {

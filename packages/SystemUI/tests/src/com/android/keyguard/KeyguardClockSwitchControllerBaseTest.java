@@ -23,6 +23,7 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLE
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -157,6 +158,12 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectDateView(any())).thenReturn(mFakeDateView);
         when(mSmartspaceController.buildAndConnectWeatherView(any())).thenReturn(mFakeWeatherView);
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
+        doAnswer(invocation -> {
+            removeView(mFakeDateView);
+            removeView(mFakeWeatherView);
+            removeView(mFakeSmartspaceView);
+            return null;
+        }).when(mSmartspaceController).removeViewsFromParent(any());
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
         mFakeFeatureFlags.set(FACE_AUTH_REFACTOR, false);
@@ -199,6 +206,13 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
         mStatusArea = new LinearLayout(getContext());
         when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
+    }
+
+    private void removeView(View v) {
+        ViewGroup group = ((ViewGroup) v.getParent());
+        if (group != null) {
+            group.removeView(v);
+        }
     }
 
     protected void init() {

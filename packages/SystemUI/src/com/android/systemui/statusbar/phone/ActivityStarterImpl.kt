@@ -401,7 +401,7 @@ constructor(
         isActivityIntent: Boolean,
         showOverLockscreen: Boolean,
     ): Boolean {
-        // TODO(b/184121838): Support launch animations when occluded.
+        // TODO(b/294418322): Support launch animations when occluded.
         if (keyguardStateController.isOccluded) {
             return false
         }

@@ -18,8 +18,10 @@ package com.android.systemui.authentication.domain.interactor
 
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -35,8 +37,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -56,21 +60,40 @@ constructor(
     private val clock: SystemClock,
 ) {
     /**
+     * The currently-configured authentication method. This determines how the authentication
+     * challenge needs to be completed in order to unlock an otherwise locked device.
+     *
+     * Note: there may be other ways to unlock the device that "bypass" the need for this
+     * authentication challenge (notably, biometrics like fingerprint or face unlock).
+     *
+     * Note: by design, this is a [Flow] and not a [StateFlow]; a consumer who wishes to get a
+     * snapshot of the current authentication method without establishing a collector of the flow
+     * can do so by invoking [getAuthenticationMethod].
+     *
+     * Note: this layer adds the synthetic authentication method of "swipe" which is special. When
+     * the current authentication method is "swipe", the user does not need to complete any
+     * authentication challenge to unlock the device; they just need to dismiss the lockscreen to
+     * get past it. This also means that the value of [isUnlocked] remains `false` even when the
+     * lockscreen is showing and still needs to be dismissed by the user to proceed.
+     */
+    val authenticationMethod: Flow<DomainLayerAuthenticationMethodModel> =
+        repository.authenticationMethod.map { rawModel -> rawModel.toDomainLayer() }
+
+    /**
      * Whether the device is unlocked.
      *
      * A device that is not yet unlocked requires unlocking by completing an authentication
-     * challenge according to the current authentication method.
-     *
-     * Note that this state has no real bearing on whether the lock screen is showing or dismissed.
+     * challenge according to the current authentication method, unless in cases when the current
+     * authentication method is not "secure" (for example, None and Swipe); in such cases, the value
+     * of this flow will always be `true`, even if the lockscreen is showing and still needs to be
+     * dismissed by the user to proceed.
      */
     val isUnlocked: StateFlow<Boolean> =
-        repository.isUnlocked
-            .map { isUnlocked ->
-                if (getAuthenticationMethod() is AuthenticationMethodModel.None) {
-                    true
-                } else {
-                    isUnlocked
-                }
+        combine(
+                repository.isUnlocked,
+                authenticationMethod,
+            ) { isUnlocked, authenticationMethod ->
+                authenticationMethod is DomainLayerAuthenticationMethodModel.None || isUnlocked
             }
             .stateIn(
                 scope = applicationScope,
@@ -129,18 +152,24 @@ constructor(
 
     /**
      * Returns the currently-configured authentication method. This determines how the
-     * authentication challenge is completed in order to unlock an otherwise locked device.
+     * authentication challenge needs to be completed in order to unlock an otherwise locked device.
+     *
+     * Note: there may be other ways to unlock the device that "bypass" the need for this
+     * authentication challenge (notably, biometrics like fingerprint or face unlock).
+     *
+     * Note: by design, this is offered as a convenience method alongside [authenticationMethod].
+     * The flow should be used for code that wishes to stay up-to-date its logic as the
+     * authentication changes over time and this method should be used for simple code that only
+     * needs to check the current value.
+     *
+     * Note: this layer adds the synthetic authentication method of "swipe" which is special. When
+     * the current authentication method is "swipe", the user does not need to complete any
+     * authentication challenge to unlock the device; they just need to dismiss the lockscreen to
+     * get past it. This also means that the value of [isUnlocked] remains `false` even when the
+     * lockscreen is showing and still needs to be dismissed by the user to proceed.
      */
-    suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
-        val authMethod = repository.getAuthenticationMethod()
-        return if (
-            authMethod is AuthenticationMethodModel.None && repository.isLockscreenEnabled()
-        ) {
-            // We treat "None" as "Swipe" when the lockscreen is enabled.
-            AuthenticationMethodModel.Swipe
-        } else {
-            authMethod
-        }
+    suspend fun getAuthenticationMethod(): DomainLayerAuthenticationMethodModel {
+        return repository.getAuthenticationMethod().toDomainLayer()
     }
 
     /**
@@ -270,21 +299,38 @@ constructor(
         }
     }
 
-    private fun AuthenticationMethodModel.createCredential(
+    private fun DomainLayerAuthenticationMethodModel.createCredential(
         input: List<Any>
     ): LockscreenCredential? {
         return when (this) {
-            is AuthenticationMethodModel.Pin ->
+            is DomainLayerAuthenticationMethodModel.Pin ->
                 LockscreenCredential.createPin(input.joinToString(""))
-            is AuthenticationMethodModel.Password ->
+            is DomainLayerAuthenticationMethodModel.Password ->
                 LockscreenCredential.createPassword(input.joinToString(""))
-            is AuthenticationMethodModel.Pattern ->
+            is DomainLayerAuthenticationMethodModel.Pattern ->
                 LockscreenCredential.createPattern(
                     input
-                        .map { it as AuthenticationMethodModel.Pattern.PatternCoordinate }
+                        .map { it as AuthenticationPatternCoordinate }
                         .map { LockPatternView.Cell.of(it.y, it.x) }
                 )
             else -> null
+        }
+    }
+
+    private suspend fun DataLayerAuthenticationMethodModel.toDomainLayer():
+        DomainLayerAuthenticationMethodModel {
+        return when (this) {
+            is DataLayerAuthenticationMethodModel.None ->
+                if (repository.isLockscreenEnabled()) {
+                    DomainLayerAuthenticationMethodModel.Swipe
+                } else {
+                    DomainLayerAuthenticationMethodModel.None
+                }
+            is DataLayerAuthenticationMethodModel.Pin -> DomainLayerAuthenticationMethodModel.Pin
+            is DataLayerAuthenticationMethodModel.Password ->
+                DomainLayerAuthenticationMethodModel.Password
+            is DataLayerAuthenticationMethodModel.Pattern ->
+                DomainLayerAuthenticationMethodModel.Pattern
         }
     }
 }

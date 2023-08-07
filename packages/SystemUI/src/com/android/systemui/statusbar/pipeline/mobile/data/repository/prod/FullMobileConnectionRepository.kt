@@ -287,6 +287,15 @@ class FullMobileConnectionRepository(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
 
+    override val isAllowedDuringAirplaneMode =
+        activeRepo
+            .flatMapLatest { it.isAllowedDuringAirplaneMode }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                activeRepo.value.isAllowedDuringAirplaneMode.value,
+            )
+
     class Factory
     @Inject
     constructor(

@@ -50,6 +50,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -66,6 +67,8 @@ import com.google.common.truth.Truth
 import java.util.Optional
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -139,6 +142,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var testableResources: TestableResources
     private lateinit var sceneTestUtils: SceneTestUtils
     private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
 
     private lateinit var underTest: KeyguardSecurityContainerController
 
@@ -198,6 +202,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(userInteractor.getSelectedUserId()).thenReturn(TARGET_USER_ID)
         sceneTestUtils = SceneTestUtils(this)
         sceneInteractor = sceneTestUtils.sceneInteractor()
+        sceneTransitionStateFlow =
+            MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
+        sceneInteractor.setTransitionState(sceneTransitionStateFlow)
 
         underTest =
             KeyguardSecurityContainerController(
@@ -733,20 +740,39 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // is
             // not enough to trigger a dismissal of the keyguard.
             underTest.onViewAttached()
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    SceneKey.Lockscreen,
+                    SceneKey.Bouncer,
+                    flowOf(.5f)
+                )
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Bouncer)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
             // While listening, going from the bouncer scene to the gone scene, does dismiss the
             // keyguard.
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(SceneKey.Bouncer, SceneKey.Gone, flowOf(.5f))
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
 
             // While listening, moving back to the bouncer scene does not dismiss the keyguard
             // again.
             clearInvocations(viewMediatorCallback)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(SceneKey.Gone, SceneKey.Bouncer, flowOf(.5f))
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Bouncer)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
@@ -754,12 +780,22 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // scene
             // does not dismiss the keyguard while we're not listening.
             underTest.onViewDetached()
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(SceneKey.Bouncer, SceneKey.Gone, flowOf(.5f))
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
             // While not listening, moving back to the bouncer does not dismiss the keyguard.
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(SceneKey.Gone, SceneKey.Bouncer, flowOf(.5f))
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Bouncer)
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
@@ -767,7 +803,12 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // gone
             // scene now does dismiss the keyguard again.
             underTest.onViewAttached()
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value =
+                ObservableTransitionState.Transition(SceneKey.Bouncer, SceneKey.Gone, flowOf(.5f))
+            runCurrent()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone, null), "reason")
+            sceneTransitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
         }
