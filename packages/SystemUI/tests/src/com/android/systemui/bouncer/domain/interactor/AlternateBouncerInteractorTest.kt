@@ -165,6 +165,28 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
+    @Test
+    fun alternateBouncerUiAvailable_fromMultipleSources() {
+        assertFalse(bouncerRepository.alternateBouncerUIAvailable.value)
+
+        // GIVEN there are two different sources indicating the alternate bouncer is available
+        underTest.setAlternateBouncerUIAvailable(true, "source1")
+        underTest.setAlternateBouncerUIAvailable(true, "source2")
+        assertTrue(bouncerRepository.alternateBouncerUIAvailable.value)
+
+        // WHEN one of the sources no longer says the UI is available
+        underTest.setAlternateBouncerUIAvailable(false, "source1")
+
+        // THEN alternate bouncer UI is still available (from the other source)
+        assertTrue(bouncerRepository.alternateBouncerUIAvailable.value)
+
+        // WHEN all sources say the UI is not available
+        underTest.setAlternateBouncerUIAvailable(false, "source2")
+
+        // THEN alternate boucer UI is not available
+        assertFalse(bouncerRepository.alternateBouncerUIAvailable.value)
+    }
+
     private fun givenCanShowAlternateBouncer() {
         bouncerRepository.setAlternateBouncerUIAvailable(true)
         biometricSettingsRepository.setFingerprintEnrolled(true)

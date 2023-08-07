@@ -40,6 +40,7 @@ constructor(
 ) {
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
+    private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
@@ -69,8 +70,15 @@ constructor(
         return bouncerRepository.alternateBouncerVisible.value
     }
 
-    fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
-        bouncerRepository.setAlternateBouncerUIAvailable(isAvailable)
+    fun setAlternateBouncerUIAvailable(isAvailable: Boolean, token: String) {
+        if (isAvailable) {
+            alternateBouncerUiAvailableFromSource.add(token)
+        } else {
+            alternateBouncerUiAvailableFromSource.remove(token)
+        }
+        bouncerRepository.setAlternateBouncerUIAvailable(
+            alternateBouncerUiAvailableFromSource.isNotEmpty()
+        )
     }
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {

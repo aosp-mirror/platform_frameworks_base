@@ -186,7 +186,7 @@ constructor(
     }
 
     private fun listenForAlternateBouncerVisibility() {
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, "SideFpsController")
         scope.launch {
             alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
                 if (isVisible) {

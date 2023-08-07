@@ -83,6 +83,7 @@ constructor(
         dumpManager,
     ),
     UdfpsKeyguardViewControllerAdapter {
+    private val uniqueIdentifier = this.toString()
     private val useExpandedOverlay: Boolean =
         featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)
     private var showingUdfpsBouncer = false
@@ -282,7 +283,7 @@ constructor(
 
     public override fun onViewAttached() {
         super.onViewAttached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, uniqueIdentifier)
         val dozeAmount = statusBarStateController.dozeAmount
         lastDozeAmount = dozeAmount
         stateListener.onDozeAmountChanged(dozeAmount, dozeAmount)
@@ -312,7 +313,7 @@ constructor(
 
     override fun onViewDetached() {
         super.onViewDetached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false, uniqueIdentifier)
         faceDetectRunning = false
         keyguardStateController.removeCallback(keyguardStateControllerCallback)
         statusBarStateController.removeCallback(stateListener)
