@@ -25,6 +25,7 @@ import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
@@ -39,6 +40,7 @@ import android.os.VibrationAttributes;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -613,12 +615,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 if (!mDownDetected && mAccessibilityManager.isTouchExplorationEnabled()) {
-                    mVibrator.vibrate(
-                            Process.myUid(),
-                            getContext().getOpPackageName(),
-                            UdfpsController.EFFECT_CLICK,
-                            "lock-icon-down",
-                            TOUCH_VIBRATION_ATTRIBUTES);
+                    vibrateOnTouchExploration();
                 }
 
                 // The pointer that causes ACTION_DOWN is always at index 0.
@@ -699,13 +696,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mOnGestureDetectedRunnable.run();
         }
 
-        // play device entry haptic (same as biometric success haptic)
-        mVibrator.vibrate(
-                Process.myUid(),
-                getContext().getOpPackageName(),
-                UdfpsController.EFFECT_CLICK,
-                "lock-screen-lock-icon-longpress",
-                TOUCH_VIBRATION_ATTRIBUTES);
+        // play device entry haptic (consistent with UDFPS controller longpress)
+        vibrateOnLongPress();
 
         mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);
     }
@@ -751,6 +743,37 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             updateIsUdfpsEnrolled();
             updateConfiguration();
         });
+    }
+
+    @VisibleForTesting
+    void vibrateOnTouchExploration() {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mVibrator.performHapticFeedback(
+                    mView,
+                    HapticFeedbackConstants.CONTEXT_CLICK
+            );
+        } else {
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-icon-down",
+                    TOUCH_VIBRATION_ATTRIBUTES);
+        }
+    }
+
+    @VisibleForTesting
+    void vibrateOnLongPress() {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mVibrator.performHapticFeedback(mView, UdfpsController.LONG_PRESS);
+        } else {
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-screen-lock-icon-longpress",
+                    TOUCH_VIBRATION_ATTRIBUTES);
+        }
     }
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
