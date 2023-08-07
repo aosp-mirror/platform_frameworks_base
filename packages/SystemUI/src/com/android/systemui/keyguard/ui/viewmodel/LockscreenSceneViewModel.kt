@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -51,15 +52,14 @@ constructor(
             )
 
     /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey =
-        authenticationInteractor.canSwipeToDismiss
-            .map { canSwipeToDismiss -> upDestinationSceneKey(canSwipeToDismiss) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue =
-                    upDestinationSceneKey(authenticationInteractor.canSwipeToDismiss.value),
-            )
+    val upDestinationSceneKey: Flow<SceneKey> =
+        authenticationInteractor.isUnlocked.map { isUnlocked ->
+            if (isUnlocked) {
+                SceneKey.Gone
+            } else {
+                SceneKey.Bouncer
+            }
+        }
 
     /** Notifies that the lock button on the lock screen was clicked. */
     fun onLockButtonClicked() {

@@ -18,9 +18,11 @@ package com.android.systemui.scene
 
 import android.content.pm.UserInfo
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
+import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
@@ -201,5 +203,18 @@ class SceneTestUtils(
                 RemoteUserInput(10f, 40f, RemoteUserInputAction.MOVE),
                 RemoteUserInput(10f, 40f, RemoteUserInputAction.UP),
             )
+
+        fun DomainLayerAuthenticationMethodModel.toDataLayer(): DataLayerAuthenticationMethodModel {
+            return when (this) {
+                DomainLayerAuthenticationMethodModel.None -> DataLayerAuthenticationMethodModel.None
+                DomainLayerAuthenticationMethodModel.Swipe ->
+                    DataLayerAuthenticationMethodModel.None
+                DomainLayerAuthenticationMethodModel.Pin -> DataLayerAuthenticationMethodModel.Pin
+                DomainLayerAuthenticationMethodModel.Password ->
+                    DataLayerAuthenticationMethodModel.Password
+                DomainLayerAuthenticationMethodModel.Pattern ->
+                    DataLayerAuthenticationMethodModel.Pattern
+            }
+        }
     }
 }

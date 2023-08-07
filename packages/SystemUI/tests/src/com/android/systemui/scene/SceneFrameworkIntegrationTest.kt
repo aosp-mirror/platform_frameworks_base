@@ -20,7 +20,6 @@ package com.android.systemui.scene
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
@@ -31,6 +30,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.model.SysUiState
+import com.android.systemui.scene.SceneTestUtils.Companion.toDataLayer
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -212,6 +212,17 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
 
     @Test
+    fun withAuthMethodSwipe_deviceWakeUp_doesNotSkipLockscreen() =
+        testScope.runTest {
+            setAuthMethod(AuthenticationMethodModel.Swipe)
+            putDeviceToSleep(instantlyLockDevice = false)
+            assertCurrentScene(SceneKey.Lockscreen)
+
+            wakeUpDevice()
+            assertCurrentScene(SceneKey.Lockscreen)
+        }
+
+    @Test
     fun deviceGoesToSleep_switchesToLockscreen() =
         testScope.runTest {
             unlockDevice()
@@ -233,6 +244,26 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
             unlockDevice()
             assertCurrentScene(SceneKey.Gone)
+        }
+
+    @Test
+    fun deviceWakesUpWhileUnlocked_dismissesLockscreen() =
+        testScope.runTest {
+            unlockDevice()
+            assertCurrentScene(SceneKey.Gone)
+            putDeviceToSleep(instantlyLockDevice = false)
+            assertCurrentScene(SceneKey.Lockscreen)
+            wakeUpDevice()
+            assertCurrentScene(SceneKey.Gone)
+        }
+
+    @Test
+    fun swipeUpOnLockscreenWhileUnlocked_dismissesLockscreen() =
+        testScope.runTest {
+            unlockDevice()
+            val upDestinationSceneKey by
+                collectLastValue(lockscreenSceneViewModel.upDestinationSceneKey)
+            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
         }
 
     @Test
@@ -460,19 +491,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
         if (instantlyLockDevice) {
             lockDevice()
-        }
-    }
-
-    private fun DomainLayerAuthenticationMethodModel.toDataLayer():
-        DataLayerAuthenticationMethodModel {
-        return when (this) {
-            DomainLayerAuthenticationMethodModel.None -> DataLayerAuthenticationMethodModel.None
-            DomainLayerAuthenticationMethodModel.Swipe -> DataLayerAuthenticationMethodModel.None
-            DomainLayerAuthenticationMethodModel.Pin -> DataLayerAuthenticationMethodModel.Pin
-            DomainLayerAuthenticationMethodModel.Password ->
-                DataLayerAuthenticationMethodModel.Password
-            DomainLayerAuthenticationMethodModel.Pattern ->
-                DataLayerAuthenticationMethodModel.Pattern
         }
     }
 }
