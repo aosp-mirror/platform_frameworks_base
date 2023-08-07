@@ -770,7 +770,7 @@ object Flags {
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
-    val COMPOSE_PEOPLE_SPACE = unreleasedFlag("compose_people_space")
+    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
 
     /** Enable the Compose implementation of the Quick Settings footer actions. */
     @JvmField
