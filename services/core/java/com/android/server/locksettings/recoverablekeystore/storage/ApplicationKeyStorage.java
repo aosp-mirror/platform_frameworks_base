@@ -138,7 +138,7 @@ public class ApplicationKeyStorage {
         } catch (android.security.KeyStoreException e) {
             if (e.getNumericErrorCode()
                     == android.security.KeyStoreException.ERROR_KEY_DOES_NOT_EXIST) {
-                Log.e(TAG, "Failed to get grant for KeyStore key - key not found", e);
+                Log.w(TAG, "Failed to get grant for KeyStore key - key not found");
                 throw new ServiceSpecificException(ERROR_KEY_NOT_FOUND, e.getMessage());
             }
             Log.e(TAG, "Failed to get grant for KeyStore key.", e);
