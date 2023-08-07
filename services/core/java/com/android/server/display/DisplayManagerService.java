@@ -39,6 +39,7 @@ import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
 import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPORTED;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
 
@@ -593,7 +594,7 @@ public final class DisplayManagerService extends SystemService {
         DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
         publishBinderService(Context.DISPLAY_SERVICE, new BinderService(),
-                true /*allowIsolated*/);
+                true /*allowIsolated*/, DUMP_FLAG_PRIORITY_CRITICAL);
         publishLocalService(DisplayManagerInternal.class, new LocalService());
     }
 
