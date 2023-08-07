@@ -10748,7 +10748,7 @@ package android.os {
     field @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY) public static final String ACTION_LOW_POWER_STANDBY_PORTS_CHANGED = "android.os.action.LOW_POWER_STANDBY_PORTS_CHANGED";
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
-    field public static final String REBOOT_USERSPACE = "userspace";
+    field @Deprecated public static final String REBOOT_USERSPACE = "userspace";
     field public static final int SOUND_TRIGGER_MODE_ALL_DISABLED = 2; // 0x2
     field public static final int SOUND_TRIGGER_MODE_ALL_ENABLED = 0; // 0x0
     field public static final int SOUND_TRIGGER_MODE_CRITICAL_ONLY = 1; // 0x1
