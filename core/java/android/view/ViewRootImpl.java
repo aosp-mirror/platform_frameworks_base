@@ -3792,6 +3792,11 @@ public final class ViewRootImpl implements ViewParent,
         boolean cancelDueToPreDrawListener = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
         boolean cancelAndRedraw = cancelDueToPreDrawListener
                  || (cancelDraw && mDrewOnceForSync);
+        if (cancelAndRedraw) {
+            Log.d(mTag, "Cancelling draw."
+                    + " cancelDueToPreDrawListener=" + cancelDueToPreDrawListener
+                    + " cancelDueToSync=" + (cancelDraw && mDrewOnceForSync));
+        }
         if (!cancelAndRedraw) {
             // A sync was already requested before the WMS requested sync. This means we need to
             // sync the buffer, regardless if WMS wants to sync the buffer.
