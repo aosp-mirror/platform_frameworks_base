@@ -37,6 +37,10 @@ public class Utils {
     /**
      * Allows lambda iteration over a list. It is done in reverse order so it is safe
      * to add or remove items during the iteration.  Skips over null items.
+     *
+     * @deprecated According to b/286841705, this is *not* safe: If an item is removed from the
+     *   list, then list.get(i) could throw an IndexOutOfBoundsException. This method should not be
+     *   used; try using `synchronized` or making a copy of the list instead.
      */
     public static <T> void safeForeach(List<T> list, Consumer<T> c) {
         for (int i = list.size() - 1; i >= 0; i--) {
