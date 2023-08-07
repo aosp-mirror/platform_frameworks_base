@@ -165,6 +165,13 @@ class CarrierMergedConnectionRepository(
     override val isGsm = MutableStateFlow(false).asStateFlow()
     override val carrierNetworkChangeActive = MutableStateFlow(false).asStateFlow()
 
+    /**
+     * Carrier merged connections happen over wifi but are displayed as a mobile triangle. Because
+     * they occur over wifi, it's possible to have a valid carrier merged connection even during
+     * airplane mode. See b/291993542.
+     */
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(true).asStateFlow()
+
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
     companion object {

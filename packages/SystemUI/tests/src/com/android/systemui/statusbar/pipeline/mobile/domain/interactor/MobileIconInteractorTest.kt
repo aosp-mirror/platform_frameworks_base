@@ -23,6 +23,7 @@ import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
 import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.CarrierMergedNetworkType
@@ -471,6 +472,18 @@ class MobileIconInteractorTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             job.cancel()
+        }
+
+    @Test
+    fun isAllowedDuringAirplaneMode_matchesRepo() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isAllowedDuringAirplaneMode)
+
+            connectionRepository.isAllowedDuringAirplaneMode.value = true
+            assertThat(latest).isTrue()
+
+            connectionRepository.isAllowedDuringAirplaneMode.value = false
+            assertThat(latest).isFalse()
         }
 
     private fun createInteractor(
