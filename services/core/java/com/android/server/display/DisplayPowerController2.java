@@ -2451,6 +2451,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         dumpRbcEvents(pw);
 
+        if (mScreenOffBrightnessSensorController != null) {
+            mScreenOffBrightnessSensorController.dump(pw);
+        }
+
         if (mBrightnessRangeController != null) {
             mBrightnessRangeController.dump(pw);
         }
