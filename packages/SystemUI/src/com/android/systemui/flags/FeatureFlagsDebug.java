@@ -32,7 +32,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -94,8 +93,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
                             shouldRestart = true;
                         }
                     } else if (mStringFlagCache.containsKey(flag.getName())) {
-                        String newValue = value == null ? "" : value;
-                        if (mStringFlagCache.get(flag.getName()) != value) {
+                        if (!mStringFlagCache.get(flag.getName()).equals(value)) {
                             shouldRestart = true;
                         }
                     } else if (mIntFlagCache.containsKey(flag.getName())) {
@@ -203,8 +201,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
         String name = flag.getName();
         if (!mStringFlagCache.containsKey(name)) {
             mStringFlagCache.put(name,
-                    readFlagValueInternal(
-                            flag.getId(), name, flag.getDefault(), StringFlagSerializer.INSTANCE));
+                    readFlagValueInternal(name, flag.getDefault(), StringFlagSerializer.INSTANCE));
         }
 
         return mStringFlagCache.get(name);
@@ -216,36 +213,30 @@ public class FeatureFlagsDebug implements FeatureFlags {
         String name = flag.getName();
         if (!mStringFlagCache.containsKey(name)) {
             mStringFlagCache.put(name,
-                    readFlagValueInternal(
-                            flag.getId(), name, mResources.getString(flag.getResourceId()),
+                    readFlagValueInternal(name, mResources.getString(flag.getResourceId()),
                             StringFlagSerializer.INSTANCE));
         }
 
         return mStringFlagCache.get(name);
     }
 
-
-    @NonNull
     @Override
     public int getInt(@NonNull IntFlag flag) {
         String name = flag.getName();
         if (!mIntFlagCache.containsKey(name)) {
             mIntFlagCache.put(name,
-                    readFlagValueInternal(
-                            flag.getId(), name, flag.getDefault(), IntFlagSerializer.INSTANCE));
+                    readFlagValueInternal(name, flag.getDefault(), IntFlagSerializer.INSTANCE));
         }
 
         return mIntFlagCache.get(name);
     }
 
-    @NonNull
     @Override
     public int getInt(@NonNull ResourceIntFlag flag) {
         String name = flag.getName();
         if (!mIntFlagCache.containsKey(name)) {
             mIntFlagCache.put(name,
-                    readFlagValueInternal(
-                            flag.getId(), name, mResources.getInteger(flag.getResourceId()),
+                    readFlagValueInternal(name, mResources.getInteger(flag.getResourceId()),
                             IntFlagSerializer.INSTANCE));
         }
 
@@ -255,13 +246,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
     /** Specific override for Boolean flags that checks against the teamfood list.*/
     private boolean readBooleanFlagInternal(Flag<Boolean> flag, boolean defaultValue) {
         Boolean result = readBooleanFlagOverride(flag.getName());
-        if (result == null) {
-            result = readBooleanFlagOverride(flag.getId());
-            if (result != null) {
-                // Move overrides from id to name
-                setFlagValueInternal(flag.getName(), result, BooleanFlagSerializer.INSTANCE);
-            }
-        }
         boolean hasServerOverride = mServerFlagReader.hasOverride(
                 flag.getNamespace(), flag.getName());
 
@@ -279,43 +263,20 @@ public class FeatureFlagsDebug implements FeatureFlags {
                 flag.getNamespace(), flag.getName(), defaultValue) : result;
     }
 
-    private Boolean readBooleanFlagOverride(int id) {
-        return readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
-    }
 
     private Boolean readBooleanFlagOverride(String name) {
         return readFlagValueInternal(name, BooleanFlagSerializer.INSTANCE);
     }
 
-    // TODO(b/265188950): Remove id from this method once ids are fully deprecated.
     @NonNull
     private <T> T readFlagValueInternal(
-            int id, String name, @NonNull T defaultValue, FlagSerializer<T> serializer) {
+            String name, @NonNull T defaultValue, FlagSerializer<T> serializer) {
         requireNonNull(defaultValue, "defaultValue");
         T resultForName = readFlagValueInternal(name, serializer);
         if (resultForName == null) {
-            T resultForId = readFlagValueInternal(id, serializer);
-            if (resultForId == null) {
-                return defaultValue;
-            } else {
-                setFlagValue(name, resultForId, serializer);
-                return resultForId;
-            }
+            return defaultValue;
         }
         return resultForName;
-    }
-
-
-    /** Returns the stored value or null if not set. */
-    // TODO(b/265188950): Remove method this once ids are fully deprecated.
-    @Nullable
-    private <T> T readFlagValueInternal(int id, FlagSerializer<T> serializer) {
-        try {
-            return mFlagManager.readFlagValue(id, serializer);
-        } catch (Exception e) {
-            eraseInternal(id);
-        }
-        return null;
     }
 
     /** Returns the stored value or null if not set. */
@@ -385,15 +346,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
     }
 
     /** Works just like {@link #eraseFlag(String)} except that it doesn't restart SystemUI. */
-    // TODO(b/265188950): Remove method this once ids are fully deprecated.
-    private void eraseInternal(int id) {
-        // We can't actually "erase" things from settings, but we can set them to empty!
-        mGlobalSettings.putStringForUser(mFlagManager.idToSettingsKey(id), "",
-                UserHandle.USER_CURRENT);
-        Log.i(TAG, "Erase name " + id);
-    }
-
-    /** Works just like {@link #eraseFlag(String)} except that it doesn't restart SystemUI. */
     private void eraseInternal(String name) {
         // We can't actually "erase" things from settings, but we can set them to empty!
         mGlobalSettings.putStringForUser(mFlagManager.nameToSettingsKey(name), "",
@@ -434,7 +386,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
             setFlagValue(flag.getName(), value, BooleanFlagSerializer.INSTANCE);
         } else if (flag instanceof SysPropBooleanFlag) {
             // Store SysProp flags in SystemProperties where they can read by outside parties.
-            mSystemProperties.setBoolean(((SysPropBooleanFlag) flag).getName(), value);
+            mSystemProperties.setBoolean(flag.getName(), value);
             dispatchListenersAndMaybeRestart(
                     flag.getName(),
                     suppressRestart -> restartSystemUI(
@@ -527,7 +479,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
                 }
             } catch (IllegalArgumentException e) {
                 Log.w(TAG,
-                        "Unable to set " + flag.getId() + " of type " + flag.getClass()
+                        "Unable to set " + flag.getName() + " of type " + flag.getClass()
                                 + " to value of type " + (value == null ? null : value.getClass()));
             }
         }
@@ -545,21 +497,18 @@ public class FeatureFlagsDebug implements FeatureFlags {
 
             if (f instanceof ReleasedFlag) {
                 enabled = isEnabled((ReleasedFlag) f);
-                overridden = readBooleanFlagOverride(f.getName()) != null
-                            || readBooleanFlagOverride(f.getId()) != null;
+                overridden = readBooleanFlagOverride(f.getName()) != null;
             } else if (f instanceof UnreleasedFlag) {
                 enabled = isEnabled((UnreleasedFlag) f);
-                overridden = readBooleanFlagOverride(f.getName()) != null
-                            || readBooleanFlagOverride(f.getId()) != null;
+                overridden = readBooleanFlagOverride(f.getName()) != null;
             } else if (f instanceof ResourceBooleanFlag) {
                 enabled = isEnabled((ResourceBooleanFlag) f);
-                overridden = readBooleanFlagOverride(f.getName()) != null
-                            || readBooleanFlagOverride(f.getId()) != null;
+                overridden = readBooleanFlagOverride(f.getName()) != null;
             } else if (f instanceof SysPropBooleanFlag) {
                 // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
                 enabled = isEnabled((SysPropBooleanFlag) f);
                 teamfood = false;
-                overridden = !mSystemProperties.get(((SysPropBooleanFlag) f).getName()).isEmpty();
+                overridden = !mSystemProperties.get(f.getName()).isEmpty();
             } else {
                 // TODO: add support for other flag types.
                 Log.w(TAG, "Unsupported Flag Type. Please file a bug.");
@@ -567,11 +516,9 @@ public class FeatureFlagsDebug implements FeatureFlags {
             }
 
             if (enabled) {
-                return new ReleasedFlag(
-                        f.getId(), f.getName(), f.getNamespace(), teamfood, overridden);
+                return new ReleasedFlag(f.getName(), f.getNamespace(), teamfood, overridden);
             } else {
-                return new UnreleasedFlag(
-                        f.getId(), f.getName(), f.getNamespace(), teamfood, overridden);
+                return new UnreleasedFlag(f.getName(), f.getNamespace(), teamfood, overridden);
             }
         }
     };
