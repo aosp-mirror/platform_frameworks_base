@@ -300,7 +300,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         // immediately finishes since there is no animation for screen-wake.
         if (info.getType() == WindowManager.TRANSIT_WAKE && !info.isKeyguardGoingAway()) {
             startTransaction.apply();
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
             return true;
         }
 
@@ -309,7 +309,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 || (info.getFlags() & WindowManager.TRANSIT_FLAG_INVISIBLE) != 0) {
             startTransaction.apply();
             finishTransaction.apply();
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
             return true;
         }
 
@@ -323,7 +323,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final Runnable onAnimFinish = () -> {
             if (!animations.isEmpty()) return;
             mAnimations.remove(transition);
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         };
 
         final List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks =
