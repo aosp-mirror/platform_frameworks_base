@@ -97,7 +97,7 @@ class SceneTestUtils(
     fun fakeSceneContainerRepository(
         containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
     ): SceneContainerRepository {
-        return SceneContainerRepository(containerConfig)
+        return SceneContainerRepository(applicationScope(), containerConfig)
     }
 
     fun fakeSceneKeys(): List<SceneKey> {

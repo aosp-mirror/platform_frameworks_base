@@ -18,50 +18,49 @@
 
 package com.android.systemui.scene.data.repository
 
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 
 /** Source of truth for scene framework application state. */
 class SceneContainerRepository
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val config: SceneContainerConfig,
 ) {
+    private val _desiredScene = MutableStateFlow(SceneModel(config.initialSceneKey))
+    val desiredScene: StateFlow<SceneModel> = _desiredScene.asStateFlow()
 
     private val _isVisible = MutableStateFlow(true)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
-    private val _currentScene = MutableStateFlow(SceneModel(config.initialSceneKey))
-    val currentScene: StateFlow<SceneModel> = _currentScene.asStateFlow()
-
-    private val transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
-    val transitionProgress: Flow<Float> =
-        transitionState.flatMapLatest { observableTransitionStateFlow ->
-            observableTransitionStateFlow?.flatMapLatest { observableTransitionState ->
-                when (observableTransitionState) {
-                    is ObservableTransitionState.Idle -> flowOf(1f)
-                    is ObservableTransitionState.Transition -> observableTransitionState.progress
-                }
-            }
-                ?: flowOf(1f)
-        }
-
-    private val _transitions = MutableStateFlow<SceneTransitionModel?>(null)
-    val transitions: StateFlow<SceneTransitionModel?> = _transitions.asStateFlow()
+    private val defaultTransitionState = ObservableTransitionState.Idle(config.initialSceneKey)
+    private val _transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
+    val transitionState: StateFlow<ObservableTransitionState> =
+        _transitionState
+            .flatMapLatest { innerFlowOrNull -> innerFlowOrNull ?: flowOf(defaultTransitionState) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = defaultTransitionState,
+            )
 
     /**
-     * Returns the keys to all scenes in the container with the given name.
+     * Returns the keys to all scenes in the container.
      *
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
@@ -70,40 +69,19 @@ constructor(
         return config.sceneKeys
     }
 
-    /** Sets the current scene in the container with the given name. */
-    fun setCurrentScene(scene: SceneModel) {
+    fun setDesiredScene(scene: SceneModel) {
         check(allSceneKeys().contains(scene.key)) {
             """
-                Cannot set current scene key to "${scene.key}". The configuration does not contain a
-                scene with that key.
+                Cannot set the desired scene key to "${scene.key}". The configuration does not
+                contain a scene with that key.
             """
                 .trimIndent()
         }
 
-        _currentScene.value = scene
+        _desiredScene.value = scene
     }
 
-    /** Sets the scene transition in the container with the given name. */
-    fun setSceneTransition(from: SceneKey, to: SceneKey) {
-        check(allSceneKeys().contains(from)) {
-            """
-                Cannot set current scene key to "$from". The configuration does not contain a scene
-                with that key.
-            """
-                .trimIndent()
-        }
-        check(allSceneKeys().contains(to)) {
-            """
-                Cannot set current scene key to "$to". The configuration does not contain a scene
-                with that key.
-            """
-                .trimIndent()
-        }
-
-        _transitions.value = SceneTransitionModel(from = from, to = to)
-    }
-
-    /** Sets whether the container with the given name is visible. */
+    /** Sets whether the container is visible. */
     fun setVisible(isVisible: Boolean) {
         _isVisible.value = isVisible
     }
@@ -114,6 +92,6 @@ constructor(
      * Note that you must call is with `null` when the UI is done or risk a memory leak.
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
-        this.transitionState.value = transitionState
+        _transitionState.value = transitionState
     }
 }
