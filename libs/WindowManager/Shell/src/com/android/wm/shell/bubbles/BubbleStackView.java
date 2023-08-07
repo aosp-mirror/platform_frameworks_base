@@ -137,7 +137,7 @@ public class BubbleStackView extends FrameLayout
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
 
-    private static final float SCRIM_ALPHA = 0.6f;
+    private static final float SCRIM_ALPHA = 0.32f;
 
     /** Minimum alpha value for scrim when alpha is being changed via drag */
     private static final float MIN_SCRIM_ALPHA_FOR_DRAG = 0.2f;
