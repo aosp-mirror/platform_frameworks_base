@@ -40,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -68,6 +69,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -93,6 +95,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -488,6 +491,14 @@ public class ResolverActivity extends Activity implements
             rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
 
             mResolverDrawerLayout = rdl;
+
+            for (int i = 0, size = mMultiProfilePagerAdapter.getCount(); i < size; i++) {
+                View view = mMultiProfilePagerAdapter.getItem(i).rootView.findViewById(
+                        R.id.resolver_list);
+                if (view != null) {
+                    view.setAccessibilityDelegate(new AppListAccessibilityDelegate(rdl));
+                }
+            }
         }
 
         mProfileView = findViewById(R.id.profile_button);
@@ -2606,5 +2617,42 @@ public class ResolverActivity extends Activity implements
             Log.e(TAG, "ResolveInfo with null UserHandle found: " + resolveInfo);
         }
         return resolveInfo.userHandle;
+    }
+
+    /**
+     * An a11y delegate that expands resolver drawer when gesture navigation reaches a partially
+     * invisible target in the list.
+     */
+    private static class AppListAccessibilityDelegate extends View.AccessibilityDelegate {
+        private final ResolverDrawerLayout mDrawer;
+        @Nullable
+        private final View mBottomBar;
+        private final Rect mRect = new Rect();
+
+        private AppListAccessibilityDelegate(ResolverDrawerLayout drawer) {
+            mDrawer = drawer;
+            mBottomBar = mDrawer.findViewById(R.id.button_bar_container);
+        }
+
+        @Override
+        public boolean onRequestSendAccessibilityEvent(@androidx.annotation.NonNull ViewGroup host,
+                @NonNull View child,
+                @NonNull AccessibilityEvent event) {
+            boolean result = super.onRequestSendAccessibilityEvent(host, child, event);
+            if (result && event.getEventType() == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+                    && mDrawer.isCollapsed()) {
+                child.getBoundsOnScreen(mRect);
+                int childTop = mRect.top;
+                int childBottom = mRect.bottom;
+                mDrawer.getBoundsOnScreen(mRect, true);
+                int bottomBarHeight = mBottomBar == null ? 0 : mBottomBar.getHeight();
+                int drawerTop = mRect.top;
+                int drawerBottom = mRect.bottom - bottomBarHeight;
+                if (drawerTop > childTop || childBottom > drawerBottom) {
+                    mDrawer.setCollapsed(false);
+                }
+            }
+            return result;
+        }
     }
 }
