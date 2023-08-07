@@ -28,6 +28,8 @@
 #include "SkM44.h"
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include "include/gpu/GpuTypes.h" // from Skia
+#include <include/gpu/gl/GrGLTypes.h>
+#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
 #include "utils/GLUtils.h"
 #include <effects/GainmapRenderer.h>
 #include "renderthread/CanvasContext.h"
@@ -47,7 +49,7 @@ static void setScissor(int viewportHeight, const SkIRect& clip) {
 static void GetFboDetails(SkCanvas* canvas, GLuint* outFboID, SkISize* outFboSize) {
     GrBackendRenderTarget renderTarget = skgpu::ganesh::TopLayerBackendRenderTarget(canvas);
     GrGLFramebufferInfo fboInfo;
-    LOG_ALWAYS_FATAL_IF(!renderTarget.getGLFramebufferInfo(&fboInfo),
+    LOG_ALWAYS_FATAL_IF(!GrBackendRenderTargets::GetGLFramebufferInfo(renderTarget, &fboInfo),
         "getGLFrameBufferInfo failed");
 
     *outFboID = fboInfo.fFBOID;
@@ -102,9 +104,10 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         tmpSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
 
         GrGLFramebufferInfo fboInfo;
-        if (!SkSurfaces::GetBackendRenderTarget(tmpSurface.get(),
-                                                SkSurfaces::BackendHandleAccess::kFlushWrite)
-                     .getGLFramebufferInfo(&fboInfo)) {
+        if (!GrBackendRenderTargets::GetGLFramebufferInfo(
+                    SkSurfaces::GetBackendRenderTarget(
+                        tmpSurface.get(), SkSurfaces::BackendHandleAccess::kFlushWrite),
+                    &fboInfo)) {
             ALOGW("Unable to extract renderTarget info from offscreen canvas; aborting GLFunctor");
             return;
         }
