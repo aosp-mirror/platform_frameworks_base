@@ -4882,6 +4882,7 @@ public class UserManagerService extends IUserManager.Stub {
                     UserManager.USER_OPERATION_ERROR_LOW_STORAGE);
         }
 
+        final boolean isMainUser = (flags & UserInfo.FLAG_MAIN) != 0;
         final boolean isProfile = userTypeDetails.isProfile();
         final boolean isGuest = UserManager.isUserTypeGuest(userType);
         final boolean isRestricted = UserManager.isUserTypeRestricted(userType);
@@ -5028,6 +5029,10 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             } else {
                 userTypeDetails.addDefaultRestrictionsTo(restrictions);
+                if (isMainUser) {
+                    restrictions.remove(UserManager.DISALLOW_OUTGOING_CALLS);
+                    restrictions.remove(UserManager.DISALLOW_SMS);
+                }
             }
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.updateRestrictions(userId, restrictions);

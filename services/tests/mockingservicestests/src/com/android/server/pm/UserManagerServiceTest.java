@@ -15,7 +15,10 @@
  */
 package com.android.server.pm;
 
+import static android.os.UserManager.DISALLOW_OUTGOING_CALLS;
+import static android.os.UserManager.DISALLOW_SMS;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -488,6 +491,17 @@ public final class UserManagerServiceTest {
 
         mockDeviceDemoMode(/* enabled= */ false);
         assertThat(mUms.isUserSwitcherEnabled(USER_ID)).isTrue();
+    }
+
+    @Test
+    public void testMainUser_hasNoCallsOrSMSRestrictionsByDefault() {
+        UserInfo mainUser = mUms.createUserWithThrow("main user", USER_TYPE_FULL_SECONDARY,
+                UserInfo.FLAG_FULL | UserInfo.FLAG_MAIN);
+
+        assertThat(mUms.hasUserRestriction(DISALLOW_OUTGOING_CALLS, mainUser.id))
+                .isFalse();
+        assertThat(mUms.hasUserRestriction(DISALLOW_SMS, mainUser.id))
+                .isFalse();
     }
 
     private void resetUserSwitcherEnabled() {
