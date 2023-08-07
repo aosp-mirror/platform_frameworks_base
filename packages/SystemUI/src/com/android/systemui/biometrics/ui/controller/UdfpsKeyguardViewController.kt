@@ -46,6 +46,7 @@ open class UdfpsKeyguardViewController(
         dumpManager,
     ),
     UdfpsKeyguardViewControllerAdapter {
+    private val uniqueIdentifier = this.toString()
     override val tag: String
         get() = TAG
 
@@ -55,12 +56,12 @@ open class UdfpsKeyguardViewController(
 
     public override fun onViewAttached() {
         super.onViewAttached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, uniqueIdentifier)
     }
 
     public override fun onViewDetached() {
         super.onViewDetached()
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false)
+        alternateBouncerInteractor.setAlternateBouncerUIAvailable(false, uniqueIdentifier)
     }
 
     override fun shouldPauseAuth(): Boolean {
