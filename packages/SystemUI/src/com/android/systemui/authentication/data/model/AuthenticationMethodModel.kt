@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.authentication.shared.model
+package com.android.systemui.authentication.data.model
 
 /** Enumerates all known authentication methods. */
 sealed class AuthenticationMethodModel(
@@ -29,17 +29,9 @@ sealed class AuthenticationMethodModel(
     /** There is no authentication method on the device. We shouldn't even show the lock screen. */
     object None : AuthenticationMethodModel(isSecure = false)
 
-    /** The most basic authentication method. The lock screen can be swiped away when displayed. */
-    object Swipe : AuthenticationMethodModel(isSecure = false)
-
     object Pin : AuthenticationMethodModel(isSecure = true)
 
     object Password : AuthenticationMethodModel(isSecure = true)
 
-    object Pattern : AuthenticationMethodModel(isSecure = true) {
-        data class PatternCoordinate(
-            val x: Int,
-            val y: Int,
-        )
-    }
+    object Pattern : AuthenticationMethodModel(isSecure = true)
 }
