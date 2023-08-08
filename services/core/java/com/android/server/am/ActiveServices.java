@@ -5069,7 +5069,7 @@ public final class ActiveServices {
             boolean whileRestarting, boolean permissionsReviewRequired, boolean packageFrozen,
             boolean enqueueOomAdj)
             throws TransactionTooLargeException {
-        if (r.app != null && r.app.getThread() != null) {
+        if (r.app != null && r.app.isThreadReady()) {
             sendServiceArgsLocked(r, execInFg, false);
             return null;
         }
@@ -5141,7 +5141,7 @@ public final class ActiveServices {
                 final IApplicationThread thread = app.getThread();
                 final int pid = app.getPid();
                 final UidRecord uidRecord = app.getUidRecord();
-                if (thread != null) {
+                if (app.isThreadReady()) {
                     try {
                         if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
@@ -5173,7 +5173,7 @@ public final class ActiveServices {
                     final int pid = app.getPid();
                     final UidRecord uidRecord = app.getUidRecord();
                     r.isolationHostProc = app;
-                    if (thread != null) {
+                    if (app.isThreadReady()) {
                         try {
                             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
@@ -5573,7 +5573,7 @@ public final class ActiveServices {
 
         boolean oomAdjusted = false;
         // Tell the service that it has been unbound.
-        if (r.app != null && r.app.getThread() != null) {
+        if (r.app != null && r.app.isThreadReady()) {
             for (int i = r.bindings.size() - 1; i >= 0; i--) {
                 IntentBindRecord ibr = r.bindings.valueAt(i);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing down binding " + ibr
@@ -5715,7 +5715,7 @@ public final class ActiveServices {
             mAm.mBatteryStatsService.noteServiceStopLaunch(r.appInfo.uid, r.name.getPackageName(),
                     r.name.getClassName());
             stopServiceAndUpdateAllowlistManagerLocked(r);
-            if (r.app.getThread() != null) {
+            if (r.app.isThreadReady()) {
                 // Bump the process to the top of LRU list
                 mAm.updateLruProcessLocked(r.app, false, null);
                 updateServiceForegroundLocked(r.app.mServices, false);
@@ -5879,7 +5879,7 @@ public final class ActiveServices {
         if (!c.serviceDead) {
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Disconnecting binding " + b.intent
                     + ": shouldUnbind=" + b.intent.hasBound);
-            if (s.app != null && s.app.getThread() != null && b.intent.apps.size() == 0
+            if (s.app != null && s.app.isThreadReady() && b.intent.apps.size() == 0
                     && b.intent.hasBound) {
                 try {
                     bumpServiceExecutingLocked(s, false, "unbind", OOM_ADJ_REASON_UNBIND_SERVICE);
@@ -6381,7 +6381,7 @@ public final class ActiveServices {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
                             sr.getLastStartId(), baseIntent, null, 0, null, null,
                             ActivityManager.PROCESS_STATE_UNKNOWN));
-                    if (sr.app != null && sr.app.getThread() != null) {
+                    if (sr.app != null && sr.app.isThreadReady()) {
                         // We always run in the foreground, since this is called as
                         // part of the "remove task" UI operation.
                         try {
