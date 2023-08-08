@@ -38,7 +38,7 @@ import javax.inject.Inject
 interface SensitiveContentCoordinatorModule
 
 @Module
-private interface PrivateSensitiveContentCoordinatorModule {
+interface PrivateSensitiveContentCoordinatorModule {
     @Binds
     fun bindCoordinator(impl: SensitiveContentCoordinatorImpl): SensitiveContentCoordinator
 }
@@ -47,7 +47,7 @@ private interface PrivateSensitiveContentCoordinatorModule {
 interface SensitiveContentCoordinator : Coordinator
 
 @CoordinatorScope
-private class SensitiveContentCoordinatorImpl @Inject constructor(
+class SensitiveContentCoordinatorImpl @Inject constructor(
     private val dynamicPrivacyController: DynamicPrivacyController,
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,

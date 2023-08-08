@@ -41,7 +41,7 @@ interface RemoteInputViewSubcomponent {
 }
 
 @Module
-private interface InternalRemoteInputViewModule {
+interface InternalRemoteInputViewModule {
     @Binds
     fun bindController(impl: RemoteInputViewControllerImpl): RemoteInputViewController
 }
