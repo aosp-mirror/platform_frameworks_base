@@ -7393,6 +7393,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             case BugreportParams.BUGREPORT_MODE_WIFI:
                 type = "bugreportwifi";
                 break;
+            case BugreportParams.BUGREPORT_MODE_ONBOARDING:
+                type = "bugreportonboarding";
+                break;
             default:
                 throw new IllegalArgumentException(
                     "Provided bugreport type is not correct, value: "
