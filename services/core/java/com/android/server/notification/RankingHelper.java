@@ -103,8 +103,11 @@ public class RankingHelper {
             notificationList.get(i).setGlobalSortKey(null);
         }
 
-        // rank each record individually
-        Collections.sort(notificationList, mPreliminaryComparator);
+        // Rank each record individually.
+        // Lock comparator state for consistent compare() results.
+        synchronized (mPreliminaryComparator.mStateLock) {
+            notificationList.sort(mPreliminaryComparator);
+        }
 
         synchronized (mProxyByGroupTmp) {
             // record individual ranking result and nominate proxies for each group

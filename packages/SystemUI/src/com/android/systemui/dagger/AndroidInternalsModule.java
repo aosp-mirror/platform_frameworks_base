@@ -24,10 +24,10 @@ import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Singleton;
 
 /**
  * Provides items imported from com.android.internal.
@@ -51,7 +51,7 @@ public class AndroidInternalsModule {
     /** */
     @Provides
     public NotificationMessagingUtil provideNotificationMessagingUtil(Context context) {
-        return new NotificationMessagingUtil(context);
+        return new NotificationMessagingUtil(context, null);
     }
 
     /** Provides an instance of {@link com.android.internal.logging.UiEventLogger} */
