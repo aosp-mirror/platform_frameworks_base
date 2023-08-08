@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Ra
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.NamedListenerSet;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
@@ -161,7 +162,8 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private final HashMap<String, FutureDismissal> mFutureDismissals = new HashMap<>();
 
     @Nullable private CollectionReadyForBuildListener mBuildListener;
-    private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
+    private final NamedListenerSet<NotifCollectionListener>
+            mNotifCollectionListeners = new NamedListenerSet<>();
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
     private final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
@@ -236,7 +238,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     /** @see NotifPipeline#addCollectionListener(NotifCollectionListener) */
     void addCollectionListener(NotifCollectionListener listener) {
         Assert.isMainThread();
-        mNotifCollectionListeners.add(listener);
+        mNotifCollectionListeners.addIfAbsent(listener);
     }
 
     /** @see NotifPipeline#removeCollectionListener(NotifCollectionListener) */
