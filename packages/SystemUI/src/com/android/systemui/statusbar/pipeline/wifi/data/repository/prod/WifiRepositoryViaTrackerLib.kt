@@ -93,7 +93,8 @@ constructor(
             WifiPickerTrackerInfo(
                 state = WIFI_STATE_DEFAULT,
                 isDefault = false,
-                network = WIFI_NETWORK_DEFAULT,
+                primaryNetwork = WIFI_NETWORK_DEFAULT,
+                secondaryNetworks = emptyList(),
             )
         callbackFlow {
                 val callback =
@@ -101,6 +102,17 @@ constructor(
                         override fun onWifiEntriesChanged() {
                             val connectedEntry = wifiPickerTracker?.connectedWifiEntry
                             logOnWifiEntriesChanged(connectedEntry)
+
+                            val secondaryNetworks =
+                                if (featureFlags.isEnabled(Flags.WIFI_SECONDARY_NETWORKS)) {
+                                    val activeNetworks =
+                                        wifiPickerTracker?.activeWifiEntries ?: emptyList()
+                                    activeNetworks
+                                        .filter { it != connectedEntry && !it.isPrimaryNetwork }
+                                        .map { it.toWifiNetworkModel() }
+                                } else {
+                                    emptyList()
+                                }
 
                             // [WifiPickerTracker.connectedWifiEntry] will return the same instance
                             // but with updated internals. For example, when its validation status
@@ -112,8 +124,9 @@ constructor(
                             // into our internal model immediately. [toWifiNetworkModel] always
                             // returns a new instance, so the flow is guaranteed to emit.
                             send(
-                                newNetwork = connectedEntry?.toWifiNetworkModel()
+                                newPrimaryNetwork = connectedEntry?.toPrimaryWifiNetworkModel()
                                         ?: WIFI_NETWORK_DEFAULT,
+                                newSecondaryNetworks = secondaryNetworks,
                                 newIsDefault = connectedEntry?.isDefaultNetwork ?: false,
                             )
                         }
@@ -131,9 +144,17 @@ constructor(
                         private fun send(
                             newState: Int = current.state,
                             newIsDefault: Boolean = current.isDefault,
-                            newNetwork: WifiNetworkModel = current.network,
+                            newPrimaryNetwork: WifiNetworkModel = current.primaryNetwork,
+                            newSecondaryNetworks: List<WifiNetworkModel> =
+                                current.secondaryNetworks,
                         ) {
-                            val new = WifiPickerTrackerInfo(newState, newIsDefault, newNetwork)
+                            val new =
+                                WifiPickerTrackerInfo(
+                                    newState,
+                                    newIsDefault,
+                                    newPrimaryNetwork,
+                                    newSecondaryNetworks,
+                                )
                             current = new
                             trySend(new)
                         }
@@ -170,7 +191,7 @@ constructor(
 
     override val wifiNetwork: StateFlow<WifiNetworkModel> =
         wifiPickerTrackerInfo
-            .map { it.network }
+            .map { it.primaryNetwork }
             .distinctUntilChanged()
             .logDiffsForTable(
                 wifiTrackerLibTableLogBuffer,
@@ -179,11 +200,32 @@ constructor(
             )
             .stateIn(scope, SharingStarted.Eagerly, WIFI_NETWORK_DEFAULT)
 
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        wifiPickerTrackerInfo
+            .map { it.secondaryNetworks }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                wifiTrackerLibTableLogBuffer,
+                columnPrefix = "",
+                columnName = "secondaryNetworks",
+                initialValue = emptyList(),
+            )
+            .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    /**
+     * Converts WifiTrackerLib's [WifiEntry] into our internal model only if the entry is the
+     * primary network. Returns an inactive network if it's not primary.
+     */
+    private fun WifiEntry.toPrimaryWifiNetworkModel(): WifiNetworkModel {
+        return if (!this.isPrimaryNetwork) {
+            WIFI_NETWORK_DEFAULT
+        } else {
+            this.toWifiNetworkModel()
+        }
+    }
+
     /** Converts WifiTrackerLib's [WifiEntry] into our internal model. */
     private fun WifiEntry.toWifiNetworkModel(): WifiNetworkModel {
-        if (!this.isPrimaryNetwork) {
-            return WIFI_NETWORK_DEFAULT
-        }
         return if (this is MergedCarrierEntry) {
             this.convertCarrierMergedToModel()
         } else {
@@ -291,7 +333,9 @@ constructor(
         /** True if wifi is currently the default connection and false otherwise. */
         val isDefault: Boolean,
         /** The currently primary wifi network. */
-        val network: WifiNetworkModel,
+        val primaryNetwork: WifiNetworkModel,
+        /** The current secondary network(s), if any. Specifically excludes the primary network. */
+        val secondaryNetworks: List<WifiNetworkModel>
     )
 
     @SysUISingleton

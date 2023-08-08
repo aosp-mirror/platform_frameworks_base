@@ -369,7 +369,7 @@ object Flags {
 
     // TODO(b/292533677): Tracking Bug
     val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
-        unreleasedFlag(613, "wifi_tracker_lib_for_wifi_icon")
+        unreleasedFlag(613, "wifi_tracker_lib_for_wifi_icon", teamfood = true)
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
@@ -377,6 +377,9 @@ object Flags {
 
     // TODO(b/293585143): Tracking Bug
     val INSTANT_TETHER = unreleasedFlag(615, "instant_tether")
+
+    // TODO(b/294588085): Tracking Bug
+    val WIFI_SECONDARY_NETWORKS = unreleasedFlag(617, "wifi_secondary_networks")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug

@@ -43,6 +43,9 @@ class DisabledWifiRepository @Inject constructor() :
 
     override val wifiNetwork: StateFlow<WifiNetworkModel> = MutableStateFlow(NETWORK).asStateFlow()
 
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        MutableStateFlow(emptyList<WifiNetworkModel>()).asStateFlow()
+
     override val wifiActivity: StateFlow<DataActivityModel> =
         MutableStateFlow(ACTIVITY).asStateFlow()
 

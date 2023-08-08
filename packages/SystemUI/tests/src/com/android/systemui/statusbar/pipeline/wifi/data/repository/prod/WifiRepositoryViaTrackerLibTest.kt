@@ -101,6 +101,7 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
     @Before
     fun setUp() {
         featureFlags.set(Flags.INSTANT_TETHER, false)
+        featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, false)
         whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor)))
             .thenReturn(wifiPickerTracker)
     }
@@ -760,6 +761,197 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             val latest2Active = latest2 as WifiNetworkModel.Active
             assertThat(latest2Active.level).isEqualTo(1)
             assertThat(latest2Active.ssid).isEqualTo(TITLE)
+        }
+
+    @Test
+    fun secondaryNetworks_activeEntriesEmpty_isEmpty() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf())
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isEmpty()
+        }
+
+    @Test
+    fun secondaryNetworks_oneActiveEntry_hasOne() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val wifiEntry = mock<WifiEntry>()
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(wifiEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(1)
+        }
+
+    @Test
+    fun secondaryNetworks_multipleActiveEntries_hasMultiple() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val wifiEntry1 = mock<WifiEntry>()
+            val wifiEntry2 = mock<WifiEntry>()
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(wifiEntry1, wifiEntry2))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(2)
+        }
+
+    @Test
+    fun secondaryNetworks_mapsToInactive() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val inactiveEntry =
+                mock<WifiEntry>().apply { whenever(this.level).thenReturn(WIFI_LEVEL_UNREACHABLE) }
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(inactiveEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0]).isInstanceOf(WifiNetworkModel.Inactive::class.java)
+        }
+
+    @Test
+    fun secondaryNetworks_mapsToActive() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val activeEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(activeEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0]).isInstanceOf(WifiNetworkModel.Active::class.java)
+            assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
+        }
+
+    @Test
+    fun secondaryNetworks_mapsToCarrierMerged() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val carrierMergedEntry =
+                mock<MergedCarrierEntry>().apply { whenever(this.level).thenReturn(3) }
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(carrierMergedEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0]).isInstanceOf(WifiNetworkModel.CarrierMerged::class.java)
+            assertThat((latest!![0] as WifiNetworkModel.CarrierMerged).level).isEqualTo(3)
+        }
+
+    @Test
+    fun secondaryNetworks_mapsMultipleInOrder() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val activeEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
+            val carrierMergedEntry =
+                mock<MergedCarrierEntry>().apply { whenever(this.level).thenReturn(3) }
+            whenever(wifiPickerTracker.activeWifiEntries)
+                .thenReturn(listOf(activeEntry, carrierMergedEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest!![0]).isInstanceOf(WifiNetworkModel.Active::class.java)
+            assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
+            assertThat(latest!![1]).isInstanceOf(WifiNetworkModel.CarrierMerged::class.java)
+            assertThat((latest!![1] as WifiNetworkModel.CarrierMerged).level).isEqualTo(3)
+        }
+
+    @Test
+    fun secondaryNetworks_filtersOutConnectedEntry() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val connectedEntry = mock<WifiEntry>().apply { whenever(this.level).thenReturn(1) }
+            val secondaryEntry1 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
+            val secondaryEntry2 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(3) }
+            // WHEN the active list has both a primary and secondary networks
+            whenever(wifiPickerTracker.activeWifiEntries)
+                .thenReturn(listOf(connectedEntry, secondaryEntry1, secondaryEntry2))
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(connectedEntry)
+
+            getCallback().onWifiEntriesChanged()
+
+            // THEN only the secondary networks are included
+            assertThat(latest).hasSize(2)
+            assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
+            assertThat((latest!![1] as WifiNetworkModel.Active).level).isEqualTo(3)
+        }
+
+    @Test
+    fun secondaryNetworks_noConnectedEntry_hasAllActiveEntries() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val secondaryEntry1 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
+            val secondaryEntry2 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(3) }
+            whenever(wifiPickerTracker.activeWifiEntries)
+                .thenReturn(listOf(secondaryEntry1, secondaryEntry2))
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(null)
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).hasSize(2)
+            assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
+            assertThat((latest!![1] as WifiNetworkModel.Active).level).isEqualTo(3)
+        }
+
+    @Test
+    fun secondaryNetworks_filtersOutPrimaryNetwork() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, true)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val primaryEntry =
+                mock<WifiEntry>().apply {
+                    whenever(this.isPrimaryNetwork).thenReturn(true)
+                    whenever(this.level).thenReturn(1)
+                }
+            val secondaryEntry1 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(2) }
+            val secondaryEntry2 = mock<WifiEntry>().apply { whenever(this.level).thenReturn(3) }
+            // WHEN the active list has both a primary and secondary networks
+            whenever(wifiPickerTracker.activeWifiEntries)
+                .thenReturn(listOf(secondaryEntry1, primaryEntry, secondaryEntry2))
+
+            getCallback().onWifiEntriesChanged()
+
+            // THEN only the secondary networks are included
+            assertThat(latest).hasSize(2)
+            assertThat((latest!![0] as WifiNetworkModel.Active).level).isEqualTo(2)
+            assertThat((latest!![1] as WifiNetworkModel.Active).level).isEqualTo(3)
+        }
+
+    @Test
+    fun secondaryNetworks_flagOff_noNetworks() =
+        testScope.runTest {
+            featureFlags.set(Flags.WIFI_SECONDARY_NETWORKS, false)
+            val latest by collectLastValue(underTest.secondaryNetworks)
+
+            val wifiEntry = mock<WifiEntry>()
+            whenever(wifiPickerTracker.activeWifiEntries).thenReturn(listOf(wifiEntry))
+
+            getCallback().onWifiEntriesChanged()
+
+            assertThat(latest).isEmpty()
         }
 
     @Test
