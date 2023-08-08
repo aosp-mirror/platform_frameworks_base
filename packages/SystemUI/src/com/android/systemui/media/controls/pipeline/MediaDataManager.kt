@@ -19,11 +19,13 @@ package com.android.systemui.media.controls.pipeline
 import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
+import android.app.UriGrantsManager
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
 import android.app.smartspace.SmartspaceTarget
 import android.content.BroadcastReceiver
+import android.content.ContentProvider
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -677,10 +679,13 @@ class MediaDataManager(
             Log.d(TAG, "adding track for $userId from browser: $desc")
         }
 
+        val currentEntry = mediaEntries.get(packageName)
+        val appUid = currentEntry?.appUid ?: Process.INVALID_UID
+
         // Album art
         var artworkBitmap = desc.iconBitmap
         if (artworkBitmap == null && desc.iconUri != null) {
-            artworkBitmap = loadBitmapFromUri(desc.iconUri!!)
+            artworkBitmap = loadBitmapFromUriForUser(desc.iconUri!!, userId, appUid, packageName)
         }
         val artworkIcon =
             if (artworkBitmap != null) {
@@ -689,9 +694,7 @@ class MediaDataManager(
                 null
             }
 
-        val currentEntry = mediaEntries.get(packageName)
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
-        val appUid = currentEntry?.appUid ?: Process.INVALID_UID
         val isExplicit =
             desc.extras?.getLong(MediaConstants.METADATA_KEY_IS_EXPLICIT) ==
                 MediaConstants.METADATA_VALUE_ATTRIBUTE_PRESENT &&
@@ -1231,6 +1234,30 @@ class MediaDataManager(
             false
         }
     }
+
+    /** Returns a bitmap if the user can access the given URI, else null */
+    private fun loadBitmapFromUriForUser(
+        uri: Uri,
+        userId: Int,
+        appUid: Int,
+        packageName: String,
+    ): Bitmap? {
+        try {
+            val ugm = UriGrantsManager.getService()
+            ugm.checkGrantUriPermission_ignoreNonSystem(
+                appUid,
+                packageName,
+                ContentProvider.getUriWithoutUserId(uri),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                ContentProvider.getUserIdFromUri(uri, userId)
+            )
+            return loadBitmapFromUri(uri)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to get URI permission: $e")
+        }
+        return null
+    }
+
     /**
      * Load a bitmap from a URI
      *
