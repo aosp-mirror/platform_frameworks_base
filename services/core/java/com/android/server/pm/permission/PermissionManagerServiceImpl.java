@@ -681,7 +681,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId, int userId) {
+    public int getPermissionFlags(String packageName, String permName, int userId) {
         final int callingUid = Binder.getCallingUid();
         return getPermissionFlagsInternal(packageName, permName, callingUid, userId);
     }
@@ -724,7 +724,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
         final int callingUid = Binder.getCallingUid();
         boolean overridePolicy = false;
 
@@ -908,12 +908,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
-    private int checkPermission(String pkgName, String permName, int userId) {
-        return checkPermission(pkgName, permName, Context.DEVICE_ID_DEFAULT, userId);
-    }
-
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
+    public int checkPermission(String pkgName, String permName, int userId) {
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
         }
@@ -979,12 +975,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         return true;
     }
 
-    private int checkUidPermission(int uid, String permName) {
-        return checkUidPermission(uid, permName, Context.DEVICE_ID_DEFAULT);
-    }
-
     @Override
-    public int checkUidPermission(int uid, String permName, int deviceId) {
+    public int checkUidPermission(int uid, String permName) {
         final int userId = UserHandle.getUserId(uid);
         if (!mUserManagerInt.exists(userId)) {
             return PackageManager.PERMISSION_DENIED;
@@ -1303,8 +1295,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            int userId) {
+    public void grantRuntimePermission(String packageName, String permName, final int userId) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
                 checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
@@ -1477,11 +1468,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            int userId, String reason) {
+    public void revokeRuntimePermission(String packageName, String permName, int userId,
+            String reason) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
-                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY, deviceId)
+                checkUidPermission(callingUid, ADJUST_RUNTIME_PERMISSIONS_POLICY)
                         == PackageManager.PERMISSION_GRANTED;
 
         revokeRuntimePermissionInternal(packageName, permName, overridePolicy, callingUid, userId,
@@ -1868,7 +1859,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, @UserIdInt int userId) {
+            @UserIdInt int userId) {
         final int callingUid = Binder.getCallingUid();
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
@@ -1931,8 +1922,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
-            int userId) {
+    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int userId) {
         if (UserHandle.getCallingUserId() != userId) {
             mContext.enforceCallingPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -2069,8 +2059,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     continue;
                 }
                 boolean isSystemOrPolicyFixed = (getPermissionFlags(newPackage.getPackageName(),
-                        permInfo.name, Context.DEVICE_ID_DEFAULT, userId) & (
-                        FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_POLICY_FIXED)) != 0;
+                        permInfo.name, userId) & (FLAG_PERMISSION_SYSTEM_FIXED
+                        | FLAG_PERMISSION_POLICY_FIXED)) != 0;
                 if (isSystemOrPolicyFixed) {
                     continue;
                 }
@@ -2236,8 +2226,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 for (final int userId : userIds) {
                     final int permissionState = checkPermission(packageName, permName,
                             userId);
-                    final int flags = getPermissionFlags(packageName, permName,
-                            Context.DEVICE_ID_DEFAULT, userId);
+                    final int flags = getPermissionFlags(packageName, permName, userId);
                     final int flagMask = FLAG_PERMISSION_SYSTEM_FIXED
                             | FLAG_PERMISSION_POLICY_FIXED
                             | FLAG_PERMISSION_GRANTED_BY_DEFAULT
@@ -5133,7 +5122,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @NonNull
     @Override
-    public Set<String> getGrantedPermissions(@NonNull String packageName, @UserIdInt int userId) {
+    public Set<String> getGrantedPermissions(@NonNull String packageName,
+            @UserIdInt int userId) {
         Objects.requireNonNull(packageName, "packageName");
         Preconditions.checkArgumentNonNegative(userId, "userId");
         return getGrantedPermissionsInternal(packageName, userId);
