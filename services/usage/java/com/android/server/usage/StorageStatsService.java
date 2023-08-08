@@ -364,8 +364,10 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
                 // We don't count code baked into system image
             } else {
-                codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                if (appInfo.getCodePath() != null) {
+                    codePaths = ArrayUtils.appendElement(String.class, codePaths,
                         appInfo.getCodePath());
+                }
             }
 
             final PackageStats stats = new PackageStats(TAG);
@@ -418,8 +420,10 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
                 if (appInfo.isSystemApp() && !appInfo.isUpdatedSystemApp()) {
                     // We don't count code baked into system image
                 } else {
-                    codePaths = ArrayUtils.appendElement(String.class, codePaths,
-                            appInfo.getCodePath());
+                    if (appInfo.getCodePath() != null) {
+                        codePaths = ArrayUtils.appendElement(String.class, codePaths,
+                                appInfo.getCodePath());
+                    }
                 }
             } catch (NameNotFoundException e) {
                 throw new ParcelableException(e);
