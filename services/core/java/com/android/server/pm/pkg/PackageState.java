@@ -59,11 +59,6 @@ import java.util.Set;
 public interface PackageState {
 
     /*
-     * Until immutability or read-only caching is enabled, {@link PackageSetting} cannot be
-     * returned directly, so {@link PackageStateImpl} is used to temporarily copy the data.
-     * This is a relatively expensive operation since it has to create an object for every package,
-     * but it's much lighter than the alternative of generating {@link PackageInfo} objects.
-     * <p>
      * TODO: Documentation
      * TODO: Currently missing, should be exposed as API?
      *   - keySetData
