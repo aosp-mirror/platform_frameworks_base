@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.telecom.TelecomManager;
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.util.Comparator;
@@ -39,7 +38,6 @@ public class NotificationComparator
 
     private final Context mContext;
     private final NotificationMessagingUtil mMessagingUtil;
-    private final boolean mSortByInterruptiveness;
     private String mDefaultPhoneApp;
 
     public NotificationComparator(Context context) {
@@ -47,8 +45,6 @@ public class NotificationComparator
         mContext.registerReceiver(mPhoneAppBroadcastReceiver,
                 new IntentFilter(TelecomManager.ACTION_DEFAULT_DIALER_CHANGED));
         mMessagingUtil = new NotificationMessagingUtil(mContext);
-        mSortByInterruptiveness = !SystemUiSystemPropertiesFlags.getResolver().isEnabled(
-                SystemUiSystemPropertiesFlags.NotificationFlags.NO_SORT_BY_INTERRUPTIVENESS);
     }
 
     @Override
@@ -137,14 +133,6 @@ public class NotificationComparator
         if (leftPriority != rightPriority) {
             // by priority, high to low
             return -1 * Integer.compare(leftPriority, rightPriority);
-        }
-
-        if (mSortByInterruptiveness) {
-            final boolean leftInterruptive = left.isInterruptive();
-            final boolean rightInterruptive = right.isInterruptive();
-            if (leftInterruptive != rightInterruptive) {
-                return -1 * Boolean.compare(leftInterruptive, rightInterruptive);
-            }
         }
 
         // then break ties by time, most recent first
