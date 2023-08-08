@@ -27,6 +27,7 @@ import android.hardware.HardwareBuffer
 import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
+import android.view.Display
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import androidx.test.filters.SmallTest
@@ -34,6 +35,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.MULTI_DISPLAY_SCREENSHOT
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback
@@ -48,6 +50,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.isNull
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.times
@@ -60,6 +63,8 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     private val application = mock<Application>()
     private val controller = mock<ScreenshotController>()
+    private val controllerFactory = mock<ScreenshotController.Factory>()
+    private val takeScreenshotExecutor = mock<TakeScreenshotExecutor>()
     private val userManager = mock<UserManager>()
     private val requestProcessor = mock<RequestProcessor>()
     private val devicePolicyManager = mock<DevicePolicyManager>()
@@ -71,21 +76,11 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
     private val flags = FakeFeatureFlags()
     private val topComponent = ComponentName(mContext, TakeScreenshotServiceTest::class.java)
 
-    private val service =
-        TakeScreenshotService(
-            controller,
-            userManager,
-            devicePolicyManager,
-            eventLogger,
-            notificationsController,
-            mContext,
-            Runnable::run,
-            flags,
-            requestProcessor
-        )
+    private lateinit var service: TakeScreenshotService
 
     @Before
     fun setUp() {
+        flags.set(MULTI_DISPLAY_SCREENSHOT, false)
         whenever(devicePolicyManager.resources).thenReturn(devicePolicyResourcesManager)
         whenever(
                 devicePolicyManager.getScreenCaptureDisabled(
@@ -95,6 +90,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             )
             .thenReturn(false)
         whenever(userManager.isUserUnlocked).thenReturn(true)
+        whenever(controllerFactory.create(any())).thenReturn(controller)
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
         doAnswer {
@@ -113,14 +109,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             .whenever(requestProcessor)
             .processAsync(/* screenshot= */ any(ScreenshotData::class.java), /* callback= */ any())
 
-        service.attach(
-            mContext,
-            /* thread = */ null,
-            /* className = */ null,
-            /* token = */ null,
-            application,
-            /* activityManager = */ null
-        )
+        service = createService()
     }
 
     @Test
@@ -146,7 +135,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
         verify(controller, times(1))
             .handleScreenshot(
-                eq(ScreenshotData.fromRequest(request)),
+                eq(ScreenshotData.fromRequest(request, Display.DEFAULT_DISPLAY)),
                 /* onSavedListener = */ any(),
                 /* requestCallback = */ any()
             )
@@ -294,6 +283,74 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
             topComponent.packageName,
             failureEvent.packageName
         )
+    }
+
+    @Test
+    fun takeScreenshotFullScreen_multiDisplayFlagEnabled_takeScreenshotExecutor() {
+        flags.set(MULTI_DISPLAY_SCREENSHOT, true)
+        service = createService()
+
+        val request =
+            ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
+                .setTopComponent(topComponent)
+                .build()
+
+        service.handleRequest(request, { /* onSaved */}, callback)
+
+        verifyZeroInteractions(controller)
+        verify(takeScreenshotExecutor, times(1)).executeScreenshotsAsync(any(), any(), any())
+
+        assertEquals("Expected one UiEvent", 0, eventLogger.numLogs())
+    }
+
+    @Test
+    fun testServiceLifecycle_multiDisplayScreenshotFlagEnabled() {
+        flags.set(MULTI_DISPLAY_SCREENSHOT, true)
+        service = createService()
+
+        service.onCreate()
+        service.onBind(null /* unused: Intent */)
+
+        service.onUnbind(null /* unused: Intent */)
+        verify(takeScreenshotExecutor, times(1)).removeWindows()
+
+        service.onDestroy()
+        verify(takeScreenshotExecutor, times(1)).onDestroy()
+    }
+
+    @Test
+    fun constructor_MultiDisplayFlagOn_screenshotControllerNotCreated() {
+        flags.set(MULTI_DISPLAY_SCREENSHOT, true)
+        clearInvocations(controllerFactory)
+
+        service = createService()
+
+        verifyZeroInteractions(controllerFactory)
+    }
+
+    private fun createService(): TakeScreenshotService {
+        val service =
+            TakeScreenshotService(
+                controllerFactory,
+                userManager,
+                devicePolicyManager,
+                eventLogger,
+                notificationsController,
+                mContext,
+                Runnable::run,
+                flags,
+                requestProcessor,
+                { takeScreenshotExecutor },
+            )
+        service.attach(
+            mContext,
+            /* thread = */ null,
+            /* className = */ null,
+            /* token = */ null,
+            application,
+            /* activityManager = */ null
+        )
+        return service
     }
 }
 
