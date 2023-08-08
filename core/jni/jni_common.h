@@ -22,5 +22,6 @@ class Rect;
 class JNICommon {
 public:
     static Rect rectFromObj(JNIEnv* env, jobject rectObj);
+    static jobject objFromRect(JNIEnv* env, Rect rect);
 };
 } // namespace android

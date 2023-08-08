@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.TouchOcclusionMode;
 import android.os.IBinder;
@@ -103,10 +104,7 @@ public final class InputWindowHandle {
     public long dispatchingTimeoutMillis;
 
     // Window frame.
-    public int frameLeft;
-    public int frameTop;
-    public int frameRight;
-    public int frameBottom;
+    public final Rect frame = new Rect();
 
     public int surfaceInset;
 
@@ -184,10 +182,7 @@ public final class InputWindowHandle {
         layoutParamsFlags = other.layoutParamsFlags;
         layoutParamsType = other.layoutParamsType;
         dispatchingTimeoutMillis = other.dispatchingTimeoutMillis;
-        frameLeft = other.frameLeft;
-        frameTop = other.frameTop;
-        frameRight = other.frameRight;
-        frameBottom = other.frameBottom;
+        frame.set(other.frame);
         surfaceInset = other.surfaceInset;
         scaleFactor = other.scaleFactor;
         touchableRegion.set(other.touchableRegion);
@@ -209,8 +204,7 @@ public final class InputWindowHandle {
     @Override
     public String toString() {
         return new StringBuilder(name != null ? name : "")
-                .append(", frame=[").append(frameLeft).append(",").append(frameTop).append(",")
-                        .append(frameRight).append(",").append(frameBottom).append("]")
+                .append(", frame=[").append(frame).append("]")
                 .append(", touchableRegion=").append(touchableRegion)
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)

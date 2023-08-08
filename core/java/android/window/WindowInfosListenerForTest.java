@@ -161,10 +161,8 @@ public class WindowInfosListenerForTest {
     private static List<WindowInfo> buildWindowInfos(InputWindowHandle[] windowHandles) {
         var windowInfos = new ArrayList<WindowInfo>(windowHandles.length);
         for (var handle : windowHandles) {
-            var bounds = new Rect(handle.frameLeft, handle.frameTop, handle.frameRight,
-                    handle.frameBottom);
             windowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name, handle.displayId,
-                    bounds, handle.inputConfig, handle.transform));
+                    handle.frame, handle.inputConfig, handle.transform));
         }
         return windowInfos;
     }

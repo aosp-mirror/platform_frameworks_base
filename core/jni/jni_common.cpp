@@ -26,6 +26,8 @@
 namespace android {
 
 static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID bottom;
     jfieldID left;
     jfieldID right;
@@ -40,8 +42,15 @@ Rect JNICommon::rectFromObj(JNIEnv* env, jobject rectObj) {
     return Rect(left, top, right, bottom);
 }
 
+jobject JNICommon::objFromRect(JNIEnv* env, Rect rect) {
+    return env->NewObject(gRectClassInfo.clazz, gRectClassInfo.ctor, rect.left, rect.top,
+                          rect.right, rect.bottom);
+}
+
 int register_jni_common(JNIEnv* env) {
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.clazz = MakeGlobalRefOrDie(env, rectClazz);
+    gRectClassInfo.ctor = GetMethodIDOrDie(env, rectClazz, "<init>", "(IIII)V");
     gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
     gRectClassInfo.left = GetFieldIDOrDie(env, rectClazz, "left", "I");
     gRectClassInfo.right = GetFieldIDOrDie(env, rectClazz, "right", "I");
