@@ -120,6 +120,14 @@ public class LogModule {
         return factory.create("ShadeLog", 500, false);
     }
 
+    /** Provides a logging buffer for Shade messages. */
+    @Provides
+    @SysUISingleton
+    @ShadeTouchLog
+    public static LogBuffer provideShadeTouchLogBuffer(LogBufferFactory factory) {
+        return factory.create("ShadeTouchLog", 500, false);
+    }
+
     /** Provides a logging buffer for all logs related to managing notification sections. */
     @Provides
     @SysUISingleton
