@@ -2369,7 +2369,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mCurVirtualDisplayToScreenMatrix = null;
             ImeTracker.forLogging().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = null;
-            InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
             mMenuController.hideInputMethodMenuLocked();
         }
     }
