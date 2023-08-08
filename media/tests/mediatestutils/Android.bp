@@ -24,9 +24,13 @@ java_library {
 
 java_library {
     name: "mediatestutils",
+    srcs: [
+        "java/com/android/media/mediatestutils/TestUtils.java",
+    ],
     static_libs: [
+        "androidx.concurrent_concurrent-futures",
+        "guava",
         "mediatestutils_host",
-        "junit",
     ],
     visibility: [
         "//cts/tests/tests/media:__subpackages__",
