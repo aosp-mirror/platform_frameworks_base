@@ -58,10 +58,10 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
             // callingPackage as the server's package name (typically android) should not be used
             // for any device / profile owner checks. The majority of requests for the serial number
             // should use the getSerialForPackage method with the calling package specified.
-            if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
-                    /* callingPackage */ null, null, "getSerial")) {
-                return Build.UNKNOWN;
-            }
+            //if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
+            //        /* callingPackage */ null, null, "getSerial")) {
+            //    return Build.UNKNOWN;
+            //}
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
         }
 
