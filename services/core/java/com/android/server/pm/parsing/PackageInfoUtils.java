@@ -1082,18 +1082,18 @@ public class PackageInfoUtils {
     }
 
     @NonNull
-    public static File getDataDir(AndroidPackage pkg, int userId) {
-        if ("android".equals(pkg.getPackageName())) {
+    public static File getDataDir(PackageStateInternal ps, int userId) {
+        if ("android".equals(ps.getPackageName())) {
             return Environment.getDataSystemDirectory();
         }
 
-        if (pkg.isDefaultToDeviceProtectedStorage()
+        if (ps.isDefaultToDeviceProtectedStorage()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
-            return Environment.getDataUserDePackageDirectory(pkg.getVolumeUuid(), userId,
-                    pkg.getPackageName());
+            return Environment.getDataUserDePackageDirectory(ps.getVolumeUuid(), userId,
+                    ps.getPackageName());
         } else {
-            return Environment.getDataUserCePackageDirectory(pkg.getVolumeUuid(), userId,
-                    pkg.getPackageName());
+            return Environment.getDataUserCePackageDirectory(ps.getVolumeUuid(), userId,
+                    ps.getPackageName());
         }
     }
 

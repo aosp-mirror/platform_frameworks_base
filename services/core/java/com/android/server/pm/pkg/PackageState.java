@@ -350,6 +350,12 @@ public interface PackageState {
     String getVolumeUuid();
 
     /**
+     * @see AndroidPackage#isDefaultToDeviceProtectedStorage()
+     * @hide
+     */
+    boolean isDefaultToDeviceProtectedStorage();
+
+    /**
      * @see AndroidPackage#isExternalStorage()
      * @hide
      */

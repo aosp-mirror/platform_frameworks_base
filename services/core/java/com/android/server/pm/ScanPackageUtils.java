@@ -462,6 +462,8 @@ final class ScanPackageUtils {
                             + " to " + volumeUuid);
             pkgSetting.setVolumeUuid(volumeUuid);
         }
+        pkgSetting.setDefaultToDeviceProtectedStorage(
+                parsedPackage.isDefaultToDeviceProtectedStorage());
 
         SharedLibraryInfo sdkLibraryInfo = null;
         if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {

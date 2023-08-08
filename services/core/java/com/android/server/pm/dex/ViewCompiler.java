@@ -23,7 +23,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.Installer;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.io.File;
 
@@ -37,12 +37,11 @@ public class ViewCompiler {
         mInstaller = installer;
     }
 
-    public boolean compileLayouts(AndroidPackage pkg) {
+    public boolean compileLayouts(PackageStateInternal ps, String apkPath) {
         try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseApkPath();
+            final String packageName = ps.getPackageName();
             // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
+            File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                 ") to " + outDexFile);
@@ -50,7 +49,7 @@ public class ViewCompiler {
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        pkg.getUid());
+                        ps.getAppId());
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);
