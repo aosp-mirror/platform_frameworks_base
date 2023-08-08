@@ -113,6 +113,9 @@
         },
         {
           "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
         }
       ]
     }
@@ -134,6 +137,14 @@
     },
     {
       "name": "CtsAppEnumerationTestCases"
+    },
+    {
+      "name": "CtsPackageManagerTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandMultiUserTest"
+        }
+      ]
     }
   ],
   "imports": [
