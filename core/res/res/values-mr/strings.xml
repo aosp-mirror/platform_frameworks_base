@@ -752,8 +752,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"नवीन टेलिकॉम कनेक्शनची नोंदणी करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"टेलिकॉम कनेक्शन व्यवस्थापित करा"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"टेलिकॉम कनेक्शन व्यवस्थापित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉल-मधील स्‍क्रीनशी परस्‍परसंवाद करा"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉल-मधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉलमधील स्‍क्रीनशी संवाद साधा"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉलमधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"टेलिफोनी सेवांशी परस्परसंवाद साधा"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"कॉल करण्यासाठी/घेण्यासाठी टेलिफोनी सेवांशी परस्परसंवाद साधण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"एक कॉल-मधील वापरकर्ता अनुभव प्रदान करा"</string>
@@ -2323,13 +2323,13 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"सहयोगी अ‍ॅपला बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करण्याची अनुमती देते."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"मायक्रोफोन उपलब्ध आहे"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"मायक्रोफोन ब्लॉक केलेला आहे"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ड्युअल स्क्रीन"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ड्युअल स्क्रीन सुरू आहे"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen सुरू आहे"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"आशय दाखवण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> दोन्ही डिस्प्ले वापरत आहे"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"डिव्हाइस खूप गरम आहे"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तुमचा फोन खूप गरम होत असल्यामुळे ड्युअल स्क्रीन उपलब्ध नाही"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ड्युअल स्क्रीन उपलब्ध नाही"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बॅटरी सेव्हर सुरू असल्यामुळे ड्युअल स्क्रीन उपलब्ध नाही. तुम्ही हे सेटिंग्ज मध्ये बंद करू शकता."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तुमचा फोन खूप गरम होत असल्यामुळे Dual Screen उपलब्ध नाही"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen उपलब्ध नाही"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बॅटरी सेव्हर सुरू असल्यामुळे Dual Screen उपलब्ध नाही. तुम्ही हे सेटिंग्ज मध्ये बंद करू शकता."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिंग्ज वर जा"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करा"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉंफिगर केले आहे"</string>
