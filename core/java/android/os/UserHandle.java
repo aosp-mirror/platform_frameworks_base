@@ -125,7 +125,8 @@ public final class UserHandle implements Parcelable {
     public static final int MIN_SECONDARY_USER_ID = 10;
 
     /** @hide */
-    public static final int MAX_SECONDARY_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+    public static final int MAX_SECONDARY_USER_ID =
+            Integer.MAX_VALUE / UserHandle.PER_USER_RANGE - 1;
 
     /**
      * (Arbitrary) user handle cache size.
