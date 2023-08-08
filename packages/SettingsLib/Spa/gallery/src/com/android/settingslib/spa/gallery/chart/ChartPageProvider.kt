@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spa.gallery.page
+package com.android.settingslib.spa.gallery.chart
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
@@ -25,9 +25,6 @@ import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.chart.BarChart
-import com.android.settingslib.spa.widget.chart.BarChartData
-import com.android.settingslib.spa.widget.chart.BarChartModel
 import com.android.settingslib.spa.widget.chart.LineChart
 import com.android.settingslib.spa.widget.chart.LineChartData
 import com.android.settingslib.spa.widget.chart.LineChartModel
@@ -83,36 +80,7 @@ object ChartPageProvider : SettingsPageProvider {
                     )
                 }.build()
         )
-        entryList.add(
-            SettingsEntryBuilder.create("Bar Chart", owner)
-                .setUiLayoutFn {
-                    Preference(object : PreferenceModel {
-                        override val title = "Bar Chart"
-                    })
-                    BarChart(
-                        barChartModel = object : BarChartModel {
-                            override val chartDataList = listOf(
-                                BarChartData(x = 0f, y = 12f),
-                                BarChartData(x = 1f, y = 5f),
-                                BarChartData(x = 2f, y = 21f),
-                                BarChartData(x = 3f, y = 5f),
-                                BarChartData(x = 4f, y = 10f),
-                                BarChartData(x = 5f, y = 9f),
-                                BarChartData(x = 6f, y = 1f),
-                            )
-                            override val xValueFormatter =
-                                IAxisValueFormatter { value, _ ->
-                                    "${WeekDay.values()[value.toInt()]}"
-                                }
-                            override val yValueFormatter =
-                                IAxisValueFormatter { value, _ ->
-                                    "${value.toInt()}m"
-                                }
-                            override val yAxisMaxValue = 30f
-                        }
-                    )
-                }.build()
-        )
+        entryList.add(createBarChartEntry(owner))
         entryList.add(
             SettingsEntryBuilder.create("Pie Chart", owner)
                 .setUiLayoutFn {
