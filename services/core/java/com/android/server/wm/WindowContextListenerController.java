@@ -26,7 +26,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.IWindowToken;
 import android.app.servertransaction.WindowContextInfoChangeItem;
 import android.app.servertransaction.WindowContextWindowRemovalItem;
 import android.content.Context;
@@ -142,7 +141,7 @@ class WindowContextListenerController {
             final WindowContextListenerImpl listener = mListeners.valueAt(i);
             if (listener.getWindowContainer().getDisplayContent().getDisplayId() == displayId
                     && listener.mHasPendingConfiguration) {
-                listener.reportConfigToWindowTokenClient();
+                listener.dispatchWindowContextInfoChange();
             }
         }
     }
@@ -208,7 +207,7 @@ class WindowContextListenerController {
         @NonNull
         private final WindowProcessController mWpc;
         @NonNull
-        private final IWindowToken mClientToken;
+        private final IBinder mClientToken;
         @NonNull
         private WindowContainer<?> mContainer;
         /**
@@ -230,7 +229,7 @@ class WindowContextListenerController {
                 @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
                 @WindowType int type, @Nullable Bundle options) {
             mWpc = Objects.requireNonNull(wpc);
-            mClientToken = IWindowToken.Stub.asInterface(clientToken);
+            mClientToken = clientToken;
             mContainer = Objects.requireNonNull(container);
             mType = type;
             mOptions = options;
@@ -272,7 +271,7 @@ class WindowContextListenerController {
         }
 
         private void register(boolean shouldDispatchConfig) {
-            final IBinder token = mClientToken.asBinder();
+            final IBinder token = mClientToken;
             if (mDeathRecipient == null) {
                 throw new IllegalStateException("Invalid client token: " + token);
             }
@@ -282,7 +281,7 @@ class WindowContextListenerController {
 
         private void unregister() {
             mContainer.unregisterWindowContainerListener(this);
-            mListeners.remove(mClientToken.asBinder());
+            mListeners.remove(mClientToken);
         }
 
         private void clear() {
@@ -292,17 +291,17 @@ class WindowContextListenerController {
 
         @Override
         public void onMergedOverrideConfigurationChanged(Configuration mergedOverrideConfig) {
-            reportConfigToWindowTokenClient();
+            dispatchWindowContextInfoChange();
         }
 
         @Override
         public void onDisplayChanged(DisplayContent dc) {
-            reportConfigToWindowTokenClient();
+            dispatchWindowContextInfoChange();
         }
 
-        private void reportConfigToWindowTokenClient() {
+        private void dispatchWindowContextInfoChange() {
             if (mDeathRecipient == null) {
-                throw new IllegalStateException("Invalid client token: " + mClientToken.asBinder());
+                throw new IllegalStateException("Invalid client token: " + mClientToken);
             }
             final DisplayContent dc = mContainer.getDisplayContent();
             if (!dc.isReady()) {
@@ -332,14 +331,14 @@ class WindowContextListenerController {
             mLastReportedDisplay = displayId;
 
             mWpc.scheduleClientTransactionItem(WindowContextInfoChangeItem.obtain(
-                    mClientToken.asBinder(), config, displayId));
+                    mClientToken, config, displayId));
             mHasPendingConfiguration = false;
         }
 
         @Override
         public void onRemoved() {
             if (mDeathRecipient == null) {
-                throw new IllegalStateException("Invalid client token: " + mClientToken.asBinder());
+                throw new IllegalStateException("Invalid client token: " + mClientToken);
             }
             final WindowToken windowToken = mContainer.asWindowToken();
             if (windowToken != null && windowToken.isFromClient()) {
@@ -357,14 +356,13 @@ class WindowContextListenerController {
                 }
             }
             mDeathRecipient.unlinkToDeath();
-            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(
-                    mClientToken.asBinder()));
+            mWpc.scheduleClientTransactionItem(WindowContextWindowRemovalItem.obtain(mClientToken));
             unregister();
         }
 
         @Override
         public String toString() {
-            return "WindowContextListenerImpl{clientToken=" + mClientToken.asBinder() + ", "
+            return "WindowContextListenerImpl{clientToken=" + mClientToken + ", "
                     + "container=" + mContainer + "}";
         }
 
@@ -378,11 +376,11 @@ class WindowContextListenerController {
             }
 
             void linkToDeath() throws RemoteException {
-                mClientToken.asBinder().linkToDeath(this, 0);
+                mClientToken.linkToDeath(this, 0);
             }
 
             void unlinkToDeath() {
-                mClientToken.asBinder().unlinkToDeath(this, 0);
+                mClientToken.unlinkToDeath(this, 0);
             }
         }
     }

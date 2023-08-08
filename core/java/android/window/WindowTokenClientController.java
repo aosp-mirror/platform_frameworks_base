@@ -160,7 +160,7 @@ public class WindowTokenClientController {
     /** Detaches a {@link WindowTokenClient} from associated WindowContainer if there's one. */
     public void detachIfNeeded(@NonNull WindowTokenClient client) {
         synchronized (mLock) {
-            if (mWindowTokenClientMap.remove(client.asBinder()) == null) {
+            if (mWindowTokenClientMap.remove(client) == null) {
                 return;
             }
         }
@@ -174,7 +174,7 @@ public class WindowTokenClientController {
     private void onWindowContextTokenAttached(@NonNull WindowTokenClient client,
             @NonNull WindowContextInfo info, boolean shouldReportConfigChange) {
         synchronized (mLock) {
-            mWindowTokenClientMap.put(client.asBinder(), client);
+            mWindowTokenClientMap.put(client, client);
         }
         if (shouldReportConfigChange) {
             // Should trigger an #onConfigurationChanged callback to the WindowContext. Post the
