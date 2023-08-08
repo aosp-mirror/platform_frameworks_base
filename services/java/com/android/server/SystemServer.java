@@ -354,8 +354,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.contentcapture.ContentCaptureManagerService";
     private static final String TRANSLATION_MANAGER_SERVICE_CLASS =
             "com.android.server.translation.TranslationManagerService";
-    private static final String SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS =
-            "com.android.server.selectiontoolbar.SelectionToolbarManagerService";
     private static final String MUSIC_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String AMBIENT_CONTEXT_MANAGER_SERVICE_CLASS =
@@ -2736,13 +2734,6 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
         } else {
             Slog.d(TAG, "TranslationService not defined by OEM");
-        }
-
-        if (!isTv) {
-            // Selection toolbar service
-            t.traceBegin("StartSelectionToolbarManagerService");
-            mSystemServiceManager.startService(SELECTION_TOOLBAR_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
         }
 
         // NOTE: ClipboardService depends on ContentCapture and Autofill
