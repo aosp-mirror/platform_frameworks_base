@@ -33,6 +33,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -605,7 +606,68 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(hintedPinLength).isNull()
         }
 
-    private fun switchToScene(sceneKey: SceneKey) {
-        sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
+    @Test
+    fun isLockscreenDismissed() =
+        testScope.runTest {
+            val isLockscreenDismissed by collectLastValue(underTest.isLockscreenDismissed)
+            // Start on lockscreen.
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user swipes down to reveal shade.
+            switchToScene(SceneKey.Shade)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user swipes down to reveal quick settings.
+            switchToScene(SceneKey.QuickSettings)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user swipes up to go back to shade.
+            switchToScene(SceneKey.Shade)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user swipes up to reveal bouncer.
+            switchToScene(SceneKey.Bouncer)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user hits back to return to lockscreen.
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user swipes up to reveal bouncer.
+            switchToScene(SceneKey.Bouncer)
+            assertThat(isLockscreenDismissed).isFalse()
+
+            // The user enters correct credentials and goes to gone.
+            switchToScene(SceneKey.Gone)
+            assertThat(isLockscreenDismissed).isTrue()
+
+            // The user swipes down to reveal shade.
+            switchToScene(SceneKey.Shade)
+            assertThat(isLockscreenDismissed).isTrue()
+
+            // The user swipes down to reveal quick settings.
+            switchToScene(SceneKey.QuickSettings)
+            assertThat(isLockscreenDismissed).isTrue()
+
+            // The user swipes up to go back to shade.
+            switchToScene(SceneKey.Shade)
+            assertThat(isLockscreenDismissed).isTrue()
+
+            // The user swipes up to go back to gone.
+            switchToScene(SceneKey.Gone)
+            assertThat(isLockscreenDismissed).isTrue()
+
+            // The device goes to sleep, returning to the lockscreen.
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(isLockscreenDismissed).isFalse()
+        }
+
+    private fun TestScope.switchToScene(sceneKey: SceneKey) {
+        val model = SceneModel(sceneKey)
+        val loggingReason = "reason"
+        sceneInteractor.changeScene(model, loggingReason)
+        sceneInteractor.onSceneChanged(model, loggingReason)
+        runCurrent()
     }
 }
