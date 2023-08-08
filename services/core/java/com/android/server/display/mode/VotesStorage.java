@@ -90,6 +90,7 @@ class VotesStorage {
                     + ", vote=" + vote);
             return;
         }
+        boolean changed = false;
         SparseArray<Vote> votes;
         synchronized (mStorageLock) {
             if (mVotesByDisplay.contains(displayId)) {
@@ -98,16 +99,21 @@ class VotesStorage {
                 votes = new SparseArray<>();
                 mVotesByDisplay.put(displayId, votes);
             }
-            if (vote != null) {
+            var currentVote = votes.get(priority);
+            if (vote != null && !vote.equals(currentVote)) {
                 votes.put(priority, vote);
-            } else {
+                changed = true;
+            } else if (vote == null && currentVote != null) {
                 votes.remove(priority);
+                changed = true;
             }
         }
         if (mLoggingEnabled) {
             Slog.i(TAG, "Updated votes for display=" + displayId + " votes=" + votes);
         }
-        mListener.onChanged();
+        if (changed) {
+            mListener.onChanged();
+        }
     }
 
     /** dump class values, for debugging */

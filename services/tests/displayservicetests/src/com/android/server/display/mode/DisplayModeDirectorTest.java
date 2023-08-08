@@ -328,9 +328,8 @@ public class DisplayModeDirectorTest {
         // should take precedence over lower priority votes.
         {
             int minFps = 60;
-            int maxFps = 90;
-            director = createDirectorFromFpsRange(60, 90);
-            assertTrue(2 * numPriorities < maxFps - minFps + 1);
+            int maxFps = minFps + 2 * numPriorities;
+            director = createDirectorFromFpsRange(minFps, maxFps);
             SparseArray<Vote> votes = new SparseArray<>();
             SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
             votesByDisplay.put(DISPLAY_ID, votes);

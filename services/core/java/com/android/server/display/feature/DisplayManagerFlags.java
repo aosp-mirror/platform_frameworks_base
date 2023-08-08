@@ -51,6 +51,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_DISPLAY_RESOLUTION_RANGE_VOTING,
             Flags::enableDisplayResolutionRangeVoting);
 
+    private final FlagState mUserPreferredModeVoteState = new FlagState(
+            Flags.FLAG_ENABLE_USER_PREFERRED_MODE_VOTE,
+            Flags::enableUserPreferredModeVote);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -75,6 +79,14 @@ public class DisplayManagerFlags {
     /** Returns whether resolution range voting feature is enabled or not. */
     public boolean isDisplayResolutionRangeVotingEnabled() {
         return mDisplayResolutionRangeVotingState.isEnabled();
+    }
+
+    /**
+     * @return Whether user preferred mode is added as a vote in
+     *      {@link com.android.server.display.mode.DisplayModeDirector}
+     */
+    public boolean isUserPreferredModeVoteEnabled() {
+        return mUserPreferredModeVoteState.isEnabled();
     }
 
     private static class FlagState {

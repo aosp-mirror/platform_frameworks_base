@@ -41,3 +41,11 @@ flag {
     bug: "299297058"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_user_preferred_mode_vote"
+    namespace: "display_manager"
+    description: "Feature flag to use voting for UserPreferredMode for display"
+    bug: "297018612"
+    is_fixed_read_only: true
+}

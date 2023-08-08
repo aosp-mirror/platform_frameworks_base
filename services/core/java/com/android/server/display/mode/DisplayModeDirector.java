@@ -19,6 +19,7 @@ package com.android.server.display.mode;
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
 import static android.os.PowerManager.BRIGHTNESS_INVALID_FLOAT;
+import static android.view.Display.Mode.INVALID_MODE_ID;
 
 import android.annotation.IntegerRes;
 import android.annotation.NonNull;
@@ -157,6 +158,11 @@ public class DisplayModeDirector {
      */
     private final boolean mIsDisplayResolutionRangeVotingEnabled;
 
+    /**
+     * Whether user preferred mode voting feature is enabled.
+     */
+    private final boolean mIsUserPreferredModeVoteEnabled;
+
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler,
             @NonNull DisplayManagerFlags displayManagerFlags) {
         this(context, handler, new RealInjector(context), displayManagerFlags);
@@ -167,6 +173,7 @@ public class DisplayModeDirector {
             @NonNull DisplayManagerFlags displayManagerFlags) {
         mIsDisplayResolutionRangeVotingEnabled = displayManagerFlags
                 .isDisplayResolutionRangeVotingEnabled();
+        mIsUserPreferredModeVoteEnabled = displayManagerFlags.isUserPreferredModeVoteEnabled();
         mContext = context;
         mHandler = new DisplayModeDirectorHandler(handler.getLooper());
         mInjector = injector;
@@ -1485,6 +1492,7 @@ public class DisplayModeDirector {
             DisplayInfo displayInfo = getDisplayInfo(displayId);
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
+            updateUserSettingDisplayPreferredSize(displayInfo);
         }
 
         @Override
@@ -1494,6 +1502,7 @@ public class DisplayModeDirector {
                 mDefaultModeByDisplay.remove(displayId);
             }
             updateLayoutLimitedFrameRate(displayId, null);
+            removeUserSettingDisplayPreferredSize(displayId);
         }
 
         @Override
@@ -1501,6 +1510,7 @@ public class DisplayModeDirector {
             DisplayInfo displayInfo = getDisplayInfo(displayId);
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
+            updateUserSettingDisplayPreferredSize(displayInfo);
         }
 
         @Nullable
@@ -1515,6 +1525,44 @@ public class DisplayModeDirector {
                     ? Vote.forPhysicalRefreshRates(info.layoutLimitedRefreshRate.min,
                     info.layoutLimitedRefreshRate.max) : null;
             mVotesStorage.updateVote(displayId, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE, vote);
+        }
+
+        private void removeUserSettingDisplayPreferredSize(int displayId) {
+            if (!mIsUserPreferredModeVoteEnabled) {
+                return;
+            }
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
+                    null);
+        }
+
+        private void updateUserSettingDisplayPreferredSize(@Nullable DisplayInfo info) {
+            if (info == null || !mIsUserPreferredModeVoteEnabled) {
+                return;
+            }
+
+            var preferredMode = findDisplayPreferredMode(info);
+            if (preferredMode == null) {
+                removeUserSettingDisplayPreferredSize(info.displayId);
+                return;
+            }
+
+            mVotesStorage.updateVote(info.displayId,
+                    Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
+                    Vote.forSize(/* width */ preferredMode.getPhysicalWidth(),
+                            /* height */ preferredMode.getPhysicalHeight()));
+        }
+
+        @Nullable
+        private Display.Mode findDisplayPreferredMode(@NonNull DisplayInfo info) {
+            if (info.userPreferredModeId == INVALID_MODE_ID) {
+                return null;
+            }
+            for (var mode : info.supportedModes) {
+                if (mode.getModeId() == info.userPreferredModeId) {
+                    return mode;
+                }
+            }
+            return null;
         }
 
         private void updateDisplayModes(int displayId, @Nullable DisplayInfo info) {
