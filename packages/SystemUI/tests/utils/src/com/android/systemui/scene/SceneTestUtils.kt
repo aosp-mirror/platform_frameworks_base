@@ -134,6 +134,7 @@ class SceneTestUtils(
 
     fun authenticationInteractor(
         repository: AuthenticationRepository,
+        sceneInteractor: SceneInteractor = sceneInteractor(),
     ): AuthenticationInteractor {
         return AuthenticationInteractor(
             applicationScope = applicationScope(),
@@ -141,6 +142,7 @@ class SceneTestUtils(
             backgroundDispatcher = testDispatcher,
             userRepository = userRepository,
             keyguardRepository = keyguardRepository,
+            sceneInteractor = sceneInteractor,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
     }

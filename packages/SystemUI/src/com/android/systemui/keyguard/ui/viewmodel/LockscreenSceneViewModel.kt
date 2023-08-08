@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.R
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -27,7 +26,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -53,14 +51,15 @@ constructor(
             )
 
     /** The key of the scene we should switch to when swiping up. */
-    val upDestinationSceneKey: Flow<SceneKey> =
-        authenticationInteractor.authenticationMethod.map { authenticationMethod ->
-            if (authenticationMethod is AuthenticationMethodModel.Swipe) {
-                SceneKey.Gone
-            } else {
-                SceneKey.Bouncer
-            }
-        }
+    val upDestinationSceneKey =
+        authenticationInteractor.canSwipeToDismiss
+            .map { canSwipeToDismiss -> upDestinationSceneKey(canSwipeToDismiss) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue =
+                    upDestinationSceneKey(authenticationInteractor.canSwipeToDismiss.value),
+            )
 
     /** Notifies that the lock button on the lock screen was clicked. */
     fun onLockButtonClicked() {
@@ -73,30 +72,24 @@ constructor(
     }
 
     private fun upDestinationSceneKey(
-        isSwipeToUnlockEnabled: Boolean,
+        canSwipeToDismiss: Boolean,
     ): SceneKey {
-        return if (isSwipeToUnlockEnabled) SceneKey.Gone else SceneKey.Bouncer
+        return if (canSwipeToDismiss) SceneKey.Gone else SceneKey.Bouncer
     }
 
     private fun lockIcon(
         isUnlocked: Boolean,
     ): Icon {
-        return Icon.Resource(
-            res =
-                if (isUnlocked) {
-                    R.drawable.ic_device_lock_off
-                } else {
-                    R.drawable.ic_device_lock_on
-                },
-            contentDescription =
-                ContentDescription.Resource(
-                    res =
-                        if (isUnlocked) {
-                            R.string.accessibility_unlock_button
-                        } else {
-                            R.string.accessibility_lock_icon
-                        }
-                )
-        )
+        return if (isUnlocked) {
+            Icon.Resource(
+                R.drawable.ic_device_lock_off,
+                ContentDescription.Resource(R.string.accessibility_unlock_button)
+            )
+        } else {
+            Icon.Resource(
+                R.drawable.ic_device_lock_on,
+                ContentDescription.Resource(R.string.accessibility_lock_icon)
+            )
+        }
     }
 }
