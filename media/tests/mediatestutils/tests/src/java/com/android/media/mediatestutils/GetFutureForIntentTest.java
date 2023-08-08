@@ -19,6 +19,7 @@ package com.android.media.mediatestutils;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 import static com.android.media.mediatestutils.TestUtils.getFutureForIntent;
+import static com.android.media.mediatestutils.TestUtils.getFutureForListener;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,6 +30,8 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,6 +101,51 @@ public class GetFutureForIntentTest {
         var intent = future.get();
         assertThat(intent.getAction()).isEqualTo(INTENT_ACTION);
         assertThat(intent.getIntExtra(INTENT_EXTRA, -1)).isEqualTo(MAGIC_VALUE);
+    }
+
+    @Test
+    public void unregisterListener_whenComplete() throws Exception {
+        final var service = new FakeService();
+        final ListenableFuture<Void> future =
+                getFutureForListener(
+                        service::registerListener,
+                        service::unregisterListener,
+                        completer ->
+                                () -> {
+                                    completer.set(null);
+                                },
+                        "FakeService listener future");
+        service.mRunnable.run();
+        assertThat(service.mRunnable).isNull();
+    }
+
+    @Test
+    public void unregisterListener_whenCancel() throws Exception {
+        final var service = new FakeService();
+        final ListenableFuture<Void> future =
+                getFutureForListener(
+                        service::registerListener,
+                        service::unregisterListener,
+                        completer ->
+                                () -> {
+                                    completer.set(null);
+                                },
+                        "FakeService listener future");
+        future.cancel(false);
+        assertThat(service.mRunnable).isNull();
+    }
+
+    private static class FakeService {
+        Runnable mRunnable;
+
+        void registerListener(Runnable r) {
+            mRunnable = r;
+        }
+
+        void unregisterListener(Runnable r) {
+            assertThat(r).isEqualTo(mRunnable);
+            mRunnable = null;
+        }
     }
 
     private void sendIntent(boolean correctValue) {
