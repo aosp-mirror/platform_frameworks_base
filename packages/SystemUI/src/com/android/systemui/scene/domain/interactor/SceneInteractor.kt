@@ -17,21 +17,22 @@
 package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * Generic business logic and app state accessors for the scene framework.
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.mapNotNull
 class SceneInteractor
 @Inject
 constructor(
+    @Application applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
     private val logger: SceneLogger,
 ) {
@@ -87,6 +89,22 @@ constructor(
      * 3. When transitioning, what the progress of the transition is.
      */
     val transitionState: StateFlow<ObservableTransitionState> = repository.transitionState
+
+    /**
+     * The key of the scene that the UI is currently transitioning to or `null` if there is no
+     * active transition at the moment.
+     *
+     * This is a convenience wrapper around [transitionState], meant for flow-challenged consumers
+     * like Java code.
+     */
+    val transitioningTo: StateFlow<SceneKey?> =
+        transitionState
+            .map { state -> (state as? ObservableTransitionState.Transition)?.toScene }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null,
+            )
 
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> = repository.isVisible
@@ -140,21 +158,6 @@ constructor(
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         repository.setTransitionState(transitionState)
-    }
-
-    /**
-     * Returns a stream of events that emits one [Unit] every time the framework transitions from
-     * [from] to [to].
-     */
-    fun finishedSceneTransitions(from: SceneKey, to: SceneKey): Flow<Unit> {
-        return transitionState
-            .mapNotNull { it as? ObservableTransitionState.Idle }
-            .map { idleState -> idleState.scene }
-            .distinctUntilChanged()
-            .pairwise()
-            .mapNotNull { (previousSceneKey, currentSceneKey) ->
-                Unit.takeIf { previousSceneKey == from && currentSceneKey == to }
-            }
     }
 
     /** Handles a remote user input. */
