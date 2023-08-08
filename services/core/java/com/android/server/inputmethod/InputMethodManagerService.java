@@ -3792,11 +3792,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean isTextEditor = (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
         final boolean startInputByWinGainedFocus =
                 (startInputFlags & StartInputFlags.WINDOW_GAINED_FOCUS) != 0;
+        final int toolType = editorInfo != null
+                ? editorInfo.getInitialToolType() : MotionEvent.TOOL_TYPE_UNKNOWN;
 
         // Init the focused window state (e.g. whether the editor has focused or IME focus has
         // changed from another window).
-        final ImeTargetWindowState windowState = new ImeTargetWindowState(softInputMode,
-                windowFlags, !sameWindowFocused, isTextEditor, startInputByWinGainedFocus);
+        final ImeTargetWindowState windowState = new ImeTargetWindowState(
+                softInputMode, windowFlags, !sameWindowFocused, isTextEditor,
+                startInputByWinGainedFocus, toolType);
         mVisibilityStateComputer.setWindowState(windowToken, windowState);
 
         if (sameWindowFocused && isTextEditor) {
