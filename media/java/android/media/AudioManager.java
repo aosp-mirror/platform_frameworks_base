@@ -6929,6 +6929,114 @@ public class AudioManager {
 
     /**
      * @hide
+     * Describes an audio device that has not been categorized with a specific
+     * audio type.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_UNKNOWN = 0;
+
+    /**
+     * @hide
+     * Describes an audio device which is categorized as something different.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_OTHER = 1;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as speakers.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_SPEAKER = 2;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as headphones.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_HEADPHONES = 3;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as car-kit.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_CARKIT = 4;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as watch.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_WATCH = 5;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as hearing aid.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_HEARING_AID = 6;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as receiver.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_RECEIVER = 7;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIO_DEVICE_CATEGORY", value = {
+            AUDIO_DEVICE_CATEGORY_UNKNOWN,
+            AUDIO_DEVICE_CATEGORY_OTHER,
+            AUDIO_DEVICE_CATEGORY_SPEAKER,
+            AUDIO_DEVICE_CATEGORY_HEADPHONES,
+            AUDIO_DEVICE_CATEGORY_CARKIT,
+            AUDIO_DEVICE_CATEGORY_WATCH,
+            AUDIO_DEVICE_CATEGORY_HEARING_AID,
+            AUDIO_DEVICE_CATEGORY_RECEIVER }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDeviceCategory {}
+
+    /** @hide */
+    public static String audioDeviceCategoryToString(int audioDeviceCategory) {
+        switch (audioDeviceCategory) {
+            case AUDIO_DEVICE_CATEGORY_UNKNOWN: return "AUDIO_DEVICE_CATEGORY_UNKNOWN";
+            case AUDIO_DEVICE_CATEGORY_OTHER: return "AUDIO_DEVICE_CATEGORY_OTHER";
+            case AUDIO_DEVICE_CATEGORY_SPEAKER: return "AUDIO_DEVICE_CATEGORY_SPEAKER";
+            case AUDIO_DEVICE_CATEGORY_HEADPHONES: return "AUDIO_DEVICE_CATEGORY_HEADPHONES";
+            case AUDIO_DEVICE_CATEGORY_CARKIT: return "AUDIO_DEVICE_CATEGORY_CARKIT";
+            case AUDIO_DEVICE_CATEGORY_WATCH: return "AUDIO_DEVICE_CATEGORY_WATCH";
+            case AUDIO_DEVICE_CATEGORY_HEARING_AID: return "AUDIO_DEVICE_CATEGORY_HEARING_AID";
+            case AUDIO_DEVICE_CATEGORY_RECEIVER: return "AUDIO_DEVICE_CATEGORY_RECEIVER";
+            default:
+                return new StringBuilder("unknown AudioDeviceCategory ").append(
+                        audioDeviceCategory).toString();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
+            @AudioDeviceCategory int btAudioDeviceType) {
+        try {
+            getService().setBluetoothAudioDeviceCategory(address, isBle, btAudioDeviceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @AudioDeviceCategory
+    public int getBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle) {
+        try {
+            return getService().getBluetoothAudioDeviceCategory(address, isBle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Sound dose warning at every 100% of dose during integration window
      */
     public static final int CSD_WARNING_DOSE_REACHED_1X = 1;
