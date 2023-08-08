@@ -295,7 +295,8 @@ public final class UserTypeFactory {
                         .setMediaSharedWithParent(false)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setCrossProfileIntentFilterAccessControl(
-                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM));
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT));
     }
 
     /**
