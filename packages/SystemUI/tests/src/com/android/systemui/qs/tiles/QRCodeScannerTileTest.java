@@ -117,7 +117,7 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
     @Test
     public void testQRCodeTileUnavailable() {
-        when(mController.isAbleToOpenCameraApp()).thenReturn(false);
+        when(mController.isAbleToLaunchScannerActivity()).thenReturn(false);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
         assertEquals(state.state, Tile.STATE_UNAVAILABLE);
@@ -127,7 +127,7 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
     @Test
     public void testQRCodeTileAvailable() {
-        when(mController.isAbleToOpenCameraApp()).thenReturn(true);
+        when(mController.isAbleToLaunchScannerActivity()).thenReturn(true);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
         assertEquals(state.state, Tile.STATE_INACTIVE);
