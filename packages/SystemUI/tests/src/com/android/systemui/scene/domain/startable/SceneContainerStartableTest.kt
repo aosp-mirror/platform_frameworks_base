@@ -21,6 +21,7 @@ package com.android.systemui.scene.domain.startable
 import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
@@ -28,15 +29,17 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -76,59 +79,86 @@ class SceneContainerStartableTest : SysuiTestCase() {
             sceneLogger = mock(),
         )
 
-    @Before
-    fun setUp() {
-        prepareState()
-    }
-
     @Test
     fun hydrateVisibility_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentDesiredSceneKey by
+                collectLastValue(sceneInteractor.desiredScene.map { it.key })
             val isVisible by collectLastValue(sceneInteractor.isVisible)
-            prepareState(
-                isFeatureEnabled = true,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Gone,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
+            val transitionStateFlow =
+                prepareState(
+                    isFeatureEnabled = true,
+                    isDeviceUnlocked = true,
+                    initialSceneKey = SceneKey.Gone,
+                )
+            assertThat(currentDesiredSceneKey).isEqualTo(SceneKey.Gone)
             assertThat(isVisible).isTrue()
 
             underTest.start()
-
             assertThat(isVisible).isFalse()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Gone,
+                    toScene = SceneKey.Shade,
+                    progress = flowOf(0.5f),
+                )
             assertThat(isVisible).isTrue()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Shade)
+            assertThat(isVisible).isTrue()
+
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Shade,
+                    toScene = SceneKey.Gone,
+                    progress = flowOf(0.5f),
+                )
+            assertThat(isVisible).isTrue()
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
+            transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Gone)
+            assertThat(isVisible).isFalse()
         }
 
     @Test
     fun hydrateVisibility_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentDesiredSceneKey by
+                collectLastValue(sceneInteractor.desiredScene.map { it.key })
             val isVisible by collectLastValue(sceneInteractor.isVisible)
-            prepareState(
-                isFeatureEnabled = false,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Lockscreen,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            val transitionStateFlow =
+                prepareState(
+                    isFeatureEnabled = false,
+                    isDeviceUnlocked = true,
+                    initialSceneKey = SceneKey.Gone,
+                )
+            assertThat(currentDesiredSceneKey).isEqualTo(SceneKey.Gone)
             assertThat(isVisible).isTrue()
 
             underTest.start()
+
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone), "reason")
+            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Gone,
+                    toScene = SceneKey.Shade,
+                    progress = flowOf(0.5f),
+                )
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
+            transitionStateFlow.value = ObservableTransitionState.Idle(SceneKey.Shade)
             assertThat(isVisible).isTrue()
         }
 
     @Test
     fun switchToLockscreenWhenDeviceLocks_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = true,
@@ -145,7 +175,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToLockscreenWhenDeviceLocks_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -162,7 +192,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromBouncerToGoneWhenDeviceUnlocked_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = false,
@@ -179,7 +209,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromBouncerToGoneWhenDeviceUnlocked_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -196,7 +226,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOn_bypassOn() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isBypassEnabled = true,
@@ -213,7 +243,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOn_bypassOff() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isBypassEnabled = false,
@@ -230,7 +260,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOff_bypassOn() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isBypassEnabled = true,
@@ -245,43 +275,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun switchToGoneWhenDeviceSleepsUnlocked_featureEnabled() =
-        testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
-            prepareState(
-                isFeatureEnabled = true,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Shade,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-            underTest.start()
-
-            keyguardRepository.setWakefulnessModel(ASLEEP)
-
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
-        }
-
-    @Test
-    fun switchToGoneWhenDeviceSleepsUnlocked_featureDisabled() =
-        testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
-            prepareState(
-                isFeatureEnabled = false,
-                isDeviceUnlocked = true,
-                initialSceneKey = SceneKey.Shade,
-            )
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-            underTest.start()
-
-            keyguardRepository.setWakefulnessModel(ASLEEP)
-
-            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
-        }
-
-    @Test
     fun switchToLockscreenWhenDeviceSleepsLocked_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = false,
@@ -290,7 +286,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
             underTest.start()
 
-            keyguardRepository.setWakefulnessModel(ASLEEP)
+            keyguardRepository.setWakefulnessModel(STARTING_TO_SLEEP)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
@@ -298,7 +294,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToLockscreenWhenDeviceSleepsLocked_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -307,7 +303,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
             underTest.start()
 
-            keyguardRepository.setWakefulnessModel(ASLEEP)
+            keyguardRepository.setWakefulnessModel(STARTING_TO_SLEEP)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
         }
@@ -315,6 +311,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun hydrateSystemUiState() =
         testScope.runTest {
+            val transitionStateFlow = prepareState()
             underTest.start()
             runCurrent()
             clearInvocations(sysUiState)
@@ -327,11 +324,69 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     SceneKey.QuickSettings,
                 )
                 .forEachIndexed { index, sceneKey ->
-                    sceneInteractor.setCurrentScene(SceneModel(sceneKey), "reason")
+                    sceneInteractor.changeScene(SceneModel(sceneKey), "reason")
                     runCurrent()
+                    verify(sysUiState, times(index)).commitUpdate(Display.DEFAULT_DISPLAY)
 
+                    sceneInteractor.onSceneChanged(SceneModel(sceneKey), "reason")
+                    runCurrent()
+                    verify(sysUiState, times(index)).commitUpdate(Display.DEFAULT_DISPLAY)
+
+                    transitionStateFlow.value = ObservableTransitionState.Idle(sceneKey)
+                    runCurrent()
                     verify(sysUiState, times(index + 1)).commitUpdate(Display.DEFAULT_DISPLAY)
                 }
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNone_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = true,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.None,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNotNone_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = true,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.Pin,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceStartsToWakeUp_authMethodNone_featureDisabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState(
+                isFeatureEnabled = false,
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.None,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(STARTING_TO_WAKE)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
 
     private fun prepareState(
@@ -339,17 +394,40 @@ class SceneContainerStartableTest : SysuiTestCase() {
         isDeviceUnlocked: Boolean = false,
         isBypassEnabled: Boolean = false,
         initialSceneKey: SceneKey? = null,
-    ) {
+        authenticationMethod: AuthenticationMethodModel? = null,
+    ): MutableStateFlow<ObservableTransitionState> {
         featureFlags.set(Flags.SCENE_CONTAINER, isFeatureEnabled)
         authenticationRepository.setUnlocked(isDeviceUnlocked)
         keyguardRepository.setBypassEnabled(isBypassEnabled)
-        initialSceneKey?.let { sceneInteractor.setCurrentScene(SceneModel(it), "reason") }
+        val transitionStateFlow =
+            MutableStateFlow<ObservableTransitionState>(
+                ObservableTransitionState.Idle(SceneKey.Lockscreen)
+            )
+        sceneInteractor.setTransitionState(transitionStateFlow)
+        initialSceneKey?.let {
+            transitionStateFlow.value = ObservableTransitionState.Idle(it)
+            sceneInteractor.changeScene(SceneModel(it), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(it), "reason")
+        }
+        authenticationMethod?.let {
+            authenticationRepository.setAuthenticationMethod(authenticationMethod)
+            authenticationRepository.setLockscreenEnabled(
+                authenticationMethod != AuthenticationMethodModel.None
+            )
+        }
+        return transitionStateFlow
     }
 
     companion object {
-        private val ASLEEP =
+        private val STARTING_TO_SLEEP =
             WakefulnessModel(
-                state = WakefulnessState.ASLEEP,
+                state = WakefulnessState.STARTING_TO_SLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON
+            )
+        private val STARTING_TO_WAKE =
+            WakefulnessModel(
+                state = WakefulnessState.STARTING_TO_WAKE,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
                 lastSleepReason = WakeSleepReason.POWER_BUTTON
             )

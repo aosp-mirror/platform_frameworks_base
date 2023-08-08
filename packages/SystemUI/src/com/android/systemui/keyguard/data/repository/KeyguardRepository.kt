@@ -199,13 +199,16 @@ interface KeyguardRepository {
     fun setAnimateDozingTransitions(animate: Boolean)
 
     /** Sets the current amount of alpha that should be used for rendering the bottom area. */
-    @Deprecated("Deprecated as part of b/278057014")
-    fun setBottomAreaAlpha(alpha: Float)
+    @Deprecated("Deprecated as part of b/278057014") fun setBottomAreaAlpha(alpha: Float)
 
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
 
-    fun setKeyguardVisibility(statusBarState: Int, goingToFullShade: Boolean, occlusionTransitionRunning: Boolean)
+    fun setKeyguardVisibility(
+        statusBarState: Int,
+        goingToFullShade: Boolean,
+        occlusionTransitionRunning: Boolean
+    )
 
     /**
      * Sets the relative offset of the lock-screen clock from its natural position on the screen.

@@ -244,10 +244,6 @@ object Flags {
 
     /** Keyguard Migration */
 
-    /** Migrate the indication area to the new keyguard root view. */
-    // TODO(b/280067944): Tracking bug.
-    @JvmField val MIGRATE_INDICATION_AREA = releasedFlag(236, "migrate_indication_area")
-
     /**
      * Migrate the bottom area to the new keyguard root view. Because there is no such thing as a
      * "bottom area" after this, this also breaks it up into many smaller, modular pieces.
@@ -290,7 +286,8 @@ object Flags {
     val WALLPAPER_PICKER_PREVIEW_ANIMATION =
             unreleasedFlag(
                     244,
-                    "wallpaper_picker_preview_animation"
+                    "wallpaper_picker_preview_animation",
+                teamfood = true
             )
 
     // 300 - power menu
@@ -372,6 +369,9 @@ object Flags {
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
         unreleasedFlag(614, "incompatible_charging_battery_icon")
+
+    // TODO(b/293585143): Tracking Bug
+    val INSTANT_TETHER = unreleasedFlag(615, "instant_tether")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -719,6 +719,11 @@ object Flags {
     @JvmField
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
         unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
+
+    // TODO(b/292062937): Tracking bug
+    @JvmField
+    val NOTIFICATION_CLEARABLE_REFACTOR =
+            unreleasedFlag(292062937, "notification_clearable_refactor")
 
     // TODO(b/283740863): Tracking Bug
     @JvmField

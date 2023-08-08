@@ -25,10 +25,12 @@ import android.tools.common.flicker.config.FlickerConfig
 import android.tools.common.flicker.config.FlickerServiceConfig
 import android.tools.device.flicker.junit.FlickerServiceJUnit4ClassRunner
 import com.android.server.wm.flicker.service.notification.scenarios.OpenAppFromLockscreenNotificationWithOverlayApp
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(FlickerServiceJUnit4ClassRunner::class)
+@Ignore("b/294418322: no notification launch animation exists when keyguard is occluded")
 class OpenAppFromLockscreenNotificationWithOverlayApp3ButtonNavPortrait :
     OpenAppFromLockscreenNotificationWithOverlayApp(NavBar.MODE_3BUTTON, Rotation.ROTATION_0) {
     @ExpectedScenarios(["APP_LAUNCH_FROM_NOTIFICATION"])

@@ -42,13 +42,10 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.R
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -69,15 +66,6 @@ fun PeopleScreen(
 ) {
     val priorityTiles by viewModel.priorityTiles.collectAsState()
     val recentTiles by viewModel.recentTiles.collectAsState()
-
-    // Make sure to refresh the tiles/conversations when the lifecycle is resumed, so that it
-    // updates them when going back to the Activity after leaving it.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(lifecycleOwner, viewModel) {
-        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.onTileRefreshRequested()
-        }
-    }
 
     // Call [onResult] this activity when the ViewModel tells us so.
     LaunchedEffect(viewModel.result) {

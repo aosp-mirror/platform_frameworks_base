@@ -102,9 +102,16 @@ constructor(
             } else {
                 combine(
                     airplaneModeInteractor.isAirplaneMode,
+                    iconInteractor.isAllowedDuringAirplaneMode,
                     iconInteractor.isForceHidden,
-                ) { isAirplaneMode, isForceHidden ->
-                    !isAirplaneMode && !isForceHidden
+                ) { isAirplaneMode, isAllowedDuringAirplaneMode, isForceHidden ->
+                    if (isForceHidden) {
+                        false
+                    } else if (isAirplaneMode) {
+                        isAllowedDuringAirplaneMode
+                    } else {
+                        true
+                    }
                 }
             }
             .distinctUntilChanged()

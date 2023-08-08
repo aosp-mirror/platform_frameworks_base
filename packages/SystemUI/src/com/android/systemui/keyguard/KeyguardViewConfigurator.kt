@@ -20,6 +20,8 @@ package com.android.systemui.keyguard
 import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
+import com.android.keyguard.KeyguardStatusViewController
+import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -80,6 +82,7 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
+    private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -88,6 +91,7 @@ constructor(
     private var rightShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
     private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
     private var settingsPopupMenuHandle: DisposableHandle? = null
+    private var keyguardStatusViewController: KeyguardStatusViewController? = null
 
     override fun start() {
         bindKeyguardRootView()
@@ -96,6 +100,7 @@ constructor(
         unbindKeyguardBottomArea(notificationPanel)
         bindIndicationArea()
         bindLockIconView(notificationPanel)
+        bindKeyguardStatusView(notificationPanel)
         setupNotificationStackScrollLayout(notificationPanel)
         bindLeftShortcut()
         bindRightShortcut()
@@ -117,7 +122,7 @@ constructor(
             sharedNotificationContainer.addNotificationStackScrollLayout(nssl)
             SharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
-                sharedNotificationContainerViewModel
+                sharedNotificationContainerViewModel,
             )
         }
     }
@@ -131,14 +136,6 @@ constructor(
 
     fun bindIndicationArea() {
         indicationAreaHandle?.dispose()
-
-        // At startup, 2 views with the ID `R.id.keyguard_indication_area` will be available.
-        // Disable one of them
-        if (!featureFlags.isEnabled(Flags.MIGRATE_INDICATION_AREA)) {
-            keyguardRootView.findViewById<View?>(R.id.keyguard_indication_area)?.let {
-                keyguardRootView.removeView(it)
-            }
-        }
 
         indicationAreaHandle =
             KeyguardIndicationAreaBinder.bind(
@@ -255,4 +252,31 @@ constructor(
             }
         }
     }
+
+    fun bindKeyguardStatusView(legacyParent: ViewGroup) {
+        // At startup, 2 views with the ID `R.id.keyguard_status_view` will be available.
+        // Disable one of them
+        if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            legacyParent.findViewById<View>(R.id.keyguard_status_view)?.let {
+                legacyParent.removeView(it)
+            }
+
+            val keyguardStatusView = keyguardRootView.addStatusView()
+            val statusViewComponent = keyguardStatusViewComponentFactory.build(keyguardStatusView)
+            val controller = statusViewComponent.getKeyguardStatusViewController()
+            controller.init()
+            keyguardStatusViewController = controller
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.keyguard_status_view)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
+    }
+
+    /**
+     * Temporary, to allow NotificationPanelViewController to use the same instance while code is
+     * migrated: b/288242803
+     */
+    fun getKeyguardStatusViewController() = keyguardStatusViewController
+    fun getKeyguardRootView() = keyguardRootView
 }

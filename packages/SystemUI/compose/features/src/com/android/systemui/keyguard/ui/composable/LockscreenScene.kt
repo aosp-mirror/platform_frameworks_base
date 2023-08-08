@@ -63,7 +63,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = destinationScenes(up = viewModel.upDestinationSceneKey.value)
+                initialValue = destinationScenes(up = null)
             )
 
     @Composable
@@ -77,12 +77,12 @@ constructor(
     }
 
     private fun destinationScenes(
-        up: SceneKey,
+        up: SceneKey?,
     ): Map<UserAction, SceneModel> {
-        return mapOf(
-            UserAction.Swipe(Direction.UP) to SceneModel(up),
-            UserAction.Swipe(Direction.DOWN) to SceneModel(SceneKey.Shade)
-        )
+        return buildMap {
+            up?.let { this[UserAction.Swipe(Direction.UP)] = SceneModel(up) }
+            this[UserAction.Swipe(Direction.DOWN)] = SceneModel(SceneKey.Shade)
+        }
     }
 }
 

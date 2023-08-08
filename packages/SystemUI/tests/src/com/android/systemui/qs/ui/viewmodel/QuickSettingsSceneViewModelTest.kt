@@ -18,7 +18,7 @@ package com.android.systemui.qs.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -46,21 +46,17 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private val underTest =
         QuickSettingsSceneViewModel(
-            lockscreenSceneInteractor =
-                utils.lockScreenSceneInteractor(
+            bouncerInteractor =
+                utils.bouncerInteractor(
                     authenticationInteractor = authenticationInteractor,
-                    bouncerInteractor =
-                        utils.bouncerInteractor(
-                            authenticationInteractor = authenticationInteractor,
-                            sceneInteractor = sceneInteractor,
-                        ),
+                    sceneInteractor = sceneInteractor,
                 ),
         )
 
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
@@ -73,7 +69,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()

@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -119,8 +120,8 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     @Test
     public void correctlyDump() {
         mController.onInit();
-        verify(mDumpManager).registerDumpable(mController);
+        verify(mDumpManager).registerDumpable(eq(mController.getInstanceName()), eq(mController));
         mController.onDestroy();
-        verify(mDumpManager, times(1)).unregisterDumpable(KeyguardStatusViewController.TAG);
+        verify(mDumpManager, times(1)).unregisterDumpable(eq(mController.getInstanceName()));
     }
 }

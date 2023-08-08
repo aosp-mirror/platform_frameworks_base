@@ -423,8 +423,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * transition.
      */
     public void prepareExitSplitScreen(WindowContainerTransaction wct,
-            @StageType int stageToTop) {
+            @StageType int stageToTop, @ExitReason int reason) {
         mStageCoordinator.prepareExitSplitScreen(stageToTop, wct);
+        mStageCoordinator.clearSplitPairedInRecents(reason);
     }
 
     public void enterSplitScreen(int taskId, boolean leftOrTop) {

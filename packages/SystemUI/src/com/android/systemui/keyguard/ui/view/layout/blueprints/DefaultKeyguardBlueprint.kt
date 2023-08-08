@@ -25,6 +25,8 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAr
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import javax.inject.Inject
 
 /**
@@ -42,6 +44,8 @@ constructor(
     private val defaultShortcutsSection: DefaultShortcutsSection,
     private val defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
     private val defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
+    private val defaultStatusViewSection: DefaultStatusViewSection,
+    private val splitShadeGuidelines: SplitShadeGuidelines,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
@@ -51,6 +55,8 @@ constructor(
         defaultShortcutsSection.apply(constraintSet)
         defaultAmbientIndicationAreaSection.apply(constraintSet)
         defaultSettingsPopupMenuSection.apply(constraintSet)
+        defaultStatusViewSection.apply(constraintSet)
+        splitShadeGuidelines.apply(constraintSet)
     }
 
     companion object {
