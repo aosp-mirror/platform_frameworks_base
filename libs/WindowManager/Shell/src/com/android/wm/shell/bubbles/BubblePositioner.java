@@ -661,14 +661,26 @@ public class BubblePositioner {
         final boolean startOnLeft =
                 mContext.getResources().getConfiguration().getLayoutDirection()
                         != LAYOUT_DIRECTION_RTL;
-        final float startingVerticalOffset = mContext.getResources().getDimensionPixelOffset(
-                R.dimen.bubble_stack_starting_offset_y);
-        // TODO: placement bug here because mPositionRect doesn't handle the overhanging edge
-        return new BubbleStackView.RelativeStackPosition(
-                startOnLeft,
-                startingVerticalOffset / mPositionRect.height())
-                .getAbsolutePositionInRegion(getAllowableStackPositionRegion(
-                        1 /* default starts with 1 bubble */));
+        final RectF allowableStackPositionRegion = getAllowableStackPositionRegion(
+                1 /* default starts with 1 bubble */);
+        if (isLargeScreen()) {
+            // We want the stack to be visually centered on the edge, so we need to base it
+            // of a rect that includes insets.
+            final float desiredY = mScreenRect.height() / 2f - (mBubbleSize / 2f);
+            final float offset = desiredY / mScreenRect.height();
+            return new BubbleStackView.RelativeStackPosition(
+                    startOnLeft,
+                    offset)
+                    .getAbsolutePositionInRegion(allowableStackPositionRegion);
+        } else {
+            final float startingVerticalOffset = mContext.getResources().getDimensionPixelOffset(
+                    R.dimen.bubble_stack_starting_offset_y);
+            // TODO: placement bug here because mPositionRect doesn't handle the overhanging edge
+            return new BubbleStackView.RelativeStackPosition(
+                    startOnLeft,
+                    startingVerticalOffset / mPositionRect.height())
+                    .getAbsolutePositionInRegion(allowableStackPositionRegion);
+        }
     }
 
     /**

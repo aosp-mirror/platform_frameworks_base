@@ -27,6 +27,7 @@ import android.testing.TestableResources
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowInsetsController
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
@@ -83,6 +84,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -491,6 +493,30 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun showNextSecurityScreenOrFinish_SimPinToAnotherSimPin_None() {
+        // GIVEN the current security method is SimPin
+        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
+        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
+            .thenReturn(false)
+        underTest.showSecurityScreen(SecurityMode.SimPin)
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
+            .thenReturn(SecurityMode.SimPin)
+        whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
+
+        underTest.showNextSecurityScreenOrFinish(
+            /* authenticated= */ true,
+            TARGET_USER_ID,
+            /* bypassSecondaryLockScreen= */ true,
+            SecurityMode.SimPin
+        )
+
+        // THEN the next security method of None will dismiss keyguard.
+        verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
+    }
+
+    @Test
     fun onSwipeUp_whenFaceDetectionIsNotRunning_initiatesFaceAuth() {
         val registeredSwipeListener = registeredSwipeListener
         whenever(keyguardUpdateMonitor.isFaceDetectionRunning).thenReturn(false)
@@ -812,6 +838,16 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
         }
+
+    @Test
+    fun testResetUserSwitcher() {
+        val userSwitcher = mock(View::class.java)
+        whenever(view.findViewById<View>(R.id.keyguard_bouncer_user_switcher))
+            .thenReturn(userSwitcher)
+
+        underTest.prepareToShow()
+        verify(userSwitcher).setAlpha(0f)
+    }
 
     private val registeredSwipeListener: KeyguardSecurityContainer.SwipeListener
         get() {

@@ -19,6 +19,7 @@ package com.android.systemui.screenshot
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ComponentName
+import android.content.ContentProvider
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -36,7 +37,9 @@ object ActionIntentCreator {
     fun createShareWithText(uri: Uri, extraText: String): Intent =
         createShare(uri, text = extraText)
 
-    private fun createShare(uri: Uri, subject: String? = null, text: String? = null): Intent {
+    private fun createShare(rawUri: Uri, subject: String? = null, text: String? = null): Intent {
+        val uri = uriWithoutUserId(rawUri)
+
         // Create a share intent, this will always go through the chooser activity first
         // which should not trigger auto-enter PiP
         val sharingIntent =
@@ -68,7 +71,8 @@ object ActionIntentCreator {
      * @return an ACTION_EDIT intent for the given URI, directed to config_screenshotEditor if
      *   available.
      */
-    fun createEditIntent(uri: Uri, context: Context): Intent {
+    fun createEdit(rawUri: Uri, context: Context): Intent {
+        val uri = uriWithoutUserId(rawUri)
         val editIntent = Intent(Intent.ACTION_EDIT)
 
         val editor = context.getString(R.string.config_screenshotEditor)
@@ -83,4 +87,13 @@ object ActionIntentCreator {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
     }
+}
+
+/**
+ * URIs here are passed only via Intent which are sent to the target user via Intent. Because of
+ * this, the userId component can be removed to prevent compatibility issues when an app attempts
+ * valid a URI containing a userId within the authority.
+ */
+private fun uriWithoutUserId(uri: Uri): Uri {
+    return ContentProvider.getUriWithoutUserId(uri)
 }

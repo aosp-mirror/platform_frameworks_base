@@ -290,6 +290,11 @@ object Flags {
                 teamfood = true
             )
 
+    /** Stop running face auth when the display state changes to OFF. */
+    // TODO(b/294221702): Tracking bug.
+    @JvmField val STOP_FACE_AUTH_ON_DISPLAY_OFF = resourceBooleanFlag(245,
+            R.bool.flag_stop_face_auth_on_display_off, "stop_face_auth_on_display_off")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -369,6 +374,9 @@ object Flags {
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
         unreleasedFlag(614, "incompatible_charging_battery_icon")
+
+    // TODO(b/293585143): Tracking Bug
+    val INSTANT_TETHER = unreleasedFlag(615, "instant_tether")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
