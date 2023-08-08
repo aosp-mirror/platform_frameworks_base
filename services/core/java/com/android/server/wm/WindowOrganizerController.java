@@ -399,18 +399,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     @Override
-    public int finishTransition(@NonNull IBinder transitionToken,
-            @Nullable WindowContainerTransaction t,
-            @Nullable IWindowContainerTransactionCallback callback) {
+    public void finishTransition(@NonNull IBinder transitionToken,
+            @Nullable WindowContainerTransaction t) {
         enforceTaskPermission("finishTransition()");
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                int syncId = -1;
-                if (t != null && callback != null) {
-                    syncId = startSyncWithOrganizer(callback);
-                }
                 final Transition transition = Transition.fromBinder(transitionToken);
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
@@ -419,14 +414,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // changes of the transition participants will only set visible-requested
                     // and still let finishTransition handle the participants.
                     mTransitionController.mFinishingTransition = transition;
-                    applyTransaction(t, syncId, null /*transition*/, caller, transition);
+                    applyTransaction(t, -1 /* syncId */, null /*transition*/, caller, transition);
                 }
                 mTransitionController.finishTransition(transition);
                 mTransitionController.mFinishingTransition = null;
-                if (syncId >= 0) {
-                    setSyncReady(syncId);
-                }
-                return syncId;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

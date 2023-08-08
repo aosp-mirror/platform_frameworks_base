@@ -404,7 +404,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
         // No animation, just show it immediately.
         startTransaction.apply();
-        finishCallback.onTransitionFinished(wct, null /* wctCB */);
+        finishCallback.onTransitionFinished(wct);
         startNextTransition();
         return true;
     }

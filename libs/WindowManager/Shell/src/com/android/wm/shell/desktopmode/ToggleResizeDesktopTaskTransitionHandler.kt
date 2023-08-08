@@ -104,7 +104,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 .setWindowCrop(leash, endBounds.width(), endBounds.height())
                                 .show(leash)
                             windowDecor.hideResizeVeil()
-                            finishCallback.onTransitionFinished(null, null)
+                            finishCallback.onTransitionFinished(null)
                             boundsAnimator = null
                         }
                     )
