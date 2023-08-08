@@ -321,6 +321,32 @@ public class TaskFragmentContainerTest {
     }
 
     @Test
+    public void testCollectNonFinishingActivities_checkIfStable() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                mIntent, taskContainer, mController, null /* pairedPrimaryContainer */);
+
+        // In case mInfo is null, collectNonFinishingActivities(true) should return null.
+        List<Activity> activities =
+                container.collectNonFinishingActivities(true /* checkIfStable */);
+        assertNull(activities);
+
+        // collectNonFinishingActivities(true) should return proper value when the container is in a
+        // stable state.
+        final List<IBinder> runningActivities = Lists.newArrayList(mActivity.getActivityToken());
+        doReturn(runningActivities).when(mInfo).getActivities();
+        container.setInfo(mTransaction, mInfo);
+        activities = container.collectNonFinishingActivities(true /* checkIfStable */);
+        assertEquals(1, activities.size());
+
+        // In case any activity is finishing, collectNonFinishingActivities(true) should return
+        // null.
+        doReturn(true).when(mActivity).isFinishing();
+        activities = container.collectNonFinishingActivities(true /* checkIfStable */);
+        assertNull(activities);
+    }
+
+    @Test
     public void testAddPendingActivity() {
         final TaskContainer taskContainer = createTestTaskContainer();
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,

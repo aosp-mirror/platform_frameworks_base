@@ -1908,8 +1908,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (mEmbeddingCallback == null || !readyToReportToClient()) {
             return;
         }
-        final List<SplitInfo> currentSplitStates = getActiveSplitStates();
-        if (mLastReportedSplitStates.equals(currentSplitStates)) {
+        final List<SplitInfo> currentSplitStates = getActiveSplitStatesIfStable();
+        if (currentSplitStates == null || mLastReportedSplitStates.equals(currentSplitStates)) {
             return;
         }
         mLastReportedSplitStates.clear();
@@ -1919,13 +1919,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     /**
      * Returns a list of descriptors for currently active split states.
+     *
+     * @return a list of descriptors for currently active split states if all the containers are in
+     * a stable state, or {@code null} otherwise.
      */
     @GuardedBy("mLock")
-    @NonNull
-    private List<SplitInfo> getActiveSplitStates() {
+    @Nullable
+    private List<SplitInfo> getActiveSplitStatesIfStable() {
         final List<SplitInfo> splitStates = new ArrayList<>();
         for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
-            mTaskContainers.valueAt(i).getSplitStates(splitStates);
+            final List<SplitInfo> taskSplitStates =
+                    mTaskContainers.valueAt(i).getSplitStatesIfStable();
+            if (taskSplitStates == null) {
+                return null;
+            }
+            splitStates.addAll(taskSplitStates);
         }
         return splitStates;
     }

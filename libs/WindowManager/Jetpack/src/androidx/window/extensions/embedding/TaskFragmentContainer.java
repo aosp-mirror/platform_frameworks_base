@@ -217,6 +217,30 @@ class TaskFragmentContainer {
     /** List of non-finishing activities that belong to this container and live in this process. */
     @NonNull
     List<Activity> collectNonFinishingActivities() {
+        final List<Activity> activities = collectNonFinishingActivities(false /* checkIfStable */);
+        if (activities == null) {
+            throw new IllegalStateException(
+                    "Result activities should never be null when checkIfstable is false.");
+        }
+        return activities;
+    }
+
+    /**
+     * Collects non-finishing activities that belong to this container and live in this process.
+     *
+     * @param checkIfStable if {@code true}, returns {@code null} when the container is in an
+     *                      intermediate state.
+     * @return List of non-finishing activities that belong to this container and live in this
+     * process, {@code null} if checkIfStable is {@code true} and the container is in an
+     * intermediate state.
+     */
+    @Nullable
+    List<Activity> collectNonFinishingActivities(boolean checkIfStable) {
+        if (checkIfStable
+                && (mInfo == null || mInfo.isEmpty() || !mPendingAppearedActivities.isEmpty())) {
+            return null;
+        }
+
         final List<Activity> allActivities = new ArrayList<>();
         if (mInfo != null) {
             // Add activities reported from the server.
@@ -224,6 +248,15 @@ class TaskFragmentContainer {
                 final Activity activity = mController.getActivity(token);
                 if (activity != null && !activity.isFinishing()) {
                     allActivities.add(activity);
+                } else {
+                    if (checkIfStable) {
+                        // Return null except for a special case when the activity is started in
+                        // background.
+                        if (activity == null && !mTaskContainer.isVisible()) {
+                            continue;
+                        }
+                        return null;
+                    }
                 }
             }
         }
@@ -277,9 +310,19 @@ class TaskFragmentContainer {
         return false;
     }
 
-    @NonNull
-    ActivityStack toActivityStack() {
-        return new ActivityStack(collectNonFinishingActivities(), isEmpty(), mToken);
+    /**
+     * Returns the ActivityStack representing this container.
+     *
+     * @return ActivityStack representing this container if it is in a stable state. {@code null} if
+     * in an intermediate state.
+     */
+    @Nullable
+    ActivityStack toActivityStackIfStable() {
+        final List<Activity> activities = collectNonFinishingActivities(true /* checkIfStable */);
+        if (activities == null) {
+            return null;
+        }
+        return new ActivityStack(activities, isEmpty(), mToken);
     }
 
     /** Adds the activity that will be reparented to this container. */

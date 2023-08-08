@@ -329,11 +329,23 @@ class TaskContainer {
         }
     }
 
-    /** Adds the descriptors of split states in this Task to {@code outSplitStates}. */
-    void getSplitStates(@NonNull List<SplitInfo> outSplitStates) {
+    /**
+     * Gets the descriptors of split states in this Task.
+     *
+     * @return a list of {@code SplitInfo} if all the SplitContainers are stable, or {@code null} if
+     * any SplitContainer is in an intermediate state.
+     */
+    @Nullable
+    List<SplitInfo> getSplitStatesIfStable() {
+        final List<SplitInfo> splitStates = new ArrayList<>();
         for (SplitContainer container : mSplitContainers) {
-            outSplitStates.add(container.toSplitInfo());
+            final SplitInfo splitInfo = container.toSplitInfoIfStable();
+            if (splitInfo == null) {
+                return null;
+            }
+            splitStates.add(splitInfo);
         }
+        return splitStates;
     }
 
     /** A wrapper class which contains the information of {@link TaskContainer} */

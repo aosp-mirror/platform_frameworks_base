@@ -48,6 +48,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 /**
  * Test class for {@link TaskContainer}.
  *
@@ -164,5 +166,36 @@ public class TaskContainerTest {
         final Activity activity1 = mock(Activity.class);
         doReturn(activity1).when(tf1).getTopNonFinishingActivity();
         assertEquals(activity1, taskContainer.getTopNonFinishingActivity());
+    }
+
+    @Test
+    public void testGetSplitStatesIfStable() {
+        final TaskContainer taskContainer = createTestTaskContainer();
+
+        final SplitContainer splitContainer0 = mock(SplitContainer.class);
+        final SplitContainer splitContainer1 = mock(SplitContainer.class);
+        final SplitInfo splitInfo0 = mock(SplitInfo.class);
+        final SplitInfo splitInfo1 = mock(SplitInfo.class);
+        taskContainer.addSplitContainer(splitContainer0);
+        taskContainer.addSplitContainer(splitContainer1);
+
+        // When all the SplitContainers are stable, getSplitStatesIfStable() returns the list of
+        // SplitInfo representing the SplitContainers.
+        doReturn(splitInfo0).when(splitContainer0).toSplitInfoIfStable();
+        doReturn(splitInfo1).when(splitContainer1).toSplitInfoIfStable();
+
+        List<SplitInfo> splitInfoList = taskContainer.getSplitStatesIfStable();
+
+        assertEquals(2, splitInfoList.size());
+        assertEquals(splitInfo0, splitInfoList.get(0));
+        assertEquals(splitInfo1, splitInfoList.get(1));
+
+        // When any SplitContainer is in an intermediate state, getSplitStatesIfStable() returns
+        // null.
+        doReturn(null).when(splitContainer0).toSplitInfoIfStable();
+
+        splitInfoList = taskContainer.getSplitStatesIfStable();
+
+        assertNull(splitInfoList);
     }
 }
