@@ -10126,6 +10126,13 @@ public final class Settings {
         public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
 
         /**
+         * Stores a boolean that defines whether the CSD as a feature is enabled or not.
+         * @hide
+         */
+        public static final String AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED =
+                "audio_safe_csd_as_a_feature_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)

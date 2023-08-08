@@ -10742,6 +10742,27 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureAvailable() {
+        super.isCsdAsAFeatureAvailable_enforcePermission();
+        return mSoundDoseHelper.isCsdAsAFeatureAvailable();
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureEnabled() {
+        super.isCsdAsAFeatureEnabled_enforcePermission();
+        return mSoundDoseHelper.isCsdAsAFeatureEnabled();
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setCsdAsAFeatureEnabled(boolean csdToggleValue) {
+        super.setCsdAsAFeatureEnabled_enforcePermission();
+        mSoundDoseHelper.setCsdAsAFeatureEnabled(csdToggleValue);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
             @AudioDeviceCategory int btAudioDeviceCategory) {
         super.setBluetoothAudioDeviceCategory_enforcePermission();
