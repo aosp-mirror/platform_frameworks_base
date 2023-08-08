@@ -517,7 +517,11 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
-     * The device ID for which permissions are checked.
+     * Gets the device ID for this attribution source. Attribution source can set the device ID
+     * using {@link Builder#setDeviceId(int)}, the default device ID is
+     * {@link Context#DEVICE_ID_DEFAULT}.
+     * <p>
+     * This device ID is used for permissions checking during attribution source validation.
      */
     public int getDeviceId() {
         return mAttributionSourceState.deviceId;
