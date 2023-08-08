@@ -8637,6 +8637,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;
     }
