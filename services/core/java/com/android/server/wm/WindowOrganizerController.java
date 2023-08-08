@@ -309,6 +309,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 applyTransaction(wct, -1 /* syncId */, nextTransition, caller,
                                         deferred);
                                 if (needsSetReady) {
+                                    // TODO(b/294925498): Remove this once we have accurate ready
+                                    //                    tracking.
+                                    if (hasActivityLaunch(wct) && !mService.mRootWindowContainer
+                                            .allPausedActivitiesComplete()) {
+                                        // WCT is launching an activity, so we need to wait for its
+                                        // lifecycle events.
+                                        return;
+                                    }
                                     nextTransition.setAllReady();
                                 }
                             });
@@ -342,6 +350,15 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private static boolean hasActivityLaunch(WindowContainerTransaction wct) {
+        for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
+            if (wct.getHierarchyOps().get(i).getType() == HIERARCHY_OP_TYPE_LAUNCH_TASK) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
