@@ -40,6 +40,7 @@ import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_T
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
 import static com.android.systemui.flags.Flags.FP_LISTEN_OCCLUDING_APPS;
+import static com.android.systemui.flags.Flags.STOP_FACE_AUTH_ON_DISPLAY_OFF;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_CLOSED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
@@ -89,6 +90,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
@@ -121,6 +123,9 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.DisplayAdjustments;
+import android.view.DisplayInfo;
 
 import androidx.annotation.NonNull;
 
@@ -143,6 +148,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -304,10 +310,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             mFingerprintAuthenticatorsRegisteredCallback;
     private IFaceAuthenticatorsRegisteredCallback mFaceAuthenticatorsRegisteredCallback;
     private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
+    private FakeDisplayTracker mDisplayTracker;
 
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        mDisplayTracker = new FakeDisplayTracker(mContext);
         when(mSessionTracker.getSessionId(SESSION_KEYGUARD)).thenReturn(mKeyguardInstanceId);
 
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
@@ -348,6 +356,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
+        mFeatureFlags.set(STOP_FACE_AUTH_ON_DISPLAY_OFF, false);
 
         when(mSecureSettings.getUriFor(anyString())).thenReturn(mURI);
 
@@ -358,6 +367,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                         anyInt());
 
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
+        setupBiometrics(mKeyguardUpdateMonitor);
+    }
+
+    private void setupBiometrics(KeyguardUpdateMonitor keyguardUpdateMonitor)
+            throws RemoteException {
         captureAuthenticatorsRegisteredCallbacks();
         setupFaceAuth(/* isClass3 */ false);
         setupFingerprintAuth(/* isClass3 */ true);
@@ -367,9 +381,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mBiometricEnabledOnKeyguardCallback = mBiometricEnabledCallbackArgCaptor.getValue();
         biometricsEnabledForCurrentUser();
 
-        mHandler = spy(mKeyguardUpdateMonitor.getHandler());
+        mHandler = spy(keyguardUpdateMonitor.getHandler());
         try {
-            FieldSetter.setField(mKeyguardUpdateMonitor,
+            FieldSetter.setField(keyguardUpdateMonitor,
                     KeyguardUpdateMonitor.class.getDeclaredField("mHandler"), mHandler);
         } catch (NoSuchFieldException e) {
 
@@ -3029,6 +3043,79 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(callback).onBiometricEnrollmentStateChanged(BiometricSourceType.FACE);
     }
 
+    @Test
+    public void stopFaceAuthOnDisplayOffFlagNotEnabled_doNotRegisterForDisplayCallback() {
+        assertThat(mDisplayTracker.getDisplayCallbacks().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void onDisplayOn_nothingHappens() throws RemoteException {
+        // GIVEN
+        keyguardIsVisible();
+        enableStopFaceAuthOnDisplayOff();
+
+        // WHEN the default display state changes to ON
+        triggerDefaultDisplayStateChangeToOn();
+
+        // THEN face auth is NOT started since we rely on STARTED_WAKING_UP to start face auth,
+        // NOT the display on event
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
+    }
+
+    @Test
+    public void onDisplayOff_stopFaceAuth() throws RemoteException {
+        enableStopFaceAuthOnDisplayOff();
+
+        // GIVEN device is listening for face
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+        verifyFaceAuthenticateCall();
+
+        final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
+        mKeyguardUpdateMonitor.mFaceCancelSignal = faceCancel;
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        // WHEN the default display state changes to OFF
+        triggerDefaultDisplayStateChangeToOff();
+
+        // THEN face listening is stopped.
+        verify(faceCancel).cancel();
+        verify(callback).onBiometricRunningStateChanged(
+                eq(false), eq(BiometricSourceType.FACE)); // beverlyt
+
+    }
+
+    private void triggerDefaultDisplayStateChangeToOn() {
+        triggerDefaultDisplayStateChangeTo(true);
+    }
+
+    private void triggerDefaultDisplayStateChangeToOff() {
+        triggerDefaultDisplayStateChangeTo(false);
+    }
+
+    /**
+     * @param on true for Display.STATE_ON, else Display.STATE_OFF
+     */
+    private void triggerDefaultDisplayStateChangeTo(boolean on) {
+        DisplayManagerGlobal displayManagerGlobal = mock(DisplayManagerGlobal.class);
+        DisplayInfo displayInfoWithDisplayState = new DisplayInfo();
+        displayInfoWithDisplayState.state = on ? Display.STATE_ON : Display.STATE_OFF;
+        when(displayManagerGlobal.getDisplayInfo(mDisplayTracker.getDefaultDisplayId()))
+                .thenReturn(displayInfoWithDisplayState);
+        mDisplayTracker.setAllDisplays(new Display[]{
+                new Display(
+                        displayManagerGlobal,
+                        mDisplayTracker.getDefaultDisplayId(),
+                        displayInfoWithDisplayState,
+                        DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
+                )
+        });
+        mDisplayTracker.triggerOnDisplayChanged(mDisplayTracker.getDefaultDisplayId());
+    }
+
     private void verifyFingerprintAuthenticateNeverCalled() {
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -3297,6 +3384,18 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    private void enableStopFaceAuthOnDisplayOff() throws RemoteException {
+        cleanupKeyguardUpdateMonitor();
+        clearInvocations(mFaceManager);
+        clearInvocations(mFingerprintManager);
+        clearInvocations(mBiometricManager);
+        clearInvocations(mStatusBarStateController);
+        mFeatureFlags.set(STOP_FACE_AUTH_ON_DISPLAY_OFF, true);
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext);
+        setupBiometrics(mKeyguardUpdateMonitor);
+        assertThat(mDisplayTracker.getDisplayCallbacks().size()).isEqualTo(1);
+    }
+
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
         int subscription = simInited
                 ? 1/* mock subid=1 */ : SubscriptionManager.PLACEHOLDER_SUBSCRIPTION_ID_BASE;
@@ -3374,7 +3473,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mPackageManager, mFaceManager, mFingerprintManager, mBiometricManager,
                     mFaceWakeUpTriggersConfig, mDevicePostureController,
                     Optional.of(mInteractiveToAuthProvider), mFeatureFlags,
-                    mTaskStackChangeListeners, mActivityTaskManager);
+                    mTaskStackChangeListeners, mActivityTaskManager, mDisplayTracker);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 
