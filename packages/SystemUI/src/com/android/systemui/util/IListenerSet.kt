@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package com.android.systemui.util
 
-import java.util.concurrent.CopyOnWriteArrayList
-
 /**
  * A collection of listeners, observers, callbacks, etc.
  *
@@ -26,15 +24,13 @@ import java.util.concurrent.CopyOnWriteArrayList
  * [ConcurrentModificationException] is never thrown, this iterator will not reflect changes made to
  * the set after the iterator is constructed.
  */
-class ListenerSet<E : Any>
-/** Private constructor takes the internal list so that we can use auto-delegation */
-private constructor(private val listeners: CopyOnWriteArrayList<E>) :
-    Collection<E> by listeners, IListenerSet<E> {
+interface IListenerSet<E : Any> : Set<E> {
+    /**
+     * A thread-safe, reentrant-safe method to add a listener. Does nothing if the listener is
+     * already in the set.
+     */
+    fun addIfAbsent(element: E): Boolean
 
-    /** Create a new instance */
-    constructor() : this(CopyOnWriteArrayList())
-
-    override fun addIfAbsent(element: E): Boolean = listeners.addIfAbsent(element)
-
-    override fun remove(element: E): Boolean = listeners.remove(element)
+    /** A thread-safe, reentrant-safe method to remove a listener. */
+    fun remove(element: E): Boolean
 }
