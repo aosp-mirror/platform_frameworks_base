@@ -38,7 +38,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.animation.AnimatorTestRule;
 import android.app.KeyguardManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
@@ -85,8 +84,6 @@ import java.util.function.Predicate;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class VolumeDialogImplTest extends SysuiTestCase {
-    private static final AnimatorTestRule sAnimatorTestRule = new AnimatorTestRule();
-
     VolumeDialogImpl mDialog;
     View mActiveRinger;
     View mDrawerContainer;
@@ -727,7 +724,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     public void teardown() {
         cleanUp(mDialog);
         setOrientation(mOriginalOrientation);
-        sAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         mTestableLooper.processAllMessages();
         reset(mPostureController);
