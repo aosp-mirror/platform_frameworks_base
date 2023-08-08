@@ -51,6 +51,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -85,7 +86,7 @@ public class PipTouchHandler {
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     @NonNull private final PipBoundsState mPipBoundsState;
-    @NonNull private final PipSizeSpecHandler mPipSizeSpecHandler;
+    @NonNull private final SizeSpecSource mSizeSpecSource;
     private final PipUiEventLogger mPipUiEventLogger;
     private final PipDismissTargetHandler mPipDismissTargetHandler;
     private final PipTaskOrganizer mPipTaskOrganizer;
@@ -179,7 +180,7 @@ public class PipTouchHandler {
             PhonePipMenuController menuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler,
+            @NonNull SizeSpecSource sizeSpecSource,
             PipTaskOrganizer pipTaskOrganizer,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -190,7 +191,7 @@ public class PipTouchHandler {
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
-        mPipSizeSpecHandler = pipSizeSpecHandler;
+        mSizeSpecSource = sizeSpecSource;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMenuController = menuController;
         mPipUiEventLogger = pipUiEventLogger;
@@ -413,7 +414,7 @@ public class PipTouchHandler {
 
         // Calculate the expanded size
         float aspectRatio = (float) normalBounds.width() / normalBounds.height();
-        Size expandedSize = mPipSizeSpecHandler.getDefaultSize(aspectRatio);
+        Size expandedSize = mSizeSpecSource.getDefaultSize(aspectRatio);
         mPipBoundsState.setExpandedBounds(
                 new Rect(0, 0, expandedSize.getWidth(), expandedSize.getHeight()));
         Rect expandedMovementBounds = new Rect();
@@ -517,10 +518,10 @@ public class PipTouchHandler {
     private void updatePinchResizeSizeConstraints(float aspectRatio) {
         final int minWidth, minHeight, maxWidth, maxHeight;
 
-        minWidth = mPipSizeSpecHandler.getMinSize(aspectRatio).getWidth();
-        minHeight = mPipSizeSpecHandler.getMinSize(aspectRatio).getHeight();
-        maxWidth = mPipSizeSpecHandler.getMaxSize(aspectRatio).getWidth();
-        maxHeight = mPipSizeSpecHandler.getMaxSize(aspectRatio).getHeight();
+        minWidth = mSizeSpecSource.getMinSize(aspectRatio).getWidth();
+        minHeight = mSizeSpecSource.getMinSize(aspectRatio).getHeight();
+        maxWidth = mSizeSpecSource.getMaxSize(aspectRatio).getWidth();
+        maxHeight = mSizeSpecSource.getMaxSize(aspectRatio).getHeight();
 
         mPipResizeGestureHandler.updateMinSize(minWidth, minHeight);
         mPipResizeGestureHandler.updateMaxSize(maxWidth, maxHeight);
