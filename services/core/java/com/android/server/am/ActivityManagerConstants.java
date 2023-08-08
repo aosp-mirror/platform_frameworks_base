@@ -1027,7 +1027,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final String KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION =
             "enable_wait_for_finish_attach_application";
 
-    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = false;
+    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = true;
 
     /** @see #KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION */
     public volatile boolean mEnableWaitForFinishAttachApplication =
