@@ -2315,8 +2315,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClient = null;
             ImeTracker.forLogging().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = null;
-            InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
-
             mMenuController.hideInputMethodMenuLocked();
         }
     }
