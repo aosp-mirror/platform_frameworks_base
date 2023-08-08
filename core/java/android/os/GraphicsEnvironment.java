@@ -117,8 +117,6 @@ public class GraphicsEnvironment {
     private static final String ANGLE_GL_DRIVER_CHOICE_NATIVE = "native";
     private static final String SYSTEM_ANGLE_STRING = "system";
 
-    private static final String PROPERTY_RO_ANGLE_SUPPORTED = "ro.gfx.angle.supported";
-
     private ClassLoader mClassLoader;
     private String mLibrarySearchPaths;
     private String mLibraryPermittedPaths;
@@ -620,8 +618,7 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Attempt to set up ANGLE from system, if the apk can be found, pass ANGLE details to
-     * the C++ GraphicsEnv class.
+     * Set up ANGLE from system.
      *
      * @param context - Context of the application.
      * @param bundle - Bundle of the application.
@@ -630,14 +627,8 @@ public class GraphicsEnvironment {
      *         false: can not set up to use system ANGLE because it doesn't exist.
      */
     private boolean setupAngleFromSystem(Context context, Bundle bundle, String packageName) {
-        final boolean systemAngleSupported = SystemProperties
-                                             .getBoolean(PROPERTY_RO_ANGLE_SUPPORTED, false);
-        if (!systemAngleSupported) {
-            return false;
-        }
-
-        // If we make it to here, system ANGLE will be used.  Call nativeSetAngleInfo() with
-        // the application package name and ANGLE features to use.
+        // System ANGLE always exists, call nativeSetAngleInfo() with the application package
+        // name and ANGLE features to use.
         final String[] features = getAngleEglFeatures(context, bundle);
         nativeSetAngleInfo(SYSTEM_ANGLE_STRING, false, packageName, features);
         return true;
