@@ -2720,7 +2720,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE) {
             // Open to side should only be used when split already active and foregorund.
             if (mainChild == null && sideChild == null) {
-                Log.w(TAG, "Launched a task in split, but didn't receive any task in transition.");
+                Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
+                        "Launched a task in split, but didn't receive any task in transition."));
                 // This should happen when the target app is already on front, so just cancel.
                 mSplitTransitions.mPendingEnter.cancel(null);
                 return true;
