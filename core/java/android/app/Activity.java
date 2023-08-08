@@ -1996,7 +1996,7 @@ public class Activity extends ContextThemeWrapper
      * indicator that the activity became active and ready to receive input. This sometimes could
      * also be a transit state toward another resting state. For instance, an activity may be
      * relaunched to {@link #onPause} due to configuration changes and the activity was visible,
-     * but wasn’t the top-most activity of an activity task. {@link #onResume} is guaranteed to be
+     * but wasn't the top-most activity of an activity task. {@link #onResume} is guaranteed to be
      * called before {@link #onPause} in this case which honors the activity lifecycle policy and
      * the activity eventually rests in {@link #onPause}.
      *
