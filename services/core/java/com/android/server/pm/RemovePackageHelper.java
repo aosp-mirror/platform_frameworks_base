@@ -135,6 +135,7 @@ final class RemovePackageHelper {
         cacher.cleanCachedResult(codePath);
     }
 
+    // Used for system apps only
     public void removePackage(AndroidPackage pkg, boolean chatty) {
         synchronized (mPm.mInstallLock) {
             removePackageLI(pkg, chatty);
@@ -284,6 +285,13 @@ final class RemovePackageHelper {
         }
 
         removePackageLI(deletedPs.getPackageName(), (flags & PackageManager.DELETE_CHATTY) != 0);
+        if (!deletedPs.isSystem()) {
+            // A non-system app's AndroidPackage object has been removed from the service.
+            // Explicitly nullify the corresponding app's PackageSetting's pkg object to
+            // prevent any future usage of it, in case the PackageSetting object will remain because
+            // of DELETE_KEEP_DATA.
+            deletedPs.setPkg(null);
+        }
 
         if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
             final AndroidPackage resolvedPkg;

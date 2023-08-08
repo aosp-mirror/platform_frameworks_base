@@ -1519,6 +1519,7 @@ public class ComputerEngine implements Computer {
             ai.privateFlags = ps.getPrivateFlags();
             pi.applicationInfo = PackageInfoUtils.generateDelegateApplicationInfo(
                     ai, flags, state, userId);
+            pi.signingInfo = ps.getSigningInfo();
 
             if (DEBUG_PACKAGE_INFO) {
                 Log.v(TAG, "ps.pkg is n/a for ["

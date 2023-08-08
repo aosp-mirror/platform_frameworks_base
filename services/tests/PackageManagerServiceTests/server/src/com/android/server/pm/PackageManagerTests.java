@@ -966,9 +966,11 @@ public class PackageManagerTests extends AndroidTestCase {
     }
 
     private static void assertUninstalled(ApplicationInfo info) throws Exception {
-        File nativeLibraryFile = new File(info.nativeLibraryDir);
-        assertFalse("Native library directory " + info.nativeLibraryDir
-                + " should be erased", nativeLibraryFile.exists());
+        if (info.nativeLibraryDir != null) {
+            File nativeLibraryFile = new File(info.nativeLibraryDir);
+            assertFalse("Native library directory " + info.nativeLibraryDir
+                    + " should be erased", nativeLibraryFile.exists());
+        }
     }
 
     public void deleteFromRawResource(int iFlags, int dFlags) throws Exception {
@@ -2883,14 +2885,15 @@ public class PackageManagerTests extends AndroidTestCase {
                     break;
                 }
             }
-            assertNotNull("activities should not be null", packageInfo.activities);
-            assertNotNull("configPreferences should not be null", packageInfo.configPreferences);
-            assertNotNull("instrumentation should not be null", packageInfo.instrumentation);
-            assertNotNull("permissions should not be null", packageInfo.permissions);
-            assertNotNull("providers should not be null", packageInfo.providers);
-            assertNotNull("receivers should not be null", packageInfo.receivers);
-            assertNotNull("services should not be null", packageInfo.services);
-            assertNotNull("signatures should not be null", packageInfo.signatures);
+            assertNotNull("applicationInfo should not be null", packageInfo.applicationInfo);
+            assertNull("activities should be null", packageInfo.activities);
+            assertNull("configPreferences should be null", packageInfo.configPreferences);
+            assertNull("instrumentation should be null", packageInfo.instrumentation);
+            assertNull("permissions should be null", packageInfo.permissions);
+            assertNull("providers should be null", packageInfo.providers);
+            assertNull("receivers should be null", packageInfo.receivers);
+            assertNull("services should be null", packageInfo.services);
+            assertNotNull("signingInfo should not be null", packageInfo.signingInfo);
         } finally {
             cleanUpInstall(ip);
         }
