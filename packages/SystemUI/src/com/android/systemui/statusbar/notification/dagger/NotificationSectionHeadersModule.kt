@@ -145,7 +145,7 @@ interface SectionHeaderControllerSubcomponent {
 }
 
 @Module
-private abstract class SectionHeaderBindingModule {
+abstract class SectionHeaderBindingModule {
     @Binds abstract fun bindsNodeController(impl: SectionHeaderNodeControllerImpl): NodeController
     @Binds abstract fun bindsSectionHeaderController(
         impl: SectionHeaderNodeControllerImpl
