@@ -32,7 +32,8 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
 
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private DisplayInfo mDefaultDisplayInfo;
-    private PipBoundsState mPipBoundsState; private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipBoundsState mPipBoundsState;
+    private SizeSpecSource mSizeSpecSource;
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
 
@@ -68,11 +70,12 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     public void setUp() throws Exception {
         initializeMockResources();
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
+
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
-                mPipSizeSpecHandler);
+                mPipDisplayLayoutState, mSizeSpecSource);
 
         DisplayLayout layout =
                 new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true);
@@ -132,7 +135,7 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
 
     @Test
     public void getDefaultBounds_noOverrideMinSize_matchesDefaultSizeAndAspectRatio() {
-        final Size defaultSize = mPipSizeSpecHandler.getDefaultSize(DEFAULT_ASPECT_RATIO);
+        final Size defaultSize = mSizeSpecSource.getDefaultSize(DEFAULT_ASPECT_RATIO);
 
         mPipBoundsState.setOverrideMinSize(null);
         final Rect defaultBounds = mPipBoundsAlgorithm.getDefaultBounds();
