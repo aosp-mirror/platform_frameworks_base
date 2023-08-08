@@ -19175,6 +19175,14 @@ public final class Settings {
              * @hide
              */
             public static final String WEAR_LAUNCHER_UI_MODE = "wear_launcher_ui_mode";
+
+            /** Whether Wear Power Anomaly Service is enabled.
+             *
+             * (0 = false, 1 = true)
+             * @hide
+             */
+            public static final String WEAR_POWER_ANOMALY_SERVICE_ENABLED =
+                    "wear_power_anomaly_service_enabled";
         }
     }
 
