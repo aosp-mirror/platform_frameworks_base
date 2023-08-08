@@ -32,6 +32,8 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
@@ -50,6 +52,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     private final TunerService mTunerService;
     private final Handler mMainHandler;
     private final ContentResolver mContentResolver;
+    private final FeatureFlags mFeatureFlags;
     private final BatteryController mBatteryController;
 
     private final String mSlotBattery;
@@ -99,6 +102,13 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 }
 
                 @Override
+                public void onIsIncompatibleChargingChanged(boolean isIncompatibleCharging) {
+                    if (mFeatureFlags.isEnabled(Flags.INCOMPATIBLE_CHARGING_BATTERY_ICON)) {
+                        mView.onIsIncompatibleChargingChanged(isIncompatibleCharging);
+                    }
+                }
+
+                @Override
                 public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
                     pw.print(super.toString());
                     pw.println(" location=" + mLocation);
@@ -129,6 +139,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
             TunerService tunerService,
             @Main Handler mainHandler,
             ContentResolver contentResolver,
+            FeatureFlags featureFlags,
             BatteryController batteryController) {
         super(view);
         mLocation = location;
@@ -137,6 +148,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
         mTunerService = tunerService;
         mMainHandler = mainHandler;
         mContentResolver = contentResolver;
+        mFeatureFlags = featureFlags;
         mBatteryController = batteryController;
 
         mView.setBatteryEstimateFetcher(mBatteryController::getEstimatedTimeRemainingString);

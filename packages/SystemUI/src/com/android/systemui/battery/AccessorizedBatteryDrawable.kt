@@ -178,6 +178,11 @@ class AccessorizedBatteryDrawable(
         mainBatteryDrawable.charging = charging
     }
 
+    /** Returns whether the battery is currently charging. */
+    fun getCharging(): Boolean {
+        return mainBatteryDrawable.charging
+    }
+
     /** Sets the current level (out of 100) of the battery. */
     fun setBatteryLevel(level: Int) {
         mainBatteryDrawable.setBatteryLevel(level)
