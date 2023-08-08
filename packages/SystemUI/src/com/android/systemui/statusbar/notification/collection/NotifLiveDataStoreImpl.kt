@@ -21,7 +21,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.util.Assert
 import com.android.systemui.util.ListenerSet
-import com.android.systemui.util.isNotEmpty
 import com.android.systemui.util.traceSection
 import java.util.Collections.unmodifiableList
 import java.util.concurrent.Executor
