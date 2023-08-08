@@ -806,12 +806,12 @@ public class PackageInstallerActivity extends AlertActivity {
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
+                    startActivity(getIntent());
                     // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
                     // work for the multiple user case, i.e. the caller task user and started
                     // Activity user are not the same. To avoid having multiple PIAs in the task,
                     // finish the current PackageInstallerActivity
                     finish();
-                    startActivity(getIntent());
                 }
             }, 500);
 
