@@ -357,7 +357,7 @@ final class Constants {
 
     static final int INVALID_PORT_ID = HdmiDeviceInfo.PORT_INVALID;
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
-    static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
+    static final int TV_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INTERNAL;
 
     // The relationship from one path (physical address) to another.
     @IntDef({
