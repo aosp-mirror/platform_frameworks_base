@@ -23,10 +23,12 @@ import android.content.pm.PackageManager
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.waitUntilExists
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,7 +53,7 @@ class AppInfoTest {
             }
         }
 
-        composeTestRule.onNodeWithText(LABEL).assertIsDisplayed()
+        composeTestRule.waitUntilExists(hasText(LABEL))
     }
 
     @Test
