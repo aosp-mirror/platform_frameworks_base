@@ -25,12 +25,4 @@ class TransportTestClass(cdm_base_test.BaseTestClass):
 
 
 if __name__ == '__main__':
-    try:
-        # Take test args and remove standalone '--' from the list
-        index = sys.argv.index('--')
-        sys.argv = sys.argv[:1] + sys.argv[index + 1:]
-    except ValueError:
-        # Ignore if '--' is not in args
-        pass
-
     test_runner.main()
