@@ -121,7 +121,7 @@ object KeyguardBouncerViewBinder {
                             view.visibility = if (isShowing) View.VISIBLE else View.INVISIBLE
                             if (isShowing) {
                                 // Reset security container because these views are not reinflated.
-                                securityContainerController.reset()
+                                securityContainerController.prepareToShow()
                                 securityContainerController.reinflateViewFlipper {
                                     // Reset Security Container entirely.
                                     securityContainerController.onBouncerVisibilityChanged(
