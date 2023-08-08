@@ -442,7 +442,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            final Rect sourceHintRect = getValidSourceHintRect(info, currentBounds);
+            final Rect sourceHintRect = getValidSourceHintRect(info, currentBounds,
+                    destinationBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, sourceHintRect,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
                     null /* updateBoundsCallback */);
@@ -457,14 +458,17 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     /**
      * Returns the source hint rect if it is valid (if provided and is contained by the current
-     * task bounds).
+     * task bounds and not too small).
      */
-    private Rect getValidSourceHintRect(ActivityManager.RunningTaskInfo info, Rect sourceBounds) {
+    private Rect getValidSourceHintRect(ActivityManager.RunningTaskInfo info, Rect sourceBounds,
+            Rect destinationBounds) {
         final Rect sourceHintRect = info.pictureInPictureParams != null
                 && info.pictureInPictureParams.hasSourceBoundsHint()
                 ? info.pictureInPictureParams.getSourceRectHint()
                 : null;
-        if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)) {
+        if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)
+                && sourceHintRect.width() > destinationBounds.width()
+                && sourceHintRect.height() > destinationBounds.height()) {
             return sourceHintRect;
         }
         return null;
