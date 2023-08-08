@@ -63,6 +63,8 @@ public class ImageFloatingTextView extends TextView {
     public ImageFloatingTextView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL_FAST);
+        setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY);
     }
 
     @Override
@@ -83,8 +85,8 @@ public class ImageFloatingTextView extends TextView {
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
                 .setUseLineSpacingFromFallbacks(true)
-                .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
-                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL_FAST);
+                .setBreakStrategy(getBreakStrategy())
+                .setHyphenationFrequency(getHyphenationFrequency());
         int maxLines;
         if (mMaxLinesForHeight > 0) {
             maxLines = mMaxLinesForHeight;
