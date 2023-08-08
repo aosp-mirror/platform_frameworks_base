@@ -34,7 +34,6 @@ import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import androidx.annotation.WorkerThread;
@@ -122,8 +121,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
     };
 
-
-   protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
+    protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
 
     /**
      * @param opArrays the given op arrays.

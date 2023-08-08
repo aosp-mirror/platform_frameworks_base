@@ -21,6 +21,8 @@ import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
 import static com.android.systemui.appops.AppOpsControllerImpl.OPS_MIC;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
@@ -66,6 +68,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -543,69 +546,114 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
     @Test
     public void testAudioFilteredWhenMicDisabled() {
-        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_CAMERA},
-                mCallback);
+        int micOp = AppOpsManager.OP_RECORD_AUDIO;
+        int nonMicOp = AppOpsManager.OP_CAMERA;
+
+        // Add callbacks for the micOp and nonMicOp, called for the micOp active state change,
+        // verify the micOp is the only active op returned.
+        mController.addCallback(new int[]{micOp, nonMicOp}, mCallback);
         mTestableLooper.processAllMessages();
         mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+                AppOpsManager.opToPublicName(micOp), TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
-        List<AppOpItem> list = mController.getActiveAppOps();
-        assertEquals(1, list.size());
-        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(0).getCode());
-        assertFalse(list.get(0).isDisabled());
+        verifySingleActiveOps(micOp);
 
-        // Add a camera op, and disable the microphone. The camera op should be the only op returned
+        // Add a non-mic op, and disable the microphone. The camera op should be the only active op
+        // returned.
         mController.onSensorBlockedChanged(MICROPHONE, true);
-        mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(nonMicOp), TEST_UID_OTHER,
+                TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
-        list = mController.getActiveAppOps();
-        assertEquals(1, list.size());
-        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+        verifySingleActiveOps(nonMicOp);
 
-
-        // Re enable the microphone, and verify the op returns
+        // Re-enable the microphone, and verify the active op returns.
         mController.onSensorBlockedChanged(MICROPHONE, false);
         mTestableLooper.processAllMessages();
-
-        list = mController.getActiveAppOps();
-        assertEquals(2, list.size());
-        int micIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 1 : 0;
-        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(micIdx).getCode());
+        verifyActiveOps(micOp, nonMicOp);
     }
 
     @Test
     public void testPhoneCallMicrophoneFilteredWhenMicDisabled() {
-        mController.addCallback(
-                new int[]{AppOpsManager.OP_PHONE_CALL_MICROPHONE, AppOpsManager.OP_CAMERA},
-                mCallback);
+        int micOp = AppOpsManager.OP_PHONE_CALL_MICROPHONE;
+        int nonMicOp = AppOpsManager.OP_CAMERA;
+
+        // Add callbacks for the micOp and nonMicOp, called for the micOp active state change,
+        // verify the micOp is the only active op returned.
+        mController.addCallback(new int[]{micOp, nonMicOp}, mCallback);
         mTestableLooper.processAllMessages();
         mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_PHONE_CALL_MICROPHONE, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+                AppOpsManager.opToPublicName(micOp), TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
-        List<AppOpItem> list = mController.getActiveAppOps();
-        assertEquals(1, list.size());
-        assertEquals(AppOpsManager.OP_PHONE_CALL_MICROPHONE, list.get(0).getCode());
-        assertFalse(list.get(0).isDisabled());
+        verifySingleActiveOps(micOp);
 
-        // Add a camera op, and disable the microphone. The camera op should be the only op returned
+        // Add a non-mic op, and disable the microphone. The camera op should be the only active op
+        // returned.
         mController.onSensorBlockedChanged(MICROPHONE, true);
-        mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(nonMicOp), TEST_UID_OTHER,
+                TEST_PACKAGE_NAME, true);
         mTestableLooper.processAllMessages();
-        list = mController.getActiveAppOps();
-        assertEquals(1, list.size());
-        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+        verifySingleActiveOps(nonMicOp);
 
-
-        // Re enable the microphone, and verify the op returns
+        // Re-enable the microphone, and verify the active op returns.
         mController.onSensorBlockedChanged(MICROPHONE, false);
         mTestableLooper.processAllMessages();
+        verifyActiveOps(micOp, nonMicOp);
+    }
 
-        list = mController.getActiveAppOps();
-        assertEquals(2, list.size());
-        int micIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 1 : 0;
-        assertEquals(AppOpsManager.OP_PHONE_CALL_MICROPHONE, list.get(micIdx).getCode());
+    @Test
+    public void testAmbientTriggerMicrophoneFilteredWhenMicDisabled() {
+        int micOp = AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+        int nonMicOp = AppOpsManager.OP_CAMERA;
+
+        // Add callbacks for the micOp and nonMicOp, called for the micOp active state change,
+        // verify the micOp is the only active op returned.
+        mController.addCallback(new int[]{micOp, nonMicOp}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.opToPublicName(micOp), TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        verifySingleActiveOps(micOp);
+
+        // Add a non-mic op, and disable the microphone. The camera op should be the only active op
+        // returned.
+        mController.onSensorBlockedChanged(MICROPHONE, true);
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(nonMicOp), TEST_UID_OTHER,
+                TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        verifySingleActiveOps(nonMicOp);
+
+        // Re-enable the microphone, and verify the active op returns.
+        mController.onSensorBlockedChanged(MICROPHONE, false);
+        mTestableLooper.processAllMessages();
+        verifyActiveOps(micOp, nonMicOp);
+    }
+
+    @Test
+    public void testSandboxTriggerMicrophoneFilteredWhenMicDisabled() {
+        int micOp = AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
+        int nonMicOp = AppOpsManager.OP_CAMERA;
+
+        // Add callbacks for the micOp and nonMicOp, called for the micOp active state change,
+        // verify the micOp is the only active op returned.
+        mController.addCallback(new int[]{micOp, nonMicOp}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.opToPublicName(micOp), TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        verifySingleActiveOps(micOp);
+
+        // Add a non-mic op, and disable the microphone. The camera op should be the only active op
+        // returned.
+        mController.onSensorBlockedChanged(MICROPHONE, true);
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(nonMicOp), TEST_UID_OTHER,
+                TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        verifySingleActiveOps(nonMicOp);
+
+        // Re-enable the microphone, and verify the active op returns.
+        mController.onSensorBlockedChanged(MICROPHONE, false);
+        mTestableLooper.processAllMessages();
+        verifyActiveOps(micOp, nonMicOp);
     }
 
     @Test
@@ -706,6 +754,22 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         inOrder.verify(mCallback).onActiveStateChanged(
                 micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
+    }
+
+    private void verifySingleActiveOps(int op) {
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(op, list.get(0).getCode());
+        assertFalse(list.get(0).isDisabled());
+    }
+
+    private void verifyActiveOps(int micOp, int nonMicOp) {
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(2, list.size());
+        List<Integer> codes = Arrays.asList(list.get(0).getCode(), list.get(1).getCode());
+        assertThat(codes).containsExactly(micOp, nonMicOp);
+        assertFalse(list.get(0).isDisabled());
+        assertFalse(list.get(1).isDisabled());
     }
 
     private class TestHandler extends AppOpsControllerImpl.H {
