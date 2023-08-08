@@ -19,6 +19,14 @@ package com.android.server.audio;
 import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
+import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
+import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
+import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
+import static android.media.AudioManager.DEVICE_OUT_BLE_HEADSET;
+import static android.media.AudioManager.DEVICE_OUT_BLE_SPEAKER;
+import static android.media.AudioManager.DEVICE_OUT_BLUETOOTH_A2DP;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
@@ -91,6 +99,7 @@ import android.media.AudioFocusRequest;
 import android.media.AudioFormat;
 import android.media.AudioHalVersionInfo;
 import android.media.AudioManager;
+import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioManagerInternal;
 import android.media.AudioMixerAttributes;
 import android.media.AudioPlaybackConfiguration;
@@ -402,6 +411,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 100;
     private static final int MSG_INIT_STREAMS_VOLUMES = 101;
     private static final int MSG_INIT_SPATIALIZER = 102;
+    private static final int MSG_INIT_ADI_DEVICE_STATES = 103;
 
     // end of messages handled under wakelock
 
@@ -1250,6 +1260,8 @@ public class AudioService extends IAudioService.Stub
         // done with service initialization, continue additional work in our Handler thread
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_STREAMS_VOLUMES,
                 0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
+        queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_ADI_DEVICE_STATES,
+                0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
     }
@@ -7335,7 +7347,7 @@ public class AudioService extends IAudioService.Stub
         if (pkgName == null) {
             pkgName = "";
         }
-        if (device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP) {
+        if (device.getType() == TYPE_BLUETOOTH_A2DP) {
             avrcpSupportsAbsoluteVolume(device.getAddress(),
                     deviceVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
             return;
@@ -9213,6 +9225,11 @@ public class AudioService extends IAudioService.Stub
                     mAudioEventWakeLock.release();
                     break;
 
+                case MSG_INIT_ADI_DEVICE_STATES:
+                    onInitAdiDeviceStates();
+                    mAudioEventWakeLock.release();
+                    break;
+
                 case MSG_INIT_SPATIALIZER:
                     onInitSpatializer();
                     mAudioEventWakeLock.release();
@@ -10277,8 +10294,13 @@ public class AudioService extends IAudioService.Stub
                 /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
     }
 
-    void onInitSpatializer() {
+    void onInitAdiDeviceStates() {
         mDeviceBroker.onReadAudioDeviceSettings();
+        mSoundDoseHelper.initCachedAudioDeviceCategories(
+                mDeviceBroker.getImmutableDeviceInventory());
+    }
+
+    void onInitSpatializer() {
         mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
         mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
     }
@@ -10670,6 +10692,51 @@ public class AudioService extends IAudioService.Stub
     public boolean isCsdEnabled() {
         super.isCsdEnabled_enforcePermission();
         return mSoundDoseHelper.isCsdEnabled();
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
+            @AudioDeviceCategory int btAudioDeviceCategory) {
+        super.setBluetoothAudioDeviceCategory_enforcePermission();
+
+        final String addr = Objects.requireNonNull(address);
+
+        AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(addr, isBle);
+
+        int internalType = !isBle ? DEVICE_OUT_BLUETOOTH_A2DP
+                : ((btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES)
+                        ? DEVICE_OUT_BLE_HEADSET : DEVICE_OUT_BLE_SPEAKER);
+        int deviceType = !isBle ? TYPE_BLUETOOTH_A2DP
+                : ((btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES) ? TYPE_BLE_HEADSET
+                        : TYPE_BLE_SPEAKER);
+
+        if (deviceState == null) {
+            deviceState = new AdiDeviceState(deviceType, internalType, addr);
+        }
+
+        deviceState.setAudioDeviceCategory(btAudioDeviceCategory);
+
+        mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
+        mDeviceBroker.persistAudioDeviceSettings();
+
+        mSoundDoseHelper.setAudioDeviceCategory(addr, internalType,
+                btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES);
+    }
+
+    @Override
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @AudioDeviceCategory
+    public int getBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle) {
+        super.getBluetoothAudioDeviceCategory_enforcePermission();
+
+        final AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(
+                Objects.requireNonNull(address), isBle);
+        if (deviceState == null) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+
+        return deviceState.getAudioDeviceCategory();
     }
 
     //==========================================================================================

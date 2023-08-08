@@ -15,6 +15,8 @@
  */
 package com.android.server.audio;
 
+import static android.media.AudioSystem.DEVICE_OUT_ALL_A2DP_SET;
+import static android.media.AudioSystem.DEVICE_OUT_ALL_BLE_SET;
 import static android.media.AudioSystem.isBluetoothDevice;
 
 import android.annotation.NonNull;
@@ -61,11 +63,13 @@ import com.google.android.collect.Sets;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -90,38 +94,95 @@ public class AudioDeviceInventory {
     private static final String mMetricsId = "audio.device.";
 
     private final Object mDeviceInventoryLock = new Object();
+
     @GuardedBy("mDeviceInventoryLock")
-    private final ArrayList<AdiDeviceState> mDeviceInventory = new ArrayList<>(0);
+    private final HashMap<Pair<Integer, String>, AdiDeviceState> mDeviceInventory = new HashMap<>();
 
-
-    List<AdiDeviceState> getImmutableDeviceInventory() {
+    Collection<AdiDeviceState> getImmutableDeviceInventory() {
         synchronized (mDeviceInventoryLock) {
-            return List.copyOf(mDeviceInventory);
+            return mDeviceInventory.values();
         }
     }
 
-    void addDeviceStateToInventory(AdiDeviceState deviceState) {
+    /**
+     * Adds a new AdiDeviceState or updates the spatial audio related properties of the matching
+     * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
+     * @param deviceState the device to update
+     */
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
         synchronized (mDeviceInventoryLock) {
-            mDeviceInventory.add(deviceState);
+            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState, (oldState, newState) -> {
+                oldState.setHasHeadTracker(newState.hasHeadTracker());
+                oldState.setHeadTrackerEnabled(newState.isHeadTrackerEnabled());
+                oldState.setSAEnabled(newState.isSAEnabled());
+                return oldState;
+            });
         }
     }
 
-    AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
-            int canonicalDeviceType) {
-        final boolean isWireless = isBluetoothDevice(ada.getInternalType());
-
+    /**
+     * Adds a new AdiDeviceState or updates the audio device cateogory of the matching
+     * AdiDeviceState in the {@link AudioDeviceInventory#mDeviceInventory} list.
+     * @param deviceState the device to update
+     */
+    void addOrUpdateAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
         synchronized (mDeviceInventoryLock) {
-            for (AdiDeviceState deviceSetting : mDeviceInventory) {
-                if (deviceSetting.getDeviceType() == canonicalDeviceType
-                        && (!isWireless || ada.getAddress().equals(
-                        deviceSetting.getDeviceAddress()))) {
-                    return deviceSetting;
+            mDeviceInventory.merge(deviceState.getDeviceId(), deviceState, (oldState, newState) -> {
+                oldState.setAudioDeviceCategory(newState.getAudioDeviceCategory());
+                return oldState;
+            });
+        }
+    }
+
+    /**
+     * Finds the BT device that matches the passed {@code address}. Currently, this method only
+     * returns a valid device for A2DP and BLE devices.
+     *
+     * @param address MAC address of BT device
+     * @param isBle true if the device is BLE, false for A2DP
+     * @return the found {@link AdiDeviceState} or {@code null} otherwise.
+     */
+    @Nullable
+    AdiDeviceState findBtDeviceStateForAddress(String address, boolean isBle) {
+        synchronized (mDeviceInventoryLock) {
+            final Set<Integer> deviceSet = isBle ? DEVICE_OUT_ALL_BLE_SET : DEVICE_OUT_ALL_A2DP_SET;
+            for (Integer internalType : deviceSet) {
+                AdiDeviceState deviceState = mDeviceInventory.get(
+                        new Pair<>(internalType, address));
+                if (deviceState != null) {
+                    return deviceState;
                 }
             }
         }
         return null;
     }
 
+    /**
+     * Finds the device state that matches the passed {@link AudioDeviceAttributes} and device
+     * type. Note: currently this method only returns a valid device for A2DP and BLE devices.
+     *
+     * @param ada attributes of device to match
+     * @param canonicalDeviceType external device type to match
+     * @return the found {@link AdiDeviceState} matching a cached A2DP or BLE device or
+     *         {@code null} otherwise.
+     */
+    @Nullable
+    AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
+            int canonicalDeviceType) {
+        final boolean isWireless = isBluetoothDevice(ada.getInternalType());
+        synchronized (mDeviceInventoryLock) {
+            for (AdiDeviceState deviceState : mDeviceInventory.values()) {
+                if (deviceState.getDeviceType() == canonicalDeviceType
+                        && (!isWireless || ada.getAddress().equals(
+                        deviceState.getDeviceAddress()))) {
+                    return deviceState;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Clears all cached {@link AdiDeviceState}'s. */
     void clearDeviceInventory() {
         synchronized (mDeviceInventoryLock) {
             mDeviceInventory.clear();
@@ -387,7 +448,7 @@ public class AudioDeviceInventory {
                     +  " role:" + key.second + " devices:" + devices); });
         pw.println("\ndevices:\n");
         synchronized (mDeviceInventoryLock) {
-            for (AdiDeviceState device : mDeviceInventory) {
+            for (AdiDeviceState device : mDeviceInventory.values()) {
                 pw.println("\t" + device + "\n");
             }
         }
@@ -1235,11 +1296,11 @@ public class AudioDeviceInventory {
             AudioDeviceInfo[] connectedDevices = AudioManager.getDevicesStatic(
                     AudioManager.GET_DEVICES_ALL);
 
-            Iterator<Map.Entry<Pair<Integer, Integer>, List<AudioDeviceAttributes>>> itRole =
+            Iterator<Entry<Pair<Integer, Integer>, List<AudioDeviceAttributes>>> itRole =
                     rolesMap.entrySet().iterator();
 
             while (itRole.hasNext()) {
-                Map.Entry<Pair<Integer, Integer>, List<AudioDeviceAttributes>> entry =
+                Entry<Pair<Integer, Integer>, List<AudioDeviceAttributes>> entry =
                         itRole.next();
                 Pair<Integer, Integer> keyRole = entry.getKey();
                 Iterator<AudioDeviceAttributes> itDev = rolesMap.get(keyRole).iterator();
@@ -2426,19 +2487,20 @@ public class AudioDeviceInventory {
         int deviceCatalogSize = 0;
         synchronized (mDeviceInventoryLock) {
             deviceCatalogSize = mDeviceInventory.size();
-        }
-        final StringBuilder settingsBuilder = new StringBuilder(
-                deviceCatalogSize * AdiDeviceState.getPeristedMaxSize());
 
-        synchronized (mDeviceInventoryLock) {
-            for (int i = 0; i < mDeviceInventory.size(); i++) {
-                settingsBuilder.append(mDeviceInventory.get(i).toPersistableString());
-                if (i != mDeviceInventory.size() - 1) {
-                    settingsBuilder.append(SETTING_DEVICE_SEPARATOR_CHAR);
-                }
+            final StringBuilder settingsBuilder = new StringBuilder(
+                            deviceCatalogSize * AdiDeviceState.getPeristedMaxSize());
+
+            Iterator<AdiDeviceState> iterator = mDeviceInventory.values().iterator();
+            if (iterator.hasNext()) {
+                settingsBuilder.append(iterator.next().toPersistableString());
             }
+            while (iterator.hasNext()) {
+                settingsBuilder.append(SETTING_DEVICE_SEPARATOR_CHAR);
+                settingsBuilder.append(iterator.next().toPersistableString());
+            }
+            return settingsBuilder.toString();
         }
-        return settingsBuilder.toString();
     }
 
     /*package*/ void setDeviceSettings(String settings) {
@@ -2451,7 +2513,8 @@ public class AudioDeviceInventory {
             // Note if the device is not compatible with spatialization mode or the device
             // type is not canonical, it will be ignored in {@link SpatializerHelper}.
             if (devState != null) {
-                addDeviceStateToInventory(devState);
+                addOrUpdateDeviceSAStateInInventory(devState);
+                addOrUpdateAudioDeviceCategoryInInventory(devState);
             }
         }
     }
