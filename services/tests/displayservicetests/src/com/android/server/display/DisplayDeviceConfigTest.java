@@ -112,8 +112,6 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(mDisplayDeviceConfig.getBrightness(), BRIGHTNESS, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getNits(), NITS, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getBacklight(), BRIGHTNESS, ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
-        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
                 float[]{0.0f, 50.0f, 80.0f}, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
@@ -540,6 +538,16 @@ public final class DisplayDeviceConfigTest {
         assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);
     }
 
+    @Test
+    public void testLightDebounceFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounceIdle(), 2500);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounceIdle(), 1500);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -704,6 +712,12 @@ public final class DisplayDeviceConfigTest {
                 +   "<autoBrightness>\n"
                 +       "<brighteningLightDebounceMillis>2000</brighteningLightDebounceMillis>\n"
                 +       "<darkeningLightDebounceMillis>1000</darkeningLightDebounceMillis>\n"
+                +       "<brighteningLightDebounceIdleMillis>"
+                +           "2500"
+                +       "</brighteningLightDebounceIdleMillis>\n"
+                +       "<darkeningLightDebounceIdleMillis>"
+                +           "1500"
+                +       "</darkeningLightDebounceIdleMillis>\n"
                 +       "<displayBrightnessMapping>\n"
                 +            "<displayBrightnessPoint>\n"
                 +                "<lux>50</lux>\n"
