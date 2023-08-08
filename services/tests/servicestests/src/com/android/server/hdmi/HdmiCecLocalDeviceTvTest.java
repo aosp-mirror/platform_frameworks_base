@@ -174,6 +174,20 @@ public class HdmiCecLocalDeviceTvTest {
                     protected boolean earcBlocksArcConnection() {
                         return mEarcBlocksArc;
                     }
+
+                    /**
+                     * Override displayOsd to prevent it from broadcasting an intent, which
+                     * can trigger a SecurityException.
+                    */
+                    @Override
+                    void displayOsd(int messageId) {
+                        // do nothing
+                    }
+
+                    @Override
+                    void displayOsd(int messageId, int extra) {
+                        // do nothing
+                    }
                 };
 
         mHdmiControlService.setIoLooper(mMyLooper);
