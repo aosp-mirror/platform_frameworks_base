@@ -4820,7 +4820,7 @@ public class RemoteViews implements Parcelable, Filter {
     public static boolean isAdapterConversionEnabled() {
         return AppGlobals.getIntCoreSetting(
                 SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
-                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) == 1;
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) != 0;
     }
 
     /**
