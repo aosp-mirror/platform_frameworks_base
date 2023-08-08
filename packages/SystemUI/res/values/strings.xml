@@ -3053,13 +3053,6 @@
     <string name="wallet_quick_affordance_unavailable_configure_the_app">To add the Wallet app as a shortcut, make sure at least one card has been added</string>
 
     <!--
-    Requirement for the QR code scanner functionality to be available for the user to use. This is
-    shown as part of a bulleted list of requirements. When all requirements are met, the piece of
-    functionality can be accessed through a shortcut button on the lock screen. [CHAR LIMIT=NONE].
-    -->
-    <string name="qr_scanner_quick_affordance_unavailable_explanation">To add the QR code scanner as a shortcut, make sure a camera app is installed</string>
-
-    <!--
     Explains that the lock screen shortcut for the "home" app is not available because the app isn't
     installed. This is shown as part of a dialog that explains to the user why they cannot select
     this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
