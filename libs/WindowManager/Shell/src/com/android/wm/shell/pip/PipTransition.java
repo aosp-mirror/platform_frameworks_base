@@ -447,7 +447,7 @@ public class PipTransition extends PipTransitionController {
         // handler if there is a pending PiP animation.
         final Transitions.TransitionFinishCallback finishCallback = mFinishCallback;
         mFinishCallback = null;
-        finishCallback.onTransitionFinished(wct, null /* callback */);
+        finishCallback.onTransitionFinished(wct);
     }
 
     @Override
@@ -456,7 +456,7 @@ public class PipTransition extends PipTransitionController {
         // for example, when app crashes while in PiP and exit transition has not started
         mCurrentPipTaskToken = null;
         if (mFinishCallback == null) return;
-        mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
+        mFinishCallback.onTransitionFinished(null /* wct */);
         mFinishCallback = null;
         mFinishTransaction = null;
     }
@@ -586,7 +586,7 @@ public class PipTransition extends PipTransitionController {
         final boolean useLocalLeash = activitySc != null;
         final boolean toFullscreen = pipChange.getEndAbsBounds().equals(
                 mPipBoundsState.getDisplayBounds());
-        mFinishCallback = (wct, wctCB) -> {
+        mFinishCallback = (wct) -> {
             mPipOrganizer.onExitPipFinished(taskInfo);
 
             // TODO(b/286346098): remove the OPEN app flicker completely
@@ -610,7 +610,7 @@ public class PipTransition extends PipTransitionController {
                 mPipAnimationController.resetAnimatorState();
                 finishTransaction.remove(pipLeash);
             }
-            finishCallback.onTransitionFinished(wct, wctCB);
+            finishCallback.onTransitionFinished(wct);
         };
         mFinishTransaction = finishTransaction;
 
@@ -750,7 +750,7 @@ public class PipTransition extends PipTransitionController {
         finishTransaction.setWindowCrop(info.getChanges().get(0).getLeash(),
                 mPipDisplayLayoutState.getDisplayBounds());
         mPipOrganizer.onExitPipFinished(taskInfo);
-        finishCallback.onTransitionFinished(null, null);
+        finishCallback.onTransitionFinished(null);
     }
 
     /** Whether we should handle the given {@link TransitionInfo} animation as entering PIP. */
@@ -1045,7 +1045,7 @@ public class PipTransition extends PipTransitionController {
         startTransaction.apply();
 
         mPipOrganizer.onExitPipFinished(taskInfo);
-        finishCallback.onTransitionFinished(null, null);
+        finishCallback.onTransitionFinished(null);
     }
 
     private void resetPrevPip(@NonNull TransitionInfo.Change prevPipTaskChange,

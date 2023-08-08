@@ -19,7 +19,6 @@ package com.android.wm.shell.keyguard;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -169,7 +168,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                             // Post our finish callback to let startAnimation finish first.
                             mMainExecutor.executeDelayed(() -> {
                                 mStartedTransitions.remove(transition);
-                                finishCallback.onTransitionFinished(wct, null);
+                                finishCallback.onTransitionFinished(wct);
                             }, 0);
                         }
                     });
@@ -206,7 +205,7 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                 // implementing an AIDL interface.
                 Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
             }
-            nextFinishCallback.onTransitionFinished(null, null);
+            nextFinishCallback.onTransitionFinished(null);
         } else if (nextInfo.getType() == TRANSIT_SLEEP) {
             // An empty SLEEP transition comes in as a signal to abort transitions whenever a sleep
             // token is held. In cases where keyguard is showing, we are running the animation for

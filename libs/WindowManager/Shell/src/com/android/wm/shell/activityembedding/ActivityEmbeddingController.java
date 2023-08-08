@@ -186,6 +186,6 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
         if (callback == null) {
             throw new IllegalStateException("No finish callback found");
         }
-        callback.onTransitionFinished(null /* wct */, null /* wctCB */);
+        callback.onTransitionFinished(null /* wct */);
     }
 }
