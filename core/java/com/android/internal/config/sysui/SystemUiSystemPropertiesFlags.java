@@ -70,10 +70,6 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag OTP_REDACTION =
                 devFlag("persist.sysui.notification.otp_redaction");
 
-        /** Gating the removal of sorting-notifications-by-interruptiveness. */
-        public static final Flag NO_SORT_BY_INTERRUPTIVENESS =
-                releasedFlag("persist.sysui.notification.no_sort_by_interruptiveness");
-
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
                 releasedFlag("persist.sysui.notification.log_dnd_state_events");
