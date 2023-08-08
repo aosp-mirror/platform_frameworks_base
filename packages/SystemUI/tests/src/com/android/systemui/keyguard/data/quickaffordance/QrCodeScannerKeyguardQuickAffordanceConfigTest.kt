@@ -137,27 +137,18 @@ class QrCodeScannerKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_enabledIfConfiguredOnDevice_canOpenCamera() = runTest {
-        whenever(controller.isAvailableOnDevice).thenReturn(true)
-        whenever(controller.isAbleToOpenCameraApp).thenReturn(true)
+    fun getPickerScreenState_enabledIfConfiguredOnDevice_isEnabledForPickerState() = runTest {
+        whenever(controller.isAllowedOnLockScreen).thenReturn(true)
+        whenever(controller.isAbleToLaunchScannerActivity).thenReturn(true)
 
         assertThat(underTest.getPickerScreenState())
             .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
     }
 
     @Test
-    fun getPickerScreenState_disabledIfConfiguredOnDevice_cannotOpenCamera() = runTest {
-        whenever(controller.isAvailableOnDevice).thenReturn(true)
-        whenever(controller.isAbleToOpenCameraApp).thenReturn(false)
-
-        assertThat(underTest.getPickerScreenState())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java)
-    }
-
-    @Test
-    fun getPickerScreenState_unavailableIfNotConfiguredOnDevice() = runTest {
-        whenever(controller.isAvailableOnDevice).thenReturn(false)
-        whenever(controller.isAbleToOpenCameraApp).thenReturn(true)
+    fun getPickerScreenState_disabledIfConfiguredOnDevice_isDisabledForPickerState() = runTest {
+        whenever(controller.isAllowedOnLockScreen).thenReturn(true)
+        whenever(controller.isAbleToLaunchScannerActivity).thenReturn(false)
 
         assertThat(underTest.getPickerScreenState())
             .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
