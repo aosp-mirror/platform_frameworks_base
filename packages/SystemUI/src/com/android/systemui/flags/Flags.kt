@@ -229,6 +229,12 @@ object Flags {
     val WALLPAPER_PICKER_PAGE_TRANSITIONS =
         unreleasedFlag(291710220, "wallpaper_picker_page_transitions")
 
+    /** Add "Apply" button to wall paper picker's grid preview page. */
+    // TODO(b/294866904): Tracking bug.
+    @JvmField
+    val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
+            unreleasedFlag(294866904, "wallpaper_picker_grid_apply_button")
+
     /** Whether to run the new udfps keyguard refactor code. */
     // TODO(b/279440316): Tracking bug.
     @JvmField
