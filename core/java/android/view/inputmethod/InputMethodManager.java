@@ -2165,7 +2165,7 @@ public final class InputMethodManager {
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            return fallbackImm.showSoftInput(view, flags, resultReceiver);
+            return fallbackImm.showSoftInput(view, statsToken, flags, resultReceiver, reason);
         }
 
         checkFocus();
