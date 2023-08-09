@@ -15,7 +15,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -54,8 +53,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -72,8 +71,8 @@ import org.mockito.ArgumentCaptor;
 @RunWithLooper()
 public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider =
-            mock(NotificationInterruptStateProvider.class);
+    private final VisualInterruptionDecisionProvider mVisualInterruptionDecisionProvider =
+            mock(VisualInterruptionDecisionProvider.class);
     private NotificationInterruptSuppressor mInterruptSuppressor;
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
@@ -125,14 +124,14 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
                 mInitController,
-                mNotificationInterruptStateProvider,
+                mVisualInterruptionDecisionProvider,
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationRemoteInputManager.Callback.class),
                 mock(NotificationListContainer.class));
         mInitController.executePostInitTasks();
         ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
                 ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);
-        verify(mNotificationInterruptStateProvider).addSuppressor(suppressorCaptor.capture());
+        verify(mVisualInterruptionDecisionProvider).addLegacySuppressor(suppressorCaptor.capture());
         mInterruptSuppressor = suppressorCaptor.getValue();
     }
 

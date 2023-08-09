@@ -53,8 +53,8 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
@@ -116,7 +116,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             NotificationMediaManager notificationMediaManager,
             NotificationGutsManager notificationGutsManager,
             InitController initController,
-            NotificationInterruptStateProvider notificationInterruptStateProvider,
+            VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             NotificationRemoteInputManager remoteInputManager,
             NotificationRemoteInputManager.Callback remoteInputManagerCallback,
             NotificationListContainer notificationListContainer) {
@@ -162,7 +162,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         initController.addPostInitTask(() -> {
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
-            notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
+            visualInterruptionDecisionProvider.addLegacySuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mOnSettingsClickListener);
