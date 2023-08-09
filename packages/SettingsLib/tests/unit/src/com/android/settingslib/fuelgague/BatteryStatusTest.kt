@@ -16,6 +16,7 @@
 
 package com.android.settingslib.fuelgague
 
+import android.content.Context
 import android.content.Intent
 import android.os.BatteryManager
 import android.os.BatteryManager.BATTERY_PLUGGED_AC
@@ -26,13 +27,20 @@ import android.os.BatteryManager.BATTERY_STATUS_FULL
 import android.os.BatteryManager.BATTERY_STATUS_UNKNOWN
 import android.os.BatteryManager.CHARGING_POLICY_ADAPTIVE_LONGLIFE
 import android.os.BatteryManager.CHARGING_POLICY_DEFAULT
-import android.os.BatteryManager.EXTRA_CHARGING_STATUS
+import android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT
+import android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE
 import android.os.OsProtoEnums.BATTERY_PLUGGED_NONE
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.fuelgauge.BatteryStatus
+import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_FAST
+import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_REGULAR
+import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_SLOWLY
+import com.android.settingslib.fuelgauge.BatteryStatus.CHARGING_UNKNOWN
 import com.android.settingslib.fuelgauge.BatteryStatus.isBatteryDefender
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import java.util.Optional
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -44,11 +52,13 @@ import org.junit.runners.Suite.SuiteClasses
     BatteryStatusTest.NonParameterizedTest::class,
     BatteryStatusTest.IsPluggedInTest::class,
     BatteryStatusTest.IsChargedTest::class,
+    BatteryStatusTest.GetChargingSpeedTest::class,
+    BatteryStatusTest.IsPluggedInDockTest::class,
 )
-class BatteryStatusTest {
+open class BatteryStatusTest {
 
     @RunWith(AndroidJUnit4::class)
-    class NonParameterizedTest {
+    class NonParameterizedTest : BatteryStatusTest() {
         @Test
         fun isLowBattery_20Percent_returnsTrue() {
             val level = 20
@@ -135,16 +145,6 @@ class BatteryStatusTest {
 
                 fun isFalse() = assertions.forEach { it.isFalse() }
             }
-
-        private fun createIntent(
-            batteryLevel: Int = 50,
-            chargingStatus: Int = CHARGING_POLICY_DEFAULT
-        ): Intent =
-            Intent().apply {
-                putExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
-                putExtra(BatteryManager.EXTRA_SCALE, 100)
-                putExtra(EXTRA_CHARGING_STATUS, chargingStatus)
-            }
     }
 
     @RunWith(Parameterized::class)
@@ -152,12 +152,11 @@ class BatteryStatusTest {
         private val name: String,
         private val plugged: Int,
         val expected: Boolean
-    ) {
+    ) : BatteryStatusTest() {
 
         @Test
         fun isPluggedIn_() {
-            val batteryChangedIntent =
-                Intent().apply { putExtra(BatteryManager.EXTRA_PLUGGED, plugged) }
+            val batteryChangedIntent = createIntent(plugged = plugged)
 
             assertWithMessage("failed by isPluggedIn(plugged=$plugged)")
                 .that(BatteryStatus.isPluggedIn(plugged))
@@ -182,20 +181,48 @@ class BatteryStatusTest {
     }
 
     @RunWith(Parameterized::class)
+    class IsPluggedInDockTest(
+        private val name: String,
+        private val plugged: Int,
+        val expected: Boolean
+    ) : BatteryStatusTest() {
+
+        @Test
+        fun isPluggedDockIn_() {
+            val batteryChangedIntent = createIntent(plugged = plugged)
+
+            assertWithMessage("failed by isPluggedInDock(plugged=$plugged)")
+                .that(BatteryStatus.isPluggedInDock(plugged))
+                .isEqualTo(expected)
+            assertWithMessage("failed by isPluggedInDock(Intent), which plugged=$plugged")
+                .that(BatteryStatus.isPluggedInDock(batteryChangedIntent))
+                .isEqualTo(expected)
+        }
+
+        companion object {
+            @Parameterized.Parameters(name = "{0}")
+            @JvmStatic
+            fun parameters() =
+                arrayListOf(
+                    arrayOf("withAC_returnsTrue", BATTERY_PLUGGED_AC, false),
+                    arrayOf("withDock_returnsTrue", BATTERY_PLUGGED_DOCK, true),
+                    arrayOf("withUSB_returnsTrue", BATTERY_PLUGGED_USB, false),
+                    arrayOf("withWireless_returnsTrue", BATTERY_PLUGGED_WIRELESS, false),
+                    arrayOf("pluggedNone_returnsTrue", BATTERY_PLUGGED_NONE, false),
+                )
+        }
+    }
+
+    @RunWith(Parameterized::class)
     class IsChargedTest(
         private val status: Int,
         private val batteryLevel: Int,
         private val expected: Boolean
-    ) {
+    ) : BatteryStatusTest() {
 
         @Test
         fun isCharged_() {
-            val batteryChangedIntent =
-                Intent().apply {
-                    putExtra(BatteryManager.EXTRA_STATUS, status)
-                    putExtra(BatteryManager.EXTRA_SCALE, 100)
-                    putExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
-                }
+            val batteryChangedIntent = createIntent(batteryLevel = batteryLevel, status = status)
 
             assertWithMessage(
                     "failed by isCharged(Intent), status=$status, batteryLevel=$batteryLevel"
@@ -219,4 +246,85 @@ class BatteryStatusTest {
                 )
         }
     }
+
+    @RunWith(Parameterized::class)
+    class GetChargingSpeedTest(
+        private val name: String,
+        private val maxChargingCurrent: Optional<Int>,
+        private val maxChargingVoltage: Optional<Int>,
+        private val expectedChargingSpeed: Int,
+    ) {
+
+        val context: Context = ApplicationProvider.getApplicationContext()
+
+        @Test
+        fun getChargingSpeed_() {
+            val batteryChangedIntent =
+                Intent(Intent.ACTION_BATTERY_CHANGED).apply {
+                    maxChargingCurrent.ifPresent { putExtra(EXTRA_MAX_CHARGING_CURRENT, it) }
+                    maxChargingVoltage.ifPresent { putExtra(EXTRA_MAX_CHARGING_VOLTAGE, it) }
+                }
+
+            assertThat(BatteryStatus.getChargingSpeed(context, batteryChangedIntent))
+                .isEqualTo(expectedChargingSpeed)
+        }
+
+        companion object {
+            @Parameterized.Parameters(name = "{0}")
+            @JvmStatic
+            fun parameters() =
+                arrayListOf(
+                    arrayOf(
+                        "maxCurrent=n/a, maxVoltage=n/a -> UNKNOWN",
+                        Optional.empty<Int>(),
+                        Optional.empty<Int>(),
+                        CHARGING_UNKNOWN
+                    ),
+                    arrayOf(
+                        "maxCurrent=0, maxVoltage=9000000 -> UNKNOWN",
+                        Optional.of(0),
+                        Optional.of(0),
+                        CHARGING_UNKNOWN
+                    ),
+                    arrayOf(
+                        "maxCurrent=1500000, maxVoltage=5000000 -> CHARGING_REGULAR",
+                        Optional.of(1500000),
+                        Optional.of(5000000),
+                        CHARGING_REGULAR
+                    ),
+                    arrayOf(
+                        "maxCurrent=1000000, maxVoltage=5000000 -> CHARGING_REGULAR",
+                        Optional.of(1000000),
+                        Optional.of(5000000),
+                        CHARGING_REGULAR
+                    ),
+                    arrayOf(
+                        "maxCurrent=1500001, maxVoltage=5000000 -> CHARGING_FAST",
+                        Optional.of(1501000),
+                        Optional.of(5000000),
+                        CHARGING_FAST
+                    ),
+                    arrayOf(
+                        "maxCurrent=999999, maxVoltage=5000000 -> CHARGING_SLOWLY",
+                        Optional.of(999999),
+                        Optional.of(5000000),
+                        CHARGING_SLOWLY
+                    ),
+                )
+        }
+    }
+
+    protected fun createIntent(
+        batteryLevel: Int = 50,
+        chargingStatus: Int = CHARGING_POLICY_DEFAULT,
+        plugged: Int = BATTERY_PLUGGED_NONE,
+        status: Int = BatteryManager.BATTERY_STATUS_CHARGING,
+    ): Intent =
+        Intent(Intent.ACTION_BATTERY_CHANGED).apply {
+            putExtra(BatteryManager.EXTRA_STATUS, status)
+            putExtra(BatteryManager.EXTRA_LEVEL, batteryLevel)
+            putExtra(BatteryManager.EXTRA_SCALE, 100)
+            putExtra(BatteryManager.EXTRA_CHARGING_STATUS, chargingStatus)
+            putExtra(BatteryManager.EXTRA_PLUGGED, plugged)
+        }
 }

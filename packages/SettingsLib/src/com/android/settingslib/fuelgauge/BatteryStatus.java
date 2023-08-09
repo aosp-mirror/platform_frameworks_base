@@ -26,6 +26,7 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 import static android.os.BatteryManager.EXTRA_STATUS;
+import static android.os.OsProtoEnums.BATTERY_PLUGGED_NONE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -92,21 +93,7 @@ public class BatteryStatus {
         present = batteryChangedIntent.getBooleanExtra(EXTRA_PRESENT, true);
         this.incompatibleCharger = incompatibleCharger;
 
-        final int maxChargingMicroAmp = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT,
-                -1);
-        int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
-
-        if (maxChargingMicroVolt <= 0) {
-            maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
-        }
-        if (maxChargingMicroAmp > 0) {
-            // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
-            // to maintain precision equally on both factors.
-            maxChargingWattage = (maxChargingMicroAmp / 1000)
-                    * (maxChargingMicroVolt / 1000);
-        } else {
-            maxChargingWattage = -1;
-        }
+        maxChargingWattage = calculateMaxChargingMicroWatt(batteryChangedIntent);
     }
 
     /** Determine whether the device is plugged. */
@@ -128,7 +115,7 @@ public class BatteryStatus {
 
     /** Determine whether the device is plugged in dock. */
     public boolean isPluggedInDock() {
-        return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+        return isPluggedInDock(plugged);
     }
 
     /**
@@ -221,6 +208,17 @@ public class BatteryStatus {
                 || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 
+    /** Determine whether the device is plugged in dock. */
+    public static boolean isPluggedInDock(Intent batteryChangedIntent) {
+        return isPluggedInDock(
+                batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, BATTERY_PLUGGED_NONE));
+    }
+
+    /** Determine whether the device is plugged in dock. */
+    public static boolean isPluggedInDock(int plugged) {
+        return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
+    }
+
     /**
      * Whether the battery is low or not.
      *
@@ -289,5 +287,46 @@ public class BatteryStatus {
      */
     public static boolean isBatteryDefender(int chargingStatus) {
         return chargingStatus == CHARGING_POLICY_ADAPTIVE_LONGLIFE;
+    }
+
+    /**
+     * Gets the max charging current and max charging voltage form {@link
+     * Intent.ACTION_BATTERY_CHANGED} and calculates the charging speed based on the {@link
+     * R.integer.config_chargingSlowlyThreshold} and {@link R.integer.config_chargingFastThreshold}.
+     *
+     * @param context the application context
+     * @param batteryChangedIntent the intent from {@link Intent.ACTION_BATTERY_CHANGED}
+     * @return the charging speed. {@link CHARGING_REGULAR}, {@link CHARGING_FAST}, {@link
+     *     CHARGING_SLOWLY} or {@link CHARGING_UNKNOWN}
+     */
+    public static int getChargingSpeed(Context context, Intent batteryChangedIntent) {
+        final int maxChargingMicroWatt = calculateMaxChargingMicroWatt(batteryChangedIntent);
+        if (maxChargingMicroWatt <= 0) {
+            return CHARGING_UNKNOWN;
+        } else if (maxChargingMicroWatt
+                < context.getResources().getInteger(R.integer.config_chargingSlowlyThreshold)) {
+            return CHARGING_SLOWLY;
+        } else if (maxChargingMicroWatt
+                > context.getResources().getInteger(R.integer.config_chargingFastThreshold)) {
+            return CHARGING_FAST;
+        } else {
+            return CHARGING_REGULAR;
+        }
+    }
+
+    private static int calculateMaxChargingMicroWatt(Intent batteryChangedIntent) {
+        final int maxChargingMicroAmp =
+                batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+        int maxChargingMicroVolt = batteryChangedIntent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+        if (maxChargingMicroVolt <= 0) {
+            maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
+        }
+
+        if (maxChargingMicroAmp > 0) {
+            // Calculating µW = mA * mV
+            return (int) Math.round(maxChargingMicroAmp * 0.001 * maxChargingMicroVolt * 0.001);
+        } else {
+            return -1;
+        }
     }
 }
