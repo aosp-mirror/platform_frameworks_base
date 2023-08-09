@@ -13202,9 +13202,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mTextOperationUser == null) {
             return super.isStylusHandwritingAvailable();
         }
-        final int userId = mTextOperationUser.getIdentifier();
         final InputMethodManager imm = getInputMethodManager();
-        return imm.isStylusHandwritingAvailableAsUser(userId);
+        return imm.isStylusHandwritingAvailableAsUser(mTextOperationUser);
     }
 
     @Nullable

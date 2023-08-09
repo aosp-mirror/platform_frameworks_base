@@ -265,7 +265,8 @@ public class KeyguardPasswordViewController
     private boolean hasMultipleEnabledIMEsOrSubtypes(InputMethodManager imm,
             final boolean shouldIncludeAuxiliarySubtypes) {
         final List<InputMethodInfo> enabledImis =
-                imm.getEnabledInputMethodListAsUser(KeyguardUpdateMonitor.getCurrentUser());
+                imm.getEnabledInputMethodListAsUser(
+                        UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
 
         // Number of the filtered IMEs
         int filteredImisCount = 0;
