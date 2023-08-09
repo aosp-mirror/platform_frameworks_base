@@ -82,7 +82,7 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag RANKING_UPDATE_ASHMEM = devFlag(
                 "persist.sysui.notification.ranking_update_ashmem");
 
-        public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = devFlag(
+        public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = releasedFlag(
                 "persist.sysui.notification.propagate_channel_updates_to_conversations");
     }
 
