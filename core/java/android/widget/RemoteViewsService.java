@@ -47,7 +47,7 @@ public abstract class RemoteViewsService extends Service {
      *
      * @hide
      */
-    private static final int MAX_NUM_ENTRY = 25;
+    private static final int MAX_NUM_ENTRY = 10;
 
     /**
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
