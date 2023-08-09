@@ -1612,8 +1612,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mBackActionInteractor.setup(mQsController, mShadeSurface);
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
 
-        mHeadsUpManager.addListener(mCentralSurfacesComponent.getStatusBarHeadsUpChangeListener());
-
         // Listen for demo mode changes
         mDemoModeController.addCallback(mDemoModeCallback);
 
