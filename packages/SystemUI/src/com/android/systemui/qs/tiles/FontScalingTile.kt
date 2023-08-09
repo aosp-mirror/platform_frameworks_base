@@ -28,8 +28,6 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
@@ -64,7 +62,6 @@ constructor(
     private val systemSettings: SystemSettings,
     private val secureSettings: SecureSettings,
     private val systemClock: SystemClock,
-    private val featureFlags: FeatureFlags,
     private val userTracker: UserTracker,
     @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) :
@@ -80,10 +77,6 @@ constructor(
         qsLogger
     ) {
     private val icon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
-
-    override fun isAvailable(): Boolean {
-        return featureFlags.isEnabled(Flags.ENABLE_FONT_SCALING_TILE)
-    }
 
     override fun newTileState(): QSTile.State {
         return QSTile.State()
