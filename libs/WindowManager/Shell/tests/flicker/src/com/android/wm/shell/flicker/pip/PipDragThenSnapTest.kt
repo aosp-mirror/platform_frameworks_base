@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.graphics.Rect
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -34,6 +35,7 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /** Test the snapping of a PIP window via dragging, releasing, and checking its final location. */
+@FlakyTest(bugId = 294993100)
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
