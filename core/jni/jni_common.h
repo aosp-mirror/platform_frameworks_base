@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 #include <jni.h>
+#include <ui/Size.h>
 
 namespace android {
 
 class Rect;
+using ui::Size;
 
 class JNICommon {
 public:
     static Rect rectFromObj(JNIEnv* env, jobject rectObj);
     static jobject objFromRect(JNIEnv* env, Rect rect);
+    static jobject objFromSize(JNIEnv* env, Size size);
 };
 } // namespace android

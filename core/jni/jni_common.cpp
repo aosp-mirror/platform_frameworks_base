@@ -34,6 +34,11 @@ static struct {
     jfieldID top;
 } gRectClassInfo;
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gSizeClassInfo;
+
 Rect JNICommon::rectFromObj(JNIEnv* env, jobject rectObj) {
     int left = env->GetIntField(rectObj, gRectClassInfo.left);
     int top = env->GetIntField(rectObj, gRectClassInfo.top);
@@ -47,6 +52,10 @@ jobject JNICommon::objFromRect(JNIEnv* env, Rect rect) {
                           rect.right, rect.bottom);
 }
 
+jobject JNICommon::objFromSize(JNIEnv* env, Size size) {
+    return env->NewObject(gSizeClassInfo.clazz, gSizeClassInfo.ctor, size.width, size.height);
+}
+
 int register_jni_common(JNIEnv* env) {
     jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.clazz = MakeGlobalRefOrDie(env, rectClazz);
@@ -55,6 +64,11 @@ int register_jni_common(JNIEnv* env) {
     gRectClassInfo.left = GetFieldIDOrDie(env, rectClazz, "left", "I");
     gRectClassInfo.right = GetFieldIDOrDie(env, rectClazz, "right", "I");
     gRectClassInfo.top = GetFieldIDOrDie(env, rectClazz, "top", "I");
+
+    jclass sizeClazz = FindClassOrDie(env, "android/util/Size");
+    gSizeClassInfo.clazz = MakeGlobalRefOrDie(env, sizeClazz);
+    gSizeClassInfo.ctor = GetMethodIDOrDie(env, sizeClazz, "<init>", "(II)V");
+
     return 0;
 }
 
