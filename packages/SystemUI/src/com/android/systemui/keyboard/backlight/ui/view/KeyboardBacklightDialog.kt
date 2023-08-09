@@ -161,7 +161,7 @@ class KeyboardBacklightDialog(
     }
 
     private fun updateIconTile() {
-        val iconTile = rootView.findViewById(BACKLIGHT_ICON_ID) as ImageView
+        val iconTile = rootView.requireViewById(BACKLIGHT_ICON_ID) as ImageView
         val backgroundDrawable = iconTile.background as ShapeDrawable
         if (currentLevel == 0) {
             iconTile.setColorFilter(dimmedIconColor)

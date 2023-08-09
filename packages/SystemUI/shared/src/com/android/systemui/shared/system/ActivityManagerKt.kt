@@ -27,6 +27,6 @@ object ActivityManagerKt {
      */
     fun ActivityManager.isInForeground(packageName: String): Boolean {
         val tasks: List<ActivityManager.RunningTaskInfo> = getRunningTasks(1)
-        return tasks.isNotEmpty() && packageName == tasks[0].topActivity.packageName
+        return tasks.isNotEmpty() && packageName == tasks[0].topActivity?.packageName
     }
 }

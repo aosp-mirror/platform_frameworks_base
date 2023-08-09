@@ -67,7 +67,8 @@ data class RenderInfo(
                     iconMap.put(resourceId, icon)
                 }
             }
-            return RenderInfo(icon!!.constantState.newDrawable(context.resources), fg, bg)
+            return RenderInfo(
+                checkNotNull(icon?.constantState).newDrawable(context.resources), fg, bg)
         }
 
         fun registerComponentIcon(componentName: ComponentName, icon: Drawable) {

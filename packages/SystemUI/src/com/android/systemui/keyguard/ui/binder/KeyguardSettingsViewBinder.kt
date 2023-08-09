@@ -43,7 +43,7 @@ object KeyguardSettingsViewBinder {
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
     ): DisposableHandle {
-        val view = parentView.findViewById<LaunchableLinearLayout>(R.id.keyguard_settings_button)
+        val view = parentView.requireViewById<LaunchableLinearLayout>(R.id.keyguard_settings_button)
 
         val disposableHandle =
             view.repeatWhenAttached {

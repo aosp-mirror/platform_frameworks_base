@@ -89,7 +89,7 @@ constructor(
                 )
             val hat = gkResponse.gatekeeperHAT
             lockPatternUtils.removeGatekeeperPasswordHandle(pwHandle)
-            emit(CredentialStatus.Success.Verified(hat))
+            emit(CredentialStatus.Success.Verified(checkNotNull(hat)))
         } else if (response.timeout > 0) {
             // if requests are being throttled, update the error message every
             // second until the temporary lock has expired
@@ -226,8 +226,7 @@ private fun Context.getLastAttemptBeforeWipeProfileMessage(
             is BiometricPromptRequest.Credential.Password ->
                 DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT
         }
-    return devicePolicyManager.resources.getString(id) {
-        // use fallback a string if not found
+    val getFallbackString = {
         val defaultId =
             when (request) {
                 is BiometricPromptRequest.Credential.Pin ->
@@ -239,6 +238,8 @@ private fun Context.getLastAttemptBeforeWipeProfileMessage(
             }
         getString(defaultId)
     }
+
+    return devicePolicyManager.resources?.getString(id, getFallbackString) ?: getFallbackString()
 }
 
 private fun Context.getLastAttemptBeforeWipeUserMessage(
@@ -266,8 +267,8 @@ private fun Context.getNowWipingMessage(
                 DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS
             else -> DevicePolicyResources.UNDEFINED
         }
-    return devicePolicyManager.resources.getString(id) {
-        // use fallback a string if not found
+
+    val getFallbackString = {
         val defaultId =
             when (userType) {
                 UserType.PRIMARY ->
@@ -279,4 +280,6 @@ private fun Context.getNowWipingMessage(
             }
         getString(defaultId)
     }
+
+    return devicePolicyManager.resources?.getString(id, getFallbackString) ?: getFallbackString()
 }

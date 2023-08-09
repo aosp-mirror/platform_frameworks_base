@@ -471,7 +471,7 @@ object KeyguardBottomAreaViewBinder {
             return true
         }
 
-        override fun onLongClickUseDefaultHapticFeedback(view: View?) = false
+        override fun onLongClickUseDefaultHapticFeedback(view: View) = false
     }
 
     @Deprecated("Deprecated as part of b/278057014")
