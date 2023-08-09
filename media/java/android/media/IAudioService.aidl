@@ -520,23 +520,6 @@ interface IAudioService {
 
     long getFadeOutDurationOnFocusLossMillis(in AudioAttributes aa);
 
-    @EnforcePermission("QUERY_AUDIO_STATE")
-    /* Returns a List<Integer> */
-    @SuppressWarnings(value = {"untyped-collection"})
-    List getFocusDuckedUidsForTest();
-
-    @EnforcePermission("QUERY_AUDIO_STATE")
-    long getFocusFadeOutDurationForTest();
-
-    @EnforcePermission("QUERY_AUDIO_STATE")
-    long getFocusUnmuteDelayAfterFadeOutForTest();
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    boolean enterAudioFocusFreezeForTest(IBinder cb, in int[] uids);
-
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    boolean exitAudioFocusFreezeForTest(IBinder cb);
-
     void registerModeDispatcher(IAudioModeDispatcher dispatcher);
 
     oneway void unregisterModeDispatcher(IAudioModeDispatcher dispatcher);

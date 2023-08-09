@@ -43,7 +43,7 @@ import java.io.PrintWriter;
 public class FocusRequester {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
-    private static final String TAG = "FocusRequester";
+    private static final String TAG = "MediaFocusControl";
     private static final boolean DEBUG = false;
 
     private AudioFocusDeathHandler mDeathHandler; // may be null
@@ -340,9 +340,6 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     boolean handleFocusLossFromGain(int focusGain, final FocusRequester frWinner, boolean forceDuck)
     {
-        if (DEBUG) {
-            Log.i(TAG, "handleFocusLossFromGain for " + mClientId + " gain:" + focusGain);
-        }
         final int focusLoss = focusLossForGainRequest(focusGain);
         handleFocusLoss(focusLoss, frWinner, forceDuck);
         return (focusLoss == AudioManager.AUDIOFOCUS_LOSS);
@@ -381,9 +378,6 @@ public class FocusRequester {
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
     void handleFocusLoss(int focusLoss, @Nullable final FocusRequester frWinner, boolean forceDuck)
     {
-        if (DEBUG) {
-            Log.i(TAG, "handleFocusLoss for " + mClientId + " loss:" + focusLoss);
-        }
         try {
             if (focusLoss != mFocusLossReceived) {
                 mFocusLossReceived = focusLoss;
@@ -433,9 +427,6 @@ public class FocusRequester {
                             toAudioFocusInfo(), true /* wasDispatched */);
                     mFocusLossWasNotified = true;
                     fd.dispatchAudioFocusChange(mFocusLossReceived, mClientId);
-                } else if (DEBUG) {
-                    Log.i(TAG, "NOT dispatching " + focusChangeToString(mFocusLossReceived)
-                            + " to " + mClientId + " no IAudioFocusDispatcher");
                 }
             }
         } catch (android.os.RemoteException e) {
