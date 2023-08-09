@@ -87,7 +87,7 @@ public class MessagingLayout extends FrameLayout
     private ImageResolver mImageResolver;
     private CharSequence mConversationTitle;
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
-
+    private boolean mPrecomputedTextEnabled = false;
     public MessagingLayout(@NonNull Context context) {
         super(context);
     }
@@ -193,7 +193,53 @@ public class MessagingLayout extends FrameLayout
      */
     @NonNull
     public Runnable setDataAsync(Bundle extras) {
-        return () -> setData(extras);
+        if (!mPrecomputedTextEnabled) {
+            return () -> setData(extras);
+        }
+
+        Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
+        List<Notification.MessagingStyle.Message> newMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+        Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
+        List<Notification.MessagingStyle.Message> newHistoricMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON,
+                android.app.Person.class));
+        RemoteInputHistoryItem[] history =
+                (RemoteInputHistoryItem[]) extras.getParcelableArray(
+                        Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                        android.app.RemoteInputHistoryItem.class);
+        addRemoteInputHistoryToMessages(newMessages, history);
+
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
+        boolean showSpinner =
+                extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
+
+        final List<MessagingMessage> historicMessagingMessages = createMessages(newHistoricMessages,
+                        /* isHistoric= */true, /* usePrecomputedText= */ true);
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, /* isHistoric */false, /* usePrecomputedText= */true);
+
+        return () -> {
+            finalizeInflate(historicMessagingMessages);
+            finalizeInflate(newMessagingMessages);
+            bindViews(user, showSpinner, historicMessagingMessages, newMessagingMessages);
+        };
+    }
+
+
+    /**
+     * enable/disable precomputed text usage
+     * @hide
+     */
+    public void setPrecomputedTextEnabled(boolean precomputedTextEnabled) {
+        mPrecomputedTextEnabled = precomputedTextEnabled;
+    }
+
+    private void finalizeInflate(List<MessagingMessage> historicMessagingMessages) {
+        for (MessagingMessage messagingMessage: historicMessagingMessages) {
+            messagingMessage.finalizeInflate();
+        }
     }
 
     @Override
