@@ -145,7 +145,7 @@ public class VirtualDeviceInternal {
         mContext = context.getApplicationContext();
         mVirtualDevice = service.createVirtualDevice(
                 new Binder(),
-                mContext.getPackageName(),
+                mContext.getAttributionSource(),
                 associationId,
                 params,
                 mActivityListenerBinder,

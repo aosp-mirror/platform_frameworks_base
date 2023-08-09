@@ -35,6 +35,7 @@ import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -314,13 +315,15 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
                 IBinder token,
-                String packageName,
+                AttributionSource attributionSource,
                 int associationId,
                 @NonNull VirtualDeviceParams params,
                 @NonNull IVirtualDeviceActivityListener activityListener,
                 @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
             createVirtualDevice_enforcePermission();
+            attributionSource.enforceCallingUid();
             final int callingUid = getCallingUid();
+            final String packageName = attributionSource.getPackageName();
             if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
                 throw new SecurityException(
                         "Package name " + packageName + " does not belong to calling uid "
@@ -340,10 +343,9 @@ public class VirtualDeviceManagerService extends SystemService {
             final int deviceId = sNextUniqueIndex.getAndIncrement();
             final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
                     runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
-            VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                    associationInfo, VirtualDeviceManagerService.this, token, callingUid,
-                    deviceId, cameraAccessController,
-                    mPendingTrampolineCallback, activityListener,
+            VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(), associationInfo,
+                    VirtualDeviceManagerService.this, token, attributionSource, deviceId,
+                    cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
             synchronized (mVirtualDeviceManagerLock) {
                 if (mVirtualDevices.size() == 0) {

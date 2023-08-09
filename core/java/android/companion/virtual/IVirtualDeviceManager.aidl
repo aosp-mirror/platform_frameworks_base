@@ -21,6 +21,7 @@ import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
+import android.content.AttributionSource;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 
@@ -46,7 +47,7 @@ interface IVirtualDeviceManager {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     IVirtualDevice createVirtualDevice(
-            in IBinder token, String packageName, int associationId,
+            in IBinder token, in AttributionSource attributionSource, int associationId,
             in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener,
             in IVirtualDeviceSoundEffectListener soundEffectListener);
 
