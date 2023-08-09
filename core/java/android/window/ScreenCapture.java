@@ -33,7 +33,7 @@ import libcore.util.NativeAllocationRegistry;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.function.ObjIntConsumer;
 
 /**
  * Handles display and layer captures for the system.
@@ -43,13 +43,12 @@ import java.util.function.Consumer;
 public class ScreenCapture {
     private static final String TAG = "ScreenCapture";
     private static final int SCREENSHOT_WAIT_TIME_S = 1;
-
     private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
             long captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
             long captureListener);
     private static native long nativeCreateScreenCaptureListener(
-            Consumer<ScreenshotHardwareBuffer> consumer);
+            ObjIntConsumer<ScreenshotHardwareBuffer> consumer);
     private static native void nativeWriteListenerToParcel(long nativeObject, Parcel out);
     private static native long nativeReadListenerFromParcel(Parcel in);
     private static native long getNativeListenerFinalizer();
@@ -695,7 +694,7 @@ public class ScreenCapture {
         /**
          * @param consumer The callback invoked when the screen capture is complete.
          */
-        public ScreenCaptureListener(Consumer<ScreenshotHardwareBuffer> consumer) {
+        public ScreenCaptureListener(ObjIntConsumer<ScreenshotHardwareBuffer> consumer) {
             mNativeObject = nativeCreateScreenCaptureListener(consumer);
             sRegistry.registerNativeAllocation(this, mNativeObject);
         }
@@ -748,8 +747,13 @@ public class ScreenCapture {
     public static SynchronousScreenCaptureListener createSyncCaptureListener() {
         ScreenshotHardwareBuffer[] bufferRef = new ScreenshotHardwareBuffer[1];
         CountDownLatch latch = new CountDownLatch(1);
-        Consumer<ScreenshotHardwareBuffer> consumer = buffer -> {
-            bufferRef[0] = buffer;
+        ObjIntConsumer<ScreenshotHardwareBuffer> consumer = (buffer, status) -> {
+            if (status != 0) {
+                bufferRef[0] = null;
+                Log.e(TAG, "Failed to generate screen capture. Error code: " + status);
+            } else {
+                bufferRef[0] = buffer;
+            }
             latch.countDown();
         };
 
@@ -758,7 +762,7 @@ public class ScreenCapture {
             // it references, the underlying JNI listener holds a weak reference to the consumer.
             // This property exists to ensure the consumer stays alive during the listener's
             // lifetime.
-            private Consumer<ScreenshotHardwareBuffer> mConsumer = consumer;
+            private ObjIntConsumer<ScreenshotHardwareBuffer> mConsumer = consumer;
 
             @Override
             public ScreenshotHardwareBuffer getBuffer() {
@@ -779,7 +783,7 @@ public class ScreenCapture {
      * {@link #captureDisplay(DisplayCaptureArgs, ScreenCaptureListener)}
      */
     public abstract static class SynchronousScreenCaptureListener extends ScreenCaptureListener {
-        SynchronousScreenCaptureListener(Consumer<ScreenshotHardwareBuffer> consumer) {
+        SynchronousScreenCaptureListener(ObjIntConsumer<ScreenshotHardwareBuffer> consumer) {
             super(consumer);
         }
 
