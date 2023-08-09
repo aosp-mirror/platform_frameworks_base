@@ -60,7 +60,7 @@ class UserSwitchFullscreenDialog(
 
     override fun getWidth(): Int {
         val displayMetrics = context.resources.displayMetrics.apply {
-            context.display.getRealMetrics(this)
+            checkNotNull(context.display).getRealMetrics(this)
         }
         return displayMetrics.widthPixels
     }

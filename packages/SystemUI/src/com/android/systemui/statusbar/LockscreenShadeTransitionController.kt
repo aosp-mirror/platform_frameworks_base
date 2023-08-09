@@ -475,7 +475,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
         if (endlistener != null) {
             dragDownAnimator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     endlistener.invoke()
                 }
             })

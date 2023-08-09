@@ -29,7 +29,7 @@ import javax.inject.Inject
  */
 class FalsingA11yDelegate @Inject constructor(private val falsingCollector: FalsingCollector) :
     View.AccessibilityDelegate() {
-    override fun performAccessibilityAction(host: View?, action: Int, args: Bundle?): Boolean {
+    override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
         if (action == ACTION_CLICK) {
             falsingCollector.onA11yAction()
         }
