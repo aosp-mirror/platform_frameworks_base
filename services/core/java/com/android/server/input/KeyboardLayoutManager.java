@@ -169,7 +169,9 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     @Override
     @MainThread
     public void onInputDeviceAdded(int deviceId) {
-        onInputDeviceChanged(deviceId);
+        // Logging keyboard configuration data to statsd whenever input device is added. Currently
+        // only logging for New Settings UI where we are using IME to decide the layout information.
+        onInputDeviceChangedInternal(deviceId, true /* shouldLogConfiguration */);
     }
 
     @Override
@@ -182,6 +184,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     @Override
     @MainThread
     public void onInputDeviceChanged(int deviceId) {
+        onInputDeviceChangedInternal(deviceId, false /* shouldLogConfiguration */);
+    }
+
+    private void onInputDeviceChangedInternal(int deviceId, boolean shouldLogConfiguration) {
         final InputDevice inputDevice = getInputDevice(deviceId);
         if (inputDevice == null || inputDevice.isVirtual() || !inputDevice.isFullKeyboard()) {
             return;
@@ -243,18 +249,15 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             synchronized (mDataStore) {
                 try {
                     final String key = keyboardIdentifier.toString();
-                    boolean isFirstConfiguration = !mDataStore.hasInputDeviceEntry(key);
                     if (mDataStore.setSelectedKeyboardLayouts(key, selectedLayouts)) {
                         // Need to show the notification only if layout selection changed
                         // from the previous configuration
                         needToShowNotification = true;
+                    }
 
-                        // Logging keyboard configuration data to statsd only if the
-                        // configuration changed from the previous configuration. Currently
-                        // only logging for New Settings UI where we are using IME to decide
-                        // the layout information.
+                    if (shouldLogConfiguration) {
                         logKeyboardConfigurationEvent(inputDevice, imeInfoList, layoutInfoList,
-                                isFirstConfiguration);
+                                !mDataStore.hasInputDeviceEntry(key));
                     }
                 } finally {
                     mDataStore.saveIfNeeded();
