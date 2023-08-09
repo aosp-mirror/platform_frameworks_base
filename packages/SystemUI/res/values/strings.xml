@@ -747,6 +747,9 @@
     off. This means a separate profile on a user's phone that's specifically for their
     work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_work_mode_label">Work apps</string>
+    <!-- QuickSettings: Subtitle for the Work profile Quick Settings tile when it's in the off
+    state. This corresponds to the work profile not being currently accessible. [CHAR LIMIT=20] -->
+    <string name="quick_settings_work_mode_paused_state">Paused</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
