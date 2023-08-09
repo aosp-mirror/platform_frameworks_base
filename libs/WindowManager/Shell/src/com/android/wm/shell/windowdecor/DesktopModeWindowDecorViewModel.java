@@ -36,6 +36,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
@@ -458,7 +459,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
-                            decoration.mTaskSurface, newTaskBounds.top));
+                            decoration.mTaskSurface,
+                            new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
+                            newTaskBounds));
                     mIsDragging = true;
                     mShouldClick = false;
                     return true;
@@ -487,7 +490,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            position, newTaskBounds.top, mWindowDecorByTaskId.get(mTaskId)));
+                            position,
+                            new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
+                            newTaskBounds, mWindowDecorByTaskId.get(mTaskId)));
                     mIsDragging = false;
                     return true;
                 }

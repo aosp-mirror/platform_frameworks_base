@@ -29,6 +29,7 @@ import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
@@ -55,7 +56,10 @@ import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.annotations.ExternalThread
 import com.android.wm.shell.common.annotations.ShellMainThread
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.TO_DESKTOP_INDICATOR
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
@@ -105,7 +109,11 @@ class DesktopTasksController(
 
     private val transitionAreaHeight
         get() = context.resources.getDimensionPixelSize(
-                com.android.wm.shell.R.dimen.desktop_mode_transition_area_height)
+            com.android.wm.shell.R.dimen.desktop_mode_transition_area_height)
+
+    private val transitionAreaWidth
+        get() = context.resources.getDimensionPixelSize(
+            com.android.wm.shell.R.dimen.desktop_mode_transition_area_width)
 
     // This is public to avoid cyclic dependency; it is set by SplitScreenController
     lateinit var splitScreenController: SplitScreenController
@@ -755,7 +763,8 @@ class DesktopTasksController(
         ) {
             val wct = WindowContainerTransaction()
             addMoveToSplitChanges(wct, taskInfo)
-            splitScreenController.requestEnterSplitSelect(taskInfo, wct)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskInfo.configuration.windowConfiguration.bounds)
         }
     }
 
@@ -779,25 +788,36 @@ class DesktopTasksController(
 
     /**
      * Perform checks required on drag move. Create/release fullscreen indicator as needed.
+     * Different sources for x and y coordinates are used due to different needs for each:
+     * We want split transitions to be based on input coordinates but fullscreen transition
+     * to be based on task edge coordinate.
      *
      * @param taskInfo the task being dragged.
      * @param taskSurface SurfaceControl of dragged task.
-     * @param y coordinate of dragged task. Used for checks against status bar height.
+     * @param inputCoordinate coordinates of input. Used for checks against left/right edge of screen.
+     * @param taskBounds bounds of dragged task. Used for checks against status bar height.
      */
     fun onDragPositioningMove(
-            taskInfo: RunningTaskInfo,
-            taskSurface: SurfaceControl,
-            y: Float
+        taskInfo: RunningTaskInfo,
+        taskSurface: SurfaceControl,
+        inputCoordinate: PointF,
+        taskBounds: Rect
     ) {
-        if (taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            if (y <= transitionAreaHeight && visualIndicator == null) {
-                visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
-                        displayController, context, taskSurface, shellTaskOrganizer,
-                        rootTaskDisplayAreaOrganizer)
-                visualIndicator?.createFullscreenIndicatorWithAnimatedBounds()
-            } else if (y > transitionAreaHeight && visualIndicator != null) {
-                releaseVisualIndicator()
-            }
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        if (taskInfo.windowingMode != WINDOWING_MODE_FREEFORM) return
+        var type = DesktopModeVisualIndicator.determineIndicatorType(inputCoordinate,
+            taskBounds, displayLayout, context)
+        if (type != DesktopModeVisualIndicator.INVALID_INDICATOR && visualIndicator == null) {
+            visualIndicator = DesktopModeVisualIndicator(
+                syncQueue, taskInfo,
+                displayController, context, taskSurface, shellTaskOrganizer,
+                rootTaskDisplayAreaOrganizer, type)
+            visualIndicator?.createIndicatorWithAnimatedBounds()
+            return
+        }
+        if (visualIndicator?.eventOutsideRange(inputCoordinate.x,
+                taskBounds.top.toFloat()) == true) {
+            releaseVisualIndicator()
         }
     }
 
@@ -806,18 +826,38 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
-     * @param y the Y position of the top edge of the task
+     * @param inputCoordinate the coordinates of the motion event
+     * @param taskBounds the updated bounds of the task being dragged.
      * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
-            taskInfo: RunningTaskInfo,
-            position: Point,
-            y: Float,
-            windowDecor: DesktopModeWindowDecoration
+        taskInfo: RunningTaskInfo,
+        position: Point,
+        inputCoordinate: PointF,
+        taskBounds: Rect,
+        windowDecor: DesktopModeWindowDecoration
     ) {
-        if (y <= transitionAreaHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (taskInfo.configuration.windowConfiguration.windowingMode != WINDOWING_MODE_FREEFORM) {
+            return
+        }
+        if (taskBounds.top <= transitionAreaHeight) {
             windowDecor.incrementRelayoutBlock()
             moveToFullscreenWithAnimation(taskInfo, position)
+        }
+        if (inputCoordinate.x <= transitionAreaWidth) {
+            releaseVisualIndicator()
+            var wct = WindowContainerTransaction()
+            addMoveToSplitChanges(wct, taskInfo)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_TOP_OR_LEFT, taskBounds)
+        }
+        if (inputCoordinate.x >= (displayController.getDisplayLayout(taskInfo.displayId)?.width()
+            ?.minus(transitionAreaWidth) ?: return)) {
+            releaseVisualIndicator()
+            var wct = WindowContainerTransaction()
+            addMoveToSplitChanges(wct, taskInfo)
+            splitScreenController.requestEnterSplitSelect(taskInfo, wct,
+                SPLIT_POSITION_BOTTOM_OR_RIGHT, taskBounds)
         }
     }
 
@@ -842,8 +882,8 @@ class DesktopTasksController(
         if (visualIndicator == null) {
             visualIndicator = DesktopModeVisualIndicator(syncQueue, taskInfo,
                     displayController, context, taskSurface, shellTaskOrganizer,
-                    rootTaskDisplayAreaOrganizer)
-            visualIndicator?.createFullscreenIndicator()
+                    rootTaskDisplayAreaOrganizer, TO_DESKTOP_INDICATOR)
+            visualIndicator?.createIndicatorWithAnimatedBounds()
         }
         val indicator = visualIndicator ?: return
         if (y >= getFreeformTransitionStatusBarDragThreshold(taskInfo)) {
