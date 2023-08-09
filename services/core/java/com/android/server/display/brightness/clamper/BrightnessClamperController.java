@@ -20,6 +20,7 @@ import static com.android.server.display.brightness.clamper.BrightnessClamper.Ty
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.PowerManager;
@@ -28,6 +29,7 @@ import android.provider.DeviceConfigInterface;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.DisplayDeviceConfig.ThermalBrightnessThrottlingData;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
@@ -42,7 +44,7 @@ import java.util.concurrent.Executor;
  */
 public class BrightnessClamperController {
 
-    private static final boolean ENABLED = false;
+    private static final boolean THERMAL_ENABLED = false;
 
     private final DeviceConfigParameterProvider mDeviceConfigParameterProvider;
     private final Handler mHandler;
@@ -50,6 +52,8 @@ public class BrightnessClamperController {
 
     private final Executor mExecutor;
     private final List<BrightnessClamper<? super DisplayDeviceData>> mClampers = new ArrayList<>();
+
+    private final List<BrightnessModifier> mModifiers = new ArrayList<>();
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
     private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
@@ -77,11 +81,12 @@ public class BrightnessClamperController {
             }
         };
 
-        if (ENABLED) {
+        if (THERMAL_ENABLED) {
             mClampers.add(
                     new BrightnessThermalClamper(handler, clamperChangeListenerInternal, data));
-            start();
         }
+        mModifiers.add(new BrightnessLowPowerModeModifier());
+        start();
     }
 
     /**
@@ -95,8 +100,18 @@ public class BrightnessClamperController {
      * Applies clamping
      * Called in DisplayControllerHandler
      */
-    public float clamp(float value) {
-        return Math.min(value, mBrightnessCap);
+    public DisplayBrightnessState clamp(DisplayManagerInternal.DisplayPowerRequest request,
+            float brightnessValue, boolean slowChange) {
+        float cappedBrightness = Math.min(brightnessValue, mBrightnessCap);
+
+        DisplayBrightnessState.Builder builder = DisplayBrightnessState.builder();
+        builder.setIsSlowChange(slowChange);
+        builder.setBrightness(cappedBrightness);
+
+        for (int i = 0; i < mModifiers.size(); i++) {
+            mModifiers.get(i).apply(request, builder);
+        }
+        return builder.build();
     }
 
     /**
@@ -108,6 +123,7 @@ public class BrightnessClamperController {
         writer.println("  mClamperType: " + mClamperType);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, "    ");
         mClampers.forEach(clamper -> clamper.dump(ipw));
+        mModifiers.forEach(modifier -> modifier.dump(ipw));
     }
 
     /**
@@ -144,8 +160,10 @@ public class BrightnessClamperController {
     }
 
     private void start() {
-        mDeviceConfigParameterProvider.addOnPropertiesChangedListener(
-                mExecutor, mOnPropertiesChangedListener);
+        if (!mClampers.isEmpty()) {
+            mDeviceConfigParameterProvider.addOnPropertiesChangedListener(
+                    mExecutor, mOnPropertiesChangedListener);
+        }
     }
 
     /**
