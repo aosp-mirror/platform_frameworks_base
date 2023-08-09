@@ -1478,35 +1478,12 @@ public final class AssetManager implements AutoCloseable {
             int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
             int screenHeightDp, int screenLayout, int uiMode, int colorMode, int grammaticalGender,
             int majorVersion) {
-        if (locale != null) {
-            setConfiguration(mcc, mnc, null, new String[]{locale}, orientation, touchscreen,
-                    density, keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
-                    smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
-                    colorMode, grammaticalGender, majorVersion);
-        } else {
-            setConfiguration(mcc, mnc, null, null, orientation, touchscreen, density,
+        synchronized (this) {
+            ensureValidLocked();
+            nativeSetConfiguration(mObject, mcc, mnc, locale, orientation, touchscreen, density,
                     keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
                     smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
                     colorMode, grammaticalGender, majorVersion);
-        }
-    }
-
-    /**
-     * Change the configuration used when retrieving resources.  Not for use by
-     * applications.
-     * @hide
-     */
-    public void setConfiguration(int mcc, int mnc, String defaultLocale, String[] locales,
-            int orientation, int touchscreen, int density, int keyboard, int keyboardHidden,
-            int navigation, int screenWidth, int screenHeight, int smallestScreenWidthDp,
-            int screenWidthDp, int screenHeightDp, int screenLayout, int uiMode, int colorMode,
-            int grammaticalGender, int majorVersion) {
-        synchronized (this) {
-            ensureValidLocked();
-            nativeSetConfiguration(mObject, mcc, mnc, defaultLocale, locales, orientation,
-                    touchscreen, density, keyboard, keyboardHidden, navigation, screenWidth,
-                    screenHeight, smallestScreenWidthDp, screenWidthDp, screenHeightDp,
-                    screenLayout, uiMode, colorMode, grammaticalGender, majorVersion);
         }
     }
 
@@ -1593,11 +1570,10 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeSetApkAssets(long ptr, @NonNull ApkAssets[] apkAssets,
             boolean invalidateCaches);
     private static native void nativeSetConfiguration(long ptr, int mcc, int mnc,
-            @Nullable String defaultLocale, @NonNull String[] locales, int orientation,
-            int touchscreen, int density, int keyboard, int keyboardHidden, int navigation,
-            int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
-            int screenHeightDp, int screenLayout, int uiMode, int colorMode, int grammaticalGender,
-            int majorVersion);
+            @Nullable String locale, int orientation, int touchscreen, int density, int keyboard,
+            int keyboardHidden, int navigation, int screenWidth, int screenHeight,
+            int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
+            int uiMode, int colorMode, int grammaticalGender, int majorVersion);
     private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
             long ptr, boolean includeOverlays, boolean includeLoaders);
 
