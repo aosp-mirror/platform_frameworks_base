@@ -25,7 +25,6 @@ import com.android.settingslib.spa.framework.util.mapItem
 import com.android.settingslib.spa.testutils.waitUntil
 import com.android.settingslib.spaprivileged.template.app.AppListConfig
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -37,7 +36,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListViewModelTest {
     @get:Rule

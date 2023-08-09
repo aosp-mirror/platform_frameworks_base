@@ -31,7 +31,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -50,7 +49,6 @@ import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.Mockito.`when` as whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AppListRepositoryTest {
     @get:Rule
@@ -312,7 +310,12 @@ class AppListRepositoryTest {
     fun getSystemPackageNames_returnExpectedValues() = runTest {
         mockInstalledApplications(
             apps = listOf(
-                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP
+                NORMAL_APP,
+                INSTANT_APP,
+                SYSTEM_APP,
+                UPDATED_SYSTEM_APP,
+                HOME_APP,
+                IN_LAUNCHER_APP,
             ),
             userId = ADMIN_USER_ID,
         )
@@ -329,7 +332,12 @@ class AppListRepositoryTest {
     fun loadAndFilterApps_loadNonSystemApp_returnExpectedValues() = runTest {
         mockInstalledApplications(
             apps = listOf(
-                NORMAL_APP, INSTANT_APP, SYSTEM_APP, UPDATED_SYSTEM_APP, HOME_APP, IN_LAUNCHER_APP
+                NORMAL_APP,
+                INSTANT_APP,
+                SYSTEM_APP,
+                UPDATED_SYSTEM_APP,
+                HOME_APP,
+                IN_LAUNCHER_APP,
             ),
             userId = ADMIN_USER_ID,
         )
