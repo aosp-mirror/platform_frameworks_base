@@ -766,8 +766,7 @@ object Flags {
 
     // TODO(b/285174336): Tracking Bug
     @JvmField
-    val USE_REPOS_FOR_BOUNCER_SHOWING =
-        unreleasedFlag("use_repos_for_bouncer_showing", teamfood = true)
+    val USE_REPOS_FOR_BOUNCER_SHOWING = releasedFlag("use_repos_for_bouncer_showing")
 
     // 3100 - Haptic interactions
 

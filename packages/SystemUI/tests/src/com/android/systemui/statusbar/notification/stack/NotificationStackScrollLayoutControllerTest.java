@@ -179,7 +179,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
 
-        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, false);
+        mFeatureFlags.set(Flags.USE_REPOS_FOR_BOUNCER_SHOWING, true);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
         when(mKeyguardTransitionRepo.getTransitions()).thenReturn(emptyFlow());
