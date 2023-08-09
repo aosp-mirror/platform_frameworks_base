@@ -32,6 +32,8 @@ import android.view.DisplayInfo;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import org.junit.After;
@@ -47,10 +49,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Unit test against {@link PipSizeSpecHandler} with feature flag on.
+ * Unit test against {@link PhoneSizeSpecSource}
  */
 @RunWith(AndroidTestingRunner.class)
-public class PipSizeSpecHandlerTest extends ShellTestCase {
+public class PhoneSizeSpecSourceTest extends ShellTestCase {
     /** A sample overridden min edge size. */
     private static final int OVERRIDE_MIN_EDGE_SIZE = 40;
     /** A sample default min edge size */
@@ -75,7 +77,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Mock private Resources mResources;
 
     private PipDisplayLayoutState mPipDisplayLayoutState;
-    private TestPipSizeSpecHandler mPipSizeSpecHandler;
+    private SizeSpecSource mSizeSpecSource;
 
     /**
      * Sets up static Mockito session for SystemProperties and mocks necessary static methods.
@@ -158,10 +160,10 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         mPipDisplayLayoutState.setDisplayLayout(displayLayout);
 
         setUpStaticSystemPropertiesSession();
-        mPipSizeSpecHandler = new TestPipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
 
         // no overridden min edge size by default
-        mPipSizeSpecHandler.setOverrideMinSize(null);
+        mSizeSpecSource.setOverrideMinSize(null);
     }
 
     @After
@@ -172,19 +174,19 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Test
     public void testGetMaxSize() {
         forEveryTestCaseCheck(sExpectedMaxSizes,
-                (aspectRatio) -> mPipSizeSpecHandler.getMaxSize(aspectRatio));
+                (aspectRatio) -> mSizeSpecSource.getMaxSize(aspectRatio));
     }
 
     @Test
     public void testGetDefaultSize() {
         forEveryTestCaseCheck(sExpectedDefaultSizes,
-                (aspectRatio) -> mPipSizeSpecHandler.getDefaultSize(aspectRatio));
+                (aspectRatio) -> mSizeSpecSource.getDefaultSize(aspectRatio));
     }
 
     @Test
     public void testGetMinSize() {
         forEveryTestCaseCheck(sExpectedMinSizes,
-                (aspectRatio) -> mPipSizeSpecHandler.getMinSize(aspectRatio));
+                (aspectRatio) -> mSizeSpecSource.getMinSize(aspectRatio));
     }
 
     @Test
@@ -193,7 +195,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         Size initSize = new Size(600, 337);
 
         Size expectedSize = new Size(338, 601);
-        Size actualSize = mPipSizeSpecHandler.getSizeForAspectRatio(initSize, 9f / 16);
+        Size actualSize = mSizeSpecSource.getSizeForAspectRatio(initSize, 9f / 16);
 
         Assert.assertEquals(expectedSize, actualSize);
     }
@@ -201,26 +203,12 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Test
     public void testGetSizeForAspectRatio_withOverrideMinSize() {
         // an initial size with a 1:1 aspect ratio
-        mPipSizeSpecHandler.setOverrideMinSize(new Size(OVERRIDE_MIN_EDGE_SIZE,
-                OVERRIDE_MIN_EDGE_SIZE));
-        // make sure initial size is same as override min size
-        Size initSize = mPipSizeSpecHandler.getOverrideMinSize();
+        Size initSize = new Size(OVERRIDE_MIN_EDGE_SIZE, OVERRIDE_MIN_EDGE_SIZE);
+        mSizeSpecSource.setOverrideMinSize(initSize);
 
         Size expectedSize = new Size(40, 71);
-        Size actualSize = mPipSizeSpecHandler.getSizeForAspectRatio(initSize, 9f / 16);
+        Size actualSize = mSizeSpecSource.getSizeForAspectRatio(initSize, 9f / 16);
 
         Assert.assertEquals(expectedSize, actualSize);
-    }
-
-    static class TestPipSizeSpecHandler extends PipSizeSpecHandler {
-
-        TestPipSizeSpecHandler(Context context, PipDisplayLayoutState displayLayoutState) {
-            super(context, displayLayoutState);
-        }
-
-        @Override
-        boolean supportsPipSizeLargeScreen() {
-            return true;
-        }
     }
 }

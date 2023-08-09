@@ -30,6 +30,7 @@ import android.app.prediction.AppPredictor;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
 import android.app.prediction.AppTargetId;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutInfo;
@@ -39,6 +40,7 @@ import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -63,6 +65,7 @@ class ShareTargetPredictor extends AppTargetPredictor {
     private static final String REMOTE_APP_PREDICTOR_KEY = "remote_app_predictor";
     private final IntentFilter mIntentFilter;
     private final AppPredictor mRemoteAppPredictor;
+    @Nullable private final String mChooserActivity;
 
     ShareTargetPredictor(@NonNull AppPredictionContext predictionContext,
             @NonNull Consumer<List<AppTarget>> updatePredictionsMethod,
@@ -81,6 +84,9 @@ class ShareTargetPredictor extends AppTargetPredictor {
         } else {
             mRemoteAppPredictor = null;
         }
+        ComponentName component = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_chooserActivity));
+        mChooserActivity = (component == null) ? null : component.getShortClassName();
     }
 
     /** Reports chosen history of direct/app share targets. */
@@ -138,7 +144,7 @@ class ShareTargetPredictor extends AppTargetPredictor {
         SharesheetModelScorer.computeScoreForAppShare(shareTargets,
                 getShareEventType(mIntentFilter), getPredictionContext().getPredictedTargetCount(),
                 System.currentTimeMillis(), getDataManager(),
-                mCallingUserId);
+                mCallingUserId, mChooserActivity);
         Collections.sort(shareTargets, (t1, t2) -> -Float.compare(t1.getScore(), t2.getScore()));
         List<AppTarget> appTargetList = new ArrayList<>();
         for (ShareTarget shareTarget : shareTargets) {

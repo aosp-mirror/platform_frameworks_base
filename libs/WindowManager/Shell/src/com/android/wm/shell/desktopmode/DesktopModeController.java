@@ -535,6 +535,11 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
 
         @Override
+        public void onDesktopSplitSelectAnimComplete(RunningTaskInfo taskInfo) {
+
+        }
+
+        @Override
         public void stashDesktopApps(int displayId) throws RemoteException {
             // Stashing of desktop apps not needed. Apps always launch on desktop
         }

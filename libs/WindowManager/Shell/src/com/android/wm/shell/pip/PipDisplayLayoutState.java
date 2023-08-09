@@ -16,12 +16,18 @@
 
 package com.android.wm.shell.pip;
 
+import static com.android.wm.shell.pip.PipUtils.dpToPx;
+
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Size;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.dagger.WMSingleton;
 
@@ -40,13 +46,51 @@ public class PipDisplayLayoutState {
     private int mDisplayId;
     @NonNull private DisplayLayout mDisplayLayout;
 
+    private Point mScreenEdgeInsets = null;
+
     @Inject
     public PipDisplayLayoutState(Context context) {
         mContext = context;
         mDisplayLayout = new DisplayLayout();
+        reloadResources();
     }
 
-    /** Update the display layout. */
+    /** Responds to configuration change. */
+    public void onConfigurationChanged() {
+        reloadResources();
+    }
+
+    private void reloadResources() {
+        Resources res = mContext.getResources();
+
+        final String screenEdgeInsetsDpString = res.getString(
+                R.string.config_defaultPictureInPictureScreenEdgeInsets);
+        final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
+                ? Size.parseSize(screenEdgeInsetsDpString)
+                : null;
+        mScreenEdgeInsets = screenEdgeInsetsDp == null ? new Point()
+                : new Point(dpToPx(screenEdgeInsetsDp.getWidth(), res.getDisplayMetrics()),
+                        dpToPx(screenEdgeInsetsDp.getHeight(), res.getDisplayMetrics()));
+    }
+
+    public Point getScreenEdgeInsets() {
+        return mScreenEdgeInsets;
+    }
+
+    /**
+     * Returns the inset bounds the PIP window can be visible in.
+     */
+    public Rect getInsetBounds() {
+        Rect insetBounds = new Rect();
+        Rect insets = getDisplayLayout().stableInsets();
+        insetBounds.set(insets.left + getScreenEdgeInsets().x,
+                insets.top + getScreenEdgeInsets().y,
+                getDisplayLayout().width() - insets.right - getScreenEdgeInsets().x,
+                getDisplayLayout().height() - insets.bottom - getScreenEdgeInsets().y);
+        return insetBounds;
+    }
+
+    /** Set the display layout. */
     public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
         mDisplayLayout.set(displayLayout);
     }
@@ -87,5 +131,6 @@ public class PipDisplayLayoutState {
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "getDisplayBounds=" + getDisplayBounds());
+        pw.println(innerPrefix + "mScreenEdgeInsets=" + mScreenEdgeInsets);
     }
 }

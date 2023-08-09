@@ -40,6 +40,7 @@ import android.util.Slog;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -295,7 +296,12 @@ final class InputMethodBindingController {
                     }
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                     final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+                    boolean supportsStylusHwChanged =
+                            mSupportsStylusHw != info.supportsStylusHandwriting();
                     mSupportsStylusHw = info.supportsStylusHandwriting();
+                    if (supportsStylusHwChanged) {
+                        InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
+                    }
                     mService.initializeImeLocked(mCurMethod, mCurToken);
                     mService.scheduleNotifyImeUidToAudioService(mCurMethodUid);
                     mService.reRequestCurrentClientSessionLocked();

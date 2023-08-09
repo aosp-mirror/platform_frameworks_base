@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package android.view.selectiontoolbar;
+package com.android.wm.shell.splitscreen;
 
-import android.view.selectiontoolbar.ISelectionToolbarCallback;
-import android.view.selectiontoolbar.ShowInfo;
+import android.app.ActivityManager.RunningTaskInfo;
 
 /**
- * Mediator between apps and selection toolbar service implementation.
- *
- * @hide
+ * Listener interface that Launcher attaches to SystemUI to get split-select callbacks.
  */
-oneway interface ISelectionToolbarManager {
-    void showToolbar(in ShowInfo showInfo, in ISelectionToolbarCallback callback, int userId);
-    void hideToolbar(long widgetToken, int userId);
-    void dismissToolbar(long widgetToken, int userId);
+interface ISplitSelectListener {
+    /**
+     * Called when a task requests to enter split select
+     */
+    boolean onRequestSplitSelect(in RunningTaskInfo taskInfo);
 }

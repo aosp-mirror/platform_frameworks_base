@@ -593,6 +593,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertFalse(mViewMediator.isShowingAndNotOccluded());
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
     }
 
     @Test
@@ -609,6 +610,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertTrue(mViewMediator.isShowingAndNotOccluded());
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(true);
     }
 
     @Test
@@ -616,6 +618,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     public void testCancelKeyguardExitAnimationThenSleep_withPendingLock_keyguardWillBeShowing() {
         startMockKeyguardExitAnimation();
         cancelMockKeyguardExitAnimation();
+
+        // Calling cancel above results in keyguard not visible, as there is no pending lock
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
 
         mViewMediator.maybeHandlePendingLock();
         TestableLooper.get(this).processAllMessages();
@@ -631,9 +636,15 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void testStartKeyguardExitAnimation_expectSurfaceBehindRemoteAnimation() {
+    public void testStartKeyguardExitAnimation_expectSurfaceBehindRemoteAnimationAndExits() {
         startMockKeyguardExitAnimation();
         assertTrue(mViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
+
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
+                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
+        TestableLooper.get(this).processAllMessages();
+        verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
     }
 
     /**

@@ -84,22 +84,24 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun upTransitionSceneKey_swipeToUnlockEnabled_gone() =
+    fun upTransitionSceneKey_canSwipeToUnlock_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
             utils.authenticationRepository.setLockscreenEnabled(true)
-            utils.authenticationRepository.setUnlocked(false)
+            utils.authenticationRepository.setUnlocked(true)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }
 
     @Test
-    fun upTransitionSceneKey_swipeToUnlockNotEnabled_bouncer() =
+    fun upTransitionSceneKey_cannotSwipeToUnlock_bouncer() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
         }
