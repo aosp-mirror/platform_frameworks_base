@@ -397,8 +397,7 @@ public class ConversationLayout extends FrameLayout
                 = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
 
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, android.app.Person.class));
-
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
                 extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
@@ -406,11 +405,18 @@ public class ConversationLayout extends FrameLayout
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        // bind it, baby
-        bind(newMessages, newHistoricMessages, showSpinner);
-
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-        setUnreadCount(unreadCount);
+
+        // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
+        // if they exist
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, false /* isHistoric */);
+        final List<MessagingMessage> newHistoricMessagingMessages =
+                createMessages(newHistoricMessages, true /* isHistoric */);
+        // bind it, baby
+        bindViews(user, showSpinner, unreadCount,
+                newMessagingMessages,
+                newHistoricMessagingMessages);
     }
 
     /**
@@ -452,15 +458,17 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
-    private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages,
-            boolean showSpinner) {
-        // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
-        // if they exist
-        List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
-        List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
 
+    private void bindViews(Person user,
+            boolean showSpinner, int unreadCount, List<MessagingMessage> newMessagingMessages,
+            List<MessagingMessage> newHistoricMessagingMessages) {
+        setUser(user);
+        setUnreadCount(unreadCount);
+        bind(showSpinner, newMessagingMessages, newHistoricMessagingMessages);
+    }
+
+    private void bind(boolean showSpinner, List<MessagingMessage> messages,
+            List<MessagingMessage> historicMessages) {
         // Copy our groups, before they get clobbered
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
 
