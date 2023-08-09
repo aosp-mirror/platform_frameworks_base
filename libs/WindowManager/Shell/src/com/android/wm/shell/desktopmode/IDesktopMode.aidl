@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode;
 
+import android.app.ActivityManager.RunningTaskInfo;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 
 /**
@@ -37,6 +38,9 @@ interface IDesktopMode {
 
     /** Get count of visible desktop tasks on the given display */
     int getVisibleTaskCount(int displayId);
+
+    /** Perform cleanup transactions after the animation to split select is complete */
+    oneway void onDesktopSplitSelectAnimComplete(in RunningTaskInfo taskInfo);
 
     /** Set listener that will receive callbacks about updates to desktop tasks */
     oneway void setTaskListener(IDesktopTaskListener listener);
