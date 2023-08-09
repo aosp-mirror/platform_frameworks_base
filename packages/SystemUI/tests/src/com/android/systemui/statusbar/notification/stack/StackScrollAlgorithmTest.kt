@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.DimenRes
+import android.content.pm.PackageManager
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
@@ -21,6 +22,7 @@ import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -66,11 +68,17 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        Assume.assumeFalse(isTv())
+
         whenever(notificationShelf.viewState).thenReturn(ExpandableViewState())
         whenever(notificationRow.viewState).thenReturn(ExpandableViewState())
         ambientState.isSmallScreen = true
 
         hostView.addView(notificationRow)
+    }
+
+    private fun isTv(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
     }
 
     @Test
