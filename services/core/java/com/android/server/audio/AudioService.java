@@ -43,7 +43,6 @@ import static com.android.server.utils.EventLogger.Event.ALOGI;
 import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import android.Manifest;
-import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -9999,14 +9998,6 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
-    /** see {@link AudioManager#getFocusDuckedUidsForTest()} */
-    @Override
-    @EnforcePermission("QUERY_AUDIO_STATE")
-    public @NonNull List<Integer> getFocusDuckedUidsForTest() {
-        super.getFocusDuckedUidsForTest_enforcePermission();
-        return mPlaybackMonitor.getFocusDuckedUids();
-    }
-
     public void unregisterAudioFocusClient(String clientId) {
         new MediaMetrics.Item(mMetricsId + "focus")
                 .set(MediaMetrics.Property.CLIENT_NAME, clientId)
@@ -10023,67 +10014,6 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
-    /**
-     * Test method to return the duration of the fade out applied on the players of a focus loser
-     * @see AudioManager#getFocusFadeOutDurationForTest()
-     * @return the fade out duration, in ms
-     */
-    public long getFocusFadeOutDurationForTest() {
-        super.getFocusFadeOutDurationForTest_enforcePermission();
-        return mMediaFocusControl.getFocusFadeOutDurationForTest();
-    }
-
-    /**
-     * Test method to return the length of time after a fade out before the focus loser is unmuted
-     * (and is faded back in).
-     * @see AudioManager#getFocusUnmuteDelayAfterFadeOutForTest()
-     * @return the time gap after a fade out completion on focus loss, and fade in start, in ms
-     */
-    @Override
-    @EnforcePermission("QUERY_AUDIO_STATE")
-    public long getFocusUnmuteDelayAfterFadeOutForTest() {
-        super.getFocusUnmuteDelayAfterFadeOutForTest_enforcePermission();
-        return mMediaFocusControl.getFocusUnmuteDelayAfterFadeOutForTest();
-    }
-
-    /**
-     * Test method to start preventing applications from requesting audio focus during a test,
-     * which could interfere with the testing of the functionality/behavior under test.
-     * Calling this method needs to be paired with a call to {@link #exitAudioFocusFreezeForTest}
-     * when the testing is done. If this is not the case (e.g. in case of a test crash),
-     * a death observer mechanism will ensure the system is not left in a bad state, but this should
-     * not be relied on when implementing tests.
-     * @see AudioManager#enterAudioFocusFreezeForTest(List)
-     * @param cb IBinder to track the death of the client of this method
-     * @param exemptedUids a list of UIDs that are exempt from the freeze. This would for instance
-     *                     be those of the test runner and other players used in the test
-     * @return true if the focus freeze mode is successfully entered, false if there was an issue,
-     *     such as another freeze currently used.
-     */
-    @Override
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    public boolean enterAudioFocusFreezeForTest(IBinder cb, int[] exemptedUids) {
-        super.enterAudioFocusFreezeForTest_enforcePermission();
-        Objects.requireNonNull(exemptedUids);
-        Objects.requireNonNull(cb);
-        return mMediaFocusControl.enterAudioFocusFreezeForTest(cb, exemptedUids);
-    }
-
-    /**
-     * Test method to end preventing applications from requesting audio focus during a test.
-     * @see AudioManager#exitAudioFocusFreezeForTest()
-     * @param cb IBinder identifying the client of this method
-     * @return true if the focus freeze mode is successfully exited, false if there was an issue,
-     *     such as the freeze already having ended, or not started.
-     */
-    @Override
-    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
-    public boolean exitAudioFocusFreezeForTest(IBinder cb) {
-        super.exitAudioFocusFreezeForTest_enforcePermission();
-        Objects.requireNonNull(cb);
-        return mMediaFocusControl.exitAudioFocusFreezeForTest(cb);
-    }
-
     /** only public for mocking/spying, do not call outside of AudioService */
     @VisibleForTesting
     public boolean hasAudioFocusUsers() {
@@ -10091,8 +10021,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** see {@link AudioManager#getFadeOutDurationOnFocusLossMillis(AudioAttributes)} */
-    @Override
-    @EnforcePermission("QUERY_AUDIO_STATE")
     public long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
         if (!enforceQueryAudioStateForTest("fade out duration")) {
             return 0;
