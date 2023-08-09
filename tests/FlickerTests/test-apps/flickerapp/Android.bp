@@ -24,6 +24,9 @@ package {
 android_test {
     name: "FlickerTestApp",
     srcs: ["**/*.java"],
+    resource_dirs: [
+        "res",
+    ],
     sdk_version: "current",
     test_suites: ["device-tests"],
     static_libs: [

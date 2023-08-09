@@ -53,4 +53,11 @@
     <style name="no_starting_window" parent="@android:style/Theme.DeviceDefault">
         <item name="android:windowDisablePreview">true</item>
     </style>
+
+    <style name="SplashscreenAppTheme" parent="@android:style/Theme.DeviceDefault">
+        <!-- Splashscreen Attributes -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/avd_anim</item>
+        <!-- Here we want to match the duration of our AVD -->
+        <item name="android:windowSplashScreenAnimationDuration">900</item>
+    </style>
 </resources>

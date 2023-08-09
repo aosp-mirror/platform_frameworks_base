@@ -347,6 +347,17 @@
             android:exported="false"
             android:theme="@style/CutoutShortEdges"
             android:resizeableActivity="true"/>
+        <activity
+            android:name=".TransferSplashscreenActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.TransferSplashscreenActivity"
+            android:label="TransferSplashscreenActivity"
+            android:theme="@style/SplashscreenAppTheme"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <service
             android:name=".AssistantInteractionSessionService"
             android:exported="true"
