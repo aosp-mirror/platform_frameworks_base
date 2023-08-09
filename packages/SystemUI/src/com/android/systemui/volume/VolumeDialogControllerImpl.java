@@ -44,7 +44,6 @@ import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.Token;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -58,7 +57,6 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.CaptioningManager;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.GuardedBy;
@@ -67,7 +65,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -134,7 +131,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Receiver mReceiver = new Receiver();
     private final RingerModeObservers mRingerModeObservers;
     private final MediaSessions mMediaSessions;
-    private CaptioningManager mCaptioningManager;
+    private final CaptioningManager mCaptioningManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityManager mActivityManager;
     private final UserTracker mUserTracker;
@@ -182,11 +179,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             AccessibilityManager accessibilityManager,
             PackageManager packageManager,
             WakefulnessLifecycle wakefulnessLifecycle,
+            CaptioningManager captioningManager,
             KeyguardManager keyguardManager,
             ActivityManager activityManager,
             UserTracker userTracker,
-            DumpManager dumpManager,
-            @Main Handler mainHandler
+            DumpManager dumpManager
     ) {
         mContext = context.getApplicationContext();
         mPackageManager = packageManager;
@@ -212,12 +209,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mVibrator = vibrator;
         mHasVibrator = mVibrator.hasVibrator();
         mAudioService = iAudioService;
+        mCaptioningManager = captioningManager;
         mKeyguardManager = keyguardManager;
         mActivityManager = activityManager;
         mUserTracker = userTracker;
-        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(mainHandler));
-        createCaptioningManagerServiceByUserContext(mUserTracker.getUserContext());
-
         dumpManager.registerDumpable("VolumeDialogControllerImpl", this);
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
@@ -319,25 +314,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public void getState() {
         mWorker.sendEmptyMessage(W.GET_STATE);
-    }
-
-    /**
-     * We met issues about the wrong state of System Caption in multi-user mode.
-     * It happened in the usage of CaptioningManager Service from SysUI process
-     * that is a global system process of User 0.
-     * Therefore, we have to add callback on UserTracker that allows us to get the Context of
-     * active User and then get the corresponding CaptioningManager Service for further usages.
-     */
-    private final UserTracker.Callback mUserChangedCallback =
-            new UserTracker.Callback() {
-                @Override
-                public void onUserChanged(int newUser, @NonNull Context userContext) {
-                    createCaptioningManagerServiceByUserContext(userContext);
-                }
-            };
-
-    private void createCaptioningManagerServiceByUserContext(@NonNull Context userContext) {
-        mCaptioningManager = userContext.getSystemService(CaptioningManager.class);
     }
 
     public boolean areCaptionsEnabled() {
@@ -743,7 +719,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
          * This method will never be called if the CSD (Computed Sound Dose) feature is
          * not enabled. See com.android.android.server.audio.SoundDoseHelper for the state of
          * the feature.
-         * @param csdWarning the type of warning to display, values are one of
+         * @param warning the type of warning to display, values are one of
          *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REACHED_1X},
          *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REPEATED_5X},
          *        {@link android.media.AudioManager#CSD_WARNING_MOMENTARY_EXPOSURE},
