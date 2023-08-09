@@ -115,6 +115,10 @@ internal constructor(
         }
     }
 
+    override fun getDisplay(displayId: Int): Display {
+        return displayManager.getDisplay(displayId)
+    }
+
     @WorkerThread
     private fun onDisplayAdded(displayId: Int, list: List<DisplayTrackerDataItem>) {
         Assert.isNotMainThread()
