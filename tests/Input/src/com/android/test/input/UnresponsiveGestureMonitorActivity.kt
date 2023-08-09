@@ -47,6 +47,6 @@ class UnresponsiveGestureMonitorActivity : Activity() {
         super.onCreate(savedInstanceState)
         mInputMonitor = InputManager.getInstance().monitorGestureInput(MONITOR_NAME, displayId)
         mInputEventReceiver = UnresponsiveReceiver(
-                mInputMonitor.getInputChannel(), Looper.myLooper())
+                mInputMonitor.getInputChannel(), Looper.myLooper()!!)
     }
 }
