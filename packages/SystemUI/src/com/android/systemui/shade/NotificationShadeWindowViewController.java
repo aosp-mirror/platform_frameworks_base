@@ -508,6 +508,7 @@ public class NotificationShadeWindowViewController {
                         MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
                 event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
             }
+            Log.w(TAG, "Canceling current touch event (should be very rare)");
             mView.dispatchTouchEvent(event);
             event.recycle();
             mTouchCancelled = true;
