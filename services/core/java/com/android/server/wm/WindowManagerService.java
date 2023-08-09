@@ -2020,7 +2020,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (win.mActivityRecord != null) {
-            win.mActivityRecord.postWindowRemoveStartingWindowCleanup(win);
+            win.mActivityRecord.postWindowRemoveStartingWindowCleanup();
         }
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {

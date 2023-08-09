@@ -66,7 +66,8 @@ class ControlViewHolderTest : SysuiTestCase() {
                     FakeExecutor(clock),
                     mock(ControlActionCoordinator::class.java),
                     mock(ControlsMetricsLogger::class.java),
-                    uid = 100
+                    uid = 100,
+                    0,
             )
 
             val cws = ControlWithState(

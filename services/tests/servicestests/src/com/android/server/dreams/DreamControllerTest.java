@@ -16,7 +16,11 @@
 
 package com.android.server.dreams;
 
+import static android.os.PowerManager.USER_ACTIVITY_EVENT_OTHER;
+import static android.os.PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS;
+
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -32,7 +36,9 @@ import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IPowerManager;
 import android.os.IRemoteCallback;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.service.dreams.IDreamService;
@@ -58,6 +64,8 @@ public class DreamControllerTest {
 
     @Mock
     private ActivityTaskManager mActivityTaskManager;
+    @Mock
+    private IPowerManager mPowerManager;
 
     @Mock
     private IBinder mIBinder;
@@ -66,6 +74,8 @@ public class DreamControllerTest {
 
     @Captor
     private ArgumentCaptor<ServiceConnection> mServiceConnectionACaptor;
+    @Captor
+    private ArgumentCaptor<IBinder.DeathRecipient> mDeathRecipientCaptor;
     @Captor
     private ArgumentCaptor<IRemoteCallback> mRemoteCallbackCaptor;
 
@@ -89,6 +99,12 @@ public class DreamControllerTest {
                 .thenReturn(mActivityTaskManager);
         when(mContext.getSystemServiceName(ActivityTaskManager.class))
                 .thenReturn(Context.ACTIVITY_TASK_SERVICE);
+
+        final PowerManager powerManager = new PowerManager(mContext, mPowerManager, null, null);
+        when(mContext.getSystemService(Context.POWER_SERVICE))
+                .thenReturn(powerManager);
+        when(mContext.getSystemServiceName(PowerManager.class))
+                .thenReturn(Context.POWER_SERVICE);
 
         mToken = new Binder();
         mDreamName = ComponentName.unflattenFromString("dream");
@@ -209,9 +225,51 @@ public class DreamControllerTest {
         verify(mIDreamService).detach();
     }
 
+    @Test
+    public void serviceDisconnect_resetsScreenTimeout() throws RemoteException {
+        // Start dream.
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+        ServiceConnection serviceConnection = captureServiceConnection();
+        serviceConnection.onServiceConnected(mDreamName, mIBinder);
+        mLooper.dispatchAll();
+
+        // Dream disconnects unexpectedly.
+        serviceConnection.onServiceDisconnected(mDreamName);
+        mLooper.dispatchAll();
+
+        // Power manager receives user activity signal.
+        verify(mPowerManager).userActivity(/*displayId=*/ anyInt(), /*time=*/ anyLong(),
+                eq(USER_ACTIVITY_EVENT_OTHER),
+                eq(USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS));
+    }
+
+    @Test
+    public void binderDied_resetsScreenTimeout() throws RemoteException {
+        // Start dream.
+        mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
+                0 /*userId*/, null /*wakeLock*/, mOverlayName, "test" /*reason*/);
+        captureServiceConnection().onServiceConnected(mDreamName, mIBinder);
+        mLooper.dispatchAll();
+
+        // Dream binder dies.
+        captureDeathRecipient().binderDied();
+        mLooper.dispatchAll();
+
+        // Power manager receives user activity signal.
+        verify(mPowerManager).userActivity(/*displayId=*/ anyInt(), /*time=*/ anyLong(),
+                eq(USER_ACTIVITY_EVENT_OTHER),
+                eq(USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS));
+    }
+
     private ServiceConnection captureServiceConnection() {
         verify(mContext).bindServiceAsUser(any(), mServiceConnectionACaptor.capture(), anyInt(),
                 any());
         return mServiceConnectionACaptor.getValue();
+    }
+
+    private IBinder.DeathRecipient captureDeathRecipient() throws RemoteException {
+        verify(mIBinder).linkToDeath(mDeathRecipientCaptor.capture(), anyInt());
+        return mDeathRecipientCaptor.getValue();
     }
 }

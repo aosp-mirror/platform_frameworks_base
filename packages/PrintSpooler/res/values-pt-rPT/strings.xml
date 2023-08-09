@@ -89,7 +89,7 @@
     <string name="restart" msgid="2472034227037808749">"Reiniciar"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Sem ligação à impressora"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"desconhecido"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"Pretende utilizar o <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"Quer utilizar o <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"O seu documento pode passar por um ou mais servidores no respetivo caminho para a impressora."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Preto e branco"</item>

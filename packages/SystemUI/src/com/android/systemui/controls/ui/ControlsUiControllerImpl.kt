@@ -279,7 +279,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlsListingController.get().removeCallback(listingCallback)
         controlsController.get().unsubscribe()
-        taskViewController?.dismiss()
+        taskViewController?.removeTask()
         taskViewController = null
 
         val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
@@ -690,7 +690,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     bgExecutor,
                     controlActionCoordinator,
                     controlsMetricsLogger,
-                    selected.uid
+                    selected.uid,
+                    controlsController.get().currentUserId,
                 )
                 cvh.bindData(it, false /* isLocked, will be ignored on initial load */)
                 controlViewsById.put(key, cvh)
@@ -777,7 +778,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
             closeDialogs(true)
             controlsController.get().unsubscribe()
-            taskViewController?.dismiss()
+            taskViewController?.removeTask()
             taskViewController = null
 
             controlsById.clear()

@@ -11210,7 +11210,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a call notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        when(mTelecomManager.isInManagedCall()).thenReturn(true);
 
         Person person = new Person.Builder()
                 .setName("caller")
