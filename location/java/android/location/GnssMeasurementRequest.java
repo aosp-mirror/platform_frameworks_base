@@ -16,11 +16,15 @@
 
 package android.location;
 
+import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.WorkSource;
 import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
@@ -46,15 +50,16 @@ public final class GnssMeasurementRequest implements Parcelable {
     private final boolean mCorrelationVectorOutputsEnabled;
     private final boolean mFullTracking;
     private final int mIntervalMillis;
-
+    private WorkSource mWorkSource;
     /**
      * Creates a {@link GnssMeasurementRequest} with a full list of parameters.
      */
     private GnssMeasurementRequest(boolean fullTracking, boolean correlationVectorOutputsEnabled,
-            int intervalMillis) {
+            int intervalMillis, WorkSource workSource) {
         mFullTracking = fullTracking;
         mCorrelationVectorOutputsEnabled = correlationVectorOutputsEnabled;
         mIntervalMillis = intervalMillis;
+        mWorkSource = Objects.requireNonNull(workSource);
     }
 
     /**
@@ -107,14 +112,31 @@ public final class GnssMeasurementRequest implements Parcelable {
         return mIntervalMillis;
     }
 
+    /**
+     * Returns the work source used for power blame for this request. If empty (i.e.,
+     * {@link WorkSource#isEmpty()} is {@code true}, the system is free to assign power blame as it
+     * deems most appropriate.
+     *
+     * @return the work source used for power blame for this request
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull WorkSource getWorkSource() {
+        return mWorkSource;
+    }
+
     @NonNull
     public static final Creator<GnssMeasurementRequest> CREATOR =
             new Creator<GnssMeasurementRequest>() {
                 @Override
                 @NonNull
                 public GnssMeasurementRequest createFromParcel(@NonNull Parcel parcel) {
-                    return new GnssMeasurementRequest(parcel.readBoolean(), parcel.readBoolean(),
-                            parcel.readInt());
+                    return new GnssMeasurementRequest(
+                            /* fullTracking= */ parcel.readBoolean(),
+                            /* correlationVectorOutputsEnabled= */ parcel.readBoolean(),
+                            /* intervalMillis= */ parcel.readInt(),
+                            /* workSource= */ parcel.readTypedObject(WorkSource.CREATOR));
                 }
 
                 @Override
@@ -128,6 +150,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         parcel.writeBoolean(mFullTracking);
         parcel.writeBoolean(mCorrelationVectorOutputsEnabled);
         parcel.writeInt(mIntervalMillis);
+        parcel.writeTypedObject(mWorkSource, 0);
     }
 
     @NonNull
@@ -147,6 +170,9 @@ public final class GnssMeasurementRequest implements Parcelable {
         if (mCorrelationVectorOutputsEnabled) {
             s.append(", CorrelationVectorOutputs");
         }
+        if (mWorkSource != null && !mWorkSource.isEmpty()) {
+            s.append(", ").append(mWorkSource);
+        }
         s.append(']');
         return s.toString();
     }
@@ -165,12 +191,16 @@ public final class GnssMeasurementRequest implements Parcelable {
         if (mIntervalMillis != other.mIntervalMillis) {
             return false;
         }
+        if (!Objects.equals(mWorkSource, other.mWorkSource)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled, mIntervalMillis);
+        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled, mIntervalMillis,
+                mWorkSource);
     }
 
     @Override
@@ -183,6 +213,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         private boolean mCorrelationVectorOutputsEnabled;
         private boolean mFullTracking;
         private int mIntervalMillis;
+        private WorkSource mWorkSource;
 
         /**
          * Constructs a {@link Builder} instance.
@@ -197,6 +228,7 @@ public final class GnssMeasurementRequest implements Parcelable {
             mCorrelationVectorOutputsEnabled = request.isCorrelationVectorOutputsEnabled();
             mFullTracking = request.isFullTracking();
             mIntervalMillis = request.getIntervalMillis();
+            mWorkSource = request.getWorkSource();
         }
 
         /**
@@ -255,11 +287,29 @@ public final class GnssMeasurementRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the work source to use for power blame for this request. Passing in null or leaving
+         * it unset will be an empty WorkSource, which implies the system is free to assign power
+         * blame as it determines best for this request (which usually means blaming the owner of
+         * the GnssMeasurement listener).
+         *
+         * <p>Permissions enforcement occurs when resulting request is actually used, not when this
+         * method is invoked.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
+        public @NonNull Builder setWorkSource(@Nullable WorkSource workSource) {
+            mWorkSource = workSource;
+            return this;
+        }
+
         /** Builds a {@link GnssMeasurementRequest} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementRequest build() {
             return new GnssMeasurementRequest(mFullTracking, mCorrelationVectorOutputsEnabled,
-                    mIntervalMillis);
+                    mIntervalMillis, new WorkSource(mWorkSource));
         }
     }
 }
