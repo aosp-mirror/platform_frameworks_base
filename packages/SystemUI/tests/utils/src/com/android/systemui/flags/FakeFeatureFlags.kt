@@ -19,45 +19,45 @@ package com.android.systemui.flags
 import java.io.PrintWriter
 
 class FakeFeatureFlags : FeatureFlags {
-    private val booleanFlags = mutableMapOf<Int, Boolean>()
-    private val stringFlags = mutableMapOf<Int, String>()
-    private val intFlags = mutableMapOf<Int, Int>()
-    private val knownFlagNames = mutableMapOf<Int, String>()
-    private val flagListeners = mutableMapOf<Int, MutableSet<FlagListenable.Listener>>()
-    private val listenerFlagIds = mutableMapOf<FlagListenable.Listener, MutableSet<Int>>()
+    private val booleanFlags = mutableMapOf<String, Boolean>()
+    private val stringFlags = mutableMapOf<String, String>()
+    private val intFlags = mutableMapOf<String, Int>()
+    private val knownFlagNames = mutableMapOf<String, String>()
+    private val flagListeners = mutableMapOf<String, MutableSet<FlagListenable.Listener>>()
+    private val listenerflagNames = mutableMapOf<FlagListenable.Listener, MutableSet<String>>()
 
     init {
         FlagsFactory.knownFlags.forEach { entry: Map.Entry<String, Flag<*>> ->
-            knownFlagNames[entry.value.id] = entry.key
+            knownFlagNames[entry.value.name] = entry.key
         }
     }
 
     fun set(flag: BooleanFlag, value: Boolean) {
-        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+        if (booleanFlags.put(flag.name, value)?.let { value != it } != false) {
             notifyFlagChanged(flag)
         }
     }
 
     fun set(flag: ResourceBooleanFlag, value: Boolean) {
-        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+        if (booleanFlags.put(flag.name, value)?.let { value != it } != false) {
             notifyFlagChanged(flag)
         }
     }
 
     fun set(flag: SysPropBooleanFlag, value: Boolean) {
-        if (booleanFlags.put(flag.id, value)?.let { value != it } != false) {
+        if (booleanFlags.put(flag.name, value)?.let { value != it } != false) {
             notifyFlagChanged(flag)
         }
     }
 
     fun set(flag: StringFlag, value: String) {
-        if (stringFlags.put(flag.id, value)?.let { value != it } == null) {
+        if (stringFlags.put(flag.name, value)?.let { value != it } == null) {
             notifyFlagChanged(flag)
         }
     }
 
     fun set(flag: ResourceStringFlag, value: String) {
-        if (stringFlags.put(flag.id, value)?.let { value != it } == null) {
+        if (stringFlags.put(flag.name, value)?.let { value != it } == null) {
             notifyFlagChanged(flag)
         }
     }
@@ -73,7 +73,7 @@ class FakeFeatureFlags : FeatureFlags {
      *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
      *  start failing.
      */
-    fun setDefault(flag: BooleanFlag) = booleanFlags.putIfAbsent(flag.id, flag.default)
+    fun setDefault(flag: BooleanFlag) = booleanFlags.putIfAbsent(flag.name, flag.default)
 
     /**
      * Set the given flag's default value if no other value has been set.
@@ -86,10 +86,10 @@ class FakeFeatureFlags : FeatureFlags {
      *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
      *  start failing.
      */
-    fun setDefault(flag: SysPropBooleanFlag) = booleanFlags.putIfAbsent(flag.id, flag.default)
+    fun setDefault(flag: SysPropBooleanFlag) = booleanFlags.putIfAbsent(flag.name, flag.default)
 
     private fun notifyFlagChanged(flag: Flag<*>) {
-        flagListeners[flag.id]?.let { listeners ->
+        flagListeners[flag.name]?.let { listeners ->
             listeners.forEach { listener ->
                 listener.onFlagChanged(
                     object : FlagListenable.FlagEvent {
@@ -101,30 +101,30 @@ class FakeFeatureFlags : FeatureFlags {
         }
     }
 
-    override fun isEnabled(flag: UnreleasedFlag): Boolean = requireBooleanValue(flag.id)
+    override fun isEnabled(flag: UnreleasedFlag): Boolean = requireBooleanValue(flag.name)
 
-    override fun isEnabled(flag: ReleasedFlag): Boolean = requireBooleanValue(flag.id)
+    override fun isEnabled(flag: ReleasedFlag): Boolean = requireBooleanValue(flag.name)
 
-    override fun isEnabled(flag: ResourceBooleanFlag): Boolean = requireBooleanValue(flag.id)
+    override fun isEnabled(flag: ResourceBooleanFlag): Boolean = requireBooleanValue(flag.name)
 
-    override fun isEnabled(flag: SysPropBooleanFlag): Boolean = requireBooleanValue(flag.id)
+    override fun isEnabled(flag: SysPropBooleanFlag): Boolean = requireBooleanValue(flag.name)
 
-    override fun getString(flag: StringFlag): String = requireStringValue(flag.id)
+    override fun getString(flag: StringFlag): String = requireStringValue(flag.name)
 
-    override fun getString(flag: ResourceStringFlag): String = requireStringValue(flag.id)
+    override fun getString(flag: ResourceStringFlag): String = requireStringValue(flag.name)
 
-    override fun getInt(flag: IntFlag): Int = requireIntValue(flag.id)
+    override fun getInt(flag: IntFlag): Int = requireIntValue(flag.name)
 
-    override fun getInt(flag: ResourceIntFlag): Int = requireIntValue(flag.id)
+    override fun getInt(flag: ResourceIntFlag): Int = requireIntValue(flag.name)
 
     override fun addListener(flag: Flag<*>, listener: FlagListenable.Listener) {
-        flagListeners.getOrPut(flag.id) { mutableSetOf() }.add(listener)
-        listenerFlagIds.getOrPut(listener) { mutableSetOf() }.add(flag.id)
+        flagListeners.getOrPut(flag.name) { mutableSetOf() }.add(listener)
+        listenerflagNames.getOrPut(listener) { mutableSetOf() }.add(flag.name)
     }
 
     override fun removeListener(listener: FlagListenable.Listener) {
-        listenerFlagIds.remove(listener)?.let {
-                flagIds -> flagIds.forEach {
+        listenerflagNames.remove(listener)?.let {
+                flagNames -> flagNames.forEach {
                         id -> flagListeners[id]?.remove(listener)
                 }
         }
@@ -134,22 +134,22 @@ class FakeFeatureFlags : FeatureFlags {
         // no-op
     }
 
-    private fun flagName(flagId: Int): String {
-        return knownFlagNames[flagId] ?: "UNKNOWN(id=$flagId)"
+    private fun flagName(flagName: String): String {
+        return knownFlagNames[flagName] ?: "UNKNOWN($flagName)"
     }
 
-    private fun requireBooleanValue(flagId: Int): Boolean {
-        return booleanFlags[flagId]
-            ?: error("Flag ${flagName(flagId)} was accessed as boolean but not specified.")
+    private fun requireBooleanValue(flagName: String): Boolean {
+        return booleanFlags[flagName]
+            ?: error("Flag ${flagName(flagName)} was accessed as boolean but not specified.")
     }
 
-    private fun requireStringValue(flagId: Int): String {
-        return stringFlags[flagId]
-            ?: error("Flag ${flagName(flagId)} was accessed as string but not specified.")
+    private fun requireStringValue(flagName: String): String {
+        return stringFlags[flagName]
+            ?: error("Flag ${flagName(flagName)} was accessed as string but not specified.")
     }
 
-    private fun requireIntValue(flagId: Int): Int {
-        return intFlags[flagId]
-            ?: error("Flag ${flagName(flagId)} was accessed as int but not specified.")
+    private fun requireIntValue(flagName: String): Int {
+        return intFlags[flagName]
+            ?: error("Flag ${flagName(flagName)} was accessed as int but not specified.")
     }
 }
