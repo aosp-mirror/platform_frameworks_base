@@ -668,7 +668,6 @@ public class CompanionDeviceManagerService extends SystemService {
             addOnAssociationsChangedListener_enforcePermission();
 
             enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
-
             mListeners.register(listener, userId);
         }
 
@@ -1012,6 +1011,18 @@ public class CompanionDeviceManagerService extends SystemService {
             }
             return System.currentTimeMillis() - association.getTimeApprovedMs()
                     < PAIR_WITHOUT_PROMPT_WINDOW_MS;
+        }
+
+        @Override
+        public void setAssociationTag(int associationId, String tag) {
+            AssociationInfo association = getAssociationWithCallerChecks(associationId);
+            association = AssociationInfo.builder(association).setTag(tag).build();
+            mAssociationStore.updateAssociation(association);
+        }
+
+        @Override
+        public void clearAssociationTag(int associationId) {
+            setAssociationTag(associationId, null);
         }
 
         @Override

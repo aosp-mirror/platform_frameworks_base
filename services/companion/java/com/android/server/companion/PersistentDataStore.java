@@ -171,6 +171,7 @@ final class PersistentDataStore {
     private static final String XML_TAG_ASSOCIATION = "association";
     private static final String XML_TAG_PREVIOUSLY_USED_IDS = "previously-used-ids";
     private static final String XML_TAG_PACKAGE = "package";
+    private static final String XML_TAG_TAG = "tag";
     private static final String XML_TAG_ID = "id";
 
     private static final String XML_ATTR_PERSISTENCE_VERSION = "persistence-version";
@@ -421,6 +422,7 @@ final class PersistentDataStore {
         requireStartOfTag(parser, XML_TAG_ASSOCIATION);
 
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
+        final String tag = readStringAttribute(parser, XML_TAG_TAG);
         final String deviceAddress = readStringAttribute(parser, LEGACY_XML_ATTR_DEVICE);
 
         if (appPackage == null || deviceAddress == null) return;
@@ -429,7 +431,7 @@ final class PersistentDataStore {
         final boolean notify = readBooleanAttribute(parser, XML_ATTR_NOTIFY_DEVICE_NEARBY);
         final long timeApproved = readLongAttribute(parser, XML_ATTR_TIME_APPROVED, 0L);
 
-        out.add(new AssociationInfo(associationId, userId, appPackage,
+        out.add(new AssociationInfo(associationId, userId, appPackage, tag,
                 MacAddress.fromString(deviceAddress), null, profile, null,
                 /* managedByCompanionApp */ false, notify, /* revoked */ false, timeApproved,
                 Long.MAX_VALUE, /* systemDataSyncFlags */ 0));
@@ -456,6 +458,7 @@ final class PersistentDataStore {
         final int associationId = readIntAttribute(parser, XML_ATTR_ID);
         final String profile = readStringAttribute(parser, XML_ATTR_PROFILE);
         final String appPackage = readStringAttribute(parser, XML_ATTR_PACKAGE);
+        final String tag = readStringAttribute(parser, XML_TAG_TAG);
         final MacAddress macAddress = stringToMacAddress(
                 readStringAttribute(parser, XML_ATTR_MAC_ADDRESS));
         final String displayName = readStringAttribute(parser, XML_ATTR_DISPLAY_NAME);
@@ -469,7 +472,7 @@ final class PersistentDataStore {
                 XML_ATTR_SYSTEM_DATA_SYNC_FLAGS, 0);
 
         final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
-                appPackage, macAddress, displayName, profile, selfManaged, notify, revoked,
+                appPackage, tag, macAddress, displayName, profile, selfManaged, notify, revoked,
                 timeApproved, lastTimeConnected, systemDataSyncFlags);
         if (associationInfo != null) {
             out.add(associationInfo);
@@ -518,6 +521,7 @@ final class PersistentDataStore {
         writeIntAttribute(serializer, XML_ATTR_ID, a.getId());
         writeStringAttribute(serializer, XML_ATTR_PROFILE, a.getDeviceProfile());
         writeStringAttribute(serializer, XML_ATTR_PACKAGE, a.getPackageName());
+        writeStringAttribute(serializer, XML_TAG_TAG, a.getTag());
         writeStringAttribute(serializer, XML_ATTR_MAC_ADDRESS, a.getDeviceMacAddressAsString());
         writeStringAttribute(serializer, XML_ATTR_DISPLAY_NAME, a.getDisplayName());
         writeBooleanAttribute(serializer, XML_ATTR_SELF_MANAGED, a.isSelfManaged());
@@ -565,17 +569,17 @@ final class PersistentDataStore {
     }
 
     private static AssociationInfo createAssociationInfoNoThrow(int associationId,
-            @UserIdInt int userId, @NonNull String appPackage, @Nullable MacAddress macAddress,
-            @Nullable CharSequence displayName, @Nullable String profile, boolean selfManaged,
-            boolean notify, boolean revoked, long timeApproved, long lastTimeConnected,
-            int systemDataSyncFlags) {
+            @UserIdInt int userId, @NonNull String appPackage, @Nullable String tag,
+            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
+            @Nullable String profile, boolean selfManaged, boolean notify, boolean revoked,
+            long timeApproved, long lastTimeConnected, int systemDataSyncFlags) {
         AssociationInfo associationInfo = null;
         try {
             // We do not persist AssociatedDevice, which means that AssociationInfo retrieved from
             // datastore is not guaranteed to be identical to the one from initial association.
-            associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
-                    displayName, profile, null, selfManaged, notify, revoked,
-                    timeApproved, lastTimeConnected, systemDataSyncFlags);
+            associationInfo = new AssociationInfo(associationId, userId, appPackage, tag,
+                    macAddress, displayName, profile, null, selfManaged, notify,
+                    revoked, timeApproved, lastTimeConnected, systemDataSyncFlags);
         } catch (Exception e) {
             if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
         }

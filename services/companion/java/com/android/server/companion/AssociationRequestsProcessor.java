@@ -281,9 +281,9 @@ class AssociationRequestsProcessor {
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
-                macAddress, displayName, deviceProfile, associatedDevice, selfManaged,
-                /* notifyOnDeviceNearby */ false, /* revoked */ false, timestamp, Long.MAX_VALUE,
-                /* systemDataSyncFlags */ 0);
+                /* tag */ null, macAddress, displayName, deviceProfile, associatedDevice,
+                selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
+                timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
 
         if (deviceProfile != null) {
             // If the "Device Profile" is specified, make the companion application a holder of the

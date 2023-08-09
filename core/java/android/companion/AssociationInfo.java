@@ -57,6 +57,7 @@ public final class AssociationInfo implements Parcelable {
     private final boolean mSelfManaged;
     private final boolean mNotifyOnDeviceNearby;
     private final int mSystemDataSyncFlags;
+    private final String mTag;
 
     /**
      * Indicates that the association has been revoked (removed), but we keep the association
@@ -78,10 +79,11 @@ public final class AssociationInfo implements Parcelable {
      * @hide
      */
     public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
-            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
-            @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
-            boolean selfManaged, boolean notifyOnDeviceNearby, boolean revoked,
-            long timeApprovedMs, long lastTimeConnectedMs, int systemDataSyncFlags) {
+            @Nullable String tag, @Nullable MacAddress macAddress,
+            @Nullable CharSequence displayName, @Nullable String deviceProfile,
+            @Nullable AssociatedDevice associatedDevice, boolean selfManaged,
+            boolean notifyOnDeviceNearby, boolean revoked, long timeApprovedMs,
+            long lastTimeConnectedMs, int systemDataSyncFlags) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -97,6 +99,7 @@ public final class AssociationInfo implements Parcelable {
 
         mDeviceMacAddress = macAddress;
         mDisplayName = displayName;
+        mTag = tag;
         mDeviceProfile = deviceProfile;
         mAssociatedDevice = associatedDevice;
 
@@ -113,6 +116,14 @@ public final class AssociationInfo implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * @return the tag of this association.
+     * @see CompanionDeviceManager#setAssociationTag(int, String)
+     */
+    public @Nullable String getTag() {
+        return mTag;
     }
 
     /**
@@ -287,6 +298,7 @@ public final class AssociationInfo implements Parcelable {
                 + "mId=" + mId
                 + ", mUserId=" + mUserId
                 + ", mPackageName='" + mPackageName + '\''
+                + ", mTag='" + mTag + '\''
                 + ", mDeviceMacAddress=" + mDeviceMacAddress
                 + ", mDisplayName='" + mDisplayName + '\''
                 + ", mDeviceProfile='" + mDeviceProfile + '\''
@@ -315,6 +327,7 @@ public final class AssociationInfo implements Parcelable {
                 && mTimeApprovedMs == that.mTimeApprovedMs
                 && mLastTimeConnectedMs == that.mLastTimeConnectedMs
                 && Objects.equals(mPackageName, that.mPackageName)
+                && Objects.equals(mTag, that.mTag)
                 && Objects.equals(mDeviceMacAddress, that.mDeviceMacAddress)
                 && Objects.equals(mDisplayName, that.mDisplayName)
                 && Objects.equals(mDeviceProfile, that.mDeviceProfile)
@@ -324,7 +337,7 @@ public final class AssociationInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
+        return Objects.hash(mId, mUserId, mPackageName, mTag, mDeviceMacAddress, mDisplayName,
                 mDeviceProfile, mAssociatedDevice, mSelfManaged, mNotifyOnDeviceNearby, mRevoked,
                 mTimeApprovedMs, mLastTimeConnectedMs, mSystemDataSyncFlags);
     }
@@ -340,6 +353,7 @@ public final class AssociationInfo implements Parcelable {
 
         dest.writeInt(mUserId);
         dest.writeString(mPackageName);
+        dest.writeString(mTag);
 
         dest.writeTypedObject(mDeviceMacAddress, 0);
         dest.writeCharSequence(mDisplayName);
@@ -359,6 +373,7 @@ public final class AssociationInfo implements Parcelable {
 
         mUserId = in.readInt();
         mPackageName = in.readString();
+        mTag = in.readString();
 
         mDeviceMacAddress = in.readTypedObject(MacAddress.CREATOR);
         mDisplayName = in.readCharSequence();
@@ -413,9 +428,11 @@ public final class AssociationInfo implements Parcelable {
         private boolean mRevoked;
         private long mLastTimeConnectedMs;
         private int mSystemDataSyncFlags;
+        private String mTag;
 
         private Builder(@NonNull AssociationInfo info) {
             mOriginalInfo = info;
+            mTag = info.mTag;
             mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
             mRevoked = info.mRevoked;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
@@ -460,12 +477,21 @@ public final class AssociationInfo implements Parcelable {
         }
 
         /** @hide */
+        @Override
+        @NonNull
+        public Builder setTag(String tag) {
+            mTag = tag;
+            return this;
+        }
+
+        /** @hide */
         @NonNull
         public AssociationInfo build() {
             return new AssociationInfo(
                     mOriginalInfo.mId,
                     mOriginalInfo.mUserId,
                     mOriginalInfo.mPackageName,
+                    mTag,
                     mOriginalInfo.mDeviceMacAddress,
                     mOriginalInfo.mDisplayName,
                     mOriginalInfo.mDeviceProfile,
@@ -508,5 +534,8 @@ public final class AssociationInfo implements Parcelable {
         /** @hide */
         @NonNull
         Builder setSystemDataSyncFlags(int flags);
+
+        /** @hide */
+        Builder setTag(String tag);
     }
 }
