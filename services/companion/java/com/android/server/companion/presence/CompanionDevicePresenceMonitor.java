@@ -281,43 +281,30 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             case DEVICE_EVENT_BLE_APPEARED:
             case DEVICE_EVENT_BT_CONNECTED:
             case DEVICE_EVENT_SELF_MANAGED_APPEARED:
-                final boolean alreadyPresent = isDevicePresent(associationId);
                 final boolean added = presentDevicesForSource.add(associationId);
+
                 if (!added) {
                     Slog.w(TAG, "Association with id "
                             + associationId + " is ALREADY reported as "
                             + "present by this source, event=" + event);
-                    return;
                 }
-                // For backward compatibility, do not send the onDeviceAppeared() callback
-                // if it already reported BLE device status.
-                if (event == DEVICE_EVENT_BT_CONNECTED && alreadyPresent) {
-                    Slog.i(TAG, "Ignore sending onDeviceAppeared callback, "
-                            + "device id (" + associationId + ") already present.");
-                } else {
-                    mCallback.onDeviceAppeared(associationId);
-                }
+
+                mCallback.onDeviceAppeared(associationId);
 
                 break;
             case DEVICE_EVENT_BLE_DISAPPEARED:
             case DEVICE_EVENT_BT_DISCONNECTED:
             case DEVICE_EVENT_SELF_MANAGED_DISAPPEARED:
                 final boolean removed = presentDevicesForSource.remove(associationId);
+
                 if (!removed) {
-                    Log.w(TAG, "Association with id " + associationId + " was NOT reported "
+                    Slog.w(TAG, "Association with id " + associationId + " was NOT reported "
                             + "as present by this source, event= " + event);
 
                     return;
                 }
-                final boolean stillPresent = isDevicePresent(associationId);
-                // For backward compatibility, do not send the onDeviceDisappeared()
-                // callback when ble scan still presenting.
-                if (stillPresent) {
-                    Slog.i(TAG, "Ignore sending onDeviceDisappeared callback, "
-                            + "device id (" + associationId + ") is still present.");
-                } else {
-                    mCallback.onDeviceDisappeared(associationId);
-                }
+
+                mCallback.onDeviceDisappeared(associationId);
 
                 break;
             default:
