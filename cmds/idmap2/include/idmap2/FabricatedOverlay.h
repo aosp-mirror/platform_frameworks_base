@@ -49,6 +49,8 @@ struct FabricatedOverlay {
 
     Builder& SetResourceValue(const std::string& resource_name,
                               std::optional<android::base::borrowed_fd>&& binary_value,
+                              off64_t data_binary_offset,
+                              size_t data_binary_size,
                               const std::string& configuration);
 
     inline Builder& setFrroPath(std::string frro_path) {
@@ -65,6 +67,8 @@ struct FabricatedOverlay {
       DataValue data_value;
       std::string data_string_value;
       std::optional<android::base::borrowed_fd> data_binary_value;
+      off64_t data_binary_offset;
+      size_t data_binary_size;
       std::string configuration;
     };
 
@@ -74,6 +78,12 @@ struct FabricatedOverlay {
     std::string target_overlayable_;
     std::string frro_path_;
     std::vector<Entry> entries_;
+  };
+
+  struct BinaryData {
+    android::base::borrowed_fd file_descriptor;
+    off64_t offset;
+    size_t size;
   };
 
   Result<Unit> ToBinaryStream(std::ostream& stream) const;
@@ -92,13 +102,13 @@ struct FabricatedOverlay {
 
   explicit FabricatedOverlay(pb::FabricatedOverlay&& overlay,
                              std::string&& string_pool_data_,
-                             std::vector<android::base::borrowed_fd> binary_files_,
+                             std::vector<FabricatedOverlay::BinaryData> binary_files_,
                              off_t total_binary_bytes_,
                              std::optional<uint32_t> crc_from_disk = {});
 
   pb::FabricatedOverlay overlay_pb_;
   std::string string_pool_data_;
-  std::vector<android::base::borrowed_fd> binary_files_;
+  std::vector<FabricatedOverlay::BinaryData> binary_files_;
   uint32_t total_binary_bytes_;
   std::optional<uint32_t> crc_from_disk_;
   mutable std::optional<SerializedData> data_;

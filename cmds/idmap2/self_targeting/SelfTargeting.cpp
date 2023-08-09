@@ -52,6 +52,7 @@ CreateFrroFile(std::string& out_err_result, const std::string& packageName,
         const auto dataType = entry_params.data_type;
         if (entry_params.data_binary_value.has_value()) {
             builder.SetResourceValue(entry_params.resource_name, *entry_params.data_binary_value,
+                                     entry_params.binary_data_offset, entry_params.binary_data_size,
                                      entry_params.configuration);
         } else  if (dataType >= Res_value::TYPE_FIRST_INT && dataType <= Res_value::TYPE_LAST_INT) {
            builder.SetResourceValue(entry_params.resource_name, dataType,
