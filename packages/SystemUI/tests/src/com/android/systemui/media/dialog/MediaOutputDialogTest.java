@@ -256,6 +256,30 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void isBroadcastSupported_noBleDeviceAndEnabledBroadcast_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(true);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_noBleDeviceAndDisabledBroadcast_returnsFalse() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isFalse();
+    }
+
+    @Test
     public void getBroadcastIconVisibility_isBroadcasting_returnVisible() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
