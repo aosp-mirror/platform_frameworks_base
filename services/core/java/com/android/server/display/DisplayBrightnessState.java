@@ -134,6 +134,13 @@ public final class DisplayBrightnessState {
     }
 
     /**
+     * Helper methods to create builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * A DisplayBrightnessState's builder class.
      */
     public static class Builder {
