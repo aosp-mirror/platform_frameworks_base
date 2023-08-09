@@ -18,10 +18,14 @@ package com.android.server.notification;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
@@ -51,6 +55,7 @@ public class ConditionProvidersTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContext.ensureTestableResources();
 
         mProviders = new ConditionProviders(mContext, mUserProfiles, mIpm);
         mProviders.setCallback(mCallback);
@@ -130,5 +135,22 @@ public class ConditionProvidersTest extends UiServiceTestCase {
         verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
         verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[3]));
         verifyNoMoreInteractions(mCallback);
+    }
+
+    @Test
+    public void testRemoveDefaultFromConfig() {
+        final int userId = 0;
+        ComponentName oldDefaultComponent = ComponentName.unflattenFromString("package/Component1");
+
+        when(mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultDndDeniedPackages))
+                .thenReturn("package");
+        mProviders.setPackageOrComponentEnabled(oldDefaultComponent.flattenToString(),
+                userId, true, true /*enabled*/, false /*userSet*/);
+        assertEquals("package", mProviders.getApproved(userId, true));
+
+        mProviders.removeDefaultFromConfig(userId);
+
+        assertTrue(mProviders.getApproved(userId, true).isEmpty());
     }
 }

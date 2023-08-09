@@ -858,7 +858,8 @@ public class SettingsBackupTest {
                  Settings.Secure.UI_TRANSLATION_ENABLED,
                  Settings.Secure.CREDENTIAL_SERVICE,
                  Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
-                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED);
+                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_EDGE_HAPTIC_ENABLED,
+                 Settings.Secure.DND_CONFIGS_MIGRATED);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

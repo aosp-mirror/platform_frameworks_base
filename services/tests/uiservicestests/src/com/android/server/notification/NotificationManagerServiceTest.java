@@ -117,6 +117,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -12429,6 +12430,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
         verify(mListeners).isComponentEnabledForPackage(packageName);
         verify(mDevicePolicyManager).isActiveDeviceOwner(uid);
+    }
+
+    @Test
+    public void testResetDefaultDnd() {
+        TestableNotificationManagerService service = spy(mService);
+        UserInfo user = new UserInfo(0, "owner", 0);
+        when(mUm.getAliveUsers()).thenReturn(List.of(user));
+        doReturn(false).when(service).isDNDMigrationDone(anyInt());
+
+        service.resetDefaultDndIfNecessary();
+
+        verify(mConditionProviders, times(1)).removeDefaultFromConfig(user.id);
+        verify(mConditionProviders, times(1)).resetDefaultFromConfig();
+        verify(service, times(1)).allowDndPackages(user.id);
+        verify(service, times(1)).setDNDMigrationDone(user.id);
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(T source,

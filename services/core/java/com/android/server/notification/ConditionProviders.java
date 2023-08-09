@@ -441,6 +441,58 @@ public class ConditionProviders extends ManagedServices {
         return info == null ? null : (IConditionProvider) info.service;
     }
 
+    void resetDefaultFromConfig() {
+        synchronized (mDefaultsLock) {
+            mDefaultComponents.clear();
+            mDefaultPackages.clear();
+        }
+        loadDefaultsFromConfig();
+    }
+
+    boolean removeDefaultFromConfig(int userId) {
+        boolean removed = false;
+        String defaultDndDenied = mContext.getResources().getString(
+                R.string.config_defaultDndDeniedPackages);
+        if (defaultDndDenied != null) {
+            String[] dnds = defaultDndDenied.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
+            for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
+                removed |= removePackageFromApprovedLists(userId, dnds[i], "remove from config");
+            }
+        }
+        return removed;
+    }
+
+    private boolean removePackageFromApprovedLists(int userId, String pkg, String reason) {
+        boolean removed = false;
+        synchronized (mApproved) {
+            final ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(
+                    userId);
+            if (approvedByType != null) {
+                int approvedByTypeSize = approvedByType.size();
+                for (int i = 0; i < approvedByTypeSize; i++) {
+                    final ArraySet<String> approved = approvedByType.valueAt(i);
+                    int approvedSize = approved.size();
+                    for (int j = approvedSize - 1; j >= 0; j--) {
+                        final String packageOrComponent = approved.valueAt(j);
+                        final String packageName = getPackageName(packageOrComponent);
+                        if (TextUtils.equals(pkg, packageName)) {
+                            approved.removeAt(j);
+                            removed = true;
+                            if (DEBUG) {
+                                Slog.v(TAG, "Removing " + packageOrComponent
+                                        + " from approved list; " + reason);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
+    }
+
     private static class ConditionRecord {
         public final Uri id;
         public final ComponentName component;
