@@ -324,8 +324,10 @@ class SplitScreenTransitions {
 
     void startFullscreenTransition(WindowContainerTransaction wct,
             @Nullable RemoteTransition handler) {
-        mTransitions.startTransition(TRANSIT_OPEN, wct,
-                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler));
+        OneShotRemoteHandler fullscreenHandler =
+                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler);
+        fullscreenHandler.setTransition(mTransitions
+                .startTransition(TRANSIT_OPEN, wct, fullscreenHandler));
     }
 
 
