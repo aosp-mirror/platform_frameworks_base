@@ -379,7 +379,7 @@ object Flags {
     val INSTANT_TETHER = unreleasedFlag("instant_tether")
 
     // TODO(b/294588085): Tracking Bug
-    val WIFI_SECONDARY_NETWORKS = unreleasedFlag("wifi_secondary_networks")
+    val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
