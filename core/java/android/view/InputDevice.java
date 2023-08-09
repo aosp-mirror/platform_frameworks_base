@@ -37,6 +37,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Vibrator;
 import android.os.VibratorManager;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -483,10 +484,12 @@ public final class InputDevice implements Parcelable {
         mSources = sources;
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
-        if (keyboardLanguageTag != null) {
-            mKeyboardLanguageTag = ULocale
+        if (!TextUtils.isEmpty(keyboardLanguageTag)) {
+            String langTag;
+            langTag = ULocale
                     .createCanonical(ULocale.forLanguageTag(keyboardLanguageTag))
                     .toLanguageTag();
+            mKeyboardLanguageTag = TextUtils.equals(langTag, "und") ? null : langTag;
         } else {
             mKeyboardLanguageTag = null;
         }

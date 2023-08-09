@@ -123,10 +123,6 @@ class KeyboardMetricsCollectorTests {
             createImeSubtype(3, ULocale.forLanguageTag("en-US"), "qwerty"),
             KeyboardLayout(null, "German", null, 0, null, 0, 0, 0),
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
-        ).addLayoutSelection(
-            createImeSubtype(4, null, "qwerty"), // Default language tag
-            KeyboardLayout(null, "German", null, 0, null, 0, 0, 0),
-            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
         ).setIsFirstTimeConfiguration(true).build()
 
         assertEquals(
@@ -142,8 +138,8 @@ class KeyboardMetricsCollectorTests {
         assertTrue(event.isFirstConfiguration)
 
         assertEquals(
-            "KeyboardConfigurationEvent should contain 4 configurations provided",
-            4,
+            "KeyboardConfigurationEvent should contain 3 configurations provided",
+            3,
             event.layoutConfigurations.size
         )
         assertExpectedLayoutConfiguration(
@@ -159,7 +155,7 @@ class KeyboardMetricsCollectorTests {
             event.layoutConfigurations[1],
             "de-CH",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwertz"),
-            KeyboardMetricsCollector.DEFAULT_LAYOUT,
+            KeyboardMetricsCollector.DEFAULT_LAYOUT_NAME,
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER,
             "en-US",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("azerty"),
@@ -173,10 +169,29 @@ class KeyboardMetricsCollectorTests {
             "en-US",
             KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwerty"),
         )
+    }
+
+    @Test
+    fun testCreateKeyboardConfigurationEvent_withDefaultLanguageTag() {
+        val builder = KeyboardMetricsCollector.KeyboardConfigurationEvent.Builder(
+            createKeyboard(
+                DEVICE_ID,
+                DEFAULT_VENDOR_ID,
+                DEFAULT_PRODUCT_ID,
+                "und", // Undefined language tag
+                "azerty"
+            )
+        )
+        val event = builder.addLayoutSelection(
+            createImeSubtype(4, null, "qwerty"), // Default language tag
+            KeyboardLayout(null, "German", null, 0, null, 0, 0, 0),
+            KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE
+        ).build()
+
         assertExpectedLayoutConfiguration(
-            event.layoutConfigurations[3],
-            "de-CH",
-            KeyboardLayout.LayoutType.getLayoutTypeEnumValue("qwertz"),
+            event.layoutConfigurations[0],
+            KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
+            KeyboardLayout.LayoutType.getLayoutTypeEnumValue("azerty"),
             "German",
             KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
             KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
