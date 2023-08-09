@@ -23,6 +23,7 @@ import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_EXP
 import static android.server.inputmethod.InputMethodManagerServiceProto.SHOW_FORCED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.MotionEvent.TOOL_TYPE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
@@ -44,6 +45,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethod;
@@ -351,7 +353,8 @@ public final class ImeVisibilityStateComputer {
 
     void setWindowState(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
         final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
-        if (state != null && newState.hasEditorFocused()) {
+        if (state != null && newState.hasEditorFocused()
+                && newState.mToolType != MotionEvent.TOOL_TYPE_STYLUS) {
             // Inherit the last requested IME visible state when the target window is still
             // focused with an editor.
             newState.setRequestedImeVisible(state.mRequestedImeVisible);
@@ -652,14 +655,23 @@ public final class ImeVisibilityStateComputer {
      * A class that represents the current state of the IME target window.
      */
     static class ImeTargetWindowState {
+
         ImeTargetWindowState(@SoftInputModeFlags int softInputModeState, int windowFlags,
                 boolean imeFocusChanged, boolean hasFocusedEditor,
                 boolean isStartInputByGainFocus) {
+            this(softInputModeState, windowFlags, imeFocusChanged, hasFocusedEditor,
+                    isStartInputByGainFocus, TOOL_TYPE_UNKNOWN);
+        }
+
+        ImeTargetWindowState(@SoftInputModeFlags int softInputModeState, int windowFlags,
+                boolean imeFocusChanged, boolean hasFocusedEditor,
+                boolean isStartInputByGainFocus, @MotionEvent.ToolType int toolType) {
             mSoftInputModeState = softInputModeState;
             mWindowFlags = windowFlags;
             mImeFocusChanged = imeFocusChanged;
             mHasFocusedEditor = hasFocusedEditor;
             mIsStartInputByGainFocus = isStartInputByGainFocus;
+            mToolType = toolType;
         }
 
         /**
@@ -668,6 +680,11 @@ public final class ImeVisibilityStateComputer {
         private final @SoftInputModeFlags int mSoftInputModeState;
 
         private final int mWindowFlags;
+
+        /**
+         * {@link MotionEvent#getToolType(int)} that was used to click editor.
+         */
+        private final int mToolType;
 
         /**
          * {@code true} means the IME focus changed from the previous window, {@code false}
@@ -716,6 +733,10 @@ public final class ImeVisibilityStateComputer {
 
         int getWindowFlags() {
             return mWindowFlags;
+        }
+
+        int getToolType() {
+            return mToolType;
         }
 
         private void setImeDisplayId(int imeDisplayId) {

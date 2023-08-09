@@ -217,12 +217,10 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         doReturn(animator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
-        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        verify(mFinishCallback, never()).onTransitionFinished(any());
         mController.mergeAnimation(mTransition, info, new SurfaceControl.Transaction(),
-                mTransition,
-                (wct, cb) -> {
-                });
-        verify(mFinishCallback).onTransitionFinished(any(), any());
+                mTransition, (wct) -> {});
+        verify(mFinishCallback).onTransitionFinished(any());
     }
 
     @Test
@@ -238,9 +236,9 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
         mController.startAnimation(mTransition, info, mStartTransaction,
                 mFinishTransaction, mFinishCallback);
 
-        verify(mFinishCallback, never()).onTransitionFinished(any(), any());
+        verify(mFinishCallback, never()).onTransitionFinished(any());
         mController.onAnimationFinished(mTransition);
-        verify(mFinishCallback).onTransitionFinished(any(), any());
+        verify(mFinishCallback).onTransitionFinished(any());
 
         // Should not call finish when the finish has already been called.
         assertThrows(IllegalStateException.class,

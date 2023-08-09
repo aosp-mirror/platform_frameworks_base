@@ -675,6 +675,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mSecurityViewFlipperController.reset();
     }
 
+    /** Prepares views in the bouncer before starting appear animation. */
+    public void prepareToShow() {
+        View bouncerUserSwitcher = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+        if (bouncerUserSwitcher != null) {
+            bouncerUserSwitcher.setAlpha(0f);
+        }
+    }
+
     @Override
     public void onResume(int reason) {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
@@ -825,7 +833,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
                     boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser());
-                    if (securityMode == SecurityMode.None || isLockscreenDisabled) {
+
+                    if (securityMode == SecurityMode.None) {
                         finish = isLockscreenDisabled;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;

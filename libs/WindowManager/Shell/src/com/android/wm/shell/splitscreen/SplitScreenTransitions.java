@@ -43,7 +43,6 @@ import android.window.RemoteTransition;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
@@ -109,7 +108,7 @@ class SplitScreenTransitions {
             if (pendingTransition.mCanceled) {
                 // The pending transition was canceled, so skip playing animation.
                 startTransaction.apply();
-                onFinish(null /* wct */, null /* wctCB */);
+                onFinish(null /* wct */);
                 return;
             }
 
@@ -211,7 +210,7 @@ class SplitScreenTransitions {
             }
         }
         t.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     /** Play animation for drag divider dismiss transition. */
@@ -238,7 +237,7 @@ class SplitScreenTransitions {
                     mAnimations.remove(va);
                     if (animated) {
                         mTransitions.getMainExecutor().execute(() -> {
-                            onFinish(null /* wct */, null /* wctCB */);
+                            onFinish(null /* wct */);
                         });
                     }
                 });
@@ -250,7 +249,7 @@ class SplitScreenTransitions {
             }
         }
         startTransaction.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     /** Play animation for resize transition. */
@@ -283,7 +282,7 @@ class SplitScreenTransitions {
                     mAnimations.remove(va);
                     if (animated) {
                         mTransitions.getMainExecutor().execute(() -> {
-                            onFinish(null /* wct */, null /* wctCB */);
+                            onFinish(null /* wct */);
                         });
                     }
                 });
@@ -291,7 +290,7 @@ class SplitScreenTransitions {
         }
 
         startTransaction.apply();
-        onFinish(null /* wct */, null /* wctCB */);
+        onFinish(null /* wct */);
     }
 
     boolean isPendingTransition(IBinder transition) {
@@ -391,7 +390,7 @@ class SplitScreenTransitions {
         if (mPendingResize != null) {
             mPendingResize.cancel(null);
             mAnimations.clear();
-            onFinish(null /* wct */, null /* wctCB */);
+            onFinish(null /* wct */);
         }
 
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
@@ -450,7 +449,7 @@ class SplitScreenTransitions {
         }
     }
 
-    void onFinish(WindowContainerTransaction wct, WindowContainerTransactionCallback wctCB) {
+    void onFinish(WindowContainerTransaction wct) {
         if (!mAnimations.isEmpty()) return;
 
         if (wct == null) wct = new WindowContainerTransaction();
@@ -470,7 +469,7 @@ class SplitScreenTransitions {
 
         mOnFinish.run();
         if (mFinishCallback != null) {
-            mFinishCallback.onTransitionFinished(wct /* wct */, wctCB /* wctCB */);
+            mFinishCallback.onTransitionFinished(wct /* wct */);
             mFinishCallback = null;
         }
     }
@@ -495,7 +494,7 @@ class SplitScreenTransitions {
                 mTransactionPool.release(transaction);
                 mTransitions.getMainExecutor().execute(() -> {
                     mAnimations.remove(va);
-                    onFinish(null /* wct */, null /* wctCB */);
+                    onFinish(null /* wct */);
                 });
             }
         });

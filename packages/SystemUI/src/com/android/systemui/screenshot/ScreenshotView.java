@@ -815,7 +815,7 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EDIT_TAPPED, 0, mPackageName);
             prepareSharedTransition();
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
                     imageData.editTransition.get().bundle,
                     imageData.owner, true);
         });
@@ -823,7 +823,7 @@ public class ScreenshotView extends FrameLayout implements
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_PREVIEW_TAPPED, 0, mPackageName);
             prepareSharedTransition();
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(imageData.uri, mContext),
+                    ActionIntentCreator.INSTANCE.createEdit(imageData.uri, mContext),
                     imageData.editTransition.get().bundle,
                     imageData.owner, true);
         });

@@ -33,6 +33,8 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipDisplayLayoutState;
@@ -92,7 +94,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
     private PipSnapAlgorithm mPipSnapAlgorithm;
     private PipMotionHelper mMotionHelper;
     private PipResizeGestureHandler mPipResizeGestureHandler;
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private SizeSpecSource mSizeSpecSource;
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
     private DisplayLayout mDisplayLayout;
@@ -108,16 +110,16 @@ public class PipTouchHandlerTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, mPipDisplayLayoutState);
         mPipSnapAlgorithm = new PipSnapAlgorithm();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState, mPipSnapAlgorithm,
-                new PipKeepClearAlgorithmInterface() {}, mPipSizeSpecHandler);
+                new PipKeepClearAlgorithmInterface() {}, mPipDisplayLayoutState, mSizeSpecSource);
         PipMotionHelper pipMotionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, mPipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
         mPipTouchHandler = new PipTouchHandler(mContext, mShellInit, mPhonePipMenuController,
-                mPipBoundsAlgorithm, mPipBoundsState, mPipSizeSpecHandler, mPipTaskOrganizer,
+                mPipBoundsAlgorithm, mPipBoundsState, mSizeSpecSource, mPipTaskOrganizer,
                 pipMotionHelper, mFloatingContentCoordinator, mPipUiEventLogger, mMainExecutor);
         // We aren't actually using ShellInit, so just call init directly
         mPipTouchHandler.onInit();
@@ -162,8 +164,8 @@ public class PipTouchHandlerTest extends ShellTestCase {
 
         // getting the expected min and max size
         float aspectRatio = (float) mPipBounds.width() / mPipBounds.height();
-        Size expectedMinSize = mPipSizeSpecHandler.getMinSize(aspectRatio);
-        Size expectedMaxSize = mPipSizeSpecHandler.getMaxSize(aspectRatio);
+        Size expectedMinSize = mSizeSpecSource.getMinSize(aspectRatio);
+        Size expectedMaxSize = mSizeSpecSource.getMaxSize(aspectRatio);
 
         assertEquals(expectedMovementBounds, mPipBoundsState.getNormalMovementBounds());
         verify(mPipResizeGestureHandler, times(1))

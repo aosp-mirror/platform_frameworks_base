@@ -30,6 +30,8 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.onehanded.OneHandedController;
@@ -53,7 +55,6 @@ import com.android.wm.shell.pip.phone.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -87,7 +88,6 @@ public abstract class Pip1Module {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
             PipDisplayLayoutState pipDisplayLayoutState,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
@@ -110,8 +110,7 @@ public abstract class Pip1Module {
                     context, shellInit, shellCommandHandler, shellController,
                     displayController, pipAnimationController, pipAppOpsListener,
                     pipBoundsAlgorithm,
-                    pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler,
-                    pipDisplayLayoutState,
+                    pipKeepClearAlgorithm, pipBoundsState, pipDisplayLayoutState,
                     pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
                     pipTransitionState, pipTouchHandler, pipTransitionController,
                     windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
@@ -123,8 +122,8 @@ public abstract class Pip1Module {
     @WMSingleton
     @Provides
     static PipBoundsState providePipBoundsState(Context context,
-            PipSizeSpecHandler pipSizeSpecHandler, PipDisplayLayoutState pipDisplayLayoutState) {
-        return new PipBoundsState(context, pipSizeSpecHandler, pipDisplayLayoutState);
+            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
     }
 
     @WMSingleton
@@ -141,19 +140,12 @@ public abstract class Pip1Module {
 
     @WMSingleton
     @Provides
-    static PipSizeSpecHandler providePipSizeSpecHelper(Context context,
-            PipDisplayLayoutState pipDisplayLayoutState) {
-        return new PipSizeSpecHandler(context, pipDisplayLayoutState);
-    }
-
-    @WMSingleton
-    @Provides
     static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
             PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
             PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
-            PipSizeSpecHandler pipSizeSpecHandler) {
+            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
         return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
-                pipKeepClearAlgorithm, pipSizeSpecHandler);
+                pipKeepClearAlgorithm, pipDisplayLayoutState, sizeSpecSource);
     }
 
     // Handler is used by Icon.loadDrawableAsync
@@ -177,14 +169,14 @@ public abstract class Pip1Module {
             PhonePipMenuController menuPhoneController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            SizeSpecSource sizeSpecSource,
             PipTaskOrganizer pipTaskOrganizer,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipSizeSpecHandler, pipTaskOrganizer, pipMotionHelper,
+                pipBoundsState, sizeSpecSource, pipTaskOrganizer, pipMotionHelper,
                 floatingContentCoordinator, pipUiEventLogger, mainExecutor);
     }
 
@@ -239,6 +231,13 @@ public abstract class Pip1Module {
                 pipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
                 splitScreenOptional);
+    }
+
+    @WMSingleton
+    @Provides
+    static SizeSpecSource provideSizeSpecSource(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
     }
 
     @WMSingleton

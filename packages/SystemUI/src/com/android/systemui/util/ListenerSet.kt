@@ -29,20 +29,12 @@ import java.util.concurrent.CopyOnWriteArrayList
 class ListenerSet<E : Any>
 /** Private constructor takes the internal list so that we can use auto-delegation */
 private constructor(private val listeners: CopyOnWriteArrayList<E>) :
-    Collection<E> by listeners, Set<E> {
+    Collection<E> by listeners, IListenerSet<E> {
 
     /** Create a new instance */
     constructor() : this(CopyOnWriteArrayList())
 
-    /**
-     * A thread-safe, reentrant-safe method to add a listener. Does nothing if the listener is
-     * already in the set.
-     */
-    fun addIfAbsent(element: E): Boolean = listeners.addIfAbsent(element)
+    override fun addIfAbsent(element: E): Boolean = listeners.addIfAbsent(element)
 
-    /** A thread-safe, reentrant-safe method to remove a listener. */
-    fun remove(element: E): Boolean = listeners.remove(element)
+    override fun remove(element: E): Boolean = listeners.remove(element)
 }
-
-/** Extension to match Collection which is implemented to only be (easily) accessible in kotlin */
-fun <T : Any> ListenerSet<T>.isNotEmpty(): Boolean = !isEmpty()

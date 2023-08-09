@@ -169,7 +169,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             animator.stop();
         }
 
-        mFinishCallback.onTransitionFinished(null, null);
+        mFinishCallback.onTransitionFinished(null);
         mFinishCallback = null;
         mTransition = null;
     }
@@ -193,7 +193,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             }
             // Apply changes happening during the unfold animation immediately
             t.apply();
-            finishCallback.onTransitionFinished(null, null);
+            finishCallback.onTransitionFinished(null);
         }
     }
 

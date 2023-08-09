@@ -771,7 +771,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Error sending appeared tasks to recents animation", e);
                 }
             }
-            finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
+            finishCallback.onTransitionFinished(null /* wct */);
         }
 
         /** For now, just set-up a jump-cut to the new activity. */
@@ -937,7 +937,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             cleanUp();
-            finishCB.onTransitionFinished(wct.isEmpty() ? null : wct, null /* wctCB */);
+            finishCB.onTransitionFinished(wct.isEmpty() ? null : wct);
         }
 
         @Override

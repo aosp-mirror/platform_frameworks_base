@@ -26,7 +26,7 @@ class FakeDisplayTracker constructor(val context: Context) : DisplayTracker {
     override var defaultDisplayId: Int = Display.DEFAULT_DISPLAY
     override var allDisplays: Array<Display> = displayManager.displays
 
-    private val displayCallbacks: MutableList<DisplayTracker.Callback> = ArrayList()
+    val displayCallbacks: MutableList<DisplayTracker.Callback> = ArrayList()
     private val brightnessCallbacks: MutableList<DisplayTracker.Callback> = ArrayList()
     override fun addDisplayChangeCallback(callback: DisplayTracker.Callback, executor: Executor) {
         displayCallbacks.add(callback)
@@ -43,12 +43,12 @@ class FakeDisplayTracker constructor(val context: Context) : DisplayTracker {
         brightnessCallbacks.remove(callback)
     }
 
-    fun setDefaultDisplay(displayId: Int) {
-        defaultDisplayId = displayId
+    override fun getDisplay(displayId: Int): Display {
+        return allDisplays.filter { display -> display.displayId == displayId }[0]
     }
 
-    fun setDisplays(displays: Array<Display>) {
-        allDisplays = displays
+    fun setDefaultDisplay(displayId: Int) {
+        defaultDisplayId = displayId
     }
 
     fun triggerOnDisplayAdded(displayId: Int) {
