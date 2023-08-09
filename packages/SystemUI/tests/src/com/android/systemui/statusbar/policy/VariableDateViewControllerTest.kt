@@ -19,9 +19,11 @@ package com.android.systemui.statusbar.policy
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.FakeSystemClock
@@ -59,6 +61,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     private var lastText: String? = null
 
+    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     private lateinit var systemClock: FakeSystemClock
     private lateinit var testableLooper: TestableLooper
     private lateinit var testableHandler: Handler
@@ -75,6 +78,8 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
         systemClock = FakeSystemClock()
         systemClock.setCurrentTimeMillis(TIME_STAMP)
+
+        shadeExpansionStateManager = ShadeExpansionStateManager()
 
         `when`(view.longerPattern).thenReturn(LONG_PATTERN)
         `when`(view.shorterPattern).thenReturn(SHORT_PATTERN)
@@ -99,6 +104,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         controller = VariableDateViewController(
                 systemClock,
                 broadcastDispatcher,
+                shadeExpansionStateManager,
                 testableHandler,
                 view
         )
@@ -121,7 +127,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testLotsOfSpaceUseLongText() {
-        onMeasureListenerCaptor.value.onMeasureAction(10000)
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.EXACTLY)
 
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
@@ -129,7 +135,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testSmallSpaceUseEmpty() {
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEmpty()
@@ -139,7 +145,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
     fun testSpaceInBetweenUseShortText() {
         val average = ((getTextLength(longText) + getTextLength(shortText)) / 2).toInt()
 
-        onMeasureListenerCaptor.value.onMeasureAction(average)
+        onMeasureListenerCaptor.value.onMeasureAction(average, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEqualTo(shortText)
@@ -147,10 +153,10 @@ class VariableDateViewControllerTest : SysuiTestCase() {
 
     @Test
     fun testSwitchBackToLonger() {
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
-        onMeasureListenerCaptor.value.onMeasureAction(10000)
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
 
         assertThat(lastText).isEqualTo(longText)
@@ -161,11 +167,41 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         `when`(view.freezeSwitching).thenReturn(true)
 
         val average = ((getTextLength(longText) + getTextLength(shortText)) / 2).toInt()
-        onMeasureListenerCaptor.value.onMeasureAction(average)
+        onMeasureListenerCaptor.value.onMeasureAction(average, View.MeasureSpec.EXACTLY)
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
 
-        onMeasureListenerCaptor.value.onMeasureAction(1)
+        onMeasureListenerCaptor.value.onMeasureAction(1, View.MeasureSpec.EXACTLY)
+        testableLooper.processAllMessages()
+        assertThat(lastText).isEqualTo(longText)
+    }
+
+    @Test
+    fun testQsExpansionTrue_ignoreAtMostMeasureRequests() {
+        shadeExpansionStateManager.onQsExpansionFractionChanged(0f)
+
+        onMeasureListenerCaptor.value.onMeasureAction(
+                getTextLength(shortText).toInt(),
+                View.MeasureSpec.EXACTLY
+            )
+        testableLooper.processAllMessages()
+
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.AT_MOST)
+        testableLooper.processAllMessages()
+        assertThat(lastText).isEqualTo(shortText)
+    }
+
+    @Test
+    fun testQsExpansionFalse_acceptAtMostMeasureRequests() {
+        shadeExpansionStateManager.onQsExpansionFractionChanged(1f)
+
+        onMeasureListenerCaptor.value.onMeasureAction(
+                getTextLength(shortText).toInt(),
+                View.MeasureSpec.EXACTLY
+        )
+        testableLooper.processAllMessages()
+
+        onMeasureListenerCaptor.value.onMeasureAction(10000, View.MeasureSpec.AT_MOST)
         testableLooper.processAllMessages()
         assertThat(lastText).isEqualTo(longText)
     }
