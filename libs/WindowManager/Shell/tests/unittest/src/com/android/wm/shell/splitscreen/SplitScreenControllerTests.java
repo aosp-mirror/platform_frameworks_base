@@ -65,6 +65,7 @@ import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -106,6 +107,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
     @Mock RecentTasksController mRecentTasks;
     @Mock LaunchAdjacentController mLaunchAdjacentController;
     @Mock WindowDecorViewModel mWindowDecorViewModel;
+    @Mock DesktopTasksController mDesktopTasksController;
     @Captor ArgumentCaptor<Intent> mIntentCaptor;
 
     private ShellController mShellController;
@@ -122,7 +124,7 @@ public class SplitScreenControllerTests extends ShellTestCase {
                 mRootTDAOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mDragAndDropController, mTransitions, mTransactionPool,
                 mIconProvider, mRecentTasks, mLaunchAdjacentController, mWindowDecorViewModel,
-                mMainExecutor, mStageCoordinator));
+                mDesktopTasksController, mMainExecutor, mStageCoordinator));
     }
 
     @Test
