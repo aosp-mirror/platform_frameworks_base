@@ -97,7 +97,7 @@ constructor(
     private var host: SurfaceControlViewHost
 
     val surfacePackage: SurfaceControlViewHost.SurfacePackage
-        get() = host.surfacePackage
+        get() = checkNotNull(host.surfacePackage)
 
     private lateinit var largeClockHostView: FrameLayout
     private lateinit var smallClockHostView: FrameLayout

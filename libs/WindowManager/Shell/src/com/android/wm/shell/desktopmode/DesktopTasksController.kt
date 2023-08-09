@@ -398,17 +398,18 @@ class DesktopTasksController(
         request: TransitionRequestInfo
     ): WindowContainerTransaction? {
         // Check if we should skip handling this transition
+        val triggerTask = request.triggerTask
         val shouldHandleRequest =
             when {
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> false
                 // Only handle when it is a task transition
-                request.triggerTask == null -> false
+                triggerTask == null -> false
                 // Only handle standard type tasks
-                request.triggerTask.activityType != ACTIVITY_TYPE_STANDARD -> false
+                triggerTask.activityType != ACTIVITY_TYPE_STANDARD -> false
                 // Only handle fullscreen or freeform tasks
-                request.triggerTask.windowingMode != WINDOWING_MODE_FULLSCREEN &&
-                        request.triggerTask.windowingMode != WINDOWING_MODE_FREEFORM -> false
+                triggerTask.windowingMode != WINDOWING_MODE_FULLSCREEN &&
+                        triggerTask.windowingMode != WINDOWING_MODE_FREEFORM -> false
                 // Otherwise process it
                 else -> true
             }
@@ -417,27 +418,30 @@ class DesktopTasksController(
             return null
         }
 
-        val task: RunningTaskInfo = request.triggerTask
-        val activeTasks = desktopModeTaskRepository.getActiveTasks(task.displayId)
+	if (triggerTask == null) {
+	    return null
+	}
+
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(triggerTask.displayId)
 
         // Check if we should switch a fullscreen task to freeform
-        if (task.windowingMode == WINDOWING_MODE_FULLSCREEN) {
+        if (triggerTask.windowingMode == WINDOWING_MODE_FULLSCREEN) {
             // If there are any visible desktop tasks, switch the task to freeform
             if (activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
                 KtProtoLog.d(
                     WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksController: switch fullscreen task to freeform on transition" +
                         " taskId=%d",
-                    task.taskId
+                    triggerTask.taskId
                 )
                 return WindowContainerTransaction().also { wct ->
-                    addMoveToDesktopChanges(wct, task.token)
+                    addMoveToDesktopChanges(wct, triggerTask.token)
                 }
             }
         }
 
         // CHeck if we should switch a freeform task to fullscreen
-        if (task.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (triggerTask.windowingMode == WINDOWING_MODE_FREEFORM) {
             // If no visible desktop tasks, switch this task to freeform as the transition came
             // outside of this controller
             if (activeTasks.none { desktopModeTaskRepository.isVisibleTask(it) }) {
@@ -445,10 +449,10 @@ class DesktopTasksController(
                     WM_SHELL_DESKTOP_MODE,
                     "DesktopTasksController: switch freeform task to fullscreen oon transition" +
                         " taskId=%d",
-                    task.taskId
+                    triggerTask.taskId
                 )
                 return WindowContainerTransaction().also { wct ->
-                    addMoveToFullscreenChanges(wct, task.token)
+                    addMoveToFullscreenChanges(wct, triggerTask.token)
                 }
             }
         }
@@ -471,7 +475,7 @@ class DesktopTasksController(
         token: WindowContainerToken
     ) {
         wct.setWindowingMode(token, WINDOWING_MODE_FULLSCREEN)
-        wct.setBounds(token, null)
+        wct.setBounds(token, Rect())
         if (isDesktopDensityOverrideSet()) {
             wct.setDensityDpi(token, getFullscreenDensityDpi())
         }

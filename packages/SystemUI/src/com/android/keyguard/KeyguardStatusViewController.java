@@ -23,6 +23,7 @@ import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CL
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.graphics.Rect;

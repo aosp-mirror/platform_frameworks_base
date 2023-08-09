@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.animation.requiresRemeasuring
 
 /**
  * Renders the bottom area of the lock-screen. Concerned primarily with the quick affordance UI
@@ -94,7 +95,7 @@ constructor(
         ambientIndicationArea?.let { nonNullAmbientIndicationArea ->
             // remove old ambient indication from its parent
             val originalAmbientIndicationView =
-                oldBottomArea.findViewById<View>(R.id.ambient_indication_container)
+                oldBottomArea.requireViewById<View>(R.id.ambient_indication_container)
             (originalAmbientIndicationView.parent as ViewGroup).removeView(
                 originalAmbientIndicationView
             )

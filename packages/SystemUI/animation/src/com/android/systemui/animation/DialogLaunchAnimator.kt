@@ -249,7 +249,7 @@ constructor(
         // intent is to launch a dialog from another dialog.
         val animatedParent =
             openedDialogs.firstOrNull {
-                it.dialog.window.decorView.viewRootImpl == controller.viewRoot
+                it.dialog.window?.decorView?.viewRootImpl == controller.viewRoot
             }
         val controller =
             animatedParent?.dialogContentWithBackground?.let {
@@ -336,7 +336,7 @@ constructor(
     ): ActivityLaunchAnimator.Controller? {
         val animatedDialog =
             openedDialogs.firstOrNull {
-                it.dialog.window.decorView.viewRootImpl == view.viewRootImpl
+                it.dialog.window?.decorView?.viewRootImpl == view.viewRootImpl
             }
                 ?: return null
         return createActivityLaunchController(animatedDialog, cujType)
@@ -417,7 +417,7 @@ constructor(
                 animatedDialog.prepareForStackDismiss()
 
                 // Remove the dim.
-                dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             }
 
             override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
@@ -867,7 +867,7 @@ private class AnimatedDialog(
         }
 
         // Show the background dim.
-        dialog.window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
 
         startAnimation(
             isLaunching = true,
@@ -947,7 +947,7 @@ private class AnimatedDialog(
             isLaunching = false,
             onLaunchAnimationStart = {
                 // Remove the dim background as soon as we start the animation.
-                dialog.window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             },
             onLaunchAnimationEnd = {
                 val dialogContentWithBackground = this.dialogContentWithBackground!!

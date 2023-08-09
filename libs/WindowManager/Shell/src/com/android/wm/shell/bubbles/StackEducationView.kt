@@ -48,9 +48,9 @@ class StackEducationView constructor(
     private val positioner: BubblePositioner = positioner
     private val controller: BubbleController = controller
 
-    private val view by lazy { findViewById<View>(R.id.stack_education_layout) }
-    private val titleTextView by lazy { findViewById<TextView>(R.id.stack_education_title) }
-    private val descTextView by lazy { findViewById<TextView>(R.id.stack_education_description) }
+    private val view by lazy { requireViewById<View>(R.id.stack_education_layout) }
+    private val titleTextView by lazy { requireViewById<TextView>(R.id.stack_education_title) }
+    private val descTextView by lazy { requireViewById<TextView>(R.id.stack_education_description) }
 
     var isHiding = false
         private set

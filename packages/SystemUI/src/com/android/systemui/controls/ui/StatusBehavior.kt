@@ -94,10 +94,8 @@ class StatusBehavior : Behavior {
             )
         }
         cvh.visibleDialog = builder.create().apply {
-            getWindow().apply {
-                setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-                show()
-            }
+            window?.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+            show()
         }
     }
 }

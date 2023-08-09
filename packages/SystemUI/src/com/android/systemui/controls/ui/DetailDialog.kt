@@ -132,8 +132,8 @@ class DetailDialog(
 
     init {
         // To pass touches to the task inside TaskView.
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window?.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
+        window?.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
 
         setContentView(R.layout.controls_detail_dialog)
 
@@ -182,7 +182,7 @@ class DetailDialog(
         }
 
         // consume all insets to achieve slide under effect
-        window.getDecorView().setOnApplyWindowInsetsListener {
+        checkNotNull(window).decorView.setOnApplyWindowInsetsListener {
             v: View, insets: WindowInsets ->
                 val l = v.getPaddingLeft()
                 val r = v.getPaddingRight()
@@ -202,7 +202,7 @@ class DetailDialog(
     }
 
     fun getTaskViewBounds(): Rect {
-        val wm = context.getSystemService(WindowManager::class.java)
+        val wm = checkNotNull(context.getSystemService(WindowManager::class.java))
         val windowMetrics = wm.getCurrentWindowMetrics()
         val rect = windowMetrics.bounds
         val metricInsets = windowMetrics.windowInsets

@@ -42,7 +42,9 @@ interface TypefaceVariantCache {
                 return baseTypeface
             }
 
-            val axes = FontVariationAxis.fromFontVariationSettings(fVar).toMutableList()
+            val axes = FontVariationAxis.fromFontVariationSettings(fVar)
+                ?.toMutableList()
+                ?: mutableListOf()
             axes.removeIf { !baseTypeface.isSupportedAxes(it.getOpenTypeTagValue()) }
             if (axes.isEmpty()) {
                 return baseTypeface
@@ -120,8 +122,8 @@ class TextAnimator(
             }
             addListener(
                 object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) = textInterpolator.rebase()
-                    override fun onAnimationCancel(animation: Animator?) = textInterpolator.rebase()
+                    override fun onAnimationEnd(animation: Animator) = textInterpolator.rebase()
+                    override fun onAnimationCancel(animation: Animator) = textInterpolator.rebase()
                 }
             )
         }
@@ -302,11 +304,11 @@ class TextAnimator(
             if (onAnimationEnd != null) {
                 val listener =
                     object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
+                        override fun onAnimationEnd(animation: Animator) {
                             onAnimationEnd.run()
                             animator.removeListener(this)
                         }
-                        override fun onAnimationCancel(animation: Animator?) {
+                        override fun onAnimationCancel(animation: Animator) {
                             animator.removeListener(this)
                         }
                     }

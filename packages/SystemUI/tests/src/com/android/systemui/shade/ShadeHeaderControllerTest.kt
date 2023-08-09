@@ -134,18 +134,18 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        whenever<Clock>(view.findViewById(R.id.clock)).thenReturn(clock)
+        whenever<Clock>(view.requireViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
 
-        whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
+        whenever<TextView>(view.requireViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
 
-        whenever<ShadeCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+        whenever<ShadeCarrierGroup>(view.requireViewById(R.id.carrier_group)).thenReturn(carrierGroup)
 
-        whenever<BatteryMeterView>(view.findViewById(R.id.batteryRemainingIcon))
+        whenever<BatteryMeterView>(view.requireViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
 
-        whenever<StatusIconContainer>(view.findViewById(R.id.statusIcons)).thenReturn(statusIcons)
+        whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons)).thenReturn(statusIcons)
 
         viewContext = Mockito.spy(context)
         whenever(view.context).thenReturn(viewContext)

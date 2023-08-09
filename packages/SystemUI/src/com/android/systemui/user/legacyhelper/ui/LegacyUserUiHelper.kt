@@ -67,7 +67,7 @@ object LegacyUserUiHelper {
         val resourceId: Int? = getGuestUserRecordNameResourceId(record)
         return when {
             resourceId != null -> context.getString(resourceId)
-            record.info != null -> record.info.name
+            record.info != null -> checkNotNull(record.info.name)
             else ->
                 context.getString(
                     getUserSwitcherActionTextResourceId(

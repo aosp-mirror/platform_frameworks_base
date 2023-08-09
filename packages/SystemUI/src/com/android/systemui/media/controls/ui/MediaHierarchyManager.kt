@@ -180,20 +180,20 @@ constructor(
                 object : AnimatorListenerAdapter() {
                     private var cancelled: Boolean = false
 
-                    override fun onAnimationCancel(animation: Animator?) {
+                    override fun onAnimationCancel(animation: Animator) {
                         cancelled = true
                         animationPending = false
                         rootView?.removeCallbacks(startAnimation)
                     }
 
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         isCrossFadeAnimatorRunning = false
                         if (!cancelled) {
                             applyTargetStateIfNotAnimating()
                         }
                     }
 
-                    override fun onAnimationStart(animation: Animator?) {
+                    override fun onAnimationStart(animation: Animator) {
                         cancelled = false
                         animationPending = false
                     }
@@ -606,7 +606,7 @@ constructor(
         val viewHost = UniqueObjectHostView(context)
         viewHost.addOnAttachStateChangeListener(
             object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(p0: View?) {
+                override fun onViewAttachedToWindow(p0: View) {
                     if (rootOverlay == null) {
                         rootView = viewHost.viewRootImpl.view
                         rootOverlay = (rootView!!.overlay as ViewGroupOverlay)
@@ -614,7 +614,7 @@ constructor(
                     viewHost.removeOnAttachStateChangeListener(this)
                 }
 
-                override fun onViewDetachedFromWindow(p0: View?) {}
+                override fun onViewDetachedFromWindow(p0: View) {}
             }
         )
         return viewHost

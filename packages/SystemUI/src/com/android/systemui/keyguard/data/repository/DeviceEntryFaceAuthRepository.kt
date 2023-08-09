@@ -538,7 +538,7 @@ constructor(
             // We always want to invoke face detect in the main thread.
             faceAuthLogger.faceDetectionStarted()
             faceManager?.detectFace(
-                detectCancellationSignal,
+                checkNotNull(detectCancellationSignal),
                 detectionCallback,
                 FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
             )
