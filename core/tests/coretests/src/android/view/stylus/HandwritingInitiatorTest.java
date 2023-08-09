@@ -221,8 +221,10 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_inputConnectionBuilt_stylusMoveInExtendedHWArea() {
+        // The stylus down point is between mTestView1 and  mTestView2, but it is within the
+        // extended handwriting area of both views. It is closer to mTestView1.
         final int x1 = sHwArea1.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
-        final int y1 = sHwArea1.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX / 2;
+        final int y1 = sHwArea1.bottom + (sHwArea2.top - sHwArea1.bottom) / 3;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -231,10 +233,14 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
-        // InputConnection is created after stylus movement.
-        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        // First create InputConnection for mTestView2 and verify that handwriting is not started.
+        mHandwritingInitiator.onInputConnectionCreated(mTestView2);
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView2);
 
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
+        // Next create InputConnection for mTextView1. Handwriting is started for this view since
+        // the stylus down point is closest to this view.
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        verify(mHandwritingInitiator).startHandwriting(mTestView1);
     }
 
     @Test
