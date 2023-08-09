@@ -774,6 +774,11 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    boolean isThreadReady() {
+        return mThread != null && !mPendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
     long getStartSeq() {
         return mStartSeq;
     }
