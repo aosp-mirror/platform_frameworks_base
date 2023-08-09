@@ -59,7 +59,7 @@ constructor(
         conflatedCallbackFlow {
             val callback =
                 object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
-                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse) {
                         val hasCards = response?.walletCards?.isNotEmpty() == true
                         trySendWithFailureLogging(
                             state(
@@ -71,7 +71,7 @@ constructor(
                         )
                     }
 
-                    override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
+                    override fun onWalletCardRetrievalError(error: GetWalletCardsError) {
                         Log.e(TAG, "Wallet card retrieval error, message: \"${error?.message}\"")
                         trySendWithFailureLogging(
                             KeyguardQuickAffordanceConfig.LockScreenState.Hidden,
@@ -133,13 +133,13 @@ constructor(
         return suspendCancellableCoroutine { continuation ->
             val callback =
                 object : QuickAccessWalletClient.OnWalletCardsRetrievedCallback {
-                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse?) {
+                    override fun onWalletCardsRetrieved(response: GetWalletCardsResponse) {
                         continuation.resumeWith(
                             Result.success(response?.walletCards ?: emptyList())
                         )
                     }
 
-                    override fun onWalletCardRetrievalError(error: GetWalletCardsError?) {
+                    override fun onWalletCardRetrievalError(error: GetWalletCardsError) {
                         continuation.resumeWith(Result.success(emptyList()))
                     }
                 }

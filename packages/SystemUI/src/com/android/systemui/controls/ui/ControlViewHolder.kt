@@ -382,7 +382,7 @@ class ControlViewHolder(
                 )
             }
             addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     stateAnimator = null
                 }
             })
@@ -436,7 +436,7 @@ class ControlViewHolder(
                 duration = 200L
                 interpolator = Interpolators.LINEAR
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         statusRowUpdater.invoke()
                     }
                 })
@@ -448,7 +448,7 @@ class ControlViewHolder(
             statusAnimator = AnimatorSet().apply {
                 playSequentially(fadeOut, fadeIn)
                 addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
+                    override fun onAnimationEnd(animation: Animator) {
                         status.alpha = STATUS_ALPHA_ENABLED
                         statusAnimator = null
                     }

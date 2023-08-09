@@ -52,7 +52,7 @@ constructor(
 
         private fun readIntFromBundle(extras: Bundle, key: String): Int? =
             try {
-                extras.getString(key).toInt()
+                extras.getString(key)?.toInt()
             } catch (e: Exception) {
                 null
             }
