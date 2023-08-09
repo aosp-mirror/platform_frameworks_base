@@ -16,42 +16,65 @@
 
 package com.android.server.display.brightness.clamper;
 
-import static android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
+import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
+import android.os.PowerManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
-public class BrightnessLowPowerModeModifierTest {
+public class DisplayDimModifierTest {
     private static final float FLOAT_TOLERANCE = 0.001f;
     private static final float DEFAULT_BRIGHTNESS = 0.5f;
-    private static final float LOW_POWER_BRIGHTNESS_FACTOR = 0.8f;
-    private static final float EXPECTED_LOW_POWER_BRIGHTNESS =
-            DEFAULT_BRIGHTNESS * LOW_POWER_BRIGHTNESS_FACTOR;
-    private final DisplayPowerRequest mRequest = new DisplayPowerRequest();
+    private static final float MIN_DIM_AMOUNT = 0.05f;
+    private static final float DIM_CONFIG = 0.4f;
+
+    @Mock
+    private Context mMockContext;
+
+    @Mock
+    private PowerManager mMockPowerManager;
+
+    @Mock
+    private Resources mMockResources;
+
+    private final DisplayManagerInternal.DisplayPowerRequest
+            mRequest = new DisplayManagerInternal.DisplayPowerRequest();
     private final DisplayBrightnessState.Builder mBuilder = prepareBuilder();
-    private BrightnessLowPowerModeModifier mModifier;
+    private DisplayDimModifier mModifier;
 
     @Before
     public void setUp() {
-        mModifier = new BrightnessLowPowerModeModifier();
-        mRequest.screenLowPowerBrightnessFactor = LOW_POWER_BRIGHTNESS_FACTOR;
-        mRequest.lowPowerMode = true;
+        MockitoAnnotations.initMocks(this);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
+        when(mMockResources.getFloat(
+                R.dimen.config_screenBrightnessMinimumDimAmountFloat)).thenReturn(MIN_DIM_AMOUNT);
+        when(mMockContext.getSystemService(PowerManager.class)).thenReturn(mMockPowerManager);
+        when(mMockPowerManager.getBrightnessConstraint(
+                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM)).thenReturn(DIM_CONFIG);
+
+        mModifier = new DisplayDimModifier(mMockContext);
+        mRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DIM;
     }
 
     @Test
-    public void testApply_lowPowerModeOff() {
-        mRequest.lowPowerMode = false;
-
+    public void testApply_noDimPolicy() {
+        mRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
         mModifier.apply(mRequest, mBuilder);
 
         assertEquals(DEFAULT_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
@@ -60,29 +83,41 @@ public class BrightnessLowPowerModeModifierTest {
     }
 
     @Test
-    public void testApply_lowPowerModeOn() {
+    public void testApply_dimPolicyFromResources() {
+        mBuilder.setBrightness(0.4f);
         mModifier.apply(mRequest, mBuilder);
 
-        assertEquals(EXPECTED_LOW_POWER_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
-        assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
+        assertEquals(0.4f - MIN_DIM_AMOUNT, mBuilder.getBrightness(), FLOAT_TOLERANCE);
+        assertEquals(BrightnessReason.MODIFIER_DIMMED,
                 mBuilder.getBrightnessReason().getModifier());
         assertFalse(mBuilder.isSlowChange());
     }
 
     @Test
-    public void testApply_lowPowerModeOnAndLowPowerBrightnessFactorHigh() {
-        mRequest.screenLowPowerBrightnessFactor = 1.1f;
-
+    public void testApply_dimPolicyFromConfig() {
         mModifier.apply(mRequest, mBuilder);
 
-        assertEquals(DEFAULT_BRIGHTNESS, mBuilder.getBrightness(), FLOAT_TOLERANCE);
-        assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
+        assertEquals(DIM_CONFIG, mBuilder.getBrightness(), FLOAT_TOLERANCE);
+        assertEquals(BrightnessReason.MODIFIER_DIMMED,
                 mBuilder.getBrightnessReason().getModifier());
         assertFalse(mBuilder.isSlowChange());
     }
 
     @Test
-    public void testApply_lowPowerModeOnAndMinBrightness() {
+    public void testApply_dimPolicyAndDimPolicyAlreadyApplied() {
+        mModifier.apply(mRequest, mBuilder);
+        DisplayBrightnessState.Builder builder = prepareBuilder();
+
+        mModifier.apply(mRequest, builder);
+
+        assertEquals(DIM_CONFIG, builder.getBrightness(), FLOAT_TOLERANCE);
+        assertEquals(BrightnessReason.MODIFIER_DIMMED,
+                builder.getBrightnessReason().getModifier());
+        assertTrue(builder.isSlowChange());
+    }
+
+    @Test
+    public void testApply_dimPolicyAndMinBrightness() {
         mBuilder.setBrightness(0.0f);
         mModifier.apply(mRequest, mBuilder);
 
@@ -92,22 +127,9 @@ public class BrightnessLowPowerModeModifierTest {
     }
 
     @Test
-    public void testApply_lowPowerModeOnAndLowPowerAlreadyApplied() {
+    public void testApply_dimPolicyOffAfterDimPolicyOn() {
         mModifier.apply(mRequest, mBuilder);
-        DisplayBrightnessState.Builder builder = prepareBuilder();
-
-        mModifier.apply(mRequest, builder);
-
-        assertEquals(EXPECTED_LOW_POWER_BRIGHTNESS, builder.getBrightness(), FLOAT_TOLERANCE);
-        assertEquals(BrightnessReason.MODIFIER_LOW_POWER,
-                builder.getBrightnessReason().getModifier());
-        assertTrue(builder.isSlowChange());
-    }
-
-    @Test
-    public void testApply_lowPowerModeOffAfterLowPowerOn() {
-        mModifier.apply(mRequest, mBuilder);
-        mRequest.lowPowerMode = false;
+        mRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF;
         DisplayBrightnessState.Builder builder = prepareBuilder();
 
         mModifier.apply(mRequest, builder);
