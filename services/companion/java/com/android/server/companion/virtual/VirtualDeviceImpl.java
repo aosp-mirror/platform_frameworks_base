@@ -106,10 +106,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private static final String TAG = "VirtualDeviceImpl";
 
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
@@ -285,6 +282,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
         if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+        }
+        if (mParams.getDevicePolicy(VirtualDeviceParams.POLICY_TYPE_RECENTS)
+                == VirtualDeviceParams.DEVICE_POLICY_CUSTOM) {
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
         }
         return flags;
     }
