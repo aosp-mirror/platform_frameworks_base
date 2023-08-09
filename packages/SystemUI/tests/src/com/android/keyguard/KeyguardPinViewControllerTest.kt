@@ -185,27 +185,27 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun startAppearAnimation() {
+    fun testOnViewAttached() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(keyguardMessageAreaController)
             .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
     }
 
     @Test
-    fun startAppearAnimation_withExistingMessage() {
+    fun testOnViewAttached_withExistingMessage() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(keyguardMessageAreaController, Mockito.never()).setMessage(anyString(), anyBoolean())
     }
 
     @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
+    fun testOnViewAttached_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
@@ -213,7 +213,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
         `when`(passwordTextView.text).thenReturn("")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(deleteButton).visibility = View.INVISIBLE
         verify(enterButton).visibility = View.INVISIBLE
@@ -222,7 +222,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
+    fun testOnViewAttached_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
         val pinViewController = constructPinViewController(mockKeyguardPinView)
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
         `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
@@ -230,7 +230,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
         `when`(passwordTextView.text).thenReturn("")
 
-        pinViewController.startAppearAnimation()
+        pinViewController.onViewAttached()
 
         verify(deleteButton).visibility = View.VISIBLE
         verify(enterButton).visibility = View.VISIBLE
