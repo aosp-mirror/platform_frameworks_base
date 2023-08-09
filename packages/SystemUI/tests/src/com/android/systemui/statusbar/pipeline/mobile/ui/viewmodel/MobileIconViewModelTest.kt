@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -184,133 +184,6 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun iconId_correctLevel_notCutout() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-            val expected = defaultSignal()
-
-            assertThat(latest).isEqualTo(expected)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesLevelFromInteractor() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.level.value = 3
-            assertThat(latest!!.level).isEqualTo(3)
-
-            interactor.level.value = 1
-            assertThat(latest!!.level).isEqualTo(1)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesNumberOfLevelsFromInteractor() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.numberOfLevels.value = 5
-            assertThat(latest!!.numberOfLevels).isEqualTo(5)
-
-            interactor.numberOfLevels.value = 2
-            assertThat(latest!!.numberOfLevels).isEqualTo(2)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_defaultDataDisabled_showExclamationTrue() =
-        testScope.runTest {
-            interactor.setIsDefaultDataEnabled(false)
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_defaultConnectionFailed_showExclamationTrue() =
-        testScope.runTest {
-            interactor.isDefaultConnectionFailed.value = true
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_enabledAndNotFailed_showExclamationFalse() =
-        testScope.runTest {
-            interactor.setIsDefaultDataEnabled(true)
-            interactor.isDefaultConnectionFailed.value = false
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesEmptyState_whenNotInService() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.isInService.value = false
-
-            var expected = emptySignal()
-
-            assertThat(latest).isEqualTo(expected)
-
-            // Changing the level doesn't overwrite the disabled state
-            interactor.level.value = 2
-            assertThat(latest).isEqualTo(expected)
-
-            // Once back in service, the regular icon appears
-            interactor.isInService.value = true
-            expected = defaultSignal(level = 2)
-            assertThat(latest).isEqualTo(expected)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.carrierNetworkChangeActive.value = true
-            interactor.level.value = 1
-
-            assertThat(latest!!.level).isEqualTo(1)
-            assertThat(latest!!.carrierNetworkChange).isTrue()
-
-            // SignalIconModel respects the current level
-            interactor.level.value = 2
-
-            assertThat(latest!!.level).isEqualTo(2)
-            assertThat(latest!!.carrierNetworkChange).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
     fun contentDescription_notInService_usesNoPhone() =
         testScope.runTest {
             var latest: ContentDescription? = null
@@ -330,13 +203,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
             var latest: ContentDescription? = null
             val job = underTest.contentDescription.onEach { latest = it }.launchIn(this)
 
-            interactor.isInService.value = true
-
-            interactor.level.value = 2
+            interactor.signalLevelIcon.value = defaultSignal(level = 2)
             assertThat((latest as ContentDescription.Resource).res)
                 .isEqualTo(PHONE_SIGNAL_STRENGTH[2])
 
-            interactor.level.value = 0
+            interactor.signalLevelIcon.value = defaultSignal(level = 0)
             assertThat((latest as ContentDescription.Resource).res)
                 .isEqualTo(PHONE_SIGNAL_STRENGTH[0])
 
