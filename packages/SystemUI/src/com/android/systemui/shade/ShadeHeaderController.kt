@@ -135,7 +135,8 @@ constructor(
     private val date: TextView = header.requireViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.requireViewById(R.id.statusIcons)
     private val mShadeCarrierGroup: ShadeCarrierGroup = header.requireViewById(R.id.carrier_group)
-    private val systemIcons: View = header.requireViewById(R.id.shade_header_system_icons)
+    private val systemIconsHoverContainer: View =
+        header.requireViewById(R.id.hover_system_icons_container)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -259,14 +260,18 @@ constructor(
                     header.paddingRight,
                     header.paddingBottom
                 )
-                systemIcons.setPaddingRelative(
+                systemIconsHoverContainer.setPaddingRelative(
                     resources.getDimensionPixelSize(
-                        R.dimen.shade_header_system_icons_padding_start
+                        R.dimen.hover_system_icons_container_padding_start
                     ),
-                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_top),
-                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_end),
                     resources.getDimensionPixelSize(
-                        R.dimen.shade_header_system_icons_padding_bottom
+                        R.dimen.hover_system_icons_container_padding_top
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_end
+                    ),
+                    resources.getDimensionPixelSize(
+                        R.dimen.hover_system_icons_container_padding_bottom
                     )
                 )
             }
@@ -330,8 +335,8 @@ constructor(
         demoModeController.addCallback(demoModeReceiver)
         statusBarIconController.addIconGroup(iconManager)
         nextAlarmController.addCallback(nextAlarmCallback)
-        systemIcons.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createListener(systemIcons)
+        systemIconsHoverContainer.setOnHoverListener(
+            statusOverlayHoverListenerFactory.createListener(systemIconsHoverContainer)
         )
     }
 
@@ -343,7 +348,7 @@ constructor(
         demoModeController.removeCallback(demoModeReceiver)
         statusBarIconController.removeIconGroup(iconManager)
         nextAlarmController.removeCallback(nextAlarmCallback)
-        systemIcons.setOnHoverListener(null)
+        systemIconsHoverContainer.setOnHoverListener(null)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -479,11 +484,11 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
-            systemIcons.setOnClickListener { shadeCollapseAction?.run() }
+            systemIconsHoverContainer.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
-            systemIcons.setOnClickListener(null)
+            systemIconsHoverContainer.setOnClickListener(null)
         }
         header.jumpToState(header.startState)
         updatePosition()

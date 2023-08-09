@@ -80,10 +80,10 @@
 
     <dimen name="large_screen_shade_header_height">42dp</dimen>
     <!-- start padding is smaller to account for status icon margins coming from drawable itself -->
-    <dimen name="shade_header_system_icons_padding_start">3dp</dimen>
-    <dimen name="shade_header_system_icons_padding_end">4dp</dimen>
-    <dimen name="shade_header_system_icons_padding_top">2dp</dimen>
-    <dimen name="shade_header_system_icons_padding_bottom">2dp</dimen>
+    <dimen name="hover_system_icons_container_padding_start">3dp</dimen>
+    <dimen name="hover_system_icons_container_padding_end">4dp</dimen>
+    <dimen name="hover_system_icons_container_padding_top">2dp</dimen>
+    <dimen name="hover_system_icons_container_padding_bottom">2dp</dimen>
 
     <!-- Lockscreen shade transition values -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
