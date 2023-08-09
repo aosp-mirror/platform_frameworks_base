@@ -56,8 +56,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -215,6 +217,10 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = WIFI_NETWORK_DEFAULT,
             )
+
+    // Secondary networks can only be supported by [WifiRepositoryViaTrackerLib].
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        MutableStateFlow(emptyList<WifiNetworkModel>()).asStateFlow()
 
     override val wifiActivity: StateFlow<DataActivityModel> =
         WifiRepositoryHelper.createActivityFlow(

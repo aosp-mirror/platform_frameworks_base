@@ -1004,6 +1004,27 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun secondaryNetworks_alwaysEmpty() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.secondaryNetworks)
+            collectLastValue(underTest.wifiNetwork)
+
+            // Even WHEN we do have non-primary wifi info
+            val wifiInfo =
+                mock<WifiInfo>().apply {
+                    whenever(this.ssid).thenReturn(SSID)
+                    whenever(this.isPrimary).thenReturn(false)
+                }
+            val network = mock<Network>().apply { whenever(this.getNetId()).thenReturn(NETWORK_ID) }
+
+            getNetworkCallback()
+                .onCapabilitiesChanged(network, createWifiNetworkCapabilities(wifiInfo))
+
+            // THEN the secondary networks list is empty because this repo doesn't support it
+            assertThat(latest).isEmpty()
+        }
+
+    @Test
     fun isWifiConnectedWithValidSsid_inactiveNetwork_false() =
         testScope.runTest {
             collectLastValue(underTest.wifiNetwork)
