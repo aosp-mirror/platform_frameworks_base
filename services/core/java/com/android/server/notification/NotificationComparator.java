@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.telecom.TelecomManager;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.util.Comparator;
@@ -33,18 +34,23 @@ import java.util.Objects;
 /**
  * Sorts notifications individually into attention-relevant order.
  */
-public class NotificationComparator
-        implements Comparator<NotificationRecord> {
+class NotificationComparator implements Comparator<NotificationRecord> {
 
     private final Context mContext;
     private final NotificationMessagingUtil mMessagingUtil;
     private String mDefaultPhoneApp;
 
+    /**
+     * Lock that must be held during a sort() call that uses this {@link Comparator}, AND to make
+     * any changes to the state of this object that could affect the results of {@link #compare}.
+     */
+    public final Object mStateLock = new Object();
+
     public NotificationComparator(Context context) {
         mContext = context;
         mContext.registerReceiver(mPhoneAppBroadcastReceiver,
                 new IntentFilter(TelecomManager.ACTION_DEFAULT_DIALER_CHANGED));
-        mMessagingUtil = new NotificationMessagingUtil(mContext);
+        mMessagingUtil = new NotificationMessagingUtil(mContext, mStateLock);
     }
 
     @Override
@@ -212,8 +218,13 @@ public class NotificationComparator
     private final BroadcastReceiver mPhoneAppBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mDefaultPhoneApp =
-                    intent.getStringExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME);
+            BackgroundThread.getExecutor().execute(() -> {
+                synchronized (mStateLock) {
+                    mDefaultPhoneApp =
+                            intent.getStringExtra(
+                                    TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME);
+                }
+            });
         }
     };
 }
