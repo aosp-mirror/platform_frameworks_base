@@ -1875,6 +1875,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    /**
+     * Computes datasets that are eligible to be shown based on provider detections.
+     * Datasets are populated in the provided container for them to be later merged with the
+     * PCC eligible datasets based on preference strategy.
+     * @param response
+     * @param container
+     */
     private void computeDatasetsForProviderAndUpdateContainer(
             FillResponse response, DatasetComputationContainer container) {
         @DatasetEligibleReason int globalPickReason = PICK_REASON_UNKNOWN;
@@ -1975,6 +1982,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         container.mAutofillIds = eligibleAutofillIds;
     }
 
+    /**
+     * Computes datasets that are eligible to be shown based on PCC detections.
+     * Datasets are populated in the provided container for them to be later merged with the
+     * provider eligible datasets based on preference strategy.
+     * @param response
+     * @param container
+     */
     private void computeDatasetsForPccAndUpdateContainer(
             FillResponse response, DatasetComputationContainer container) {
         List<Dataset> datasets = response.getDatasets();
@@ -2009,10 +2023,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 ArrayList<Dataset.DatasetFieldFilter> fieldFilters = new ArrayList<>();
                 Set<AutofillId> datasetAutofillIds = new ArraySet<>();
 
+                boolean isDatasetAvailable = false;
+                Set<AutofillId> additionalDatasetAutofillIds = new LinkedHashSet<>();
+                Set<AutofillId> additionalEligibleAutofillIds = new LinkedHashSet<>();
+
                 for (int j = 0; j < dataset.getAutofillDatatypes().size(); j++) {
                     if (dataset.getAutofillDatatypes().get(j) == null) {
+                        // TODO : revisit pickReason logic
                         if (dataset.getFieldIds() != null && dataset.getFieldIds().get(j) != null) {
                             pickReason = PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+                        }
+                        // Check if the autofill id at this index is detected by PCC.
+                        // If not, add that id here, otherwise, we can have duplicates when later
+                        // merging with provider datasets.
+                        // Howover, this doesn't make datasetAvailable for PCC on its own.
+                        // For that, there has to be a datatype detected by PCC, and the dataset
+                        // for that datatype provided by the provider.
+                        AutofillId autofillId = dataset.getFieldIds().get(j);
+                        if (!mClassificationState.mClassificationCombinedHintsMap
+                                .containsKey(autofillId)) {
+                            additionalEligibleAutofillIds.add(autofillId);
+                            additionalDatasetAutofillIds.add(autofillId);
+                            // For each of the field, copy over values.
+                            copyFieldsFromDataset(dataset, j, autofillId, fieldIds, fieldValues,
+                                    fieldPresentations, fieldDialogPresentations,
+                                    fieldInlinePresentations, fieldInlineTooltipPresentations,
+                                    fieldFilters);
                         }
                         continue;
                     }
@@ -2021,22 +2057,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (hintsToAutofillIdMap.containsKey(hint)) {
                         ArrayList<AutofillId> tempIds =
                                 new ArrayList<>(hintsToAutofillIdMap.get(hint));
-
+                        if (tempIds.isEmpty()) {
+                            continue;
+                        }
+                        isDatasetAvailable = true;
                         for (AutofillId autofillId : tempIds) {
                             eligibleAutofillIds.add(autofillId);
                             datasetAutofillIds.add(autofillId);
                             // For each of the field, copy over values.
-                            fieldIds.add(autofillId);
-                            fieldValues.add(dataset.getFieldValues().get(j));
-                            //  TODO(b/266379948): might need to make it more efficient by not
-                            //  copying over value if it didn't exist. This would require creating
-                            //  a getter for the presentations arraylist.
-                            fieldPresentations.add(dataset.getFieldPresentation(j));
-                            fieldDialogPresentations.add(dataset.getFieldDialogPresentation(j));
-                            fieldInlinePresentations.add(dataset.getFieldInlinePresentation(j));
-                            fieldInlineTooltipPresentations.add(
-                                    dataset.getFieldInlineTooltipPresentation(j));
-                            fieldFilters.add(dataset.getFilter(j));
+                            copyFieldsFromDataset(dataset, j, autofillId, fieldIds, fieldValues,
+                                    fieldPresentations, fieldDialogPresentations,
+                                    fieldInlinePresentations, fieldInlineTooltipPresentations,
+                                    fieldFilters);
                         }
                     }
                     // TODO(b/266379948):  handle the case:
@@ -2045,40 +2077,69 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // TODO(b/266379948):  also handle the case where there could be more types in
                     // the dataset, provided by the provider, however, they aren't applicable.
                 }
-                Dataset newDataset =
-                        new Dataset(
-                                fieldIds,
-                                fieldValues,
-                                fieldPresentations,
-                                fieldDialogPresentations,
-                                fieldInlinePresentations,
-                                fieldInlineTooltipPresentations,
-                                fieldFilters,
-                                new ArrayList<>(),
-                                dataset.getFieldContent(),
-                                null,
-                                null,
-                                null,
-                                null,
-                                dataset.getId(),
-                                dataset.getAuthentication());
-                newDataset.setEligibleReasonReason(pickReason);
-                eligibleDatasets.add(newDataset);
-                Set<Dataset> newDatasets;
-                for (AutofillId autofillId : datasetAutofillIds) {
-                    if (map.containsKey(autofillId)) {
-                        newDatasets = map.get(autofillId);
-                    } else {
-                        newDatasets = new ArraySet<>();
+                if (isDatasetAvailable) {
+                    datasetAutofillIds.addAll(additionalDatasetAutofillIds);
+                    eligibleAutofillIds.addAll(additionalEligibleAutofillIds);
+                    Dataset newDataset =
+                            new Dataset(
+                                    fieldIds,
+                                    fieldValues,
+                                    fieldPresentations,
+                                    fieldDialogPresentations,
+                                    fieldInlinePresentations,
+                                    fieldInlineTooltipPresentations,
+                                    fieldFilters,
+                                    new ArrayList<>(),
+                                    dataset.getFieldContent(),
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    dataset.getId(),
+                                    dataset.getAuthentication());
+                    newDataset.setEligibleReasonReason(pickReason);
+                    eligibleDatasets.add(newDataset);
+                    Set<Dataset> newDatasets;
+                    for (AutofillId autofillId : datasetAutofillIds) {
+                        if (map.containsKey(autofillId)) {
+                            newDatasets = map.get(autofillId);
+                        } else {
+                            newDatasets = new LinkedHashSet<>();
+                        }
+                        newDatasets.add(newDataset);
+                        map.put(autofillId, newDatasets);
                     }
-                    newDatasets.add(newDataset);
-                    map.put(autofillId, newDatasets);
                 }
             }
             container.mAutofillIds = eligibleAutofillIds;
             container.mDatasets = eligibleDatasets;
             container.mAutofillIdToDatasetMap = map;
         }
+    }
+
+    private void copyFieldsFromDataset(
+            Dataset dataset,
+            int index,
+            AutofillId autofillId,
+            ArrayList<AutofillId> fieldIds,
+            ArrayList<AutofillValue> fieldValues,
+            ArrayList<RemoteViews> fieldPresentations,
+            ArrayList<RemoteViews> fieldDialogPresentations,
+            ArrayList<InlinePresentation> fieldInlinePresentations,
+            ArrayList<InlinePresentation> fieldInlineTooltipPresentations,
+            ArrayList<Dataset.DatasetFieldFilter> fieldFilters) {
+        // copy over values
+        fieldIds.add(autofillId);
+        fieldValues.add(dataset.getFieldValues().get(index));
+        //  TODO(b/266379948): might need to make it more efficient by not
+        //  copying over value if it didn't exist. This would require creating
+        //  a getter for the presentations arraylist.
+        fieldPresentations.add(dataset.getFieldPresentation(index));
+        fieldDialogPresentations.add(dataset.getFieldDialogPresentation(index));
+        fieldInlinePresentations.add(dataset.getFieldInlinePresentation(index));
+        fieldInlineTooltipPresentations.add(
+                dataset.getFieldInlineTooltipPresentation(index));
+        fieldFilters.add(dataset.getFilter(index));
     }
 
     @GuardedBy("mLock")
