@@ -15,13 +15,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <unistd.h>
+
 using namespace android::util;
 using android::sp;
 
 constexpr size_t __TEST_CHUNK_SIZE = 16UL;
-constexpr size_t TEST_CHUNK_SIZE = (__TEST_CHUNK_SIZE + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1);
-constexpr size_t TEST_CHUNK_HALF_SIZE = TEST_CHUNK_SIZE / 2;
-constexpr size_t TEST_CHUNK_3X_SIZE = 3 * TEST_CHUNK_SIZE;
+const size_t kPageSize = getpagesize();
+const size_t TEST_CHUNK_SIZE = (__TEST_CHUNK_SIZE + (kPageSize - 1)) & ~(kPageSize - 1);
+const size_t TEST_CHUNK_HALF_SIZE = TEST_CHUNK_SIZE / 2;
+const size_t TEST_CHUNK_3X_SIZE = 3 * TEST_CHUNK_SIZE;
 
 static void expectPointer(EncodedBuffer::Pointer* p, size_t pos) {
     EXPECT_EQ(p->pos(), pos);
