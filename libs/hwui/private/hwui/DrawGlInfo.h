@@ -24,8 +24,7 @@ namespace android {
 namespace uirenderer {
 
 /**
- * Structure used by OpenGLRenderer::callDrawGLFunction() to pass and
- * receive data from OpenGL functors.
+ * Structure used to pass and receive data from OpenGL functors.
  */
 struct DrawGlInfo {
     // Input: current clip rect

@@ -25,9 +25,6 @@
 #include <sys/cdefs.h>
 #include <vulkan/vulkan.h>
 
-#undef LOG_TAG
-#define LOG_TAG "AndroidGraphicsJNI"
-
 extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);

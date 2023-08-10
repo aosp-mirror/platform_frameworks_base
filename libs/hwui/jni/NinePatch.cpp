@@ -15,8 +15,6 @@
 ** limitations under the License.
 */
 
-#undef LOG_TAG
-#define LOG_TAG "9patch"
 #define LOG_NDEBUG 1
 
 #include <androidfw/ResourceTypes.h>

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "Minikin"
-
 #include "graphics_jni_helpers.h"
 #include <nativehelper/ScopedUtfChars.h>
 

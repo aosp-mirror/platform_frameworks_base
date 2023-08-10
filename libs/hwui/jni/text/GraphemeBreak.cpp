@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "GraphemeBreaker"
-
 #include <minikin/GraphemeBreak.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <Animator.h>
 #include <Interpolator.h>
 #include <RenderProperties.h>

@@ -25,9 +25,6 @@
 #include "VulkanManager.h"
 #include "utils/Color.h"
 
-#undef LOG_TAG
-#define LOG_TAG "VulkanSurface"
-
 namespace android {
 namespace uirenderer {
 namespace renderthread {
