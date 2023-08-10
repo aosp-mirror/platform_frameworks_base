@@ -125,6 +125,7 @@ public class SurfaceControlTests {
 
     @Test
     public void testSurfaceChangedOnRotation() {
+        CommonUtils.dismissKeyguard();
         final Instrumentation instrumentation = getInstrumentation();
         final Context context = instrumentation.getContext();
         final Intent intent = new Intent().setComponent(
@@ -137,6 +138,8 @@ public class SurfaceControlTests {
         instrumentation.runOnMainSync(() -> activity.setContentView(sv));
         sv.getHolder().addCallback(new SurfaceHolder.Callback() {
             int mInitialTransformHint = -1;
+            int mInitialW;
+            int mInitialH;
 
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -148,7 +151,10 @@ public class SurfaceControlTests {
                         sv.getViewRootImpl().getSurfaceControl().getTransformHint();
                 if (mInitialTransformHint == -1) {
                     mInitialTransformHint = transformHint;
-                } else if (mInitialTransformHint == transformHint) {
+                    mInitialW = width;
+                    mInitialH = height;
+                } else if (mInitialTransformHint == transformHint
+                        && (width > height) != (mInitialW > mInitialH)) {
                     // For example, the initial hint is from portrait, so the later changes from
                     // landscape should not receive the same hint.
                     unexpectedTransformHint[0] = true;
