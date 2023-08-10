@@ -913,7 +913,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             "android.window.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION";
 
@@ -983,7 +982,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Make this public API.
     String PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS =
             "android.window.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS";
 
@@ -1018,7 +1016,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ENABLE_FAKE_FOCUS = "android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS";
 
     /**
@@ -1056,7 +1053,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
@@ -1102,7 +1098,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH =
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
@@ -1151,7 +1146,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
@@ -1189,7 +1183,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
@@ -1233,7 +1226,6 @@ public interface WindowManager extends ViewManager {
      * &lt;/application&gt;
      * </pre>
      */
-    // TODO(b/263984287): Add CTS tests.
     String PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE =
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
 
@@ -1298,6 +1290,102 @@ public interface WindowManager extends ViewManager {
     // TODO(b/280052089): Make this public API.
     String PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES =
             "android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES";
+
+    /**
+     * Application level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that (when set to false) informs the system the app has opted out of the
+     * user-facing aspect ratio compatibility override.
+     *
+     * <p>The compatibility override enables device users to set the app's aspect
+     * ratio or force the app to fill the display regardless of the aspect
+     * ratio or orientation specified in the app manifest.
+     *
+     * <p>The aspect ratio compatibility override is exposed to users in device
+     * settings. A menu in device settings lists all apps that don't opt out of
+     * the compatibility override. Users select apps from the menu and set the
+     * app aspect ratio on a per-app basis. Typically, the menu is available
+     * only on large screen devices.
+     *
+     * <p>When users apply the aspect ratio override, the minimum aspect ratio
+     * specified in the app manifest is overridden. If users choose a
+     * full-screen aspect ratio, the orientation of the activity is forced to
+     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER};
+     * see {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE} to
+     * disable the full-screen option only.
+     *
+     * <p>The user override is intended to improve the app experience on devices
+     * that have the ignore orientation request display setting enabled by OEMs
+     * (enables compatibility mode for fixed orientation on Android 12 (API
+     * level 31) or higher; see
+     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-app-compatibility">
+     * Large screen app compatibility</a>
+     * for more details).
+     *
+     * <p>To opt out of the user aspect ratio compatibility override, add this property
+     * to your app manifest and set the value to {@code false}. Your app will be excluded
+     * from the list of apps in device settings, and users will not be able to override
+     * the app's aspect ratio.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/294227289): Make this public API
+    String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE =
+            "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE";
+
+    /**
+     * Application level
+     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that (when set to false) informs the system the app has opted out of the
+     * full-screen option of the aspect ratio compatibility override. (For
+     * background information about the aspect ratio compatibility override, see
+     * {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE}.)
+     *
+     * <p>When users apply the aspect ratio compatibility override, the orientation
+     * of the activity is forced to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
+     *
+     * <p>The user override is intended to improve the app experience on devices
+     * that have the ignore orientation request display setting enabled by OEMs
+     * (enables compatibility mode for fixed orientation on Android 12 (API
+     * level 31) or higher; see
+     * <a href="https://developer.android.com/guide/topics/large-screens/large-screen-app-compatibility">
+     * Large screen app compatibility</a>
+     * for more details).
+     *
+     * <p>To opt out of the full-screen option of the user aspect ratio compatibility
+     * override, add this property to your app manifest and set the value to {@code false}.
+     * Your app will have full-screen option removed from the list of user aspect ratio
+     * override options in device settings, and users will not be able to apply
+     * full-screen override to your app.
+     *
+     * <p><b>Note:</b> If {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE} is
+     * {@code false}, this property has no effect.
+     *
+     * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE"
+     *     android:value="false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     * @hide
+     */
+    // TODO(b/294227289): Make this public API
+    String PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE =
+            "android.window.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE";
 
     /**
      * @hide
