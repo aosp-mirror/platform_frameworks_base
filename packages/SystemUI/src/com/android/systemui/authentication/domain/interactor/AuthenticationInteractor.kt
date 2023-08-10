@@ -102,7 +102,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = true,
+                initialValue = false,
             )
 
     /**

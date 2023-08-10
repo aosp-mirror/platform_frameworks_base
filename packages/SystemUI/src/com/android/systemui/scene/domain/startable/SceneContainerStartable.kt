@@ -178,12 +178,24 @@ constructor(
                         }
                         WakefulnessState.STARTING_TO_WAKE -> {
                             val authMethod = authenticationInteractor.getAuthenticationMethod()
-                            if (authMethod == AuthenticationMethodModel.None) {
-                                switchToScene(
-                                    targetSceneKey = SceneKey.Gone,
-                                    loggingReason =
-                                        "device is starting to wake up while auth method is None",
-                                )
+                            val isUnlocked = authenticationInteractor.isUnlocked.value
+                            when {
+                                authMethod == AuthenticationMethodModel.None -> {
+                                    switchToScene(
+                                        targetSceneKey = SceneKey.Gone,
+                                        loggingReason =
+                                            "device is starting to wake up while auth method is" +
+                                                " none",
+                                    )
+                                }
+                                authMethod.isSecure && isUnlocked -> {
+                                    switchToScene(
+                                        targetSceneKey = SceneKey.Gone,
+                                        loggingReason =
+                                            "device is starting to wake up while unlocked with a" +
+                                                " secure auth method",
+                                    )
+                                }
                             }
                         }
                         else -> Unit
