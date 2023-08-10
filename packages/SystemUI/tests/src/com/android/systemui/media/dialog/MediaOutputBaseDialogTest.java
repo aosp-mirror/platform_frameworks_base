@@ -278,6 +278,21 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void
+            whenNotBroadcasting_verifyLeBroadcastServiceCallBackIsUnregisteredIfProfileEnabled() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        mIsBroadcasting = true;
+
+        mMediaOutputBaseDialogImpl.start();
+        verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
+
+        mIsBroadcasting = false;
+        mMediaOutputBaseDialogImpl.stop();
+        verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
+    }
+
+    @Test
     public void refresh_checkStopText() {
         mStopText = "test_string";
         mMediaOutputBaseDialogImpl.refresh();

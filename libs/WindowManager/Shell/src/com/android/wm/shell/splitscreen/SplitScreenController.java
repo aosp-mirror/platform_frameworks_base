@@ -87,6 +87,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -104,6 +105,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class manages split-screen multitasking mode and implements the main interface
@@ -177,6 +179,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final Optional<RecentTasksController> mRecentTasksOptional;
     private final LaunchAdjacentController mLaunchAdjacentController;
     private final Optional<WindowDecorViewModel> mWindowDecorViewModel;
+    private final Optional<DesktopTasksController> mDesktopTasksController;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
     private final String[] mAppsSupportMultiInstances;
 
@@ -205,6 +208,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel,
+            Optional<DesktopTasksController> desktopTasksController,
             ShellExecutor mainExecutor) {
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -223,6 +227,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mRecentTasksOptional = recentTasks;
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = windowDecorViewModel;
+        mDesktopTasksController = desktopTasksController;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
         //                    override for this controller from the base module
@@ -254,6 +259,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             RecentTasksController recentTasks,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorViewModel,
+            DesktopTasksController desktopTasksController,
             ShellExecutor mainExecutor,
             StageCoordinator stageCoordinator) {
         mShellCommandHandler = shellCommandHandler;
@@ -273,6 +279,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mRecentTasksOptional = Optional.of(recentTasks);
         mLaunchAdjacentController = launchAdjacentController;
         mWindowDecorViewModel = Optional.of(windowDecorViewModel);
+        mDesktopTasksController = Optional.of(desktopTasksController);
         mStageCoordinator = stageCoordinator;
         mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
         shellInit.addInitCallback(this::onInit, this);
@@ -306,6 +313,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
         mDragAndDropController.ifPresent(controller -> controller.setSplitScreenController(this));
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.setSplitScreenController(this));
+        mDesktopTasksController.ifPresent(controller -> controller.setSplitScreenController(this));
     }
 
     protected StageCoordinator createStageCoordinator() {
@@ -468,6 +476,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.unregisterSplitScreenListener(listener);
     }
 
+    /** Register a split select listener */
+    public void registerSplitSelectListener(SplitScreen.SplitSelectListener listener) {
+        mStageCoordinator.registerSplitSelectListener(listener);
+    }
+
+    /** Unregister a split select listener */
+    public void unregisterSplitSelectListener(SplitScreen.SplitSelectListener listener) {
+        mStageCoordinator.unregisterSplitSelectListener(listener);
+    }
+
     public void goToFullscreenFromSplit() {
         mStageCoordinator.goToFullscreenFromSplit();
     }
@@ -483,6 +501,16 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public int getActivateSplitPosition(TaskInfo taskInfo) {
         return mStageCoordinator.getActivateSplitPosition(taskInfo);
+    }
+
+    /**
+     * Move a task to split select
+     * @param taskInfo the task being moved to split select
+     * @param wct transaction to apply if this is a valid request
+     */
+    public void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+            WindowContainerTransaction wct) {
+        mStageCoordinator.requestEnterSplitSelect(taskInfo, wct);
     }
 
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
@@ -1088,6 +1116,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         private SplitScreenController mController;
         private final SingleInstanceRemoteListener<SplitScreenController,
                 ISplitScreenListener> mListener;
+        private final SingleInstanceRemoteListener<SplitScreenController,
+                ISplitSelectListener> mSelectListener;
         private final SplitScreen.SplitScreenListener mSplitScreenListener =
                 new SplitScreen.SplitScreenListener() {
                     @Override
@@ -1101,11 +1131,25 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     }
                 };
 
+        private final SplitScreen.SplitSelectListener mSplitSelectListener =
+                new SplitScreen.SplitSelectListener() {
+                    @Override
+                    public boolean onRequestEnterSplitSelect(
+                            ActivityManager.RunningTaskInfo taskInfo) {
+                        AtomicBoolean result = new AtomicBoolean(false);
+                        mSelectListener.call(l -> result.set(l.onRequestSplitSelect(taskInfo)));
+                        return result.get();
+                    }
+                };
+
         public ISplitScreenImpl(SplitScreenController controller) {
             mController = controller;
             mListener = new SingleInstanceRemoteListener<>(controller,
                     c -> c.registerSplitScreenListener(mSplitScreenListener),
                     c -> c.unregisterSplitScreenListener(mSplitScreenListener));
+            mSelectListener = new SingleInstanceRemoteListener<>(controller,
+                    c -> c.registerSplitSelectListener(mSplitSelectListener),
+                    c -> c.unregisterSplitSelectListener(mSplitSelectListener));
         }
 
         /**
@@ -1128,6 +1172,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         public void unregisterSplitScreenListener(ISplitScreenListener listener) {
             executeRemoteCallWithTaskPermission(mController, "unregisterSplitScreenListener",
                     (controller) -> mListener.unregister());
+        }
+
+        @Override
+        public void registerSplitSelectListener(ISplitSelectListener listener) {
+            executeRemoteCallWithTaskPermission(mController, "registerSplitSelectListener",
+                    (controller) -> mSelectListener.register(listener));
+        }
+
+        @Override
+        public void unregisterSplitSelectListener(ISplitSelectListener listener) {
+            executeRemoteCallWithTaskPermission(mController, "unregisterSplitSelectListener",
+                    (controller) -> mSelectListener.unregister());
         }
 
         @Override

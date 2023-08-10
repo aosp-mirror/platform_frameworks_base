@@ -4194,9 +4194,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This control allows Camera extension clients to configure the strength of the applied
      * extension effect. Strength equal to 0 means that the extension must not apply any
      * post-processing and return a regular captured frame. Strength equal to 100 is the
-     * default level of post-processing applied when the control is not supported or not set
-     * by the client. Values between 0 and 100 will have different effect depending on the
-     * extension type as described below:</p>
+     * maximum level of post-processing. Values between 0 and 100 will have different effect
+     * depending on the extension type as described below:</p>
      * <ul>
      * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_BOKEH BOKEH} -
      * the strength is expected to control the amount of blur.</li>
@@ -4211,7 +4210,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#getAvailableCaptureRequestKeys }.
      * The control is only defined and available to clients sending capture requests via
      * {@link android.hardware.camera2.CameraExtensionSession }.
-     * The default value is 100.</p>
+     * If the client doesn't specify the extension strength value, then a default value will
+     * be set by the extension. Clients can retrieve the default value by checking the
+     * corresponding capture result.</p>
      * <p><b>Range of valid values:</b><br>
      * 0 - 100</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

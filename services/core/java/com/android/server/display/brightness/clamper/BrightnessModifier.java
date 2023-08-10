@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 
-package android.view.selectiontoolbar;
+package com.android.server.display.brightness.clamper;
+
+import android.hardware.display.DisplayManagerInternal;
+
+import com.android.server.display.DisplayBrightnessState;
+
+import java.io.PrintWriter;
 
 /**
- * @hide
+ * Modifies current brightness based on request
  */
-parcelable WidgetInfo;
+interface BrightnessModifier {
+
+    void apply(DisplayManagerInternal.DisplayPowerRequest request,
+            DisplayBrightnessState.Builder builder);
+
+    void dump(PrintWriter pw);
+}

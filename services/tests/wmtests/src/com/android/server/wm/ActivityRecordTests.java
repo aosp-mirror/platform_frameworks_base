@@ -2939,6 +2939,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         // transform to activity1.
         int rotation = (mDisplayContent.getRotation() + 1) % 4;
         mDisplayContent.setFixedRotationLaunchingApp(activity, rotation);
+        // The configuration with rotation change should not trigger task-association.
+        assertNotNull(activity.mStartingData);
+        assertNull(activity.mStartingData.mAssociatedTask);
         doReturn(rotation).when(mDisplayContent)
                 .rotationForActivityInDifferentOrientation(topActivity);
 

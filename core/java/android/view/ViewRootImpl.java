@@ -1808,6 +1808,9 @@ public final class ViewRootImpl implements ViewParent,
                 // Request to update light center.
                 mAttachInfo.mNeedsUpdateLightCenter = true;
             }
+            if ((changes & WindowManager.LayoutParams.COLOR_MODE_CHANGED) != 0) {
+                invalidate();
+            }
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
             }
@@ -5513,6 +5516,7 @@ public final class ViewRootImpl implements ViewParent,
         if (desiredRatio != mDesiredHdrSdrRatio) {
             mDesiredHdrSdrRatio = desiredRatio;
             updateRenderHdrSdrRatio();
+            invalidate();
 
             if (mDesiredHdrSdrRatio < 1.01f) {
                 mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
