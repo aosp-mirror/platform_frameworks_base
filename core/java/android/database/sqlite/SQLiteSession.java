@@ -998,9 +998,9 @@ public final class SQLiteSession {
      * this connection.
      * @hide
      */
-    long getLastChangedRowsCount() {
+    long getLastChangedRowCount() {
         throwIfNoTransaction();
-        return mConnection.getLastChangedRowsCount();
+        return mConnection.getLastChangedRowCount();
     }
 
     /**
@@ -1008,9 +1008,9 @@ public final class SQLiteSession {
      * it was created.
      * @hide
      */
-    long getTotalChangedRowsCount() {
+    long getTotalChangedRowCount() {
         throwIfNoTransaction();
-        return mConnection.getTotalChangedRowsCount();
+        return mConnection.getTotalChangedRowCount();
     }
 
     /**

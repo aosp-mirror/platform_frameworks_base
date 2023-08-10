@@ -1875,7 +1875,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * statement
      * @hide
      */
-    long getLastChangedRowsCount() {
+    long getLastChangedRowCount() {
         try {
             return nativeChanges(mConnectionPtr);
         } finally {
@@ -1887,7 +1887,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * Return the total number of database changes made on the current connection.
      * @hide
      */
-    long getTotalChangedRowsCount() {
+    long getTotalChangedRowCount() {
         try {
             return nativeTotalChanges(mConnectionPtr);
         } finally {
