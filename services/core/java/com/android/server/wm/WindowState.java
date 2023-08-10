@@ -2334,6 +2334,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mDisplayContent.updateImeControlTarget(isImeLayeringTarget() /* updateImeParent */);
             // Fix the starting window to task when Activity has changed.
             if (mStartingData != null && mStartingData.mAssociatedTask == null
+                    && mTempConfiguration.windowConfiguration.getRotation()
+                            == selfConfiguration.windowConfiguration.getRotation()
                     && !mTempConfiguration.windowConfiguration.getBounds().equals(getBounds())) {
                 mStartingData.mResizedFromTransfer = true;
                 // Lock the starting window to task, so it won't resize from transfer anymore.
