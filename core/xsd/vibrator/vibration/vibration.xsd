@@ -21,9 +21,19 @@
            elementFormDefault="qualified"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+    <!-- Root tag definitions -->
+
     <xs:element name="vibration" type="Vibration"/>
 
+    <xs:element name="vibration-select" type="VibrationSelect"/>
+
     <!-- Type definitions -->
+
+    <xs:complexType name="VibrationSelect">
+        <xs:sequence>
+            <xs:element name="vibration" type="Vibration" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:complexType name="Vibration">
         <xs:choice>
