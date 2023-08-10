@@ -23,6 +23,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.os.StrictMode;
 import android.security.keymaster.KeymasterDefs;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreService;
@@ -147,6 +148,8 @@ public class KeyStore2 {
     }
 
     void delete(KeyDescriptor descriptor) throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         handleRemoteExceptionWithRetry((service) -> {
             service.deleteKey(descriptor);
             return 0;
@@ -157,6 +160,8 @@ public class KeyStore2 {
      * List all entries in the keystore for in the given namespace.
      */
     public KeyDescriptor[] list(int domain, long namespace) throws KeyStoreException {
+        StrictMode.noteDiskRead();
+
         return handleRemoteExceptionWithRetry((service) -> service.listEntries(domain, namespace));
     }
 
@@ -165,6 +170,8 @@ public class KeyStore2 {
      */
     public KeyDescriptor[] listBatch(int domain, long namespace, String startPastAlias)
             throws KeyStoreException {
+        StrictMode.noteDiskRead();
+
         return handleRemoteExceptionWithRetry(
                 (service) -> service.listEntriesBatched(domain, namespace, startPastAlias));
     }
@@ -227,6 +234,8 @@ public class KeyStore2 {
      */
     public KeyDescriptor grant(KeyDescriptor descriptor, int granteeUid, int accessVector)
             throws  KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         return handleRemoteExceptionWithRetry(
                 (service) -> service.grant(descriptor, granteeUid, accessVector)
         );
@@ -242,6 +251,8 @@ public class KeyStore2 {
      */
     public void ungrant(KeyDescriptor descriptor, int granteeUid)
             throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         handleRemoteExceptionWithRetry((service) -> {
             service.ungrant(descriptor, granteeUid);
             return 0;
@@ -258,6 +269,8 @@ public class KeyStore2 {
      */
     public KeyEntryResponse getKeyEntry(@NonNull KeyDescriptor descriptor)
             throws KeyStoreException {
+        StrictMode.noteDiskRead();
+
         return handleRemoteExceptionWithRetry((service) -> service.getKeyEntry(descriptor));
     }
 
@@ -289,6 +302,8 @@ public class KeyStore2 {
      */
     public void updateSubcomponents(@NonNull KeyDescriptor key, byte[] publicCert,
             byte[] publicCertChain) throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         handleRemoteExceptionWithRetry((service) -> {
             service.updateSubcomponent(key, publicCert, publicCertChain);
             return 0;
@@ -304,6 +319,8 @@ public class KeyStore2 {
      */
     public void deleteKey(@NonNull KeyDescriptor descriptor)
             throws KeyStoreException {
+        StrictMode.noteDiskWrite();
+
         handleRemoteExceptionWithRetry((service) -> {
             service.deleteKey(descriptor);
             return 0;
@@ -314,6 +331,8 @@ public class KeyStore2 {
      * Returns the number of Keystore entries for a given domain and namespace.
      */
     public int getNumberOfEntries(int domain, long namespace) throws KeyStoreException {
+        StrictMode.noteDiskRead();
+
         return handleRemoteExceptionWithRetry((service)
                 -> service.getNumberOfEntries(domain, namespace));
     }

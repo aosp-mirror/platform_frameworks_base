@@ -24,6 +24,7 @@ import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
+import android.os.StrictMode;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -164,6 +165,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
 
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.getKeyEntry(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -447,6 +449,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             assertCanReplace(alias, targetDomain, mNamespace, descriptor);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(
                         ((AndroidKeyStorePrivateKey) key).getKeyIdDescriptor(),
                         userCertBytes, chainBytes);
@@ -597,6 +600,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     importArgs, flags, pkcs8EncodedPrivateKeyBytes);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(metadata.key, userCertBytes, chainBytes);
             } catch (android.security.KeyStoreException e) {
                 mKeyStore.deleteKey(metadata.key);
@@ -932,6 +936,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyEntryResponse response = null;
         try {
+            StrictMode.noteDiskRead();
             response = mKeyStore.getKeyEntry(wrappingkey);
         } catch (android.security.KeyStoreException e) {
             throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
@@ -988,6 +993,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         try {
+            StrictMode.noteDiskWrite();
             securityLevel.importWrappedKey(
                     wrappedKey, wrappingkey,
                     entry.getWrappedKeyBytes(),
@@ -1048,6 +1054,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.updateSubcomponents(makeKeyDescriptor(alias),
                     null /* publicCert - unused when used as pure certificate store. */,
                     encoded);
@@ -1060,6 +1067,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public void engineDeleteEntry(String alias) throws KeyStoreException {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.deleteKey(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -1070,6 +1078,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     private KeyDescriptor[] getAliasesBatch(String startPastAlias) {
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.listBatch(
                     getTargetDomain(),
                     mNamespace,
@@ -1097,6 +1106,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     @Override
     public int engineSize() {
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.getNumberOfEntries(
                     getTargetDomain(),
                     mNamespace
@@ -1160,6 +1170,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyDescriptor[] keyDescriptors = null;
         try {
+            StrictMode.noteDiskRead();
             keyDescriptors = mKeyStore.list(
                     getTargetDomain(),
                     mNamespace
