@@ -184,6 +184,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    public boolean getSplitShadeCentered() {
+        return mSplitShadeCentered;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
