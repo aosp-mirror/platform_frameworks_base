@@ -45,7 +45,6 @@ import com.android.systemui.biometrics.AuthBiometricView.Callback
 import com.android.systemui.biometrics.AuthBiometricViewAdapter
 import com.android.systemui.biometrics.AuthIconController
 import com.android.systemui.biometrics.AuthPanelController
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
@@ -80,9 +79,6 @@ object BiometricViewBinder {
         applicationScope: CoroutineScope,
     ): AuthBiometricViewAdapter {
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
-        fun notifyAccessibilityChanged() {
-            Utils.notifyAccessibilityContentChanged(accessibilityManager, view)
-        }
 
         val textColorError =
             view.resources.getColor(R.color.biometric_dialog_error, view.context.theme)
@@ -326,21 +322,14 @@ object BiometricViewBinder {
                     }
                 }
 
-                // not sure why this is here, but the legacy code did it probably needed?
-                launch {
-                    viewModel.isAuthenticating.collect { isAuthenticating ->
-                        if (isAuthenticating) {
-                            notifyAccessibilityChanged()
-                        }
-                    }
-                }
-
                 // dismiss prompt when authenticated and confirmed
                 launch {
                     viewModel.isAuthenticated.collect { authState ->
                         // Disable background view for cancelling authentication once authenticated,
                         // and remove from talkback
                         if (authState.isAuthenticated) {
+                            // Prevents Talkback from speaking subtitle after already authenticated
+                            subtitleView.importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
                             backgroundView.setOnClickListener(null)
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -349,7 +338,6 @@ object BiometricViewBinder {
                             view.announceForAccessibility(
                                 view.resources.getString(R.string.biometric_dialog_authenticated)
                             )
-                            notifyAccessibilityChanged()
 
                             launch {
                                 delay(authState.delay)
@@ -381,7 +369,18 @@ object BiometricViewBinder {
                             !accessibilityManager.isEnabled ||
                                 !accessibilityManager.isTouchExplorationEnabled
 
-                        notifyAccessibilityChanged()
+                        /**
+                         * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
+                         * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context:
+                         * b/281765653#comment18) Using {@link View#announceForAccessibility}
+                         * instead as workaround since sending events exceeding this frequency is
+                         * required.
+                         */
+                        indicatorMessageView?.text?.let {
+                            if (it.isNotBlank()) {
+                                view.announceForAccessibility(it)
+                            }
+                        }
                     }
                 }
             }
