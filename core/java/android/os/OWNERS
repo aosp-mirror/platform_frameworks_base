@@ -77,6 +77,9 @@ per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
 
+# ART
+per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
+
 # PerformanceHintManager
 per-file PerformanceHintManager.java = file:/ADPF_OWNERS
 
