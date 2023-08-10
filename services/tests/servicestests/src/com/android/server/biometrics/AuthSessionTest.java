@@ -351,6 +351,8 @@ public class AuthSessionTest {
         assertEquals(startFingerprintNow ? BiometricSensor.STATE_AUTHENTICATING
                         : BiometricSensor.STATE_COOKIE_RETURNED,
                 session.mPreAuthInfo.eligibleSensors.get(fingerprintSensorId).getSensorState());
+        verify(mBiometricContext).updateContext((OperationContextExt) anyObject(),
+                eq(session.isCrypto()));
 
         // start fingerprint sensor if it was delayed
         if (!startFingerprintNow) {
