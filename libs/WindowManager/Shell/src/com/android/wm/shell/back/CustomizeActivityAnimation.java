@@ -55,13 +55,13 @@ import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
-/**
- * Class that handle customized close activity transition animation.
- */
+import javax.inject.Inject;
+
+/** Class that handle customized close activity transition animation. */
 @ShellMainThread
-class CustomizeActivityAnimation {
+public class CustomizeActivityAnimation extends ShellBackAnimation {
     private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
-    final BackAnimationRunner mBackAnimationRunner;
+    private final BackAnimationRunner mBackAnimationRunner;
     private final float mCornerRadius;
     private final SurfaceControl.Transaction mTransaction;
     private final BackAnimationBackground mBackground;
@@ -88,7 +88,8 @@ class CustomizeActivityAnimation {
 
     private final Choreographer mChoreographer;
 
-    CustomizeActivityAnimation(Context context, BackAnimationBackground background) {
+    @Inject
+    public CustomizeActivityAnimation(Context context, BackAnimationBackground background) {
         this(context, background, new SurfaceControl.Transaction(), null);
     }
 
@@ -258,10 +259,12 @@ class CustomizeActivityAnimation {
         valueAnimator.start();
     }
 
-    /**
-     * Load customize animation before animation start.
-     */
-    boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+    /** Load customize animation before animation start. */
+    @Override
+    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+        if (animationInfo == null) {
+            return false;
+        }
         final AnimationLoadResult result = mCustomAnimationLoader.loadAll(animationInfo);
         if (result != null) {
             mCloseAnimation = result.mCloseAnimation;
@@ -270,6 +273,11 @@ class CustomizeActivityAnimation {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public BackAnimationRunner getRunner() {
+        return mBackAnimationRunner;
     }
 
     private final class Callback extends IOnBackInvokedCallback.Default {

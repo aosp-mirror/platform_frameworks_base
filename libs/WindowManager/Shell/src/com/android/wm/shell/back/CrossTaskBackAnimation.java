@@ -47,21 +47,23 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
+import javax.inject.Inject;
+
 /**
  * Controls the animation of swiping back and returning to another task.
  *
- * This is a two part animation. The first part is an animation that tracks gesture location to
- * scale and move the closing and entering app windows.
- * Once the gesture is committed, the second part remains the closing window in place.
- * The entering window plays the rest of app opening transition to enter full screen.
+ * <p>This is a two part animation. The first part is an animation that tracks gesture location to
+ * scale and move the closing and entering app windows. Once the gesture is committed, the second
+ * part remains the closing window in place. The entering window plays the rest of app opening
+ * transition to enter full screen.
  *
- * This animation is used only for apps that enable back dispatching via
- * {@link android.window.OnBackInvokedDispatcher}. The controller registers
- * an {@link IOnBackInvokedCallback} with WM Shell and receives back dispatches when a back
- * navigation to launcher starts.
+ * <p>This animation is used only for apps that enable back dispatching via {@link
+ * android.window.OnBackInvokedDispatcher}. The controller registers an {@link
+ * IOnBackInvokedCallback} with WM Shell and receives back dispatches when a back navigation to
+ * launcher starts.
  */
 @ShellMainThread
-class CrossTaskBackAnimation {
+public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int BACKGROUNDCOLOR = 0x43433A;
 
     /**
@@ -104,26 +106,39 @@ class CrossTaskBackAnimation {
 
     private final float[] mTmpFloat9 = new float[9];
     private final float[] mTmpTranslate = {0, 0, 0};
-
+    private final BackAnimationRunner mBackAnimationRunner;
+    private final BackAnimationBackground mBackground;
     private RemoteAnimationTarget mEnteringTarget;
     private RemoteAnimationTarget mClosingTarget;
     private SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
-
     private boolean mBackInProgress = false;
-
     private boolean mIsRightEdge;
     private float mProgress = 0;
     private PointF mTouchPos = new PointF();
     private IRemoteAnimationFinishedCallback mFinishCallback;
     private BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
-    final BackAnimationRunner mBackAnimationRunner;
 
-    private final BackAnimationBackground mBackground;
-
-    CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
+    @Inject
+    public CrossTaskBackAnimation(Context context, BackAnimationBackground background) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
         mBackground = background;
+    }
+
+    private static void computeScaleTransformMatrix(float scale, float[] matrix) {
+        matrix[0] = scale;
+        matrix[1] = 0;
+        matrix[2] = 0;
+        matrix[3] = 0;
+        matrix[4] = scale;
+        matrix[5] = 0;
+        matrix[6] = 0;
+        matrix[7] = 0;
+        matrix[8] = scale;
+    }
+
+    private static float mapRange(float value, float min, float max) {
+        return min + (value * (max - min));
     }
 
     private float getInterpolatedProgress(float backProgress) {
@@ -233,18 +248,6 @@ class CrossTaskBackAnimation {
         mTransaction.setColorTransform(leash, mTmpFloat9, mTmpTranslate);
     }
 
-    static void computeScaleTransformMatrix(float scale, float[] matrix) {
-        matrix[0] = scale;
-        matrix[1] = 0;
-        matrix[2] = 0;
-        matrix[3] = 0;
-        matrix[4] = scale;
-        matrix[5] = 0;
-        matrix[6] = 0;
-        matrix[7] = 0;
-        matrix[8] = scale;
-    }
-
     private void finishAnimation() {
         if (mEnteringTarget != null) {
             mEnteringTarget.leash.release();
@@ -314,11 +317,12 @@ class CrossTaskBackAnimation {
         valueAnimator.start();
     }
 
-    private static float mapRange(float value, float min, float max) {
-        return min + (value * (max - min));
+    @Override
+    public BackAnimationRunner getRunner() {
+        return mBackAnimationRunner;
     }
 
-    private final class Callback extends IOnBackInvokedCallback.Default  {
+    private final class Callback extends IOnBackInvokedCallback.Default {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
             mProgressAnimator.onBackStarted(backEvent,
@@ -340,7 +344,7 @@ class CrossTaskBackAnimation {
             mProgressAnimator.reset();
             onGestureCommitted();
         }
-    };
+    }
 
     private final class Runner extends IRemoteAnimationRunner.Default {
         @Override
@@ -360,5 +364,5 @@ class CrossTaskBackAnimation {
             startBackAnimation();
             mFinishCallback = finishedCallback;
         }
-    };
+    }
 }

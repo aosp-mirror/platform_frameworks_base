@@ -52,6 +52,7 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -100,17 +101,19 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only
- * accessible from components within the WM subcomponent (can be explicitly exposed to the
- * SysUIComponent, see {@link WMComponent}).
+ * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only accessible
+ * from components within the WM subcomponent (can be explicitly exposed to the SysUIComponent, see
+ * {@link WMComponent}).
  *
- * This module only defines Shell dependencies for handheld SystemUI implementation.  Common
+ * <p>This module only defines Shell dependencies for handheld SystemUI implementation. Common
  * dependencies should go into {@link WMShellBaseModule}.
  */
-@Module(includes = {
-        WMShellBaseModule.class,
-        PipModule.class
-})
+@Module(
+        includes = {
+            WMShellBaseModule.class,
+            PipModule.class,
+            ShellBackAnimationModule.class,
+        })
 public abstract class WMShellModule {
 
     //

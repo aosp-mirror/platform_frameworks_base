@@ -102,15 +102,17 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
         // start animation with remote animation targets
         final CountDownLatch finishCalled = new CountDownLatch(1);
         final Runnable finishCallback = finishCalled::countDown;
-        mCustomizeActivityAnimation.mBackAnimationRunner.startAnimation(
-                new RemoteAnimationTarget[]{close, open}, null, null, finishCallback);
+        mCustomizeActivityAnimation
+                .getRunner()
+                .startAnimation(
+                        new RemoteAnimationTarget[] {close, open}, null, null, finishCallback);
         verify(mMockCloseAnimation).initialize(eq(BOUND_SIZE), eq(BOUND_SIZE),
                 eq(BOUND_SIZE), eq(BOUND_SIZE));
         verify(mMockOpenAnimation).initialize(eq(BOUND_SIZE), eq(BOUND_SIZE),
                 eq(BOUND_SIZE), eq(BOUND_SIZE));
 
         try {
-            mCustomizeActivityAnimation.mBackAnimationRunner.getCallback().onBackInvoked();
+            mCustomizeActivityAnimation.getRunner().getCallback().onBackInvoked();
         } catch (RemoteException r) {
             fail("onBackInvoked throw remote exception");
         }
@@ -133,15 +135,17 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
         // start animation with remote animation targets
         final CountDownLatch finishCalled = new CountDownLatch(1);
         final Runnable finishCallback = finishCalled::countDown;
-        mCustomizeActivityAnimation.mBackAnimationRunner.startAnimation(
-                new RemoteAnimationTarget[]{close, open}, null, null, finishCallback);
+        mCustomizeActivityAnimation
+                .getRunner()
+                .startAnimation(
+                        new RemoteAnimationTarget[] {close, open}, null, null, finishCallback);
         verify(mMockCloseAnimation).initialize(eq(BOUND_SIZE), eq(BOUND_SIZE),
                 eq(BOUND_SIZE), eq(BOUND_SIZE));
         verify(mMockOpenAnimation).initialize(eq(BOUND_SIZE), eq(BOUND_SIZE),
                 eq(BOUND_SIZE), eq(BOUND_SIZE));
 
         try {
-            mCustomizeActivityAnimation.mBackAnimationRunner.getCallback().onBackCancelled();
+            mCustomizeActivityAnimation.getRunner().getCallback().onBackCancelled();
         } catch (RemoteException r) {
             fail("onBackCancelled throw remote exception");
         }
@@ -155,11 +159,12 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
         // start animation without any remote animation targets
         final CountDownLatch finishCalled = new CountDownLatch(1);
         final Runnable finishCallback = finishCalled::countDown;
-        mCustomizeActivityAnimation.mBackAnimationRunner.startAnimation(
-                new RemoteAnimationTarget[]{}, null, null, finishCallback);
+        mCustomizeActivityAnimation
+                .getRunner()
+                .startAnimation(new RemoteAnimationTarget[] {}, null, null, finishCallback);
 
         try {
-            mCustomizeActivityAnimation.mBackAnimationRunner.getCallback().onBackInvoked();
+            mCustomizeActivityAnimation.getRunner().getCallback().onBackInvoked();
         } catch (RemoteException r) {
             fail("onBackInvoked throw remote exception");
         }
