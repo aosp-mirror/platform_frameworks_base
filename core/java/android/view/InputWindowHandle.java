@@ -161,6 +161,11 @@ public final class InputWindowHandle {
     public Matrix transform;
 
     /**
+     * The alpha value returned from SurfaceFlinger. This will be ignored if passed as input data.
+     */
+    public float alpha;
+
+    /**
      * The input token for the window to which focus should be transferred when this input window
      * can be successfully focused. If null, this input window will not transfer its focus to
      * any other window.
@@ -204,6 +209,7 @@ public final class InputWindowHandle {
         }
         focusTransferTarget = other.focusTransferTarget;
         contentSize = new Size(other.contentSize.getWidth(), other.contentSize.getHeight());
+        alpha = other.alpha;
     }
 
     @Override
@@ -217,6 +223,7 @@ public final class InputWindowHandle {
                 .append(", displayId=").append(displayId)
                 .append(", isClone=").append((inputConfig & InputConfig.CLONE) != 0)
                 .append(", contentSize=").append(contentSize)
+                .append(", alpha=").append(alpha)
                 .toString();
 
     }
