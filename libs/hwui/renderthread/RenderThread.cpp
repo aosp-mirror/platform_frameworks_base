@@ -357,7 +357,7 @@ void RenderThread::dumpGraphicsMemory(int fd, bool includeProfileData) {
 
     String8 cachesOutput;
     mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
-    dprintf(fd, "\nPipeline=%s\n%s", pipelineToString(), cachesOutput.string());
+    dprintf(fd, "\nPipeline=%s\n%s", pipelineToString(), cachesOutput.c_str());
     for (auto&& context : mCacheManager->mCanvasContexts) {
         context->visitAllRenderNodes([&](const RenderNode& node) {
             if (node.isTextureView()) {
