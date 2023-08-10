@@ -18,7 +18,8 @@
 using namespace android::util;
 using android::sp;
 
-constexpr size_t TEST_CHUNK_SIZE = 16UL;
+constexpr size_t __TEST_CHUNK_SIZE = 16UL;
+constexpr size_t TEST_CHUNK_SIZE = (__TEST_CHUNK_SIZE + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1);
 constexpr size_t TEST_CHUNK_HALF_SIZE = TEST_CHUNK_SIZE / 2;
 constexpr size_t TEST_CHUNK_3X_SIZE = 3 * TEST_CHUNK_SIZE;
 
@@ -34,13 +35,13 @@ TEST(EncodedBufferTest, WriteSimple) {
     expectPointer(buffer->wp(), 0);
     EXPECT_EQ(buffer->currentToWrite(), TEST_CHUNK_SIZE);
     for (size_t i = 0; i < TEST_CHUNK_HALF_SIZE; i++) {
-        buffer->writeRawByte(50 + i);
+        buffer->writeRawByte(static_cast<uint8_t>(50 + i));
     }
     EXPECT_EQ(buffer->size(), TEST_CHUNK_HALF_SIZE);
     expectPointer(buffer->wp(), TEST_CHUNK_HALF_SIZE);
     EXPECT_EQ(buffer->currentToWrite(), TEST_CHUNK_HALF_SIZE);
     for (size_t i = 0; i < TEST_CHUNK_SIZE; i++) {
-        buffer->writeRawByte(80 + i);
+        buffer->writeRawByte(static_cast<uint8_t>(80 + i));
     }
     EXPECT_EQ(buffer->size(), TEST_CHUNK_SIZE + TEST_CHUNK_HALF_SIZE);
     expectPointer(buffer->wp(), TEST_CHUNK_SIZE + TEST_CHUNK_HALF_SIZE);
@@ -49,10 +50,10 @@ TEST(EncodedBufferTest, WriteSimple) {
     // verifies the buffer's data
     expectPointer(buffer->ep(), 0);
     for (size_t i = 0; i < TEST_CHUNK_HALF_SIZE; i++) {
-        EXPECT_EQ(buffer->readRawByte(), 50 + i);
+        EXPECT_EQ(buffer->readRawByte(), static_cast<uint8_t>(50 + i));
     }
     for (size_t i = 0; i < TEST_CHUNK_SIZE; i++) {
-        EXPECT_EQ(buffer->readRawByte(), 80 + i);
+        EXPECT_EQ(buffer->readRawByte(), static_cast<uint8_t>(80 + i));
     }
 
     // clears the buffer
