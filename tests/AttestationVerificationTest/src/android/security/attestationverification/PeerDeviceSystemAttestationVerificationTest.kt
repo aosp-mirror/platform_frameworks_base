@@ -39,7 +39,7 @@ class PeerDeviceSystemAttestationVerificationTest {
     @Before
     fun setup() {
         rule.getScenario().onActivity {
-            avm = it.getSystemService(AttestationVerificationManager::class.java)
+            avm = it.getSystemService(AttestationVerificationManager::class.java)!!
             activity = it
         }
         invalidAttestationByteArray = TEST_ATTESTATION_CERT_FILENAME.fromPEMFileToByteArray()
