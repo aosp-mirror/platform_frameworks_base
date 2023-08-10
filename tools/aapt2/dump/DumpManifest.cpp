@@ -216,9 +216,7 @@ class SupportsScreen;
 
 class ManifestExtractor {
  public:
-
-  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
-      : apk_(apk), options_(options) { }
+  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options);
 
   class Element {
    public:
@@ -509,7 +507,7 @@ class ManifestExtractor {
 
  private:
   std::unique_ptr<xml::XmlResource> doc_;
-  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_ = util::make_unique<CommonFeatureGroup>();
+  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_;
   std::map<std::string, ConfigDescription> locales_;
   std::map<uint16_t, ConfigDescription> densities_;
   std::vector<Element*> parent_stack_;
@@ -2469,6 +2467,12 @@ static void ToProto(ManifestExtractor::Element* el, pb::Badging* out_badging) {
   for (auto& child : el->children()) {
     ToProto(child.get(), out_badging);
   }
+}
+
+// Define this constructor after the CommonFeatureGroup class definition to avoid errors with using
+// std::unique_ptr on an incomplete type.
+ManifestExtractor::ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
+    : apk_(apk), options_(options), commonFeatureGroup_(util::make_unique<CommonFeatureGroup>()) {
 }
 
 bool ManifestExtractor::Extract(android::IDiagnostics* diag) {
