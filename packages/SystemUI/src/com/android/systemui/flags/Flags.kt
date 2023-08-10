@@ -536,7 +536,7 @@ object Flags {
     // TODO(b/293252410) : Tracking Bug
     @JvmField
     val LOCKSCREEN_ENABLE_LANDSCAPE =
-            unreleasedFlag(1116, name = "lockscreen.enable_landscape")
+            unreleasedFlag("lockscreen.enable_landscape")
 
     // TODO(b/273443374): Tracking Bug
     @Keep
