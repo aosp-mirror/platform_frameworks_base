@@ -33,7 +33,7 @@
       ]
     },
     {
-      "name": "CtsVirtualDevicesTestCases",
+      "name": "CtsHardwareTestCases",
       "options": [
         {
           "include-filter": "android.hardware.input.cts.tests"
