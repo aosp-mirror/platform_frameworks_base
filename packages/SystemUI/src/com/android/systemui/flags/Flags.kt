@@ -252,8 +252,7 @@ object Flags {
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
-    @JvmField val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag("fp_listen_occluding_apps",
-            teamfood = true)
+    @JvmField val FP_LISTEN_OCCLUDING_APPS = releasedFlag("fp_listen_occluding_apps")
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
