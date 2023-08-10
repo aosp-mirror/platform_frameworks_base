@@ -5717,7 +5717,7 @@ class Task extends TaskFragment {
             }
         }
         ActivityRecord topActivity = getDisplayArea().topRunningActivity();
-        Task topRootTask = topActivity.getRootTask();
+        Task topRootTask = topActivity == null ? null : topActivity.getRootTask();
         if (topRootTask != null && topRootTask != this && topActivity.isState(RESUMED)) {
             // Usually resuming a top activity triggers the next app transition, but nothing's got
             // resumed in this case, so we need to execute it explicitly.
