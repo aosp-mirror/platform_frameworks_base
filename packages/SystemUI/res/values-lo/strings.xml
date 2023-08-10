@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ເພື່ອຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າຄືນໃໝ່, ຮູບແບບໃບໜ້າປັດຈຸບັນຂອງທ່ານຈະຖືກລຶບອອກ.\n\nທ່ານຈະຕ້ອງຕັ້ງຄ່າຄຸນສົມບັດນີ້ຄືນໃໝ່ເພື່ອໃຊ້ໃບໜ້າຂອງທ່ານໃນການປົດລັອກໂທລະສັບຂອງທ່ານ."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ບໍ່ສາມາດຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າໄດ້. ກະລຸນາເຂົ້າໄປການຕັ້ງຄ່າເພື່ອລອງໃໝ່."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ແຕະໃສ່ເຊັນເຊີລາຍນິ້ວມື"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ບໍ່ສາມາດຈຳແນກໜ້າໄດ້. ກະລຸນາໃຊ້ລາຍນິ້ວມືແທນ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

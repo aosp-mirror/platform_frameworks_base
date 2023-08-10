@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Ili uweke tena mipangilio ya Kufungua kwa Uso, muundo wa uso wako unaotumika kwa sasa utafutwa.\n\nUtahitaji kuweka upya mipangilio ya kipengele hiki ili uweze kutumia uso wako kufungua simu yako."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Imeshindwa kuweka mipangilio ya kufungua kwa uso. Nenda kwenye Mipangilio ili ujaribu tena."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Gusa kitambua alama ya kidole"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Bonyeza aikoni ya kufungua ili uendelee"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Imeshindwa kutambua uso. Tumia alama ya kidole."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

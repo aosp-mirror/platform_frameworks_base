@@ -795,6 +795,14 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void onDisplayChangedUncheck(DisplayLayout layout, boolean saveRestoreSnapFraction) {
+        if (mPipTransitionState.getInSwipePipToHomeTransition()) {
+            // If orientation is changed when performing swipe-pip animation, DisplayLayout has
+            // been updated in startSwipePipToHome. So it is unnecessary to update again when
+            // receiving onDisplayConfigurationChanged. This also avoids TouchHandler.userResizeTo
+            // update surface position in different orientation by the intermediate state. The
+            // desired resize will be done by the end of transition.
+            return;
+        }
         Runnable updateDisplayLayout = () -> {
             final boolean fromRotation = Transitions.ENABLE_SHELL_TRANSITIONS
                     && mPipDisplayLayoutState.getDisplayLayout().rotation() != layout.rotation();

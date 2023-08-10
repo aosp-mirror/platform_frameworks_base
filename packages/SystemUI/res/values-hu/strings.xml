@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Az Arcalapú feloldás újbóli beállításához a rendszer törli majd arcmodelljét.\n\nA funkciót újból be kell állítania ahhoz, hogy arca segítségével tudja feloldani telefonja zárolását."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nem sikerült beállítani az arcalapú feloldást. Próbálkozzon újra a Beállításokban."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Érintse meg az ujjlenyomat-érzékelőt"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"A folytatáshoz koppintson a Feloldás ikonra"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Az arc nem felismerhető. Használjon ujjlenyomatot."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
