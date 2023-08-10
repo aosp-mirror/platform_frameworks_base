@@ -1,0 +1,5 @@
+# Bug template url: https://b.corp.google.com/issues/new?component=1337891&template=1814288
+# Assign bugs to aep-automated-tests@google.com
+
+file:EnterprisePlatform_OWNERS
+scottjonathan@google.com
