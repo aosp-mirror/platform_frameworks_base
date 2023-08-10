@@ -233,6 +233,7 @@ public:
 // process_madvise on failure
 int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
                          uint64_t* outBytesProcessed) {
+    static const size_t kPageSize = getpagesize();
     if (batch.totalVmas == 0 || batch.totalBytes == 0) {
         // No VMAs in Batch, skip.
         *outBytesProcessed = 0;
@@ -258,7 +259,7 @@ int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
     } else if (bytesProcessedInSend < batch.totalBytes) {
         // Partially processed the bytes requested
         // skip last page which is where it failed.
-        bytesProcessedInSend += PAGE_SIZE;
+        bytesProcessedInSend += kPageSize;
     }
     bytesProcessedInSend = consumeBytes(batch, bytesProcessedInSend);
 
