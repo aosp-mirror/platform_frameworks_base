@@ -22,6 +22,7 @@ import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.GraphicBuffer;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -399,11 +400,14 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final @android.annotation.NonNull Parcelable.Creator<HardwareBuffer> CREATOR =
             new Parcelable.Creator<HardwareBuffer>() {
         public HardwareBuffer createFromParcel(Parcel in) {
+            if (in == null) {
+                throw new NullPointerException("null passed to createFromParcel");
+            }
             long nativeObject = nReadHardwareBufferFromParcel(in);
             if (nativeObject != 0) {
                 return new HardwareBuffer(nativeObject);
             }
-            return null;
+            throw new BadParcelableException("Failed to read hardware buffer");
         }
 
         public HardwareBuffer[] newArray(int size) {
