@@ -26,3 +26,6 @@ per-file surface_texture.cpp = file:/graphics/java/android/graphics/OWNERS
 
 # Input
 per-file input.cpp = file:/INPUT_OWNERS
+
+# PerformanceHint
+per-file performance_hint.cpp = file:/ADPF_OWNERS
