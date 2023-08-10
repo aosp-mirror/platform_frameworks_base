@@ -1547,6 +1547,25 @@ public final class UserManagerTest {
         assertThat(userInfo.name).isEqualTo(newName);
     }
 
+    @Test
+    public void testCannotCreateAdditionalMainUser() {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeTrue("There is no main user", mainUser != null);
+
+        // Users with FLAG_MAIN can't be removed, so no point using the local createUser method.
+        UserInfo newMainUser = mUserManager.createUser("test", UserInfo.FLAG_MAIN);
+        assertThat(newMainUser).isNull();
+
+        List<UserInfo> users = mUserManager.getUsers();
+        int mainUserCount = 0;
+        for (UserInfo user : users) {
+            if (user.isMain()) {
+                mainUserCount++;
+            }
+        }
+        assertThat(mainUserCount).isEqualTo(1);
+    }
+
     private boolean isPackageInstalledForUser(String packageName, int userId) {
         try {
             return mPackageManager.getPackageInfoAsUser(packageName, 0, userId) != null;
