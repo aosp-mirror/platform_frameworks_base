@@ -26,6 +26,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
 import android.text.method.TextKeyListener;
@@ -278,7 +279,9 @@ public abstract class Layout {
                      int width, Alignment align,
                      float spacingMult, float spacingAdd) {
         this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingMult, spacingAdd);
+                spacingMult, spacingAdd, false, false, 0, null, Integer.MAX_VALUE,
+                BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null, null,
+                JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE);
     }
 
     /**
@@ -290,15 +293,44 @@ public abstract class Layout {
      * @param width the wrapping width for the text.
      * @param align whether to left, right, or center the text.  Styles can
      * override the alignment.
+     * @param textDir a text direction heuristic.
      * @param spacingMult factor by which to scale the font size to get the
      * default line spacing
      * @param spacingAdd amount to add to the default line spacing
+     * @param includePad true for enabling including font padding
+     * @param fallbackLineSpacing true for enabling fallback line spacing
+     * @param ellipsizedWidth width as used for ellipsizing purpose
+     * @param ellipsize an ellipsize option
+     * @param maxLines a maximum number of lines.
+     * @param breakStrategy a break strategy.
+     * @param hyphenationFrequency a hyphenation frequency
+     * @param leftIndents a visually left margins
+     * @param rightIndents a visually right margins
+     * @param justificationMode a justification mode
+     * @param lineBreakConfig a line break config
      *
      * @hide
      */
-    protected Layout(CharSequence text, TextPaint paint,
-                     int width, Alignment align, TextDirectionHeuristic textDir,
-                     float spacingMult, float spacingAdd) {
+    protected Layout(
+            CharSequence text,
+            TextPaint paint,
+            int width,
+            Alignment align,
+            TextDirectionHeuristic textDir,
+            float spacingMult,
+            float spacingAdd,
+            boolean includePad,
+            boolean fallbackLineSpacing,
+            int ellipsizedWidth,
+            TextUtils.TruncateAt ellipsize,
+            int maxLines,
+            int breakStrategy,
+            int hyphenationFrequency,
+            int[] leftIndents,
+            int[] rightIndents,
+            int justificationMode,
+            LineBreakConfig lineBreakConfig
+    ) {
 
         if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
@@ -320,11 +352,17 @@ public abstract class Layout {
         mSpacingAdd = spacingAdd;
         mSpannedText = text instanceof Spanned;
         mTextDir = textDir;
-    }
-
-    /** @hide */
-    protected void setJustificationMode(@JustificationMode int justificationMode) {
+        mIncludePad = includePad;
+        mFallbackLineSpacing = fallbackLineSpacing;
+        mEllipsizedWidth = ellipsize == null ? width : ellipsizedWidth;
+        mEllipsize = ellipsize;
+        mMaxLines = maxLines;
+        mBreakStrategy = breakStrategy;
+        mHyphenationFrequency = hyphenationFrequency;
+        mLeftIndents = leftIndents;
+        mRightIndents = rightIndents;
         mJustificationMode = justificationMode;
+        mLineBreakConfig = lineBreakConfig;
     }
 
     /**
@@ -910,37 +948,6 @@ public abstract class Layout {
     }
 
     /**
-     * Return the text that is displayed by this Layout.
-     */
-    public final CharSequence getText() {
-        return mText;
-    }
-
-    /**
-     * Return the base Paint properties for this layout.
-     * Do NOT change the paint, which may result in funny
-     * drawing for this layout.
-     */
-    public final TextPaint getPaint() {
-        return mPaint;
-    }
-
-    /**
-     * Return the width of this layout.
-     */
-    public final int getWidth() {
-        return mWidth;
-    }
-
-    /**
-     * Return the width to which this Layout is ellipsizing, or
-     * {@link #getWidth} if it is not doing anything special.
-     */
-    public int getEllipsizedWidth() {
-        return mWidth;
-    }
-
-    /**
      * Increase the width of this layout to the specified width.
      * Be careful to use this only when you know it is appropriate&mdash;
      * it does not cause the text to reflow to use the full new width.
@@ -969,35 +976,6 @@ public abstract class Layout {
      */
     public int getHeight(boolean cap) {
         return getHeight();
-    }
-
-    /**
-     * Return the base alignment of this layout.
-     */
-    public final Alignment getAlignment() {
-        return mAlignment;
-    }
-
-    /**
-     * Return what the text height is multiplied by to get the line height.
-     */
-    public final float getSpacingMultiplier() {
-        return mSpacingMult;
-    }
-
-    /**
-     * Return the number of units of leading that are added to each line.
-     */
-    public final float getSpacingAdd() {
-        return mSpacingAdd;
-    }
-
-    /**
-     * Return the heuristic used to determine paragraph text direction.
-     * @hide
-     */
-    public final TextDirectionHeuristic getTextDirectionHeuristic() {
-        return mTextDir;
     }
 
     /**
@@ -1102,15 +1080,6 @@ public abstract class Layout {
      */
     public int getIndentAdjust(int line, Alignment alignment) {
         return 0;
-    }
-
-    /**
-     * Return true if the fallback line space is enabled in this Layout.
-     *
-     * @return true if the fallback line space is enabled. Otherwise returns false.
-     */
-    public boolean isFallbackLineSpacingEnabled() {
-        return false;
     }
 
     /**
@@ -3254,7 +3223,17 @@ public abstract class Layout {
     private boolean mSpannedText;
     private TextDirectionHeuristic mTextDir;
     private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
+    private boolean mIncludePad;
+    private boolean mFallbackLineSpacing;
+    private int mEllipsizedWidth;
+    private TextUtils.TruncateAt mEllipsize;
+    private int mMaxLines;
+    private int mBreakStrategy;
+    private int mHyphenationFrequency;
+    private int[] mLeftIndents;
+    private int[] mRightIndents;
     private int mJustificationMode;
+    private LineBreakConfig mLineBreakConfig;
 
     /** @hide */
     @IntDef(prefix = { "DIR_" }, value = {
@@ -3351,5 +3330,684 @@ public abstract class Layout {
          * bounds ({@code getLineTop(line)} and {@code getLineBottom(line, false)}).
          */
         boolean isSegmentInside(@NonNull RectF segmentBounds, @NonNull RectF area);
+    }
+
+    /**
+     * A builder class for Layout object.
+     *
+     * Different from {@link StaticLayout.Builder}, this builder generates the optimal layout based
+     * on input. If the given text and parameters can be rendered with {@link BoringLayout}, this
+     * builder generates {@link BoringLayout} instance. Otherwise, {@link StaticLayout} instance is
+     * generated.
+     *
+     * @see StaticLayout.Builder
+     */
+    public static final class Builder {
+        /**
+         * Construct a builder class.
+         *
+         * @param text a text to be displayed.
+         * @param start an inclusive start index of the text to be displayed.
+         * @param end an exclusive end index of the text to be displayed.
+         * @param paint a paint object to be used for drawing text.
+         * @param width a width constraint in pixels.
+         */
+        public Builder(
+                @NonNull CharSequence text,
+                @IntRange(from = 0) int start,
+                @IntRange(from = 0) int end,
+                @NonNull TextPaint paint,
+                @IntRange(from = 0) int width) {
+            mText = text;
+            mStart = start;
+            mEnd = end;
+            mPaint = paint;
+            mWidth = width;
+            mEllipsizedWidth = width;
+        }
+
+        /**
+         * Set the text alignment.
+         *
+         * The default value is {@link Layout.Alignment#ALIGN_NORMAL}.
+         *
+         * @param alignment an alignment.
+         * @return this builder instance.
+         * @see Layout.Alignment
+         * @see Layout#getAlignment()
+         * @see StaticLayout.Builder#setAlignment(Alignment)
+         */
+        @NonNull
+        public Builder setAlignment(@NonNull Alignment alignment) {
+            mAlignment = alignment;
+            return this;
+        }
+
+        /**
+         * Set the text direction heuristics.
+         *
+         * The text direction heuristics is used to resolve text direction on the text.
+         *
+         * The default value is {@link TextDirectionHeuristics#FIRSTSTRONG_LTR}
+         *
+         * @param textDirection a text direction heuristic.
+         * @return this builder instance.
+         * @see TextDirectionHeuristics
+         * @see Layout#getTextDirectionHeuristic()
+         * @see StaticLayout.Builder#setTextDirection(TextDirectionHeuristic)
+         */
+        @NonNull
+        public Builder setTextDirectionHeuristic(@NonNull TextDirectionHeuristic textDirection) {
+            mTextDir = textDirection;
+            return this;
+        }
+
+        /**
+         * Set the line spacing amount.
+         *
+         * The specified amount of pixels will be added to each line.
+         *
+         * The default value is {@code 0}.
+         *
+         * @param amount an amount of pixels to be added to line height.
+         * @return this builder instance.
+         * @see Layout#getLineSpacingAmount()
+         * @see Layout#getSpacingAdd()
+         * @see StaticLayout.Builder#setLineSpacing(float, float)
+         */
+        @NonNull
+        public Builder setLineSpacingAmount(float amount) {
+            mSpacingAdd = amount;
+            return this;
+        }
+
+        /**
+         * Set the line spacing multiplier.
+         *
+         * The specified value will be multiplied to each line.
+         *
+         * The default value is {@code 1}.
+         *
+         * @param multiplier a multiplier to be applied to the line height
+         * @return this builder instance.
+         * @see Layout#getLineSpacingMultiplier()
+         * @see Layout#getSpacingMultiplier()
+         * @see StaticLayout.Builder#setLineSpacing(float, float)
+         */
+        @NonNull
+        public Builder setLineSpacingMultiplier(float multiplier) {
+            mSpacingMult = multiplier;
+            return this;
+        }
+
+        /**
+         * Set whether including extra padding into the first and the last line height.
+         *
+         * By setting true, the first line of the text and the last line of the text will have extra
+         * vertical space for avoiding clipping.
+         *
+         * The default value is {@code true}.
+         *
+         * @param includeFontPadding true for including extra space into first and last line.
+         * @return this builder instance.
+         * @see Layout#isIncludeFontPadding()
+         * @see StaticLayout.Builder#setIncludePad(boolean)
+         */
+        @NonNull
+        public Builder setIncludeFontPadding(boolean includeFontPadding) {
+            mIncludePad = includeFontPadding;
+            return this;
+        }
+
+        /**
+         * Set whether to respect the ascent and descent of the fallback fonts.
+         *
+         * Set whether to respect the ascent and descent of the fallback fonts that are used in
+         * displaying the text (which is needed to avoid text from consecutive lines running into
+         * each other). If set, fallback fonts that end up getting used can increase the ascent
+         * and descent of the lines that they are used on.
+         *
+         * The default value is {@code false}
+         *
+         * @param fallbackLineSpacing whether to expand line height based on fallback fonts.
+         * @return this builder instance.
+         * @see Layout#isFallbackLineSpacingEnabled()
+         * @see StaticLayout.Builder#setUseLineSpacingFromFallbacks(boolean)
+         */
+        @NonNull
+        public Builder setFallbackLineSpacingEnabled(boolean fallbackLineSpacing) {
+            mFallbackLineSpacing = fallbackLineSpacing;
+            return this;
+        }
+
+        /**
+         * Set the width as used for ellipsizing purpose in pixels.
+         *
+         * The passed value is ignored and forced to set to the value of width constraint passed in
+         * constructor if no ellipsize option is set.
+         *
+         * The default value is the width constraint.
+         *
+         * @param ellipsizeWidth a ellipsizing width in pixels.
+         * @return this builder instance.
+         * @see Layout#getEllipsizedWidth()
+         * @see StaticLayout.Builder#setEllipsizedWidth(int)
+         */
+        @NonNull
+        public Builder setEllipsizedWidth(@IntRange(from = 0) int ellipsizeWidth) {
+            mEllipsizedWidth = ellipsizeWidth;
+            return this;
+        }
+
+        /**
+         * Set the ellipsizing type.
+         *
+         * By setting null, the ellipsize is disabled.
+         *
+         * The default value is {@code null}.
+         *
+         * @param ellipsize type of the ellipsize. null for disabling ellipsize.
+         * @return this builder instance.
+         * @see Layout#getEllipsize()
+         * @see StaticLayout.Builder#getEllipsize()
+         * @see android.text.TextUtils.TruncateAt
+         */
+        @NonNull
+        public Builder setEllipsize(@Nullable TextUtils.TruncateAt ellipsize) {
+            mEllipsize = ellipsize;
+            return this;
+        }
+
+        /**
+         * Set the maximum number of lines.
+         *
+         * The default value is unlimited.
+         *
+         * @param maxLines maximum number of lines in the layout.
+         * @return this builder instance.
+         * @see Layout#getMaxLines()
+         * @see StaticLayout.Builder#setMaxLines(int)
+         */
+        @NonNull
+        public Builder setMaxLines(@IntRange(from = 1) int maxLines) {
+            mMaxLines = maxLines;
+            return this;
+        }
+
+        /**
+         * Set the line break strategy.
+         *
+         * The default value is {@link Layout#BREAK_STRATEGY_SIMPLE}.
+         *
+         * @param breakStrategy a break strategy for line breaking.
+         * @return this builder instance.
+         * @see Layout#getBreakStrategy()
+         * @see StaticLayout.Builder#setBreakStrategy(int)
+         * @see Layout#BREAK_STRATEGY_SIMPLE
+         * @see Layout#BREAK_STRATEGY_HIGH_QUALITY
+         * @see Layout#BREAK_STRATEGY_BALANCED
+         */
+        @NonNull
+        public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
+            mBreakStrategy = breakStrategy;
+            return this;
+        }
+
+        /**
+         * Set the hyphenation frequency.
+         *
+         * The default value is {@link Layout#HYPHENATION_FREQUENCY_NONE}.
+         *
+         * @param hyphenationFrequency a hyphenation frequency.
+         * @return this builder instance.
+         * @see Layout#getHyphenationFrequency()
+         * @see StaticLayout.Builder#setHyphenationFrequency(int)
+         * @see Layout#HYPHENATION_FREQUENCY_NONE
+         * @see Layout#HYPHENATION_FREQUENCY_NORMAL
+         * @see Layout#HYPHENATION_FREQUENCY_FULL
+         * @see Layout#HYPHENATION_FREQUENCY_NORMAL_FAST
+         * @see Layout#HYPHENATION_FREQUENCY_FULL_FAST
+         */
+        @NonNull
+        public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {
+            mHyphenationFrequency = hyphenationFrequency;
+            return this;
+        }
+
+        /**
+         * Set visually left indents in pixels per lines.
+         *
+         * For the lines past the last element in the array, the last element repeats. Passing null
+         * for disabling indents.
+         *
+         * Note that even with the RTL layout, this method reserve spacing at the visually left of
+         * the line.
+         *
+         * The default value is {@code null}.
+         *
+         * @param leftIndents array of indents values for the left margins in pixels.
+         * @return this builder instance.
+         * @see Layout#getLeftIndents()
+         * @see Layout#getRightIndents()
+         * @see Layout.Builder#setRightIndents(int[])
+         * @see StaticLayout.Builder#setIndents(int[], int[])
+         */
+        @NonNull
+        public Builder setLeftIndents(@Nullable int[] leftIndents) {
+            mLeftIndents = leftIndents;
+            return this;
+        }
+
+        /**
+         * Set visually right indents in pixels per lines.
+         *
+         * For the lines past the last element in the array, the last element repeats. Passing null
+         * for disabling indents.
+         *
+         * Note that even with the RTL layout, this method reserve spacing at the visually right of
+         * the line.
+         *
+         * The default value is {@code null}.
+         *
+         * @param rightIndents array of indents values for the right margins in pixels.
+         * @return this builder instance.
+         * @see Layout#getLeftIndents()
+         * @see Layout#getRightIndents()
+         * @see Layout.Builder#setLeftIndents(int[])
+         * @see StaticLayout.Builder#setIndents(int[], int[])
+         */
+        @NonNull
+        public Builder setRightIndents(@Nullable int[] rightIndents) {
+            mRightIndents = rightIndents;
+            return this;
+        }
+
+        /**
+         * Set justification mode.
+         *
+         * When justification mode is {@link Layout#JUSTIFICATION_MODE_INTER_WORD}, the word spacing
+         * on the given Paint passed to the constructor will be ignored. This behavior also affects
+         * spans which change the word spacing.
+         *
+         * The default value is {@link Layout#JUSTIFICATION_MODE_NONE}.
+         *
+         * @param justificationMode justification mode.
+         * @return this builder instance.
+         * @see Layout#getJustificationMode()
+         * @see StaticLayout.Builder#setJustificationMode(int)
+         * @see Layout#JUSTIFICATION_MODE_NONE
+         * @see Layout#JUSTIFICATION_MODE_INTER_WORD
+         */
+        @NonNull
+        public Builder setJustificationMode(@JustificationMode int justificationMode) {
+            mJustificationMode = justificationMode;
+            return this;
+        }
+
+        /**
+         * Set the line break configuration.
+         *
+         * The default value is a LinebreakConfig instance that has
+         * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE} and
+         * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE}.
+         *
+         * @param lineBreakConfig the line break configuration
+         * @return this builder instance.
+         * @see Layout#getLineBreakConfig()
+         * @see StaticLayout.Builder#setLineBreakConfig(LineBreakConfig)
+         */
+        @NonNull
+        public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+            mLineBreakConfig = lineBreakConfig;
+            return this;
+        }
+
+        private BoringLayout.Metrics isBoring() {
+            if (mStart != 0 || mEnd != mText.length()) {  // BoringLayout only support entire text.
+                return null;
+            }
+            BoringLayout.Metrics metrics = BoringLayout.isBoring(mText, mPaint, mTextDir,
+                    mFallbackLineSpacing, null);
+            if (metrics == null) {
+                return null;
+            }
+            if (metrics.width <= mWidth) {
+                return metrics;
+            }
+            if (mEllipsize != null) {
+                return metrics;
+            }
+            return null;
+        }
+
+        /**
+         * Build a Layout object.
+         */
+        @NonNull
+        public Layout build() {
+            BoringLayout.Metrics metrics = isBoring();
+            if (metrics == null) {  // we cannot use BoringLayout, create StaticLayout.
+                return StaticLayout.Builder.obtain(mText, mStart, mEnd, mPaint, mWidth)
+                        .setAlignment(mAlignment)
+                        .setLineSpacing(mSpacingAdd, mSpacingMult)
+                        .setTextDirection(mTextDir)
+                        .setIncludePad(mIncludePad)
+                        .setUseLineSpacingFromFallbacks(mFallbackLineSpacing)
+                        .setEllipsizedWidth(mEllipsizedWidth)
+                        .setEllipsize(mEllipsize)
+                        .setMaxLines(mMaxLines)
+                        .setBreakStrategy(mBreakStrategy)
+                        .setHyphenationFrequency(mHyphenationFrequency)
+                        .setIndents(mLeftIndents, mRightIndents)
+                        .setJustificationMode(mJustificationMode)
+                        .setLineBreakConfig(mLineBreakConfig)
+                        .build();
+            } else {
+                return new BoringLayout(
+                        mText, mPaint, mWidth, mAlignment, mTextDir, mSpacingMult, mSpacingAdd,
+                        mIncludePad, mFallbackLineSpacing, mEllipsizedWidth, mEllipsize, mMaxLines,
+                        mBreakStrategy, mHyphenationFrequency, mLeftIndents, mRightIndents,
+                        mJustificationMode, mLineBreakConfig, metrics);
+            }
+        }
+
+        private final CharSequence mText;
+        private final int mStart;
+        private final int mEnd;
+        private final TextPaint mPaint;
+        private final int mWidth;
+        private Alignment mAlignment = Alignment.ALIGN_NORMAL;
+        private float mSpacingMult = 1.0f;
+        private float mSpacingAdd = 0.0f;
+        private TextDirectionHeuristic mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
+        private boolean mIncludePad = true;
+        private boolean mFallbackLineSpacing = false;
+        private int mEllipsizedWidth;
+        private TextUtils.TruncateAt mEllipsize = null;
+        private int mMaxLines = Integer.MAX_VALUE;
+        private int mBreakStrategy = BREAK_STRATEGY_SIMPLE;
+        private int mHyphenationFrequency = HYPHENATION_FREQUENCY_NONE;
+        private int[] mLeftIndents = null;
+        private int[] mRightIndents = null;
+        private int mJustificationMode = JUSTIFICATION_MODE_NONE;
+        private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Getters of parameters that is used for building Layout instance
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Return the text used for creating this layout.
+     *
+     * @return the text used for creating this layout.
+     * @see Layout.Builder
+     */
+    @NonNull
+    public final CharSequence getText() {
+        return mText;
+    }
+
+    /**
+     * Return the paint used for creating this layout.
+     *
+     * Do not modify the returned paint object. This paint object will still be used for
+     * drawing/measuring text.
+     *
+     * @return the paint used for creating this layout.
+     * @see Layout.Builder
+     */
+    @NonNull
+    public final TextPaint getPaint() {
+        return mPaint;
+    }
+
+    /**
+     * Return the width used for creating this layout in pixels.
+     *
+     * @return the width used for creating this layout in pixels.
+     * @see Layout.Builder
+     */
+    @IntRange(from = 0)
+    public final int getWidth() {
+        return mWidth;
+    }
+
+    /**
+     * Returns the alignment used for creating this layout in pixels.
+     *
+     * @return the alignment used for creating this layout.
+     * @see Layout.Builder#setAlignment(Alignment)
+     * @see StaticLayout.Builder#setAlignment(Alignment)
+     */
+    @NonNull
+    public final Alignment getAlignment() {
+        return mAlignment;
+    }
+
+    /**
+     * Returns the text direction heuristic used for creating this layout.
+     *
+     * @return the text direction heuristic used for creating this layout
+     * @see Layout.Builder#setTextDirectionHeuristic(TextDirectionHeuristic)
+     * @see StaticLayout.Builder#setTextDirection(TextDirectionHeuristic)
+     */
+    @NonNull
+    public final TextDirectionHeuristic getTextDirectionHeuristic() {
+        return mTextDir;
+    }
+
+    /**
+     * Returns the multiplier applied to the line height.
+     *
+     * This is an alias of {@link #getLineSpacingMultiplier}.
+     *
+     * @return the line height multiplier.
+     * @see Layout.Builder#setLineSpacingMultiplier(float)
+     * @see StaticLayout.Builder#setLineSpacing(float, float)
+     * @see Layout#getLineSpacingMultiplier()
+     */
+    public final float getSpacingMultiplier() {
+        return getLineSpacingMultiplier();
+    }
+
+    /**
+     * Returns the multiplier applied to the line height.
+     *
+     * @return the line height multiplier.
+     * @see Layout.Builder#setLineSpacingMultiplier(float)
+     * @see StaticLayout.Builder#setLineSpacing(float, float)
+     * @see Layout#getSpacingMultiplier()
+     */
+    public final float getLineSpacingMultiplier() {
+        return mSpacingMult;
+    }
+
+    /**
+     * Returns the amount added to the line height.
+     *
+     * This is an alias of {@link #getLineSpacingAmount()}.
+     *
+     * @return the line height additional amount.
+     * @see Layout.Builder#setLineSpacingAmount(float)
+     * @see StaticLayout.Builder#setLineSpacing(float, float)
+     * @see Layout#getLineSpacingAmount()
+     */
+    public final float getSpacingAdd() {
+        return getLineSpacingAmount();
+    }
+
+    /**
+     * Returns the amount added to the line height.
+     *
+     * @return the line height additional amount.
+     * @see Layout.Builder#setLineSpacingAmount(float)
+     * @see StaticLayout.Builder#setLineSpacing(float, float)
+     * @see Layout#getSpacingAdd()
+     */
+    public final float getLineSpacingAmount() {
+        return mSpacingAdd;
+    }
+
+    /**
+     * Returns true if this layout is created with increased line height.
+     *
+     * @return true if the layout is created with increased line height.
+     * @see Layout.Builder#setIncludeFontPadding(boolean)
+     * @see StaticLayout.Builder#setIncludePad(boolean)
+     */
+    public final boolean isIncludeFontPadding() {
+        return mIncludePad;
+    }
+
+    /**
+     * Return true if the fallback line space is enabled in this Layout.
+     *
+     * @return true if the fallback line space is enabled. Otherwise, returns false.
+     * @see Layout.Builder#setFallbackLineSpacingEnabled(boolean)
+     * @see StaticLayout.Builder#setUseLineSpacingFromFallbacks(boolean)
+     */
+    // not being final because of already published API.
+    public boolean isFallbackLineSpacingEnabled() {
+        return mFallbackLineSpacing;
+    }
+
+    /**
+     * Return the width to which this layout is ellipsized.
+     *
+     * If no ellipsize is applied, the same amount of {@link #getWidth} is returned.
+     *
+     * @return the amount of ellipsized width in pixels.
+     * @see Layout.Builder#setEllipsizedWidth(int)
+     * @see StaticLayout.Builder#setEllipsizedWidth(int)
+     * @see Layout.Builder#setEllipsize(TextUtils.TruncateAt)
+     * @see StaticLayout.Builder#setEllipsize(TextUtils.TruncateAt)
+     * @see Layout#getEllipsize()
+     */
+    @IntRange(from = 0)
+    public int getEllipsizedWidth() {  // not being final because of already published API.
+        return mEllipsizedWidth;
+    }
+
+    /**
+     * Return the ellipsize option used for creating this layout.
+     *
+     * May return null if no ellipsize option was selected.
+     *
+     * @return The ellipsize option used for creating this layout, or null if no ellipsize option
+     * was selected.
+     * @see Layout.Builder#setEllipsize(TextUtils.TruncateAt)
+     * @see StaticLayout.Builder#setEllipsize(TextUtils.TruncateAt)
+     * @see Layout.Builder#setEllipsizedWidth(int)
+     * @see StaticLayout.Builder#setEllipsizedWidth(int)
+     * @see Layout#getEllipsizedWidth()
+     */
+    @Nullable
+    public final TextUtils.TruncateAt getEllipsize() {
+        return mEllipsize;
+    }
+
+    /**
+     * Return the maximum lines allowed used for creating this layout.
+     *
+     * Note that this is not an actual line count of this layout. Use {@link #getLineCount()} for
+     * getting the actual line count of this layout.
+     *
+     * @return the maximum lines allowed used for creating this layout.
+     * @see Layout.Builder#setMaxLines(int)
+     * @see StaticLayout.Builder#setMaxLines(int)
+     */
+    @IntRange(from = 1)
+    public final int getMaxLines() {
+        return mMaxLines;
+    }
+
+    /**
+     * Return the break strategy used for creating this layout.
+     *
+     * @return the break strategy used for creating this layout.
+     * @see Layout.Builder#setBreakStrategy(int)
+     * @see StaticLayout.Builder#setBreakStrategy(int)
+     */
+    @BreakStrategy
+    public final int getBreakStrategy() {
+        return mBreakStrategy;
+    }
+
+    /**
+     * Return the hyphenation frequency used for creating this layout.
+     *
+     * @return the hyphenation frequency used for creating this layout.
+     * @see Layout.Builder#setHyphenationFrequency(int)
+     * @see StaticLayout.Builder#setHyphenationFrequency(int)
+     */
+    @HyphenationFrequency
+    public final int getHyphenationFrequency() {
+        return mHyphenationFrequency;
+    }
+
+    /**
+     * Return a copy of the left indents used for this layout.
+     *
+     * May return null if no left indentation is applied.
+     *
+     * @return the array of left indents in pixels.
+     * @see Layout.Builder#setLeftIndents(int[])
+     * @see Layout.Builder#setRightIndents(int[])
+     * @see StaticLayout.Builder#setIndents(int[], int[])
+     */
+    @Nullable
+    public final int[] getLeftIndents() {
+        if (mLeftIndents == null) {
+            return null;
+        }
+        int[] newArray = new int[mLeftIndents.length];
+        System.arraycopy(mLeftIndents, 0, newArray, 0, newArray.length);
+        return newArray;
+    }
+
+    /**
+     * Return a copy of the right indents used for this layout.
+     *
+     * May return null if no right indentation is applied.
+     *
+     * @return the array of right indents in pixels.
+     * @see Layout.Builder#setLeftIndents(int[])
+     * @see Layout.Builder#setRightIndents(int[])
+     * @see StaticLayout.Builder#setIndents(int[], int[])
+     */
+    @Nullable
+    public final int[] getRightIndents() {
+        if (mRightIndents == null) {
+            return mLeftIndents;
+        }
+        int[] newArray = new int[mRightIndents.length];
+        System.arraycopy(mRightIndents, 0, newArray, 0, newArray.length);
+        return newArray;
+    }
+
+    /**
+     * Return the justification mode used for creating this layout.
+     *
+     * @return the justification mode used for creating this layout.
+     * @see Layout.Builder#setJustificationMode(int)
+     * @see StaticLayout.Builder#setJustificationMode(int)
+     */
+    @JustificationMode
+    public final int getJustificationMode() {
+        return mJustificationMode;
+    }
+
+    /**
+     * Gets the {@link LineBreakConfig} used for creating this layout.
+     *
+     * Do not modify the returned object.
+     *
+     * @return The line break config used for creating this layout.
+     */
+    // not being final because of subclass has already published API.
+    @NonNull
+    public LineBreakConfig getLineBreakConfig() {
+        return mLineBreakConfig;
     }
 }
