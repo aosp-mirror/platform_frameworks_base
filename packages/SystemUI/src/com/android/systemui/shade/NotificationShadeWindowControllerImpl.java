@@ -840,13 +840,17 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         pw.println("  mDeferWindowLayoutParams=" + mDeferWindowLayoutParams);
         pw.println(mCurrentState);
         if (mWindowRootView != null && mWindowRootView.getViewRootImpl() != null) {
+            Trace.beginSection("mWindowRootView.dump()");
             mWindowRootView.getViewRootImpl().dump("  ", pw);
+            Trace.endSection();
         }
+        Trace.beginSection("Table<State>");
         new DumpsysTableLogger(
                 TAG,
                 NotificationShadeWindowState.TABLE_HEADERS,
                 mStateBuffer.toList()
         ).printTableData(pw);
+        Trace.endSection();
     }
 
     @Override

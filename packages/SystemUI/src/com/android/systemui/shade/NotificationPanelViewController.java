@@ -3447,11 +3447,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mIgnoreXTouchSlop="); ipw.println(mIgnoreXTouchSlop);
         ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
         ipw.println("gestureExclusionRect:" + calculateGestureExclusionRect());
+        Trace.beginSection("Table<DownEvents>");
         new DumpsysTableLogger(
                 TAG,
                 NPVCDownEventState.TABLE_HEADERS,
                 mLastDownEvents.toList()
         ).printTableData(ipw);
+        Trace.endSection();
     }
 
     @Override
