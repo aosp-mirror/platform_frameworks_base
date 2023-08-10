@@ -21,6 +21,9 @@ import android.os.PowerManager;
 
 import java.io.PrintWriter;
 
+/**
+ * Provides max allowed brightness
+ */
 abstract class BrightnessClamper<T> {
 
     protected float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;

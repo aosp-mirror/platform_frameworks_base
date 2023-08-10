@@ -349,7 +349,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private boolean mDozing;
 
     private boolean mAppliedDimming;
-    private boolean mAppliedLowPower;
+
     private boolean mAppliedThrottling;
 
     // Reason for which the brightness was last changed. See {@link BrightnessReason} for more
@@ -1467,24 +1467,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             slowChange = false;
             mAppliedDimming = false;
         }
-        // If low power mode is enabled, scale brightness by screenLowPowerBrightnessFactor
-        // as long as it is above the minimum threshold.
-        if (mPowerRequest.lowPowerMode) {
-            if (brightnessState > PowerManager.BRIGHTNESS_MIN) {
-                final float brightnessFactor =
-                        Math.min(mPowerRequest.screenLowPowerBrightnessFactor, 1);
-                final float lowPowerBrightnessFloat = (brightnessState * brightnessFactor);
-                brightnessState = Math.max(lowPowerBrightnessFloat, PowerManager.BRIGHTNESS_MIN);
-                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_LOW_POWER);
-            }
-            if (!mAppliedLowPower) {
-                slowChange = false;
-            }
-            mAppliedLowPower = true;
-        } else if (mAppliedLowPower) {
-            slowChange = false;
-            mAppliedLowPower = false;
-        }
+
+        DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(mPowerRequest,
+                brightnessState, slowChange);
+
+        brightnessState = clampedState.getBrightness();
+        slowChange = clampedState.isSlowChange();
+        mBrightnessReasonTemp.addModifier(clampedState.getBrightnessReason().getModifier());
 
         // The current brightness to use has been calculated at this point, and HbmController should
         // be notified so that it can accurately calculate HDR or HBM levels. We specifically do it
@@ -1541,8 +1530,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // transformations to the brightness have pushed it outside of the currently
             // allowed range.
             float animateValue = clampScreenBrightness(brightnessState);
-
-            animateValue = mBrightnessClamperController.clamp(animateValue);
 
             // If there are any HDR layers on the screen, we have a special brightness value that we
             // use instead. We still preserve the calculated brightness for Standard Dynamic Range
@@ -2411,7 +2398,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mPowerRequest=" + mPowerRequest);
         pw.println("  mBrightnessReason=" + mBrightnessReason);
         pw.println("  mAppliedDimming=" + mAppliedDimming);
-        pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
         pw.println("  mDozing=" + mDozing);
         pw.println("  mSkipRampState=" + skipRampStateToString(mSkipRampState));
