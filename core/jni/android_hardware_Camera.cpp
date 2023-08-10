@@ -878,7 +878,7 @@ static jstring android_hardware_Camera_getParameters(JNIEnv *env, jobject thiz)
         jniThrowRuntimeException(env, "getParameters failed (empty parameters)");
         return 0;
     }
-    return env->NewStringUTF(params8.string());
+    return env->NewStringUTF(params8.c_str());
 }
 
 static void android_hardware_Camera_reconnect(JNIEnv *env, jobject thiz)
