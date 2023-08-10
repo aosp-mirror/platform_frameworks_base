@@ -28,9 +28,6 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,6 +102,40 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun transitioningTo() =
+        testScope.runTest {
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(underTest.desiredScene.value.key)
+                )
+            underTest.setTransitionState(transitionState)
+
+            val transitionTo by collectLastValue(underTest.transitioningTo)
+            assertThat(transitionTo).isNull()
+
+            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
+            assertThat(transitionTo).isNull()
+
+            val progress = MutableStateFlow(0f)
+            transitionState.value =
+                ObservableTransitionState.Transition(
+                    fromScene = underTest.desiredScene.value.key,
+                    toScene = SceneKey.Shade,
+                    progress = progress,
+                )
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            progress.value = 0.5f
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            progress.value = 1f
+            assertThat(transitionTo).isEqualTo(SceneKey.Shade)
+
+            transitionState.value = ObservableTransitionState.Idle(SceneKey.Shade)
+            assertThat(transitionTo).isNull()
+        }
+
+    @Test
     fun isVisible() =
         testScope.runTest {
             val isVisible by collectLastValue(underTest.isVisible)
@@ -115,81 +146,6 @@ class SceneInteractorTest : SysuiTestCase() {
 
             underTest.setVisible(true, "reason")
             assertThat(isVisible).isTrue()
-        }
-
-    @Test
-    fun finishedSceneTransitions() =
-        testScope.runTest {
-            val transitionState =
-                MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(SceneKey.Lockscreen)
-                )
-            underTest.setTransitionState(transitionState)
-            var transitionCount = 0
-            val job = launch {
-                underTest
-                    .finishedSceneTransitions(
-                        from = SceneKey.Shade,
-                        to = SceneKey.QuickSettings,
-                    )
-                    .collect { transitionCount++ }
-            }
-
-            assertThat(transitionCount).isEqualTo(0)
-
-            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
-            transitionState.value =
-                ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Lockscreen,
-                    toScene = SceneKey.Shade,
-                    progress = flowOf(0.5f),
-                )
-            runCurrent()
-            underTest.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
-            transitionState.value = ObservableTransitionState.Idle(SceneKey.Shade)
-            runCurrent()
-            assertThat(transitionCount).isEqualTo(0)
-
-            underTest.changeScene(SceneModel(SceneKey.QuickSettings), "reason")
-            transitionState.value =
-                ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Shade,
-                    toScene = SceneKey.QuickSettings,
-                    progress = flowOf(0.5f),
-                )
-            runCurrent()
-            underTest.onSceneChanged(SceneModel(SceneKey.QuickSettings), "reason")
-            transitionState.value = ObservableTransitionState.Idle(SceneKey.QuickSettings)
-            runCurrent()
-            assertThat(transitionCount).isEqualTo(1)
-
-            underTest.changeScene(SceneModel(SceneKey.Shade), "reason")
-            transitionState.value =
-                ObservableTransitionState.Transition(
-                    fromScene = SceneKey.QuickSettings,
-                    toScene = SceneKey.Shade,
-                    progress = flowOf(0.5f),
-                )
-            runCurrent()
-            underTest.onSceneChanged(SceneModel(SceneKey.Shade), "reason")
-            transitionState.value = ObservableTransitionState.Idle(SceneKey.Shade)
-            runCurrent()
-            assertThat(transitionCount).isEqualTo(1)
-
-            underTest.changeScene(SceneModel(SceneKey.QuickSettings), "reason")
-            transitionState.value =
-                ObservableTransitionState.Transition(
-                    fromScene = SceneKey.Shade,
-                    toScene = SceneKey.QuickSettings,
-                    progress = flowOf(0.5f),
-                )
-            runCurrent()
-            underTest.onSceneChanged(SceneModel(SceneKey.QuickSettings), "reason")
-            transitionState.value = ObservableTransitionState.Idle(SceneKey.QuickSettings)
-            runCurrent()
-            assertThat(transitionCount).isEqualTo(2)
-
-            job.cancel()
         }
 
     @Test
