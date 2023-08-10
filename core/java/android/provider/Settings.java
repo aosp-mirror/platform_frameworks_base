@@ -17103,6 +17103,12 @@ public final class Settings {
                 ArrayMap<String, Integer> readableKeysWithMaxTargetSdk) {
             getPublicSettingsForClass(Global.class, allKeys, readableKeys,
                     readableKeysWithMaxTargetSdk);
+            // Add Global.Wearable keys on watches.
+            if (ActivityThread.currentApplication().getApplicationContext().getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                getPublicSettingsForClass(Global.Wearable.class, allKeys, readableKeys,
+                        readableKeysWithMaxTargetSdk);
+            }
         }
 
         /**
@@ -18287,7 +18293,7 @@ public final class Settings {
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
-        public static class Wearable {
+        public static final class Wearable extends NameValueTable {
             /**
              * Whether the user has any pay tokens on their watch.
              * @hide
