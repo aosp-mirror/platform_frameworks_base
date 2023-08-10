@@ -286,6 +286,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 + ")");
     }
 
+    private String getFgsInfoForWtf() {
+        return " cmp: " + this.getComponentName().toShortString()
+                + " sdk: " + this.appInfo.targetSdkVersion
+                ;
+    }
+
     void maybeLogFgsLogicChange() {
         final int origWiu = reasonOr(mAllowWhileInUsePermissionInFgsReasonNoBinding,
                 mAllowWIUInBindService);
@@ -311,7 +317,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 + " OS:" // Orig-start
                 + changeMessage(mAllowStartForegroundNoBinding, mAllowStartInBindService)
                 + " NS:" // New-start
-                + changeMessage(mAllowStartForegroundNoBinding, mAllowStartByBindings);
+                + changeMessage(mAllowStartForegroundNoBinding, mAllowStartByBindings)
+                + getFgsInfoForWtf();
         Slog.wtf(TAG_SERVICE, message);
     }
 
