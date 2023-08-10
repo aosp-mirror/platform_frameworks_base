@@ -78,6 +78,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -128,6 +129,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
@@ -301,6 +303,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mViewMediatorCallback.keyguardDone(fromPrimaryAuth, targetUserId);
                 }
             }
+
+            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                mKeyguardTransitionInteractor.startDismissKeyguardTransition();
+            }
         }
 
         @Override
@@ -419,7 +425,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             Provider<JavaAdapter> javaAdapter,
             UserInteractor userInteractor,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
-            Provider<SceneInteractor> sceneInteractor
+            Provider<SceneInteractor> sceneInteractor,
+            KeyguardTransitionInteractor keyguardTransitionInteractor
     ) {
         super(view);
         view.setAccessibilityDelegate(faceAuthAccessibilityDelegate);
@@ -450,6 +457,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mUserInteractor = userInteractor;
         mSceneInteractor = sceneInteractor;
         mJavaAdapter = javaAdapter;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
     }
 
     @Override
