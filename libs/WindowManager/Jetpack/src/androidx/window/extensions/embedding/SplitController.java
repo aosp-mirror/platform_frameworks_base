@@ -831,7 +831,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return true;
         }
 
-        if (!isOnReparent && getContainerWithActivity(activity) == null
+        final TaskFragmentContainer container = getContainerWithActivity(activity);
+        if (!isOnReparent && container == null
                 && getTaskFragmentTokenFromActivityClientRecord(activity) != null) {
             // We can't find the new launched activity in any recorded container, but it is
             // currently placed in an embedded TaskFragment. This can happen in two cases:
@@ -843,11 +844,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return true;
         }
 
-        final TaskFragmentContainer container = getContainerWithActivity(activity);
-        if (!isOnReparent && container != null
-                && container.getTaskContainer().getTopNonFinishingTaskFragmentContainer()
+        // Skip resolving if the activity is on a pinned TaskFragmentContainer.
+        // TODO(b/243518738): skip resolving for overlay container.
+        if (container != null) {
+            final TaskContainer taskContainer = container.getTaskContainer();
+            if (taskContainer.isTaskFragmentContainerPinned(container)) {
+                return true;
+            }
+        }
+
+        final TaskContainer taskContainer = container != null ? container.getTaskContainer() : null;
+        if (!isOnReparent && taskContainer != null
+                && taskContainer.getTopNonFinishingTaskFragmentContainer(false /* includePin */)
                         != container) {
-            // Do not resolve if the launched activity is not the top-most container in the Task.
+            // Do not resolve if the launched activity is not the top-most container (excludes
+            // the pinned container) in the Task.
             return true;
         }
 
@@ -1244,6 +1255,19 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @GuardedBy("mLock")
     TaskFragmentContainer resolveStartActivityIntent(@NonNull WindowContainerTransaction wct,
             int taskId, @NonNull Intent intent, @Nullable Activity launchingActivity) {
+        // Skip resolving if started from pinned TaskFragmentContainer.
+        // TODO(b/243518738): skip resolving for overlay container.
+        if (launchingActivity != null) {
+            final TaskFragmentContainer taskFragmentContainer = getContainerWithActivity(
+                    launchingActivity);
+            final TaskContainer taskContainer =
+                    taskFragmentContainer != null ? taskFragmentContainer.getTaskContainer() : null;
+            if (taskContainer != null && taskContainer.isTaskFragmentContainerPinned(
+                    taskFragmentContainer)) {
+                return null;
+            }
+        }
+
         /*
          * We will check the following to see if there is any embedding rule matched:
          * 1. Whether the new activity intent should always expand.
@@ -1584,6 +1608,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return;
         }
 
+        // If the secondary container is pinned, it should not be removed.
+        final SplitContainer activeContainer =
+                getActiveSplitForContainer(existingSplitContainer.getSecondaryContainer());
+        if (activeContainer instanceof SplitPinContainer) {
+            return;
+        }
+
         existingSplitContainer.getSecondaryContainer().finish(
                 false /* shouldFinishDependent */, mPresenter, wct, this);
     }
@@ -1625,12 +1656,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // background.
             return;
         }
-        final SplitContainer splitContainer = getActiveSplitForContainer(container);
-        if (splitContainer instanceof SplitPinContainer
-                && updateSplitContainerIfNeeded(splitContainer, wct, null /* splitAttributes */)) {
-            // A SplitPinContainer exists and is updated.
-            return;
-        }
+
         if (launchPlaceholderIfNecessary(wct, container)) {
             // Placeholder was launched, the positions will be updated when the activity is added
             // to the secondary container.
@@ -1643,6 +1669,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // If the info is not available yet the task fragment will be expanded when it's ready
             return;
         }
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
         if (splitContainer == null) {
             return;
         }
@@ -1824,6 +1851,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         final SplitContainer splitContainer = getActiveSplitForContainer(container);
         if (splitContainer != null && container.equals(splitContainer.getPrimaryContainer())) {
             // Don't launch placeholder for primary split container.
+            return false;
+        }
+        if (splitContainer instanceof SplitPinContainer) {
+            // Don't launch placeholder if pinned
             return false;
         }
         return true;
@@ -2080,8 +2111,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns {@code true} if an Activity with the provided component name should always be
      * expanded to occupy full task bounds. Such activity must not be put in a split.
      */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private boolean shouldExpand(@Nullable Activity activity, @Nullable Intent intent) {
+    boolean shouldExpand(@Nullable Activity activity, @Nullable Intent intent) {
         for (EmbeddingRule rule : mSplitRules) {
             if (!(rule instanceof ActivityRule)) {
                 continue;

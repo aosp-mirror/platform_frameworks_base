@@ -179,8 +179,16 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getTopNonFinishingTaskFragmentContainer() {
+        return getTopNonFinishingTaskFragmentContainer(true /* includePin */);
+    }
+
+    @Nullable
+    TaskFragmentContainer getTopNonFinishingTaskFragmentContainer(boolean includePin) {
         for (int i = mContainers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = mContainers.get(i);
+            if (!includePin && isTaskFragmentContainerPinned(container)) {
+                continue;
+            }
             if (!container.isFinished()) {
                 return container;
             }
@@ -264,6 +272,11 @@ class TaskContainer {
     @Nullable
     SplitPinContainer getSplitPinContainer() {
         return mSplitPinContainer;
+    }
+
+    boolean isTaskFragmentContainerPinned(@NonNull TaskFragmentContainer taskFragmentContainer) {
+        return mSplitPinContainer != null
+                && mSplitPinContainer.getSecondaryContainer() == taskFragmentContainer;
     }
 
     void addTaskFragmentContainer(@NonNull TaskFragmentContainer taskFragmentContainer) {
