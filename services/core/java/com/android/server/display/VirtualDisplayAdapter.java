@@ -147,9 +147,12 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         try {
             if (projection != null) {
                 projection.registerCallback(mediaProjectionCallback);
+                Slog.d(TAG, "Virtual Display: registered media projection callback for new "
+                        + "VirtualDisplayDevice");
             }
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
+            Slog.e(TAG, "Virtual Display: error while setting up VirtualDisplayDevice", ex);
             mVirtualDisplayDevices.remove(appToken);
             device.destroyLocked(false);
             return null;
@@ -445,6 +448,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         public void stopLocked() {
+            Slog.d(TAG, "Virtual Display: stopping device " + mName);
             setSurfaceLocked(null);
             mStopped = true;
         }
