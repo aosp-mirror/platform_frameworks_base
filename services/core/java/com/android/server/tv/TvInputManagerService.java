@@ -890,10 +890,13 @@ public final class TvInputManagerService extends SystemService {
                 sessionState.session = null;
             }
         }
-        logExternalInputEvent(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__RELEASED,
-                mCurrentInputId, sessionState);
-        mCurrentInputId = null;
-        mCurrentSessionState = null;
+        if (mCurrentSessionState == sessionState) {
+            // only log when releasing the current on-screen session
+            logExternalInputEvent(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__RELEASED,
+                    mCurrentInputId, sessionState);
+            mCurrentInputId = null;
+            mCurrentSessionState = null;
+        }
         removeSessionStateLocked(sessionToken, userId);
         return sessionState;
     }
@@ -3057,6 +3060,7 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
+        // TODO: handle recording sessions
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
         TvInputState tvInputState = userState.inputMap.get(inputId);
         TvInputInfo tvInputInfo = tvInputState.info;
