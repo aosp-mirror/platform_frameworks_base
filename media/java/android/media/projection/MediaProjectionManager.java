@@ -256,6 +256,7 @@ public final class MediaProjectionManager {
      */
     public void stopActiveProjection() {
         try {
+            Log.d(TAG, "Content Recording: stopping active projection");
             mService.stopActiveProjection();
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to stop the currently active media projection", e);
@@ -269,6 +270,7 @@ public final class MediaProjectionManager {
      */
     public void addCallback(@NonNull Callback callback, @Nullable Handler handler) {
         if (callback == null) {
+            Log.w(TAG, "Content Recording: cannot add null callback");
             throw new IllegalArgumentException("callback must not be null");
         }
         CallbackDelegate delegate = new CallbackDelegate(callback, handler);
@@ -286,6 +288,7 @@ public final class MediaProjectionManager {
      */
     public void removeCallback(@NonNull Callback callback) {
         if (callback == null) {
+            Log.w(TAG, "ContentRecording: cannot remove null callback");
             throw new IllegalArgumentException("callback must not be null");
         }
         CallbackDelegate delegate = mCallbacks.remove(callback);
