@@ -272,7 +272,7 @@ static jobject NativeGetAssetAllocations(JNIEnv* env, jobject /*clazz*/) {
   if (alloc.length() <= 0) {
     return nullptr;
   }
-  return env->NewStringUTF(alloc.string());
+  return env->NewStringUTF(alloc.c_str());
 }
 
 static jint NativeGetGlobalAssetManagerCount(JNIEnv* /*env*/, jobject /*clazz*/) {
@@ -427,7 +427,7 @@ static jobjectArray NativeList(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring
   }
 
   for (size_t i = 0; i < file_count; i++) {
-    jstring java_string = env->NewStringUTF(asset_dir->getFileName(i).string());
+    jstring java_string = env->NewStringUTF(asset_dir->getFileName(i).c_str());
 
     // Check for errors creating the strings (if malformed or no memory).
     if (env->ExceptionCheck()) {

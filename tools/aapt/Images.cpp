@@ -1328,13 +1328,13 @@ static bool read_png_protected(png_structp read_ptr, String8& printableName, png
 
     png_init_io(read_ptr, fp);
 
-    read_png(printableName.string(), read_ptr, read_info, imageInfo);
+    read_png(printableName.c_str(), read_ptr, read_info, imageInfo);
 
     const size_t nameLen = file->getPath().length();
     if (nameLen > 6) {
-        const char* name = file->getPath().string();
+        const char* name = file->getPath().c_str();
         if (name[nameLen-5] == '9' && name[nameLen-6] == '.') {
-            if (do_9patch(printableName.string(), imageInfo) != NO_ERROR) {
+            if (do_9patch(printableName.c_str(), imageInfo) != NO_ERROR) {
                 return false;
             }
         }
@@ -1349,7 +1349,7 @@ static bool write_png_protected(png_structp write_ptr, String8& printableName, p
         return false;
     }
 
-    write_png(printableName.string(), write_ptr, write_info, *imageInfo, bundle);
+    write_png(printableName.c_str(), write_ptr, write_info, *imageInfo, bundle);
 
     return true;
 }
@@ -1360,7 +1360,7 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
     String8 ext(file->getPath().getPathExtension());
 
     // We currently only process PNG images.
-    if (strcmp(ext.string(), ".png") != 0) {
+    if (strcmp(ext.c_str(), ".png") != 0) {
         return NO_ERROR;
     }
 
@@ -1371,7 +1371,7 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
     String8 printableName(file->getPrintableSource());
 
     if (bundle->getVerbose()) {
-        printf("Processing image: %s\n", printableName.string());
+        printf("Processing image: %s\n", printableName.c_str());
     }
 
     png_structp read_ptr = NULL;
@@ -1385,9 +1385,9 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
 
     status_t error = UNKNOWN_ERROR;
 
-    fp = fopen(file->getSourceFile().string(), "rb");
+    fp = fopen(file->getSourceFile().c_str(), "rb");
     if (fp == NULL) {
-        fprintf(stderr, "%s: ERROR: Unable to open PNG file\n", printableName.string());
+        fprintf(stderr, "%s: ERROR: Unable to open PNG file\n", printableName.c_str());
         goto bail;
     }
 
@@ -1434,7 +1434,7 @@ status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets *
         size_t newSize = file->getSize();
         float factor = ((float)newSize)/oldSize;
         int percent = (int)(factor*100);
-        printf("    (processed image %s: %d%% size of source)\n", printableName.string(), percent);
+        printf("    (processed image %s: %d%% size of source)\n", printableName.c_str(), percent);
     }
 
 bail:
@@ -1450,7 +1450,7 @@ bail:
 
     if (error != NO_ERROR) {
         fprintf(stderr, "ERROR: Failure processing PNG image %s\n",
-                file->getPrintableSource().string());
+                file->getPrintableSource().c_str());
     }
     return error;
 }
@@ -1470,13 +1470,13 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     status_t error = UNKNOWN_ERROR;
 
     if (bundle->getVerbose()) {
-        printf("Processing image to cache: %s => %s\n", source.string(), dest.string());
+        printf("Processing image to cache: %s => %s\n", source.c_str(), dest.c_str());
     }
 
     // Get a file handler to read from
-    fp = fopen(source.string(),"rb");
+    fp = fopen(source.c_str(),"rb");
     if (fp == NULL) {
-        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", source.string());
+        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", source.c_str());
         return error;
     }
 
@@ -1507,7 +1507,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     png_init_io(read_ptr,fp);
 
     // Actually read data from the file
-    read_png(source.string(), read_ptr, read_info, &imageInfo);
+    read_png(source.c_str(), read_ptr, read_info, &imageInfo);
 
     // We're done reading so we can clean up
     // Find old file size before releasing handle
@@ -1519,7 +1519,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     // Check to see if we're dealing with a 9-patch
     // If we are, process appropriately
     if (source.getBasePath().getPathExtension() == ".9")  {
-        if (do_9patch(source.string(), &imageInfo) != NO_ERROR) {
+        if (do_9patch(source.c_str(), &imageInfo) != NO_ERROR) {
             return error;
         }
     }
@@ -1541,9 +1541,9 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     }
 
     // Open up our destination file for writing
-    fp = fopen(dest.string(), "wb");
+    fp = fopen(dest.c_str(), "wb");
     if (!fp) {
-        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", dest.string());
+        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", dest.c_str());
         png_destroy_write_struct(&write_ptr, &write_info);
         return error;
     }
@@ -1559,11 +1559,11 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
     }
 
     // Actually write out to the new png
-    write_png(dest.string(), write_ptr, write_info, imageInfo, bundle);
+    write_png(dest.c_str(), write_ptr, write_info, imageInfo, bundle);
 
     if (bundle->getVerbose()) {
         // Find the size of our new file
-        FILE* reader = fopen(dest.string(), "rb");
+        FILE* reader = fopen(dest.c_str(), "rb");
         fseek(reader, 0, SEEK_END);
         size_t newSize = (size_t)ftell(reader);
         fclose(reader);
@@ -1571,7 +1571,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
         float factor = ((float)newSize)/oldSize;
         int percent = (int)(factor*100);
         printf("  (processed image to cache entry %s: %d%% size of source)\n",
-               dest.string(), percent);
+               dest.c_str(), percent);
     }
 
     //Clean up
@@ -1588,7 +1588,7 @@ status_t postProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
 
     // At this point, now that we have all the resource data, all we need to
     // do is compile XML files.
-    if (strcmp(ext.string(), ".xml") == 0) {
+    if (strcmp(ext.c_str(), ".xml") == 0) {
         String16 resourceName(parseResourceName(file->getSourceFile().getPathLeaf()));
         return compileXmlFile(bundle, assets, resourceName, file, table);
     }

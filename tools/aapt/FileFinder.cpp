@@ -59,14 +59,14 @@ bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
 
         String8 fullPath = basePath.appendPathCopy(entryName);
         // If this entry is a directory we'll recurse into it
-        if (isDirectory(fullPath.string()) ) {
+        if (isDirectory(fullPath.c_str()) ) {
             DirectoryWalker* copy = dw->clone();
             findFiles(fullPath, extensions, fileStore,copy);
             delete copy;
         }
 
         // If this entry is a file, we'll pass it over to checkAndAddFile
-        if (isFile(fullPath.string()) ) {
+        if (isFile(fullPath.c_str()) ) {
             checkAndAddFile(fullPath,dw->entryStats(),extensions,fileStore);
         }
     }

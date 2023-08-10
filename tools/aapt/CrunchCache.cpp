@@ -44,7 +44,7 @@ size_t CrunchCache::crunch(CacheUpdater* cu, bool forceOverwrite)
         // This efficiently strips the source directory prefix from our path.
         // Also, String8 doesn't have a substring method so this is what we've
         // got to work with.
-        const char* rPathPtr = mSourceFiles.keyAt(0).string()+mSourcePath.length();
+        const char* rPathPtr = mSourceFiles.keyAt(0).c_str()+mSourcePath.length();
         // Strip leading slash if present
         int offset = 0;
         if (rPathPtr[0] == OS_PATH_SEPARATOR)

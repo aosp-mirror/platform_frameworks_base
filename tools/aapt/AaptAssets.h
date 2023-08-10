@@ -463,7 +463,7 @@ private:
         if (valid_symbol_name(symbol)) {
             return true;
         }
-        pos.error("invalid %s: '%s'\n", label, symbol.string());
+        pos.error("invalid %s: '%s'\n", label, symbol.c_str());
         return false;
     }
     AaptSymbolEntry& edit_symbol(const String8& symbol, const SourcePos* pos) {
