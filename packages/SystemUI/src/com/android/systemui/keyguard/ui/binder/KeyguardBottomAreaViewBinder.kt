@@ -176,14 +176,15 @@ object KeyguardBottomAreaViewBinder {
 
                     launch {
                         viewModel.alpha.collect { alpha ->
-                            view.importantForAccessibility =
-                                if (alpha == 0f) {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                } else {
-                                    View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                }
-
-                            ambientIndicationArea?.alpha = alpha
+                            ambientIndicationArea?.apply {
+                                this.importantForAccessibility =
+                                    if (alpha == 0f) {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                    } else {
+                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                    }
+                                this.alpha = alpha
+                            }
                         }
                     }
 
