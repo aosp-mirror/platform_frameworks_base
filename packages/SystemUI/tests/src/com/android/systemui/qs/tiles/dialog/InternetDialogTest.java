@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -716,6 +717,26 @@ public class InternetDialogTest extends SysuiTestCase {
         setNetworkVisible(true, true, true);
 
         assertThat(mInternetDialog.getWifiListMaxCount()).isEqualTo(MAX_WIFI_ENTRY_COUNT - 2);
+    }
+
+    @Test
+    public void updateDialog_shareWifiIntentNull_hideButton() {
+        when(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(any()))
+                .thenReturn(null);
+
+        mInternetDialog.updateDialog(false);
+
+        assertThat(mInternetDialog.mShareWifiButton.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void updateDialog_shareWifiShareable_showButton() {
+        when(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(any()))
+                .thenReturn(new Intent());
+
+        mInternetDialog.updateDialog(false);
+
+        assertThat(mInternetDialog.mShareWifiButton.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     private void setNetworkVisible(boolean ethernetVisible, boolean mobileDataVisible,

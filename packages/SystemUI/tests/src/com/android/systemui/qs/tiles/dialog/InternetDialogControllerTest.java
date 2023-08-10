@@ -60,6 +60,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
+import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -190,6 +191,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     public void setUp() {
         mStaticMockSession = mockitoSession()
                 .mockStatic(SubscriptionManager.class)
+                .mockStatic(WifiDppIntentHelper.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
         MockitoAnnotations.initMocks(this);
@@ -230,6 +232,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
         mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, false);
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, false);
 
         mConfig = new Configuration(mContext.getResources().getConfiguration());
         Configuration c2 = new Configuration(mConfig);
@@ -970,6 +973,29 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
         assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+    }
+
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_wifiNotShareable_returnNull() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, true);
+        when(mConnectedEntry.canShare()).thenReturn(false);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNull();
+    }
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_flagOff_returnNull() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, false);
+        when(mConnectedEntry.canShare()).thenReturn(true);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNull();
+    }
+
+    @Test
+    public void getConfiguratorQrCodeGeneratorIntentOrNull_wifiShareable() {
+        mFlags.set(Flags.SHARE_WIFI_QS_BUTTON, true);
+        when(mConnectedEntry.canShare()).thenReturn(true);
+        assertThat(mInternetDialogController.getConfiguratorQrCodeGeneratorIntentOrNull(
+                mConnectedEntry)).isNotNull();
     }
 
     @Test
