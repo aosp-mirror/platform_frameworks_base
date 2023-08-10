@@ -85,8 +85,11 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.data.repository.BiometricType;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
+
+import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -101,7 +104,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
 /**
@@ -183,6 +185,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @NonNull private final UdfpsUtils mUdfpsUtils;
     private final @Background DelayableExecutor mBackgroundExecutor;
     private final DisplayInfo mCachedDisplayInfo = new DisplayInfo();
+    @NonNull private final VibratorHelper mVibratorHelper;
 
     @VisibleForTesting
     final TaskStackListener mTaskStackListener = new TaskStackListener() {
@@ -771,7 +774,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor,
-            @NonNull UdfpsUtils udfpsUtils) {
+            @NonNull UdfpsUtils udfpsUtils,
+            @NonNull VibratorHelper vibratorHelper) {
         mContext = context;
         mFeatureFlags = featureFlags;
         mExecution = execution;
@@ -794,6 +798,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         mFaceEnrolledForUser = new SparseBooleanArray();
         mUdfpsUtils = udfpsUtils;
         mApplicationCoroutineScope = applicationCoroutineScope;
+        mVibratorHelper = vibratorHelper;
 
         mLogContextInteractor = logContextInteractor;
         mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
@@ -1341,7 +1346,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
                 mInteractionJankMonitor, mAuthBiometricFingerprintViewModelProvider,
                 mPromptCredentialInteractor, mPromptSelectorInteractor, viewModel,
-                mCredentialViewModelProvider, bgExecutor);
+                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override
