@@ -190,9 +190,6 @@ object CustomizationProviderContract {
         /** Flag denoting transit clock are enabled in wallpaper picker. */
         const val FLAG_NAME_PAGE_TRANSITIONS = "wallpaper_picker_page_transitions"
 
-        /** Flag denoting adding apply button to wallpaper picker's grid preview page. */
-        const val FLAG_NAME_GRID_APPLY_BUTTON = "wallpaper_picker_grid_apply_button"
-
         /** Flag denoting whether preview loading animation is enabled. */
         const val FLAG_NAME_WALLPAPER_PICKER_PREVIEW_ANIMATION =
             "wallpaper_picker_preview_animation"
