@@ -328,12 +328,13 @@ public abstract class WMShellModule {
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             Optional<WindowDecorViewModel> windowDecorViewModel,
+            Optional<DesktopTasksController> desktopTasksController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new SplitScreenController(context, shellInit, shellCommandHandler, shellController,
                 shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, displayController,
                 displayImeController, displayInsetsController, dragAndDropController, transitions,
                 transactionPool, iconProvider, recentTasks, launchAdjacentController,
-                windowDecorViewModel, mainExecutor);
+                windowDecorViewModel, desktopTasksController, mainExecutor);
     }
 
     //
