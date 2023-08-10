@@ -33,7 +33,6 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.media.AudioManager;
@@ -143,7 +142,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private Runnable mCancelAction;
     private boolean mWillRunDismissFromKeyguard;
 
-    private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private int mLastOrientation;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
     private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
@@ -349,7 +348,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
                 @Override
                 public void onDensityOrFontScaleChanged() {
-                    KeyguardSecurityContainerController.this.onDensityOrFontScaleChanged();
+                    KeyguardSecurityContainerController.this
+                            .onDensityOrFontScaleOrOrientationChanged();
+                }
+
+                @Override
+                public void onOrientationChanged(int orientation) {
+                    KeyguardSecurityContainerController.this
+                            .onDensityOrFontScaleOrOrientationChanged();
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
@@ -1154,7 +1160,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     /** Handles density or font scale changes. */
-    private void onDensityOrFontScaleChanged() {
+    private void onDensityOrFontScaleOrOrientationChanged() {
         reinflateViewFlipper(controller -> mView.onDensityOrFontScaleChanged());
     }
 

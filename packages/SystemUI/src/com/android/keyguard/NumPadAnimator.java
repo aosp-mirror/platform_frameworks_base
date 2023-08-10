@@ -58,6 +58,7 @@ class NumPadAnimator {
     private float mStartRadius;
     private float mEndRadius;
     private int mHeight;
+    private int mWidth;
 
     private static final int EXPAND_ANIMATION_MS = 100;
     private static final int EXPAND_COLOR_ANIMATION_MS = 50;
@@ -95,11 +96,17 @@ class NumPadAnimator {
         mBackground.setCornerRadius(mEndRadius + (mStartRadius - mEndRadius) * progress);
         int height = (int) (mHeight * 0.7f + mHeight * 0.3 * progress);
         int difference = mHeight - height;
-        mBackground.setBounds(0, difference / 2, mHeight, mHeight - difference / 2);
+
+        int left = 0;
+        int top = difference / 2;
+        int right = mWidth;
+        int bottom = mHeight - difference / 2;
+        mBackground.setBounds(left, top, right, bottom);
     }
 
-    void onLayout(int height) {
+    void onLayout(int width, int height) {
         boolean shouldUpdateHeight = height != mHeight;
+        mWidth = width;
         mHeight = height;
         mStartRadius = height / 2f;
         mEndRadius = height / 4f;
@@ -121,7 +128,7 @@ class NumPadAnimator {
         ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
         @SuppressLint("ResourceType") TypedArray a = ctw.obtainStyledAttributes(customAttrs);
         mNormalBackgroundColor = getPrivateAttrColorIfUnset(ctw, a, 0, 0,
-                       NUM_PAD_BACKGROUND);
+                NUM_PAD_BACKGROUND);
         a.recycle();
 
         mPressedBackgroundColor = getColorAttrDefaultColor(context, NUM_PAD_BACKGROUND_PRESSED);
