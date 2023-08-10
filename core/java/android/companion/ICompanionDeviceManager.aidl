@@ -119,4 +119,8 @@ interface ICompanionDeviceManager {
     void setAssociationTag(int associationId, String tag);
 
     void clearAssociationTag(int associationId);
+
+    byte[] getBackupPayload(int userId);
+
+    void applyRestoredPayload(in byte[] payload, int userId);
 }

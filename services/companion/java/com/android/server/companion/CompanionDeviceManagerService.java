@@ -1026,6 +1026,17 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public byte[] getBackupPayload(int userId) {
+            // TODO(b/286124853): back up CDM data
+            return new byte[0];
+        }
+
+        @Override
+        public void applyRestoredPayload(byte[] payload, int userId) {
+            // TODO(b/286124853): restore CDM data
+        }
+
+        @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
