@@ -80,12 +80,12 @@ ErrorPos::print(FILE* to) const
     
     if (!this->file.isEmpty()) {
         if (this->line >= 0) {
-            fprintf(to, "%s:%d: %s%s\n", this->file.string(), this->line, type, this->error.string());
+            fprintf(to, "%s:%d: %s%s\n", this->file.c_str(), this->line, type, this->error.c_str());
         } else {
-            fprintf(to, "%s: %s%s\n", this->file.string(), type, this->error.string());
+            fprintf(to, "%s: %s%s\n", this->file.c_str(), type, this->error.c_str());
         }
     } else {
-        fprintf(to, "%s%s\n", type, this->error.string());
+        fprintf(to, "%s%s\n", type, this->error.c_str());
     }
 }
 

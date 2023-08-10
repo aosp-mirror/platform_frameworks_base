@@ -23,7 +23,7 @@ namespace AaptUtil {
 
 Vector<String8> split(const String8& str, const char sep) {
     Vector<String8> parts;
-    const char* p = str.string();
+    const char* p = str.c_str();
     const char* q;
 
     while (true) {
@@ -41,7 +41,7 @@ Vector<String8> split(const String8& str, const char sep) {
 
 Vector<String8> splitAndLowerCase(const String8& str, const char sep) {
     Vector<String8> parts;
-    const char* p = str.string();
+    const char* p = str.c_str();
     const char* q;
 
     while (true) {

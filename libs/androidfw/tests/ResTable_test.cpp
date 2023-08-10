@@ -64,8 +64,8 @@ TEST(ResTableTest, ResourceNameIsResolved) {
   String16 defPackage("com.android.basic");
   String16 testName("@string/test1");
   uint32_t resID =
-      table.identifierForName(testName.string(), testName.size(), 0, 0,
-                              defPackage.string(), defPackage.size());
+      table.identifierForName(testName.c_str(), testName.size(), 0, 0,
+                              defPackage.c_str(), defPackage.size());
   ASSERT_NE(uint32_t(0x00000000), resID);
   ASSERT_EQ(basic::R::string::test1, resID);
 }

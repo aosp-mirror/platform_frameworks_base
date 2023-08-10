@@ -111,7 +111,7 @@ Result<std::string> GetStringValue(const ResXMLParser& parser, const Res_value& 
   switch (value.dataType) {
     case Res_value::TYPE_STRING: {
       if (auto str = parser.getStrings().string8ObjectAt(value.data); str.ok()) {
-        return std::string(str->string());
+        return std::string(str->c_str());
       }
       break;
     }

@@ -213,7 +213,7 @@ inline bool ConfigDescription::operator>(const ConfigDescription& o) const {
 
 inline ::std::ostream& operator<<(::std::ostream& out,
                                   const ConfigDescription& o) {
-  return out << o.toString().string();
+  return out << o.toString().c_str();
 }
 
 }  // namespace android
