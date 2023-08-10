@@ -1099,6 +1099,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite aplikaciju <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Reproducirajte pjesmu <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> pomoću aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Reproducirajte pjesmu <xliff:g id="SONG_NAME">%1$s</xliff:g> pomoću aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je pokrenuta"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>

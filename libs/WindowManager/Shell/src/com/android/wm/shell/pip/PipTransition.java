@@ -110,7 +110,7 @@ public class PipTransition extends PipTransitionController {
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             final Rect sourceHintRect =
                     PipBoundsAlgorithm.getValidSourceHintRect(
-                            taskInfo.pictureInPictureParams, currentBounds);
+                            taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
                     0 /* startingAngle */, Surface.ROTATION_0);
