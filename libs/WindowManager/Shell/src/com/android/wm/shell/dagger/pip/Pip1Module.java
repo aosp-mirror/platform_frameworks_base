@@ -30,9 +30,13 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
-import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.pip.SizeSpecSource;
@@ -41,17 +45,12 @@ import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransition;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
-import com.android.wm.shell.pip.phone.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
@@ -119,35 +118,6 @@ public abstract class Pip1Module {
         }
     }
 
-    @WMSingleton
-    @Provides
-    static PipBoundsState providePipBoundsState(Context context,
-            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
-        return new PipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipSnapAlgorithm providePipSnapAlgorithm() {
-        return new PipSnapAlgorithm();
-    }
-
-    @WMSingleton
-    @Provides
-    static PhonePipKeepClearAlgorithm providePhonePipKeepClearAlgorithm(Context context) {
-        return new PhonePipKeepClearAlgorithm(context);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
-            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
-            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
-            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
-        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
-                pipKeepClearAlgorithm, pipDisplayLayoutState, sizeSpecSource);
-    }
-
     // Handler is used by Icon.loadDrawableAsync
     @WMSingleton
     @Provides
@@ -213,13 +183,6 @@ public abstract class Pip1Module {
 
     @WMSingleton
     @Provides
-    static PipAnimationController providePipAnimationController(PipSurfaceTransactionHelper
-            pipSurfaceTransactionHelper) {
-        return new PipAnimationController(pipSurfaceTransactionHelper);
-    }
-
-    @WMSingleton
-    @Provides
     static PipTransition providePipTransition(Context context,
             ShellInit shellInit, ShellTaskOrganizer shellTaskOrganizer, Transitions transitions,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
@@ -231,13 +194,6 @@ public abstract class Pip1Module {
                 pipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
                 splitScreenOptional);
-    }
-
-    @WMSingleton
-    @Provides
-    static SizeSpecSource provideSizeSpecSource(Context context,
-            PipDisplayLayoutState pipDisplayLayoutState) {
-        return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
     }
 
     @WMSingleton

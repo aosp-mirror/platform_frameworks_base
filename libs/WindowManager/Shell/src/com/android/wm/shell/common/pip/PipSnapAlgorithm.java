@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_LEFT;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
 import android.graphics.Rect;
 
@@ -39,14 +39,14 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * @return returns a fraction that describes where along the {@param movementBounds} the
-     *         {@param stackBounds} are. If the {@param stackBounds} are not currently on the
-     *         {@param movementBounds} exactly, then they will be snapped to the movement bounds.
+     * @return returns a fraction that describes where along the movementBounds the
+     *         stackBounds are. If the stackBounds are not currently on the
+     *         movementBounds exactly, then they will be snapped to the movement bounds.
      *         stashType dictates whether the PiP is stashed (off-screen) or not. If
      *         that's the case, we will have to do some math to calculate the snap fraction
      *         correctly.
      *
-     *         The fraction is defined in a clockwise fashion against the {@param movementBounds}:
+     *         The fraction is defined in a clockwise fashion against the movementBounds:
      *
      *            0   1
      *          4 +---+ 1
@@ -58,10 +58,10 @@ public class PipSnapAlgorithm {
             @PipBoundsState.StashType int stashType) {
         final Rect tmpBounds = new Rect();
         snapRectToClosestEdge(stackBounds, movementBounds, tmpBounds, stashType);
-        final float widthFraction = (float) (tmpBounds.left - movementBounds.left) /
-                movementBounds.width();
-        final float heightFraction = (float) (tmpBounds.top - movementBounds.top) /
-                movementBounds.height();
+        final float widthFraction = (float) (tmpBounds.left - movementBounds.left)
+                / movementBounds.width();
+        final float heightFraction = (float) (tmpBounds.top - movementBounds.top)
+                / movementBounds.height();
         if (tmpBounds.top == movementBounds.top) {
             return widthFraction;
         } else if (tmpBounds.left == movementBounds.right) {
@@ -74,10 +74,10 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * Moves the {@param stackBounds} along the {@param movementBounds} to the given snap fraction.
+     * Moves the stackBounds along the movementBounds to the given snap fraction.
      * See {@link #getSnapFraction(Rect, Rect)}.
      *
-     * The fraction is define in a clockwise fashion against the {@param movementBounds}:
+     * The fraction is define in a clockwise fashion against the movementBounds:
      *
      *    0   1
      *  4 +---+ 1
@@ -122,11 +122,11 @@ public class PipSnapAlgorithm {
     }
 
     /**
-     * Snaps the {@param stackBounds} to the closest edge of the {@param movementBounds} and writes
-     * the new bounds out to {@param boundsOut}.
+     * Snaps the stackBounds to the closest edge of the movementBounds and writes
+     * the new bounds out to boundsOut.
      */
     @VisibleForTesting
-    void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
+    public void snapRectToClosestEdge(Rect stackBounds, Rect movementBounds, Rect boundsOut,
             @PipBoundsState.StashType int stashType) {
         int leftEdge = stackBounds.left;
         if (stashType == STASH_TYPE_LEFT) {
