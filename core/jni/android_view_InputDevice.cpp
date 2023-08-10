@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <binder/Parcel.h>
 #include <input/Input.h>
 
 #include <android_runtime/AndroidRuntime.h>
@@ -48,9 +49,17 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
         return NULL;
     }
 
+    sp<KeyCharacterMap> map = deviceInfo.getKeyCharacterMap();
+    if (map != nullptr) {
+        Parcel parcel;
+        map->writeToParcel(&parcel);
+        parcel.setDataPosition(0);
+        map = map->readFromParcel(&parcel);
+    }
+
     ScopedLocalRef<jobject> kcmObj(env,
-            android_view_KeyCharacterMap_create(env, deviceInfo.getId(),
-            deviceInfo.getKeyCharacterMap()));
+                                   android_view_KeyCharacterMap_create(env, deviceInfo.getId(),
+                                                                       map));
     if (!kcmObj.get()) {
         return NULL;
     }
