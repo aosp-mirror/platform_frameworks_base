@@ -357,8 +357,9 @@ bool CanvasContext::makeCurrent() {
     return true;
 }
 
-static bool wasSkipped(FrameInfo* info) {
-    return info && ((*info)[FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame);
+static std::optional<SkippedFrameReason> wasSkipped(FrameInfo* info) {
+    if (info) return info->getSkippedFrameReason();
+    return std::nullopt;
 }
 
 bool CanvasContext::isSwapChainStuffed() {
@@ -407,13 +408,26 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     // If the previous frame was dropped we don't need to hold onto it, so
     // just keep using the previous frame's structure instead
-    if (wasSkipped(mCurrentFrameInfo)) {
+    if (const auto reason = wasSkipped(mCurrentFrameInfo)) {
         // Use the oldest skipped frame in case we skip more than a single frame
         if (!mSkippedFrameInfo) {
-            mSkippedFrameInfo.emplace();
-            mSkippedFrameInfo->vsyncId =
-                mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
-            mSkippedFrameInfo->startTime = mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime);
+            switch (*reason) {
+                case SkippedFrameReason::AlreadyDrawn:
+                case SkippedFrameReason::NoBuffer:
+                case SkippedFrameReason::NoOutputTarget:
+                    mSkippedFrameInfo.emplace();
+                    mSkippedFrameInfo->vsyncId =
+                            mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
+                    mSkippedFrameInfo->startTime =
+                            mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime);
+                    break;
+                case SkippedFrameReason::DrawingOff:
+                case SkippedFrameReason::ContextIsStopped:
+                case SkippedFrameReason::NothingToDraw:
+                    // Do not report those as skipped frames as there was no frame expected to be
+                    // drawn
+                    break;
+            }
         }
     } else {
         mCurrentFrameInfo = mJankTracker.startFrame();
@@ -427,7 +441,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     info.damageAccumulator = &mDamageAccumulator;
     info.layerUpdateQueue = &mLayerUpdateQueue;
     info.damageGenerationId = mDamageId++;
-    info.out.canDrawThisFrame = true;
+    info.out.skippedFrameReason = std::nullopt;
 
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
@@ -447,8 +461,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
     mIsDirty = true;
 
     if (CC_UNLIKELY(!hasOutputTarget())) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-        info.out.canDrawThisFrame = false;
+        info.out.skippedFrameReason = SkippedFrameReason::NoOutputTarget;
+        mCurrentFrameInfo->setSkippedFrameReason(*info.out.skippedFrameReason);
         return;
     }
 
@@ -463,23 +477,23 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
         if (vsyncDelta < 2_ms) {
             // Already drew for this vsync pulse, UI draw request missed
             // the deadline for RT animations
-            info.out.canDrawThisFrame = false;
+            info.out.skippedFrameReason = SkippedFrameReason::AlreadyDrawn;
         }
     } else {
-        info.out.canDrawThisFrame = true;
+        info.out.skippedFrameReason = std::nullopt;
     }
 
     // TODO: Do we need to abort out if the backdrop is added but not ready? Should that even
     // be an allowable combination?
     if (mRenderNodes.size() > 2 && !mRenderNodes[1]->isRenderable()) {
-        info.out.canDrawThisFrame = false;
+        info.out.skippedFrameReason = SkippedFrameReason::NothingToDraw;
     }
 
-    if (info.out.canDrawThisFrame) {
+    if (!info.out.skippedFrameReason) {
         int err = mNativeSurface->reserveNext();
         if (err != OK) {
-            mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-            info.out.canDrawThisFrame = false;
+            info.out.skippedFrameReason = SkippedFrameReason::NoBuffer;
+            mCurrentFrameInfo->setSkippedFrameReason(*info.out.skippedFrameReason);
             ALOGW("reserveNext failed, error = %d (%s)", err, strerror(-err));
             if (err != TIMED_OUT) {
                 // A timed out surface can still recover, but assume others are permanently dead.
@@ -488,11 +502,11 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
             }
         }
     } else {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+        mCurrentFrameInfo->setSkippedFrameReason(*info.out.skippedFrameReason);
     }
 
     bool postedFrameCallback = false;
-    if (info.out.hasAnimations || !info.out.canDrawThisFrame) {
+    if (info.out.hasAnimations || info.out.skippedFrameReason) {
         if (CC_UNLIKELY(!Properties::enableRTAnimations)) {
             info.out.requiresUiRedraw = true;
         }
@@ -558,9 +572,20 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     mSyncDelayDuration = 0;
     mIdleDuration = 0;
 
-    if (!Properties::isDrawingEnabled() ||
-        (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw())) {
-        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+    const auto skippedFrameReason = [&]() -> std::optional<SkippedFrameReason> {
+        if (!Properties::isDrawingEnabled()) {
+            return SkippedFrameReason::DrawingOff;
+        }
+
+        if (dirty.isEmpty() && Properties::skipEmptyFrames && !surfaceRequiresRedraw()) {
+            return SkippedFrameReason::NothingToDraw;
+        }
+
+        return std::nullopt;
+    }();
+    if (skippedFrameReason) {
+        mCurrentFrameInfo->setSkippedFrameReason(*skippedFrameReason);
+
         if (auto grContext = getGrContext()) {
             // Submit to ensure that any texture uploads complete and Skia can
             // free its staging buffers.
@@ -904,7 +929,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
-    if (info.out.canDrawThisFrame) {
+    if (!info.out.skippedFrameReason) {
         draw(info.out.solelyTextureViewUpdates);
     } else {
         // wait on fences so tasks don't overlap next frame
