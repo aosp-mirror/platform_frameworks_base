@@ -383,7 +383,11 @@ public class ConversationLayout extends FrameLayout
         updateContentEndPaddings();
     }
 
-    @RemotableViewMethod
+    /**
+     * Set conversation data
+     * @param extras Bundle contains conversation data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
         List<Notification.MessagingStyle.Message> newMessages
@@ -407,6 +411,18 @@ public class ConversationLayout extends FrameLayout
 
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
         setUnreadCount(unreadCount);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param extras Bundle contains conversation data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        return () -> setData(extras);
     }
 
     @Override
