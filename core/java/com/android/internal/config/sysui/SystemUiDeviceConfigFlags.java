@@ -534,7 +534,14 @@ public final class SystemUiDeviceConfigFlags {
     /**
      * (boolean) Whether to enable the adapter conversion in RemoteViews
      */
-    public static final String REMOTEVIEWS_ADAPTER_CONVERSION = "remoteviews_adapter_conversion";
+    public static final String REMOTEVIEWS_ADAPTER_CONVERSION =
+            "CursorControlFeature__remoteviews_adapter_conversion";
+
+    /**
+     * The key name used in app core settings for {@link #REMOTEVIEWS_ADAPTER_CONVERSION}
+     */
+    public static final String KEY_REMOTEVIEWS_ADAPTER_CONVERSION =
+            "systemui__remoteviews_adapter_conversion";
 
     /**
      * Default value for whether the adapter conversion is enabled or not. This is set for
