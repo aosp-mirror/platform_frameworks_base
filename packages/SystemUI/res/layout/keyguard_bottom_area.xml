@@ -22,6 +22,42 @@
     android:layout_width="match_parent"
     android:outlineProvider="none" >
 
+    <LinearLayout
+        android:id="@id/keyguard_indication_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
+        android:layout_gravity="bottom|center_horizontal"
+        android:orientation="vertical">
+
+        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+            android:id="@id/keyguard_indication_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingStart="@dimen/keyguard_indication_text_padding"
+            android:paddingEnd="@dimen/keyguard_indication_text_padding"
+            android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+            android:accessibilityLiveRegion="polite"/>
+
+        <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
+            android:id="@id/keyguard_indication_text_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:minHeight="@dimen/keyguard_indication_text_min_height"
+            android:layout_gravity="center_horizontal"
+            android:paddingStart="@dimen/keyguard_indication_text_padding"
+            android:paddingEnd="@dimen/keyguard_indication_text_padding"
+            android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:alpha=".8"
+            android:accessibilityLiveRegion="polite"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
     <com.android.systemui.animation.view.LaunchableImageView
         android:id="@+id/start_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
