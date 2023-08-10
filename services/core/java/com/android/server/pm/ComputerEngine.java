@@ -24,6 +24,7 @@ import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfi
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
@@ -1514,6 +1515,11 @@ public class ComputerEngine implements Computer {
             ai.uid = UserHandle.getUid(userId, ps.getAppId());
             ai.primaryCpuAbi = ps.getPrimaryCpuAbiLegacy();
             ai.secondaryCpuAbi = ps.getSecondaryCpuAbiLegacy();
+            ai.volumeUuid = ps.getVolumeUuid();
+            ai.storageUuid = StorageManager.convert(ai.volumeUuid);
+            if (ps.isDefaultToDeviceProtectedStorage()) {
+                ai.privateFlags |= PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
+            }
             ai.setVersionCode(ps.getVersionCode());
             ai.flags = ps.getFlags();
             ai.privateFlags = ps.getPrivateFlags();
