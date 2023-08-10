@@ -156,7 +156,7 @@ class WallpaperWindowToken extends WindowToken {
                 linkFixedRotationTransform(wallpaperTarget.mToken);
             }
         }
-        if (mTransitionController.isShellTransitionsEnabled()) {
+        if (mTransitionController.inTransition(this)) {
             // If wallpaper is in transition, setVisible() will be called from commitVisibility()
             // when finishing transition. Otherwise commitVisibility() is already called from above
             // setVisibility().
