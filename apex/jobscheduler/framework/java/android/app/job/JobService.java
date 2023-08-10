@@ -40,9 +40,25 @@ import java.lang.annotation.RetentionPolicy;
  * <p>This service executes each incoming job on a {@link android.os.Handler} running on your
  * application's main thread. This means that you <b>must</b> offload your execution logic to
  * another thread/handler/{@link android.os.AsyncTask} of your choosing. Not doing so will result
- * in blocking any future callbacks from the JobManager - specifically
+ * in blocking any future callbacks from the JobScheduler - specifically
  * {@link #onStopJob(android.app.job.JobParameters)}, which is meant to inform you that the
  * scheduling requirements are no longer being met.</p>
+ *
+ * <p class="note">
+ * Since the introduction of JobScheduler, if an app did not return from
+ * {@link #onStartJob(JobParameters)} within several seconds, JobScheduler would consider the app
+ * unresponsive and clean up job execution. In such cases, the app was no longer considered
+ * to be running a job and therefore did not have any of the job lifecycle guarantees outlined
+ * in {@link JobScheduler}. However, prior to Android version
+ * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the failure and cleanup were silent
+ * and apps had no indication that they no longer had job lifecycle guarantees.
+ * Starting with Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+ * JobScheduler will explicitly trigger an ANR in such cases so that apps and developers
+ * can be aware of the issue.
+ * Similar behavior applies to the return time from {@link #onStopJob(JobParameters)} as well.
+ * <br /> <br />
+ * If you see ANRs, then the app may be doing too much work on the UI thread. Ensure that
+ * potentially long operations are moved to a worker thread.
  *
  * <p>As a subclass of {@link Service}, there will only be one active instance of any JobService
  * subclasses, regardless of job ID. This means that if you schedule multiple jobs with different
@@ -240,7 +256,7 @@ public abstract class JobService extends Service {
      * @param params The parameters identifying this job, similar to what was supplied to the job in
      *               the {@link #onStartJob(JobParameters)} callback, but with the stop reason
      *               included.
-     * @return {@code true} to indicate to the JobManager whether you'd like to reschedule
+     * @return {@code true} to indicate to the JobScheduler whether you'd like to reschedule
      * this job based on the retry criteria provided at job creation-time; or {@code false}
      * to end the job entirely (or, for a periodic job, to reschedule it according to its
      * requested periodic criteria). Regardless of the value returned, your job must stop executing.
