@@ -27,6 +27,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -42,6 +44,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,6 +60,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val keyguardRepository: KeyguardRepository,
+    sceneInteractor: SceneInteractor,
     private val clock: SystemClock,
 ) {
     /**
@@ -93,12 +97,50 @@ constructor(
                 repository.isUnlocked,
                 authenticationMethod,
             ) { isUnlocked, authenticationMethod ->
-                authenticationMethod is DomainLayerAuthenticationMethodModel.None || isUnlocked
+                !authenticationMethod.isSecure || isUnlocked
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
                 initialValue = true,
+            )
+
+    /**
+     * Whether the lockscreen has been dismissed (by any method). This can be false even when the
+     * device is unlocked, e.g. when swipe to unlock is enabled.
+     *
+     * Note:
+     * - `false` doesn't mean the lockscreen is visible (it may be occluded or covered by other UI).
+     * - `true` doesn't mean the lockscreen is invisible (since this state changes before the
+     *   transition occurs).
+     */
+    private val isLockscreenDismissed =
+        sceneInteractor.desiredScene
+            .map { it.key }
+            .filter { currentScene ->
+                currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
+            }
+            .map { it == SceneKey.Gone }
+            .distinctUntilChanged()
+
+    /**
+     * Whether it's currently possible to swipe up to dismiss the lockscreen without requiring
+     * authentication. This returns false whenever the lockscreen has been dismissed.
+     *
+     * Note: `true` doesn't mean the lockscreen is visible. It may be occluded or covered by other
+     * UI.
+     */
+    val canSwipeToDismiss =
+        combine(authenticationMethod, isLockscreenDismissed) {
+                authenticationMethod,
+                isLockscreenDismissed ->
+                authenticationMethod is DomainLayerAuthenticationMethodModel.Swipe &&
+                    !isLockscreenDismissed
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
             )
 
     /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
