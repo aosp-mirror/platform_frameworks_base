@@ -216,6 +216,10 @@ public final class BiometricContextProvider implements BiometricContext {
     public void subscribe(@NonNull OperationContextExt context,
             @NonNull Consumer<OperationContext> consumer) {
         mSubscribers.put(context, consumer);
+        // TODO(b/294161627) Combine the getContext/subscribe APIs to avoid race
+        if (context.getDisplayState() != getDisplayState()) {
+            consumer.accept(context.update(this, context.isCrypto()).toAidlContext());
+        }
     }
 
     @Override
