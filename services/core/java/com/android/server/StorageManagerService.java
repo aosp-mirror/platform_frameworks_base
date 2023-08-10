@@ -1735,6 +1735,23 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void onVolumeStateChangedAsync(VolumeInfo vol, int oldState, int newState) {
+        if (newState == VolumeInfo.STATE_MOUNTED) {
+            // Private volumes can be unmounted and re-mounted even after a user has
+            // been unlocked; on devices that support encryption keys tied to the filesystem,
+            // this requires setting up the keys again.
+            try {
+                prepareUserStorageIfNeeded(vol);
+            } catch (Exception e) {
+                // Unusable partition, unmount.
+                try {
+                    mVold.unmount(vol.id);
+                } catch (Exception ee) {
+                    Slog.wtf(TAG, ee);
+                }
+                return;
+            }
+        }
+
         synchronized (mLock) {
             // Remember that we saw this volume so we're ready to accept user
             // metadata, or so we can annoy them when a private volume is ejected
@@ -1758,13 +1775,6 @@ class StorageManagerService extends IStorageManager.Stub
                 rec.lastSeenMillis = System.currentTimeMillis();
                 writeSettingsLocked();
             }
-        }
-
-        if (newState == VolumeInfo.STATE_MOUNTED) {
-            // Private volumes can be unmounted and re-mounted even after a user has
-            // been unlocked; on devices that support encryption keys tied to the filesystem,
-            // this requires setting up the keys again.
-            prepareUserStorageIfNeeded(vol);
         }
 
         // This is a blocking call to Storage Service which needs to process volume state changed
@@ -3355,7 +3365,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void prepareUserStorageIfNeeded(VolumeInfo vol) {
+    private void prepareUserStorageIfNeeded(VolumeInfo vol) throws Exception {
         if (vol.type != VolumeInfo.TYPE_PRIVATE) {
             return;
         }
@@ -3382,11 +3392,15 @@ class StorageManagerService extends IStorageManager.Stub
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
-        prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        try {
+            prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
-            int flags) {
+            int flags) throws Exception {
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
             // After preparing user storage, we should check if we should mount data mirror again,
@@ -3413,7 +3427,7 @@ class StorageManagerService extends IStorageManager.Stub
                         + "; device may be insecure!");
                 return;
             }
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
