@@ -1894,6 +1894,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return traceTag;
         }
 
+        if (isSummaryWithChildren()) {
+            return traceTag + "(summary)";
+        }
         Class<? extends Notification.Style> style =
                 getEntry().getSbn().getNotification().getNotificationStyle();
         if (style == null) {
