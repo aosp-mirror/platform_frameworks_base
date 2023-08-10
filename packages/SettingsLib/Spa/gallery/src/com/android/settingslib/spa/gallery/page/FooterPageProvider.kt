@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+import com.android.settingslib.spa.widget.ui.AnnotatedText
 import com.android.settingslib.spa.widget.ui.Footer
 
 private const val TITLE = "Sample Footer"
@@ -78,6 +80,9 @@ object FooterPageProvider : SettingsPageProvider {
                 entry.UiLayout()
             }
             Footer(footerText = "Footer text always at the end of page.")
+            Footer {
+                AnnotatedText(R.string.footer_with_two_links)
+            }
         }
     }
 }
