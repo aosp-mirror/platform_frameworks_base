@@ -237,22 +237,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
             }
             if (containsFile(code, userId)) {
                 synchronized (mSnapshotPersistQueue.getLock()) {
-                    mSnapshotPersistQueue.sendToQueueLocked(
-                            new SnapshotPersistQueue.WriteQueueItem(mPersistInfoProvider) {
-                                @Override
-                                void write() {
-                                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
-                                            "load_activity_snapshot");
-                                    final TaskSnapshot snapshot = mSnapshotLoader.loadTask(code,
-                                            userId, false /* loadLowResolutionBitmap */);
-                                    synchronized (mService.getWindowManagerLock()) {
-                                        if (snapshot != null && !ar.finishing) {
-                                            mCache.putSnapshot(ar, snapshot);
-                                        }
-                                    }
-                                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                                }
-                            });
+                    mSnapshotPersistQueue.insertQueueAtFirstLocked(
+                            new LoadActivitySnapshotItem(ar, code, userId, mPersistInfoProvider));
                 }
             }
         }
@@ -271,6 +257,42 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
         }
         // don't keep any reference
         resetTmpFields();
+    }
+
+    class LoadActivitySnapshotItem extends SnapshotPersistQueue.WriteQueueItem {
+        private final int mCode;
+        private final int mUserId;
+        private final ActivityRecord mActivityRecord;
+
+        LoadActivitySnapshotItem(@NonNull ActivityRecord ar, int code, int userId,
+                @NonNull PersistInfoProvider persistInfoProvider) {
+            super(persistInfoProvider);
+            mActivityRecord = ar;
+            mCode = code;
+            mUserId = userId;
+        }
+
+        @Override
+        void write() {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                    "load_activity_snapshot");
+            final TaskSnapshot snapshot = mSnapshotLoader.loadTask(mCode,
+                    mUserId, false /* loadLowResolutionBitmap */);
+            synchronized (mService.getWindowManagerLock()) {
+                if (snapshot != null && !mActivityRecord.finishing) {
+                    mCache.putSnapshot(mActivityRecord, snapshot);
+                }
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            final LoadActivitySnapshotItem other = (LoadActivitySnapshotItem) o;
+            return mCode == other.mCode && mUserId == other.mUserId
+                    && mPersistInfoProvider == other.mPersistInfoProvider;
+        }
     }
 
     void recordSnapshot(ActivityRecord activity) {
@@ -571,7 +593,8 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
             for (int i = savedFileCount - 1; i > removeTillIndex; --i) {
                 final UserSavedFile usf = mSavedFilesInOrder.remove(i);
                 if (usf != null) {
-                    mUserSavedFiles.remove(usf.mFileId);
+                    final SparseArray<UserSavedFile> records = getUserFiles(usf.mUserId);
+                    records.remove(usf.mFileId);
                     usfs.add(usf);
                 }
             }

@@ -1408,12 +1408,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     false /* forceRelayout */);
         }
         cleanUpInternal();
-        mController.updateAnimatingState();
 
         // Handle back animation if it's already started.
         mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
         mController.mFinishingTransition = null;
         mController.mSnapshotController.onTransitionFinish(mType, mTargets);
+        // Resume snapshot persist thread after snapshot controller analysis this transition.
+        mController.updateAnimatingState();
     }
 
     @Nullable
