@@ -1064,13 +1064,18 @@ public class HdmiControlService extends SystemService {
      */
     @VisibleForTesting
     public void setSoundbarMode(final int settingValue) {
+        boolean isArcSupported = isArcSupported();
         HdmiCecLocalDevicePlayback playback = playback();
         HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+        getAtomWriter().dsmStatusChanged(isArcSupported,
+                settingValue == SOUNDBAR_MODE_ENABLED,
+                HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED);
+
         if (playback == null) {
             Slog.w(TAG, "Device type not compatible to change soundbar mode.");
             return;
         }
-        if (!SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)) {
+        if (!isArcSupported) {
             Slog.w(TAG, "Device type doesn't support ARC.");
             return;
         }
@@ -1269,11 +1274,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private List<Integer> getCecLocalDeviceTypes() {
         ArrayList<Integer> allLocalDeviceTypes = new ArrayList<>(mCecLocalDevices);
-        if (mHdmiCecConfig.getIntValue(HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
-                == SOUNDBAR_MODE_ENABLED
-                && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
-                && SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
-                && mSoundbarModeFeatureFlagEnabled) {
+        if (isDsmEnabled() && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+                && isArcSupported() && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }
         return allLocalDeviceTypes;
@@ -3589,6 +3591,16 @@ public class HdmiControlService extends SystemService {
         }
     }
 
+    private boolean isDsmEnabled() {
+        return mHdmiCecConfig.getIntValue(HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
+                == SOUNDBAR_MODE_ENABLED;
+    }
+
+    @VisibleForTesting
+    protected boolean isArcSupported() {
+        return SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true);
+    }
+
     @ServiceThreadOnly
     int getPowerStatus() {
         assertRunOnServiceThread();
@@ -3705,6 +3717,9 @@ public class HdmiControlService extends SystemService {
             int earcStatus = getEarcStatus();
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
                     earcStatus, earcStatus, HdmiStatsEnums.LOG_REASON_WAKE);
+        } else if (isPlaybackDevice()) {
+            getAtomWriter().dsmStatusChanged(isArcSupported(), isDsmEnabled(),
+                    HdmiStatsEnums.LOG_REASON_DSM_WAKE);
         }
         // TODO: Initialize MHL local devices.
     }

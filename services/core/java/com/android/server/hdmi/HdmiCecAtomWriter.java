@@ -222,6 +222,21 @@ public class HdmiCecAtomWriter {
         );
     }
 
+    /**
+     * Writes a HdmiSoundbarModeStatusReported atom representing a Dynamic soundbar mode status
+     * change.
+     * @param isSupported         Whether the hardware supports ARC.
+     * @param isEnabled           Whether DSM is enabled.
+     * @param enumLogReason       The event that triggered the log.
+     */
+    public void dsmStatusChanged(boolean isSupported, boolean isEnabled, int enumLogReason) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.HDMI_SOUNDBAR_MODE_STATUS_REPORTED,
+                isSupported,
+                isEnabled,
+                enumLogReason);
+    }
+
     private int earcStateToEnum(int earcState) {
         switch (earcState) {
             case HDMI_EARC_STATUS_IDLE:
