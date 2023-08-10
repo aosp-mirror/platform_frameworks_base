@@ -642,6 +642,7 @@ public final class NfcAdapter {
                 try {
                     sTagService = sService.getNfcTagInterface();
                 } catch (RemoteException e) {
+                    sTagService = null;
                     Log.e(TAG, "could not retrieve NFC Tag service");
                     throw new UnsupportedOperationException();
                 }
@@ -650,12 +651,14 @@ public final class NfcAdapter {
                 try {
                     sNfcFCardEmulationService = sService.getNfcFCardEmulationInterface();
                 } catch (RemoteException e) {
+                    sNfcFCardEmulationService = null;
                     Log.e(TAG, "could not retrieve NFC-F card emulation service");
                     throw new UnsupportedOperationException();
                 }
                 try {
                     sCardEmulationService = sService.getNfcCardEmulationInterface();
                 } catch (RemoteException e) {
+                    sCardEmulationService = null;
                     Log.e(TAG, "could not retrieve card emulation service");
                     throw new UnsupportedOperationException();
                 }
@@ -839,29 +842,53 @@ public final class NfcAdapter {
         // assigning to sService is not thread-safe, but this is best-effort code
         // and on a well-behaved system should never happen
         sService = service;
-        try {
-            sTagService = service.getNfcTagInterface();
-        } catch (RemoteException ee) {
-            Log.e(TAG, "could not retrieve NFC tag service during service recovery");
-            // nothing more can be done now, sService is still stale, we'll hit
-            // this recovery path again later
-            return;
+        if (sHasNfcFeature) {
+            try {
+                sTagService = service.getNfcTagInterface();
+            } catch (RemoteException ee) {
+                sTagService = null;
+                Log.e(TAG, "could not retrieve NFC tag service during service recovery");
+                // nothing more can be done now, sService is still stale, we'll hit
+                // this recovery path again later
+                return;
+            }
         }
 
-        try {
-            sCardEmulationService = service.getNfcCardEmulationInterface();
-        } catch (RemoteException ee) {
-            Log.e(TAG, "could not retrieve NFC card emulation service during service recovery");
-        }
+        if (sHasCeFeature) {
+            try {
+                sCardEmulationService = service.getNfcCardEmulationInterface();
+            } catch (RemoteException ee) {
+                sCardEmulationService = null;
+                Log.e(TAG,
+                        "could not retrieve NFC card emulation service during service recovery");
+            }
 
-        try {
-            sNfcFCardEmulationService = service.getNfcFCardEmulationInterface();
-        } catch (RemoteException ee) {
-            Log.e(TAG, "could not retrieve NFC-F card emulation service during service recovery");
+            try {
+                sNfcFCardEmulationService = service.getNfcFCardEmulationInterface();
+            } catch (RemoteException ee) {
+                sNfcFCardEmulationService = null;
+                Log.e(TAG,
+                        "could not retrieve NFC-F card emulation service during service recovery");
+            }
         }
 
         return;
     }
+
+    private boolean isCardEmulationEnabled() {
+        if (sHasCeFeature) {
+            return (sCardEmulationService != null || sNfcFCardEmulationService != null);
+        }
+        return false;
+    }
+
+    private boolean isTagReadingEnabled() {
+        if (sHasNfcFeature) {
+            return sTagService != null;
+        }
+        return false;
+    }
+
 
     /**
      * Return true if this NFC Adapter has any features enabled.
@@ -876,8 +903,9 @@ public final class NfcAdapter {
      * @return true if this NFC Adapter has any features enabled
      */
     public boolean isEnabled() {
+        boolean serviceState = false;
         try {
-            return sService.getState() == STATE_ON;
+            serviceState = sService.getState() == STATE_ON;
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             // Try one more time
@@ -886,12 +914,12 @@ public final class NfcAdapter {
                 return false;
             }
             try {
-                return sService.getState() == STATE_ON;
+                serviceState = sService.getState() == STATE_ON;
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to recover NFC Service.");
             }
-            return false;
         }
+        return serviceState && (isTagReadingEnabled() || isCardEmulationEnabled());
     }
 
     /**
