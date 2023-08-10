@@ -694,13 +694,13 @@ public class HdmiControlService extends SystemService {
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
 
         mSoundbarModeFeatureFlagEnabled = mDeviceConfig.getBoolean(
-                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, false);
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, true);
         mEarcTxFeatureFlagEnabled = mDeviceConfig.getBoolean(
-                Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, false);
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, true);
         mTransitionFromArcToEarcTxEnabled = mDeviceConfig.getBoolean(
-                Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX, false);
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX, true);
         mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = mDeviceConfig.getBoolean(
-                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI, false);
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI, true);
 
         synchronized (mLock) {
             mEarcEnabled = (mHdmiCecConfig.getIntValue(
@@ -857,7 +857,7 @@ public class HdmiControlService extends SystemService {
                         public void onPropertiesChanged(DeviceConfig.Properties properties) {
                             mEarcTxFeatureFlagEnabled = properties.getBoolean(
                                     Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX,
-                                    false);
+                                    true);
                             boolean earcEnabledSetting = mHdmiCecConfig.getIntValue(
                                     HdmiControlManager.SETTING_NAME_EARC_ENABLED)
                                     == EARC_FEATURE_ENABLED;
@@ -891,7 +891,7 @@ public class HdmiControlService extends SystemService {
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         mSoundbarModeFeatureFlagEnabled = properties.getBoolean(
                                 Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
-                                false);
+                                true);
                         boolean soundbarModeSetting = mHdmiCecConfig.getIntValue(
                                 HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE)
                                 == SOUNDBAR_MODE_ENABLED;
@@ -917,7 +917,7 @@ public class HdmiControlService extends SystemService {
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         mTransitionFromArcToEarcTxEnabled = properties.getBoolean(
                                 Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX,
-                                false);
+                                true);
                     }
                 });
 
@@ -927,7 +927,7 @@ public class HdmiControlService extends SystemService {
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = properties.getBoolean(
                                 Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI,
-                                false);
+                                true);
                         checkAndUpdateAbsoluteVolumeBehavior();
                     }
                 });
