@@ -130,6 +130,7 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
 static install_status_t
 copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
+    static const size_t kPageSize = getpagesize();
     void** args = reinterpret_cast<void**>(arg);
     jstring* javaNativeLibPath = (jstring*) args[0];
     jboolean extractNativeLibs = *(jboolean*) args[1];
@@ -156,9 +157,9 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
             return INSTALL_FAILED_INVALID_APK;
         }
 
-        if (offset % PAGE_SIZE != 0) {
-            ALOGE("Library '%s' is not page-aligned - will not be able to open it directly from"
-                " apk.\n", fileName);
+        if (offset % kPageSize != 0) {
+            ALOGE("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
+                  "from apk.\n", fileName, kPageSize);
             return INSTALL_FAILED_INVALID_APK;
         }
 
