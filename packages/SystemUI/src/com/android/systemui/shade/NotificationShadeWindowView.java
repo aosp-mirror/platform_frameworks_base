@@ -107,6 +107,8 @@ public class NotificationShadeWindowView extends WindowRootView {
 
         result = result != null ? result : super.dispatchTouchEvent(ev);
 
+        TouchLogger.logDispatchTouch(TAG, ev, result);
+
         mInteractionEventHandler.dispatchTouchEventComplete();
 
         return result;
