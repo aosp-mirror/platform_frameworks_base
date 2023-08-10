@@ -335,6 +335,9 @@ public class HdmiCecAtomLoggingTest {
 
     @Test
     public void testDsmStatusChanged_onWakeUp_ArcSupported_writesAtom_logReasonWake() {
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
         doReturn(true).when(mHdmiControlServiceSpy).isArcSupported();
         mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
         mTestLooper.dispatchAll();
@@ -349,6 +352,9 @@ public class HdmiCecAtomLoggingTest {
 
     @Test
     public void testDsmStatusChanged_onWakeUp_ArcNotSupported_writesAtom_logReasonWake() {
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
         doReturn(false).when(mHdmiControlServiceSpy).isArcSupported();
         mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
         mTestLooper.dispatchAll();
