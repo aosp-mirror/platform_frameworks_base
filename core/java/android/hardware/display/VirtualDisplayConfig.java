@@ -39,7 +39,8 @@ import java.util.Set;
  * Holds configuration used to create {@link VirtualDisplay} instances.
  *
  * @see DisplayManager#createVirtualDisplay(VirtualDisplayConfig, Handler, VirtualDisplay.Callback)
- * @see MediaProjection#createVirtualDisplay
+ * @see MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
+ * VirtualDisplay.Callback, Handler)
  */
 public final class VirtualDisplayConfig implements Parcelable {
 
