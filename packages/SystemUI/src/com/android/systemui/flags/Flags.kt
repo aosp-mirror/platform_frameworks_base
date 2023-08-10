@@ -545,6 +545,12 @@ object Flags {
     val ENABLE_PIP_APP_ICON_OVERLAY =
         sysPropBooleanFlag("persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
+
+    // TODO(b/293252410) : Tracking Bug
+    @JvmField
+    val LOCKSCREEN_ENABLE_LANDSCAPE =
+            unreleasedFlag(1116, name = "lockscreen.enable_landscape")
+
     // TODO(b/273443374): Tracking Bug
     @Keep
     @JvmField
