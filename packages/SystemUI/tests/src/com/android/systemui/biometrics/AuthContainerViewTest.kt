@@ -139,6 +139,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         featureFlags.set(Flags.BIOMETRIC_BP_STRONG, useNewBiometricPrompt)
+        featureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
     @After
@@ -151,7 +152,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Test
     fun testNotifiesAnimatedIn() {
         initializeFingerprintContainer()
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -196,7 +200,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         // attaching the view resets the state and allows this to happen again
-        verify(callback).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -211,7 +218,10 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
         // the first time is triggered by initializeFingerprintContainer()
         // the second time was triggered by dismissWithoutCallback()
-        verify(callback, times(2)).onDialogAnimatedIn(authContainer?.requestId ?: 0L, true /* startFingerprintNow */)
+        verify(callback, times(2)).onDialogAnimatedIn(
+            authContainer?.requestId ?: 0L,
+            true /* startFingerprintNow */
+        )
     }
 
     @Test
@@ -517,10 +527,11 @@ open class AuthContainerViewTest : SysuiTestCase() {
         { authBiometricFingerprintViewModel },
         { promptSelectorInteractor },
         { bpCredentialInteractor },
-        PromptViewModel(promptSelectorInteractor, vibrator),
+        PromptViewModel(promptSelectorInteractor, vibrator, featureFlags),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
-        fakeExecutor
+        fakeExecutor,
+        vibrator
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()

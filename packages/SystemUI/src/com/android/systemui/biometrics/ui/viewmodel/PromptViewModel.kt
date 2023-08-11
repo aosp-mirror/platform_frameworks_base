@@ -17,11 +17,14 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -43,6 +46,7 @@ class PromptViewModel
 constructor(
     private val interactor: PromptSelectorInteractor,
     private val vibrator: VibratorHelper,
+    private val featureFlags: FeatureFlags,
 ) {
     /** The set of modalities available for this prompt */
     val modalities: Flow<BiometricModalities> =
@@ -89,6 +93,11 @@ constructor(
 
     private val _forceLargeSize = MutableStateFlow(false)
     private val _forceMediumSize = MutableStateFlow(false)
+
+    private val _hapticsToPlay = MutableStateFlow(HapticFeedbackConstants.NO_HAPTICS)
+
+    /** Event fired to the view indicating a [HapticFeedbackConstants] to be played */
+    val hapticsToPlay = _hapticsToPlay.asStateFlow()
 
     /** The size of the prompt. */
     val size: Flow<PromptSize> =
@@ -438,11 +447,26 @@ constructor(
         _forceLargeSize.value = true
     }
 
-    private fun VibratorHelper.success(modality: BiometricModality) =
-        vibrateAuthSuccess("$TAG, modality = $modality BP::success")
+    private fun VibratorHelper.success(modality: BiometricModality) {
+        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            _hapticsToPlay.value = HapticFeedbackConstants.CONFIRM
+        } else {
+            vibrateAuthSuccess("$TAG, modality = $modality BP::success")
+        }
+    }
 
-    private fun VibratorHelper.error(modality: BiometricModality = BiometricModality.None) =
-        vibrateAuthError("$TAG, modality = $modality BP::error")
+    private fun VibratorHelper.error(modality: BiometricModality = BiometricModality.None) {
+        if (featureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            _hapticsToPlay.value = HapticFeedbackConstants.REJECT
+        } else {
+            vibrateAuthError("$TAG, modality = $modality BP::error")
+        }
+    }
+
+    /** Clears the [hapticsToPlay] variable by setting it to the NO_HAPTICS default. */
+    fun clearHaptics() {
+        _hapticsToPlay.value = HapticFeedbackConstants.NO_HAPTICS
+    }
 
     companion object {
         private const val TAG = "PromptViewModel"
