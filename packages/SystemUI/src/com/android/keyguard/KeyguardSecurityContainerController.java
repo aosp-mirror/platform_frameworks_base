@@ -840,8 +840,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
                     boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser());
-
-                    if (securityMode == SecurityMode.None) {
+                    if (securityMode == SecurityMode.None || isLockscreenDisabled) {
                         finish = isLockscreenDisabled;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
