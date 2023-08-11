@@ -388,6 +388,7 @@ android_library {
         "mockito-target-extended-minus-junit4",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
+        "kotlin-test",
     ],
     libs: [
         "android.test.runner",

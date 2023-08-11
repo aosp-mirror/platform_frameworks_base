@@ -365,7 +365,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         val selectedItems =
             listOf(
                 SelectedItem.StructureItem(
-                    StructureInfo(ComponentName.unflattenFromString("pkg/.cls1"), "a", ArrayList())
+                    StructureInfo(checkNotNull(ComponentName.unflattenFromString("pkg/.cls1")),
+                        "a", ArrayList())
                 ),
             )
         preferredPanelRepository.setSelectedComponent(

@@ -21,9 +21,9 @@ class KeyguardStatusViewTest : SysuiTestCase() {
 
     private lateinit var keyguardStatusView: KeyguardStatusView
     private val mediaView: View
-        get() = keyguardStatusView.findViewById(R.id.status_view_media_container)
+        get() = keyguardStatusView.requireViewById(R.id.status_view_media_container)
     private val statusViewContainer: ViewGroup
-        get() = keyguardStatusView.findViewById(R.id.status_view_container)
+        get() = keyguardStatusView.requireViewById(R.id.status_view_container)
     private val childrenExcludingMedia
         get() = statusViewContainer.children.filter { it != mediaView }
 

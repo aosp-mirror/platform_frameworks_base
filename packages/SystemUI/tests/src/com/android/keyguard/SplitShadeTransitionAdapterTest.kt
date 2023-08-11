@@ -19,9 +19,11 @@ import android.animation.Animator
 import android.testing.AndroidTestingRunner
 import android.transition.TransitionValues
 import android.view.View
+import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardStatusViewController.SplitShadeTransitionAdapter
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -84,5 +86,5 @@ private fun SplitShadeTransitionAdapter.createAnimator(
     startValues: TransitionValues?,
     endValues: TransitionValues?
 ): Animator? {
-    return createAnimator(/* sceneRoot= */ null, startValues, endValues)
+    return createAnimator(/* sceneRoot= */ mock(), startValues, endValues)
 }

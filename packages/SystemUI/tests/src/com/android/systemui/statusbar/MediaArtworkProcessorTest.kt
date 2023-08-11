@@ -47,7 +47,7 @@ class MediaArtworkProcessorTest : SysuiTestCase() {
         processor = MediaArtworkProcessor()
 
         val point = Point()
-        context.display.getSize(point)
+        checkNotNull(context.display).getSize(point)
         screenWidth = point.x
         screenHeight = point.y
     }
