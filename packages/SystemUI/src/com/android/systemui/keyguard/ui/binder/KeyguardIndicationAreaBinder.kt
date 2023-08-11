@@ -73,25 +73,27 @@ object KeyguardIndicationAreaBinder {
                     launch {
                         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                             keyguardRootViewModel.alpha.collect { alpha ->
-                                view.importantForAccessibility =
-                                    if (alpha == 0f) {
-                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                    } else {
-                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                    }
-
-                                indicationArea.alpha = alpha
+                                indicationArea.apply {
+                                    this.importantForAccessibility =
+                                        if (alpha == 0f) {
+                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                        } else {
+                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                        }
+                                    this.alpha = alpha
+                                }
                             }
                         } else {
                             viewModel.alpha.collect { alpha ->
-                                view.importantForAccessibility =
-                                    if (alpha == 0f) {
-                                        View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-                                    } else {
-                                        View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
-                                    }
-
-                                indicationArea.alpha = alpha
+                                indicationArea.apply {
+                                    this.importantForAccessibility =
+                                        if (alpha == 0f) {
+                                            View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                                        } else {
+                                            View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                                        }
+                                    this.alpha = alpha
+                                }
                             }
                         }
                     }
