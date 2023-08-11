@@ -125,6 +125,7 @@ class SceneTestUtils(
         repository: SceneContainerRepository = fakeSceneContainerRepository()
     ): SceneInteractor {
         return SceneInteractor(
+            applicationScope = applicationScope(),
             repository = repository,
             logger = mock(),
         )
