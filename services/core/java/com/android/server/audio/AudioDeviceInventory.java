@@ -2070,12 +2070,18 @@ public class AudioDeviceInventory {
     @GuardedBy("mDevicesLock")
     private void makeLeAudioDeviceAvailable(
             AudioDeviceBroker.BtDeviceInfo btInfo, int streamType, String eventSource) {
-        final String address = btInfo.mDevice.getAddress();
-        final String name = BtHelper.getName(btInfo.mDevice);
         final int volumeIndex = btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10;
         final int device = btInfo.mAudioSystemDevice;
 
         if (device != AudioSystem.DEVICE_NONE) {
+            final String address = btInfo.mDevice.getAddress();
+            String name = BtHelper.getName(btInfo.mDevice);
+
+            // The BT Stack does not provide a name for LE Broadcast devices
+            if (device == AudioSystem.DEVICE_OUT_BLE_BROADCAST && name.equals("")) {
+                name = "Broadcast";
+            }
+
             /* Audio Policy sees Le Audio similar to A2DP. Let's make sure
              * AUDIO_POLICY_FORCE_NO_BT_A2DP is not set
              */
