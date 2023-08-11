@@ -83,7 +83,7 @@ constructor(
         if (overrideTransition) {
             val runner = RemoteAnimationAdapter(SCREENSHOT_REMOTE_RUNNER, 0, 0)
             try {
-                WindowManagerGlobal.getWindowManagerService()
+                checkNotNull(WindowManagerGlobal.getWindowManagerService())
                     .overridePendingAppTransitionRemote(runner, displayTracker.defaultDisplayId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error overriding screenshot app transition", e)

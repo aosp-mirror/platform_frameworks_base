@@ -59,7 +59,7 @@ constructor(val context: Context, val displayTracker: DisplayTracker) {
         context.startActivity(intent, transition.first.toBundle())
         val runner = RemoteAnimationAdapter(NULL_ACTIVITY_TRANSITION, 0, 0)
         try {
-            WindowManagerGlobal.getWindowManagerService()
+            checkNotNull(WindowManagerGlobal.getWindowManagerService())
                 .overridePendingAppTransitionRemote(runner, displayTracker.defaultDisplayId)
         } catch (e: Exception) {
             Log.e(TAG, "Error overriding clipboard app transition", e)
