@@ -7863,12 +7863,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Dialog.Confirmation"
-                android:excludeFromRecents="true"
-                android:process=":ui">
-        </activity>
-
         <activity android:name="com.android.internal.app.SystemUserHomeActivity"
                   android:enabled="false"
                   android:process=":ui"
