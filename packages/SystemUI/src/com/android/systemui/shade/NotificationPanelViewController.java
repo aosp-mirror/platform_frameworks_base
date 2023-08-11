@@ -1117,7 +1117,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
                 mDreamingToLockscreenTransition, mMainDispatcher);
         collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+                setDreamLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
+                mMainDispatcher);
         collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
                 mDreamingToLockscreenTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
@@ -1153,7 +1154,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition, mMainDispatcher);
         collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
-                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+                setDreamLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
+                mMainDispatcher);
         collectFlow(mView, mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(
                 mLockscreenToDreamingTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
@@ -3447,11 +3449,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mIgnoreXTouchSlop="); ipw.println(mIgnoreXTouchSlop);
         ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
         ipw.println("gestureExclusionRect:" + calculateGestureExclusionRect());
+        Trace.beginSection("Table<DownEvents>");
         new DumpsysTableLogger(
                 TAG,
                 NPVCDownEventState.TABLE_HEADERS,
                 mLastDownEvents.toList()
         ).printTableData(ipw);
+        Trace.endSection();
     }
 
     @Override
@@ -4738,6 +4742,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
         }
         mCurrentPanelState = state;
+    }
+
+    private Consumer<Float> setDreamLockscreenTransitionAlpha(
+            NotificationStackScrollLayoutController stackScroller) {
+        return (Float alpha) -> {
+            // Also animate the status bar's alpha during transitions between the lockscreen and
+            // dreams.
+            mKeyguardStatusBarViewController.setAlpha(alpha);
+            setTransitionAlpha(stackScroller).accept(alpha);
+        };
     }
 
     private Consumer<Float> setTransitionAlpha(

@@ -102,7 +102,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = true,
+                initialValue = false,
             )
 
     /**
@@ -114,14 +114,18 @@ constructor(
      * - `true` doesn't mean the lockscreen is invisible (since this state changes before the
      *   transition occurs).
      */
-    private val isLockscreenDismissed =
+    val isLockscreenDismissed: StateFlow<Boolean> =
         sceneInteractor.desiredScene
             .map { it.key }
             .filter { currentScene ->
                 currentScene == SceneKey.Gone || currentScene == SceneKey.Lockscreen
             }
             .map { it == SceneKey.Gone }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /**
      * Whether it's currently possible to swipe up to dismiss the lockscreen without requiring

@@ -432,9 +432,11 @@ constructor(
         }
 
         private inline fun PrintWriter.wrapSection(entry: DumpsysEntry, block: () -> Unit) {
+            Trace.beginSection(entry.name)
             preamble(entry)
             val dumpTime = measureTimeMillis(block)
             footer(entry, dumpTime)
+            Trace.endSection()
         }
 
         /**

@@ -63,6 +63,8 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTAT
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
@@ -215,6 +217,11 @@ final class LetterboxUiController {
     @Nullable
     private final Boolean mBooleanPropertyAllowForceResizeOverride;
 
+    @Nullable
+    private final Boolean mBooleanPropertyAllowUserAspectRatioOverride;
+    @Nullable
+    private final Boolean mBooleanPropertyAllowUserAspectRatioFullscreenOverride;
+
     /*
      * WindowContainerListener responsible to make translucent activities inherit
      * constraints from the first opaque activity beneath them. It's null for not
@@ -334,6 +341,15 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         /* gatingCondition */ null,
                         PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
+
+        mBooleanPropertyAllowUserAspectRatioOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        () -> mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled(),
+                        PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
+        mBooleanPropertyAllowUserAspectRatioFullscreenOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        () -> mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled(),
+                        PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
         mIsOverrideToPortraitOrientationEnabled =
@@ -1109,7 +1125,8 @@ final class LetterboxUiController {
     }
 
     boolean shouldApplyUserMinAspectRatioOverride() {
-        if (!mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
+        if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
+                || !mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled()
                 || mActivityRecord.mDisplayContent == null
                 || !mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
             return false;
@@ -1122,7 +1139,9 @@ final class LetterboxUiController {
     }
 
     boolean shouldApplyUserFullscreenOverride() {
-        if (!mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()
+        if (FALSE.equals(mBooleanPropertyAllowUserAspectRatioOverride)
+                || FALSE.equals(mBooleanPropertyAllowUserAspectRatioFullscreenOverride)
+                || !mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled()
                 || mActivityRecord.mDisplayContent == null
                 || !mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
             return false;
@@ -1151,7 +1170,8 @@ final class LetterboxUiController {
         }
     }
 
-    private int getUserMinAspectRatioOverrideCode() {
+    @VisibleForTesting
+    int getUserMinAspectRatioOverrideCode() {
         try {
             return mActivityRecord.mAtmService.getPackageManager()
                     .getUserMinAspectRatio(mActivityRecord.packageName, mActivityRecord.mUserId);

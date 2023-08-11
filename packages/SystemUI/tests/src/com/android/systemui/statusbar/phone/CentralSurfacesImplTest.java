@@ -115,6 +115,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -441,6 +442,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mShadeController = spy(new ShadeControllerImpl(
                 mCommandQueue,
                 mMainExecutor,
+                mock(LogBuffer.class),
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,

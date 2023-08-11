@@ -26,15 +26,24 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.LocaleList;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentProvider;
+import android.test.mock.MockContentResolver;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -57,6 +66,13 @@ public class SettingsHelperTest {
     private static final String SETTING_VALUE = "setting_value";
     private static final String SETTING_REAL_VALUE = "setting_real_value";
 
+    private static final String DEFAULT_RINGTONE_VALUE =
+            "content://media/internal/audio/media/10?title=DefaultRingtone&canonical=1";
+    private static final String DEFAULT_NOTIFICATION_VALUE =
+            "content://media/internal/audio/media/20?title=DefaultNotification&canonical=1";
+    private static final String DEFAULT_ALARM_VALUE =
+            "content://media/internal/audio/media/30?title=DefaultAlarm&canonical=1";
+
     private SettingsHelper mSettingsHelper;
 
     @Mock private Context mContext;
@@ -74,6 +90,7 @@ public class SettingsHelperTest {
                 mTelephonyManager);
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getApplicationContext()).thenReturn(mContext);
+        when(mContext.getApplicationInfo()).thenReturn(new ApplicationInfo());
         when(mContext.getContentResolver()).thenReturn(getContentResolver());
 
         mSettingsHelper = spy(new SettingsHelper(mContext));
@@ -338,6 +355,377 @@ public class SettingsHelperTest {
     }
 
     @Test
+    public void testRestoreValue_customRingtone_regularUncanonicalize_Success() {
+        final String sourceRingtoneValue =
+                "content://media/internal/audio/media/1?title=Song&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://media/internal/audio/media/100";
+        final String newRingtoneValueCanonicalized =
+                "content://media/internal/audio/media/100?title=Song&canonical=1";
+
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(sourceRingtoneValue));
+                        return Uri.parse(newRingtoneValueUncanonicalized);
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/1?title=Song&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/100";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/100?title=Song&canonical=1";
+
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {100L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_ringtone=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"Song"});
+                        return cursor;
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_notificationSound_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/2?title=notificationPing&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/200";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/200?title=notificationPing&canonicalize=1";
+
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {200L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_notification=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"notificationPing"});
+                        return cursor;
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.NOTIFICATION_SOUND,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(
+                        Settings.System.getString(
+                                mMockContentResolver, Settings.System.NOTIFICATION_SOUND))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_alarmSound_useCustomLookup_success() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/3?title=alarmSound&canonical=1";
+        final String newRingtoneValueUncanonicalized =
+                "content://0@media/external/audio/media/300";
+        final String newRingtoneValueCanonicalized =
+                "content://0@media/external/audio/media/300?title=alarmSound&canonical=1";
+
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {300L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public Uri canonicalize(Uri url) {
+                        assertThat(url).isEqualTo(Uri.parse(newRingtoneValueUncanonicalized));
+                        return Uri.parse(newRingtoneValueCanonicalized);
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+
+                    @Override
+                    public Cursor query(
+                            Uri uri,
+                            String[] projection,
+                            String selection,
+                            String[] selectionArgs,
+                            String sortOrder) {
+                        assertThat(uri)
+                                .isEqualTo(Uri.parse("content://0@media/external/audio/media"));
+                        assertThat(projection).isEqualTo(new String[] {"_id"});
+                        assertThat(selection).isEqualTo("is_alarm=1 AND title=?");
+                        assertThat(selectionArgs).isEqualTo(new String[] {"alarmSound"});
+                        return cursor;
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.ALARM_ALERT,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.ALARM_ALERT))
+                .isEqualTo(newRingtoneValueCanonicalized);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_useCustomLookup_multipleResults_notRestore() {
+        final String sourceRingtoneValue =
+                "content://0@media/external/audio/media/1?title=Song&canonical=1";
+
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        // This is to mock the case that there are multiple results by querying title +
+        // ringtone_type.
+        MatrixCursor cursor = new MatrixCursor(new String[] {BaseColumns._ID});
+        cursor.addRow(new Object[] {100L});
+        cursor.addRow(new Object[] {110L});
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider("0@" + MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                sourceRingtoneValue,
+                0);
+
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+    }
+
+    @Test
+    public void testRestoreValue_customRingtone_restoreSilentValue() {
+        MockContentResolver mMockContentResolver = new MockContentResolver();
+        when(mContext.getContentResolver()).thenReturn(mMockContentResolver);
+
+        ContentProvider mockMediaContentProvider =
+                new MockContentProvider(mContext) {
+                    @Override
+                    public Uri uncanonicalize(Uri url) {
+                        // mock the lookup failure in regular MediaProvider.uncanonicalize.
+                        return null;
+                    }
+
+                    @Override
+                    public String getType(Uri url) {
+                        return "audio/ogg";
+                    }
+                };
+
+        ContentProvider mockSettingsContentProvider =
+                new MockSettingsProvider(mContext, getContentResolver());
+        mMockContentResolver.addProvider(MediaStore.AUTHORITY, mockMediaContentProvider);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mockSettingsContentProvider);
+
+        resetRingtoneSettingsToDefault(mMockContentResolver);
+
+        mSettingsHelper.restoreValue(
+                mContext,
+                mMockContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                Settings.System.RINGTONE,
+                "_silent",
+                0);
+
+        assertThat(Settings.System.getString(mMockContentResolver, Settings.System.RINGTONE))
+                .isEqualTo(null);
+    }
+
+    public static class MockSettingsProvider extends MockContentProvider {
+        ContentResolver mBaseContentResolver;
+
+        public MockSettingsProvider(Context context, ContentResolver baseContentResolver) {
+            super(context);
+            this.mBaseContentResolver = baseContentResolver;
+        }
+
+        @Override
+        public Bundle call(String method, String request, Bundle args) {
+            return mBaseContentResolver.call(Settings.AUTHORITY, method, request, args);
+        }
+    }
+
+    @Test
     public void restoreValue_autoRotation_deviceStateAutoRotationDisabled_restoresValue() {
         when(mResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
                 .thenReturn(new String[]{});
@@ -399,5 +787,21 @@ public class SettingsHelperTest {
                 .getContentResolver();
         Settings.Global.putString(cr, Settings.Global.POWER_BUTTON_LONG_PRESS, null);
         Settings.Global.putString(cr, Settings.Global.KEY_CHORD_POWER_VOLUME_UP, null);
+    }
+
+    private void resetRingtoneSettingsToDefault(ContentResolver contentResolver) {
+        Settings.System.putString(
+                contentResolver, Settings.System.RINGTONE, DEFAULT_RINGTONE_VALUE);
+        Settings.System.putString(
+                contentResolver, Settings.System.NOTIFICATION_SOUND, DEFAULT_NOTIFICATION_VALUE);
+        Settings.System.putString(
+                contentResolver, Settings.System.ALARM_ALERT, DEFAULT_ALARM_VALUE);
+
+        assertThat(Settings.System.getString(contentResolver, Settings.System.RINGTONE))
+                .isEqualTo(DEFAULT_RINGTONE_VALUE);
+        assertThat(Settings.System.getString(contentResolver, Settings.System.NOTIFICATION_SOUND))
+                .isEqualTo(DEFAULT_NOTIFICATION_VALUE);
+        assertThat(Settings.System.getString(contentResolver, Settings.System.ALARM_ALERT))
+                .isEqualTo(DEFAULT_ALARM_VALUE);
     }
 }

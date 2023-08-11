@@ -44,6 +44,8 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.keyguard.util.IndicationHelper
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -80,6 +82,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
     private lateinit var configurationRepository: FakeConfigurationRepository
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var trustRepository: FakeTrustRepository
+    private lateinit var powerRepository: FakePowerRepository
 
     @Mock private lateinit var indicationHelper: IndicationHelper
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
@@ -102,6 +105,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                 set(Flags.DELAY_BOUNCER, false)
             }
         trustRepository = FakeTrustRepository()
+        powerRepository = FakePowerRepository()
         underTest =
             OccludingAppDeviceEntryInteractor(
                 BiometricMessageInteractor(
@@ -145,6 +149,14 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mockedContext,
                 activityStarter,
+                PowerInteractor(
+                    powerRepository,
+                    keyguardRepository,
+                    falsingCollector = mock(),
+                    screenOffAnimationController = mock(),
+                    statusBarStateController = mock(),
+                ),
+                FakeFeatureFlags().apply { set(Flags.FP_LISTEN_OCCLUDING_APPS, true) },
             )
     }
 
@@ -157,6 +169,18 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             )
             runCurrent()
             verifyGoToHomeScreen()
+        }
+
+    @Test
+    fun fingerprintSuccess_notInteractive_doesNotGoToHomeScreen() =
+        testScope.runTest {
+            givenOnOccludingApp(true)
+            powerRepository.setInteractive(false)
+            fingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+            verifyNeverGoToHomeScreen()
         }
 
     @Test
@@ -291,6 +315,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     private fun givenOnOccludingApp(isOnOccludingApp: Boolean) {
+        powerRepository.setInteractive(true)
         keyguardRepository.setKeyguardOccluded(isOnOccludingApp)
         keyguardRepository.setKeyguardShowing(isOnOccludingApp)
         bouncerRepository.setPrimaryShow(!isOnOccludingApp)

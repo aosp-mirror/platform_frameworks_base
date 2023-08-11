@@ -137,6 +137,12 @@ constructor(
     fun bindIndicationArea() {
         indicationAreaHandle?.dispose()
 
+        if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            keyguardRootView.findViewById<View?>(R.id.keyguard_indication_area)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
+
         indicationAreaHandle =
             KeyguardIndicationAreaBinder.bind(
                 notificationShadeWindowView,

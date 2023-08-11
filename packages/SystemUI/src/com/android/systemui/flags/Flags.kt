@@ -230,7 +230,7 @@ object Flags {
     // TODO(b/294866904): Tracking bug.
     @JvmField
     val WALLPAPER_PICKER_GRID_APPLY_BUTTON =
-        unreleasedFlag("wallpaper_picker_grid_apply_button")
+            unreleasedFlag("wallpaper_picker_grid_apply_button")
 
     /** Whether to run the new udfps keyguard refactor code. */
     // TODO(b/279440316): Tracking bug.
@@ -258,8 +258,7 @@ object Flags {
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
-    @JvmField val FP_LISTEN_OCCLUDING_APPS = unreleasedFlag("fp_listen_occluding_apps",
-            teamfood = true)
+    @JvmField val FP_LISTEN_OCCLUDING_APPS = releasedFlag("fp_listen_occluding_apps")
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
@@ -296,6 +295,12 @@ object Flags {
     // TODO(b/294221702): Tracking bug.
     @JvmField val STOP_FACE_AUTH_ON_DISPLAY_OFF = resourceBooleanFlag(
             R.bool.flag_stop_face_auth_on_display_off, "stop_face_auth_on_display_off")
+
+    /** Flag to disable the face scanning animation pulsing. */
+    // TODO(b/295245791): Tracking bug.
+    @JvmField val STOP_PULSING_FACE_SCANNING_ANIMATION = resourceBooleanFlag(
+            R.bool.flag_stop_pulsing_face_scanning_animation,
+            "stop_pulsing_face_scanning_animation")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -533,6 +538,12 @@ object Flags {
     val ENABLE_PIP_APP_ICON_OVERLAY =
         sysPropBooleanFlag("persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
+
+    // TODO(b/293252410) : Tracking Bug
+    @JvmField
+    val LOCKSCREEN_ENABLE_LANDSCAPE =
+            unreleasedFlag("lockscreen.enable_landscape")
+
     // TODO(b/273443374): Tracking Bug
     @Keep
     @JvmField
@@ -759,4 +770,8 @@ object Flags {
     /** Enable the Compose implementation of the Quick Settings footer actions. */
     @JvmField
     val COMPOSE_QS_FOOTER_ACTIONS = unreleasedFlag("compose_qs_footer_actions")
+
+    /** Enable the share wifi button in Quick Settings internet dialog. */
+    @JvmField
+    val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button")
 }

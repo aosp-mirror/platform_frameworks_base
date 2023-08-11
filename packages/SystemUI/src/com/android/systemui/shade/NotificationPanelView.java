@@ -106,6 +106,11 @@ public final class NotificationPanelView extends FrameLayout {
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch("NPV", ev, super.dispatchTouchEvent(ev));
+    }
+
+    @Override
     public void dispatchConfigurationChanged(Configuration newConfig) {
         super.dispatchConfigurationChanged(newConfig);
         mOnConfigurationChangedListener.onConfigurationChanged(newConfig);

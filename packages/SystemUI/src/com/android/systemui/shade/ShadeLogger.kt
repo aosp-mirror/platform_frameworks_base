@@ -79,19 +79,39 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
 
     fun logMotionEvent(event: MotionEvent, message: String) {
         buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                str1 = message
-                long1 = event.eventTime
-                long2 = event.downTime
-                int1 = event.action
-                int2 = event.classification
-                double1 = event.y.toDouble()
-            },
-            {
-                "$str1: eventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
-            }
+                TAG,
+                LogLevel.VERBOSE,
+                {
+                    str1 = message
+                    long1 = event.eventTime
+                    long2 = event.downTime
+                    int1 = event.action
+                    int2 = event.classification
+                },
+                {
+                    "$str1: eventTime=$long1,downTime=$long2,action=$int1,class=$int2"
+                }
+        )
+    }
+
+    /** Logs motion event dispatch results from NotificationShadeWindowViewController. */
+    fun logShadeWindowDispatch(event: MotionEvent, message: String, result: Boolean?) {
+        buffer.log(
+                TAG,
+                LogLevel.VERBOSE,
+                {
+                    str1 = message
+                    long1 = event.eventTime
+                    long2 = event.downTime
+                },
+                {
+                    val prefix = when (result) {
+                        true -> "SHADE TOUCH REROUTED"
+                        false -> "SHADE TOUCH BLOCKED"
+                        null -> "SHADE TOUCH DISPATCHED"
+                    }
+                    "$prefix: eventTime=$long1,downTime=$long2, reason=$str1"
+                }
         )
     }
 

@@ -156,7 +156,11 @@ public class MessagingLayout extends FrameLayout
         mConversationTitle = conversationTitle;
     }
 
-    @RemotableViewMethod
+    /**
+     * Set Messaging data
+     * @param extras Bundle contains messaging data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
         List<Notification.MessagingStyle.Message> newMessages
@@ -168,9 +172,28 @@ public class MessagingLayout extends FrameLayout
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
                 extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
+
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        bind(newMessages, newHistoricMessages, showSpinner);
+
+        final List<MessagingMessage> historicMessagingMessages = createMessages(newHistoricMessages,
+                true /* isHistoric */);
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, false /* isHistoric */);
+        bindViews(user, showSpinner, historicMessagingMessages, newMessagingMessages);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param extras Bundle contains messaging data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        return () -> setData(extras);
     }
 
     @Override
@@ -195,14 +218,15 @@ public class MessagingLayout extends FrameLayout
         }
     }
 
-    private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages,
-            boolean showSpinner) {
+    private void bindViews(Person user, boolean showSpinner,
+            List<MessagingMessage> historicMessagingMessages,
+            List<MessagingMessage> newMessagingMessages) {
+        setUser(user);
+        bind(showSpinner, historicMessagingMessages, newMessagingMessages);
+    }
 
-        List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
-        List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
-
+    private void bind(boolean showSpinner, List<MessagingMessage> historicMessages,
+            List<MessagingMessage> messages) {
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
         addMessagesToGroups(historicMessages, messages, showSpinner);
 

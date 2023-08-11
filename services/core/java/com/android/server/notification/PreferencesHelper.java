@@ -2608,7 +2608,12 @@ public class PreferencesHelper implements RankingConfig {
                             for (NotificationChannel channel : r.channels.values()) {
                                 if (!channel.isSoundRestored()) {
                                     Uri uri = channel.getSound();
-                                    Uri restoredUri = channel.restoreSoundUri(mContext, uri, true);
+                                    Uri restoredUri =
+                                            channel.restoreSoundUri(
+                                                    mContext,
+                                                    uri,
+                                                    true,
+                                                    channel.getAudioAttributes().getUsage());
                                     if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(
                                             restoredUri)) {
                                         Log.w(TAG,

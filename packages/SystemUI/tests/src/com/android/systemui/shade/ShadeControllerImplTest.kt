@@ -22,6 +22,7 @@ import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.assist.AssistManager
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -59,6 +60,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
+    @Mock private lateinit var touchLog: LogBuffer
 
     private lateinit var shadeController: ShadeControllerImpl
 
@@ -71,6 +73,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
             ShadeControllerImpl(
                 commandQueue,
                 FakeExecutor(FakeSystemClock()),
+                touchLog,
                 keyguardStateController,
                 statusBarStateController,
                 statusBarKeyguardViewManager,
