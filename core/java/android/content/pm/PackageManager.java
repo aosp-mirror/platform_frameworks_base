@@ -3700,12 +3700,12 @@ public abstract class PackageManager {
             "android.hardware.telephony.subscription";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device is capable of communicating with
-     * other devices via Thread network.
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device is capable of communicating with other devices via
+     * <a href="https://www.threadgroup.org">Thread</a> networking protocol.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_THREADNETWORK = "android.hardware.threadnetwork";
+    public static final String FEATURE_THREAD_NETWORK = "android.hardware.thread_network";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
