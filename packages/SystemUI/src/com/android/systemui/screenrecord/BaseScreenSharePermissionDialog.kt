@@ -128,7 +128,7 @@ open class BaseScreenSharePermissionDialog(
 
     private fun createOptionsView(@LayoutRes layoutId: Int?) {
         if (layoutId == null) return
-        val stub = findViewById<View>(R.id.options_stub) as ViewStub
+        val stub = requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
     }
