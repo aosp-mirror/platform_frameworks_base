@@ -3450,7 +3450,8 @@ static void android_media_MediaCodec_native_setup(
         JNIEnv *env, jobject thiz,
         jstring name, jboolean nameIsType, jboolean encoder, int pid, int uid) {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowException(env, "java/lang/NullPointerException",
+                          "No codec name specified");
         return;
     }
 
