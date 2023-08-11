@@ -190,6 +190,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1828,11 +1829,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private static class DatasetComputationContainer {
         // List of all autofill ids that have a corresponding datasets
-        Set<AutofillId> mAutofillIds = new ArraySet<>();
+        Set<AutofillId> mAutofillIds = new LinkedHashSet<>();
         // Set of datasets. Kept separately, to be able to be used directly for composing
         // FillResponse.
         Set<Dataset> mDatasets = new LinkedHashSet<>();
-        ArrayMap<AutofillId, Set<Dataset>> mAutofillIdToDatasetMap = new ArrayMap<>();
+        Map<AutofillId, Set<Dataset>> mAutofillIdToDatasetMap = new LinkedHashMap<>();
 
         public String toString() {
             final StringBuilder builder = new StringBuilder("DatasetComputationContainer[");
@@ -1870,7 +1871,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // for now to keep safe. TODO(b/266379948): Revisit this logic.
 
                 Set<Dataset> datasets = c2.mAutofillIdToDatasetMap.get(id);
-                Set<Dataset> copyDatasets = new ArraySet<>(datasets);
+                Set<Dataset> copyDatasets = new LinkedHashSet<>(datasets);
                 c1.mAutofillIds.add(id);
                 c1.mAutofillIdToDatasetMap.put(id, copyDatasets);
                 c1.mDatasets.addAll(copyDatasets);
@@ -1904,9 +1905,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         List<Dataset> datasets = response.getDatasets();
         if (datasets == null) return;
-        ArrayMap<AutofillId, Set<Dataset>> autofillIdToDatasetMap = new ArrayMap<>();
+        Map<AutofillId, Set<Dataset>> autofillIdToDatasetMap = new LinkedHashMap<>();
         Set<Dataset> eligibleDatasets = new LinkedHashSet<>();
-        Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
+        Set<AutofillId> eligibleAutofillIds = new LinkedHashSet<>();
         for (Dataset dataset : response.getDatasets()) {
             if (dataset.getFieldIds() == null || dataset.getFieldIds().isEmpty()) continue;
             @DatasetEligibleReason int pickReason = globalPickReason;
@@ -1982,7 +1983,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 eligibleAutofillIds.add(id);
                 Set<Dataset> datasetForIds = autofillIdToDatasetMap.get(id);
                 if (datasetForIds == null) {
-                    datasetForIds = new ArraySet<>();
+                    datasetForIds = new LinkedHashSet<>();
                 }
                 datasetForIds.add(dataset);
                 autofillIdToDatasetMap.put(id, datasetForIds);
@@ -2006,17 +2007,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (datasets == null) return;
 
         synchronized (mLock) {
-            ArrayMap<String, Set<AutofillId>> hintsToAutofillIdMap =
+            Map<String, Set<AutofillId>> hintsToAutofillIdMap =
                     mClassificationState.mHintsToAutofillIdMap;
 
             // TODO(266379948): Handle group hints too.
-            ArrayMap<String, Set<AutofillId>> groupHintsToAutofillIdMap =
+            Map<String, Set<AutofillId>> groupHintsToAutofillIdMap =
                     mClassificationState.mGroupHintsToAutofillIdMap;
 
-            ArrayMap<AutofillId, Set<Dataset>> map = new ArrayMap<>();
+            Map<AutofillId, Set<Dataset>> map = new LinkedHashMap<>();
 
             Set<Dataset> eligibleDatasets = new LinkedHashSet<>();
-            Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
+            Set<AutofillId> eligibleAutofillIds = new LinkedHashSet<>();
 
             for (int i = 0; i < datasets.size(); i++) {
 
@@ -2032,7 +2033,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 ArrayList<InlinePresentation> fieldInlinePresentations = new ArrayList<>();
                 ArrayList<InlinePresentation> fieldInlineTooltipPresentations = new ArrayList<>();
                 ArrayList<Dataset.DatasetFieldFilter> fieldFilters = new ArrayList<>();
-                Set<AutofillId> datasetAutofillIds = new ArraySet<>();
+                Set<AutofillId> datasetAutofillIds = new LinkedHashSet<>();
 
                 boolean isDatasetAvailable = false;
                 Set<AutofillId> additionalDatasetAutofillIds = new LinkedHashSet<>();
