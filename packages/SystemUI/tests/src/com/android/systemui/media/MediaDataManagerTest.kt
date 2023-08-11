@@ -16,6 +16,7 @@ import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
@@ -48,9 +49,11 @@ private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
 private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
 private const val PACKAGE_NAME = "com.android.systemui"
-private const val APP_NAME = "SystemUI"
+private const val APP_NAME = "com.android.systemui.tests"
 private const val SESSION_ARTIST = "artist"
 private const val SESSION_TITLE = "title"
+private const val SESSION_BLANK_TITLE = " "
+private const val SESSION_EMPTY_TITLE = ""
 private const val USER_ID = 0
 private val DISMISS_INTENT = Intent().apply { action = "dismiss" }
 
@@ -234,6 +237,95 @@ class MediaDataManagerTest : SysuiTestCase() {
         mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = mock(MediaData::class.java))
         mediaDataManager.onNotificationRemoved(KEY)
         verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testOnNotificationAdded_emptyTitle_hasPlaceholder() {
+        // When the manager has a notification with an empty title
+        val listener = mock(MediaDataManager.Listener::class.java)
+        mediaDataManager.addListener(listener)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
+                    .build()
+            )
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then a media control is created with a placeholder title string
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor)
+            )
+        val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
+        assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
+    }
+
+    @Test
+    fun testOnNotificationAdded_blankTitle_hasPlaceholder() {
+        // GIVEN that the manager has a notification with a blank title
+        val listener = mock(MediaDataManager.Listener::class.java)
+        mediaDataManager.addListener(listener)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
+                    .build()
+            )
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then a media control is created with a placeholder title string
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor)
+            )
+        val placeholderTitle = context.getString(R.string.controls_media_empty_title, APP_NAME)
+        assertThat(mediaDataCaptor.value.song).isEqualTo(placeholderTitle)
+    }
+
+    @Test
+    fun testOnNotificationAdded_emptyMetadata_usesNotificationTitle() {
+        // When the app sets the metadata title fields to empty strings, but does include a
+        // non-blank notification title
+        val listener = mock(MediaDataManager.Listener::class.java)
+        mediaDataManager.addListener(listener)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
+                    .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, SESSION_EMPTY_TITLE)
+                    .build()
+            )
+        mediaNotification =
+            SbnBuilder().run {
+                setPkg(PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setContentTitle(SESSION_TITLE)
+                    it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+                }
+                build()
+            }
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        // Then the media control is added using the notification's title
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor)
+            )
+        assertThat(mediaDataCaptor.value.song).isEqualTo(SESSION_TITLE)
     }
 
     @Test
