@@ -81,7 +81,7 @@
       ]
     }
   ],
-  "presubmit-large": [
+  "postsubmit": [
     {
       "name": "CtsContentTestCases",
       "options": [
@@ -95,9 +95,7 @@
           "include-filter": "android.content.pm.cts"
         }
       ]
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "CtsPermissionTestCases",
       "options": [
