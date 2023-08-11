@@ -23,6 +23,7 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,7 +43,8 @@ import java.util.function.ObjIntConsumer;
  */
 public class ScreenCapture {
     private static final String TAG = "ScreenCapture";
-    private static final int SCREENSHOT_WAIT_TIME_S = 1;
+    private static final int SCREENSHOT_WAIT_TIME_S = 4 * Build.HW_TIMEOUT_MULTIPLIER;
+
     private static native int nativeCaptureDisplay(DisplayCaptureArgs captureArgs,
             long captureListener);
     private static native int nativeCaptureLayers(LayerCaptureArgs captureArgs,
@@ -767,7 +769,10 @@ public class ScreenCapture {
             @Override
             public ScreenshotHardwareBuffer getBuffer() {
                 try {
-                    latch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS);
+                    if (!latch.await(SCREENSHOT_WAIT_TIME_S, TimeUnit.SECONDS)) {
+                        Log.e(TAG, "Timed out waiting for screenshot results");
+                        return null;
+                    }
                     return bufferRef[0];
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to wait for screen capture result", e);
@@ -791,6 +796,7 @@ public class ScreenCapture {
          * Get the {@link ScreenshotHardwareBuffer} synchronously. This can be null if the
          * screenshot failed or if there was no callback in {@link #SCREENSHOT_WAIT_TIME_S} seconds.
          */
+        @Nullable
         public abstract ScreenshotHardwareBuffer getBuffer();
     }
 }
