@@ -371,7 +371,15 @@ class CrossActivityAnimation {
 
         @Override
         public void onBackCancelled() {
-            mProgressAnimator.onBackCancelled(CrossActivityAnimation.this::finishAnimation);
+            mProgressAnimator.onBackCancelled(() -> {
+                // mProgressAnimator can reach finish stage earlier than mLeavingProgressSpring,
+                // and if we release all animation leash first, the leavingProgressSpring won't
+                // able to update the animation anymore, which cause flicker.
+                // Here should force update the closing animation target to the final stage before
+                // release it.
+                setLeavingProgress(0);
+                finishAnimation();
+            });
         }
 
         @Override
