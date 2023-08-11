@@ -76,6 +76,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.shared.system.SysUiStatsLog;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -137,6 +138,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private boolean mIsDragging;
     private float mStartTouchY = -1;
     private boolean mDisappearAnimRunning;
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
@@ -261,6 +263,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mSecondaryLockScreenController = new AdminSecondaryLockScreenController(context, this,
                 mUpdateMonitor, mCallback, new Handler(Looper.myLooper()));
+       mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -726,8 +729,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case SimPuk:
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
-                    if (securityMode == SecurityMode.None || mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser())) {
+                    boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
+                            KeyguardUpdateMonitor.getCurrentUser())
+                            || !mDeviceProvisionedController.isUserSetup(targetUserId);
+
+                    if (securityMode == SecurityMode.None && isLockscreenDisabled) {
                         finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
