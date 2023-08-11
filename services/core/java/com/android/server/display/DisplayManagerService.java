@@ -1939,6 +1939,27 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setVirtualDisplayRotationInternal(IBinder appToken,
+            @Surface.Rotation int rotation) {
+        int displayId;
+        synchronized (mSyncRoot) {
+            if (mVirtualDisplayAdapter == null) {
+                return;
+            }
+            DisplayDevice device = mVirtualDisplayAdapter.getDisplayDevice(appToken);
+            if (device == null) {
+                return;
+            }
+            LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(device);
+            if (display == null) {
+                return;
+            }
+            displayId = display.getDisplayIdLocked();
+        }
+        mWindowManagerInternal.setNonDefaultDisplayRotation(
+                displayId, rotation, /* caller= */ "Virtual Display");
+    }
+
     private void registerDefaultDisplayAdapters() {
         // Register default display adapters.
         synchronized (mSyncRoot) {
@@ -4173,6 +4194,20 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 setVirtualDisplayStateInternal(callback.asBinder(), isOn);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setVirtualDisplayRotation(IVirtualDisplayCallback callback,
+                @Surface.Rotation int rotation) {
+            if (!android.companion.virtualdevice.flags.Flags.virtualDisplayRotationApi()) {
+                return;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setVirtualDisplayRotationInternal(callback.asBinder(), rotation);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

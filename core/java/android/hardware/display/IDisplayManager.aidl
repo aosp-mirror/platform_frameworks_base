@@ -117,6 +117,9 @@ interface IDisplayManager {
     // No permissions required but must be same Uid as the creator.
     void setVirtualDisplayState(in IVirtualDisplayCallback token, boolean isOn);
 
+    // No permissions required but must be same Uid as the creator.
+    void setVirtualDisplayRotation(in IVirtualDisplayCallback token, int rotation);
+
     // Get a stable metric for the device's display size. No permissions required.
     Point getStableDisplaySize();
 

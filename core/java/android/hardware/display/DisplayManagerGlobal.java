@@ -812,6 +812,14 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    void setVirtualDisplayRotation(IVirtualDisplayCallback token, @Surface.Rotation int rotation) {
+        try {
+            mDm.setVirtualDisplayRotation(token, rotation);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Gets the stable device display size, in pixels.
      */
