@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiIntera
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
-import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel.Companion.NO_INTERNET
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon.Companion.NO_INTERNET
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
