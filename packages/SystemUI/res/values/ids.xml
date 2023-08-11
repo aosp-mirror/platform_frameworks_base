@@ -219,4 +219,7 @@
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />
     <item type="id" name="privacy_dialog_manage_app_button" />
+
+    <!-- Communal mode -->
+    <item type="id" name="communal_widget_wrapper" />
 </resources>

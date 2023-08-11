@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.ui.view.layout.blueprints
+package com.android.systemui.communal.domain.interactor
 
-import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.communal.ui.view.layout.sections.DefaultCommunalWidgetSection
+import com.android.systemui.communal.data.repository.CommunalWidgetRepository
+import com.android.systemui.communal.shared.CommunalAppWidgetInfo
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
-/** Blueprint for communal mode. */
+/** Encapsulates business-logic related to communal mode. */
 @SysUISingleton
-@JvmSuppressWildcards
-class DefaultCommunalBlueprint
+class CommunalInteractor
 @Inject
 constructor(
-    private val defaultCommunalWidgetSection: DefaultCommunalWidgetSection,
-) : KeyguardBlueprint {
-    override val id: String = COMMUNAL
-
-    override fun apply(constraintSet: ConstraintSet) {
-        defaultCommunalWidgetSection.apply(constraintSet)
-    }
-
-    companion object {
-        const val COMMUNAL = "communal"
-    }
+    widgetRepository: CommunalWidgetRepository,
+) {
+    /** A flow of info about the widget to be displayed, or null if widget is unavailable. */
+    val appWidgetInfo: Flow<CommunalAppWidgetInfo?> = widgetRepository.stopwatchAppWidgetInfo
 }

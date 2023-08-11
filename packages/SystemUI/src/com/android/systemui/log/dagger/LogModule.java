@@ -489,6 +489,16 @@ public class LogModule {
         return factory.create("DreamLog", 250);
     }
 
+    /**
+     * Provides a {@link LogBuffer} for communal-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalLog
+    public static LogBuffer provideCommunalLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalLog", 250);
+    }
+
     /** Provides a {@link LogBuffer} for display metrics related logs. */
     @Provides
     @SysUISingleton

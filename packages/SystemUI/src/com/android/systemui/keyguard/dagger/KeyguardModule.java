@@ -37,6 +37,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
+import com.android.systemui.communal.data.repository.CommunalWidgetRepositoryModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -75,11 +76,12 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
-import java.util.concurrent.Executor;
-
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.concurrent.Executor;
+
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -91,6 +93,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
         KeyguardStatusViewComponent.class,
         KeyguardUserSwitcherComponent.class},
         includes = {
+            CommunalWidgetRepositoryModule.class,
             FalsingModule.class,
             KeyguardDataQuickAffordanceModule.class,
             KeyguardRepositoryModule.class,
