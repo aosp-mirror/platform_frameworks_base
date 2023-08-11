@@ -2501,12 +2501,12 @@ public final class ActiveServices {
                         FGS_STOP_REASON_STOP_FOREGROUND,
                         FGS_TYPE_POLICY_CHECK_UNKNOWN);
 
-                // foregroundServiceType is used in logFGSStateChangeLocked(), so we can't clear it
-                // earlier.
-                r.foregroundServiceType = 0;
                 synchronized (mFGSLogger) {
                     mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
                 }
+                // foregroundServiceType is used in logFGSStateChangeLocked(), so we can't clear it
+                // earlier.
+                r.foregroundServiceType = 0;
                 r.mFgsNotificationWasDeferred = false;
                 signalForegroundServiceObserversLocked(r);
                 resetFgsRestrictionLocked(r);
