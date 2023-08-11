@@ -135,6 +135,7 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.CompositeUserData;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetEligibleReason;
+import android.service.autofill.Field;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FieldClassificationUserData;
@@ -2722,10 +2723,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
                 }
-                Dataset dataset = (Dataset) result;
-                FillResponse temp = new FillResponse.Builder().addDataset(dataset).build();
-                temp = getEffectiveFillResponse(temp);
-                dataset = temp.getDatasets().get(0);
+                Dataset dataset = getEffectiveDatasetForAuthentication((Dataset) result);
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
                 if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
                     authenticatedResponse.getDatasets().set(datasetIdx, dataset);
@@ -2749,6 +2747,39 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 AUTHENTICATION_RESULT_FAILURE);
             processNullResponseLocked(requestId, 0);
         }
+    }
+
+    Dataset getEffectiveDatasetForAuthentication(Dataset authenticatedDataset) {
+        FillResponse response = new FillResponse.Builder().addDataset(authenticatedDataset).build();
+        response = getEffectiveFillResponse(response);
+        if (DBG) {
+            Slog.d(TAG, "DBG: authenticated effective response: " + response);
+        }
+        if (response == null || response.getDatasets().size() == 0) {
+            Log.wtf(TAG, "No datasets in fill response on authentication. response = "
+                    + (response == null ? "null" : response.toString()));
+            return authenticatedDataset;
+        }
+        List<Dataset> datasets = response.getDatasets();
+        Dataset result = response.getDatasets().get(0);
+        if (datasets.size() > 1) {
+            Dataset.Builder builder = new Dataset.Builder();
+            for (Dataset dataset : datasets) {
+                if (!dataset.getFieldIds().isEmpty()) {
+                    for (int i = 0; i < dataset.getFieldIds().size(); i++) {
+                        builder.setField(dataset.getFieldIds().get(i),
+                                new Field.Builder().setValue(dataset.getFieldValues().get(i))
+                                        .build());
+                    }
+                }
+            }
+            result = builder.setId(authenticatedDataset.getId()).build();
+        }
+
+        if (DBG) {
+            Slog.d(TAG, "DBG: authenticated effective dataset after auth: " + result);
+        }
+        return result;
     }
 
     /**
