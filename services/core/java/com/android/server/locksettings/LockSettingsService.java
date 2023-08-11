@@ -192,9 +192,40 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
- * Keeps the lock pattern/password data and related settings for each user. Used by
- * LockPatternUtils. Needs to be a service because Settings app also needs to be able to save
- * lockscreen information for secondary users.
+ * LockSettingsService (LSS) mainly has the following responsibilities:
+ * <p>
+ * <ul>
+ *   <li>Provide APIs to verify and change the Lock Screen Knowledge Factor (LSKF) ("lockscreen
+ *   credential") of each user.  Unlock users when their correct LSKF is given.</li>
+ *
+ *   <li>Store other lockscreen related settings, such as some Keyguard (UI) settings.</li>
+ *
+ *   <li>Manage each user's synthetic password (SP), which is their main cryptographic secret.
+ *   See {@link SyntheticPasswordManager}.</li>
+ *
+ *   <li>Protect each user's SP using their LSKF.  Use the Gatekeeper or Weaver HAL to ensure that
+ *   guesses of the LSKF are ratelimited by the TEE or secure element.</li>
+ *
+ *   <li>Protect each user's data using their SP.  For example, use the SP to encrypt/decrypt the
+ *   user's credential-encrypted (CE) key for file-based encryption (FBE).</li>
+ *
+ *   <li>Generate, protect, and use profile passwords for managed profiles.</li>
+ *
+ *   <li>Support unlocking the SP by alternative means: resume-on-reboot (reboot escrow) for easier
+ *   OTA updates, and escrow tokens when set up by the Device Policy Controller (DPC).</li>
+ *
+ *   <li>Implement part of the Factory Reset Protection (FRP) and Repair Mode features by storing
+ *   the information needed to verify a user's LSKF on the persist or metadata partition.</li>
+ *
+ *   <li>Support insider attack resistance using the AuthSecret HAL.</li>
+ *
+ *   <li>Implement "recoverable keystore", a feature that enables end-to-end encrypted backups.
+ *   See {@link android.security.keystore.recovery.RecoveryController}.</li>
+ * </ul>
+ * <p>
+ * The main clients of LockSettingsService are Keyguard (i.e. the lockscreen UI, which is part of
+ * System UI), the Settings app (com.android.settings), and other parts of system_server.  Most
+ * methods are protected by ACCESS_KEYGUARD_SECURE_STORAGE which only system processes can have.
  *
  * @hide
  */
@@ -1284,7 +1315,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return getCredentialTypeInternal(userId);
     }
 
-    // TODO: this is a hot path, can we optimize it?
     /**
      * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
