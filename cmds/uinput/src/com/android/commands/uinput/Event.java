@@ -39,9 +39,19 @@ import src.com.android.commands.uinput.InputAbsInfo;
 public class Event {
     private static final String TAG = "UinputEvent";
 
-    public static final String COMMAND_REGISTER = "register";
-    public static final String COMMAND_DELAY = "delay";
-    public static final String COMMAND_INJECT = "inject";
+    enum Command {
+        REGISTER("register"),
+        DELAY("delay"),
+        INJECT("inject"),
+        SYNC("sync");
+
+        final String mCommandName;
+
+        Command(String command) {
+            mCommandName = command;
+        }
+    }
+
     private static final int EV_KEY = 0x01;
     private static final int EV_REL = 0x02;
     private static final int EV_ABS = 0x03;
@@ -87,7 +97,7 @@ public class Event {
     }
 
     private int mId;
-    private String mCommand;
+    private Command mCommand;
     private String mName;
     private int mVid;
     private int mPid;
@@ -98,12 +108,13 @@ public class Event {
     private int mFfEffectsMax = 0;
     private String mInputport;
     private SparseArray<InputAbsInfo> mAbsInfo;
+    private String mSyncToken;
 
     public int getId() {
         return mId;
     }
 
-    public String getCommand() {
+    public Command getCommand() {
         return mCommand;
     }
 
@@ -147,6 +158,10 @@ public class Event {
         return mInputport;
     }
 
+    public String getSyncToken() {
+        return mSyncToken;
+    }
+
     /**
      * Convert an event to String.
      */
@@ -177,7 +192,14 @@ public class Event {
         }
 
         private void setCommand(String command) {
-            mEvent.mCommand = command;
+            Objects.requireNonNull(command, "Command must not be null");
+            for (Command cmd : Command.values()) {
+                if (cmd.mCommandName.equals(command)) {
+                    mEvent.mCommand = cmd;
+                    return;
+                }
+            }
+            throw new IllegalStateException("Unrecognized command: " + command);
         }
 
         public void setName(String name) {
@@ -220,27 +242,38 @@ public class Event {
             mEvent.mInputport = port;
         }
 
+        public void setSyncToken(String syncToken) {
+            mEvent.mSyncToken = Objects.requireNonNull(syncToken, "Sync token must not be null");
+        }
+
         public Event build() {
             if (mEvent.mId == -1) {
                 throw new IllegalStateException("No event id");
             } else if (mEvent.mCommand == null) {
                 throw new IllegalStateException("Event does not contain a command");
             }
-            if (COMMAND_REGISTER.equals(mEvent.mCommand)) {
-                if (mEvent.mConfiguration == null) {
-                    throw new IllegalStateException(
-                            "Device registration is missing configuration");
+            switch (mEvent.mCommand) {
+                case REGISTER -> {
+                    if (mEvent.mConfiguration == null) {
+                        throw new IllegalStateException(
+                                "Device registration is missing configuration");
+                    }
                 }
-            } else if (COMMAND_DELAY.equals(mEvent.mCommand)) {
-                if (mEvent.mDuration <= 0) {
-                    throw new IllegalStateException("Delay has missing or invalid duration");
+                case DELAY -> {
+                    if (mEvent.mDuration <= 0) {
+                        throw new IllegalStateException("Delay has missing or invalid duration");
+                    }
                 }
-            } else if (COMMAND_INJECT.equals(mEvent.mCommand)) {
-                if (mEvent.mInjections  == null) {
-                    throw new IllegalStateException("Inject command is missing injection data");
+                case INJECT -> {
+                    if (mEvent.mInjections == null) {
+                        throw new IllegalStateException("Inject command is missing injection data");
+                    }
                 }
-            } else {
-                throw new IllegalStateException("Unknown command " + mEvent.mCommand);
+                case SYNC -> {
+                    if (mEvent.mSyncToken == null) {
+                        throw new IllegalStateException("Sync command is missing sync token");
+                    }
+                }
             }
             return mEvent;
         }
@@ -306,6 +339,9 @@ public class Event {
                                 break;
                             case "port":
                                 eb.setInputport(mReader.nextString());
+                                break;
+                            case "syncToken":
+                                eb.setSyncToken(mReader.nextString());
                                 break;
                             default:
                                 mReader.skipValue();

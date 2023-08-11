@@ -128,7 +128,9 @@ stack, and `uinput` does not wait for that process to finish. Any commands sent 
 that time will be dropped. If you are controlling `uinput` by sending commands through standard
 input from an app, you need to wait for [`onInputDeviceAdded`][onInputDeviceAdded] to be called on
 an `InputDeviceListener` before issuing commands to the device. If you are passing a file to
-`uinput`, add a `delay` after the `register` command to let registration complete.
+`uinput`, add a `delay` after the `register` command to let registration complete. You can add a
+`sync` in certain positions, like at the end of the file to get a response when all commands have
+finished processing.
 
 [onInputDeviceAdded]: https://developer.android.com/reference/android/hardware/input/InputManager.InputDeviceListener.html
 
@@ -184,6 +186,38 @@ keys would look like this:
              "EV_KEY", "KEY_1", 0,
              "EV_SYN", "SYN_REPORT", 0
             ]
+}
+```
+
+### `sync`
+
+A command used to get a response once the command is processed. When several `inject` and `delay`
+commands are used in a row, the `sync` command can be used to track the progress of the command
+queue.
+
+|    Field    |  Type   | Description                                  |
+|:-----------:|:-------:|:---------------------------------------------|
+|    `id`     | integer | Device ID                                    |
+|  `command`  | string  | Must be set to "sync"                        |
+| `syncToken` | string  | The token used to identify this sync command |
+
+Example:
+
+```json5
+{
+  "id": 1,
+  "command": "syncToken",
+  "syncToken": "finished_injecting_events"
+}
+```
+
+This command will result in the following response when it is processed:
+
+```json5
+{
+  "id": 1,
+  "result": "sync",
+  "syncToken": "finished_injecting_events"
 }
 ```
 
