@@ -2890,11 +2890,6 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
-            if (person != null) {
-                visitor.accept(person.getIconUri());
-            }
-
             final RemoteInputHistoryItem[] history = extras.getParcelableArray(
                     Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
                     RemoteInputHistoryItem.class);
@@ -2906,9 +2901,14 @@ public class Notification implements Parcelable
                     }
                 }
             }
-        }
 
-        if (isStyle(MessagingStyle.class) && extras != null) {
+            // Extras for MessagingStyle. We visit them even if not isStyle(MessagingStyle), since
+            // Notification Listeners might use directly (without the isStyle check).
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
+            if (person != null) {
+                visitor.accept(person.getIconUri());
+            }
+
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
                     Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
@@ -2938,9 +2938,8 @@ public class Notification implements Parcelable
             }
 
             visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class));
-        }
 
-        if (isStyle(CallStyle.class) & extras != null) {
+            // Extras for CallStyle (same reason for visiting without checking isStyle).
             Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             if (callPerson != null) {
                 visitor.accept(callPerson.getIconUri());
