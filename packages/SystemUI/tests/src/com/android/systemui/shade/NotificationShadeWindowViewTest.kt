@@ -105,6 +105,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var lockIconViewController: LockIconViewController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
+    @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
@@ -179,6 +180,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
+                shadeLogger,
                 pulsingGestureListener,
                 mLockscreenHostedDreamGestureListener,
                 keyguardBouncerViewModel,

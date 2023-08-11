@@ -27,6 +27,8 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -56,6 +58,7 @@ public final class ShadeControllerImpl implements ShadeController {
 
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
+    private final LogBuffer mTouchLog;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
@@ -79,6 +82,7 @@ public final class ShadeControllerImpl implements ShadeController {
     public ShadeControllerImpl(
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
+            @ShadeTouchLog LogBuffer touchLog,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -92,6 +96,7 @@ public final class ShadeControllerImpl implements ShadeController {
     ) {
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
+        mTouchLog = touchLog;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
@@ -413,6 +418,7 @@ public final class ShadeControllerImpl implements ShadeController {
 
     @Override
     public void start() {
+        TouchLogger.logTouchesTo(mTouchLog);
         getShadeViewController().setTrackingStartedListener(this::runPostCollapseRunnables);
         getShadeViewController().setOpenCloseListener(
                 new OpenCloseListener() {
