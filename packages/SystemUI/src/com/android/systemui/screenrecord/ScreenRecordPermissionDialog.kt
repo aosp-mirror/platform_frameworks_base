@@ -100,11 +100,11 @@ class ScreenRecordPermissionDialog(
     @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
     private fun initRecordOptionsView() {
-        audioSwitch = findViewById(R.id.screenrecord_audio_switch)
-        tapsSwitch = findViewById(R.id.screenrecord_taps_switch)
-        tapsView = findViewById(R.id.show_taps)
+        audioSwitch = requireViewById(R.id.screenrecord_audio_switch)
+        tapsSwitch = requireViewById(R.id.screenrecord_taps_switch)
+        tapsView = requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
-        options = findViewById(R.id.screen_recording_options)
+        options = requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(context, android.R.layout.simple_spinner_dropdown_item, MODES)
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

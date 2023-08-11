@@ -106,10 +106,8 @@ object ChallengeDialogs {
                 }
             )
 
-            getWindow().apply {
-                setType(WINDOW_TYPE)
-                setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-            }
+            window?.setType(WINDOW_TYPE)
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
             setOnShowListener(DialogInterface.OnShowListener { _ ->
                 val editText = requireViewById<EditText>(R.id.controls_pin_input)
                 editText.setHint(instructions)
@@ -153,9 +151,7 @@ object ChallengeDialogs {
             )
         }
         return builder.create().apply {
-            getWindow().apply {
-                setType(WINDOW_TYPE)
-            }
+            window?.setType(WINDOW_TYPE)
         }
     }
 
