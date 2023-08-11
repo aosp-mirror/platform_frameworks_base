@@ -92,6 +92,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
+    @Mock private NotifLayoutInflaterFactory.Provider mNotifLayoutInflaterFactoryProvider;
     @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
@@ -124,6 +125,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow(mBuilder.build());
         mRow = spy(row);
+        when(mNotifLayoutInflaterFactoryProvider.provide(any(), any()))
+                .thenReturn(mNotifLayoutInflaterFactory);
 
         mNotificationInflater = new NotificationContentInflater(
                 mCache,
@@ -132,7 +135,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
                 mSmartReplyStateInflater,
-                mNotifLayoutInflaterFactory);
+                mNotifLayoutInflaterFactoryProvider);
     }
 
     @Test

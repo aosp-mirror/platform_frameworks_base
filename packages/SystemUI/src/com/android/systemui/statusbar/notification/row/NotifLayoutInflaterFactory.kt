@@ -21,29 +21,25 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import com.android.systemui.statusbar.notification.row.NotificationRowModule.NOTIF_REMOTEVIEWS_FACTORIES
-import com.android.systemui.util.asIndenting
-import com.android.systemui.util.withIncreasedIndent
-import java.io.PrintWriter
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import javax.inject.Named
 
 /**
  * Implementation of [NotifLayoutInflaterFactory]. This class uses a set of
  * [NotifRemoteViewsFactory] objects to create replacement views for Notification RemoteViews.
  */
-open class NotifLayoutInflaterFactory
-@Inject
+class NotifLayoutInflaterFactory
+@AssistedInject
 constructor(
-    dumpManager: DumpManager,
+    @Assisted private val row: ExpandableNotificationRow,
+    @Assisted @InflationFlag val layoutType: Int,
     @Named(NOTIF_REMOTEVIEWS_FACTORIES)
     private val remoteViewsFactories: Set<@JvmSuppressWildcards NotifRemoteViewsFactory>
-) : LayoutInflater.Factory2, Dumpable {
-    init {
-        dumpManager.registerNormalDumpable(TAG, this)
-    }
+) : LayoutInflater.Factory2 {
 
     override fun onCreateView(
         parent: View?,
@@ -51,33 +47,24 @@ constructor(
         context: Context,
         attrs: AttributeSet
     ): View? {
-        var view: View? = null
         var handledFactory: NotifRemoteViewsFactory? = null
+        var result: View? = null
         for (layoutFactory in remoteViewsFactories) {
-            view = layoutFactory.instantiate(parent, name, context, attrs)
-            if (view != null) {
+            layoutFactory.instantiate(row, layoutType, parent, name, context, attrs)?.run {
                 check(handledFactory == null) {
-                    "${layoutFactory.javaClass.name} tries to produce view. However, " +
-                        "${handledFactory?.javaClass?.name} produced view for $name before."
+                    "$layoutFactory tries to produce name:$name with type:$layoutType. " +
+                        "However, $handledFactory produced view for $name before."
                 }
                 handledFactory = layoutFactory
+                result = this
             }
         }
-        logOnCreateView(name, view, handledFactory)
-        return view
+        logOnCreateView(name, result, handledFactory)
+        return result
     }
 
     override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? =
         onCreateView(null, name, context, attrs)
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        val indentingPW = pw.asIndenting()
-
-        indentingPW.appendLine("$TAG ReplacementFactories:")
-        indentingPW.withIncreasedIndent {
-            remoteViewsFactories.forEach { indentingPW.appendLine(it.javaClass.simpleName) }
-        }
-    }
 
     private fun logOnCreateView(
         name: String,
@@ -85,12 +72,20 @@ constructor(
         factory: NotifRemoteViewsFactory?
     ) {
         if (SPEW && replacedView != null && factory != null) {
-            Log.d(TAG, "$factory produced view for $name: $replacedView")
+            Log.d(TAG, "$factory produced $replacedView for name:$name with type:$layoutType")
         }
     }
 
     private companion object {
         private const val TAG = "NotifLayoutInflaterFac"
         private val SPEW = Log.isLoggable(TAG, Log.VERBOSE)
+    }
+
+    @AssistedFactory
+    interface Provider {
+        fun provide(
+            row: ExpandableNotificationRow,
+            @InflationFlag layoutType: Int
+        ): NotifLayoutInflaterFactory
     }
 }

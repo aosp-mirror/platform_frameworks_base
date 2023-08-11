@@ -20,19 +20,21 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.util.AttributeSet
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
-import junit.framework.Assert.assertEquals
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertNull
-import org.junit.Before
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
+import com.android.systemui.util.mockito.mock
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 
 /** Tests for [NotifLayoutInflaterFactory] */
 @SmallTest
@@ -40,87 +42,106 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper
 class NotifLayoutInflaterFactoryTest : SysuiTestCase() {
 
-    @Mock private lateinit var attrs: AttributeSet
+    private lateinit var inflaterFactory: NotifLayoutInflaterFactory
 
-    @Before
-    fun before() {
-        MockitoAnnotations.initMocks(this)
+    private val attrs: AttributeSet = mock()
+    private val row: ExpandableNotificationRow = mock()
+    private val textViewExpandedFactory =
+        createReplacementViewFactory("TextView", FLAG_CONTENT_VIEW_EXPANDED) { context, _ ->
+            Button(context)
+        }
+    private val textViewCollapsedFactory =
+        createReplacementViewFactory("TextView", FLAG_CONTENT_VIEW_CONTRACTED) { context, _ ->
+            Button(context)
+        }
+    private val textViewExpandedFactorySpy = spy(textViewExpandedFactory)
+    private val textViewCollapsedFactorySpy = spy(textViewCollapsedFactory)
+    private val viewFactorySpies = setOf(textViewExpandedFactorySpy, textViewCollapsedFactorySpy)
+
+    @Test
+    fun onCreateView_noMatchingViewForName_returnNull() {
+        // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
+        val layoutType = FLAG_CONTENT_VIEW_EXPANDED
+        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
+
+        // WHEN we try to inflate an ImageView for the expanded layout
+        val createdView = inflaterFactory.onCreateView("ImageView", context, attrs)
+
+        // THEN the inflater factory returns null
+        viewFactorySpies.forEach { viewFactory ->
+            verify(viewFactory).instantiate(row, layoutType, null, "ImageView", context, attrs)
+        }
+        assertThat(createdView).isNull()
     }
 
     @Test
-    fun onCreateView_notMatchingViews_returnNull() {
-        // GIVEN
-        val layoutInflaterFactory =
-            createNotifLayoutInflaterFactoryImpl(
-                setOf(
-                    createReplacementViewFactory("TextView") { context, attrs ->
-                        FrameLayout(context)
-                    }
-                )
-            )
+    fun onCreateView_noMatchingViewForLayoutType_returnNull() {
+        // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
+        val layoutType = FLAG_CONTENT_VIEW_HEADS_UP
+        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
 
-        // WHEN
-        val createView = layoutInflaterFactory.onCreateView("ImageView", mContext, attrs)
+        // WHEN we try to inflate a TextView for the heads-up layout
+        val createdView = inflaterFactory.onCreateView("TextView", context, attrs)
 
-        // THEN
-        assertNull(createView)
+        // THEN the inflater factory returns null
+        viewFactorySpies.forEach { viewFactory ->
+            verify(viewFactory).instantiate(row, layoutType, null, "TextView", context, attrs)
+        }
+        assertThat(createdView).isNull()
     }
 
     @Test
     fun onCreateView_matchingViews_returnReplacementView() {
-        // GIVEN
-        val layoutInflaterFactory =
-            createNotifLayoutInflaterFactoryImpl(
-                setOf(
-                    createReplacementViewFactory("TextView") { context, attrs ->
-                        FrameLayout(context)
-                    }
-                )
-            )
+        // GIVEN we have ViewFactories that replaces TextViews in expanded and collapsed layouts
+        val layoutType = FLAG_CONTENT_VIEW_EXPANDED
+        inflaterFactory = NotifLayoutInflaterFactory(row, layoutType, viewFactorySpies)
 
-        // WHEN
-        val createView = layoutInflaterFactory.onCreateView("TextView", mContext, attrs)
+        // WHEN we try to inflate a TextView for the expanded layout
+        val createdView = inflaterFactory.onCreateView("TextView", context, attrs)
 
-        // THEN
-        assertNotNull(createView)
-        assertEquals(requireNotNull(createView)::class.java, FrameLayout::class.java)
+        // THEN the expanded viewFactory returns the replaced view
+        verify(textViewCollapsedFactorySpy)
+            .instantiate(row, layoutType, null, "TextView", context, attrs)
+        assertThat(createdView).isInstanceOf(Button::class.java)
     }
 
     @Test(expected = IllegalStateException::class)
     fun onCreateView_multipleFactory_throwIllegalStateException() {
-        // GIVEN
-        val layoutInflaterFactory =
-            createNotifLayoutInflaterFactoryImpl(
+        // GIVEN we have two factories that replaces TextViews in expanded layouts
+        val layoutType = FLAG_CONTENT_VIEW_EXPANDED
+        inflaterFactory =
+            NotifLayoutInflaterFactory(
+                row,
+                layoutType,
                 setOf(
-                    createReplacementViewFactory("TextView") { context, attrs ->
+                    createReplacementViewFactory("TextView", layoutType) { context, _ ->
                         FrameLayout(context)
                     },
-                    createReplacementViewFactory("TextView") { context, attrs ->
+                    createReplacementViewFactory("TextView", layoutType) { context, _ ->
                         LinearLayout(context)
                     }
                 )
             )
 
-        // WHEN
-        layoutInflaterFactory.onCreateView("TextView", mContext, attrs)
+        // WHEN we try to inflate a TextView for the expanded layout
+        inflaterFactory.onCreateView("TextView", mContext, attrs)
     }
-
-    private fun createNotifLayoutInflaterFactoryImpl(
-        replacementViewFactories: Set<@JvmSuppressWildcards NotifRemoteViewsFactory>
-    ) = NotifLayoutInflaterFactory(DumpManager(), replacementViewFactories)
 
     private fun createReplacementViewFactory(
         replacementName: String,
+        @InflationFlag replacementLayoutType: Int,
         createView: (context: Context, attrs: AttributeSet) -> View
     ) =
         object : NotifRemoteViewsFactory {
             override fun instantiate(
+                row: ExpandableNotificationRow,
+                @InflationFlag layoutType: Int,
                 parent: View?,
                 name: String,
                 context: Context,
                 attrs: AttributeSet
             ): View? =
-                if (replacementName == name) {
+                if (replacementName == name && replacementLayoutType == layoutType) {
                     createView(context, attrs)
                 } else {
                     null

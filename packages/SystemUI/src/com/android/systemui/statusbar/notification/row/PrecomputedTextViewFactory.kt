@@ -23,10 +23,13 @@ import android.widget.TextView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.ImageFloatingTextView
 import com.android.internal.widget.MessagingLayout
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 import javax.inject.Inject
 
 class PrecomputedTextViewFactory @Inject constructor() : NotifRemoteViewsFactory {
     override fun instantiate(
+        row: ExpandableNotificationRow,
+        @InflationFlag layoutType: Int,
         parent: View?,
         name: String,
         context: Context,
