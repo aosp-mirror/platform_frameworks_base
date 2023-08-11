@@ -71,6 +71,7 @@ import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -208,7 +209,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mConfigurationController, mFalsingCollector, mFalsingManager,
                 mUserSwitcherController, mFeatureFlags, mGlobalSettings,
                 mSessionTracker, Optional.of(mSideFpsController), mFalsingA11yDelegate,
-                mTelephonyManager, mViewMediatorCallback, mAudioManager);
+                mTelephonyManager, mViewMediatorCallback, mAudioManager,
+                mock(DeviceProvisionedController.class));
     }
 
     @Test
