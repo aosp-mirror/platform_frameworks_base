@@ -1167,6 +1167,21 @@ public final class DisplayPowerControllerTest {
                 eq(BRIGHTNESS_RAMP_RATE_SLOW_INCREASE_IDLE));
     }
 
+    @Test
+    public void testPowerStateStopsOnDpcStop() {
+        // Set up
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);
+
+        // Stop dpc
+        mHolder.dpc.stop();
+        advanceTime(1);
+
+        // Ensure dps has stopped
+        verify(mHolder.displayPowerState, times(1)).stop();
+    }
+
     private void advanceTime(long timeMs) {
         mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
