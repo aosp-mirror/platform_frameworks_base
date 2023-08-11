@@ -226,7 +226,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         val builder = InteractionJankMonitor.Configuration.Builder
             .withView(
                     InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD,
-                    notifShadeWindowControllerLazy.get().windowRootView
+                    checkNotNull(notifShadeWindowControllerLazy.get().windowRootView)
             )
             .setTag(statusBarStateControllerImpl.getClockId())
 
