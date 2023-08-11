@@ -390,36 +390,37 @@ public class ConversationLayout extends FrameLayout
      */
     @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
+        bind(parseMessagingData(extras, /* usePrecomputedText= */ false));
+    }
+
+    @NonNull
+    private MessagingData parseMessagingData(Bundle extras, boolean usePrecomputedText) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        List<Notification.MessagingStyle.Message> newMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+        List<Notification.MessagingStyle.Message> newMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-        List<Notification.MessagingStyle.Message> newHistoricMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        List<Notification.MessagingStyle.Message> newHistoricMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
 
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
         final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                        RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
 
-        // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
-        // if they exist
         final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, /* isHistoric= */false,
-                        /* usePrecomputedText= */false);
+                createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
         final List<MessagingMessage> newHistoricMessagingMessages =
-                createMessages(newHistoricMessages, /* isHistoric= */true,
-                        /* usePrecomputedText= */false);
-        // bind it, baby
-        bindViews(user, showSpinner, unreadCount,
-                newMessagingMessages,
-                newHistoricMessagingMessages);
+                createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
+
+        return new MessagingData(user, showSpinner, unreadCount,
+                newHistoricMessagingMessages, newMessagingMessages);
     }
 
     /**
@@ -435,42 +436,16 @@ public class ConversationLayout extends FrameLayout
             return () -> setData(extras);
         }
 
-        Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        List<Notification.MessagingStyle.Message> newMessages =
-                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
-        Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-        List<Notification.MessagingStyle.Message> newHistoricMessages =
-                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
-
-        // mUser now set (would be nice to avoid the side effect but WHATEVER)
-        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
-        // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
-        RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
-                        android.app.RemoteInputHistoryItem.class);
-        addRemoteInputHistoryToMessages(newMessages, history);
-
-        boolean showSpinner =
-                extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-
-        // bind it, baby
-        final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, /* isHistoric= */false, /* usePrecomputedText= */true);
-        final List<MessagingMessage> newHistoricMessagingMessages =
-                createMessages(newHistoricMessages, /* isHistoric= */true,
-                        /* usePrecomputedText= */true);
+        final MessagingData messagingData =
+                parseMessagingData(extras, /* usePrecomputedText= */ true);
 
         return () -> {
-            finalizeInflate(newHistoricMessagingMessages);
-            finalizeInflate(newMessagingMessages);
+            finalizeInflate(messagingData.getHistoricMessagingMessages());
+            finalizeInflate(messagingData.getNewMessagingMessages());
 
-            bindViews(user, showSpinner, unreadCount,
-                    newMessagingMessages,
-                    newHistoricMessagingMessages);
+            bind(messagingData);
         };
     }
-
 
     /**
      * enable/disable precomputed text usage
@@ -513,17 +488,12 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
+    private void bind(MessagingData messagingData) {
+        setUser(messagingData.getUser());
+        setUnreadCount(messagingData.getUnreadCount());
 
-    private void bindViews(Person user,
-            boolean showSpinner, int unreadCount, List<MessagingMessage> newMessagingMessages,
-            List<MessagingMessage> newHistoricMessagingMessages) {
-        setUser(user);
-        setUnreadCount(unreadCount);
-        bind(showSpinner, newMessagingMessages, newHistoricMessagingMessages);
-    }
-
-    private void bind(boolean showSpinner, List<MessagingMessage> messages,
-            List<MessagingMessage> historicMessages) {
+        List<MessagingMessage> messages = messagingData.getNewMessagingMessages();
+        List<MessagingMessage> historicMessages = messagingData.getHistoricMessagingMessages();
         // Copy our groups, before they get clobbered
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
 
@@ -536,7 +506,7 @@ public class ConversationLayout extends FrameLayout
 
         // Let's now create the views and reorder them accordingly
         //   side-effect: updates mGroups, mAddedGroups
-        createGroupViews(groups, senders, showSpinner);
+        createGroupViews(groups, senders, messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
