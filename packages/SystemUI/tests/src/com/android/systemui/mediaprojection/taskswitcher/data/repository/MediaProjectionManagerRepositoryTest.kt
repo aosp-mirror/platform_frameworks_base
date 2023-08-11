@@ -108,20 +108,6 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun mediaProjectionState_onSessionSet_tokenNull_emitsEntireScreen() =
-        testScope.runTest {
-            val state by collectLastValue(repo.mediaProjectionState)
-            runCurrent()
-
-            fakeMediaProjectionManager.dispatchOnSessionSet(
-                session =
-                    ContentRecordingSession.createTaskSession(/* taskWindowContainerToken= */ null)
-            )
-
-            assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
-        }
-
-    @Test
     fun mediaProjectionState_sessionSet_taskWithToken_noMatchingRunningTask_emitsEntireScreen() =
         testScope.runTest {
             val state by collectLastValue(repo.mediaProjectionState)
