@@ -65,7 +65,7 @@ constructor(
 
     private val sessionListener =
         object : MediaSessionManager.OnActiveSessionsChangedListener {
-            override fun onActiveSessionsChanged(controllers: List<MediaController>) {
+            override fun onActiveSessionsChanged(controllers: List<MediaController>?) {
                 handleControllersChanged(controllers)
             }
         }
@@ -190,16 +190,18 @@ constructor(
         }
     }
 
-    private fun handleControllersChanged(controllers: List<MediaController>) {
+    private fun handleControllersChanged(controllers: List<MediaController>?) {
         packageControllers.clear()
-        controllers.forEach { controller ->
+        controllers?.forEach { controller ->
             packageControllers.get(controller.packageName)?.let { tokens -> tokens.add(controller) }
                 ?: run {
                     val tokens = mutableListOf(controller)
                     packageControllers.put(controller.packageName, tokens)
                 }
         }
-        tokensWithNotifications.retainAll(controllers.map { TokenId(it.sessionToken) })
+        controllers?.map { TokenId(it.sessionToken) }?.let {
+            tokensWithNotifications.retainAll(it)
+        }
     }
 
     /**

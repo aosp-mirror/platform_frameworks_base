@@ -1046,7 +1046,7 @@ class ViewHierarchyAnimator {
                         }
                     }
 
-                    override fun onAnimationCancel(animation: Animator?) {
+                    override fun onAnimationCancel(animation: Animator) {
                         cancelled = true
                     }
                 }

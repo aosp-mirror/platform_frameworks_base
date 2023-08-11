@@ -42,13 +42,13 @@ object UdfpsKeyguardInternalViewBinder {
         view.accessibilityDelegate = viewModel.accessibilityDelegate
 
         // bind child views
-        UdfpsAodFingerprintViewBinder.bind(view.findViewById(R.id.udfps_aod_fp), aodViewModel)
+        UdfpsAodFingerprintViewBinder.bind(view.requireViewById(R.id.udfps_aod_fp), aodViewModel)
         UdfpsFingerprintViewBinder.bind(
-            view.findViewById(R.id.udfps_lockscreen_fp),
+            view.requireViewById(R.id.udfps_lockscreen_fp),
             fingerprintViewModel
         )
         UdfpsBackgroundViewBinder.bind(
-            view.findViewById(R.id.udfps_keyguard_fp_bg),
+            view.requireViewById(R.id.udfps_keyguard_fp_bg),
             backgroundViewModel
         )
     }

@@ -144,7 +144,7 @@ constructor(
                 smallClockOnAttachStateChangeListener =
                     object : OnAttachStateChangeListener {
                         var pastVisibility: Int? = null
-                        override fun onViewAttachedToWindow(view: View?) {
+                        override fun onViewAttachedToWindow(view: View) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                             if (view != null) {
                                 smallClockFrame = view.parent as FrameLayout
@@ -168,7 +168,7 @@ constructor(
                             }
                         }
 
-                        override fun onViewDetachedFromWindow(p0: View?) {
+                        override fun onViewDetachedFromWindow(p0: View) {
                             smallClockFrame?.viewTreeObserver
                                     ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
                         }
@@ -178,10 +178,10 @@ constructor(
 
                 largeClockOnAttachStateChangeListener =
                     object : OnAttachStateChangeListener {
-                        override fun onViewAttachedToWindow(p0: View?) {
+                        override fun onViewAttachedToWindow(p0: View) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                         }
-                        override fun onViewDetachedFromWindow(p0: View?) {
+                        override fun onViewDetachedFromWindow(p0: View) {
                         }
                 }
                 value.largeClock.view

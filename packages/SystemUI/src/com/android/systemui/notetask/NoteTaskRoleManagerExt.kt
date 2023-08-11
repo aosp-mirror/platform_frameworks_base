@@ -77,8 +77,13 @@ internal object NoteTaskRoleManagerExt {
             .build()
     }
 
-    private fun PackageManager.getApplicationLabel(packageName: String?): String? =
-        runCatching { getApplicationInfo(packageName, /* flags= */ 0)!! }
+    private fun PackageManager.getApplicationLabel(packageName: String?): String? {
+        if (packageName == null) {
+            return null
+        }
+
+        return runCatching { getApplicationInfo(packageName, /* flags= */ 0)!! }
             .getOrNull()
             ?.let { info -> getApplicationLabel(info).toString() }
+    }
 }

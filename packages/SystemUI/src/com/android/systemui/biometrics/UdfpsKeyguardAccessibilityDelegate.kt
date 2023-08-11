@@ -33,7 +33,7 @@ constructor(
     @Main private val resources: Resources,
     private val keyguardViewManager: StatusBarKeyguardViewManager,
 ) : View.AccessibilityDelegate() {
-    override fun onInitializeAccessibilityNodeInfo(host: View?, info: AccessibilityNodeInfo) {
+    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(host, info)
         val clickAction =
             AccessibilityNodeInfo.AccessibilityAction(
@@ -43,7 +43,7 @@ constructor(
         info.addAction(clickAction)
     }
 
-    override fun performAccessibilityAction(host: View?, action: Int, args: Bundle?): Boolean {
+    override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
         // when an a11y service is enabled, double tapping on the fingerprint sensor should
         // show the primary bouncer
         return if (action == AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id) {

@@ -51,7 +51,7 @@ constructor(
                 val callback =
                     object : ConfigurationController.ConfigurationListener {
                         override fun onConfigChanged(newConfig: Configuration?) {
-                            context.display.getMetrics(displayMetricsHolder)
+                            context.display?.getMetrics(displayMetricsHolder)
                             trySend(displayMetricsHolder)
                         }
                     }
