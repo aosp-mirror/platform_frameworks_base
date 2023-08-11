@@ -19,6 +19,7 @@ package com.android.server.input;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -48,6 +49,7 @@ public class FocusEventDebugViewTest {
 
     private FocusEventDebugView mFocusEventDebugView;
     private FocusEventDebugView.RotaryInputValueView mRotaryInputValueView;
+    private FocusEventDebugView.RotaryInputGraphView mRotaryInputGraphView;
     private float mScaledVerticalScrollFactor;
 
     @Before
@@ -60,13 +62,19 @@ public class FocusEventDebugViewTest {
                 .thenReturn(InputChannel.openInputChannelPair("FocusEventDebugViewTest")[1]);
 
         mRotaryInputValueView = new FocusEventDebugView.RotaryInputValueView(context);
+        mRotaryInputGraphView = new FocusEventDebugView.RotaryInputGraphView(context);
         mFocusEventDebugView = new FocusEventDebugView(context, mockService,
-                () -> mRotaryInputValueView);
+                () -> mRotaryInputValueView, () -> mRotaryInputGraphView);
     }
 
     @Test
     public void startsRotaryInputValueViewWithDefaultValue() {
         assertEquals("+0.0", mRotaryInputValueView.getText());
+    }
+
+    @Test
+    public void startsRotaryInputGraphViewWithDefaultFrameCenter() {
+        assertEquals(0, mRotaryInputGraphView.getFrameCenterPosition(), 0.01);
     }
 
     @Test
@@ -77,6 +85,15 @@ public class FocusEventDebugViewTest {
 
         assertEquals(String.format("+%.1f", 0.5f * mScaledVerticalScrollFactor),
                 mRotaryInputValueView.getText());
+    }
+
+    @Test
+    public void handleRotaryInput_translatesRotaryInputGraphViewWithHighScrollValue() {
+        mFocusEventDebugView.handleUpdateShowRotaryInput(true);
+
+        mFocusEventDebugView.handleRotaryInput(createRotaryMotionEvent(1000f));
+
+        assertTrue(mRotaryInputGraphView.getFrameCenterPosition() > 0);
     }
 
     @Test
