@@ -51,7 +51,6 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
@@ -59,6 +58,7 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ConcurrentUtils;

@@ -60,11 +60,11 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.FlakyTest;
-import android.platform.test.annotations.LargeTest;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.server.LocalServices;
 
