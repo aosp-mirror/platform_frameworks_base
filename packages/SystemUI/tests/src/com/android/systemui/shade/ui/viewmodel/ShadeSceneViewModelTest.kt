@@ -42,6 +42,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val authenticationInteractor =
         utils.authenticationInteractor(
             repository = utils.authenticationRepository(),
+            sceneInteractor = sceneInteractor,
         )
 
     private val underTest =
@@ -71,6 +72,30 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
+
+            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun upTransitionSceneKey_authMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
+        testScope.runTest {
+            val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
+
+            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun upTransitionSceneKey_authMethodSwipe_lockscreenDismissed_goesToGone() =
+        testScope.runTest {
+            val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
+            utils.authenticationRepository.setLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+            sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
+            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Gone), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
         }

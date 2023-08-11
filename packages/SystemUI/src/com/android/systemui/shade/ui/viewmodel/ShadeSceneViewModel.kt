@@ -25,7 +25,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the shade scene. */
@@ -39,14 +39,22 @@ constructor(
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
-        authenticationInteractor.isUnlocked
-            .map { isUnlocked -> upDestinationSceneKey(isUnlocked = isUnlocked) }
+        combine(
+                authenticationInteractor.isUnlocked,
+                authenticationInteractor.canSwipeToDismiss,
+            ) { isUnlocked, canSwipeToDismiss ->
+                upDestinationSceneKey(
+                    isUnlocked = isUnlocked,
+                    canSwipeToDismiss = canSwipeToDismiss,
+                )
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     upDestinationSceneKey(
                         isUnlocked = authenticationInteractor.isUnlocked.value,
+                        canSwipeToDismiss = authenticationInteractor.canSwipeToDismiss.value,
                     ),
             )
 
@@ -57,7 +65,12 @@ constructor(
 
     private fun upDestinationSceneKey(
         isUnlocked: Boolean,
+        canSwipeToDismiss: Boolean,
     ): SceneKey {
-        return if (isUnlocked) SceneKey.Gone else SceneKey.Lockscreen
+        return when {
+            canSwipeToDismiss -> SceneKey.Lockscreen
+            isUnlocked -> SceneKey.Gone
+            else -> SceneKey.Lockscreen
+        }
     }
 }

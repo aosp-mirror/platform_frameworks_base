@@ -37,6 +37,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.FakeDisplayTracker
+import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -120,6 +121,13 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             bouncerInteractor = bouncerInteractor,
         )
 
+    private val shadeSceneViewModel =
+        ShadeSceneViewModel(
+            applicationScope = testScope.backgroundScope,
+            authenticationInteractor = authenticationInteractor,
+            bouncerInteractor = bouncerInteractor,
+        )
+
     private val keyguardRepository = utils.keyguardRepository()
     private val keyguardInteractor =
         utils.keyguardInteractor(
@@ -196,7 +204,44 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
             emulateUserDrivenTransition(
                 to = upDestinationSceneKey,
-                expectedVisible = false,
+            )
+        }
+
+    @Test
+    fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
+        testScope.runTest {
+            val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
+            setAuthMethod(DomainLayerAuthenticationMethodModel.Swipe)
+            assertCurrentScene(SceneKey.Lockscreen)
+
+            // Emulate a user swipe to the shade scene.
+            emulateUserDrivenTransition(to = SceneKey.Shade)
+            assertCurrentScene(SceneKey.Shade)
+
+            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Lockscreen)
+            emulateUserDrivenTransition(
+                to = upDestinationSceneKey,
+            )
+        }
+
+    @Test
+    fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenDismissed_goesToGone() =
+        testScope.runTest {
+            val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
+            setAuthMethod(DomainLayerAuthenticationMethodModel.Swipe)
+            assertCurrentScene(SceneKey.Lockscreen)
+
+            // Emulate a user swipe to dismiss the lockscreen.
+            emulateUserDrivenTransition(to = SceneKey.Gone)
+            assertCurrentScene(SceneKey.Gone)
+
+            // Emulate a user swipe to the shade scene.
+            emulateUserDrivenTransition(to = SceneKey.Shade)
+            assertCurrentScene(SceneKey.Shade)
+
+            assertThat(upDestinationSceneKey).isEqualTo(SceneKey.Gone)
+            emulateUserDrivenTransition(
+                to = upDestinationSceneKey,
             )
         }
 
@@ -379,12 +424,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      * catching up with the requested scene change (see [emulateUiSceneTransition]).
      *
      * @param to The scene to transition to.
-     * @param expectedVisible Whether [SceneContainerViewModel.isVisible] should be set at the end
-     *   of the UI transition.
      */
     private fun TestScope.emulateUserDrivenTransition(
         to: SceneKey?,
-        expectedVisible: Boolean = true,
     ) {
         checkNotNull(to)
 
@@ -392,7 +434,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         assertThat(sceneContainerViewModel.currentScene.value.key).isEqualTo(to)
 
         emulateUiSceneTransition(
-            expectedVisible = expectedVisible,
+            expectedVisible = to != SceneKey.Gone,
         )
     }
 
