@@ -25,8 +25,8 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
-import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
-import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
+import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
+import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
 import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
 import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -58,8 +58,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
