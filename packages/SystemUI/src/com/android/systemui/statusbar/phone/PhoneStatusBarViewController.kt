@@ -75,13 +75,13 @@ class PhoneStatusBarViewController private constructor(
     }
 
     override fun onViewAttached() {
-        statusContainer = mView.findViewById(R.id.system_icons)
+        statusContainer = mView.requireViewById(R.id.system_icons)
         statusContainer.setOnHoverListener(
             statusOverlayHoverListenerFactory.createDarkAwareListener(statusContainer))
         if (moveFromCenterAnimationController == null) return
 
-        val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_start_side_except_heads_up)
-        val systemIconArea: ViewGroup = mView.findViewById(R.id.status_bar_end_side_content)
+        val statusBarLeftSide: View = mView.requireViewById(R.id.status_bar_start_side_except_heads_up)
+        val systemIconArea: ViewGroup = mView.requireViewById(R.id.status_bar_end_side_content)
 
         val viewsToAnimate = arrayOf(
             statusBarLeftSide,

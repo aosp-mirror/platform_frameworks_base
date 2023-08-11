@@ -69,7 +69,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
     ): Boolean {
         val change = findRelevantChange(info)
         val leash = change.leash
-        val taskId = change.taskInfo.taskId
+        val taskId = checkNotNull(change.taskInfo).taskId
         val startBounds = change.startAbsBounds
         val endBounds = change.endAbsBounds
         val windowDecor =

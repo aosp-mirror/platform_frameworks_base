@@ -25,11 +25,14 @@ internal abstract class DesktopModeWindowDecorationViewHolder(rootView: View) {
    * with the caption background color.
    */
   protected fun shouldUseLightCaptionColors(taskInfo: RunningTaskInfo): Boolean {
-    return if (Color.alpha(taskInfo.taskDescription.statusBarColor) != 0 &&
-        taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-      Color.valueOf(taskInfo.taskDescription.statusBarColor).luminance() < 0.5
-    } else {
-      taskInfo.taskDescription.statusBarAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
-    }
+    return taskInfo.taskDescription
+        ?.let { taskDescription ->
+          if (Color.alpha(taskDescription.statusBarColor) != 0 &&
+              taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            Color.valueOf(taskDescription.statusBarColor).luminance() < 0.5
+          } else {
+            taskDescription.statusBarAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
+          }
+        } ?: false
   }
 }

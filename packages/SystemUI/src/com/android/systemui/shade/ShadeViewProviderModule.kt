@@ -106,7 +106,7 @@ abstract class ShadeViewProviderModule {
             featureFlags: FeatureFlags,
         ): NotificationShadeWindowView {
             if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                return root.findViewById(R.id.legacy_window_root)
+                return root.requireViewById(R.id.legacy_window_root)
             }
             return root as NotificationShadeWindowView?
                 ?: throw IllegalStateException("root view not a NotificationShadeWindowView")
@@ -118,7 +118,7 @@ abstract class ShadeViewProviderModule {
         fun providesNotificationStackScrollLayout(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationStackScrollLayout {
-            return notificationShadeWindowView.findViewById(R.id.notification_stack_scroller)
+            return notificationShadeWindowView.requireViewById(R.id.notification_stack_scroller)
         }
 
         @Provides
@@ -153,7 +153,7 @@ abstract class ShadeViewProviderModule {
         fun providesNotificationPanelView(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationPanelView {
-            return notificationShadeWindowView.findViewById(R.id.notification_panel)
+            return notificationShadeWindowView.requireViewById(R.id.notification_panel)
         }
 
         /**
@@ -175,7 +175,7 @@ abstract class ShadeViewProviderModule {
         fun providesLightRevealScrim(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): LightRevealScrim {
-            return notificationShadeWindowView.findViewById(R.id.light_reveal_scrim)
+            return notificationShadeWindowView.requireViewById(R.id.light_reveal_scrim)
         }
 
         @Provides
@@ -183,7 +183,7 @@ abstract class ShadeViewProviderModule {
         fun providesKeyguardRootView(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): KeyguardRootView {
-            return notificationShadeWindowView.findViewById(R.id.keyguard_root_view)
+            return notificationShadeWindowView.requireViewById(R.id.keyguard_root_view)
         }
 
         @Provides
@@ -191,7 +191,7 @@ abstract class ShadeViewProviderModule {
         fun providesSharedNotificationContainer(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): SharedNotificationContainer {
-            return notificationShadeWindowView.findViewById(R.id.shared_notification_container)
+            return notificationShadeWindowView.requireViewById(R.id.shared_notification_container)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
@@ -200,7 +200,7 @@ abstract class ShadeViewProviderModule {
         fun providesAuthRippleView(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): AuthRippleView? {
-            return notificationShadeWindowView.findViewById(R.id.auth_ripple)
+            return notificationShadeWindowView.requireViewById(R.id.auth_ripple)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
@@ -212,9 +212,9 @@ abstract class ShadeViewProviderModule {
             featureFlags: FeatureFlags
         ): LockIconView {
             if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
-                return keyguardRootView.findViewById(R.id.lock_icon_view)
+                return keyguardRootView.requireViewById(R.id.lock_icon_view)
             } else {
-                return notificationPanelView.findViewById(R.id.lock_icon_view)
+                return notificationPanelView.requireViewById(R.id.lock_icon_view)
             }
         }
 
@@ -224,7 +224,7 @@ abstract class ShadeViewProviderModule {
         fun providesTapAgainView(
             notificationPanelView: NotificationPanelView,
         ): TapAgainView {
-            return notificationPanelView.findViewById(R.id.shade_falsing_tap_again)
+            return notificationPanelView.requireViewById(R.id.shade_falsing_tap_again)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
@@ -233,7 +233,7 @@ abstract class ShadeViewProviderModule {
         fun providesNotificationsQuickSettingsContainer(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationsQuickSettingsContainer {
-            return notificationShadeWindowView.findViewById(R.id.notification_container_parent)
+            return notificationShadeWindowView.requireViewById(R.id.notification_container_parent)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
@@ -243,7 +243,7 @@ abstract class ShadeViewProviderModule {
         fun providesShadeHeaderView(
             notificationShadeWindowView: NotificationShadeWindowView,
         ): MotionLayout {
-            val stub = notificationShadeWindowView.findViewById<ViewStub>(R.id.qs_header_stub)
+            val stub = notificationShadeWindowView.requireViewById<ViewStub>(R.id.qs_header_stub)
             val layoutId = R.layout.combined_qs_header
             stub.layoutResource = layoutId
             return stub.inflate() as MotionLayout
@@ -260,7 +260,7 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         @Named(SHADE_HEADER)
         fun providesBatteryMeterView(@Named(SHADE_HEADER) view: MotionLayout): BatteryMeterView {
-            return view.findViewById(R.id.batteryRemainingIcon)
+            return view.requireViewById(R.id.batteryRemainingIcon)
         }
 
         @Provides
@@ -295,7 +295,7 @@ abstract class ShadeViewProviderModule {
         fun providesOngoingPrivacyChip(
             @Named(SHADE_HEADER) header: MotionLayout,
         ): OngoingPrivacyChip {
-            return header.findViewById(R.id.privacy_chip)
+            return header.requireViewById(R.id.privacy_chip)
         }
 
         @Provides
@@ -304,7 +304,7 @@ abstract class ShadeViewProviderModule {
         fun providesStatusIconContainer(
             @Named(SHADE_HEADER) header: MotionLayout,
         ): StatusIconContainer {
-            return header.findViewById(R.id.statusIcons)
+            return header.requireViewById(R.id.statusIcons)
         }
     }
 }

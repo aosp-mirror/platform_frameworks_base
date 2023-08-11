@@ -313,7 +313,7 @@ class DesktopTasksController(
             task.taskId
         )
         val wct = WindowContainerTransaction()
-        wct.setBounds(task.token, null)
+        wct.setBounds(task.token, Rect())
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct,
@@ -550,6 +550,7 @@ class DesktopTasksController(
         )
         // Check if we should skip handling this transition
         var reason = ""
+        val triggerTask = request.triggerTask
         val shouldHandleRequest =
             when {
                 // Only handle open or to front transitions
@@ -558,19 +559,19 @@ class DesktopTasksController(
                     false
                 }
                 // Only handle when it is a task transition
-                request.triggerTask == null -> {
+                triggerTask == null -> {
                     reason = "triggerTask is null"
                     false
                 }
                 // Only handle standard type tasks
-                request.triggerTask.activityType != ACTIVITY_TYPE_STANDARD -> {
-                    reason = "activityType not handled (${request.triggerTask.activityType})"
+                triggerTask.activityType != ACTIVITY_TYPE_STANDARD -> {
+                    reason = "activityType not handled (${triggerTask.activityType})"
                     false
                 }
                 // Only handle fullscreen or freeform tasks
-                request.triggerTask.windowingMode != WINDOWING_MODE_FULLSCREEN &&
-                        request.triggerTask.windowingMode != WINDOWING_MODE_FREEFORM -> {
-                    reason = "windowingMode not handled (${request.triggerTask.windowingMode})"
+                triggerTask.windowingMode != WINDOWING_MODE_FULLSCREEN &&
+                        triggerTask.windowingMode != WINDOWING_MODE_FREEFORM -> {
+                    reason = "windowingMode not handled (${triggerTask.windowingMode})"
                     false
                 }
                 // Otherwise process it
@@ -586,17 +587,17 @@ class DesktopTasksController(
             return null
         }
 
-        val task: RunningTaskInfo = request.triggerTask
-
-        val result = when {
-            // If display has tasks stashed, handle as stashed launch
-            desktopModeTaskRepository.isStashed(task.displayId) -> handleStashedTaskLaunch(task)
-            // Check if fullscreen task should be updated
-            task.windowingMode == WINDOWING_MODE_FULLSCREEN -> handleFullscreenTaskLaunch(task)
-            // Check if freeform task should be updated
-            task.windowingMode == WINDOWING_MODE_FREEFORM -> handleFreeformTaskLaunch(task)
-            else -> {
-                null
+        val result = triggerTask?.let { task ->
+            when {
+                // If display has tasks stashed, handle as stashed launch
+                desktopModeTaskRepository.isStashed(task.displayId) -> handleStashedTaskLaunch(task)
+                // Check if fullscreen task should be updated
+                task.windowingMode == WINDOWING_MODE_FULLSCREEN -> handleFullscreenTaskLaunch(task)
+                // Check if freeform task should be updated
+                task.windowingMode == WINDOWING_MODE_FREEFORM -> handleFreeformTaskLaunch(task)
+                else -> {
+                    null
+                }
             }
         }
         KtProtoLog.v(
@@ -703,7 +704,7 @@ class DesktopTasksController(
             WINDOWING_MODE_FULLSCREEN
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
-        wct.setBounds(taskInfo.token, null)
+        wct.setBounds(taskInfo.token, Rect())
         if (isDesktopDensityOverrideSet()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
