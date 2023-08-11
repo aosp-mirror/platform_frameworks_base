@@ -7337,6 +7337,7 @@ package android.media.audiopolicy {
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public boolean setUserIdDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_POLICY = 1; // 0x1

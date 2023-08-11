@@ -191,6 +191,15 @@ public class AudioMix implements Parcelable {
     }
 
     /** @hide */
+    public void setAudioMixingRule(@NonNull AudioMixingRule rule) {
+        if (mRule.getTargetMixType() != rule.getTargetMixType()) {
+            throw new UnsupportedOperationException(
+                    "Target mix role of updated rule doesn't match the mix role of the AudioMix");
+        }
+        mRule = Objects.requireNonNull(rule);
+    }
+
+    /** @hide */
     public String getRegistration() {
         return mDeviceAddress;
     }

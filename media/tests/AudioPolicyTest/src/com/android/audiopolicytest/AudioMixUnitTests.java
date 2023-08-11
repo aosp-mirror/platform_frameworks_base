@@ -255,7 +255,38 @@ public class AudioMixUnitTests {
                 .setDevice(AudioSystem.DEVICE_OUT_SPEAKER, /*address=*/"").build());
     }
 
+    @Test
+    public void setAudioMixingRule_success() {
+        AudioMixingRule originalMixingRule = new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build();
+        AudioMix audioMix = new AudioMix.Builder(originalMixingRule)
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK).build();
+        AudioMixingRule newMixingRule = new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_AUDIO_SESSION_ID, 12345).build();
 
+        audioMix.setAudioMixingRule(newMixingRule);
+
+        assertEquals(newMixingRule, audioMix.getRule());
+    }
+
+    @Test
+    public void setAudioMixingRule_incompatibleRule_fails() {
+        AudioMixingRule originalMixingRule = new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_PLAYERS)
+                .addMixRule(RULE_MATCH_UID, 42).build();
+        AudioMix audioMix = new AudioMix.Builder(originalMixingRule)
+                .setFormat(OUTPUT_FORMAT_MONO_16KHZ_PCM)
+                .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK).build();
+        AudioMixingRule newMixingRule = new AudioMixingRule.Builder()
+                .setTargetMixRole(MIX_ROLE_INJECTOR)
+                .addMixRule(RULE_MATCH_AUDIO_SESSION_ID, 12345).build();
+
+        assertThrows(UnsupportedOperationException.class,
+                () -> audioMix.setAudioMixingRule(newMixingRule));
+    }
 
     private static AudioMix writeToAndFromParcel(AudioMix audioMix) {
         Parcel parcel = Parcel.obtain();

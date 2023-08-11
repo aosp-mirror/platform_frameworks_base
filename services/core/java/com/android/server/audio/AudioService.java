@@ -140,6 +140,7 @@ import android.media.VolumeInfo;
 import android.media.VolumePolicy;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
@@ -12048,6 +12049,49 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * Update {@link AudioMixingRule}-s for already registered {@link AudioMix}-es.
+     *
+     * @param mixesToUpdate - array of already registered {@link AudioMix}-es to update.
+     * @param updatedMixingRules - array of {@link AudioMixingRule}-s corresponding to
+     *                           {@code mixesToUpdate} mixes. The array must be same size as
+     *                           {@code mixesToUpdate} and i-th {@link AudioMixingRule} must
+     *                           correspond to i-th {@link AudioMix} from mixesToUpdate array.
+     * @param pcb - {@link IAudioPolicyCallback} corresponding to the registered
+     *              {@link AudioPolicy} all {@link AudioMix}-es for {@code mixesToUpdate}
+     *              are part of.
+     * @return {@link AudioManager#SUCCESS} iff the mixing rules were updated successfully,
+     *     {@link AudioManager#ERROR} otherwise.
+     */
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int updateMixingRulesForPolicy(
+            @NonNull AudioMix[] mixesToUpdate,
+            @NonNull AudioMixingRule[] updatedMixingRules,
+            @NonNull IAudioPolicyCallback pcb) {
+        super.updateMixingRulesForPolicy_enforcePermission();
+        Objects.requireNonNull(mixesToUpdate);
+        Objects.requireNonNull(updatedMixingRules);
+        Objects.requireNonNull(pcb);
+        if (mixesToUpdate.length != updatedMixingRules.length) {
+            Log.e(TAG, "Provided list of audio mixes to update and corresponding mixing rules "
+                    + "have mismatching length (mixesToUpdate.length = " + mixesToUpdate.length
+                    + ", updatedMixingRules.length = " + updatedMixingRules.length +  ").");
+            return AudioManager.ERROR;
+        }
+        if (DEBUG_AP) {
+            Log.d(TAG, "updateMixingRules for " + pcb.asBinder() + "with mix rules: ");
+        }
+        synchronized (mAudioPolicies) {
+            final AudioPolicyProxy app =
+                    checkUpdateForPolicy(pcb, "Cannot add AudioMix in audio policy");
+            if (app == null) {
+                return AudioManager.ERROR;
+            }
+            return app.updateMixingRules(mixesToUpdate, updatedMixingRules) == AudioSystem.SUCCESS
+                    ? AudioManager.SUCCESS : AudioManager.ERROR;
+        }
+    }
+
     /** see AudioPolicy.setUidDeviceAffinity() */
     public int setUidDeviceAffinity(IAudioPolicyCallback pcb, int uid,
             @NonNull int[] deviceTypes, @NonNull String[] deviceAddresses) {
@@ -12783,6 +12827,35 @@ public class AudioService extends IAudioService.Stub
                 Binder.restoreCallingIdentity(identity);
             }
 
+        }
+
+        @AudioSystem.AudioSystemError int updateMixingRules(
+                                        @NonNull AudioMix[] mixesToUpdate,
+                                        @NonNull AudioMixingRule[] updatedMixingRules) {
+            Objects.requireNonNull(mixesToUpdate);
+            Objects.requireNonNull(updatedMixingRules);
+
+            if (mixesToUpdate.length != updatedMixingRules.length) {
+                Log.e(TAG, "Provided list of audio mixes to update and corresponding mixing rules "
+                        + "have mismatching length (mixesToUpdate.length = " + mixesToUpdate.length
+                        + ", updatedMixingRules.length = " + updatedMixingRules.length +  ").");
+                return AudioSystem.BAD_VALUE;
+            }
+
+            synchronized (mMixes) {
+                try (SafeCloseable unused = ClearCallingIdentityContext.create()) {
+                    int ret = mAudioSystem.updateMixingRules(mixesToUpdate, updatedMixingRules);
+                    if (ret == AudioSystem.SUCCESS) {
+                        for (int i = 0; i < mixesToUpdate.length; i++) {
+                            AudioMix audioMixToUpdate = mixesToUpdate[i];
+                            AudioMixingRule audioMixingRule = updatedMixingRules[i];
+                            mMixes.stream().filter(audioMixToUpdate::equals).findAny().ifPresent(
+                                    mix -> mix.setAudioMixingRule(audioMixingRule));
+                        }
+                    }
+                    return ret;
+                }
+            }
         }
 
         int setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {

@@ -21,11 +21,13 @@ import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -254,6 +256,23 @@ public class AudioPolicyConfig implements Parcelable {
         for (AudioMix mix : mixes) {
             mMixes.remove(mix);
         }
+    }
+
+    /**
+     * Update audio mixing rules for already registered {@link AudioMix}-es.
+     *
+     * @param audioMixingRuleUpdates {@link List} of {@link Pair}-s containing {@link AudioMix} to
+     *                                           be updated and the new {@link AudioMixingRule}.
+     */
+    public void updateMixingRules(
+            @NonNull List<Pair<AudioMix, AudioMixingRule>> audioMixingRuleUpdates) {
+        Objects.requireNonNull(audioMixingRuleUpdates).forEach(
+                update -> updateMixingRule(update.first, update.second));
+    }
+
+    private void updateMixingRule(AudioMix audioMixToUpdate, AudioMixingRule audioMixingRule) {
+        mMixes.stream().filter(audioMixToUpdate::equals).findAny().ifPresent(
+                mix -> mix.setAudioMixingRule(audioMixingRule));
     }
 
     private static String mixTypeId(int type) {
