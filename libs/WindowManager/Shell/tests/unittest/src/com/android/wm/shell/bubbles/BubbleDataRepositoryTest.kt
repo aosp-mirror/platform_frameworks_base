@@ -29,11 +29,11 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.verify
 
 class BubbleDataRepositoryTest : ShellTestCase() {
 
@@ -124,7 +124,7 @@ class BubbleDataRepositoryTest : ShellTestCase() {
 
     private val testHandler = Handler(Looper.getMainLooper())
     private val mainExecutor = HandlerExecutor(testHandler)
-    private val launcherApps = mock(LauncherApps::class.java)
+    private val launcherApps = mock<LauncherApps>()
 
     private val persistedBubbles = SparseArray<List<BubbleEntity>>()
 
@@ -158,8 +158,7 @@ class BubbleDataRepositoryTest : ShellTestCase() {
         assertThat(persistedBubbles).isEqualTo(validEntitiesByUser)
 
         // No invalid users, so no persist to disk happened
-        verify(dataRepository, never()).persistToDisk(
-            any(SparseArray<List<BubbleEntity>>()::class.java))
+        verify(dataRepository, never()).persistToDisk(any())
     }
 
     @Test
@@ -199,6 +198,4 @@ class BubbleDataRepositoryTest : ShellTestCase() {
         // Verify that persist to disk happened with the new valid entities list.
         verify(dataRepository).persistToDisk(validEntitiesByUser)
     }
-
-    fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 }

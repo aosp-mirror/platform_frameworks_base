@@ -43,6 +43,7 @@ android_test {
         "frameworks-base-testutils",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
+        "mockito-kotlin2",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
         "testables",
