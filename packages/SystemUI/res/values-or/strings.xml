@@ -1079,6 +1079,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ସେଟିଂସ୍"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଚାଲୁଛି"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>

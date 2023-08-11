@@ -1085,6 +1085,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Nerādīt"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Atsākt"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Iestatījumi"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> darbojas"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktīva, pārbaudiet lietotni"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Radās kļūda. Mēģina vēlreiz…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Netika atrasta"</string>

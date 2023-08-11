@@ -1079,6 +1079,7 @@
     <string name="controls_media_dismiss_button" msgid="9081375542265132213">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ಪುನರಾರಂಭಿಸಿ"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ನಿಷ್ಕ್ರಿಯ, ಆ್ಯಪ್ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ದೋಷ, ಮರುಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ಕಂಡುಬಂದಿಲ್ಲ"</string>

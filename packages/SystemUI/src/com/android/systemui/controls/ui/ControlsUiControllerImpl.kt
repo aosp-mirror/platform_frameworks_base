@@ -400,8 +400,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     controlsController.get(),
                     uiExecutor,
                     bgExecutor,
-                    controlActionCoordinator
-                )
+                    controlActionCoordinator,
+                    controlsController.get().currentUserId)
                 cvh.bindData(it)
                 controlViewsById.put(key, cvh)
             }
