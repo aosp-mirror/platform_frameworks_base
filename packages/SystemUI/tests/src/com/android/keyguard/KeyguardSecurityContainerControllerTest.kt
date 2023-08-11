@@ -58,6 +58,7 @@ import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.user.domain.interactor.UserInteractor
@@ -135,6 +136,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var userInteractor: UserInteractor
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -184,6 +186,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(keyguardPasswordView.windowInsetsController).thenReturn(windowInsetsController)
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(SecurityMode.PIN)
         whenever(keyguardStateController.canDismissLockScreen()).thenReturn(true)
+        whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(true)
 
         featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
@@ -251,6 +254,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mock(),
                 { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
                 userInteractor,
+                deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
                 keyguardTransitionInteractor,
                 { authenticationInteractor },
@@ -506,6 +510,30 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         // THEN the next security method of None will dismiss keyguard.
         verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
+    }
+    @Test
+    fun showNextSecurityScreenOrFinish_SimPin_Swipe_userNotSetup() {
+        // GIVEN the current security method is SimPin
+        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
+        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
+            .thenReturn(false)
+        underTest.showSecurityScreen(SecurityMode.SimPin)
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
+            .thenReturn(SecurityMode.None)
+        // WHEN security method is SWIPE
+        whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+        whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(false)
+        underTest.showNextSecurityScreenOrFinish(
+            /* authenticated= */ true,
+            TARGET_USER_ID,
+            /* bypassSecondaryLockScreen= */ true,
+            SecurityMode.SimPin
+        )
+
+        // THEN the next security method of None will dismiss keyguard.
+        verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
     }
 
     @Test
