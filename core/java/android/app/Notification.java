@@ -2850,16 +2850,12 @@ public class Notification implements Parcelable
                 visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
             }
 
-            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST,
+                    Person.class);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
                     visitor.accept(p.getIconUri());
                 }
-            }
-
-            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
-            if (person != null) {
-                visitor.accept(person.getIconUri());
             }
 
             final RemoteInputHistoryItem[] history = extras.getParcelableArray(
@@ -2873,10 +2869,16 @@ public class Notification implements Parcelable
                     }
                 }
             }
-        }
 
-        if (isStyle(MessagingStyle.class) && extras != null) {
-            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            // Extras for MessagingStyle. We visit them even if not isStyle(MessagingStyle), since
+            // Notification Listeners might use directly (without the isStyle check).
+            final Person person = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
+            if (person != null) {
+                visitor.accept(person.getIconUri());
+            }
+
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
@@ -2889,7 +2891,8 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(historic)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(historic)) {
@@ -2902,15 +2905,14 @@ public class Notification implements Parcelable
                 }
             }
 
-            visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON));
-        }
+            visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class));
 
-        if (isStyle(CallStyle.class) & extras != null) {
-            Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON);
+            // Extras for CallStyle (same reason for visiting without checking isStyle).
+            Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             if (callPerson != null) {
                 visitor.accept(callPerson.getIconUri());
             }
-            visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
         }
 
         if (mBubbleMetadata != null) {
