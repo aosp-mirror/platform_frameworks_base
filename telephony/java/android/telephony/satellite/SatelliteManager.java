@@ -57,7 +57,7 @@ import java.util.function.Consumer;
  */
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SATELLITE)
 @SystemApi
-public class SatelliteManager {
+public final class SatelliteManager {
     private static final String TAG = "SatelliteManager";
 
     private static final ConcurrentHashMap<SatelliteDatagramCallback, ISatelliteDatagramCallback>
@@ -1545,11 +1545,11 @@ public class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
 
-    public void onDeviceAlignedWithSatellite(boolean isAligned) {
+    public void setDeviceAlignedWithSatellite(boolean isAligned) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.onDeviceAlignedWithSatellite(mSubId, isAligned);
+                telephony.setDeviceAlignedWithSatellite(mSubId, isAligned);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }

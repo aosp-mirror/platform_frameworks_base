@@ -2978,7 +2978,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void onDeviceAlignedWithSatellite(int subId, in boolean isAligned);
+    void setDeviceAlignedWithSatellite(int subId, in boolean isAligned);
 
     /**
      * This API can be used by only CTS to update satellite vendor service package name.
