@@ -324,8 +324,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // Must only be accessed on the handler thread.
     private DisplayPowerState mPowerState;
 
-
-
     // The currently active screen on unblocker.  This field is non-null whenever
     // we are waiting for a callback to release it and unblock the screen.
     private ScreenOnUnblocker mPendingScreenOnUnblocker;
@@ -2884,7 +2882,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         DisplayPowerState getDisplayPowerState(DisplayBlanker blanker, ColorFade colorFade,
                 int displayId, int displayState) {
-            return new DisplayPowerState(blanker, colorFade, displayId, displayState);
+            return new DisplayPowerState(blanker, colorFade, displayId, displayState,
+                    new Handler(/*async=*/ true));
         }
 
         DualRampAnimator<DisplayPowerState> getDualRampAnimator(DisplayPowerState dps,

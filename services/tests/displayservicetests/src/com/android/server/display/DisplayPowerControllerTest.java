@@ -1106,6 +1106,21 @@ public final class DisplayPowerControllerTest {
         verify(mDisplayWhiteBalanceControllerMock, times(1)).setStrongModeEnabled(true);
     }
 
+    @Test
+    public void testPowerStateStopsOnDpcStop() {
+        // Set up
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);
+
+        // Stop dpc
+        mHolder.dpc.stop();
+        advanceTime(1);
+
+        // Ensure dps has stopped
+        verify(mHolder.displayPowerState, times(1)).stop();
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
