@@ -55,9 +55,9 @@ class ViewPreviewerTest : SysuiTestCase() {
     }
 
     class TestView(context: Context) : View(context) {
-        override fun onDraw(canvas: Canvas?) {
+        override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
-            canvas?.drawColor(Color.RED)
+            canvas.drawColor(Color.RED)
         }
     }
 }
