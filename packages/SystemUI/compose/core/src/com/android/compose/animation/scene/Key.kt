@@ -37,7 +37,14 @@ sealed class Key(val name: String, val identity: Any) {
 }
 
 /** Key for a scene. */
-class SceneKey(name: String, identity: Any = Object()) : Key(name, identity) {
+class SceneKey(
+    name: String,
+    identity: Any = Object(),
+) : Key(name, identity) {
+
+    /** The unique [ElementKey] identifying this scene's root element. */
+    val rootElementKey = ElementKey(name, identity)
+
     override fun toString(): String {
         return "SceneKey(name=$name)"
     }
