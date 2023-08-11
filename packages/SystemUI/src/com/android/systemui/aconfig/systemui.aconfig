@@ -1,8 +1,65 @@
 package: "com.android.systemui.aconfig"
 
+// KEEP FLAGS IN ALPHABETICAL ORDER
+// This reduces merge conflicts by ensuring that flags aren't
+// all added at the end. Headings are provided.
+
+
+// A
+
+// B
+
+// C
+
+// D
+
+// E
+
 flag {
     name: "example_flag"
     namespace: "systemui"
     description: "An Example Flag"
     bug: "292511372"
 }
+
+// F
+
+// G
+
+// H
+
+// I
+
+// J
+
+// K
+
+// L
+
+// M
+
+// N
+
+// O
+
+// P
+
+// Q
+
+// R
+
+// S
+
+// T
+
+// U
+
+// V
+
+// W
+
+// X
+
+// Y
+
+// Z
