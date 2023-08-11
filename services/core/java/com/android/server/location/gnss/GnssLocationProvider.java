@@ -295,6 +295,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final PowerManager.WakeLock mDownloadPsdsWakeLock;
     @GuardedBy("mLock")
     private final Set<Integer> mPendingDownloadPsdsTypes = new HashSet<>();
+    @GuardedBy("mLock")
+    private final Set<Integer> mDownloadInProgressPsdsTypes = new HashSet<>();
 
     /**
      * Properties loaded from PROPERTIES_FILE.
@@ -767,8 +769,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             return;
         }
         synchronized (mLock) {
+            if (mDownloadInProgressPsdsTypes.contains(psdsType)) {
+                if (DEBUG) {
+                    Log.d(TAG,
+                            "PSDS type " + psdsType + " download in progress. Ignore the request.");
+                }
+                return;
+            }
             // hold wake lock while task runs
             mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
+            mDownloadInProgressPsdsTypes.add(psdsType);
         }
         Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
         Executors.newSingleThreadExecutor().execute(() -> {
@@ -818,6 +828,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     Log.e(TAG, "WakeLock expired before release in "
                             + "handleDownloadPsdsData()");
                 }
+                mDownloadInProgressPsdsTypes.remove(psdsType);
             }
         });
     }
