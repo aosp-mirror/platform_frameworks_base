@@ -956,7 +956,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Open the database according to the flags {@link #OPEN_READWRITE}
      * {@link #OPEN_READONLY} {@link #CREATE_IF_NECESSARY} and/or {@link #NO_LOCALIZED_COLLATORS}.
      *
-     * <p>Sets the locale of the database to the  the system's current locale.
+     * <p>Sets the locale of the database to the system's current locale.
      * Call {@link #setLocale} if you would like something else.</p>
      *
      * @param path to database file to open and/or create
@@ -1002,7 +1002,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Open the database according to the flags {@link #OPEN_READWRITE}
      * {@link #OPEN_READONLY} {@link #CREATE_IF_NECESSARY} and/or {@link #NO_LOCALIZED_COLLATORS}.
      *
-     * <p>Sets the locale of the database to the  the system's current locale.
+     * <p>Sets the locale of the database to the system's current locale.
      * Call {@link #setLocale} if you would like something else.</p>
      *
      * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
@@ -1163,7 +1163,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Create a memory backed SQLite database.  Its contents will be destroyed
      * when the database is closed.
      *
-     * <p>Sets the locale of the database to the  the system's current locale.
+     * <p>Sets the locale of the database to the system's current locale.
      * Call {@link #setLocale} if you would like something else.</p>
      *
      * @param factory an optional factory class that is called to instantiate a
@@ -1182,7 +1182,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Create a memory backed SQLite database.  Its contents will be destroyed
      * when the database is closed.
      *
-     * <p>Sets the locale of the database to the  the system's current locale.
+     * <p>Sets the locale of the database to the system's current locale.
      * Call {@link #setLocale} if you would like something else.</p>
      * @param openParams configuration parameters that are used for opening SQLiteDatabase
      * @return a SQLiteDatabase instance
