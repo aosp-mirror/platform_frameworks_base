@@ -277,6 +277,32 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 mRemovedProfiles.add(profile);
                 mLocalNapRoleConnected = false;
             }
+
+            if (HearingAidStatsLogUtils.isJustBonded(getAddress())) {
+                // Saves bonded timestamp as the source for judging whether to display the survey
+                if (getProfiles().stream().anyMatch(
+                        p -> (p instanceof HearingAidProfile || p instanceof HapClientProfile))) {
+                    HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
+                            HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_PAIRED);
+                } else if (getProfiles().stream().anyMatch(
+                        p -> (p instanceof A2dpSinkProfile || p instanceof HeadsetProfile))) {
+                    HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
+                            HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_PAIRED);
+                }
+                HearingAidStatsLogUtils.removeFromJustBonded(getAddress());
+            }
+
+            // Saves connected timestamp as the source for judging whether to display the survey
+            if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
+                if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
+                    HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
+                            HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_AIDS_CONNECTED);
+                } else if (profile instanceof A2dpSinkProfile
+                        || profile instanceof HeadsetProfile) {
+                    HearingAidStatsLogUtils.addCurrentTimeToHistory(mContext,
+                            HearingAidStatsLogUtils.HistoryType.TYPE_HEARING_DEVICES_CONNECTED);
+                }
+            }
         }
 
         fetchActiveDevices();
@@ -899,6 +925,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             if (mDevice.isBondingInitiatedLocally()) {
                 connect();
             }
+
+            // Saves this device as just bonded and checks if it's an hearing device after profiles
+            // are connected. This is for judging whether to display the survey.
+            HearingAidStatsLogUtils.addToJustBonded(getAddress());
         }
     }
 

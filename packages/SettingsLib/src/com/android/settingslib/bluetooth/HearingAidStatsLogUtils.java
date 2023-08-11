@@ -31,8 +31,10 @@ import com.android.internal.util.FrameworkStatsLog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -70,6 +72,7 @@ public final class HearingAidStatsLogUtils {
     }
 
     private static final HashMap<String, Integer> sDeviceAddressToBondEntryMap = new HashMap<>();
+    private static final Set<String> sJustBondedDeviceAddressSet = new HashSet<>();
 
     /**
      * Sets the mapping from hearing aid device to the bond entry where this device starts it's
@@ -109,6 +112,33 @@ public final class HearingAidStatsLogUtils {
     @VisibleForTesting
     static HashMap<String, Integer> getDeviceAddressToBondEntryMap() {
         return sDeviceAddressToBondEntryMap;
+    }
+
+    /**
+     * Maintains a temporarily list of just bonded device address. After the device profiles are
+     * connected, {@link HearingAidStatsLogUtils#removeFromJustBonded} will be called to remove the
+     * address.
+     * @param address the device address
+     */
+    public static void addToJustBonded(String address) {
+        sJustBondedDeviceAddressSet.add(address);
+    }
+
+    /**
+     * Removes the device address from the just bonded list.
+     * @param address the device address
+     */
+    public static void removeFromJustBonded(String address) {
+        sJustBondedDeviceAddressSet.remove(address);
+    }
+
+    /**
+     * Checks whether the device address is in the just bonded list.
+     * @param address the device address
+     * @return true if the device address is in the just bonded list
+     */
+    public static boolean isJustBonded(String address) {
+        return sJustBondedDeviceAddressSet.contains(address);
     }
 
     /**
