@@ -3049,6 +3049,7 @@
   <java-symbol type="id" name="addToDictionaryButton" />
   <java-symbol type="id" name="deleteButton" />
   <!-- TextView -->
+  <java-symbol type="bool" name="config_textShareSupported" />
   <java-symbol type="string" name="failed_to_copy_to_clipboard" />
 
   <java-symbol type="id" name="notification_material_reply_container" />

@@ -6592,6 +6592,10 @@
          for the non-customized ones. -->
     <string name="config_hapticFeedbackCustomizationFile" />
 
+    <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
+        long-pressing on selected text. Enabled by default. -->
+    <bool name="config_textShareSupported">true</bool>
+
     <!-- Whether or not ActivityManager PSS profiling is disabled. -->
     <bool name="config_am_disablePssProfiling">false</bool>
 </resources>
