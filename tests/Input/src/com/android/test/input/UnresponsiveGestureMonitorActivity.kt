@@ -48,6 +48,6 @@ class UnresponsiveGestureMonitorActivity : Activity() {
         val inputManager = getSystemService(InputManager::class.java)
         mInputMonitor = inputManager.monitorGestureInput(MONITOR_NAME, displayId)
         mInputEventReceiver = UnresponsiveReceiver(
-                mInputMonitor.getInputChannel(), Looper.myLooper())
+                mInputMonitor.getInputChannel(), Looper.myLooper()!!)
     }
 }
