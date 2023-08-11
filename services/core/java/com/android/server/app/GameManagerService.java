@@ -129,8 +129,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private static final String EVENT_ON_USER_SWITCHING = "ON_USER_SWITCHING";
     private static final String EVENT_ON_USER_STOPPING = "ON_USER_STOPPING";
 
-    private static final boolean DEBUG = false;
-
     static final int WRITE_SETTINGS = 1;
     static final int REMOVE_SETTINGS = 2;
     static final int POPULATE_GAME_MODE_SETTINGS = 3;
@@ -407,6 +405,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onPropertiesChanged(Properties properties) {
             final String[] packageNames = properties.getKeyset().toArray(new String[0]);
+            Slog.v(TAG, "Device config changed for packages: " + Arrays.toString(packageNames));
             updateConfigsForUser(ActivityManager.getCurrentUser(), true /*checkGamePackage*/,
                     packageNames);
         }
@@ -1861,15 +1860,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     final GamePackageConfiguration config =
                             new GamePackageConfiguration(mPackageManager, packageName, userId);
                     if (config.isActive()) {
-                        if (DEBUG) {
-                            Slog.i(TAG, "Adding config: " + config.toString());
-                        }
+                        Slog.v(TAG, "Adding config: " + config.toString());
                         mConfigs.put(packageName, config);
                     } else {
-                        if (DEBUG) {
-                            Slog.w(TAG, "Inactive package config for "
+                        Slog.v(TAG, "Inactive package config for "
                                     + config.getPackageName() + ":" + config.toString());
-                        }
                         mConfigs.remove(packageName);
                     }
                 }
