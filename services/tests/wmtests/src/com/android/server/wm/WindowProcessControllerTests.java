@@ -170,9 +170,13 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetRunningRecentsAnimation() {
-        mWpc.setRunningRecentsAnimation(true);
-        mWpc.setRunningRecentsAnimation(false);
+    public void testSetAnimatingReason() {
+        mWpc.addAnimatingReason(WindowProcessController.ANIMATING_REASON_REMOTE_ANIMATION);
+        assertTrue(mWpc.isRunningRemoteTransition());
+        mWpc.addAnimatingReason(WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
+        mWpc.removeAnimatingReason(WindowProcessController.ANIMATING_REASON_REMOTE_ANIMATION);
+        assertFalse(mWpc.isRunningRemoteTransition());
+        mWpc.removeAnimatingReason(WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
         waitHandlerIdle(mAtm.mH);
 
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
@@ -201,7 +205,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         waitHandlerIdle(mAtm.mH);
 
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
-        orderVerifier.verify(mMockListener, times(3)).setRunningRemoteAnimation(eq(true));
+        orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(true));
         orderVerifier.verify(mMockListener, times(1)).setRunningRemoteAnimation(eq(false));
         orderVerifier.verifyNoMoreInteractions();
     }

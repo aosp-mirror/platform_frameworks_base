@@ -3024,9 +3024,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // Set to activity manager directly to make sure the state can be seen by the subsequent
         // update of scheduling group.
         proc.setRunningAnimationUnsafe();
-        mH.removeMessages(H.UPDATE_PROCESS_ANIMATING_STATE, proc);
-        mH.sendMessageDelayed(mH.obtainMessage(H.UPDATE_PROCESS_ANIMATING_STATE, proc),
+        mH.sendMessage(mH.obtainMessage(H.ADD_WAKEFULNESS_ANIMATING_REASON, proc));
+        mH.removeMessages(H.REMOVE_WAKEFULNESS_ANIMATING_REASON, proc);
+        mH.sendMessageDelayed(mH.obtainMessage(H.REMOVE_WAKEFULNESS_ANIMATING_REASON, proc),
                 DOZE_ANIMATING_STATE_RETAIN_TIME_MS);
+        Trace.instant(TRACE_TAG_WINDOW_MANAGER, "requestWakefulnessAnimating");
     }
 
     @Override
@@ -5651,9 +5653,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
-        static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
         static final int END_POWER_MODE_UNKNOWN_VISIBILITY_MSG = 3;
         static final int RESUME_FG_APP_SWITCH_MSG = 4;
+        static final int ADD_WAKEFULNESS_ANIMATING_REASON = 5;
+        static final int REMOVE_WAKEFULNESS_ANIMATING_REASON = 6;
 
         static final int FIRST_ACTIVITY_TASK_MSG = 100;
         static final int FIRST_SUPERVISOR_TASK_MSG = 200;
@@ -5670,11 +5673,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     tracker.deliverResult(mContext);
                 }
                 break;
-                case UPDATE_PROCESS_ANIMATING_STATE: {
+                case ADD_WAKEFULNESS_ANIMATING_REASON: {
                     final WindowProcessController proc = (WindowProcessController) msg.obj;
                     synchronized (mGlobalLock) {
-                        proc.updateRunningRemoteOrRecentsAnimation();
+                        proc.addAnimatingReason(
+                                WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
                     }
+                }
+                break;
+                case REMOVE_WAKEFULNESS_ANIMATING_REASON: {
+                    final WindowProcessController proc = (WindowProcessController) msg.obj;
+                    synchronized (mGlobalLock) {
+                        proc.removeAnimatingReason(
+                                WindowProcessController.ANIMATING_REASON_WAKEFULNESS_CHANGE);
+                    }
+                    Trace.instant(TRACE_TAG_WINDOW_MANAGER, "finishWakefulnessAnimating");
                 }
                 break;
                 case END_POWER_MODE_UNKNOWN_VISIBILITY_MSG: {
