@@ -60,6 +60,13 @@ object Utils {
         return dp * (density / DisplayMetrics.DENSITY_DEFAULT)
     }
 
+    /**
+     * Note: Talkback 14.0 has new rate-limitation design to reduce frequency
+     * of TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds.
+     * (context: b/281765653#comment18)
+     * Using {@link View#announceForAccessibility} instead as workaround when sending events
+     * exceeding this frequency is required.
+     */
     @JvmStatic
     fun notifyAccessibilityContentChanged(am: AccessibilityManager, view: ViewGroup) {
         if (!am.isEnabled) {
