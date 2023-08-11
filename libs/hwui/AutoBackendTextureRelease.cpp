@@ -35,15 +35,47 @@ AutoBackendTextureRelease::AutoBackendTextureRelease(GrDirectContext* context,
     AHardwareBuffer_Desc desc;
     AHardwareBuffer_describe(buffer, &desc);
     bool createProtectedImage = 0 != (desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT);
-    GrBackendFormat backendFormat =
-            GrAHardwareBufferUtils::GetBackendFormat(context, buffer, desc.format, false);
+
+    GrBackendFormat backendFormat;
+    GrBackendApi backend = context->backend();
+    if (backend == GrBackendApi::kOpenGL) {
+        backendFormat =
+                GrAHardwareBufferUtils::GetGLBackendFormat(context, desc.format, false);
+        mBackendTexture =
+                GrAHardwareBufferUtils::MakeGLBackendTexture(context,
+                                                             buffer,
+                                                             desc.width,
+                                                             desc.height,
+                                                             &mDeleteProc,
+                                                             &mUpdateProc,
+                                                             &mImageCtx,
+                                                             createProtectedImage,
+                                                             backendFormat,
+                                                             false);
+    } else if (backend == GrBackendApi::kVulkan) {
+        backendFormat =
+                GrAHardwareBufferUtils::GetVulkanBackendFormat(context,
+                                                               buffer,
+                                                               desc.format,
+                                                               false);
+        mBackendTexture =
+                GrAHardwareBufferUtils::MakeVulkanBackendTexture(context,
+                                                                 buffer,
+                                                                 desc.width,
+                                                                 desc.height,
+                                                                 &mDeleteProc,
+                                                                 &mUpdateProc,
+                                                                 &mImageCtx,
+                                                                 createProtectedImage,
+                                                                 backendFormat,
+                                                                 false);
+    } else {
+        LOG_ALWAYS_FATAL("Unexpected backend %d", backend);
+    }
     LOG_ALWAYS_FATAL_IF(!backendFormat.isValid(),
                         __FILE__ " Invalid GrBackendFormat. GrBackendApi==%" PRIu32
                                  ", AHardwareBuffer_Format==%" PRIu32 ".",
                         static_cast<int>(context->backend()), desc.format);
-    mBackendTexture = GrAHardwareBufferUtils::MakeBackendTexture(
-            context, buffer, desc.width, desc.height, &mDeleteProc, &mUpdateProc, &mImageCtx,
-            createProtectedImage, backendFormat, false);
     LOG_ALWAYS_FATAL_IF(!mBackendTexture.isValid(),
                         __FILE__ " Invalid GrBackendTexture. Width==%" PRIu32 ", height==%" PRIu32
                                  ", protected==%d",
