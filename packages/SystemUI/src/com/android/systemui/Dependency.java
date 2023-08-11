@@ -131,13 +131,13 @@ import com.android.systemui.util.leak.LeakDetector;
 import com.android.systemui.util.leak.LeakReporter;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
-import dagger.Lazy;
-
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import dagger.Lazy;
 
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
@@ -280,7 +280,6 @@ public class Dependency {
     @Inject Lazy<AccessibilityManagerWrapper> mAccessibilityManagerWrapper;
     @Inject Lazy<SysuiColorExtractor> mSysuiColorExtractor;
     @Inject Lazy<TunablePaddingService> mTunablePaddingService;
-    @Inject Lazy<ForegroundServiceController> mForegroundServiceController;
     @Inject Lazy<UiOffloadThread> mUiOffloadThread;
     @Inject Lazy<PowerUI.WarningsUI> mWarningsUI;
     @Inject Lazy<LightBarController> mLightBarController;
@@ -457,8 +456,6 @@ public class Dependency {
         mProviders.put(SysuiColorExtractor.class, mSysuiColorExtractor::get);
 
         mProviders.put(TunablePaddingService.class, mTunablePaddingService::get);
-
-        mProviders.put(ForegroundServiceController.class, mForegroundServiceController::get);
 
         mProviders.put(UiOffloadThread.class, mUiOffloadThread::get);
 

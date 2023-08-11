@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
-import com.android.systemui.ForegroundServiceNotificationListener
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
@@ -70,7 +69,6 @@ class NotificationsControllerImpl @Inject constructor(
     private val animatedImageNotificationManager: AnimatedImageNotificationManager,
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
     private val bubblesOptional: Optional<Bubbles>,
-    private val fgsNotifListener: ForegroundServiceNotificationListener,
     private val featureFlags: FeatureFlags
 ) : NotificationsController {
 
@@ -105,7 +103,6 @@ class NotificationsControllerImpl @Inject constructor(
         notificationsMediaManager.setUpWithPresenter(presenter)
         notificationLogger.setUpWithContainer(listContainer)
         peopleSpaceWidgetManager.attach(notificationListener)
-        fgsNotifListener.init()
     }
 
     // TODO: Convert all functions below this line into listeners instead of public methods
