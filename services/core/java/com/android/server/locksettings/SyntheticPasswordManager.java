@@ -1651,8 +1651,10 @@ class SyntheticPasswordManager {
             }
             return result;
         } else if (responseCode == GateKeeperResponse.RESPONSE_RETRY) {
+            Slog.e(TAG, "Gatekeeper verification of synthetic password failed with RESPONSE_RETRY");
             return VerifyCredentialResponse.fromTimeout(response.getTimeout());
         } else {
+            Slog.e(TAG, "Gatekeeper verification of synthetic password failed with RESPONSE_ERROR");
             return VerifyCredentialResponse.ERROR;
         }
     }
