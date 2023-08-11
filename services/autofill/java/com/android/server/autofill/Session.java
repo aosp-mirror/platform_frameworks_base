@@ -54,8 +54,8 @@ import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_
 import static com.android.server.autofill.FillRequestEventLogger.TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE;
 import static com.android.server.autofill.FillResponseEventLogger.AVAILABLE_COUNT_WHEN_FILL_REQUEST_FAILED_OR_TIMEOUT;
 import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_AUTOFILL_PROVIDER;
-import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_UNKNOWN;
 import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_PCC;
+import static com.android.server.autofill.FillResponseEventLogger.DETECTION_PREFER_UNKNOWN;
 import static com.android.server.autofill.FillResponseEventLogger.HAVE_SAVE_TRIGGER_ID;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_FAILURE;
 import static com.android.server.autofill.FillResponseEventLogger.RESPONSE_STATUS_SESSION_DESTROYED;
@@ -1539,6 +1539,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
 
+            if (mSessionFlags.mShowingSaveUi) {
+                // Even though the session has not yet been destroyed at this point, after the
+                // saveUi gets closed, the session will be destroyed and AutofillManager will reset
+                // its state. Processing the fill request will result in a great chance of corrupt
+                // state in Autofill.
+                Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
+                        + id + " is showing saveUi");
+                mFillResponseEventLogger.maybeSetResponseStatus(RESPONSE_STATUS_SESSION_DESTROYED);
+                mFillResponseEventLogger.logAndEndEvent();
+                return;
+            }
 
             requestLog = mRequestLogs.get(requestId);
             if (requestLog != null) {
