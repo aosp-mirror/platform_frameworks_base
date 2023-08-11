@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
+import com.android.systemui.communal.ui.view.layout.blueprints.DefaultCommunalBlueprint
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
 import dagger.Binds
 import dagger.Module
@@ -34,5 +35,11 @@ abstract class KeyguardBlueprintModule {
     @IntoSet
     abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
+    ): KeyguardBlueprint
+
+    @Binds
+    @IntoSet
+    abstract fun bindDefaultCommunalBlueprint(
+        defaultCommunalBlueprint: DefaultCommunalBlueprint
     ): KeyguardBlueprint
 }
