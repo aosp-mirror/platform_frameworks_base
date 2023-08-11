@@ -1206,12 +1206,14 @@ public final class UiAutomation {
             return null;
         }
 
-        final ScreenshotHardwareBuffer screenshotBuffer =
-                syncScreenCapture.getBuffer();
+        final ScreenshotHardwareBuffer screenshotBuffer = syncScreenCapture.getBuffer();
+        if (screenshotBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
+            return null;
+        }
         Bitmap screenShot = screenshotBuffer.asBitmap();
         if (screenShot == null) {
-            Log.e(LOG_TAG, "mUiAutomationConnection.takeScreenshot() returned null for display "
-                    + mDisplayId);
+            Log.e(LOG_TAG, "Failed to take screenshot for display=" + mDisplayId);
             return null;
         }
         Bitmap swBitmap;
@@ -1263,16 +1265,23 @@ public final class UiAutomation {
                 ScreenCapture.createSyncCaptureListener();
         try {
             if (!mUiAutomationConnection.takeSurfaceControlScreenshot(sc, syncScreenCapture)) {
+                Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
                 return null;
             }
-
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while taking screenshot!", re);
             return null;
         }
-        ScreenCapture.ScreenshotHardwareBuffer captureBuffer =
-                syncScreenCapture.getBuffer();
+        ScreenCapture.ScreenshotHardwareBuffer captureBuffer = syncScreenCapture.getBuffer();
+        if (captureBuffer == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
         Bitmap screenShot = captureBuffer.asBitmap();
+        if (screenShot == null) {
+            Log.e(LOG_TAG, "Failed to take screenshot for window=" + window);
+            return null;
+        }
         Bitmap swBitmap;
         try (HardwareBuffer buffer = captureBuffer.getHardwareBuffer()) {
             swBitmap = screenShot.copy(Bitmap.Config.ARGB_8888, false);
