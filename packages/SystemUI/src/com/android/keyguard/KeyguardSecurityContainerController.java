@@ -51,6 +51,7 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
@@ -196,6 +197,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mSecurityViewFlipperController.reloadColors();
                 }
             };
+    private final DeviceProvisionedController mDeviceProvisionedController;
 
     private KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             AdminSecondaryLockScreenController.Factory adminSecondaryLockScreenControllerFactory,
@@ -207,7 +209,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             KeyguardStateController keyguardStateController,
             SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            DeviceProvisionedController deviceProvisionedController
+    ) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -221,6 +225,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mKeyguardSecurityCallback);
         mConfigurationController = configurationController;
         mLastOrientation = getResources().getConfiguration().orientation;
+        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override
@@ -391,8 +396,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 case SimPuk:
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
-                    if (securityMode == SecurityMode.None || mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser())) {
+                    boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
+                            KeyguardUpdateMonitor.getCurrentUser())
+                            || !mDeviceProvisionedController.isUserSetup(targetUserId);
+
+                    if (securityMode == SecurityMode.None && isLockscreenDisabled) {
                         finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
@@ -552,6 +560,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final KeyguardStateController mKeyguardStateController;
         private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
         private final ConfigurationController mConfigurationController;
+       private final DeviceProvisionedController mDeviceProvisionedController;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -564,7 +573,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 UiEventLogger uiEventLogger,
                 KeyguardStateController keyguardStateController,
                 KeyguardSecurityViewFlipperController securityViewFlipperController,
-                ConfigurationController configurationController) {
+                ConfigurationController configurationController,
+                DeviceProvisionedController deviceProvisionedController) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -575,6 +585,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mKeyguardStateController = keyguardStateController;
             mSecurityViewFlipperController = securityViewFlipperController;
             mConfigurationController = configurationController;
+            mDeviceProvisionedController = deviceProvisionedController;
         }
 
         public KeyguardSecurityContainerController create(
@@ -583,7 +594,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController);
+                    mConfigurationController, mDeviceProvisionedController);
         }
 
     }
