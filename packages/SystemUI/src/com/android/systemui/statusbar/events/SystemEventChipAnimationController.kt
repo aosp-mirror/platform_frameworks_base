@@ -168,10 +168,8 @@ class SystemEventChipAnimationController @Inject constructor(
         }
 
         val keyFrame1Height = dotSize * 2
-        val v = currentAnimatedView!!.view
-        val chipVerticalCenter = v.top + v.measuredHeight / 2
-        val height1 = ValueAnimator.ofInt(
-                currentAnimatedView!!.view.measuredHeight, keyFrame1Height).apply {
+        val chipVerticalCenter = chipBounds.top + chipBounds.height() / 2
+        val height1 = ValueAnimator.ofInt(chipBounds.height(), keyFrame1Height).apply {
             startDelay = 8.frames
             duration = 6.frames
             interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_1
