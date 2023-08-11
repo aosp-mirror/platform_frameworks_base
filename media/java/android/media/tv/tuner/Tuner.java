@@ -452,6 +452,12 @@ public class Tuner implements AutoCloseable  {
         acquireTRMSLock("shareFrontendFromTuner()");
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                // unregister self from the Frontend callback
+                mFeOwnerTuner.unregisterFrontendCallbackListener(this);
+                mFeOwnerTuner = null;
+                nativeUnshareFrontend();
+            }
             mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
             mFeOwnerTuner = tuner;
             mFeOwnerTuner.registerFrontendCallbackListener(this);
