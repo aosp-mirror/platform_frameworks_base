@@ -721,6 +721,36 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void windowMagnifierEditMode_performA11yClickAction_exitEditMode() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+                    Float.NaN);
+            mWindowMagnificationController.setEditMagnifierSizeMode(true);
+        });
+
+        View closeButton = getInternalView(R.id.close_button);
+        View bottomRightCorner = getInternalView(R.id.bottom_right_corner);
+        View bottomLeftCorner = getInternalView(R.id.bottom_left_corner);
+        View topRightCorner = getInternalView(R.id.top_right_corner);
+        View topLeftCorner = getInternalView(R.id.top_left_corner);
+
+        assertEquals(View.VISIBLE, closeButton.getVisibility());
+        assertEquals(View.VISIBLE, bottomRightCorner.getVisibility());
+        assertEquals(View.VISIBLE, bottomLeftCorner.getVisibility());
+        assertEquals(View.VISIBLE, topRightCorner.getVisibility());
+        assertEquals(View.VISIBLE, topLeftCorner.getVisibility());
+
+        final View mirrorView = mWindowManager.getAttachedView();
+        mirrorView.performAccessibilityAction(AccessibilityAction.ACTION_CLICK.getId(), null);
+
+        assertEquals(View.GONE, closeButton.getVisibility());
+        assertEquals(View.GONE, bottomRightCorner.getVisibility());
+        assertEquals(View.GONE, bottomLeftCorner.getVisibility());
+        assertEquals(View.GONE, topRightCorner.getVisibility());
+        assertEquals(View.GONE, topLeftCorner.getVisibility());
+    }
+
+    @Test
     public void enableWindowMagnification_hasA11yWindowTitle() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,

@@ -1476,6 +1476,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private class MirrorWindowA11yDelegate extends View.AccessibilityDelegate {
 
         private CharSequence getClickAccessibilityActionLabel() {
+            if (mEditSizeEnable) {
+                // Perform click action to exit edit mode
+                return mContext.getResources().getString(
+                        R.string.magnification_exit_edit_mode_click_label);
+            }
+
             return mSettingsPanelVisibility
                     ? mContext.getResources().getString(
                             R.string.magnification_close_settings_click_label)
@@ -1518,8 +1524,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         private boolean performA11yAction(int action) {
             if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                // Simulate tapping the drag view so it opens the Settings.
-                handleSingleTap(mDragView);
+                if (mEditSizeEnable) {
+                    // When edit mode is enabled, click the magnifier to exit edit mode.
+                    setEditMagnifierSizeMode(false);
+                } else {
+                    // Simulate tapping the drag view so it opens the Settings.
+                    handleSingleTap(mDragView);
+                }
+
             } else if (action == R.id.accessibility_action_zoom_in) {
                 performScale(mScale + A11Y_CHANGE_SCALE_DIFFERENCE);
             } else if (action == R.id.accessibility_action_zoom_out) {
