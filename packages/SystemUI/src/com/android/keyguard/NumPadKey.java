@@ -211,7 +211,9 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
 
-        if (mAnimator != null) mAnimator.onLayout(b - t);
+        int width = r - l;
+        int height = b - t;
+        if (mAnimator != null) mAnimator.onLayout(width, height);
     }
 
     @Override

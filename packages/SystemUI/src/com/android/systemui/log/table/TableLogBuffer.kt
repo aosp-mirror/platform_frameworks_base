@@ -302,14 +302,14 @@ class TableLogBuffer(
 
     @Synchronized
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println(HEADER_PREFIX + name)
-        pw.println("version $VERSION")
+        pw.append(HEADER_PREFIX).println(name)
+        pw.append("version ").println(VERSION)
 
         lastEvictedValues.values.sortedBy { it.timestamp }.forEach { it.dump(pw) }
         for (i in 0 until buffer.size) {
             buffer[i].dump(pw)
         }
-        pw.println(FOOTER_PREFIX + name)
+        pw.append(FOOTER_PREFIX).println(name)
     }
 
     /** Dumps an individual [TableChange]. */

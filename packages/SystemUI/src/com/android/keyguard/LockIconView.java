@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -154,11 +155,16 @@ public class LockIconView extends FrameLayout implements Dumpable {
     }
 
     float getLocationTop() {
-        return mLockIconCenter.y - mRadius;
+        Rect r = new Rect();
+        mLockIcon.getGlobalVisibleRect(r);
+        return r.top;
     }
 
     float getLocationBottom() {
-        return mLockIconCenter.y + mRadius;
+        Rect r = new Rect();
+        mLockIcon.getGlobalVisibleRect(r);
+        return r.bottom;
+
     }
 
     /**

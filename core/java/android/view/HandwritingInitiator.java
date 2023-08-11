@@ -208,6 +208,7 @@ public class HandwritingInitiator {
                             candidateView.getHandwritingDelegatorCallback().run();
                             mState.mHasPreparedHandwritingDelegation = true;
                         } else {
+                            mState.mPendingConnectedView = new WeakReference<>(candidateView);
                             requestFocusWithoutReveal(candidateView);
                         }
                     }
@@ -269,8 +270,9 @@ public class HandwritingInitiator {
                 mShowHoverIconForConnectedView = false;
                 return;
             }
-            if (mState != null && mState.mShouldInitHandwriting) {
-                tryStartHandwriting();
+            if (mState != null && mState.mPendingConnectedView != null
+                    && mState.mPendingConnectedView.get() == view) {
+                startHandwriting(view);
             }
         }
     }
@@ -292,40 +294,6 @@ public class HandwritingInitiator {
         } else {
             // Unexpected branch, set mConnectedView to null to avoid further problem.
             clearConnectedView();
-        }
-    }
-
-    /**
-     * Try to initiate handwriting. For this method to successfully send startHandwriting signal,
-     * the following 3 conditions should meet:
-     *   a) The stylus movement exceeds the touchSlop.
-     *   b) A View has built InputConnection with IME.
-     *   c) The stylus event lands into the connected View's boundary.
-     * This method will immediately fail without any side effect if condition a or b is not met.
-     * However, if both condition a and b are met but the condition c is not met, it will reset the
-     * internal states. And HandwritingInitiator won't attempt to call startHandwriting until the
-     * next ACTION_DOWN.
-     */
-    private void tryStartHandwriting() {
-        if (!mState.mExceedHandwritingSlop) {
-            return;
-        }
-        final View connectedView = getConnectedView();
-        if (connectedView == null) {
-            return;
-        }
-
-        if (!connectedView.isAutoHandwritingEnabled()) {
-            clearConnectedView();
-            return;
-        }
-
-        final Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if (isInHandwritingArea(
-                handwritingArea, mState.mStylusDownX, mState.mStylusDownY, connectedView)) {
-            startHandwriting(connectedView);
-        } else {
-            mState.mShouldInitHandwriting = false;
         }
     }
 
@@ -631,6 +599,7 @@ public class HandwritingInitiator {
         private boolean mHasInitiatedHandwriting;
 
         private boolean mHasPreparedHandwritingDelegation;
+
         /**
          * Whether the current ongoing stylus MotionEvent sequence already exceeds the
          * handwriting slop.
@@ -638,6 +607,12 @@ public class HandwritingInitiator {
          * built InputConnection.
          */
         private boolean mExceedHandwritingSlop;
+
+        /**
+         * A view which has requested focus and is pending input connection creation. When an input
+         * connection is created for the view, a handwriting session should be started for the view.
+         */
+        private WeakReference<View> mPendingConnectedView = null;
 
         /** The pointer id of the stylus pointer that is being tracked. */
         private final int mStylusPointerId;
