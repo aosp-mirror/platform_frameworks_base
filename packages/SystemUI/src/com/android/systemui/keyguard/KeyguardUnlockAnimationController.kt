@@ -932,28 +932,41 @@ class KeyguardUnlockAnimationController @Inject constructor(
 
     /**
      * Called by [KeyguardViewMediator] to let us know that the remote animation has finished, and
-     * we should clean up all of our state.
+     * we should clean up all of our state. [showKeyguard] will tell us which surface should be
+     * visible after the animation has been completed or canceled.
      *
      * This is generally triggered by us, calling
      * [KeyguardViewMediator.finishSurfaceBehindRemoteAnimation].
      */
-    fun notifyFinishedKeyguardExitAnimation(cancelled: Boolean) {
+    fun notifyFinishedKeyguardExitAnimation(showKeyguard: Boolean) {
         // Cancel any pending actions.
         handler.removeCallbacksAndMessages(null)
 
-        // Make sure we made the surface behind fully visible, just in case. It should already be
-        // fully visible. The exit animation is finished, and we should not hold the leash anymore,
-        // so forcing it to 1f.
-        surfaceBehindAlpha = 1f
-        setSurfaceBehindAppearAmount(1f)
+        // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
+        if (lockscreenSmartspace?.visibility == View.INVISIBLE) {
+            lockscreenSmartspace?.visibility = View.VISIBLE
+        }
+
+        if (!showKeyguard) {
+            // Make sure we made the surface behind fully visible, just in case. It should already be
+            // fully visible. The exit animation is finished, and we should not hold the leash anymore,
+            // so forcing it to 1f.
+            surfaceBehindAlpha = 1f
+            setSurfaceBehindAppearAmount(1f)
+
+            try {
+                launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
+            }
+        }
+
+        listeners.forEach { it.onUnlockAnimationFinished() }
+
+        // Reset all state
         surfaceBehindAlphaAnimator.cancel()
         surfaceBehindEntryAnimator.cancel()
         wallpaperCannedUnlockAnimator.cancel()
-        try {
-            launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Remote exception in notifyFinishedKeyguardExitAnimation", e)
-        }
 
         // That target is no longer valid since the animation finished, null it out.
         surfaceBehindRemoteAnimationTargets = null
@@ -963,13 +976,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
         dismissAmountThresholdsReached = false
         willUnlockWithInWindowLauncherAnimations = false
         willUnlockWithSmartspaceTransition = false
-
-        // The lockscreen surface is gone, so it is now safe to re-show the smartspace.
-        if (lockscreenSmartspace?.visibility == View.INVISIBLE) {
-            lockscreenSmartspace?.visibility = View.VISIBLE
-        }
-
-        listeners.forEach { it.onUnlockAnimationFinished() }
     }
 
     /**
