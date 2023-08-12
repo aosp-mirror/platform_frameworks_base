@@ -521,6 +521,22 @@ java_library {
 }
 
 java_library {
+    name: "android_test_frameworks_core_stubs_current.from-source",
+    static_libs: [
+        "all-updatable-modules-system-stubs",
+        "android-non-updatable.stubs.test",
+        "private-stub-annotations-jar",
+    ],
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/test-core",
+    },
+}
+
+java_library {
     name: "android_module_lib_stubs_current.from-source",
     defaults: [
         "android.jar_defaults",

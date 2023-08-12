@@ -393,6 +393,7 @@ func createFullApiLibraries(ctx android.LoadHookContext) {
 		"android_stubs_current",
 		"android_system_stubs_current",
 		"android_test_stubs_current",
+		"android_test_frameworks_core_stubs_current",
 		"android_module_lib_stubs_current",
 		"android_system_server_stubs_current",
 	}
