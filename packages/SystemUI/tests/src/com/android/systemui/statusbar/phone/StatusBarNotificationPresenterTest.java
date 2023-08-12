@@ -32,7 +32,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.FakeMetricsLogger;
-import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -94,7 +93,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
         mDependency.injectMockDependency(NotificationRemoteInputManager.Callback.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
-        mDependency.injectMockDependency(ForegroundServiceNotificationListener.class);
 
         NotificationShadeWindowView notificationShadeWindowView =
                 mock(NotificationShadeWindowView.class);

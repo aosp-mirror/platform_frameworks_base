@@ -87,6 +87,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private int mStatusBarPaddingEnd;
     private int mMinDotWidth;
     private View mSystemIconsContainer;
+    private View mSystemIcons;
     private final MutableStateFlow<DarkChange> mDarkChange = StateFlowKt.MutableStateFlow(
             DarkChange.EMPTY);
 
@@ -119,6 +120,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSystemIconsContainer = findViewById(R.id.system_icons_container);
+        mSystemIcons = findViewById(R.id.system_icons);
         mMultiUserAvatar = findViewById(R.id.multi_user_avatar);
         mCarrierLabel = findViewById(R.id.keyguard_carrier_text);
         mBatteryView = mSystemIconsContainer.findViewById(R.id.battery);
@@ -165,6 +167,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 mStatusIconContainer.getPaddingTop(),
                 getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding),
                 mStatusIconContainer.getPaddingBottom()
+        );
+
+        mSystemIcons.setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_start),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_top),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_end),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_icons_padding_bottom)
         );
 
         // Respect font size setting.

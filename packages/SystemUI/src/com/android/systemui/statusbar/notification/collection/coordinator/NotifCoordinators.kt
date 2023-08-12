@@ -33,34 +33,34 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-    sectionStyleProvider: SectionStyleProvider,
-    featureFlags: FeatureFlags,
-    dataStoreCoordinator: DataStoreCoordinator,
-    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-    keyguardCoordinator: KeyguardCoordinator,
-    rankingCoordinator: RankingCoordinator,
-    appOpsCoordinator: AppOpsCoordinator,
-    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-    bubbleCoordinator: BubbleCoordinator,
-    headsUpCoordinator: HeadsUpCoordinator,
-    gutsCoordinator: GutsCoordinator,
-    conversationCoordinator: ConversationCoordinator,
-    debugModeCoordinator: DebugModeCoordinator,
-    groupCountCoordinator: GroupCountCoordinator,
-    groupWhenCoordinator: GroupWhenCoordinator,
-    mediaCoordinator: MediaCoordinator,
-    preparationCoordinator: PreparationCoordinator,
-    remoteInputCoordinator: RemoteInputCoordinator,
-    rowAppearanceCoordinator: RowAppearanceCoordinator,
-    stackCoordinator: StackCoordinator,
-    shadeEventCoordinator: ShadeEventCoordinator,
-    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-    viewConfigCoordinator: ViewConfigCoordinator,
-    visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator,
-    dismissibilityCoordinator: DismissibilityCoordinator,
-    dreamCoordinator: DreamCoordinator,
+        sectionStyleProvider: SectionStyleProvider,
+        featureFlags: FeatureFlags,
+        dataStoreCoordinator: DataStoreCoordinator,
+        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+        keyguardCoordinator: KeyguardCoordinator,
+        rankingCoordinator: RankingCoordinator,
+        colorizedFgsCoordinator: ColorizedFgsCoordinator,
+        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+        bubbleCoordinator: BubbleCoordinator,
+        headsUpCoordinator: HeadsUpCoordinator,
+        gutsCoordinator: GutsCoordinator,
+        conversationCoordinator: ConversationCoordinator,
+        debugModeCoordinator: DebugModeCoordinator,
+        groupCountCoordinator: GroupCountCoordinator,
+        groupWhenCoordinator: GroupWhenCoordinator,
+        mediaCoordinator: MediaCoordinator,
+        preparationCoordinator: PreparationCoordinator,
+        remoteInputCoordinator: RemoteInputCoordinator,
+        rowAppearanceCoordinator: RowAppearanceCoordinator,
+        stackCoordinator: StackCoordinator,
+        shadeEventCoordinator: ShadeEventCoordinator,
+        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+        viewConfigCoordinator: ViewConfigCoordinator,
+        visualStabilityCoordinator: VisualStabilityCoordinator,
+        sensitiveContentCoordinator: SensitiveContentCoordinator,
+        dismissibilityCoordinator: DismissibilityCoordinator,
+        dreamCoordinator: DreamCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -79,7 +79,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
         mCoordinators.add(rankingCoordinator)
-        mCoordinators.add(appOpsCoordinator)
+        mCoordinators.add(colorizedFgsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
         mCoordinators.add(debugModeCoordinator)
@@ -106,7 +106,7 @@ class NotifCoordinatorsImpl @Inject constructor(
 
         // Manually add Ordered Sections
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
+        mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService
         mOrderedSections.add(conversationCoordinator.peopleAlertingSectioner) // People Alerting
         mOrderedSections.add(conversationCoordinator.peopleSilentSectioner) // People Silent
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting

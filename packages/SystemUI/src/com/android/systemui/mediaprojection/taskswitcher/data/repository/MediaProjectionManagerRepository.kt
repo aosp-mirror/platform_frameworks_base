@@ -81,8 +81,8 @@ constructor(
             return MediaProjectionState.EntireScreen
         }
         val matchingTask =
-            tasksRepository.findRunningTaskFromWindowContainerToken(session.tokenToRecord)
-                ?: return MediaProjectionState.EntireScreen
+            tasksRepository.findRunningTaskFromWindowContainerToken(
+                checkNotNull(session.tokenToRecord)) ?: return MediaProjectionState.EntireScreen
         return MediaProjectionState.SingleTask(matchingTask)
     }
 

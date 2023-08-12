@@ -192,7 +192,7 @@ class PrivacyDialogV2(
             return null
         }
         val closeAppButton =
-            window.layoutInflater.inflate(
+            checkNotNull(window).layoutInflater.inflate(
                 R.layout.privacy_dialog_card_button,
                 expandedLayout,
                 false
@@ -248,7 +248,7 @@ class PrivacyDialogV2(
 
     private fun configureManageButton(element: PrivacyElement, expandedLayout: ViewGroup): View {
         val manageButton =
-            window.layoutInflater.inflate(
+            checkNotNull(window).layoutInflater.inflate(
                 R.layout.privacy_dialog_card_button,
                 expandedLayout,
                 false
