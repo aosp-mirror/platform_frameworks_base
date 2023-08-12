@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -51,7 +50,6 @@ import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
 import android.media.permission.Identity;
-import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
 import android.media.permission.SafeCloseable;
 import android.os.Binder;
@@ -61,7 +59,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -88,6 +85,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
@@ -139,6 +137,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
+    private IVisualQueryRecognitionStatusListener mVisualQueryRecognitionStatusListener;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
@@ -1346,6 +1345,17 @@ public class VoiceInteractionManagerService extends SystemService {
         @android.annotation.EnforcePermission(
                 android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
+        public void subscribeVisualQueryRecognitionStatus(IVisualQueryRecognitionStatusListener
+                listener) {
+            super.subscribeVisualQueryRecognitionStatus_enforcePermission();
+            synchronized (this) {
+                mVisualQueryRecognitionStatusListener = listener;
+            }
+        }
+
+        @android.annotation.EnforcePermission(
+                android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
+        @Override
         public void enableVisualQueryDetection(
                 IVisualQueryDetectionAttentionListener listener) {
             super.enableVisualQueryDetection_enforcePermission();
@@ -1391,7 +1401,10 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startPerceivingLocked(callback);
+                    boolean success = mImpl.startPerceivingLocked(callback);
+                    if (success && mVisualQueryRecognitionStatusListener != null) {
+                        mVisualQueryRecognitionStatusListener.onStartPerceiving();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1409,7 +1422,10 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.stopPerceivingLocked();
+                    boolean success = mImpl.stopPerceivingLocked();
+                    if (success && mVisualQueryRecognitionStatusListener != null) {
+                        mVisualQueryRecognitionStatusListener.onStopPerceiving();
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
