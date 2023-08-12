@@ -179,15 +179,20 @@ constructor(
         }
         if (weatherTarget != null) {
             val clickIntent = weatherTarget.headerAction?.intent
-            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras, { v ->
-                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    activityStarter.startActivity(
-                        clickIntent,
-                        true, /* dismissShade */
-                        null,
-                        false)
+            val weatherData = weatherTarget.baseAction?.extras?.let { extras ->
+                WeatherData.fromBundle(
+                    extras,
+                ) { _ ->
+                    if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        activityStarter.startActivity(
+                            clickIntent,
+                            true, /* dismissShade */
+                            null,
+                            false)
+                    }
                 }
-            })
+            }
+
             if (weatherData != null) {
                 keyguardUpdateMonitor.sendWeatherData(weatherData)
             }

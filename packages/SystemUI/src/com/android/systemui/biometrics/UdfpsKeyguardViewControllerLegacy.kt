@@ -306,8 +306,9 @@ constructor(
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
         view.mUseExpandedOverlay = useExpandedOverlay
         view.startIconAsyncInflate {
-            (view.findViewById(R.id.udfps_animation_view_internal) as View).accessibilityDelegate =
-                udfpsKeyguardAccessibilityDelegate
+            val animationViewInternal: View =
+                view.requireViewById(R.id.udfps_animation_view_internal)
+            animationViewInternal.accessibilityDelegate = udfpsKeyguardAccessibilityDelegate
         }
     }
 

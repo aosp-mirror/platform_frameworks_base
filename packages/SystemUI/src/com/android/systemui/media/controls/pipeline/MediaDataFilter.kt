@@ -149,11 +149,7 @@ constructor(
         // Check if smartspace has explicitly specified whether to re-activate resumable media.
         // The default behavior is to trigger if the smartspace data is active.
         val shouldTriggerResume =
-            if (data.cardAction?.extras?.containsKey(EXTRA_KEY_TRIGGER_RESUME) == true) {
-                data.cardAction.extras.getBoolean(EXTRA_KEY_TRIGGER_RESUME, true)
-            } else {
-                true
-            }
+            data.cardAction?.extras?.getBoolean(EXTRA_KEY_TRIGGER_RESUME, true) ?: true
         val shouldReactivate =
             shouldTriggerResume && !hasActiveMedia() && hasAnyMedia() && data.isActive
 
@@ -269,9 +265,7 @@ constructor(
                     "Cannot create dismiss action click action: extras missing dismiss_intent."
                 )
             } else if (
-                dismissIntent.getComponent() != null &&
-                    dismissIntent.getComponent().getClassName() ==
-                        EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
+                dismissIntent.component?.className == EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
             ) {
                 // Dismiss the card Smartspace data through Smartspace trampoline activity.
                 context.startActivity(dismissIntent)

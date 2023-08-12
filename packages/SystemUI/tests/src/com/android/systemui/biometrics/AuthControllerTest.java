@@ -197,6 +197,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private ArgumentCaptor<String> mMessageCaptor;
     @Mock
     private Resources mResources;
+    @Mock
+    private VibratorHelper mVibratorHelper;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -1097,7 +1099,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel,
                     mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mUdfpsUtils);
+                    mBackgroundExecutor, mUdfpsUtils, mVibratorHelper);
         }
 
         @Override
