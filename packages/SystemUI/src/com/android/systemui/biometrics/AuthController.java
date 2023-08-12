@@ -88,6 +88,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +103,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
 /**
@@ -1036,7 +1037,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         final int userId = mCurrentDialogArgs.argi1;
         if (isFaceAuthEnrolled(userId) && isFingerprintEnrolled(userId)) {
             messageRes = modality == TYPE_FACE
-                    ? R.string.biometric_face_not_recognized
+                    ? R.string.fingerprint_dialog_use_fingerprint_instead
                     : R.string.fingerprint_error_not_match;
         } else {
             messageRes = R.string.biometric_not_recognized;
