@@ -784,30 +784,30 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mHotwordDetectionConnection.setVisualQueryDetectionAttentionListenerLocked(listener);
     }
 
-    public void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+    public boolean startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "startPerceivingLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
             // TODO: callback.onError();
-            return;
+            return false;
         }
 
-        mHotwordDetectionConnection.startPerceivingLocked(callback);
+        return mHotwordDetectionConnection.startPerceivingLocked(callback);
     }
 
-    public void stopPerceivingLocked() {
+    public boolean stopPerceivingLocked() {
         if (DEBUG) {
             Slog.d(TAG, "stopPerceivingLocked");
         }
 
         if (mHotwordDetectionConnection == null) {
             Slog.w(TAG, "stopPerceivingLocked() called but connection isn't established");
-            return;
+            return false;
         }
 
-        mHotwordDetectionConnection.stopPerceivingLocked();
+        return mHotwordDetectionConnection.stopPerceivingLocked();
     }
 
     public void startListeningFromMicLocked(
