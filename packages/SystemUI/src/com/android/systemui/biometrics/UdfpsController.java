@@ -644,8 +644,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             shouldPilfer = true;
         }
 
-        // Pilfer only once per gesture
-        if (shouldPilfer && !mPointerPilfered) {
+        // Pilfer only once per gesture, don't pilfer for BP
+        if (shouldPilfer && !mPointerPilfered
+                && getBiometricSessionType() != SESSION_BIOMETRIC_PROMPT) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
             mPointerPilfered = true;
