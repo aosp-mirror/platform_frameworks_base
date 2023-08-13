@@ -44,10 +44,12 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
+
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.CloseGuard;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -1473,8 +1475,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1492,9 +1496,11 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor query(boolean distinct, String table, String[] columns,
-            String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit) {
+    @NonNull
+    public Cursor query(boolean distinct, @NonNull String table,
+            @Nullable String[] columns, @Nullable String selection,
+            @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having,
+            @Nullable String orderBy, @Nullable String limit) {
         return queryWithFactory(null, distinct, table, columns, selection, selectionArgs,
                 groupBy, having, orderBy, limit, null);
     }
@@ -1511,8 +1517,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1533,9 +1541,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor query(boolean distinct, String table, String[] columns,
-            String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+    @NonNull
+    public Cursor query(boolean distinct, @NonNull String table,
+            @Nullable String[] columns, @Nullable String selection,
+            @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having,
+            @Nullable String orderBy, @Nullable String limit,
+            @Nullable CancellationSignal cancellationSignal) {
         return queryWithFactory(null, distinct, table, columns, selection, selectionArgs,
                 groupBy, having, orderBy, limit, cancellationSignal);
     }
@@ -1553,8 +1564,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1572,10 +1585,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor queryWithFactory(CursorFactory cursorFactory,
-            boolean distinct, String table, String[] columns,
-            String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit) {
+    @SuppressLint("SamShouldBeLast")
+    @NonNull
+    public Cursor queryWithFactory(@Nullable CursorFactory cursorFactory,
+            boolean distinct, @NonNull String table, @Nullable String[] columns,
+            @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy,
+            @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
         return queryWithFactory(cursorFactory, distinct, table, columns, selection,
                 selectionArgs, groupBy, having, orderBy, limit, null);
     }
@@ -1593,8 +1608,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1615,10 +1632,13 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor queryWithFactory(CursorFactory cursorFactory,
-            boolean distinct, String table, String[] columns,
-            String selection, String[] selectionArgs, String groupBy,
-            String having, String orderBy, String limit, CancellationSignal cancellationSignal) {
+    @SuppressLint("SamShouldBeLast")
+    @NonNull
+    public Cursor queryWithFactory(@Nullable CursorFactory cursorFactory,
+            boolean distinct, @NonNull String table, @Nullable String[] columns,
+            @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy,
+            @Nullable String having, @Nullable String orderBy, @Nullable String limit,
+            @Nullable CancellationSignal cancellationSignal) {
         acquireReference();
         try {
             String sql = SQLiteQueryBuilder.buildQueryString(
@@ -1642,8 +1662,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1659,9 +1681,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor query(String table, String[] columns, String selection,
-            String[] selectionArgs, String groupBy, String having,
-            String orderBy) {
+    @NonNull
+    public Cursor query(@NonNull String table, @Nullable String[] columns,
+            @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy,
+            @Nullable String having, @Nullable String orderBy) {
 
         return query(false, table, columns, selection, selectionArgs, groupBy,
                 having, orderBy, null /* limit */);
@@ -1678,8 +1701,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            SQL WHERE clause (excluding the WHERE itself). Passing null
      *            will return all rows for the given table.
      * @param selectionArgs You may include ?s in selection, which will be
-     *         replaced by the values from selectionArgs, in order that they
+     *         replaced by the values from selectionArgs, in the order that they
      *         appear in the selection. The values will be bound as Strings.
+     *         If selection is null or does not contain ?s then selectionArgs
+     *         may be null.
      * @param groupBy A filter declaring how to group rows, formatted as an SQL
      *            GROUP BY clause (excluding the GROUP BY itself). Passing null
      *            will cause the rows to not be grouped.
@@ -1697,9 +1722,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      * @see Cursor
      */
-    public Cursor query(String table, String[] columns, String selection,
-            String[] selectionArgs, String groupBy, String having,
-            String orderBy, String limit) {
+    @NonNull
+    public Cursor query(@NonNull String table, @Nullable String[] columns,
+            @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String groupBy,
+            @Nullable String having, @Nullable String orderBy, @Nullable String limit) {
 
         return query(false, table, columns, selection, selectionArgs, groupBy,
                 having, orderBy, limit);
@@ -1711,11 +1737,13 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL query. The SQL string must not be ; terminated
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
-     *     values will be bound as Strings.
+     *     values will be bound as Strings. If selection is null or does not contain ?s then
+     *     selectionArgs may be null.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
-    public Cursor rawQuery(String sql, String[] selectionArgs) {
+    @NonNull
+    public Cursor rawQuery(@NonNull String sql, @Nullable String[] selectionArgs) {
         return rawQueryWithFactory(null, sql, selectionArgs, null, null);
     }
 
@@ -1725,15 +1753,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL query. The SQL string must not be ; terminated
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
-     *     values will be bound as Strings.
+     *     values will be bound as Strings. If selection is null or does not contain ?s then
+     *     selectionArgs may be null.
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
-    public Cursor rawQuery(String sql, String[] selectionArgs,
-            CancellationSignal cancellationSignal) {
+    @NonNull
+    public Cursor rawQuery(@NonNull String sql, @Nullable String[] selectionArgs,
+            @Nullable CancellationSignal cancellationSignal) {
         return rawQueryWithFactory(null, sql, selectionArgs, null, cancellationSignal);
     }
 
@@ -1744,14 +1774,16 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL query. The SQL string must not be ; terminated
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
-     *     values will be bound as Strings.
+     *     values will be bound as Strings. If selection is null or does not contain ?s then
+     *     selectionArgs may be null.
      * @param editTable the name of the first table, which is editable
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
+    @NonNull
     public Cursor rawQueryWithFactory(
-            CursorFactory cursorFactory, String sql, String[] selectionArgs,
-            String editTable) {
+            @Nullable CursorFactory cursorFactory, @NonNull String sql,
+            @Nullable String[] selectionArgs, @NonNull String editTable) {
         return rawQueryWithFactory(cursorFactory, sql, selectionArgs, editTable, null);
     }
 
@@ -1762,7 +1794,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @param sql the SQL query. The SQL string must not be ; terminated
      * @param selectionArgs You may include ?s in where clause in the query,
      *     which will be replaced by the values from selectionArgs. The
-     *     values will be bound as Strings.
+     *     values will be bound as Strings. If selection is null or does not contain ?s then
+     *     selectionArgs may be null.
      * @param editTable the name of the first table, which is editable
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
@@ -1770,9 +1803,11 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return A {@link Cursor} object, which is positioned before the first entry. Note that
      * {@link Cursor}s are not synchronized, see the documentation for more details.
      */
+    @NonNull
     public Cursor rawQueryWithFactory(
-            CursorFactory cursorFactory, String sql, String[] selectionArgs,
-            String editTable, CancellationSignal cancellationSignal) {
+            @Nullable CursorFactory cursorFactory, @NonNull String sql,
+            @Nullable String[] selectionArgs, @NonNull String editTable,
+            @Nullable CancellationSignal cancellationSignal) {
         acquireReference();
         try {
             SQLiteCursorDriver driver = new SQLiteDirectCursorDriver(this, sql, editTable,
@@ -1800,7 +1835,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            column values
      * @return the row ID of the newly inserted row, or -1 if an error occurred
      */
-    public long insert(String table, String nullColumnHack, ContentValues values) {
+    public long insert(@NonNull String table, @Nullable String nullColumnHack,
+            @Nullable ContentValues values) {
         try {
             return insertWithOnConflict(table, nullColumnHack, values, CONFLICT_NONE);
         } catch (SQLException e) {
@@ -1826,8 +1862,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException
      * @return the row ID of the newly inserted row, or -1 if an error occurred
      */
-    public long insertOrThrow(String table, String nullColumnHack, ContentValues values)
-            throws SQLException {
+    public long insertOrThrow(@NonNull String table, @Nullable String nullColumnHack,
+            @Nullable ContentValues values) throws SQLException {
         return insertWithOnConflict(table, nullColumnHack, values, CONFLICT_NONE);
     }
 
@@ -1847,7 +1883,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *   the row. The keys should be the column names and the values the column values.
      * @return the row ID of the newly inserted row, or -1 if an error occurred
      */
-    public long replace(String table, String nullColumnHack, ContentValues initialValues) {
+    public long replace(@NonNull String table, @Nullable String nullColumnHack,
+            @Nullable ContentValues initialValues) {
         try {
             return insertWithOnConflict(table, nullColumnHack, initialValues,
                     CONFLICT_REPLACE);
@@ -1874,8 +1911,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @throws SQLException
      * @return the row ID of the newly inserted row, or -1 if an error occurred
      */
-    public long replaceOrThrow(String table, String nullColumnHack,
-            ContentValues initialValues) throws SQLException {
+    public long replaceOrThrow(@NonNull String table, @Nullable String nullColumnHack,
+            @Nullable ContentValues initialValues) throws SQLException {
         return insertWithOnConflict(table, nullColumnHack, initialValues,
                 CONFLICT_REPLACE);
     }
@@ -1899,8 +1936,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            input parameter <code>conflictAlgorithm</code> = {@link #CONFLICT_IGNORE}
      *            or an error occurred.
      */
-    public long insertWithOnConflict(String table, String nullColumnHack,
-            ContentValues initialValues, int conflictAlgorithm) {
+    public long insertWithOnConflict(@NonNull String table, @Nullable String nullColumnHack,
+            @Nullable ContentValues initialValues, int conflictAlgorithm) {
         acquireReference();
         try {
             StringBuilder sql = new StringBuilder();
@@ -1950,12 +1987,14 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            Passing null will delete all rows.
      * @param whereArgs You may include ?s in the where clause, which
      *            will be replaced by the values from whereArgs. The values
-     *            will be bound as Strings.
+     *            will be bound as Strings. If whereClause is null or does not
+     *            contain ?s then whereArgs may be null.
      * @return the number of rows affected if a whereClause is passed in, 0
      *         otherwise. To remove all rows and get a count pass "1" as the
      *         whereClause.
      */
-    public int delete(String table, String whereClause, String[] whereArgs) {
+    public int delete(@NonNull String table, @Nullable String whereClause,
+            @Nullable String[] whereArgs) {
         acquireReference();
         try {
             SQLiteStatement statement =  new SQLiteStatement(this, "DELETE FROM " + table +
@@ -1980,10 +2019,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            Passing null will update all rows.
      * @param whereArgs You may include ?s in the where clause, which
      *            will be replaced by the values from whereArgs. The values
-     *            will be bound as Strings.
+     *            will be bound as Strings. If whereClause is null or does not
+     *            contain ?s then whereArgs may be null.
      * @return the number of rows affected
      */
-    public int update(String table, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(@NonNull String table, @Nullable ContentValues values,
+            @Nullable String whereClause, @Nullable String[] whereArgs) {
         return updateWithOnConflict(table, values, whereClause, whereArgs, CONFLICT_NONE);
     }
 
@@ -1997,12 +2038,13 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            Passing null will update all rows.
      * @param whereArgs You may include ?s in the where clause, which
      *            will be replaced by the values from whereArgs. The values
-     *            will be bound as Strings.
+     *            will be bound as Strings. If whereClause is null or does not
+     *            contain ?s then whereArgs may be null.
      * @param conflictAlgorithm for update conflict resolver
      * @return the number of rows affected
      */
-    public int updateWithOnConflict(String table, ContentValues values,
-            String whereClause, String[] whereArgs, int conflictAlgorithm) {
+    public int updateWithOnConflict(@NonNull String table, @Nullable ContentValues values,
+            @Nullable String whereClause, @Nullable String[] whereArgs, int conflictAlgorithm) {
         if (values == null || values.isEmpty()) {
             throw new IllegalArgumentException("Empty values");
         }
@@ -2125,7 +2167,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @param bindArgs only byte[], String, Long and Double are supported in bindArgs.
      * @throws SQLException if the SQL string is invalid
      */
-    public void execSQL(String sql, Object[] bindArgs) throws SQLException {
+    public void execSQL(@NonNull String sql, @NonNull Object[] bindArgs)
+            throws SQLException {
         if (bindArgs == null) {
             throw new IllegalArgumentException("Empty bindArgs");
         }
@@ -2133,7 +2176,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /** {@hide} */
-    public int executeSql(String sql, Object[] bindArgs) throws SQLException {
+    public int executeSql(@NonNull String sql, @NonNull Object[] bindArgs)
+            throws SQLException {
         acquireReference();
         try {
             final int statementType = DatabaseUtils.getSqlStatementType(sql);
