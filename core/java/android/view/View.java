@@ -16212,7 +16212,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (fg != null && isVisible != fg.isVisible()) {
             fg.setVisible(isVisible, false);
         }
+        notifyAutofillManagerViewVisibilityChanged(isVisible);
+        if (isVisible != oldVisible) {
+            if (isAccessibilityPane()) {
+                notifyViewAccessibilityStateChangedIfNeeded(isVisible
+                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
+                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
+            }
 
+            notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
+
+            if (!getSystemGestureExclusionRects().isEmpty()) {
+                postUpdate(this::updateSystemGestureExclusionRects);
+            }
+
+            if (!collectPreferKeepClearRects().isEmpty()) {
+                postUpdate(this::updateKeepClearRects);
+            }
+        }
+    }
+
+    private void notifyAutofillManagerViewVisibilityChanged(boolean isVisible) {
         if (isAutofillable()) {
             AutofillManager afm = getAutofillManager();
 
@@ -16234,24 +16254,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // finish before checking state
                     mVisibilityChangeForAutofillHandler.obtainMessage(0, this).sendToTarget();
                 }
-            }
-        }
-
-        if (isVisible != oldVisible) {
-            if (isAccessibilityPane()) {
-                notifyViewAccessibilityStateChangedIfNeeded(isVisible
-                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
-                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
-            }
-
-            notifyAppearedOrDisappearedForContentCaptureIfNeeded(isVisible);
-
-            if (!getSystemGestureExclusionRects().isEmpty()) {
-                postUpdate(this::updateSystemGestureExclusionRects);
-            }
-
-            if (!collectPreferKeepClearRects().isEmpty()) {
-                postUpdate(this::updateKeepClearRects);
             }
         }
     }
@@ -22128,6 +22130,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // Invoking onVisibilityAggregated directly here since the subtree
                     // will also receive detached from window
                     onVisibilityAggregated(false);
+                } else {
+                    notifyAutofillManagerViewVisibilityChanged(false);
                 }
             }
         }
