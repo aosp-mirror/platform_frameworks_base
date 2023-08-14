@@ -353,8 +353,8 @@ static void printCompatibleScreens(ResXMLTree& tree, String8* outError) {
 }
 
 static void printUsesPermission(const String8& name, bool optional=false, int maxSdkVersion=-1,
-        const String8& requiredFeature = String8::empty(),
-        const String8& requiredNotFeature = String8::empty()) {
+        const String8& requiredFeature = String8(),
+        const String8& requiredNotFeature = String8()) {
     printf("uses-permission: name='%s'", ResTable::normalizeForOutput(name.string()).string());
     if (maxSdkVersion != -1) {
          printf(" maxSdkVersion='%d'", maxSdkVersion);
