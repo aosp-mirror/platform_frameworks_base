@@ -248,6 +248,16 @@ interface ShadeViewController {
     /** Starts tracking a shade expansion gesture that originated from the status bar. */
     fun startTrackingExpansionFromStatusBar()
 
+    /**
+     * Performs haptic feedback from a view with a haptic feedback constant.
+     *
+     * The implementation of this method should use the [android.view.View.performHapticFeedback]
+     * method with the provided constant.
+     *
+     * @param[constant] One of [android.view.HapticFeedbackConstants]
+     */
+    fun performHapticFeedback(constant: Int)
+
     // ******* End Keyguard Section *********
 
     /** Returns the ShadeHeadsUpTracker. */

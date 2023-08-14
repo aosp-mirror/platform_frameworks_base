@@ -3192,6 +3192,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
+    @Override
+    public void performHapticFeedback(int constant) {
+        mVibratorHelper.performHapticFeedback(mView, constant);
+    }
+
     private class ShadeHeadsUpTrackerImpl implements ShadeHeadsUpTracker {
         @Override
         public void addTrackingHeadsUpListener(Consumer<ExpandableNotificationRow> listener) {
