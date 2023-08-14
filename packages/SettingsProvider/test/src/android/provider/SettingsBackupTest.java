@@ -848,7 +848,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
                  Settings.Secure.CREDENTIAL_SERVICE,
-                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
+                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                 Settings.Secure.NAVIGATION_MODE_RESTORE);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {
