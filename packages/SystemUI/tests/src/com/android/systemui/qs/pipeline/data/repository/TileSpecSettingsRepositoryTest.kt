@@ -32,6 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -372,12 +373,23 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             assertThat(loadTilesForUser(0)).isNull()
         }
 
+    @Test
+    fun emptyTilesReplacedByDefaultInSettings() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+            runCurrent()
+
+            assertThat(loadTilesForUser(0))
+                .isEqualTo(getDefaultTileSpecs().map { it.spec }.joinToString(","))
+        }
+
     private fun getDefaultTileSpecs(): List<TileSpec> {
         return QSHost.getDefaultSpecs(context.resources).map(TileSpec::create)
     }
 
-    private fun storeTilesForUser(specs: String, forUser: Int) {
+    private fun TestScope.storeTilesForUser(specs: String, forUser: Int) {
         secureSettings.putStringForUser(SETTING, specs, forUser)
+        runCurrent()
     }
 
     private fun loadTilesForUser(forUser: Int): String? {

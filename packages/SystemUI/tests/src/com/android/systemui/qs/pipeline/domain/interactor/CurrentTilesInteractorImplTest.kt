@@ -648,6 +648,22 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             assertThat(tiles!![1].spec).isEqualTo(CUSTOM_TILE_SPEC)
         }
 
+    @Test
+    fun tileAddedOnEmptyList_blocked() =
+        testScope.runTest(USER_INFO_0) {
+            val tiles by collectLastValue(underTest.currentTiles)
+            val specs = listOf(TileSpec.create("a"), TileSpec.create("b"))
+            val newTile = TileSpec.create("c")
+
+            underTest.addTile(newTile)
+
+            assertThat(tiles!!.isEmpty()).isTrue()
+
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+
+            assertThat(tiles!!.size).isEqualTo(3)
+        }
+
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
         this.state = state
         this.label = label
