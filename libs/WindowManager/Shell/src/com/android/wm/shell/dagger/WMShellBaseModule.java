@@ -44,6 +44,7 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
+import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -73,7 +74,6 @@ import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
@@ -119,6 +119,12 @@ public abstract class WMShellBaseModule {
     //
     // Internal common - Components used internally by multiple shell features
     //
+
+    @WMSingleton
+    @Provides
+    static FloatingContentCoordinator provideFloatingContentCoordinator() {
+        return new FloatingContentCoordinator();
+    }
 
     @WMSingleton
     @Provides
@@ -797,7 +803,6 @@ public abstract class WMShellBaseModule {
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
-            Optional<Pip> pipOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
