@@ -1241,6 +1241,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.init();
         }
         mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+        mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int oldHeight = oldBottom - oldTop;
+                    if (v.getHeight() != oldHeight) {
+                        mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
+                    }
+                });
 
         updateClockAppearance();
 
