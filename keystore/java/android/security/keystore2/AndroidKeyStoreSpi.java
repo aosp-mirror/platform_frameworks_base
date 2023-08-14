@@ -36,6 +36,7 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.system.keystore2.AuthenticatorSpec;
+import android.system.keystore2.Authorization;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
@@ -964,6 +965,32 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             authSpec.authenticatorType = HardwareAuthenticatorType.FINGERPRINT;
             authSpec.authenticatorId = sid;
             authenticatorSpecs.add(authSpec);
+        }
+
+        if (parts.length > 2) {
+            @KeyProperties.EncryptionPaddingEnum int padding =
+                    KeyProperties.EncryptionPadding.toKeymaster(parts[2]);
+            if (padding == KeymasterDefs.KM_PAD_RSA_OAEP
+                    && response.metadata != null
+                    && response.metadata.authorizations != null) {
+                Authorization[] keyCharacteristics = response.metadata.authorizations;
+
+                for (Authorization authorization : keyCharacteristics) {
+                    // Add default MGF1 digest SHA-1
+                    // when wrapping key has KM_TAG_RSA_OAEP_MGF_DIGEST tag
+                    if (authorization.keyParameter.tag
+                            == KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST) {
+                        // Default MGF1 digest is SHA-1
+                        // and KeyMint only supports default MGF1 digest crypto operations
+                        // for importWrappedKey.
+                        args.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                        ));
+                        break;
+                    }
+                }
+            }
         }
 
         try {
