@@ -22,23 +22,35 @@ import android.content.res.Configuration
 import android.view.Surface
 import com.android.systemui.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-/** Models UI of AuthBiometricFingerprintView to support rear display state changes. */
-class AuthBiometricFingerprintViewModel
+/** Models UI of [BiometricPromptLayout.iconView] */
+class PromptFingerprintIconViewModel
 @Inject
-constructor(private val interactor: DisplayStateInteractor) {
+constructor(
+    private val displayStateInteractor: DisplayStateInteractor,
+    private val promptSelectorInteractor: PromptSelectorInteractor,
+) {
     /** Current device rotation. */
     private var rotation: Int = Surface.ROTATION_0
 
-    /** Current AuthBiometricFingerprintView asset. */
+    /** Current BiometricPromptLayout.iconView asset. */
     val iconAsset: Flow<Int> =
-        combine(interactor.isFolded, interactor.isInRearDisplayMode) {
-            isFolded: Boolean,
-            isInRearDisplayMode: Boolean ->
-            getSideFpsAnimationAsset(isFolded, isInRearDisplayMode)
+        combine(
+            displayStateInteractor.isFolded,
+            displayStateInteractor.isInRearDisplayMode,
+            promptSelectorInteractor.sensorType,
+        ) { isFolded: Boolean, isInRearDisplayMode: Boolean, sensorType: FingerprintSensorType ->
+            when (sensorType) {
+                FingerprintSensorType.POWER_BUTTON ->
+                    getSideFpsAnimationAsset(isFolded, isInRearDisplayMode)
+                // Replace below when non-SFPS iconAsset logic is migrated to this ViewModel
+                else -> -1
+            }
         }
 
     @RawRes
@@ -75,7 +87,7 @@ constructor(private val interactor: DisplayStateInteractor) {
 
     /** Called on configuration changes */
     fun onConfigurationChanged(newConfig: Configuration) {
-        interactor.onConfigurationChanged(newConfig)
+        displayStateInteractor.onConfigurationChanged(newConfig)
     }
 
     fun setRotation(newRotation: Int) {

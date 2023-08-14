@@ -73,7 +73,6 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.SysUISingleton;
@@ -134,8 +133,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     private final CoroutineScope mApplicationCoroutineScope;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<AuthBiometricFingerprintViewModel>
-            mAuthBiometricFingerprintViewModelProvider;
     @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
@@ -765,8 +762,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull UdfpsLogger udfpsLogger,
             @NonNull LogContextInteractor logContextInteractor,
-            @NonNull Provider<AuthBiometricFingerprintViewModel>
-                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
@@ -801,7 +796,6 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         mVibratorHelper = vibratorHelper;
 
         mLogContextInteractor = logContextInteractor;
-        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
         mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
@@ -1344,9 +1338,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mFeatureFlags, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mAuthBiometricFingerprintViewModelProvider,
-                mPromptCredentialInteractor, mPromptSelectorInteractor, viewModel,
-                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
+                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override
