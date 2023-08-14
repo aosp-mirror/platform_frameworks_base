@@ -1,0 +1,15 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_library {
+    name: "SettingsLibColor",
+    use_resource_processor: true,
+    sdk_version: "current",
+    min_sdk_version: "28",
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+    ],
+}

@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    api(project(":SettingsLibColor"))
     api("androidx.appcompat:appcompat:1.7.0-alpha03")
     api("androidx.slice:slice-builders:1.1.0-alpha02")
     api("androidx.slice:slice-core:1.1.0-alpha02")

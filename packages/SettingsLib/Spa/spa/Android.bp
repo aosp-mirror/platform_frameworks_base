@@ -24,6 +24,7 @@ android_library {
     srcs: ["src/**/*.kt"],
     use_resource_processor: true,
     static_libs: [
+        "SettingsLibColor",
         "androidx.slice_slice-builders",
         "androidx.slice_slice-core",
         "androidx.slice_slice-view",

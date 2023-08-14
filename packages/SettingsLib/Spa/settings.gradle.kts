@@ -40,3 +40,5 @@ rootProject.name = "SpaLib"
 include(":spa")
 include(":gallery")
 include(":testutils")
+include(":SettingsLibColor")
+project(":SettingsLibColor").projectDir = File(rootDir, "../Color")
