@@ -16,13 +16,14 @@
 
 #define LOG_TAG "VelocityTracker-JNI"
 
+#include <android-base/logging.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
 #include <input/Input.h>
 #include <input/VelocityTracker.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
+
 #include "android_view_MotionEvent.h"
 #include "core_jni_helpers.h"
 
@@ -102,7 +103,7 @@ static void android_view_VelocityTracker_nativeAddMovement(JNIEnv* env, jclass c
         jobject eventObj) {
     const MotionEvent* event = android_view_MotionEvent_getNativePtr(env, eventObj);
     if (!event) {
-        ALOGW("nativeAddMovement failed because MotionEvent was finalized.");
+        LOG(WARNING) << "nativeAddMovement failed because MotionEvent was finalized.";
         return;
     }
 
