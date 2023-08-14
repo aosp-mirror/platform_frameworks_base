@@ -115,24 +115,20 @@ class ShortcutKeyTestBase {
         }
     }
 
-    void sendKeyCombination(int[] keyCodes, long duration) {
+    void sendKeyCombination(int[] keyCodes, long duration, boolean longPress) {
         final long downTime = SystemClock.uptimeMillis();
         final int count = keyCodes.length;
-        final KeyEvent[] events = new KeyEvent[count];
         int metaState = 0;
+
         for (int i = 0; i < count; i++) {
             final int keyCode = keyCodes[i];
             final KeyEvent event = new KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, keyCode,
                     0 /*repeat*/, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
                     0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
             event.setDisplayId(DEFAULT_DISPLAY);
-            events[i] = event;
+            interceptKey(event);
             // The order is important here, metaState could be updated and applied to the next key.
             metaState |= MODIFIER.getOrDefault(keyCode, 0);
-        }
-
-        for (KeyEvent event: events) {
-            interceptKey(event);
         }
 
         try {
@@ -141,15 +137,37 @@ class ShortcutKeyTestBase {
             throw new RuntimeException(e);
         }
 
+        if (longPress) {
+            final long nextDownTime = SystemClock.uptimeMillis();
+            for (int i = 0; i < count; i++) {
+                final int keyCode = keyCodes[i];
+                final KeyEvent nextDownEvent = new KeyEvent(downTime, nextDownTime,
+                        KeyEvent.ACTION_DOWN, keyCode, 1 /*repeat*/, metaState,
+                        KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
+                        KeyEvent.FLAG_LONG_PRESS /*flags*/, InputDevice.SOURCE_KEYBOARD);
+                nextDownEvent.setDisplayId(DEFAULT_DISPLAY);
+                interceptKey(nextDownEvent);
+            }
+        }
+
+        final long eventTime = SystemClock.uptimeMillis();
         for (int i = count - 1; i >= 0; i--) {
-            final long eventTime = SystemClock.uptimeMillis();
             final int keyCode = keyCodes[i];
             final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
                     0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     InputDevice.SOURCE_KEYBOARD);
+            upEvent.setDisplayId(DEFAULT_DISPLAY);
             interceptKey(upEvent);
             metaState &= ~MODIFIER.getOrDefault(keyCode, 0);
         }
+    }
+
+    void sendKeyCombination(int[] keyCodes, long duration) {
+        sendKeyCombination(keyCodes, duration, false /* longPress */);
+    }
+
+    void sendLongPressKeyCombination(int[] keyCodes) {
+        sendKeyCombination(keyCodes, ViewConfiguration.getLongPressTimeout(), true /* longPress */);
     }
 
     void sendKey(int keyCode) {
@@ -179,6 +197,7 @@ class ShortcutKeyTestBase {
         final KeyEvent upEvent = new KeyEvent(downTime, eventTime, KeyEvent.ACTION_UP, keyCode,
                 0 /*repeat*/, 0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/,
                 0 /*flags*/, InputDevice.SOURCE_KEYBOARD);
+        upEvent.setDisplayId(DEFAULT_DISPLAY);
         interceptKey(upEvent);
     }
 

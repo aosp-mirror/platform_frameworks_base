@@ -364,6 +364,14 @@ class TestPhoneWindowManager {
         }
     }
 
+    void overrideLongPressOnHomeBehavior(int behavior) {
+        mPhoneWindowManager.mLongPressOnHomeBehavior = behavior;
+    }
+
+    void overriderDoubleTapOnHomeBehavior(int behavior) {
+        mPhoneWindowManager.mDoubleTapOnHomeBehavior = behavior;
+    }
+
     void overrideCanStartDreaming(boolean canDream) {
         doReturn(canDream).when(mDreamManagerInternal).canStartDreaming(anyBoolean());
     }
