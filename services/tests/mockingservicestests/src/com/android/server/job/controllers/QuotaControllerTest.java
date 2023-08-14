@@ -188,6 +188,7 @@ public class QuotaControllerTest {
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mUsageStatsManager)
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
+        JobSchedulerService.sUsageStatsManagerInternal = mUsageStatsManager;
         doReturn(mPowerAllowlistInternal)
                 .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         // Used in JobStatus.
