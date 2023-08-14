@@ -103,7 +103,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_RECORD_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
-            AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
+            AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
     };
 
     protected static final int[] OPS_CAMERA = new int[] {
@@ -118,8 +119,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     };
 
     protected static final int[] OPS_OTHERS = new int[] {
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW
     };
 
 
