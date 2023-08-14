@@ -110,6 +110,7 @@ type defaultsProps struct {
 	Api_surface         *string
 	Api_contributions   []string
 	Defaults_visibility []string
+	Previous_api        *string
 }
 
 type Bazel_module struct {
@@ -359,6 +360,7 @@ func createApiContributionDefaults(ctx android.LoadHookContext, modules []string
 		props.Api_contributions = transformArray(
 			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
 		props.Defaults_visibility = []string{"//visibility:public"}
+		props.Previous_api = proptools.StringPtr(":android.api.public.latest")
 		ctx.CreateModule(java.DefaultsFactory, &props)
 	}
 }
