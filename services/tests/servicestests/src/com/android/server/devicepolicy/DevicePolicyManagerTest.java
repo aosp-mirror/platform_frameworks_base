@@ -1144,6 +1144,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserManager.DISALLOW_ADD_CLONE_PROFILE),
                 eq(true), eq(UserHandle.SYSTEM));
 
+        verify(getServices().userManager, times(1)).setUserRestriction(
+                eq(UserManager.DISALLOW_ADD_PRIVATE_PROFILE),
+                eq(true), eq(UserHandle.SYSTEM));
+
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
@@ -1420,6 +1424,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(getServices().userManager)
                 .setUserRestriction(eq(UserManager.DISALLOW_ADD_CLONE_PROFILE), eq(false),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+
+        verify(getServices().userManager)
+                .setUserRestriction(eq(UserManager.DISALLOW_ADD_PRIVATE_PROFILE), eq(false),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
 
         verify(getServices().userManagerInternal).setDevicePolicyUserRestrictions(
