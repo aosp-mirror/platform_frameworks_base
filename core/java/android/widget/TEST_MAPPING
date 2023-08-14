@@ -45,6 +45,17 @@
           "exclude-annotation": "android.platform.test.annotations.AppModeFull"
         }
       ]
+    },
+    {
+      "name": "CtsTextTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.LargeTest"
+        }
+      ]
     }
   ]
 }
