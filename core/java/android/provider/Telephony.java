@@ -4905,6 +4905,16 @@ public final class Telephony {
          */
         public static final String COLUMN_SATELLITE_ENABLED = "satellite_enabled";
 
+        /**
+         * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
+         * column is set based on user settings.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER =
+                "satellite_attach_enabled_for_carrier";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -4974,7 +4984,8 @@ public final class Telephony {
                 COLUMN_USAGE_SETTING,
                 COLUMN_TP_MESSAGE_REF,
                 COLUMN_USER_HANDLE,
-                COLUMN_SATELLITE_ENABLED
+                COLUMN_SATELLITE_ENABLED,
+                COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER
         );
 
         /**
