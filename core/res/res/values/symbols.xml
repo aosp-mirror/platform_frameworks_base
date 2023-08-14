@@ -2594,6 +2594,9 @@
   <java-symbol type="string" name="biometric_error_device_not_secured" />
   <java-symbol type="string" name="biometric_error_generic" />
 
+  <!-- Biometric FRR config -->
+  <java-symbol type="fraction" name="config_biometricNotificationFrrThreshold" />
+
   <!-- Device credential strings for BiometricManager -->
   <java-symbol type="string" name="screen_lock_app_setting_name" />
   <java-symbol type="string" name="screen_lock_dialog_default_subtitle" />

@@ -57,6 +57,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -122,6 +123,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     @Nullable private ISidefpsController mSidefpsController;
     private AuthSessionCoordinator mAuthSessionCoordinator;
+    @NonNull private final AuthenticationStatsCollector mAuthenticationStatsCollector;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -180,6 +182,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mBiometricContext = biometricContext;
         mAuthSessionCoordinator = mBiometricContext.getAuthSessionCoordinator();
         mDaemon = daemon;
+
+        mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
+                BiometricsProtoEnums.MODALITY_FINGERPRINT);
 
         final List<SensorLocationInternal> workaroundLocations = getWorkaroundSensorProps(context);
 
@@ -338,7 +343,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mFingerprintSensors.get(sensorId).getLazySession(), userId,
                             mContext.getOpPackageName(), sensorId,
                             createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN,
+                                    mAuthenticationStatsCollector),
                             mBiometricContext,
                             mFingerprintSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client);
@@ -363,7 +369,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mContext, mFingerprintSensors.get(sensorId).getLazySession(), userId,
                     mContext.getOpPackageName(), sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            BiometricsProtoEnums.CLIENT_UNKNOWN,
+                            mAuthenticationStatsCollector),
                     mBiometricContext, hardwareAuthToken,
                     mFingerprintSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher,
                     Utils.getCurrentStrength(sensorId));
@@ -380,7 +387,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mFingerprintSensors.get(sensorId).getLazySession(), token,
                             new ClientMonitorCallbackConverter(receiver), userId, opPackageName,
                             sensorId, createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                             mBiometricContext);
             scheduleForSensor(sensorId, client);
         });
@@ -395,7 +402,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mFingerprintSensors.get(sensorId).getLazySession(), token,
                             userId, opPackageName, sensorId,
                             createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN,
+                                    mAuthenticationStatsCollector),
                             mBiometricContext, challenge);
             scheduleForSensor(sensorId, client);
         });
@@ -415,7 +423,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_ENROLL,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                     mBiometricContext,
                     mFingerprintSensors.get(sensorId).getSensorProperties(),
                     mUdfpsOverlayController, mSidefpsController,
@@ -455,7 +463,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
                     mFingerprintSensors.get(sensorId).getLazySession(), token, id, callback,
                     options,
-                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
+                            mAuthenticationStatsCollector),
                     mBiometricContext, mUdfpsOverlayController, isStrongBiometric);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
@@ -477,7 +486,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     mContext, mFingerprintSensors.get(sensorId).getLazySession(), token, requestId,
                     callback, operationId, restricted, options, cookie,
                     false /* requireConfirmation */,
-                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient,
+                            mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener, mFingerprintSensors.get(sensorId).getLockoutCache(),
                     mUdfpsOverlayController, mSidefpsController,
@@ -566,7 +576,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     new ClientMonitorCallbackConverter(receiver), fingerprintIds, userId,
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_REMOVE,
-                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            BiometricsProtoEnums.CLIENT_UNKNOWN,
+                            mAuthenticationStatsCollector),
                     mBiometricContext,
                     mFingerprintSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
@@ -588,7 +599,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mFingerprintSensors.get(sensorId).getLazySession(), userId,
                             mContext.getOpPackageName(), sensorId,
                             createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
-                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN,
+                                    mAuthenticationStatsCollector),
                             mBiometricContext,
                             FingerprintUtils.getInstance(sensorId),
                             mFingerprintSensors.get(sensorId).getAuthenticatorIds());
@@ -600,9 +612,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         });
     }
 
-    private BiometricLogger createLogger(int statsAction, int statsClient) {
+    private BiometricLogger createLogger(int statsAction, int statsClient,
+            AuthenticationStatsCollector authenticationStatsCollector) {
         return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                statsAction, statsClient);
+                statsAction, statsClient, authenticationStatsCollector);
     }
 
     @Override
@@ -635,7 +648,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     new FingerprintInvalidationClient(mContext,
                             mFingerprintSensors.get(sensorId).getLazySession(), userId, sensorId,
                             createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
-                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN,
+                                    mAuthenticationStatsCollector),
                             mBiometricContext,
                             mFingerprintSensors.get(sensorId).getAuthenticatorIds(), callback);
             scheduleForSensor(sensorId, client);
