@@ -29,6 +29,8 @@ import java.util.Objects;
 public final class DisplayBrightnessState {
     private final float mBrightness;
     private final float mSdrBrightness;
+
+    private final float mMaxBrightness;
     private final BrightnessReason mBrightnessReason;
     private final String mDisplayBrightnessStrategyName;
     private final boolean mShouldUseAutoBrightness;
@@ -42,6 +44,7 @@ public final class DisplayBrightnessState {
         mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
         mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
         mIsSlowChange = builder.isSlowChange();
+        mMaxBrightness = builder.getMaxBrightness();
     }
 
     /**
@@ -87,6 +90,15 @@ public final class DisplayBrightnessState {
         return mIsSlowChange;
     }
 
+    /**
+     * @return maximum allowed brightness
+     */
+    public float getMaxBrightness() {
+        return mMaxBrightness;
+    }
+
+
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -98,8 +110,8 @@ public final class DisplayBrightnessState {
         stringBuilder.append(getBrightnessReason());
         stringBuilder.append("\n    shouldUseAutoBrightness:");
         stringBuilder.append(getShouldUseAutoBrightness());
-        stringBuilder.append("\n    isSlowChange:");
-        stringBuilder.append(mIsSlowChange);
+        stringBuilder.append("\n    isSlowChange:").append(mIsSlowChange);
+        stringBuilder.append("\n    maxBrightness:").append(mMaxBrightness);
         return stringBuilder.toString();
     }
 
@@ -124,13 +136,14 @@ public final class DisplayBrightnessState {
                 && TextUtils.equals(mDisplayBrightnessStrategyName,
                         otherState.getDisplayBrightnessStrategyName())
                 && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness()
-                && mIsSlowChange == otherState.isSlowChange();
+                && mIsSlowChange == otherState.isSlowChange()
+                && mMaxBrightness == otherState.getMaxBrightness();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
-                mShouldUseAutoBrightness, mIsSlowChange);
+                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness);
     }
 
     /**
@@ -150,6 +163,7 @@ public final class DisplayBrightnessState {
         private String mDisplayBrightnessStrategyName;
         private boolean mShouldUseAutoBrightness;
         private boolean mIsSlowChange;
+        private float mMaxBrightness;
 
         /**
          * Create a builder starting with the values from the specified {@link
@@ -165,6 +179,7 @@ public final class DisplayBrightnessState {
             builder.setDisplayBrightnessStrategyName(state.getDisplayBrightnessStrategyName());
             builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
             builder.setIsSlowChange(state.isSlowChange());
+            builder.setMaxBrightness(state.getMaxBrightness());
             return builder;
         }
 
@@ -271,6 +286,21 @@ public final class DisplayBrightnessState {
          */
         public boolean isSlowChange() {
             return mIsSlowChange;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getMaxBrightness()}.
+         */
+        public Builder setMaxBrightness(float maxBrightness) {
+            this.mMaxBrightness = maxBrightness;
+            return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getMaxBrightness()}.
+         */
+        public float getMaxBrightness() {
+            return mMaxBrightness;
         }
 
         /**
