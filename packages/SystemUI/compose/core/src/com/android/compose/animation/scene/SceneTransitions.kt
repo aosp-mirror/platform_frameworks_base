@@ -35,7 +35,7 @@ import com.android.compose.ui.util.fastMap
 
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions(
-    val transitionSpecs: List<TransitionSpec>,
+    private val transitionSpecs: List<TransitionSpec>,
 ) {
     private val cache = mutableMapOf<SceneKey, MutableMap<SceneKey, TransitionSpec>>()
 
