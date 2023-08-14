@@ -2131,6 +2131,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         updateExpansionAndVisibility();
         mNotificationStackScrollLayoutController.setPanelFlinging(false);
+        mShadeLog.d("onFlingEnd called"); // TODO(b/277909752): remove log when bug is fixed
         // expandImmediate should be always reset at the end of animation
         mQsController.setExpandImmediate(false);
     }
@@ -2666,6 +2667,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             setListening(true);
         }
         if (mBarState != SHADE) {
+            // TODO(b/277909752): remove below logs when bug is fixed
+            mShadeLog.d("onExpandingFinished called");
+            if (mSplitShadeEnabled && !mQsController.getExpanded()) {
+                mShadeLog.d("onExpandingFinished called before QS got expanded");
+            }
             // updating qsExpandImmediate is done in onPanelStateChanged for unlocked shade but
             // on keyguard panel state is always OPEN so we need to have that extra update
             mQsController.setExpandImmediate(false);
@@ -4718,6 +4724,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onPanelStateChanged(@PanelState int state) {
+        mShadeLog.logPanelStateChanged(state);
         mQsController.updateExpansionEnabledAmbient();
 
         if (state == STATE_OPEN && mCurrentPanelState != state) {
