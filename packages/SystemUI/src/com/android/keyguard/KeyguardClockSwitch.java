@@ -1,10 +1,5 @@
 package com.android.keyguard;
 
-import static android.view.View.ALPHA;
-import static android.view.View.SCALE_X;
-import static android.view.View.SCALE_Y;
-import static android.view.View.TRANSLATION_Y;
-
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_X_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_SIZE;
@@ -143,6 +138,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mWeatherClockSmartspaceTranslateY = mContext.getResources().getDimensionPixelSize(
                 R.dimen.weather_clock_smartspace_translateY);
         updateStatusArea(/* animate= */false);
+    }
+
+    /** Sets whether the large clock is being shown on a connected display. */
+    public void setLargeClockOnSecondaryDisplay(boolean onSecondaryDisplay) {
+        if (mClock != null) {
+            mClock.getLargeClock().getEvents().onSecondaryDisplayChanged(onSecondaryDisplay);
+        }
     }
 
     /**

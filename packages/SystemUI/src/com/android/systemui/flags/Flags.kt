@@ -776,6 +776,10 @@ object Flags {
     @JvmField
     val ONE_WAY_HAPTICS_API_MIGRATION = unreleasedFlag("oneway_haptics_api_migration")
 
+    /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
+    @JvmField
+    val ENABLE_CLOCK_KEYGUARD_PRESENTATION = unreleasedFlag("enable_clock_keyguard_presentation")
+
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
     val COMPOSE_PEOPLE_SPACE = unreleasedFlag("compose_people_space")

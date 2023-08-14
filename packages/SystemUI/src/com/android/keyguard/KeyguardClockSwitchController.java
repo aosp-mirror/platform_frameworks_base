@@ -104,6 +104,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
 
+    private boolean mShownOnSecondaryDisplay = false;
     private boolean mOnlyClock = false;
     private boolean mIsActiveDreamLockscreenHosted = false;
     private FeatureFlags mFeatureFlags;
@@ -185,8 +186,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Mostly used for alternate displays, limit the information shown
+     * When set, limits the information shown in an external display.
      */
+    public void setShownOnSecondaryDisplay(boolean shownOnSecondaryDisplay) {
+        mShownOnSecondaryDisplay = shownOnSecondaryDisplay;
+    }
+
+    /**
+     * Mostly used for alternate displays, limit the information shown
+     *
+     * @deprecated use {@link KeyguardClockSwitchController#setShownOnSecondaryDisplay}
+     */
+    @Deprecated
     public void setOnlyClock(boolean onlyClock) {
         mOnlyClock = onlyClock;
     }
@@ -221,6 +232,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
+    private void hideSliceViewAndNotificationIconContainer() {
+        View ksv = mView.findViewById(R.id.keyguard_slice_view);
+        ksv.setVisibility(View.GONE);
+
+        View nic = mView.findViewById(
+                R.id.left_aligned_notification_icon_container);
+        nic.setVisibility(View.GONE);
+    }
+
     @Override
     protected void onViewAttached() {
         mClockRegistry.registerClockChangeListener(mClockChangedListener);
@@ -233,13 +253,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardDateWeatherViewInvisibility =
                 mView.getResources().getInteger(R.integer.keyguard_date_weather_view_invisibility);
 
-        if (mOnlyClock) {
-            View ksv = mView.findViewById(R.id.keyguard_slice_view);
-            ksv.setVisibility(View.GONE);
+        if (mShownOnSecondaryDisplay) {
+            mView.setLargeClockOnSecondaryDisplay(true);
+            displayClock(LARGE, /* animate= */ false);
+            hideSliceViewAndNotificationIconContainer();
+            return;
+        }
 
-            View nic = mView.findViewById(
-                    R.id.left_aligned_notification_icon_container);
-            nic.setVisibility(View.GONE);
+        if (mOnlyClock) {
+            hideSliceViewAndNotificationIconContainer();
             return;
         }
         updateAodIcons();
