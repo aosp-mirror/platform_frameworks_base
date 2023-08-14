@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.app.Activity
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
@@ -28,6 +27,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP

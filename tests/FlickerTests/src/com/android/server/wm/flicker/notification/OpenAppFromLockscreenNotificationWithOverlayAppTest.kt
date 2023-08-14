@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -25,6 +24,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.wakeUpAndGoToHomeScreen
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
 import org.junit.FixMethodOrder

@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.common.flicker.annotation.FlickerServiceCompatible
@@ -24,6 +23,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
 import org.junit.Test

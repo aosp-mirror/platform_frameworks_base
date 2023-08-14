@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
 import android.tools.common.traces.component.ComponentNameMatcher
@@ -24,6 +23,7 @@ import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUN
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation

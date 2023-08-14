@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.notification
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
@@ -25,6 +24,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.ClassRule
@@ -174,7 +174,7 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
         val disableUnseenNotifFilterRule =
             SettingOverrideRule(
                 Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-                /* value= */ "0",
+                "0",
             )
     }
 }
