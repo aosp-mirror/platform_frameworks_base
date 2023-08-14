@@ -315,6 +315,7 @@ package android {
     field @FlaggedApi("android.app.usage.report_usage_stats_permission") public static final String REPORT_USAGE_STATS = "android.permission.REPORT_USAGE_STATS";
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
+    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final String RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT = "android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
@@ -12688,6 +12689,7 @@ package android.service.voice {
   public static final class HotwordDetectionService.Callback {
     method public void onDetected(@NonNull android.service.voice.HotwordDetectedResult);
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
+    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public void onTrainingData(@NonNull android.service.voice.HotwordTrainingData);
   }
 
   public final class HotwordDetectionServiceFailure implements android.os.Parcelable {
@@ -12703,6 +12705,8 @@ package android.service.voice {
     field public static final int ERROR_CODE_DETECT_TIMEOUT = 4; // 0x4
     field public static final int ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION = 5; // 0x5
     field public static final int ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE = 6; // 0x6
+    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_EGRESS_LIMIT_EXCEEDED = 8; // 0x8
+    field @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public static final int ERROR_CODE_ON_TRAINING_DATA_SECURITY_EXCEPTION = 9; // 0x9
     field public static final int ERROR_CODE_REMOTE_EXCEPTION = 7; // 0x7
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
   }
@@ -12724,6 +12728,7 @@ package android.service.voice {
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
+    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") public default void onTrainingData(@NonNull android.service.voice.HotwordTrainingData);
     method public default void onUnknownFailure(@NonNull String);
   }
 
