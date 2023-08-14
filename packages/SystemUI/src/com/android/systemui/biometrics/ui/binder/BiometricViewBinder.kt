@@ -504,7 +504,7 @@ private class Spaghetti(
             modalities.hasFaceAndFingerprint &&
                 (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
                 (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face
+                R.string.biometric_dialog_tap_confirm_with_face_alt_1
             else -> null
         }
 
