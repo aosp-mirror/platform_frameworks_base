@@ -435,7 +435,7 @@ public class AudioDeviceBroker {
         // LE Audio it stays the same and we must trigger the proper stream volume alignment, if
         // LE Audio communication device is activated after the audio system has already switched to
         // MODE_IN_CALL mode.
-        if (isBluetoothLeAudioRequested()) {
+        if (isBluetoothLeAudioRequested() && device != null) {
             final int streamType = mAudioService.getBluetoothContextualVolumeStream();
             final int leAudioVolIndex = getVssVolumeForDevice(streamType, device.getInternalType());
             final int leAudioMaxVolIndex = getMaxVssVolumeForStream(streamType);
