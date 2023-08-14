@@ -164,7 +164,9 @@ constructor(
         }
 
         private fun isChipAnimationEnabled(): Boolean {
-            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, true)
+            val defaultValue =
+                context.resources.getBoolean(R.bool.config_enablePrivacyChipAnimation)
+            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, defaultValue)
         }
     }
 }
