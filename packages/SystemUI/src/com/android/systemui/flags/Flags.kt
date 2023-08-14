@@ -774,4 +774,8 @@ object Flags {
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button")
+
+    /** Enable haptic slider component in the brightness slider */
+    @JvmField
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
 }
