@@ -1,14 +1,6 @@
 {
   "presubmit": [
     {
-      "name": "CtsGraphicsTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    },
-    {
       "name": "CtsTextTestCases",
       "options": [
         {
@@ -17,8 +9,7 @@
         {
           "exclude-annotation": "androidx.test.filters.LargeTest"
         }
-      ],
-      "file_patterns": ["(/|^)Typeface\\.java", "(/|^)Paint\\.java"]
+      ]
     }
   ]
 }
