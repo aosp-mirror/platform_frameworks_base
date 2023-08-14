@@ -2412,7 +2412,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                 "removeIfPossible: %s callers=%s", this, Debug.getCallers(5));
 
-        final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
+        final boolean startingWindow = mStartingData != null;
         if (startingWindow) {
             ProtoLog.d(WM_DEBUG_STARTING_WINDOW, "Starting window removed %s", this);
             // Cancel the remove starting window animation on shell. The main window might changed
@@ -2426,6 +2426,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     return false;
                 }, true);
             }
+            mTransitionController.mTransitionTracer.logRemovingStartingWindow(mStartingData);
         } else if (mAttrs.type == TYPE_BASE_APPLICATION
                 && isSelfAnimating(0, ANIMATION_TYPE_STARTING_REVEAL)) {
             // Cancel the remove starting window animation in case the binder dead before remove
