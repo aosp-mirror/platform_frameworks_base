@@ -254,13 +254,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     // The doze screen brightness.
     private final float mScreenBrightnessDozeConfig;
 
-    // The dim screen brightness.
-    private final float mScreenBrightnessDimConfig;
-
-    // The minimum dim amount to use if the screen brightness is already below
-    // mScreenBrightnessDimConfig.
-    private final float mScreenBrightnessMinimumDimAmount;
-
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
 
@@ -529,11 +522,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = BrightnessUtils.clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
-        mScreenBrightnessDimConfig = BrightnessUtils.clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM));
-        mScreenBrightnessMinimumDimAmount = resources.getFloat(
-                R.dimen.config_screenBrightnessMinimumDimAmountFloat);
-
         loadBrightnessRampRates();
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 R.bool.config_skipScreenOnBrightnessRamp);
@@ -565,7 +553,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mUniqueDisplayId,
                 mThermalBrightnessThrottlingDataId,
                 mDisplayDeviceConfig
-        ));
+        ), mContext);
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
         mAutomaticBrightnessStrategy =
@@ -1426,6 +1414,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Note throttling effectively changes the allowed brightness range, so, similarly to HBM,
         // we broadcast this change through setting.
         final float unthrottledBrightnessState = brightnessState;
+
         if (mBrightnessThrottler.isThrottled()) {
             mTempBrightnessEvent.setThermalMax(mBrightnessThrottler.getBrightnessCap());
             brightnessState = Math.min(brightnessState, mBrightnessThrottler.getBrightnessCap());
@@ -1447,25 +1436,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // accurately represents the full possible range, even if they range changes what
             // it means in absolute terms.
             mDisplayBrightnessController.updateScreenBrightnessSetting(brightnessState);
-        }
-
-        // Apply dimming by at least some minimum amount when user activity
-        // timeout is about to expire.
-        if (mPowerRequest.policy == DisplayPowerRequest.POLICY_DIM) {
-            if (brightnessState > PowerManager.BRIGHTNESS_MIN) {
-                brightnessState = Math.max(
-                        Math.min(brightnessState - mScreenBrightnessMinimumDimAmount,
-                                mScreenBrightnessDimConfig),
-                        PowerManager.BRIGHTNESS_MIN);
-                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_DIMMED);
-            }
-            if (!mAppliedDimming) {
-                slowChange = false;
-            }
-            mAppliedDimming = true;
-        } else if (mAppliedDimming) {
-            slowChange = false;
-            mAppliedDimming = false;
         }
 
         DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(mPowerRequest,
@@ -2366,7 +2336,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println();
         pw.println("Display Power Controller Configuration:");
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
-        pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mUseSoftwareAutoBrightnessConfig=" + mUseSoftwareAutoBrightnessConfig);
         pw.println("  mSkipScreenOnBrightnessRamp=" + mSkipScreenOnBrightnessRamp);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);

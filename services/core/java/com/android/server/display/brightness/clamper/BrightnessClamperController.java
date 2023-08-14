@@ -20,6 +20,7 @@ import static com.android.server.display.brightness.clamper.BrightnessClamper.Ty
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -61,13 +62,13 @@ public class BrightnessClamperController {
     private Type mClamperType = null;
 
     public BrightnessClamperController(Handler handler,
-            ClamperChangeListener clamperChangeListener, DisplayDeviceData data) {
-        this(new Injector(), handler, clamperChangeListener, data);
+            ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context) {
+        this(new Injector(), handler, clamperChangeListener, data, context);
     }
 
     @VisibleForTesting
     BrightnessClamperController(Injector injector, Handler handler,
-            ClamperChangeListener clamperChangeListener, DisplayDeviceData data) {
+            ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context) {
         mDeviceConfigParameterProvider = injector.getDeviceConfigParameterProvider();
         mHandler = handler;
         mClamperChangeListenerExternal = clamperChangeListener;
@@ -85,6 +86,7 @@ public class BrightnessClamperController {
             mClampers.add(
                     new BrightnessThermalClamper(handler, clamperChangeListenerInternal, data));
         }
+        mModifiers.add(new DisplayDimModifier(context));
         mModifiers.add(new BrightnessLowPowerModeModifier());
         start();
     }
@@ -111,6 +113,7 @@ public class BrightnessClamperController {
         for (int i = 0; i < mModifiers.size(); i++) {
             mModifiers.get(i).apply(request, builder);
         }
+
         return builder.build();
     }
 

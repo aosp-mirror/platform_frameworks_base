@@ -18,44 +18,37 @@ package com.android.server.display.brightness.clamper;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
+import android.util.IndentingPrintWriter;
 
-import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
 
 import java.io.PrintWriter;
 
-class BrightnessLowPowerModeModifier implements BrightnessModifier {
-
-    private boolean mAppliedLowPower = false;
+class BrightnessLowPowerModeModifier extends BrightnessModifier {
 
     @Override
-    public void apply(DisplayManagerInternal.DisplayPowerRequest request,
-            DisplayBrightnessState.Builder stateBuilder) {
-        // If low power mode is enabled, scale brightness by screenLowPowerBrightnessFactor
-        // as long as it is above the minimum threshold.
-        if (request.lowPowerMode) {
-            float value = stateBuilder.getBrightness();
-            if (value > PowerManager.BRIGHTNESS_MIN) {
-                final float brightnessFactor =
-                        Math.min(request.screenLowPowerBrightnessFactor, 1);
-                final float lowPowerBrightnessFloat = Math.max((value * brightnessFactor),
-                        PowerManager.BRIGHTNESS_MIN);
-                stateBuilder.setBrightness(lowPowerBrightnessFloat);
-                stateBuilder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_LOW_POWER);
-            }
-            if (!mAppliedLowPower) {
-                stateBuilder.setIsSlowChange(false);
-            }
-            mAppliedLowPower = true;
-        } else if (mAppliedLowPower) {
-            stateBuilder.setIsSlowChange(false);
-            mAppliedLowPower = false;
-        }
+    boolean shouldApply(DisplayManagerInternal.DisplayPowerRequest request) {
+        return request.lowPowerMode;
+    }
+
+
+    @Override
+    float getBrightnessAdjusted(float currentBrightness,
+            DisplayManagerInternal.DisplayPowerRequest request) {
+        final float brightnessFactor =
+                Math.min(request.screenLowPowerBrightnessFactor, 1);
+        return Math.max((currentBrightness * brightnessFactor), PowerManager.BRIGHTNESS_MIN);
+    }
+
+    @Override
+    int getModifier() {
+        return BrightnessReason.MODIFIER_LOW_POWER;
     }
 
     @Override
     public void dump(PrintWriter pw) {
         pw.println("BrightnessLowPowerModeModifier:");
-        pw.println("  mAppliedLowPower=" + mAppliedLowPower);
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
+        super.dump(ipw);
     }
 }
