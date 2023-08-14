@@ -5339,6 +5339,12 @@
     <!-- Default value for performant auth feature. -->
     <bool name="config_performantAuthDefault">false</bool>
 
+    <!-- Threshold for false rejection rate (FRR) of biometric authentication. Applies for both
+         fingerprint and face. If a dual-modality device only enrolled a single biometric and
+         experiences high FRR (above threshold), system notification will be sent to encourage user
+         to enroll the other eligible biometric. -->
+    <fraction name="config_biometricNotificationFrrThreshold">30%</fraction>
+
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
     only. The component must be part of a system app. -->
