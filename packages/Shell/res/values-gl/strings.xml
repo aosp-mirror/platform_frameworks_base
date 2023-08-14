@@ -20,7 +20,7 @@
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"Informes de erros"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Estase xerando o informe de erros <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Rexistrouse o informe de erros <xliff:g id="ID">#%d</xliff:g>"</string>
-    <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erro"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erros"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Agarda..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"O informe de erros aparecerá no teléfono en breve"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selecciona para compartir o teu informe de erros"</string>
@@ -32,7 +32,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Non mostrar outra vez"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes de erros"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Non se puido ler o ficheiro de informe de erros"</string>
-    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Non se puideron engadir os detalles do informe de erro ao ficheiro zip"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Non se puideron engadir os detalles do informe de erros ao ficheiro zip"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sen nome"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalles"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Captura de pantalla"</string>

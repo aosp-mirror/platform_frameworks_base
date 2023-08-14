@@ -51,6 +51,7 @@ import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
+import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -305,6 +306,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Nullable private TaskbarDelegate mTaskbarDelegate;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onTrustGrantedForCurrentUser(
+                        boolean dismissKeyguard,
+                        boolean newlyUnlocked,
+                        @NonNull TrustGrantFlags flags,
+                        @Nullable String message
+                ) {
+                    updateAlternateBouncerShowing(mAlternateBouncerInteractor.maybeHide());
+                }
+
         @Override
         public void onEmergencyCallAction() {
             // Since we won't get a setOccluded call we have to reset the view manually such that
@@ -430,7 +441,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
-        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
     }
 
     /** Register a callback, to be invoked by the Predictive Back system. */
@@ -1563,14 +1573,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return mode == KeyguardSecurityModel.SecurityMode.SimPin
                 || mode == KeyguardSecurityModel.SecurityMode.SimPuk;
     }
-
-    private KeyguardStateController.Callback mKeyguardStateControllerCallback =
-            new KeyguardStateController.Callback() {
-        @Override
-        public void onUnlockedChanged() {
-            updateAlternateBouncerShowing(mAlternateBouncerInteractor.maybeHide());
-        }
-    };
 
     /**
      * Delegate used to send show and hide events to an alternate authentication method instead of

@@ -74,7 +74,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -103,6 +102,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
@@ -159,6 +159,9 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
+    private static final int SDK_SANDBOX_UID = Process.toSdkSandboxUid(UNIMPORTANT_UID);
+    private static final int SECONDARY_USER_SDK_SANDBOX_UID =
+            UserHandle.getUid(10, SDK_SANDBOX_UID);
     private static final int CURRENT_IME_UID = 12347;
 
     protected final DeviceConfigStateHelper mDeviceConfig = new DeviceConfigStateHelper(
@@ -956,6 +959,48 @@ public class ActivityStarterTests extends WindowTestsBase {
                 UNIMPORTANT_UID,
                 Process.SYSTEM_UID));
         mockingSession.finishMocking();
+    }
+
+
+    @Test
+    public void testBackgroundActivityStartsAllowed_sdkSandboxClientAppHasVisibleWindow() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        // The SDK's associated client app has a visible window
+        doReturn(true).when(mAtm).hasActiveVisibleWindow(
+                Process.getAppUidForSdkSandboxUid(SDK_SANDBOX_UID));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_sdkSandboxClientAppHasVisibleWindow", false, SDK_SANDBOX_UID,
+                false, PROCESS_STATE_TOP, SDK_SANDBOX_UID, false,
+                PROCESS_STATE_TOP, true, false, false,
+                false, false, false, false, false);
+    }
+
+    @Test
+    public void testBackgroundActivityStartsDisallowed_sdkSandboxClientHasNoVisibleWindow() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        // The SDK's associated client app does not have a visible window
+        doReturn(false).when(mAtm).hasActiveVisibleWindow(
+                Process.getAppUidForSdkSandboxUid(SDK_SANDBOX_UID));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_sdkSandboxClientHasNoVisibleWindow", true, SDK_SANDBOX_UID,
+                false, PROCESS_STATE_TOP, SDK_SANDBOX_UID, false,
+                PROCESS_STATE_TOP, true, false, false,
+                false, false, false, false, false);
+
+    }
+
+    @Test
+    public void testBackgroundActivityStartsAllowed_sdkSandboxMultiUserClientHasVisibleWindow() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        // The SDK's associated client app has a visible window
+        doReturn(true).when(mAtm).hasActiveVisibleWindow(
+                Process.getAppUidForSdkSandboxUid(SECONDARY_USER_SDK_SANDBOX_UID));
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "allowed_sdkSandboxMultiUserClientHasVisibleWindow", false,
+                SECONDARY_USER_SDK_SANDBOX_UID, false, PROCESS_STATE_TOP,
+                SECONDARY_USER_SDK_SANDBOX_UID, false, PROCESS_STATE_TOP,
+                false, false, false, false,
+                false, false, false, false);
     }
 
     private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,

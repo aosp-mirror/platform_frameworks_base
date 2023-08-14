@@ -1074,13 +1074,10 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(configFromContext.showAtLeast3G).isTrue()
 
             // WHEN the change event is fired
-            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
-                receiver.onReceive(
-                    context,
-                    Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
-                        .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
-                )
-            }
+            val intent =
+                Intent(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
+                    .putExtra(PhoneConstants.SUBSCRIPTION_KEY, SUB_1_ID)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(context, intent)
 
             // THEN the config is updated
             assertTrue(latest!!.areEqual(configFromContext))

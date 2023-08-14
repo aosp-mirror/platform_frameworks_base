@@ -41,7 +41,7 @@ import java.util.Set;
  * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP configurations} to set up
  * {@link android.view.Surface Surfaces} for creating a
  * {@link android.hardware.camera2.CameraCaptureSession capture session} with
- * {@link android.hardware.camera2.CameraDevice#createCaptureSession}.
+ * {@link android.hardware.camera2.CameraDevice#createCaptureSession(SessionConfiguration)}.
  * <!-- TODO: link to input stream configuration -->
  *
  * <p>This is the authoritative list for all <!-- input/ -->output formats (and sizes respectively
@@ -62,7 +62,7 @@ import java.util.Set;
  * }</code></pre>
  *
  * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
- * @see CameraDevice#createCaptureSession
+ * @see CameraDevice#createCaptureSession(SessionConfiguration)
  */
 public final class StreamConfigurationMap {
 
@@ -456,7 +456,7 @@ public final class StreamConfigurationMap {
 
     /**
      * Determine whether or not output surfaces with a particular user-defined format can be passed
-     * {@link CameraDevice#createCaptureSession createCaptureSession}.
+     * {@link CameraDevice#createCaptureSession(SessionConfiguration) createCaptureSession}.
      *
      * <p>This method determines that the output {@code format} is supported by the camera device;
      * each output {@code surface} target may or may not itself support that {@code format}.
@@ -468,7 +468,7 @@ public final class StreamConfigurationMap {
      * @param format an image format from either {@link ImageFormat} or {@link PixelFormat}
      * @return
      *          {@code true} iff using a {@code surface} with this {@code format} will be
-     *          supported with {@link CameraDevice#createCaptureSession}
+     *          supported with {@link CameraDevice#createCaptureSession(SessionConfiguration)}
      *
      * @throws IllegalArgumentException
      *          if the image format was not a defined named constant
@@ -476,7 +476,7 @@ public final class StreamConfigurationMap {
      *
      * @see ImageFormat
      * @see PixelFormat
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      */
     public boolean isOutputSupportedFor(int format) {
         checkArgumentFormat(format);
@@ -521,7 +521,7 @@ public final class StreamConfigurationMap {
      *
      * <p>Generally speaking this means that creating a {@link Surface} from that class <i>may</i>
      * provide a producer endpoint that is suitable to be used with
-     * {@link CameraDevice#createCaptureSession}.</p>
+     * {@link CameraDevice#createCaptureSession(SessionConfiguration)}.</p>
      *
      * <p>Since not all of the above classes support output of all format and size combinations,
      * the particular combination should be queried with {@link #isOutputSupportedFor(Surface)}.</p>
@@ -531,7 +531,7 @@ public final class StreamConfigurationMap {
      *
      * @throws NullPointerException if {@code klass} was {@code null}
      *
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      * @see #isOutputSupportedFor(Surface)
      */
     public static <T> boolean isOutputSupportedFor(Class<T> klass) {
@@ -555,8 +555,10 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Determine whether or not the {@code surface} in its current state is suitable to be included
-     * in a {@link CameraDevice#createCaptureSession capture session} as an output.
+     * Determine whether or not the {@code surface} in its current
+     * state is suitable to be included in a {@link
+     * CameraDevice#createCaptureSession(SessionConfiguration) capture
+     * session} as an output.
      *
      * <p>Not all surfaces are usable with the {@link CameraDevice}, and not all configurations
      * of that {@code surface} are compatible. Some classes that provide the {@code surface} are
@@ -588,7 +590,7 @@ public final class StreamConfigurationMap {
      * @throws NullPointerException if {@code surface} was {@code null}
      * @throws IllegalArgumentException if the Surface endpoint is no longer valid
      *
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      * @see #isOutputSupportedFor(Class)
      */
     public boolean isOutputSupportedFor(Surface surface) {
@@ -623,14 +625,16 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Determine whether or not the particular stream configuration is suitable to be included
-     * in a {@link CameraDevice#createCaptureSession capture session} as an output.
+     * Determine whether or not the particular stream configuration is
+     * suitable to be included in a {@link
+     * CameraDevice#createCaptureSession(SessionConfiguration) capture
+     * session} as an output.
      *
      * @param size stream configuration size
      * @param format stream configuration format
      * @return {@code true} if this is supported, {@code false} otherwise
      *
-     * @see CameraDevice#createCaptureSession
+     * @see CameraDevice#createCaptureSession(SessionConfiguration)
      * @see #isOutputSupportedFor(Class)
      * @hide
      */

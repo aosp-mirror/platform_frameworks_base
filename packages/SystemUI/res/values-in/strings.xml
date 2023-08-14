@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu daya"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> dari <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Layar kunci"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ponsel dimatikan karena panas"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ponsel kini berfungsi normal.\nKetuk untuk info selengkapnya"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ponsel menjadi terlalu panas, jadi dimatikan untuk mendinginkan. Ponsel kini berfungsi normal.\n\nPonsel dapat menjadi terlalu panas jika Anda:\n	• Menggunakan aplikasi yang menggunakan sumber daya secara intensif (seperti aplikasi game, video, atau navigasi)\n	• Mendownload atau mengupload file besar\n	• Menggunakan ponsel dalam suhu tinggi"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah-langkah perawatan"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Ponsel menjadi hangat"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Beberapa fitur dibatasi saat ponsel mendingin.\nKetuk untuk info selengkapnya"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cabut perangkat"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Perangkat menjadi panas saat di dekat port pengisi daya. Jika perangkat terhubung ke pengisi daya atau aksesori USB, cabutlah dan berhati-hatilah karena suhu kabel mungkin juga panas."</string>

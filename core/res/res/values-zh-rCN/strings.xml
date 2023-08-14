@@ -1958,7 +1958,7 @@
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要权限"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"无法使用摄像头"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"继续在手机上操作"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"在手机上继续操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"无法使用麦克风"</string>
     <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"无法使用 Play 商店"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"无法使用 Android TV 设置"</string>
@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暂停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"打开工作 <xliff:g id="APP">%s</xliff:g>？"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"打开工作应用 <xliff:g id="APP">%s</xliff:g>？"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"在个人 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"在工作 <xliff:g id="APP">%s</xliff:g> 中打开？"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"通过工作应用拨打电话？"</string>

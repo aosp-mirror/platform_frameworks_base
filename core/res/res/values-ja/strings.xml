@@ -2336,7 +2336,7 @@
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%s</xliff:g>に設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>に設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>に設定されています。タップで変更できます。"</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>に設定されています。タップで変更できます。"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>などに設定されています。タップで変更できます。"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"物理キーボードの設定完了"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"タップするとキーボードを表示できます"</string>
 </resources>

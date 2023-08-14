@@ -234,6 +234,24 @@ public abstract class PackageManager {
             "android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for a privileged system installer to define a list of up to 500 packages that
+     * should not have their updates owned by any installer. The list must be provided via a default
+     * XML resource with the following format:
+     *
+     * <pre>
+     * &lt;deny-ownership&gt;PACKAGE_NAME&lt;/deny-ownership&gt;
+     * &lt;deny-ownership&gt;PACKAGE_NAME&lt;/deny-ownership&gt;
+     * </pre>
+     *
+     * <b>NOTE:</b> Installers that provide this property will not granted update ownership for any
+     * packages that they request update ownership of.
+     * @hide
+     */
+    public static final String PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST =
+            "android.app.PROPERTY_LEGACY_UPDATE_OWNERSHIP_DENYLIST";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by

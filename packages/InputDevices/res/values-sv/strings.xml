@@ -12,13 +12,13 @@
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Tyskt"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Franskt"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Franskt (Kanada)"</string>
-    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Ryskt"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"ryska"</string>
     <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Ryskt, Mac"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Spanskt"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Franskt (Schweiz)"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Tyskt (Schweiz)"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belgiskt"</string>
-    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bulgariskt"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"bulgariska"</string>
     <string name="keyboard_layout_bulgarian_phonetic" msgid="7568914730360106653">"Bulgariska (fonetiskt)"</string>
     <string name="keyboard_layout_italian" msgid="6497079660449781213">"Italienskt"</string>
     <string name="keyboard_layout_danish" msgid="8036432066627127851">"Danskt"</string>
@@ -38,9 +38,9 @@
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Turkiskt"</string>
     <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"turkiska, F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ukrainskt"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Arabiska"</string>
-    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Grekiska"</string>
-    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"Hebreiska"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"arabiska"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"grekiska"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"hebreiska"</string>
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Litauiska"</string>
     <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"Spanska (latinamerikansk)"</string>
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"lettiska"</string>
