@@ -870,6 +870,7 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板电脑"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"投放您的媒体"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"投放 <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”正在运行"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"控件不可用"</string>

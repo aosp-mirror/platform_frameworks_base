@@ -870,6 +870,7 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"టాబ్లెట్"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"మీ మీడియా ప్రసారం అవుతోంది"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ప్రసారం అవుతోంది"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> రన్ అవుతోంది"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>

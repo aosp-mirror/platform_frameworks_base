@@ -870,6 +870,7 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"டேப்லெட்"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"உங்கள் மீடியா அலைபரப்பப்படுகிறது"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ஆப்ஸை அலைபரப்புகிறது"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> இயங்கிக் கொண்டிருக்கிறது"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"கட்டுப்பாடு இல்லை"</string>

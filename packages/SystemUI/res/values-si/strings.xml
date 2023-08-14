@@ -870,6 +870,7 @@
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ටැබ්ලටය"</string>
     <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"ඔබේ මාධ්‍ය විකාශය කිරීම"</string>
     <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> විකාශය කරමින්"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ධාවනය වේ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"අක්‍රියයි, යෙදුම පරීක්ෂා කරන්න"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"හමු නොවිණි"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"පාලනය ලබා ගත නොහැකිය"</string>
