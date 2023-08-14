@@ -583,7 +583,7 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
         env->ReleaseStringCritical(name, str);
     }
 
-    if (!name8.isEmpty()) {
+    if (!name8.empty()) {
         AndroidRuntime::getRuntime()->setArgv0(name8.string(), true /* setProcName */);
     }
 }
