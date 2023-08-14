@@ -3436,15 +3436,22 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     mTvInputHardwareManager.addHdmiInput(id, inputInfo);
                     addHardwareInputLocked(inputInfo);
-                    // catch the use case when a CEC device is unplugged from
-                    // an HDMI port, then plugged in to the same HDMI port.
-                    if (mCurrentInputId != null && mCurrentSessionState != null
-                            && mCurrentInputId.equals(inputInfo.getParentId())
-                            && inputInfo.getId().equals(mCurrentSessionState.inputId)) {
-                        logExternalInputEvent(
-                                FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                inputInfo.getId(), mCurrentSessionState);
-                        mCurrentInputId = inputInfo.getId();
+                    if (mCurrentInputId != null && mCurrentSessionState != null) {
+                        if (TextUtils.equals(mCurrentInputId, inputInfo.getParentId())) {
+                            // catch the use case when a CEC device is plugged in an HDMI port,
+                            // and TV app does not explicitly call tune() to the added CEC input.
+                            logExternalInputEvent(
+                                    FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
+                                    inputInfo.getId(), mCurrentSessionState);
+                            mCurrentInputId = inputInfo.getId();
+                        } else if (TextUtils.equals(mCurrentInputId, inputInfo.getId())) {
+                            // catch the use case when a CEC device disconnects itself
+                            // and reconnects to update info.
+                            logExternalInputEvent(
+                                    FrameworkStatsLog
+                                        .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__DEVICE_INFO_UPDATED,
+                                    mCurrentInputId, mCurrentSessionState);
+                        }
                     }
                 }
             } finally {
