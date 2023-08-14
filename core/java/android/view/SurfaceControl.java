@@ -47,6 +47,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
+import android.gui.StalledTransactionInfo;
 import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
@@ -292,6 +293,7 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, long nativeTpc, TrustedPresentationThresholds thresholds);
     private static native void nativeClearTrustedPresentationCallback(long transactionObj,
             long nativeObject);
+    private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -4361,6 +4363,13 @@ public final class SurfaceControl implements Parcelable {
     private static void invokeReleaseCallback(Consumer<SyncFence> callback, long nativeFencePtr) {
         SyncFence fence = new SyncFence(nativeFencePtr);
         callback.accept(fence);
+    }
+
+    /**
+     * @hide
+     */
+    public static StalledTransactionInfo getStalledTransactionInfo(int pid) {
+        return nativeGetStalledTransactionInfo(pid);
     }
 
 }
