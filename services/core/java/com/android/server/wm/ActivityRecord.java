@@ -2790,6 +2790,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (isEmbedded()) {
                 associateStartingWindowWithTaskIfNeeded();
             }
+            if (mTransitionController.isCollecting()) {
+                mStartingData.mTransitionId = mTransitionController.getCollectingTransitionId();
+            }
         }
     }
 
