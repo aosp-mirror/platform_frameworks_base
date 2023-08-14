@@ -46,6 +46,7 @@ import com.android.systemui.qs.pipeline.domain.model.TileModel
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.qs.tiles.di.NewQSTileFactory
 import com.android.systemui.qs.toProto
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -91,6 +92,8 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     @Mock private lateinit var logger: QSPipelineLogger
 
+    @Mock private lateinit var newQSTileFactory: NewQSTileFactory
+
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
@@ -105,6 +108,8 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
         featureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true)
         featureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, true)
+        // TODO(b/299909337): Add test checking the new factory is used when the flag is on
+        featureFlags.set(Flags.QS_PIPELINE_NEW_TILES, true)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
 
@@ -117,6 +122,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                 userRepository = userRepository,
                 customTileStatePersister = customTileStatePersister,
                 tileFactory = tileFactory,
+                newQSTileFactory = { newQSTileFactory },
                 customTileAddedRepository = customTileAddedRepository,
                 tileLifecycleManagerFactory = tileLifecycleManagerFactory,
                 userTracker = userTracker,

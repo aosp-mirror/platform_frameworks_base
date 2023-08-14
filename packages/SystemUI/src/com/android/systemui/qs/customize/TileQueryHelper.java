@@ -130,11 +130,9 @@ public class TileQueryHelper {
             if (tile == null) {
                 continue;
             } else if (!tile.isAvailable()) {
-                tile.setTileSpec(spec);
                 tile.destroy();
                 continue;
             }
-            tile.setTileSpec(spec);
             tilesToAdd.add(tile);
         }
 
