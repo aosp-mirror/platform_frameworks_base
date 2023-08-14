@@ -21,7 +21,6 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.PipMediaController;
@@ -37,12 +36,6 @@ import dagger.Provides;
  */
 @Module
 public abstract class Pip1SharedModule {
-    @WMSingleton
-    @Provides
-    static FloatingContentCoordinator provideFloatingContentCoordinator() {
-        return new FloatingContentCoordinator();
-    }
-
     // Needs handler for registering broadcast receivers
     @WMSingleton
     @Provides
