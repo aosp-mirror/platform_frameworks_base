@@ -31,9 +31,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.SceneScope
+
+object Notifications {
+    object Elements {
+        val Notifications = ElementKey("Notifications")
+    }
+}
 
 @Composable
-fun Notifications(
+fun SceneScope.Notifications(
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/272779828): implement.

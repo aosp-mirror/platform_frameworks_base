@@ -31,7 +31,6 @@ import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
 import com.android.compose.animation.scene.observableTransitionState
-import com.android.compose.animation.scene.transitions
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -78,7 +77,7 @@ fun SceneContainer(
     SceneTransitionLayout(
         currentScene = currentSceneKey.toTransitionSceneKey(),
         onChangeScene = viewModel::onSceneChanged,
-        transitions = transitions {},
+        transitions = SceneContainerTransitions,
         state = state,
         modifier = modifier.fillMaxSize(),
     ) {
@@ -98,7 +97,9 @@ fun SceneContainer(
             ) {
                 with(composableScene) {
                     this@scene.Content(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier =
+                            Modifier.element(sceneKey.toTransitionSceneKey().rootElementKey)
+                                .fillMaxSize(),
                     )
                 }
             }
@@ -126,14 +127,6 @@ private fun toTransitionModels(
     sceneModel: SceneModel,
 ): Pair<SceneTransitionUserAction, SceneTransitionSceneKey> {
     return userAction.toTransitionUserAction() to sceneModel.key.toTransitionSceneKey()
-}
-
-// TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.
-private fun SceneKey.toTransitionSceneKey(): SceneTransitionSceneKey {
-    return SceneTransitionSceneKey(
-        name = toString(),
-        identity = this,
-    )
 }
 
 // TODO(b/293899074): remove this once we can use the one from SceneTransitionLayout.

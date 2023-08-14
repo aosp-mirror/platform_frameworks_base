@@ -31,15 +31,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.SceneScope
+
+object QuickSettings {
+    object Elements {
+        // TODO RENAME
+        val Content = ElementKey("QuickSettingsContent")
+        val CollapsedGrid = ElementKey("QuickSettingsCollapsedGrid")
+        val FooterActions = ElementKey("QuickSettingsFooterActions")
+    }
+}
 
 @Composable
-fun QuickSettings(
+fun SceneScope.QuickSettings(
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/272780058): implement.
     Column(
         modifier =
             modifier
+                .element(QuickSettings.Elements.Content)
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 300.dp)
                 .clip(RoundedCornerShape(32.dp))
@@ -47,15 +59,19 @@ fun QuickSettings(
                 .padding(16.dp),
     ) {
         Text(
-            text = "Quick settings",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = "Quick settings grid",
+            modifier =
+                Modifier.element(QuickSettings.Elements.CollapsedGrid)
+                    .align(Alignment.CenterHorizontally),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onPrimary,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "QS footer actions",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier.element(QuickSettings.Elements.FooterActions)
+                    .align(Alignment.CenterHorizontally),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onPrimary,
         )
