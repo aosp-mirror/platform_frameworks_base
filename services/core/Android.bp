@@ -188,6 +188,7 @@ java_library_static {
         "securebox",
         "apache-commons-math",
         "power_optimization_flags_lib",
+        "notification_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
