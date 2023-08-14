@@ -231,10 +231,6 @@ public class PowerManagerServiceTest {
         cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContextSpy.getContentResolver()).thenReturn(cr);
 
-        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_dreamsSupported))
-                .thenReturn(true);
-        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_dreamsEnabledByDefault))
-                .thenReturn(true);
         Settings.Global.putInt(mContextSpy.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
@@ -1080,6 +1076,8 @@ public class PowerManagerServiceTest {
     @Test
     public void testScreensaverActivateOnSleepEnabled_powered_afterTimeout_goesToDreaming() {
         when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(true);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
 
         doAnswer(inv -> {
             when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
@@ -1101,6 +1099,8 @@ public class PowerManagerServiceTest {
     public void testAmbientSuppression_disablesDreamingAndWakesDevice() {
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
 
         setDreamsDisabledByAmbientModeSuppressionConfig(true);
         setMinimumScreenOffTimeoutConfig(10000);
@@ -1128,6 +1128,8 @@ public class PowerManagerServiceTest {
     public void testAmbientSuppressionDisabled_shouldNotWakeDevice() {
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
 
         setDreamsDisabledByAmbientModeSuppressionConfig(false);
         setMinimumScreenOffTimeoutConfig(10000);
@@ -1154,6 +1156,8 @@ public class PowerManagerServiceTest {
     public void testAmbientSuppression_doesNotAffectDreamForcing() {
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
 
         setDreamsDisabledByAmbientModeSuppressionConfig(true);
         setMinimumScreenOffTimeoutConfig(10000);
@@ -1179,6 +1183,8 @@ public class PowerManagerServiceTest {
     public void testBatteryDrainDuringDream() {
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
 
         setMinimumScreenOffTimeoutConfig(100);
         setDreamsBatteryLevelDrainConfig(5);
