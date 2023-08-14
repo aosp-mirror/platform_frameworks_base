@@ -47,7 +47,7 @@ import java.util.Set;
 public final class SystemFonts {
     private static final String TAG = "SystemFonts";
 
-    private static final String FONTS_XML = "/system/etc/fonts.xml";
+    private static final String FONTS_XML = "/system/etc/font_fallback.xml";
     /** @hide */
     public static final String SYSTEM_FONT_DIR = "/system/fonts/";
     private static final String OEM_XML = "/product/etc/fonts_customization.xml";
@@ -217,6 +217,19 @@ public final class SystemFonts {
             familyListSet.seenXmlFamilies.append(System.identityHashCode(xmlFamily), 1);
         }
         fallbackListMap.put(familyName, familyListSet);
+    }
+
+    /**
+     * Get the updated FontConfig for testing purposes.
+     * @hide
+     */
+    public static @NonNull FontConfig getSystemFontConfigForTesting(
+            @NonNull String fontsXmlPath,
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion) {
+        return getSystemFontConfigInternal(fontsXmlPath, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+                updatableFontMap, lastModifiedDate, configVersion);
     }
 
     /**
