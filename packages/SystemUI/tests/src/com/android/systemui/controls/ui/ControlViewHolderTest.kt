@@ -125,7 +125,7 @@ class ControlViewHolderTest : SysuiTestCase() {
             control
         )
         cvh.bindData(cws, false)
-        val chevronIcon = baseLayout.findViewById<View>(R.id.chevron_icon)
+        val chevronIcon = baseLayout.requireViewById<View>(R.id.chevron_icon)
 
         assertThat(chevronIcon.visibility).isEqualTo(View.VISIBLE)
     }
