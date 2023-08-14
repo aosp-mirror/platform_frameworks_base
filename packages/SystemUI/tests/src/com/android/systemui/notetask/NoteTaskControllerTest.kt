@@ -69,6 +69,7 @@ import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -672,7 +673,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             extras().bool(EXTRA_USE_STYLUS_MODE).isTrue()
         }
         iconCaptor.value?.let { icon ->
-            assertThat(icon).isNotNull()
+            assertNotNull(icon)
             assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
         }
     }
@@ -755,7 +756,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(shortLabel).isEqualTo(NOTE_TASK_SHORT_LABEL)
             assertThat(longLabel).isEqualTo(NOTE_TASK_LONG_LABEL)
             assertThat(isLongLived).isEqualTo(true)
-            assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
+            assertThat(icon?.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
             assertThat(extras?.getString(EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE))
                 .isEqualTo(NOTE_TASK_PACKAGE_NAME)
         }

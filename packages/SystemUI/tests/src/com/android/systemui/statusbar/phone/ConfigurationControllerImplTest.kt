@@ -212,13 +212,13 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
     @Test
     fun localeListChanged_listenerNotified() {
         val config = mContext.resources.configuration
-        config.locales = LocaleList(Locale.CANADA, Locale.GERMANY)
+        config.setLocales(LocaleList(Locale.CANADA, Locale.GERMANY))
         mConfigurationController.onConfigurationChanged(config)
 
         val listener = createAndAddListener()
 
         // WHEN the locales are updated
-        config.locales = LocaleList(Locale.FRANCE, Locale.JAPAN, Locale.CHINESE)
+        config.setLocales(LocaleList(Locale.FRANCE, Locale.JAPAN, Locale.CHINESE))
         mConfigurationController.onConfigurationChanged(config)
 
         // THEN the listener is notified
