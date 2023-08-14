@@ -224,6 +224,9 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIENT;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_IDLE;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
@@ -2684,6 +2687,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (isTransferringSplashScreen()) {
             return true;
         }
+        // Only do transfer after transaction has done when starting window exist.
+        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommit) {
+            mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
+            return true;
+        }
         requestCopySplashScreen();
         return isTransferringSplashScreen();
     }
@@ -2841,11 +2849,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData == null) {
             return;
         }
-        mStartingData.mWaitForSyncTransactionCommit = false;
-        if (mStartingData.mRemoveAfterTransaction) {
-            mStartingData.mRemoveAfterTransaction = false;
-            removeStartingWindowAnimation(mStartingData.mPrepareRemoveAnimation);
+        final StartingData lastData = mStartingData;
+        lastData.mWaitForSyncTransactionCommit = false;
+        if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_REMOVE_DIRECTLY) {
+            removeStartingWindowAnimation(lastData.mPrepareRemoveAnimation);
+        } else if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_COPY_TO_CLIENT) {
+            removeStartingWindow();
         }
+        lastData.mRemoveAfterTransaction = AFTER_TRANSACTION_IDLE;
     }
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
@@ -2872,7 +2883,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
                     || mTransitionController.inCollectingTransition(startingWindow)) {
-                mStartingData.mRemoveAfterTransaction = true;
+                mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
                 return;
             }
