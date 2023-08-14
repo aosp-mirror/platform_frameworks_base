@@ -18,11 +18,17 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.CommandQueue
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import org.mockito.Mockito.mock
 
-class FakeCommandQueue : CommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java)) {
+@SysUISingleton
+class FakeCommandQueue @Inject constructor() :
+    CommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java)) {
     private val callbacks = mutableListOf<Callbacks>()
 
     override fun addCallback(callback: Callbacks) {
@@ -38,4 +44,9 @@ class FakeCommandQueue : CommandQueue(mock(Context::class.java), mock(DisplayTra
     }
 
     fun callbackCount(): Int = callbacks.size
+}
+
+@Module
+interface FakeCommandQueueModule {
+    @Binds fun bindFake(fake: FakeCommandQueue): CommandQueue
 }

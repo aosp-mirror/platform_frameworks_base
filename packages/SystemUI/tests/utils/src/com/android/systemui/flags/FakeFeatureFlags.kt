@@ -16,6 +16,9 @@
 
 package com.android.systemui.flags
 
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
 import java.io.PrintWriter
 
 class FakeFeatureFlagsClassic : FakeFeatureFlags()
@@ -157,5 +160,22 @@ open class FakeFeatureFlags : FeatureFlagsClassic {
     private fun requireIntValue(flagName: String): Int {
         return intFlags[flagName]
             ?: error("Flag ${flagName(flagName)} was accessed as int but not specified.")
+    }
+}
+
+@Module(includes = [FakeFeatureFlagsClassicModule.Bindings::class])
+class FakeFeatureFlagsClassicModule(
+    @get:Provides val fakeFeatureFlagsClassic: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
+) {
+
+    constructor(
+        block: FakeFeatureFlagsClassic.() -> Unit
+    ) : this(FakeFeatureFlagsClassic().apply(block))
+
+    @Module
+    interface Bindings {
+        @Binds fun bindFake(fake: FakeFeatureFlagsClassic): FeatureFlagsClassic
+        @Binds fun bindClassic(classic: FeatureFlagsClassic): FeatureFlags
+        @Binds fun bindFakeClassic(fake: FakeFeatureFlagsClassic): FakeFeatureFlags
     }
 }

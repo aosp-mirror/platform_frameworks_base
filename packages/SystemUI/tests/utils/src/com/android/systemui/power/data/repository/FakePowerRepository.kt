@@ -18,15 +18,18 @@
 package com.android.systemui.power.data.repository
 
 import android.os.PowerManager
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakePowerRepository(
-    initialInteractive: Boolean = true,
-) : PowerRepository {
+@SysUISingleton
+class FakePowerRepository @Inject constructor() : PowerRepository {
 
-    private val _isInteractive = MutableStateFlow(initialInteractive)
+    private val _isInteractive = MutableStateFlow(true)
     override val isInteractive: Flow<Boolean> = _isInteractive.asStateFlow()
 
     var lastWakeWhy: String? = null
@@ -46,4 +49,9 @@ class FakePowerRepository(
     override fun userTouch() {
         userTouchRegistered = true
     }
+}
+
+@Module
+interface FakePowerRepositoryModule {
+    @Binds fun bindFake(fake: FakePowerRepository): PowerRepository
 }

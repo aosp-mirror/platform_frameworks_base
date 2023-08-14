@@ -22,6 +22,9 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.test.mock.MockContentResolver
 import com.android.systemui.util.mockito.mock
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
 import java.util.concurrent.Executor
 
 /** A fake [UserTracker] to be used in tests. */
@@ -82,5 +85,15 @@ class FakeUserTracker(
 
     fun onProfileChanged() {
         callbacks.forEach { it.onProfilesChanged(_userProfiles) }
+    }
+}
+
+@Module(includes = [FakeUserTrackerModule.Bindings::class])
+class FakeUserTrackerModule(
+    @get:Provides val fakeUserTracker: FakeUserTracker = FakeUserTracker()
+) {
+    @Module
+    interface Bindings {
+        @Binds fun bindFake(fake: FakeUserTracker): UserTracker
     }
 }

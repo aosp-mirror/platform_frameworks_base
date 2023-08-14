@@ -12,31 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.telephony.data.repository
+package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
+/** Defaults to `true` */
 @SysUISingleton
-class FakeTelephonyRepository @Inject constructor() : TelephonyRepository {
+class FakeUserSetupRepository @Inject constructor() : UserSetupRepository {
+    private val _isUserSetup: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    override val isUserSetupFlow = _isUserSetup
 
-    private val _callState = MutableStateFlow(0)
-    override val callState: Flow<Int> = _callState.asStateFlow()
-
-    fun setCallState(value: Int) {
-        _callState.value = value
+    fun setUserSetup(setup: Boolean) {
+        _isUserSetup.value = setup
     }
 }
 
 @Module
-interface FakeTelephonyRepositoryModule {
-    @Binds fun bindFake(fake: FakeTelephonyRepository): TelephonyRepository
+interface FakeUserSetupRepositoryModule {
+    @Binds fun bindFake(fake: FakeUserSetupRepository): UserSetupRepository
 }

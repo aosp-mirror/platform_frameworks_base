@@ -18,26 +18,19 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.demomode.DemoModeController
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.plugins.DarkIconDispatcher
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationListener
-import com.android.systemui.statusbar.NotificationMediaManager
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
-import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
-import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
+import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.whenever
-import com.android.wm.shell.bubbles.Bubbles
-import java.util.Optional
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -51,50 +44,32 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() {
-    @Mock private lateinit var notifListener: NotificationListener
-    @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var wakeUpCoordinator: NotificationWakeUpCoordinator
-    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
-    @Mock private lateinit var notifMediaManager: NotificationMediaManager
+
     @Mock private lateinit var dozeParams: DozeParameters
-    @Mock private lateinit var sectionStyleProvider: SectionStyleProvider
-    @Mock private lateinit var darkIconDispatcher: DarkIconDispatcher
-    @Mock private lateinit var statusBarWindowController: StatusBarWindowController
-    @Mock private lateinit var screenOffAnimController: ScreenOffAnimationController
-    @Mock private lateinit var bubbles: Bubbles
-    @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var aodIcons: NotificationIconContainer
-    @Mock private lateinit var featureFlags: FeatureFlags
 
-    private val shelfViewModel = NotificationIconContainerShelfViewModel()
-    private val statusBarViewModel = NotificationIconContainerStatusBarViewModel()
-    private val aodViewModel = NotificationIconContainerAlwaysOnDisplayViewModel()
-
-    private lateinit var underTest: NotificationIconAreaControllerViewBinderWrapperImpl
+    private lateinit var testComponent: TestComponent
+    private val underTest
+        get() = testComponent.underTest
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        underTest =
-            NotificationIconAreaControllerViewBinderWrapperImpl(
-                mContext,
-                statusBarStateController,
-                wakeUpCoordinator,
-                keyguardBypassController,
-                notifMediaManager,
-                notifListener,
-                dozeParams,
-                sectionStyleProvider,
-                Optional.of(bubbles),
-                demoModeController,
-                darkIconDispatcher,
-                featureFlags,
-                statusBarWindowController,
-                screenOffAnimController,
-                shelfViewModel,
-                statusBarViewModel,
-                aodViewModel,
-            )
+        allowTestableLooperAsMainThread()
+
+        testComponent =
+            DaggerNotificationIconAreaControllerViewBinderWrapperImplTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    featureFlags =
+                        FakeFeatureFlagsClassicModule {
+                            set(Flags.FACE_AUTH_REFACTOR, value = false)
+                        },
+                    mocks =
+                        TestMocksModule(
+                            dozeParameters = dozeParams,
+                        ),
+                )
     }
 
     @Test
@@ -116,5 +91,28 @@ class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() 
         underTest.appearAodIcons()
         verify(aodIcons).translationY = 0f
         verify(aodIcons).alpha = 1.0f
+    }
+
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                BiometricsDomainLayerModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent {
+
+        val underTest: NotificationIconAreaControllerViewBinderWrapperImpl
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                mocks: TestMocksModule,
+                featureFlags: FakeFeatureFlagsClassicModule,
+            ): TestComponent
+        }
     }
 }
