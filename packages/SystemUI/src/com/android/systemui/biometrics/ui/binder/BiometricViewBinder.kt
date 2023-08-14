@@ -108,6 +108,9 @@ object BiometricViewBinder {
 
         val iconViewOverlay = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
         val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
+
+        PromptFingerprintIconViewBinder.bind(iconView, viewModel.fingerprintIconViewModel)
+
         val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)
 
         // Negative-side (left) buttons
