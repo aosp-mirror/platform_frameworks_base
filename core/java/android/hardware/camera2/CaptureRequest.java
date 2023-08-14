@@ -3535,7 +3535,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_DEFAULT } mode.
      * They can be queried through
      * {@link android.hardware.camera2.CameraCharacteristics#get } with
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION) }.
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION }.
      * Unless reported by both
      * {@link android.hardware.camera2.params.StreamConfigurationMap }s, the outputs from
      * <code>{@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION android.scaler.streamConfigurationMapMaximumResolution}</code> and
@@ -3550,13 +3550,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <ul>
      * <li>
      * <p>The mandatory stream combinations listed in
-     *   {@link android.hardware.camera2.CameraCharacteristics.mandatoryMaximumResolutionStreamCombinations }
-     *   would not apply.</p>
+     *   {@link CameraCharacteristics#SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS android.scaler.mandatoryMaximumResolutionStreamCombinations}  would not apply.</p>
      * </li>
      * <li>
      * <p>The bayer pattern of {@code RAW} streams when
      *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }
-     *   is selected will be the one listed in {@link android.sensor.info.binningFactor }.</p>
+     *   is selected will be the one listed in {@link CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR android.sensor.info.binningFactor}.</p>
      * </li>
      * <li>
      * <p>The following keys will always be present:</p>
@@ -3576,9 +3575,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
+     * @see CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE_MAXIMUM_RESOLUTION
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE_MAXIMUM_RESOLUTION
      * @see #SENSOR_PIXEL_MODE_DEFAULT
@@ -4193,9 +4194,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This control allows Camera extension clients to configure the strength of the applied
      * extension effect. Strength equal to 0 means that the extension must not apply any
      * post-processing and return a regular captured frame. Strength equal to 100 is the
-     * default level of post-processing applied when the control is not supported or not set
-     * by the client. Values between 0 and 100 will have different effect depending on the
-     * extension type as described below:</p>
+     * maximum level of post-processing. Values between 0 and 100 will have different effect
+     * depending on the extension type as described below:</p>
      * <ul>
      * <li>{@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_BOKEH BOKEH} -
      * the strength is expected to control the amount of blur.</li>
@@ -4210,7 +4210,9 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * {@link android.hardware.camera2.CameraExtensionCharacteristics#getAvailableCaptureRequestKeys }.
      * The control is only defined and available to clients sending capture requests via
      * {@link android.hardware.camera2.CameraExtensionSession }.
-     * The default value is 100.</p>
+     * If the client doesn't specify the extension strength value, then a default value will
+     * be set by the extension. Clients can retrieve the default value by checking the
+     * corresponding capture result.</p>
      * <p><b>Range of valid values:</b><br>
      * 0 - 100</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>

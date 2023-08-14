@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Ενεργοποίηση USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Μάθετε περισσότερα"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Στιγμιότυπο οθόνης"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Το εκτεταμένο ξεκλείδωμα είναι απενεργοποιημένο"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Η Επέκταση ξεκλειδώματος είναι απενεργοποιημένη"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"έστειλε μια εικόνα"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Αποθήκευση στιγμιότ. οθόνης στο προφίλ εργασίας…"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Μενού λειτουργίας"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Οθόνη κλειδώματος"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Το τηλέφωνο απεν. λόγω ζέστης"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Το τηλέφωνο λειτουργεί πλέον κανονικά.\nΠατήστε για περισσότερες πληροφορίες."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Η θερμοκρασία του τηλεφώνου είναι πολύ υψηλή και απενεργοποιήθηκε για να κρυώσει. Πλέον, λειτουργεί κανονικά.\n\nΗ θερμοκρασία ενδέχεται να ανέβει κατά τη:\n	• Χρήση εφαρμογών υψηλής κατανάλωσης πόρων (όπως gaming, βίντεο ή περιήγησης)\n	• Λήψη/μεταφόρτωση μεγάλων αρχείων\n	• Χρήση σε υψηλές θερμοκρασίες"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Δείτε βήματα αντιμετώπισης."</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Αύξηση θερμοκρασίας τηλεφώνου"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Ορισμένες λειτουργίες περιορίζονται κατά τη μείωση της θερμοκρασίας.\nΠατήστε για περισσότερες πληροφορίες."</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Το τηλέφωνό σας θα προσπαθήσει να μειώσει αυτόματα τη θερμοκρασία. Μπορείτε να εξακολουθήσετε να το χρησιμοποιείτε, αλλά είναι πιθανό να λειτουργεί πιο αργά.\n\nΜόλις μειωθεί η θερμοκρασία του τηλεφώνου σας, θα λειτουργεί ξανά κανονικά."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Δείτε βήματα αντιμετώπισης."</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Αποσυνδέστε τη συσκευή"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Η συσκευή έχει αρχίσει να ζεσταίνεται κοντά στη θύρα φόρτισης. Αν είναι συνδεδεμένη σε φορτιστή ή αξεσουάρ USB, αποσυνδέστε την και προσέξτε γιατί και το καλώδιο μπορεί να έχει ζεσταθεί."</string>

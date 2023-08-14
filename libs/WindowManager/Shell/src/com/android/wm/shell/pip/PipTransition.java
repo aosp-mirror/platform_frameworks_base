@@ -72,6 +72,7 @@ import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.TransitionUtil;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
@@ -451,6 +452,9 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void forceFinishTransition() {
+        // mFinishCallback might be null with an outdated mCurrentPipTaskToken
+        // for example, when app crashes while in PiP and exit transition has not started
+        mCurrentPipTaskToken = null;
         if (mFinishCallback == null) return;
         mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
         mFinishCallback = null;
@@ -1136,5 +1140,13 @@ public class PipTransition extends PipTransitionController {
         mPipMenuController.movePipMenu(null, null, destinationBounds,
                 PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mCurrentPipTaskToken=" + mCurrentPipTaskToken);
+        pw.println(innerPrefix + "mFinishCallback=" + mFinishCallback);
     }
 }

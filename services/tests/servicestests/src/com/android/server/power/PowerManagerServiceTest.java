@@ -18,6 +18,8 @@ package com.android.server.power;
 
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
+import static android.app.ActivityManager.PROCESS_STATE_TOP_SLEEPING;
 import static android.os.PowerManager.USER_ACTIVITY_EVENT_BUTTON;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -78,6 +80,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.sysprop.PowerProperties;
@@ -91,6 +94,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.PowerManagerService.BatteryReceiver;
@@ -159,6 +163,7 @@ public class PowerManagerServiceTest {
     @Mock private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
     @Mock private PowerManagerService.PermissionCheckerWrapper mPermissionCheckerWrapperMock;
     @Mock private PowerManagerService.PowerPropertiesWrapper mPowerPropertiesWrapper;
+    @Mock private DeviceConfigParameterProvider mDeviceParameterProvider;
 
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
@@ -339,6 +344,11 @@ public class PowerManagerServiceTest {
             @Override
             PowerManagerService.PowerPropertiesWrapper createPowerPropertiesWrapper() {
                 return mPowerPropertiesWrapper;
+            }
+
+            @Override
+            DeviceConfigParameterProvider createDeviceConfigParameterProvider() {
+                return mDeviceParameterProvider;
             }
         });
         return mService;
@@ -2680,4 +2690,197 @@ public class PowerManagerServiceTest {
         verify(mNotifierMock, never()).onUserActivity(anyInt(),  anyInt(), anyInt());
     }
 
+    @Test
+    public void testFeatureEnabledProcStateUncachedToCached_fullWakeLockDisabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fullWakeLock", PowerManager.FULL_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateUncachedToCached_fullWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fullWakeLock", PowerManager.FULL_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureEnabledProcStateUncachedToCached_screenBrightWakeLockDisabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenBrightWakeLock",
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateUncachedToCached_screenBrightWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenBrightWakeLock",
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureEnabledProcStateUncachedToCached_screenDimWakeLockDisabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenDimWakeLock",
+                PowerManager.SCREEN_DIM_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isTrue();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateUncachedToCached_screenDimWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenDimWakeLock",
+                PowerManager.SCREEN_DIM_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+
+        setCachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureEnabledProcStateCachedToUncached_fullWakeLockEnabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fullWakeLock", PowerManager.FULL_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateCachedToUncached_fullWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("fullWakeLock", PowerManager.FULL_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureEnabledProcStateCachedToUncached_screenBrightWakeLockEnabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenBrightWakeLock",
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateCachedToUncached_screenBrightWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenBrightWakeLock",
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureEnabledProcStateCachedToUncached_screenDimWakeLockEnabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenDimWakeLock",
+                PowerManager.SCREEN_DIM_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureDisabledProcStateCachedToUncached_screenDimWakeLockEnabled() {
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        createService();
+        startSystem();
+        WakeLock wakeLock = acquireWakeLock("screenDimWakeLock",
+                PowerManager.SCREEN_DIM_WAKE_LOCK);
+        setCachedUidProcState(wakeLock.mOwnerUid);
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    @Test
+    public void testFeatureDynamicallyDisabledProcStateUncachedToCached_fullWakeLockEnabled() {
+        doReturn(true).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        ArgumentCaptor<DeviceConfig.OnPropertiesChangedListener> listenerCaptor =
+                ArgumentCaptor.forClass(DeviceConfig.OnPropertiesChangedListener.class);
+        createService();
+        startSystem();
+        verify(mDeviceParameterProvider, times(1))
+                .addOnPropertiesChangedListener(any(), listenerCaptor.capture());
+        WakeLock wakeLock = acquireWakeLock("fullWakeLock", PowerManager.FULL_WAKE_LOCK);
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        // dynamically disable the feature
+        doReturn(false).when(mDeviceParameterProvider)
+                .isDisableScreenWakeLocksWhileCachedFeatureEnabled();
+        listenerCaptor.getValue().onPropertiesChanged(
+                new DeviceConfig.Properties("ignored_namespace", null));
+
+        setUncachedUidProcState(wakeLock.mOwnerUid);
+        assertThat(wakeLock.mDisabled).isFalse();
+    }
+
+    private void setCachedUidProcState(int uid) {
+        mService.updateUidProcStateInternal(uid, PROCESS_STATE_TOP_SLEEPING);
+    }
+
+    private void setUncachedUidProcState(int uid) {
+        mService.updateUidProcStateInternal(uid, PROCESS_STATE_RECEIVER);
+    }
 }

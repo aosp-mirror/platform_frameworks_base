@@ -146,17 +146,8 @@ class PanelTaskViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTaskViewReleasedOnDismiss() {
-        underTest.dismiss()
-        verify(taskView).release()
-    }
-
-    @Test
-    fun testTaskViewReleasedOnBackOnRoot() {
-        underTest.launchTaskView()
-        verify(taskView).setListener(any(), capture(listenerCaptor))
-
-        listenerCaptor.value.onBackPressedOnTaskRoot(0)
+    fun testTaskViewReleasedOnRelease() {
+        underTest.release()
         verify(taskView).release()
     }
 

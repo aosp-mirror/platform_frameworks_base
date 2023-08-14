@@ -656,7 +656,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
@@ -752,8 +752,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"టెలికామ్ కనెక్షన్‌లను మేనేజ్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"వినియోగదారునికి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ఇన్-కాల్ స్క్రీన్‌తో ఇంటరాక్ట్ చేయగలదు"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"యూజర్‌కి ఇన్-కాల్ స్క్రీన్ ఎప్పుడు, ఎలా కనిపించాలనే దాన్ని నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడం"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"కాల్స్‌ చేయడం/స్వీకరించడం కోసం టెలిఫోన్ సేవలతో పరస్పర చర్య చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ఇన్-కాల్ వినియోగదారు అనుభవాన్ని అందించడం"</string>
@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"అన్‌పాజ్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌ను తెరవాలా?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> వర్క్ యాప్‌ను తెరవాలా?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"వ్యక్తిగత <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"వర్క్ యాప్ నుండి కాల్ చేయాలా?"</string>
@@ -2323,13 +2323,13 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"బ్యాక్‌గ్రౌండ్ నుండి ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ప్రారంభించడానికి సహాయక యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"మైక్రోఫోన్ అందుబాటులో ఉంది"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"మైక్రోఫోన్ బ్లాక్ చేయబడింది"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"డ్యూయల్ స్క్రీన్"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"డ్యూయల్ స్క్రీన్ ఆన్‌లో ఉంది"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ఆన్‌లో ఉంది"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"కంటెంట్‌ను చూపడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రెండు డిస్‌ప్లేలనూ ఉపయోగిస్తోంది"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"పరికరం చాలా వేడిగా ఉంది"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"మీ ఫోన్ చాలా వేడిగా అవుతున్నందున, డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"బ్యాటరీ సేవర్ ఆన్‌లో ఉన్నందున డ్యూయల్ స్క్రీన్ అందుబాటులో లేదు. మీరు దీన్ని సెట్టింగ్‌లలో ఆఫ్ చేయవచ్చు."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"మీ ఫోన్ చాలా వేడిగా అవుతున్నందున, Dual Screen అందుబాటులో లేదు"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen అందుబాటులో లేదు"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"బ్యాటరీ సేవర్ ఆన్‌లో ఉన్నందున Dual Screen అందుబాటులో లేదు. మీరు దీన్ని సెట్టింగ్‌లలో ఆఫ్ చేయవచ్చు."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ఆఫ్ చేయండి"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> కాన్ఫిగర్ చేయబడింది"</string>
