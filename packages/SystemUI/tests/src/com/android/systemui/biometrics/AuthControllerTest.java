@@ -99,7 +99,6 @@ import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -517,7 +516,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
         assertThat(mMessageCaptor.getValue()).isEqualTo(
-                mContext.getString(R.string.biometric_face_not_recognized));
+                mContext.getString(R.string.fingerprint_dialog_use_fingerprint_instead));
     }
 
     @Test
