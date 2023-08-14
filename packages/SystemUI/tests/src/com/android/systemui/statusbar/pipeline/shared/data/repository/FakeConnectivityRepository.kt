@@ -60,7 +60,18 @@ class FakeConnectivityRepository : ConnectivityRepository {
         defaultConnections.value =
             DefaultConnectionModel(
                 ethernet = DefaultConnectionModel.Ethernet(default),
-                isValidated = validated
+                isValidated = validated,
+            )
+    }
+
+    fun setWifiConnected(
+        default: Boolean = true,
+        validated: Boolean = true,
+    ) {
+        defaultConnections.value =
+            DefaultConnectionModel(
+                wifi = DefaultConnectionModel.Wifi(default),
+                isValidated = validated,
             )
     }
 }
