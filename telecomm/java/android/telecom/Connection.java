@@ -3388,7 +3388,11 @@ public abstract class Connection extends Conferenceable {
     public void onAbort() {}
 
     /**
-     * Notifies this Connection of a request to hold.
+     * Notifies this Connection of a request to hold. {@link Connection#setOnHold} should be within
+     * the onHold() body in order to transition the call state to {@link Connection#STATE_HOLDING}.
+     * <p>
+     * Note: If the Connection does not transition to  {@link Connection#STATE_HOLDING} within 2
+     * seconds, the call will be disconnected.
      */
     public void onHold() {}
 
