@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
 import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
@@ -160,7 +161,7 @@ constructor(
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlags,
     facePropertyRepository: FacePropertyRepository,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
@@ -286,8 +287,12 @@ constructor(
         // starts going to sleep.
         merge(
                 keyguardRepository.wakefulness.map { it.isStartingToSleepOrAsleep() },
-                keyguardRepository.isKeyguardGoingAway,
-                userRepository.userSwitchingInProgress
+                if (featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    keyguardTransitionInteractor.isInTransitionToState(KeyguardState.GONE)
+                } else {
+                    keyguardRepository.isKeyguardGoingAway
+                },
+                userRepository.userSwitchingInProgress,
             )
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {

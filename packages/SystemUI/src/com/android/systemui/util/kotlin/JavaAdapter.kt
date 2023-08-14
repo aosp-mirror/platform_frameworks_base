@@ -29,7 +29,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /** A class allowing Java classes to collect on Kotlin flows. */
@@ -74,4 +74,8 @@ fun <T> collectFlow(
     view.repeatWhenAttached(coroutineContext) {
         repeatOnLifecycle(state) { flow.collect { consumer.accept(it) } }
     }
+}
+
+fun <A, B, R> combineFlows(flow1: Flow<A>, flow2: Flow<B>, bifunction: (A, B) -> R): Flow<R> {
+    return combine(flow1, flow2, bifunction)
 }
