@@ -4648,7 +4648,14 @@ public class WindowManagerService extends IWindowManager.Stub
     void reportSystemGestureExclusionChanged(Session session, IWindow window,
             List<Rect> exclusionRects) {
         synchronized (mGlobalLock) {
-            final WindowState win = windowForClientLocked(session, window, true);
+            final WindowState win = windowForClientLocked(session, window,
+                    false /* throwOnError */);
+            if (win == null) {
+                Slog.i(TAG_WM,
+                        "reportSystemGestureExclusionChanged(): No window state for package:"
+                                + session.mPackageName);
+                return;
+            }
             if (win.setSystemGestureExclusion(exclusionRects)) {
                 win.getDisplayContent().updateSystemGestureExclusion();
             }
@@ -4658,7 +4665,14 @@ public class WindowManagerService extends IWindowManager.Stub
     void reportKeepClearAreasChanged(Session session, IWindow window,
             List<Rect> restricted, List<Rect> unrestricted) {
         synchronized (mGlobalLock) {
-            final WindowState win = windowForClientLocked(session, window, true);
+            final WindowState win = windowForClientLocked(session, window,
+                    false /* throwOnError */);
+            if (win == null) {
+                Slog.i(TAG_WM,
+                        "reportKeepClearAreasChanged(): No window state for package:"
+                                + session.mPackageName);
+                return;
+            }
             if (win.setKeepClearAreas(restricted, unrestricted)) {
                 win.getDisplayContent().updateKeepClearAreas();
             }
