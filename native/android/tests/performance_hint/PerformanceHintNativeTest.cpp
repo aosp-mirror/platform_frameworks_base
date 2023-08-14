@@ -56,7 +56,8 @@ public:
                 (const ::std::vector<int64_t>& actualDurationNanos,
                  const ::std::vector<int64_t>& timeStampNanos),
                 (override));
-    MOCK_METHOD(Status, sendHint, (int32_t hints), (override));
+    MOCK_METHOD(Status, sendHint, (int32_t hint), (override));
+    MOCK_METHOD(Status, setMode, (int32_t mode, bool enabled), (override));
     MOCK_METHOD(Status, close, (), (override));
     MOCK_METHOD(IBinder*, onAsBinder, (), (override));
 };
@@ -189,4 +190,52 @@ TEST_F(PerformanceHintTest, SetThreads) {
             .WillOnce(Return(status));
     result = APerformanceHint_setThreads(session, invalidTids.data(), invalidTids.size());
     EXPECT_EQ(EPERM, result);
+}
+
+TEST_F(PerformanceHintTest, SetPowerEfficient) {
+    APerformanceHintManager* manager = createManager();
+
+    std::vector<int32_t> tids;
+    tids.push_back(1);
+    tids.push_back(2);
+    int64_t targetDuration = 56789L;
+
+    StrictMock<MockIHintSession>* iSession = new StrictMock<MockIHintSession>();
+    sp<IHintSession> session_sp(iSession);
+
+    EXPECT_CALL(*mMockIHintManager, createHintSession(_, Eq(tids), Eq(targetDuration), _))
+            .Times(Exactly(1))
+            .WillRepeatedly(DoAll(SetArgPointee<3>(std::move(session_sp)), Return(Status())));
+
+    APerformanceHintSession* session =
+            APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
+    ASSERT_TRUE(session);
+
+    EXPECT_CALL(*iSession, setMode(_, Eq(true))).Times(Exactly(1));
+    int result = APerformanceHint_setPreferPowerEfficiency(session, true);
+    EXPECT_EQ(0, result);
+
+    EXPECT_CALL(*iSession, setMode(_, Eq(false))).Times(Exactly(1));
+    result = APerformanceHint_setPreferPowerEfficiency(session, false);
+    EXPECT_EQ(0, result);
+}
+
+TEST_F(PerformanceHintTest, CreateZeroTargetDurationSession) {
+    APerformanceHintManager* manager = createManager();
+
+    std::vector<int32_t> tids;
+    tids.push_back(1);
+    tids.push_back(2);
+    int64_t targetDuration = 0;
+
+    StrictMock<MockIHintSession>* iSession = new StrictMock<MockIHintSession>();
+    sp<IHintSession> session_sp(iSession);
+
+    EXPECT_CALL(*mMockIHintManager, createHintSession(_, Eq(tids), Eq(targetDuration), _))
+            .Times(Exactly(1))
+            .WillRepeatedly(DoAll(SetArgPointee<3>(std::move(session_sp)), Return(Status())));
+
+    APerformanceHintSession* session =
+            APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
+    ASSERT_TRUE(session);
 }

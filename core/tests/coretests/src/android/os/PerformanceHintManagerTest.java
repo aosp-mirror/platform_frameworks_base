@@ -173,4 +173,13 @@ public class PerformanceHintManagerTest {
             session.setThreads(new int[]{-1});
         });
     }
+
+    @Test
+    public void testSetPreferPowerEfficiency() {
+        Session s = createSession();
+        assumeNotNull(s);
+        s.setPreferPowerEfficiency(false);
+        s.setPreferPowerEfficiency(true);
+        s.setPreferPowerEfficiency(true);
+    }
 }

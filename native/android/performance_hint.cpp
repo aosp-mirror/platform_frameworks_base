@@ -17,6 +17,7 @@
 #define LOG_TAG "perf_hint"
 
 #include <aidl/android/hardware/power/SessionHint.h>
+#include <aidl/android/hardware/power/SessionMode.h>
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
 #include <android/performance_hint.h>
@@ -36,6 +37,7 @@ using namespace android::os;
 using namespace std::chrono_literals;
 
 using AidlSessionHint = aidl::android::hardware::power::SessionHint;
+using AidlSessionMode = aidl::android::hardware::power::SessionMode;
 
 struct APerformanceHintSession;
 
@@ -72,6 +74,7 @@ public:
     int sendHint(SessionHint hint);
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
+    int setPreferPowerEfficiency(bool enabled);
 
 private:
     friend struct APerformanceHintManager;
@@ -307,6 +310,18 @@ int APerformanceHintSession::getThreadIds(int32_t* const threadIds, size_t* size
     return 0;
 }
 
+int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
+    binder::Status ret =
+            mHintSession->setMode(static_cast<int32_t>(AidlSessionMode::POWER_EFFICIENCY), enabled);
+
+    if (!ret.isOk()) {
+        ALOGE("%s: HintSession setPreferPowerEfficiency failed: %s", __FUNCTION__,
+              ret.exceptionMessage().c_str());
+        return EPIPE;
+    }
+    return OK;
+}
+
 // ===================================== C API
 APerformanceHintManager* APerformanceHint_getManager() {
     return APerformanceHintManager::getInstance();
@@ -355,6 +370,10 @@ int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const 
     }
     return static_cast<APerformanceHintSession*>(aPerformanceHintSession)
             ->getThreadIds(threadIds, size);
+}
+
+int APerformanceHint_setPreferPowerEfficiency(APerformanceHintSession* session, bool enabled) {
+    return session->setPreferPowerEfficiency(enabled);
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {

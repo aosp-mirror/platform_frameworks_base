@@ -94,7 +94,10 @@ cc_library_static {
 
 cc_defaults {
     name: "libservices.core-libs",
-    defaults: ["android.hardware.graphics.common-ndk_shared"],
+    defaults: [
+        "android.hardware.graphics.common-ndk_shared",
+        "android.hardware.power-ndk_shared",
+    ],
     shared_libs: [
         "libadb_pairing_server",
         "libadb_pairing_connection",
@@ -177,7 +180,6 @@ cc_defaults {
         "android.hardware.power@1.1",
         "android.hardware.power@1.2",
         "android.hardware.power@1.3",
-        "android.hardware.power-V4-ndk",
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
