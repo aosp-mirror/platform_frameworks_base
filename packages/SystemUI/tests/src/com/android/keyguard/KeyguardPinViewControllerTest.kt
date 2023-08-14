@@ -114,7 +114,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
         objectKeyguardPINView =
             View.inflate(mContext, R.layout.keyguard_pin_view, null)
-                .findViewById(R.id.keyguard_pin_view) as KeyguardPINView
+                .requireViewById(R.id.keyguard_pin_view) as KeyguardPINView
     }
 
     private fun constructPinViewController(
@@ -175,7 +175,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     private fun getPinTopGuideline(): Float {
         val cs = ConstraintSet()
-        val container = objectKeyguardPINView.findViewById(R.id.pin_container) as ConstraintLayout
+        val container = objectKeyguardPINView.requireViewById(R.id.pin_container) as ConstraintLayout
         cs.clone(container)
         return cs.getConstraint(R.id.pin_pad_top_guideline).layout.guidePercent
     }

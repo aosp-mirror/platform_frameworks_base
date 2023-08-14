@@ -126,6 +126,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
 
     private fun onSpinnerItemSelected(position: Int) {
         val spinner = dialog.requireViewById<Spinner>(R.id.screen_share_mode_spinner)
-        spinner.onItemSelectedListener.onItemSelected(spinner, mock(), position, /* id= */ 0)
+        checkNotNull(spinner.onItemSelectedListener)
+            .onItemSelected(spinner, mock(), position, /* id= */ 0)
     }
 }
