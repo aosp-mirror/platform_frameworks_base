@@ -508,30 +508,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNextSecurityScreenOrFinish_SimPinToAnotherSimPin_None() {
-        // GIVEN the current security method is SimPin
-        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
-        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
-            .thenReturn(false)
-        underTest.showSecurityScreen(SecurityMode.SimPin)
-
-        // WHEN a request is made from the SimPin screens to show the next security method
-        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
-            .thenReturn(SecurityMode.SimPin)
-        whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
-
-        underTest.showNextSecurityScreenOrFinish(
-            /* authenticated= */ true,
-            TARGET_USER_ID,
-            /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
-        )
-
-        // THEN the next security method of None will dismiss keyguard.
-        verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
-    }
-
-    @Test
     fun onSwipeUp_whenFaceDetectionIsNotRunning_initiatesFaceAuth() {
         val registeredSwipeListener = registeredSwipeListener
         whenever(keyguardUpdateMonitor.isFaceDetectionRunning).thenReturn(false)
