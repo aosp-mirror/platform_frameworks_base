@@ -20,8 +20,11 @@ import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -34,7 +37,11 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -45,6 +52,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val flags: FeatureFlags,
     private val shadeRepository: ShadeRepository,
 ) :
     TransitionInteractor(
@@ -53,6 +61,7 @@ constructor(
 
     override fun start() {
         listenForLockscreenToGone()
+        listenForLockscreenToGoneDragging()
         listenForLockscreenToOccluded()
         listenForLockscreenToCamera()
         listenForLockscreenToAodOrDozing()
@@ -61,6 +70,63 @@ constructor(
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
     }
+
+    /**
+     * Whether we want the surface behind the keyguard visible for the transition from LOCKSCREEN,
+     * or null if we don't care and should just use a reasonable default.
+     *
+     * [KeyguardSurfaceBehindInteractor] will switch to this flow whenever a transition from
+     * LOCKSCREEN is running.
+     */
+    val surfaceBehindVisibility: Flow<Boolean?> =
+        transitionInteractor.startedKeyguardTransitionStep
+            .map { startedStep ->
+                if (startedStep.to != KeyguardState.GONE) {
+                    // LOCKSCREEN to anything but GONE does not require any special surface
+                    // visibility handling.
+                    return@map null
+                }
+
+                true // TODO(b/278086361): Implement continuous swipe to unlock.
+            }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
+
+    /**
+     * The surface behind view params to use for the transition from LOCKSCREEN, or null if we don't
+     * care and should use a reasonable default.
+     */
+    val surfaceBehindModel: Flow<KeyguardSurfaceBehindModel?> =
+        combine(
+                transitionInteractor.startedKeyguardTransitionStep,
+                transitionInteractor.transitionStepsFromState(KeyguardState.LOCKSCREEN)
+            ) { startedStep, fromLockscreenStep ->
+                if (startedStep.to != KeyguardState.GONE) {
+                    // Only LOCKSCREEN -> GONE has specific surface params (for the unlock
+                    // animation).
+                    return@combine null
+                } else if (fromLockscreenStep.value > 0.5f) {
+                    // Start the animation once we're 50% transitioned to GONE.
+                    KeyguardSurfaceBehindModel(
+                        animateFromAlpha = 0f,
+                        alpha = 1f,
+                        animateFromTranslationY = 500f,
+                        translationY = 0f
+                    )
+                } else {
+                    KeyguardSurfaceBehindModel(
+                        alpha = 0f,
+                    )
+                }
+            }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
 
     private fun listenForLockscreenToDreaming() {
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
@@ -169,7 +235,8 @@ constructor(
                             }
 
                             // If canceled, just put the state back
-                            // TODO: This logic should happen in FromPrimaryBouncerInteractor.
+                            // TODO(b/278086361): This logic should happen in
+                            //  FromPrimaryBouncerInteractor.
                             if (nextState == TransitionState.CANCELED) {
                                 transitionRepository.startTransition(
                                     TransitionInfo(
@@ -201,7 +268,32 @@ constructor(
         }
     }
 
+    fun dismissKeyguard() {
+        startTransitionTo(KeyguardState.GONE)
+    }
+
     private fun listenForLockscreenToGone() {
+        if (flags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            return
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardGoingAway
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isKeyguardGoingAway, lastStartedStep) = pair
+                    if (isKeyguardGoingAway && lastStartedStep.to == KeyguardState.LOCKSCREEN) {
+                        startTransitionTo(KeyguardState.GONE)
+                    }
+                }
+        }
+    }
+
+    private fun listenForLockscreenToGoneDragging() {
+        if (flags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
@@ -291,7 +383,7 @@ constructor(
     }
 
     companion object {
-        private val DEFAULT_DURATION = 500.milliseconds
+        private val DEFAULT_DURATION = 400.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
     }

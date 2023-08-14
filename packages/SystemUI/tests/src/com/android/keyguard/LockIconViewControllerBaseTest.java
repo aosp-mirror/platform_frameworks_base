@@ -49,7 +49,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -164,8 +164,9 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mVibrator,
                 mAuthRippleController,
                 mResources,
-                new KeyguardTransitionInteractor(mTransitionRepository,
-                        TestScopeProvider.getTestScope().getBackgroundScope()),
+                KeyguardTransitionInteractorFactory.create(
+                        TestScopeProvider.getTestScope().getBackgroundScope(),
+                                mTransitionRepository).getKeyguardTransitionInteractor(),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags,
                 mPrimaryBouncerInteractor

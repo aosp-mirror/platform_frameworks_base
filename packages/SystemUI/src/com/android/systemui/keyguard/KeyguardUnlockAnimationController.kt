@@ -403,7 +403,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
      * the device.
      */
     fun canPerformInWindowLauncherAnimations(): Boolean {
-        return isNexusLauncherUnderneath() &&
+        // TODO(b/278086361): Refactor in-window animations.
+        return !featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR) &&
+                isNexusLauncherUnderneath() &&
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
@@ -847,54 +849,57 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         surfaceBehindRemoteAnimationTargets?.forEach { surfaceBehindRemoteAnimationTarget ->
-            val surfaceHeight: Int = surfaceBehindRemoteAnimationTarget.screenSpaceBounds.height()
+            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                val surfaceHeight: Int =
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.height()
 
-            var scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
-                    (1f - SURFACE_BEHIND_START_SCALE_FACTOR) *
-                    MathUtils.clamp(amount, 0f, 1f))
+                var scaleFactor = (SURFACE_BEHIND_START_SCALE_FACTOR +
+                        (1f - SURFACE_BEHIND_START_SCALE_FACTOR) *
+                        MathUtils.clamp(amount, 0f, 1f))
 
-            // If we're dismissing via swipe to the Launcher, we'll play in-window scale animations,
-            // so don't also scale the window.
-            if (keyguardStateController.isDismissingFromSwipe &&
-                    willUnlockWithInWindowLauncherAnimations) {
-                scaleFactor = 1f
-            }
-
-            // Translate up from the bottom.
-            surfaceBehindMatrix.setTranslate(
-                    surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
-                    surfaceBehindRemoteAnimationTarget.screenSpaceBounds.top.toFloat() +
-                            surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
-            )
-
-            // Scale up from a point at the center-bottom of the surface.
-            surfaceBehindMatrix.postScale(
-                    scaleFactor,
-                    scaleFactor,
-                    keyguardViewController.viewRootImpl.width / 2f,
-                    surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
-            )
-
-            // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
-            // unable to draw
-            val sc: SurfaceControl? = surfaceBehindRemoteAnimationTarget.leash
-            if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
-                    sc?.isValid == true) {
-                with(SurfaceControl.Transaction()) {
-                    setMatrix(sc, surfaceBehindMatrix, tmpFloat)
-                    setCornerRadius(sc, roundedCornerRadius)
-                    setAlpha(sc, animationAlpha)
-                    apply()
+                // If we're dismissing via swipe to the Launcher, we'll play in-window scale
+                // animations, so don't also scale the window.
+                if (keyguardStateController.isDismissingFromSwipe &&
+                        willUnlockWithInWindowLauncherAnimations) {
+                    scaleFactor = 1f
                 }
-            } else {
-                applyParamsToSurface(
-                        SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
-                            surfaceBehindRemoteAnimationTarget.leash)
-                            .withMatrix(surfaceBehindMatrix)
-                            .withCornerRadius(roundedCornerRadius)
-                            .withAlpha(animationAlpha)
-                            .build()
+
+                // Translate up from the bottom.
+                surfaceBehindMatrix.setTranslate(
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.left.toFloat(),
+                        surfaceBehindRemoteAnimationTarget.screenSpaceBounds.top.toFloat() +
+                                surfaceHeight * SURFACE_BEHIND_START_TRANSLATION_Y * (1f - amount)
                 )
+
+                // Scale up from a point at the center-bottom of the surface.
+                surfaceBehindMatrix.postScale(
+                        scaleFactor,
+                        scaleFactor,
+                        keyguardViewController.viewRootImpl.width / 2f,
+                        surfaceHeight * SURFACE_BEHIND_SCALE_PIVOT_Y
+                )
+
+                // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is
+                // unable to draw
+                val sc: SurfaceControl? = surfaceBehindRemoteAnimationTarget.leash
+                if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
+                        sc?.isValid == true) {
+                    with(SurfaceControl.Transaction()) {
+                        setMatrix(sc, surfaceBehindMatrix, tmpFloat)
+                        setCornerRadius(sc, roundedCornerRadius)
+                        setAlpha(sc, animationAlpha)
+                        apply()
+                    }
+                } else {
+                    applyParamsToSurface(
+                            SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                                    surfaceBehindRemoteAnimationTarget.leash)
+                                    .withMatrix(surfaceBehindMatrix)
+                                    .withCornerRadius(roundedCornerRadius)
+                                    .withAlpha(animationAlpha)
+                                    .build()
+                    )
+                }
             }
         }
 
@@ -983,10 +988,12 @@ class KeyguardUnlockAnimationController @Inject constructor(
         if (keyguardStateController.isShowing) {
             // Hide the keyguard, with no fade out since we animated it away during the unlock.
 
-            keyguardViewController.hide(
-                surfaceBehindRemoteAnimationStartTime,
-                0 /* fadeOutDuration */
-            )
+            if (!featureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                keyguardViewController.hide(
+                        surfaceBehindRemoteAnimationStartTime,
+                        0 /* fadeOutDuration */
+                )
+            }
         } else {
             Log.i(TAG, "#hideKeyguardViewAfterRemoteAnimation called when keyguard view is not " +
                     "showing. Ignoring...")
