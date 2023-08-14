@@ -16,16 +16,22 @@
 
 package com.android.systemui.shade.ui.composable
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -43,6 +49,26 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+
+object Shade {
+    object Elements {
+        val QuickSettings = ElementKey("ShadeQuickSettings")
+        val Scrim = ElementKey("ShadeScrim")
+        val ScrimBackground = ElementKey("ShadeScrimBackground")
+    }
+
+    object Dimensions {
+        val ScrimCornerSize = 32.dp
+    }
+
+    object Shapes {
+        val Scrim =
+            RoundedCornerShape(
+                topStart = Dimensions.ScrimCornerSize,
+                topEnd = Dimensions.ScrimCornerSize,
+            )
+    }
+}
 
 /** The shade scene shows scrolling list of notifications and some of the quick setting tiles. */
 @SysUISingleton
@@ -79,20 +105,28 @@ constructor(
 }
 
 @Composable
-private fun ShadeScene(
+private fun SceneScope.ShadeScene(
     viewModel: ShadeSceneViewModel,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier =
-            modifier
-                .fillMaxSize()
-                .clickable(onClick = { viewModel.onContentClicked() })
-                .padding(horizontal = 16.dp, vertical = 48.dp)
-    ) {
-        QuickSettings(modifier = Modifier.height(160.dp))
-        Notifications(modifier = Modifier.weight(1f))
+    Box(modifier.element(Shade.Elements.Scrim)) {
+        Spacer(
+            modifier =
+                Modifier.element(Shade.Elements.ScrimBackground)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.scrim, shape = Shade.Shapes.Scrim)
+        )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier =
+                Modifier.fillMaxSize()
+                    .clickable(onClick = { viewModel.onContentClicked() })
+                    .padding(horizontal = 16.dp, vertical = 48.dp)
+        ) {
+            QuickSettings(modifier = Modifier.height(160.dp))
+            Notifications(modifier = Modifier.weight(1f))
+        }
     }
 }
