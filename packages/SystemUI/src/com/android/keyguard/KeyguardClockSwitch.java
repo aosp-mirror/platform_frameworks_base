@@ -44,6 +44,7 @@ import java.lang.annotation.RetentionPolicy;
 public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";
+    public static final String MISSING_CLOCK_ID = "CLOCK_MISSING";
 
     private static final long CLOCK_OUT_MILLIS = 133;
     private static final long CLOCK_IN_MILLIS = 167;
@@ -188,6 +189,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public LogBuffer getLogBuffer() {
         return mLogBuffer;
+    }
+
+    /** Returns the id of the currently rendering clock */
+    public String getClockId() {
+        if (mClock == null) {
+            return MISSING_CLOCK_ID;
+        }
+        return mClock.getConfig().getId();
     }
 
     void setClock(ClockController clock, int statusBarState) {

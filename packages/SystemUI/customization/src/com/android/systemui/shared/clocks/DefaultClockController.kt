@@ -64,7 +64,7 @@ class DefaultClockController(
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
     override val events: DefaultClockEvents
-    override val config = ClockConfig()
+    override val config = ClockConfig(DEFAULT_CLOCK_ID)
 
     init {
         val parent = FrameLayout(ctx)
