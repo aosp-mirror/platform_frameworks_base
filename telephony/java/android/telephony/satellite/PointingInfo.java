@@ -26,7 +26,7 @@ import java.util.Objects;
 /**
  * PointingInfo is used to store the position of satellite received from satellite modem.
  * The position of satellite is represented by azimuth and elevation angles
- * with degrees as unit of measurement.
+ * with degrees as unit of measurement. Satellite position is based on magnetic north direction.
  * @hide
  */
 @SystemApi

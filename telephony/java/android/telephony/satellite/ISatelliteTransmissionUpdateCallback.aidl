@@ -45,6 +45,7 @@ oneway interface ISatelliteTransmissionUpdateCallback {
      * Called when the satellite position changed.
      *
      * @param pointingInfo The pointing info containing the satellite location.
+     *                     Satellite location is based on magnetic north direction.
      */
     void onSatellitePositionChanged(in PointingInfo pointingInfo);
 }
