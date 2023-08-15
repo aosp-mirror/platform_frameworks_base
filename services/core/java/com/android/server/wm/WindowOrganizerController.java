@@ -1657,9 +1657,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int setAdjacentRootsHierarchyOp(WindowContainerTransaction.HierarchyOp hop) {
-        final TaskFragment root1 = WindowContainer.fromBinder(hop.getContainer()).asTaskFragment();
-        final TaskFragment root2 =
-                WindowContainer.fromBinder(hop.getAdjacentRoot()).asTaskFragment();
+        final WindowContainer wc1 = WindowContainer.fromBinder(hop.getContainer());
+        if (wc1 == null || !wc1.isAttached()) {
+            Slog.e(TAG, "Attempt to operate on unknown or detached container: " + wc1);
+            return TRANSACT_EFFECTS_NONE;
+        }
+        final TaskFragment root1 = wc1.asTaskFragment();
+        final WindowContainer wc2 = WindowContainer.fromBinder(hop.getAdjacentRoot());
+        if (wc2 == null || !wc2.isAttached()) {
+            Slog.e(TAG, "Attempt to operate on unknown or detached container: " + wc2);
+            return TRANSACT_EFFECTS_NONE;
+        }
+        final TaskFragment root2 = wc2.asTaskFragment();
         if (!root1.mCreatedByOrganizer || !root2.mCreatedByOrganizer) {
             throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root1=" + root1 + " root2=" + root2);
@@ -1672,7 +1681,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int clearAdjacentRootsHierarchyOp(WindowContainerTransaction.HierarchyOp hop) {
-        final TaskFragment root = WindowContainer.fromBinder(hop.getContainer()).asTaskFragment();
+        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+        if (wc == null || !wc.isAttached()) {
+            Slog.e(TAG, "Attempt to operate on unknown or detached container: " + wc);
+            return TRANSACT_EFFECTS_NONE;
+        }
+        final TaskFragment root = wc.asTaskFragment();
         if (!root.mCreatedByOrganizer) {
             throw new IllegalArgumentException("clearAdjacentRootsHierarchyOp: Not created by"
                     + " organizer root=" + root);
