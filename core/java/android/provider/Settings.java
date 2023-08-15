@@ -18616,6 +18616,7 @@ public final class Settings {
              * What OS does paired device has.
              * @hide
              */
+            @Readable
             public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
 
             // Possible values of PAIRED_DEVICE_OS_TYPE
