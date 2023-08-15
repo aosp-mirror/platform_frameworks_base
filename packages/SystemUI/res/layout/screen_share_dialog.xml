@@ -64,8 +64,7 @@
             android:layout_height="wrap_content"
             android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
             style="@style/TextAppearance.Dialog.Body.Message"
-            android:gravity="start"
-            android:lineHeight="@dimen/screenrecord_warning_line_height"/>
+            android:gravity="start"/>
 
         <!-- Buttons -->
         <LinearLayout
