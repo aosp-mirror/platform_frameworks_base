@@ -146,7 +146,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	metalavaCmd := "$(location metalava)"
 	// Silence reflection warnings. See b/168689341
 	metalavaCmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-	metalavaCmd += " --quiet --no-banner --format=v2 "
+	metalavaCmd += " --quiet merge-signatures --format=v2 "
 
 	filename := txt.TxtFilename
 	if txt.Scope != "public" {
@@ -156,7 +156,7 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
 	props.Tools = []string{"metalava"}
 	props.Out = []string{filename}
-	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --api $(out)")
+	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --out $(out)")
 	props.Srcs = append([]string{txt.BaseTxt}, createSrcs(txt.Modules, txt.ModuleTag)...)
 	props.Dists = []android.Dist{
 		{
