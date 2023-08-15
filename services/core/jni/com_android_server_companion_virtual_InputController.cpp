@@ -144,10 +144,18 @@ static unique_fd openUinput(const char* readableName, jint vendorId, jint produc
             }
             uinput_abs_setup slotAbsSetup;
             slotAbsSetup.code = ABS_MT_SLOT;
-            slotAbsSetup.absinfo.maximum = MAX_POINTERS;
+            slotAbsSetup.absinfo.maximum = MAX_POINTERS - 1;
             slotAbsSetup.absinfo.minimum = 0;
             if (ioctl(fd, UI_ABS_SETUP, &slotAbsSetup) != 0) {
                 ALOGE("Error creating touchscreen uinput slots: %s", strerror(errno));
+                return invalidFd();
+            }
+            uinput_abs_setup trackingIdAbsSetup;
+            trackingIdAbsSetup.code = ABS_MT_TRACKING_ID;
+            trackingIdAbsSetup.absinfo.maximum = MAX_POINTERS - 1;
+            trackingIdAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &trackingIdAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput tracking ids: %s", strerror(errno));
                 return invalidFd();
             }
         }
