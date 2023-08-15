@@ -328,7 +328,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         return menuUiBounds;
     }
 
-    void transitionToMenuMode(int menuMode, boolean resetMenu) {
+    void transitionToMenuMode(int menuMode) {
         switch (menuMode) {
             case MODE_NO_MENU:
                 hideAllUserControls();
@@ -337,7 +337,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
                 showMoveMenu();
                 break;
             case MODE_ALL_ACTIONS_MENU:
-                showAllActionsMenu(resetMenu);
+                showAllActionsMenu();
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -362,13 +362,13 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mEduTextDrawer.closeIfNeeded();
     }
 
-    private void showAllActionsMenu(boolean resetMenu) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: showAllActionsMenu(), resetMenu %b", TAG, resetMenu);
+    void resetMenu() {
+        scrollToFirstAction();
+    }
 
-        if (resetMenu) {
-            scrollToFirstAction();
-        }
+    private void showAllActionsMenu() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showAllActionsMenu()", TAG);
 
         if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) return;
 
@@ -378,7 +378,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         animateAlphaTo(1f, mDimLayer);
         mEduTextDrawer.closeIfNeeded();
 
-        if (mCurrentMenuMode == MODE_MOVE_MENU && !resetMenu) {
+        if (mCurrentMenuMode == MODE_MOVE_MENU) {
             refocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE));
         }
 
@@ -429,12 +429,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         if (mCurrentMenuMode == MODE_MOVE_MENU) {
             showMovementHints();
         }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasWindowFocus) {
-        super.onWindowFocusChanged(hasWindowFocus);
-        mListener.onPipWindowFocusChanged(hasWindowFocus);
     }
 
     private void animateAlphaTo(float alpha, View view) {
@@ -628,7 +622,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
 
         /**
          * Called when a button for exiting the current menu mode was pressed.
-         *
          */
         void onExitCurrentMenuMode();
 
@@ -636,12 +629,6 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
          * Called when a button to move the PiP in a certain direction, indicated by keycode.
          */
         void onPipMovement(int keycode);
-
-        /**
-         * Called when the TvPipMenuView loses focus. This also means that the TV PiP menu window
-         * has lost focus.
-         */
-        void onPipWindowFocusChanged(boolean focused);
 
         /**
          *  The edu text closing impacts the size of the Picture-in-Picture window and influences
