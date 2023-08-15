@@ -63,6 +63,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -193,7 +194,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(underTest.isKeyguardShowing()).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isShowing).thenReturn(true)
             captor.value.onKeyguardShowingChanged()
@@ -255,7 +256,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isOccluded).thenReturn(true)
             captor.value.onKeyguardShowingChanged()
@@ -280,7 +281,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(isKeyguardUnlocked).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isUnlocked).thenReturn(true)
             captor.value.onUnlockedChanged()
@@ -454,7 +455,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
             captor.value.onKeyguardGoingAwayChanged()

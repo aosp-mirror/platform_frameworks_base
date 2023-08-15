@@ -336,6 +336,17 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logPanelStateChanged(@PanelState panelState: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = panelState.panelStateToString()
+            },
+            { "New panel State: $str1" }
+        )
+    }
+
     fun flingQs(flingType: Int, isClick: Boolean) {
         buffer.log(
             TAG,

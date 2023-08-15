@@ -451,8 +451,10 @@ public class ActivityThreadTest {
         final Rect bounds = activity.getWindowManager().getCurrentWindowMetrics().getBounds();
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
-        // Ensure changes in window configuration bounds are reported
-        assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
+        // Ensure that Activity#onConfigurationChanged() not be called because the changes in
+        // WindowConfiguration shouldn't be reported, and we only apply the latest Configuration
+        // update in transaction.
+        assertEquals(numOfConfig, activity.mNumOfConfigChanges);
     }
 
     @Test

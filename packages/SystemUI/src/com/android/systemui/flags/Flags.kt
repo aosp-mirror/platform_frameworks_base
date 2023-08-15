@@ -302,6 +302,19 @@ object Flags {
             R.bool.flag_stop_pulsing_face_scanning_animation,
             "stop_pulsing_face_scanning_animation")
 
+    /**
+     * TODO(b/278086361): Tracking bug
+     * Complete rewrite of the interactions between System UI and Window Manager involving keyguard
+     * state. When enabled, calls to ActivityTaskManagerService from System UI will exclusively
+     * occur from [WmLockscreenVisibilityManager] rather than the legacy KeyguardViewMediator.
+     *
+     * This flag is under development; some types of unlock may not animate properly if you enable
+     * it.
+     */
+    @JvmField
+    val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
+            unreleasedFlag("keyguard_wm_state_refactor")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag("power_menu_lite")
@@ -378,13 +391,13 @@ object Flags {
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
-        unreleasedFlag("incompatible_charging_battery_icon")
+        releasedFlag("incompatible_charging_battery_icon")
 
     // TODO(b/293585143): Tracking Bug
     val INSTANT_TETHER = unreleasedFlag("instant_tether")
 
     // TODO(b/294588085): Tracking Bug
-    val WIFI_SECONDARY_NETWORKS = unreleasedFlag("wifi_secondary_networks")
+    val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug

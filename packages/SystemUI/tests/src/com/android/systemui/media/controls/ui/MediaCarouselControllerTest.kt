@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.keyguard.TestScopeProvider
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
@@ -37,6 +38,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -66,7 +68,6 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -132,7 +133,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK)
+        context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
@@ -152,7 +153,11 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 debugLogger,
                 mediaFlags,
                 keyguardUpdateMonitor,
-                KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
+                KeyguardTransitionInteractorFactory.create(
+                        scope = TestScopeProvider.getTestScope().backgroundScope,
+                        repository = transitionRepository,
+                    )
+                    .keyguardTransitionInteractor,
                 globalSettings
             )
         verify(configurationController).addCallback(capture(configListener))
@@ -730,13 +735,13 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     @Test
     fun testOnLocaleListChanged_playersAreAddedBack() {
-        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK, Locale.CANADA)
+        context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK, Locale.CANADA))
         testConfigurationChange(configListener.value::onLocaleListChanged)
 
         verify(pageIndicator, never()).tintList =
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
 
-        context.resources.configuration.locales = LocaleList(Locale.UK, Locale.US, Locale.CANADA)
+        context.resources.configuration.setLocales(LocaleList(Locale.UK, Locale.US, Locale.CANADA))
         testConfigurationChange(configListener.value::onLocaleListChanged)
 
         verify(pageIndicator).tintList =

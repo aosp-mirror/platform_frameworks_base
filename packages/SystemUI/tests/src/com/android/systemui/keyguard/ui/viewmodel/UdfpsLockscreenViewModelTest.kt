@@ -30,7 +30,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -98,15 +98,20 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
                 bouncerRepository = it.bouncerRepository
             }
 
+        val transitionInteractor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = testScope.backgroundScope,
+                    repository = transitionRepository,
+                    keyguardInteractor = keyguardInteractor,
+                )
+                .keyguardTransitionInteractor
+
         underTest =
             UdfpsLockscreenViewModel(
                 context,
                 lockscreenColorResId,
                 alternateBouncerResId,
-                KeyguardTransitionInteractor(
-                    transitionRepository,
-                    testScope.backgroundScope,
-                ),
+                transitionInteractor,
                 UdfpsKeyguardInteractor(
                     configRepository,
                     BurnInInteractor(

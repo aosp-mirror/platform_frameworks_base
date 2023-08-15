@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.ui.binder
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
@@ -26,6 +27,7 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
@@ -73,6 +75,7 @@ private const val TAG = "BiometricViewBinder"
 object BiometricViewBinder {
 
     /** Binds a [BiometricPromptLayout] to a [PromptViewModel]. */
+    @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
         view: BiometricPromptLayout,
@@ -300,21 +303,19 @@ object BiometricViewBinder {
 
                 // reuse the icon as a confirm button
                 launch {
-                    viewModel.isConfirmButtonVisible
+                    viewModel.isIconConfirmButton
                         .map { isPending ->
                             when {
                                 isPending && iconController.actsAsConfirmButton ->
-                                    View.OnClickListener { viewModel.confirmAuthenticated() }
+                                    View.OnTouchListener { _: View, event: MotionEvent ->
+                                        viewModel.onOverlayTouch(event)
+                                    }
                                 else -> null
                             }
                         }
-                        .collect { onClick ->
-                            iconViewOverlay.setOnClickListener(onClick)
-                            iconView.setOnClickListener(onClick)
-                            if (onClick == null) {
-                                iconViewOverlay.isClickable = false
-                                iconView.isClickable = false
-                            }
+                        .collect { onTouch ->
+                            iconViewOverlay.setOnTouchListener(onTouch)
+                            iconView.setOnTouchListener(onTouch)
                         }
                 }
 
@@ -340,6 +341,14 @@ object BiometricViewBinder {
                             backgroundView.setOnClickListener(null)
                             backgroundView.importantForAccessibility =
                                 IMPORTANT_FOR_ACCESSIBILITY_NO
+
+                            // Allow icon to be used as confirmation button with a11y enabled
+                            if (accessibilityManager.isTouchExplorationEnabled) {
+                                iconViewOverlay.setOnClickListener {
+                                    viewModel.confirmAuthenticated()
+                                }
+                                iconView.setOnClickListener { viewModel.confirmAuthenticated() }
+                            }
                         }
                         if (authState.isAuthenticatedAndConfirmed) {
                             view.announceForAccessibility(
@@ -495,7 +504,7 @@ private class Spaghetti(
             modalities.hasFaceAndFingerprint &&
                 (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
                 (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face
+                R.string.biometric_dialog_tap_confirm_with_face_alt_1
             else -> null
         }
 

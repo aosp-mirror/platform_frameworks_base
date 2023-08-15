@@ -65,6 +65,9 @@ public abstract class StartingData {
     /** Whether to prepare the removal animation. */
     boolean mPrepareRemoveAnimation;
 
+    /** Non-zero if this starting window is added in a collecting transition. */
+    int mTransitionId;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;

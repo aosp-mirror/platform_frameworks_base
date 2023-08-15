@@ -463,10 +463,10 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
             mock(DumpManager::class.java))
 
-        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
+        configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
         val firstDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
 
-        configuration.windowConfiguration.maxBounds = Rect(0, 0, 800, 600)
+        configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 800, 600))
 
         // WHEN: get insets on the second display
         val secondDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
@@ -482,14 +482,14 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
             mock(DumpManager::class.java))
 
-        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
+        configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
         val firstDisplayInsetsFirstCall = provider
             .getStatusBarContentAreaForRotation(ROTATION_NONE)
 
-        configuration.windowConfiguration.maxBounds = Rect(0, 0, 800, 600)
+        configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 800, 600))
         provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
 
-        configuration.windowConfiguration.maxBounds = Rect(0, 0, 1080, 2160)
+        configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
 
         // WHEN: get insets on the first display again
         val firstDisplayInsetsSecondCall = provider

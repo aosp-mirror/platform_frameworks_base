@@ -75,7 +75,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
     }
 }
 
-private class TransitionBuilderImpl : TransitionBuilder {
+internal class TransitionBuilderImpl : TransitionBuilder {
     val transformations = mutableListOf<Transformation>()
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
 

@@ -211,7 +211,7 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
                 context.resources.getFloat(R.dimen.physical_charger_port_location_normalized_y)
         val expectedCenterX: Float
         val expectedCenterY: Float
-        when (context.display.rotation) {
+        when (checkNotNull(context.display).rotation) {
             Surface.ROTATION_90 -> {
                 expectedCenterX = width * normalizedPortPosY
                 expectedCenterY = height * (1 - normalizedPortPosX)

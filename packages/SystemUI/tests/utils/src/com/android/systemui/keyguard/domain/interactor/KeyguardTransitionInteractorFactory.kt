@@ -18,6 +18,8 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.util.mockito.mock
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -30,18 +32,36 @@ object KeyguardTransitionInteractorFactory {
     fun create(
         scope: CoroutineScope,
         repository: KeyguardTransitionRepository = FakeKeyguardTransitionRepository(),
+        keyguardInteractor: KeyguardInteractor =
+            KeyguardInteractorFactory.create().keyguardInteractor,
+        fromLockscreenTransitionInteractor: Lazy<FromLockscreenTransitionInteractor> = Lazy {
+            mock<FromLockscreenTransitionInteractor>()
+        },
+        fromPrimaryBouncerTransitionInteractor: Lazy<FromPrimaryBouncerTransitionInteractor> =
+            Lazy {
+                mock<FromPrimaryBouncerTransitionInteractor>()
+            },
     ): WithDependencies {
         return WithDependencies(
             repository = repository,
+            keyguardInteractor = keyguardInteractor,
+            fromLockscreenTransitionInteractor = fromLockscreenTransitionInteractor,
+            fromPrimaryBouncerTransitionInteractor = fromPrimaryBouncerTransitionInteractor,
             KeyguardTransitionInteractor(
                 scope = scope,
                 repository = repository,
+                keyguardInteractor = { keyguardInteractor },
+                fromLockscreenTransitionInteractor = fromLockscreenTransitionInteractor,
+                fromPrimaryBouncerTransitionInteractor = fromPrimaryBouncerTransitionInteractor,
             )
         )
     }
 
     data class WithDependencies(
         val repository: KeyguardTransitionRepository,
+        val keyguardInteractor: KeyguardInteractor,
+        val fromLockscreenTransitionInteractor: Lazy<FromLockscreenTransitionInteractor>,
+        val fromPrimaryBouncerTransitionInteractor: Lazy<FromPrimaryBouncerTransitionInteractor>,
         val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     )
 }

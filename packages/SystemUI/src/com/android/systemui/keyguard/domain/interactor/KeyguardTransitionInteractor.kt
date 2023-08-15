@@ -17,17 +17,20 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -36,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -46,8 +50,12 @@ import kotlinx.coroutines.flow.stateIn
 class KeyguardTransitionInteractor
 @Inject
 constructor(
-    private val repository: KeyguardTransitionRepository,
     @Application val scope: CoroutineScope,
+    private val repository: KeyguardTransitionRepository,
+    private val keyguardInteractor: dagger.Lazy<KeyguardInteractor>,
+    private val fromLockscreenTransitionInteractor: dagger.Lazy<FromLockscreenTransitionInteractor>,
+    private val fromPrimaryBouncerTransitionInteractor:
+        dagger.Lazy<FromPrimaryBouncerTransitionInteractor>,
 ) {
     private val TAG = this::class.simpleName
 
@@ -128,12 +136,11 @@ constructor(
         repository.transition(PRIMARY_BOUNCER, GONE)
 
     /** OFF->LOCKSCREEN transition information. */
-    val offToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(KeyguardState.OFF, LOCKSCREEN)
+    val offToLockscreenTransition: Flow<TransitionStep> = repository.transition(OFF, LOCKSCREEN)
 
     /** DOZING->LOCKSCREEN transition information. */
     val dozingToLockscreenTransition: Flow<TransitionStep> =
-        repository.transition(KeyguardState.DOZING, LOCKSCREEN)
+        repository.transition(DOZING, LOCKSCREEN)
 
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
@@ -157,17 +164,30 @@ constructor(
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
-    /** The destination state of the last started transition */
+    /** The destination state of the last started transition. */
     val startedKeyguardState: StateFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.to }
-            .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
+            .stateIn(scope, SharingStarted.Eagerly, OFF)
 
     /** The last completed [KeyguardState] transition */
     val finishedKeyguardState: StateFlow<KeyguardState> =
         finishedKeyguardTransitionStep
             .map { step -> step.to }
             .stateIn(scope, SharingStarted.Eagerly, LOCKSCREEN)
+
+    /**
+     * Whether we're currently in a transition to a new [KeyguardState] and haven't yet completed
+     * it.
+     */
+    val isInTransitionToAnyState =
+            combine(
+                    startedKeyguardTransitionStep,
+                    finishedKeyguardState,
+            ) { startedStep, finishedState ->
+                startedStep.to != finishedState
+            }
+
     /**
      * The amount of transition into or out of the given [KeyguardState].
      *
@@ -186,5 +206,42 @@ constructor(
                     it.value
                 }
             }
+    }
+
+    fun transitionStepsFromState(fromState: KeyguardState): Flow<TransitionStep> {
+        return repository.transitions.filter { step -> step.from == fromState }
+    }
+
+    fun transitionStepsToState(toState: KeyguardState): Flow<TransitionStep> {
+        return repository.transitions.filter { step -> step.to == toState }
+    }
+
+    /**
+     * Called to start a transition that will ultimately dismiss the keyguard from the current
+     * state.
+     */
+    fun startDismissKeyguardTransition() {
+        when (startedKeyguardState.value) {
+            LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
+            PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
+            else ->
+                Log.e(
+                    "KeyguardTransitionInteractor",
+                    "We don't know how to dismiss keyguard from state " +
+                        "${startedKeyguardState.value}"
+                )
+        }
+    }
+
+    /** Whether we're in a transition to the given [KeyguardState], but haven't yet completed it. */
+    fun isInTransitionToState(
+            state: KeyguardState,
+    ): Flow<Boolean> {
+        return combine(
+                startedKeyguardTransitionStep,
+                finishedKeyguardState,
+        ) { startedStep, finishedState ->
+            startedStep.to == state && finishedState != state
+        }
     }
 }
