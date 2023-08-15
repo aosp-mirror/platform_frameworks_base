@@ -3396,15 +3396,11 @@ public class SubscriptionManager {
             if (iSub != null) {
                 groupUuid = iSub.createSubscriptionGroup(subIdArray, pkgForDebug);
             } else {
-                if (!isSystemProcess()) {
-                    throw new IllegalStateException("telephony service is null.");
-                }
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("createSubscriptionGroup RemoteException " + ex);
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            ex.rethrowAsRuntimeException();
         }
 
         return groupUuid;
@@ -3446,15 +3442,11 @@ public class SubscriptionManager {
             if (iSub != null) {
                 iSub.addSubscriptionsIntoGroup(subIdArray, groupUuid, pkgForDebug);
             } else {
-                if (!isSystemProcess()) {
-                    throw new IllegalStateException("telephony service is null.");
-                }
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("addSubscriptionsIntoGroup RemoteException " + ex);
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            ex.rethrowAsRuntimeException();
         }
     }
 
@@ -3497,15 +3489,11 @@ public class SubscriptionManager {
             if (iSub != null) {
                 iSub.removeSubscriptionsFromGroup(subIdArray, groupUuid, callingPackage);
             } else {
-                if (!isSystemProcess()) {
-                    throw new IllegalStateException("telephony service is null.");
-                }
+                throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
             loge("removeSubscriptionsFromGroup RemoteException " + ex);
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
+            ex.rethrowAsRuntimeException();
         }
     }
 
@@ -3561,6 +3549,11 @@ public class SubscriptionManager {
                 ex.rethrowAsRuntimeException();
             }
         }
+
+        // TODO(b/296125268) Really this method should throw, but it's common enough that for
+        // system callers it's worth having a little magic for the system process until it's
+        // made safer.
+        if (result == null) result = Collections.emptyList();
 
         return result;
     }
