@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -285,6 +286,7 @@ public abstract class ControlsProviderService extends Service {
         private IControlsSubscriber mCs;
         private boolean mEnforceStateless;
         private Context mContext;
+        private SubscriptionAdapter mSubscription;
 
         SubscriberProxy(boolean enforceStateless, IBinder token, IControlsSubscriber cs) {
             mEnforceStateless = enforceStateless;
@@ -300,11 +302,14 @@ public abstract class ControlsProviderService extends Service {
 
         public void onSubscribe(Subscription subscription) {
             try {
-                mCs.onSubscribe(mToken, new SubscriptionAdapter(subscription));
+                SubscriptionAdapter subscriptionAdapter = new SubscriptionAdapter(subscription);
+                mCs.onSubscribe(mToken, subscriptionAdapter);
+                mSubscription = subscriptionAdapter;
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onNext(@NonNull Control control) {
             Preconditions.checkNotNull(control);
             try {
@@ -318,20 +323,36 @@ public abstract class ControlsProviderService extends Service {
                 }
                 mCs.onNext(mToken, control);
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onError(Throwable t) {
             try {
                 mCs.onError(mToken, t.toString());
+                mSubscription = null;
             } catch (RemoteException ex) {
-                ex.rethrowAsRuntimeException();
+                handleRemoteException(ex);
             }
         }
+
         public void onComplete() {
             try {
                 mCs.onComplete(mToken);
+                mSubscription = null;
             } catch (RemoteException ex) {
+                handleRemoteException(ex);
+            }
+        }
+
+        private void handleRemoteException(RemoteException ex) {
+            if (ex instanceof DeadObjectException) {
+                // System UI crashed or is restarting. There is no need to rethrow this
+                SubscriptionAdapter subscriptionAdapter = mSubscription;
+                if (subscriptionAdapter != null) {
+                    subscriptionAdapter.cancel();
+                }
+            } else {
                 ex.rethrowAsRuntimeException();
             }
         }
