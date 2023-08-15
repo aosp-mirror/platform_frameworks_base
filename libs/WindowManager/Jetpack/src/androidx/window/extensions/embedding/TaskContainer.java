@@ -265,8 +265,25 @@ class TaskContainer {
     }
 
     void removeSplitPinContainer() {
+        if (mSplitPinContainer == null) {
+            return;
+        }
+
+        final TaskFragmentContainer primaryContainer = mSplitPinContainer.getPrimaryContainer();
+        final TaskFragmentContainer secondaryContainer = mSplitPinContainer.getSecondaryContainer();
         mSplitContainers.remove(mSplitPinContainer);
         mSplitPinContainer = null;
+
+        // Remove the other SplitContainers that contains the unpinned container (unless it
+        // is the current top-most split-pair), since the state are no longer valid.
+        final List<SplitContainer> splitsToRemove = new ArrayList<>();
+        for (SplitContainer splitContainer : mSplitContainers) {
+            if (splitContainer.getSecondaryContainer().equals(secondaryContainer)
+                    && !splitContainer.getPrimaryContainer().equals(primaryContainer)) {
+                splitsToRemove.add(splitContainer);
+            }
+        }
+        removeSplitContainers(splitsToRemove);
     }
 
     @Nullable

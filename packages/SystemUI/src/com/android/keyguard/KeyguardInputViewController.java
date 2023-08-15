@@ -30,13 +30,13 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.ui.BouncerMessageView;
+import com.android.systemui.bouncer.ui.binder.BouncerMessageViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
-import com.android.systemui.bouncer.ui.BouncerMessageView;
-import com.android.systemui.bouncer.ui.binder.BouncerMessageViewBinder;
 import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.ViewController;
@@ -95,6 +95,12 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     @CallSuper
     protected void onViewAttached() {
         updateMessageAreaVisibility();
+        if (TextUtils.isEmpty(mMessageAreaController.getMessage())
+                && getInitialMessageResId() != 0) {
+            mMessageAreaController.setMessage(
+                    mView.getResources().getString(getInitialMessageResId()),
+                    /* animate= */ false);
+        }
     }
 
     private void updateMessageAreaVisibility() {
@@ -147,12 +153,6 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     }
 
     public void startAppearAnimation() {
-        if (TextUtils.isEmpty(mMessageAreaController.getMessage())
-                && getInitialMessageResId() != 0) {
-            mMessageAreaController.setMessage(
-                    mView.getResources().getString(getInitialMessageResId()),
-                    /* animate= */ false);
-        }
         mView.startAppearAnimation();
     }
 

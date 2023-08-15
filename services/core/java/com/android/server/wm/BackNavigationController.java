@@ -1177,6 +1177,8 @@ class BackNavigationController {
                 if (!composeAnimations(mCloseTarget, mOpenTarget, openActivity)) {
                     return null;
                 }
+                mCloseTarget.mTransitionController.mSnapshotController
+                        .mActivitySnapshotController.clearOnBackPressedActivities();
                 applyPreviewStrategy(mOpenAdaptor, openActivity);
 
                 final IBackAnimationFinishedCallback callback = makeAnimationFinishedCallback();
@@ -1222,6 +1224,8 @@ class BackNavigationController {
             // Call it again to make sure the activity could be visible while handling the pending
             // animation.
             activity.commitVisibility(true, true);
+            activity.mTransitionController.mSnapshotController
+                    .mActivitySnapshotController.addOnBackPressedActivity(activity);
         }
         activity.mLaunchTaskBehind = true;
 
@@ -1248,6 +1252,9 @@ class BackNavigationController {
         // Restore the launch-behind state.
         activity.mTaskSupervisor.scheduleLaunchTaskBehindComplete(activity.token);
         activity.mLaunchTaskBehind = false;
+        // Ignore all change
+        activity.mTransitionController.mSnapshotController
+                .mActivitySnapshotController.clearOnBackPressedActivities();
         ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
                 "Setting Activity.mLauncherTaskBehind to false. Activity=%s",
                 activity);

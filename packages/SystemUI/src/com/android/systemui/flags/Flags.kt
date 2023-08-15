@@ -391,7 +391,7 @@ object Flags {
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
-        unreleasedFlag("incompatible_charging_battery_icon")
+        releasedFlag("incompatible_charging_battery_icon")
 
     // TODO(b/293585143): Tracking Bug
     val INSTANT_TETHER = unreleasedFlag("instant_tether")
@@ -787,4 +787,8 @@ object Flags {
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button")
+
+    /** Enable haptic slider component in the brightness slider */
+    @JvmField
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
 }

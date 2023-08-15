@@ -1191,8 +1191,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                                         "  Skipping post-transition snapshot for task %d",
                                         task.mTaskId);
                             }
-                            snapController.mActivitySnapshotController
-                                    .notifyAppVisibilityChanged(ar, false /* visible */);
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
@@ -1389,6 +1387,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Handle back animation if it's already started.
         mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
         mController.mFinishingTransition = null;
+        mController.mSnapshotController.onTransitionFinish(mType, mTargets);
     }
 
     void abort() {
@@ -1593,16 +1592,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // transferred. If transition is transient, IME won't be moved during the transition and
         // the tasks are still live, so we take the snapshot at the end of the transition instead.
         if (mTransientLaunches == null) {
-            for (int i = mParticipants.size() - 1; i >= 0; --i) {
-                final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-                if (ar == null || ar.getTask() == null
-                        || ar.getTask().isVisibleRequested()) continue;
-                final ChangeInfo change = mChanges.get(ar);
-                // Intentionally skip record snapshot for changes originated from PiP.
-                if (change != null && change.mWindowingMode == WINDOWING_MODE_PINNED) continue;
-                mController.mSnapshotController.mTaskSnapshotController.recordSnapshot(
-                        ar.getTask(), false /* allowSnapshotHome */);
-            }
+            mController.mSnapshotController.onTransactionReady(mType, mTargets);
         }
 
         // This is non-null only if display has changes. It handles the visible windows that don't
