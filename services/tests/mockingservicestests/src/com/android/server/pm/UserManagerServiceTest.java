@@ -331,6 +331,7 @@ public final class UserManagerServiceTest {
     @Test
     public void testGetBootUser_Headless_ThrowsIfOnlySystemUserExists() throws Exception {
         setSystemUserHeadless(true);
+        removeNonSystemUsers();
 
         assertThrows(UserManager.CheckedUserOperationException.class,
                 () -> mUmi.getBootUser(/* waitUntilSet= */ false));
@@ -502,6 +503,14 @@ public final class UserManagerServiceTest {
                 .isFalse();
         assertThat(mUms.hasUserRestriction(DISALLOW_SMS, mainUser.id))
                 .isFalse();
+    }
+
+    private void removeNonSystemUsers() {
+        for (UserInfo user : mUms.getUsers(true)) {
+            if (!user.getUserHandle().isSystem()) {
+                mUms.removeUserInfo(user.id);
+            }
+        }
     }
 
     private void resetUserSwitcherEnabled() {
