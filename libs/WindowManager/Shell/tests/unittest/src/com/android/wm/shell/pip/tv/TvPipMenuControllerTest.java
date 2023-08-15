@@ -93,6 +93,7 @@ public class TvPipMenuControllerTest extends ShellTestCase {
     public void testSwitch_FromMoveMode_ToAllActionsMode() {
         showAndAssertMoveMenu();
         showAndAssertAllActionsMenu();
+        verify(mMockDelegate, times(2)).onInMoveModeChanged();
     }
 
     @Test
@@ -124,6 +125,15 @@ public class TvPipMenuControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testCloseMenu_MoveModeFollowedByMoveMode() {
+        showAndAssertMoveMenu();
+        showAndAssertMoveMenu();
+
+        closeMenuAndAssertMenuClosed();
+        verify(mMockDelegate, times(2)).onInMoveModeChanged();
+    }
+
+    @Test
     public void testCloseMenu_MoveModeFollowedByAllActionsMode() {
         showAndAssertMoveMenu();
         showAndAssertAllActionsMenu();
@@ -142,103 +152,100 @@ public class TvPipMenuControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void testExitMoveMode_NoMenuMode() {
-        mTvPipMenuController.onExitMoveMode();
-        assertMenuIsOpen(false);
-        verify(mMockDelegate, never()).onMenuClosed();
+    public void testCloseMenu_AllActionsModeFollowedByAllActionsMode() {
+        showAndAssertAllActionsMenu();
+        showAndAssertAllActionsMenu(2);
+
+        closeMenuAndAssertMenuClosed();
+        verify(mMockDelegate, never()).onInMoveModeChanged();
     }
 
     @Test
-    public void testExitMoveMode_MoveMode() {
+    public void testExitMenuMode_NoMenuMode() {
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuIsOpen(false);
+        verify(mMockDelegate, never()).onMenuClosed();
+        verify(mMockDelegate, never()).onInMoveModeChanged();
+    }
+
+    @Test
+    public void testExitMenuMode_MoveMode() {
         showAndAssertMoveMenu();
 
-        mTvPipMenuController.onExitMoveMode();
+        mTvPipMenuController.onExitCurrentMenuMode();
         assertMenuClosed();
         verify(mMockDelegate, times(2)).onInMoveModeChanged();
     }
 
     @Test
-    public void testExitMoveMode_AllActionsMode() {
+    public void testExitMenuMode_AllActionsMode() {
         showAndAssertAllActionsMenu();
 
-        mTvPipMenuController.onExitMoveMode();
-        assertMenuIsInAllActionsMode();
-
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuClosed();
     }
 
     @Test
-    public void testExitMoveMode_AllActionsModeFollowedByMoveMode() {
-        showAndAssertAllActionsMenu();
-        showAndAssertMoveMenu();
-
-        mTvPipMenuController.onExitMoveMode();
-        assertMenuIsInAllActionsMode();
-        verify(mMockDelegate, times(2)).onInMoveModeChanged();
-        verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(false));
-        verify(mMockTvPipBackgroundView, times(2)).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
-    }
-
-    @Test
-    public void testOnBackPress_NoMenuMode() {
-        mTvPipMenuController.onBackPress();
-        assertMenuIsOpen(false);
-        verify(mMockDelegate, never()).onMenuClosed();
-    }
-
-    @Test
-    public void testOnBackPress_MoveMode() {
-        showAndAssertMoveMenu();
-
-        pressBackAndAssertMenuClosed();
-        verify(mMockDelegate, times(2)).onInMoveModeChanged();
-    }
-
-    @Test
-    public void testOnBackPress_AllActionsMode() {
-        showAndAssertAllActionsMenu();
-
-        pressBackAndAssertMenuClosed();
-    }
-
-    @Test
-    public void testOnBackPress_MoveModeFollowedByAllActionsMode() {
-        showAndAssertMoveMenu();
-        showAndAssertAllActionsMenu();
-        verify(mMockDelegate, times(2)).onInMoveModeChanged();
-
-        pressBackAndAssertMenuClosed();
-    }
-
-    @Test
-    public void testOnBackPress_AllActionsModeFollowedByMoveMode() {
+    public void testExitMenuMode_AllActionsModeFollowedByMoveMode() {
         showAndAssertAllActionsMenu();
         showAndAssertMoveMenu();
 
-        mTvPipMenuController.onBackPress();
+        mTvPipMenuController.onExitCurrentMenuMode();
         assertMenuIsInAllActionsMode();
         verify(mMockDelegate, times(2)).onInMoveModeChanged();
         verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(false));
         verify(mMockTvPipBackgroundView, times(2)).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
 
-        pressBackAndAssertMenuClosed();
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuClosed();
+    }
+
+    @Test
+    public void testExitMenuMode_AllActionsModeFollowedByAllActionsMode() {
+        showAndAssertAllActionsMenu();
+        showAndAssertAllActionsMenu(2);
+
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuClosed();
+        verify(mMockDelegate, never()).onInMoveModeChanged();
+    }
+
+    @Test
+    public void testExitMenuMode_MoveModeFollowedByAllActionsMode() {
+        showAndAssertMoveMenu();
+
+        showAndAssertAllActionsMenu();
+        verify(mMockDelegate, times(2)).onInMoveModeChanged();
+
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuClosed();
+    }
+
+    @Test
+    public void testExitMenuMode_MoveModeFollowedByMoveMode() {
+        showAndAssertMoveMenu();
+        showAndAssertMoveMenu();
+
+        mTvPipMenuController.onExitCurrentMenuMode();
+        assertMenuClosed();
+        verify(mMockDelegate, times(2)).onInMoveModeChanged();
     }
 
     @Test
     public void testOnPipMovement_NoMenuMode() {
-        assertPipMoveSuccessful(false, mTvPipMenuController.onPipMovement(TEST_MOVE_KEYCODE));
+        moveAndAssertMoveSuccessful(false);
     }
 
     @Test
     public void testOnPipMovement_MoveMode() {
         showAndAssertMoveMenu();
-        assertPipMoveSuccessful(true, mTvPipMenuController.onPipMovement(TEST_MOVE_KEYCODE));
-        verify(mMockDelegate).movePip(eq(TEST_MOVE_KEYCODE));
+        moveAndAssertMoveSuccessful(true);
     }
 
     @Test
     public void testOnPipMovement_AllActionsMode() {
         showAndAssertAllActionsMenu();
-        assertPipMoveSuccessful(false, mTvPipMenuController.onPipMovement(TEST_MOVE_KEYCODE));
+        moveAndAssertMoveSuccessful(false);
     }
 
     @Test
@@ -270,10 +277,16 @@ public class TvPipMenuControllerTest extends ShellTestCase {
     }
 
     private void showAndAssertAllActionsMenu() {
+        showAndAssertAllActionsMenu(1);
+    }
+
+    private void showAndAssertAllActionsMenu(int times) {
         mTvPipMenuController.showMenu();
         assertMenuIsInAllActionsMode();
-        verify(mMockTvPipMenuView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(true));
-        verify(mMockTvPipBackgroundView).transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
+        verify(mMockTvPipMenuView, times(times))
+                .transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU), eq(true));
+        verify(mMockTvPipBackgroundView, times(times))
+                .transitionToMenuMode(eq(MODE_ALL_ACTIONS_MENU));
     }
 
     private void closeMenuAndAssertMenuClosed() {
@@ -281,9 +294,9 @@ public class TvPipMenuControllerTest extends ShellTestCase {
         assertMenuClosed();
     }
 
-    private void pressBackAndAssertMenuClosed() {
-        mTvPipMenuController.onBackPress();
-        assertMenuClosed();
+    private void moveAndAssertMoveSuccessful(boolean expectedSuccess) {
+        mTvPipMenuController.onPipMovement(TEST_MOVE_KEYCODE);
+        verify(mMockDelegate, times(expectedSuccess ? 1 : 0)).movePip(eq(TEST_MOVE_KEYCODE));
     }
 
     private void assertMenuClosed() {
@@ -310,11 +323,6 @@ public class TvPipMenuControllerTest extends ShellTestCase {
                 + mTvPipMenuController.getMenuModeString(),
                 mTvPipMenuController.isInAllActionsMode());
         assertMenuIsOpen(true);
-    }
-
-    private void assertPipMoveSuccessful(boolean expected, boolean actual) {
-        assertTrue("Should " + (expected ? "" : "not ") + "move PiP when the menu is in mode "
-                + mTvPipMenuController.getMenuModeString(), expected == actual);
     }
 
     private class TestTvPipMenuController extends TvPipMenuController {

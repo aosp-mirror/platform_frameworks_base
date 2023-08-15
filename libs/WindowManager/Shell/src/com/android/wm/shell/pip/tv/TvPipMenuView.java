@@ -378,7 +378,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         animateAlphaTo(1f, mDimLayer);
         mEduTextDrawer.closeIfNeeded();
 
-        if (mCurrentMenuMode == MODE_MOVE_MENU) {
+        if (mCurrentMenuMode == MODE_MOVE_MENU && !resetMenu) {
             refocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE));
         }
 
@@ -483,28 +483,28 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         if (event.getAction() == ACTION_UP) {
 
             if (event.getKeyCode() == KEYCODE_BACK) {
-                mListener.onBackPress();
+                mListener.onExitCurrentMenuMode();
                 return true;
             }
 
-            if (mA11yManager.isEnabled()) {
-                return super.dispatchKeyEvent(event);
-            }
-
-            switch (event.getKeyCode()) {
-                case KEYCODE_DPAD_UP:
-                case KEYCODE_DPAD_DOWN:
-                case KEYCODE_DPAD_LEFT:
-                case KEYCODE_DPAD_RIGHT:
-                    return mListener.onPipMovement(event.getKeyCode()) || super.dispatchKeyEvent(
-                            event);
-                case KEYCODE_ENTER:
-                case KEYCODE_DPAD_CENTER:
-                    return mListener.onExitMoveMode() || super.dispatchKeyEvent(event);
-                default:
-                    break;
+            if (mCurrentMenuMode == MODE_MOVE_MENU && !mA11yManager.isEnabled()) {
+                switch (event.getKeyCode()) {
+                    case KEYCODE_DPAD_UP:
+                    case KEYCODE_DPAD_DOWN:
+                    case KEYCODE_DPAD_LEFT:
+                    case KEYCODE_DPAD_RIGHT:
+                        mListener.onPipMovement(event.getKeyCode());
+                        return true;
+                    case KEYCODE_ENTER:
+                    case KEYCODE_DPAD_CENTER:
+                        mListener.onExitCurrentMenuMode();
+                        return true;
+                    default:
+                        // Dispatch key event as normal below
+                }
             }
         }
+
         return super.dispatchKeyEvent(event);
     }
 
@@ -529,7 +529,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         if (a11yEnabled) {
             mA11yDoneButton.setVisibility(VISIBLE);
             mA11yDoneButton.setOnClickListener(v -> {
-                mListener.onExitMoveMode();
+                mListener.onExitCurrentMenuMode();
             });
             mA11yDoneButton.requestFocus();
             mA11yDoneButton.requestAccessibilityFocus();
@@ -626,20 +626,16 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
 
     interface Listener {
 
-        void onBackPress();
-
         /**
-         * Called when a button for exiting move mode was pressed.
+         * Called when a button for exiting the current menu mode was pressed.
          *
-         * @return true if the event was handled or false if the key event should be handled by the
-         * next receiver.
          */
-        boolean onExitMoveMode();
+        void onExitCurrentMenuMode();
 
         /**
-         * @return whether pip movement was handled.
+         * Called when a button to move the PiP in a certain direction, indicated by keycode.
          */
-        boolean onPipMovement(int keycode);
+        void onPipMovement(int keycode);
 
         /**
          * Called when the TvPipMenuView loses focus. This also means that the TV PiP menu window
