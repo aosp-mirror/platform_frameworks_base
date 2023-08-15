@@ -82,7 +82,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -111,8 +111,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private BlockingQueueIntentReceiver mReceiver;
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
-    @ClassRule
-    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Before
     public void setUp() throws Exception {

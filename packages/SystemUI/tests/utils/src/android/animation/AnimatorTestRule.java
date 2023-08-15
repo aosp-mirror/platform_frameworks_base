@@ -49,7 +49,7 @@ import java.util.function.Consumer;
  * public class SampleAnimatorTest {
  *
  *     {@literal @}Rule
- *     public AnimatorTestRule sAnimatorTestRule = new AnimatorTestRule();
+ *     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
  *
  *     {@literal @}UiThreadTest
  *     {@literal @}Test
@@ -58,7 +58,7 @@ import java.util.function.Consumer;
  *         animator.setDuration(1000L);
  *         assertThat(animator.getAnimatedValue(), is(0));
  *         animator.start();
- *         sAnimatorTestRule.advanceTimeBy(500L);
+ *         mAnimatorTestRule.advanceTimeBy(500L);
  *         assertThat(animator.getAnimatedValue(), is(500));
  *     }
  * }
