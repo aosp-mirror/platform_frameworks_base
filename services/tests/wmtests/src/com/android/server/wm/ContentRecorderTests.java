@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 
 import android.app.WindowConfiguration;
@@ -507,6 +508,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         // Return the default display as the value to mirror to ensure the VD with flag mirroring
         // creates a ContentRecordingSession automatically.
         doReturn(DEFAULT_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+        clearInvocations(virtualDisplay);
         virtualDisplay.updateRecording();
 
         // THEN mirroring is initiated for the default display's DisplayArea.
