@@ -89,7 +89,6 @@ import android.util.MathUtils;
 import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -2636,44 +2635,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public boolean interceptMediaKey(KeyEvent event) {
-        return mState == StatusBarState.KEYGUARD
-                && mStatusBarKeyguardViewManager.interceptMediaKey(event);
-    }
-
-    /**
-     * While IME is active and a BACK event is detected, check with
-     * {@link StatusBarKeyguardViewManager#dispatchBackKeyEventPreIme()} to see if the event
-     * should be handled before routing to IME, in order to prevent the user having to hit back
-     * twice to exit bouncer.
-     */
-    @Override
-    public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        switch (event.getKeyCode()) {
-            case KeyEvent.KEYCODE_BACK:
-                if (mState == StatusBarState.KEYGUARD
-                        && mStatusBarKeyguardViewManager.dispatchBackKeyEventPreIme()) {
-                    return mBackActionInteractor.onBackRequested();
-                }
-        }
-        return false;
-    }
-
-    protected boolean shouldUnlockOnMenuPressed() {
-        return mDeviceInteractive && mState != StatusBarState.SHADE
-            && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed();
-    }
-
-    @Override
-    public boolean onMenuPressed() {
-        if (shouldUnlockOnMenuPressed()) {
-            mShadeController.animateCollapseShadeForced();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void endAffordanceLaunch() {
         releaseGestureWakeLock();
         mCameraLauncherLazy.get().setLaunchingAffordance(false);
@@ -2690,15 +2651,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
         final boolean isBouncerOverDream = isBouncerShowingOverDream();
         return (isScrimmedBouncer || isBouncerOverDream);
-    }
-
-    @Override
-    public boolean onSpacePressed() {
-        if (mDeviceInteractive && mState != StatusBarState.SHADE) {
-            mShadeController.animateCollapseShadeForced();
-            return true;
-        }
-        return false;
     }
 
     private void showBouncerOrLockScreenIfKeyguard() {
