@@ -79,14 +79,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @Override
     public boolean isScreenCaptureAllowed(int userHandle) {
-        if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
-            return isScreenCaptureAllowedInPolicyEngine(userHandle);
-        } else {
-            synchronized (mLock) {
-                return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
-                        && mScreenCaptureDisallowedUser != userHandle;
-            }
-        }
+        return isScreenCaptureAllowedInPolicyEngine(userHandle);
     }
 
     private boolean isScreenCaptureAllowedInPolicyEngine(int userHandle) {
@@ -182,11 +175,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         synchronized (mLock) {
             pw.println("Device policy cache:");
             pw.increaseIndent();
-            if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
-                pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
-            } else {
-                pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
-            }
+            pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
             pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());
