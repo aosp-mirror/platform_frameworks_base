@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
  * Test opening an activity that will launch another activity as ActivityEmbedding placeholder in
  * split.
  *
- * To run this test: `atest FlickerTests:OpenActivityEmbeddingPlaceholderSplitTest`
+ * To run this test: `atest FlickerTestsOther:OpenActivityEmbeddingPlaceholderSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
