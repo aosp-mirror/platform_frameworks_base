@@ -985,6 +985,11 @@ public final class MediaRouter2 {
 
     void onRequestCreateControllerByManagerOnHandler(
             RoutingSessionInfo oldSession, MediaRoute2Info route, long managerRequestId) {
+        Log.i(
+                TAG,
+                TextUtils.formatSimple(
+                        "requestCreateSessionByManager | requestId: %d, oldSession: %s, route: %s",
+                        managerRequestId, oldSession, route));
         RoutingController controller;
         if (oldSession.isSystemSession()) {
             controller = getSystemController();

@@ -1291,13 +1291,18 @@ class MediaRouter2ServiceImpl {
         }
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
-        if (managerRecord.mLastSessionCreationRequest != null) {
+        SessionCreationRequest lastRequest = managerRecord.mLastSessionCreationRequest;
+        if (lastRequest != null) {
+            Slog.i(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "requestCreateSessionWithManagerLocked: Notifying failure for pending"
+                                + " session creation request - oldSession: %s, route: %s",
+                            lastRequest.mOldSession, lastRequest.mRoute));
             managerRecord.mUserRecord.mHandler.notifyRequestFailedToManager(
                     managerRecord.mManager,
-                    toOriginalRequestId(managerRecord.mLastSessionCreationRequest
-                            .mManagerRequestId),
+                    toOriginalRequestId(lastRequest.mManagerRequestId),
                     REASON_UNKNOWN_ERROR);
-            managerRecord.mLastSessionCreationRequest = null;
         }
         managerRecord.mLastSessionCreationRequest = new SessionCreationRequest(routerRecord,
                 MediaRoute2ProviderService.REQUEST_ID_NONE, uniqueRequestId,
