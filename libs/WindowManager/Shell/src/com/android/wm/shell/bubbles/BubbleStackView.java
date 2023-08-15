@@ -21,11 +21,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_VIEW;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -75,6 +75,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
@@ -2024,9 +2025,7 @@ public class BubbleStackView extends FrameLayout
      * Monitor for swipe up gesture that is used to collapse expanded view
      */
     void startMonitoringSwipeUpGesture() {
-        if (DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "startMonitoringSwipeUpGesture");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "startMonitoringSwipeUpGesture");
         stopMonitoringSwipeUpGestureInternal();
 
         if (isGestureNavEnabled()) {
@@ -2046,9 +2045,7 @@ public class BubbleStackView extends FrameLayout
      * Stop monitoring for swipe up gesture
      */
     void stopMonitoringSwipeUpGesture() {
-        if (DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "stopMonitoringSwipeUpGesture");
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "stopMonitoringSwipeUpGesture");
         stopMonitoringSwipeUpGestureInternal();
     }
 
