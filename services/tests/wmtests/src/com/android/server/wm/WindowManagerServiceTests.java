@@ -107,6 +107,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
+
 /**
  * Build/Install/Run:
  * atest WmTests:WindowManagerServiceTests
@@ -973,6 +975,28 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.requestAppKeyboardShortcuts(receiver, 0);
         mWm.requestImeKeyboardShortcuts(receiver, 0);
         verify(window, times(2)).requestAppKeyboardShortcuts(receiver, 0);
+    }
+
+    @Test
+    public void testReportSystemGestureExclusionChanged_invalidWindow() {
+        final Session session = mock(Session.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+
+        // No exception even if the window doesn't exist
+        mWm.reportSystemGestureExclusionChanged(session, window, new ArrayList<>());
+    }
+
+    @Test
+    public void testReportKeepClearAreasChanged_invalidWindow() {
+        final Session session = mock(Session.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder binder = mock(IBinder.class);
+        doReturn(binder).when(window).asBinder();
+
+        // No exception even if the window doesn't exist
+        mWm.reportKeepClearAreasChanged(session, window, new ArrayList<>(), new ArrayList<>());
     }
 
     class TestResultReceiver implements IResultReceiver {
