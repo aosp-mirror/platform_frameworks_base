@@ -130,7 +130,8 @@ public final class UserManagerTest {
             // Keep system and current user
             if (user.id != UserHandle.USER_SYSTEM &&
                     user.id != currentUser &&
-                    user.id != communalProfileId) {
+                    user.id != communalProfileId &&
+                    !user.isMain()) {
                 removeUser(user.id);
             }
         }
@@ -1105,16 +1106,16 @@ public final class UserManagerTest {
     public void testCreateProfileForUser_disallowAddManagedProfile() throws Exception {
         assumeManagedUsersSupported();
         final int mainUserId = mUserManager.getMainUser().getIdentifier();
-        final UserHandle mainUserHandle = asHandle(mainUserId);
+        final UserHandle currentUserHandle = asHandle(ActivityManager.getCurrentUser());
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
-                mainUserHandle);
+                currentUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
                     UserManager.USER_TYPE_PROFILE_MANAGED, mainUserId);
             assertThat(userInfo).isNull();
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
-                    mainUserHandle);
+                    currentUserHandle);
         }
     }
 
@@ -1190,6 +1191,7 @@ public final class UserManagerTest {
     @Test
     public void testGetManagedProfileCreationTime() throws Exception {
         assumeManagedUsersSupported();
+        assumeTrue("User does not have access to creation time", mUserManager.isMainUser());
         final int mainUserId = mUserManager.getMainUser().getIdentifier();
         final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
