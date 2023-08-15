@@ -1936,6 +1936,20 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if Battery Saver is supported on this device.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isBatterySaverSupported() {
+        try {
+            return mService.isBatterySaverSupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the current policy for full power save mode.
      *
      * @return The {@link BatterySaverPolicyConfig} which is currently set for the full power save

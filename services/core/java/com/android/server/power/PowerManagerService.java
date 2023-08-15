@@ -308,10 +308,8 @@ public final class PowerManagerService extends SystemService
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    private final BatterySaverController mBatterySaverController;
-    private final BatterySaverPolicy mBatterySaverPolicy;
+    @Nullable
     private final BatterySaverStateMachine mBatterySaverStateMachine;
-    private final BatterySavingStats mBatterySavingStats;
     private final LowPowerStandbyController mLowPowerStandbyController;
     private final AttentionDetector mAttentionDetector;
     private final FaceDownDetector mFaceDownDetector;
@@ -325,6 +323,8 @@ public final class PowerManagerService extends SystemService
     private final PermissionCheckerWrapper mPermissionCheckerWrapper;
     private final PowerPropertiesWrapper mPowerPropertiesWrapper;
     private final DeviceConfigParameterProvider mDeviceConfigProvider;
+    // True if battery saver is supported on this device.
+    private final boolean mBatterySaverSupported;
 
     private boolean mDisableScreenWakeLocksWhileCached;
 
@@ -968,20 +968,13 @@ public final class PowerManagerService extends SystemService
             return suspendBlocker;
         }
 
-        BatterySaverPolicy createBatterySaverPolicy(
-                Object lock, Context context, BatterySavingStats batterySavingStats) {
-            return new BatterySaverPolicy(lock, context, batterySavingStats);
-        }
-
-        BatterySaverController createBatterySaverController(
-                Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
-                BatterySavingStats batterySavingStats) {
-            return new BatterySaverController(lock, context, BackgroundThread.get().getLooper(),
+        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context) {
+            BatterySavingStats batterySavingStats = new BatterySavingStats(lock);
+            BatterySaverPolicy batterySaverPolicy = new BatterySaverPolicy(lock, context,
+                    batterySavingStats);
+            BatterySaverController batterySaverController = new BatterySaverController(lock,
+                    context, BackgroundThread.get().getLooper(),
                     batterySaverPolicy, batterySavingStats);
-        }
-
-        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
-                BatterySaverController batterySaverController) {
             return new BatterySaverStateMachine(lock, context, batterySaverController);
         }
 
@@ -1155,13 +1148,11 @@ public final class PowerManagerService extends SystemService
         mFaceDownDetector = new FaceDownDetector(this::onFlip);
         mScreenUndimDetector = new ScreenUndimDetector();
 
-        mBatterySavingStats = new BatterySavingStats(mLock);
-        mBatterySaverPolicy =
-                mInjector.createBatterySaverPolicy(mLock, mContext, mBatterySavingStats);
-        mBatterySaverController = mInjector.createBatterySaverController(mLock, mContext,
-                mBatterySaverPolicy, mBatterySavingStats);
-        mBatterySaverStateMachine = mInjector.createBatterySaverStateMachine(mLock, mContext,
-                mBatterySaverController);
+        mBatterySaverSupported = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverSupported);
+        mBatterySaverStateMachine =
+                mBatterySaverSupported ? mInjector.createBatterySaverStateMachine(mLock, mContext)
+                        : null;
 
         mLowPowerStandbyController = mInjector.createLowPowerStandbyController(mContext,
                 Looper.getMainLooper());
@@ -1300,7 +1291,9 @@ public final class PowerManagerService extends SystemService
                 mBootCompleted = true;
                 mDirty |= DIRTY_BOOT_COMPLETED;
 
-                mBatterySaverStateMachine.onBootCompleted();
+                if (mBatterySaverSupported) {
+                    mBatterySaverStateMachine.onBootCompleted();
+                }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
 
@@ -1390,8 +1383,9 @@ public final class PowerManagerService extends SystemService
         final ContentResolver resolver = mContext.getContentResolver();
         mConstants.start(resolver);
 
-        mBatterySaverController.systemReady();
-        mBatterySaverPolicy.systemReady();
+        if (mBatterySaverSupported) {
+            mBatterySaverStateMachine.systemReady();
+        }
         mFaceDownDetector.systemReady(mContext);
         mScreenUndimDetector.systemReady(mContext);
 
@@ -2601,7 +2595,10 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel, mBatteryLevelLow);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel,
+                        mBatteryLevelLow);
+            }
         }
     }
 
@@ -3554,7 +3551,11 @@ public final class PowerManagerService extends SystemService
                         mDozeScreenStateOverrideFromDreamManager,
                         mDozeScreenBrightnessOverrideFromDreamManagerFloat,
                         mDrawWakeLockOverrideFromSidekick,
-                        mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS),
+                        mBatterySaverSupported
+                                ?
+                                mBatterySaverStateMachine.getBatterySaverPolicy()
+                                        .getBatterySaverPolicy(ServiceType.SCREEN_BRIGHTNESS)
+                                : new PowerSaveState.Builder().build(),
                         sQuiescent, mDozeAfterScreenOff, mBootCompleted,
                         mScreenBrightnessBoostInProgress, mRequestWaitForNegativeProximity);
                 int wakefulness = powerGroup.getWakefulnessLocked();
@@ -3884,7 +3885,7 @@ public final class PowerManagerService extends SystemService
             if (DEBUG) {
                 Slog.d(TAG, "setLowPowerModeInternal " + enabled + " mIsPowered=" + mIsPowered);
             }
-            if (mIsPowered) {
+            if (mIsPowered || !mBatterySaverSupported) {
                 return false;
             }
 
@@ -4378,7 +4379,8 @@ public final class PowerManagerService extends SystemService
 
     private boolean setPowerModeInternal(int mode, boolean enabled) {
         // Maybe filter the event.
-        if (mode == Mode.LAUNCH && enabled && mBatterySaverController.isLaunchBoostDisabled()) {
+        if (mBatterySaverStateMachine == null || (mode == Mode.LAUNCH && enabled
+                && mBatterySaverStateMachine.getBatterySaverController().isLaunchBoostDisabled())) {
             return false;
         }
         return mNativeWrapper.nativeSetPowerMode(mode, enabled);
@@ -4718,8 +4720,12 @@ public final class PowerManagerService extends SystemService
             pw.println();
             pw.println("Display Power: " + mDisplayPowerCallbacks);
 
-            mBatterySaverPolicy.dump(pw);
-            mBatterySaverStateMachine.dump(pw);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.getBatterySaverPolicy().dump(pw);
+                mBatterySaverStateMachine.dump(pw);
+            } else {
+                pw.println("Battery Saver: DISABLED");
+            }
             mAttentionDetector.dump(pw);
 
             pw.println();
@@ -5101,8 +5107,10 @@ public final class PowerManagerService extends SystemService
                 proto.end(uIDToken);
             }
 
-            mBatterySaverStateMachine.dumpProto(proto,
-                    PowerManagerServiceDumpProto.BATTERY_SAVER_STATE_MACHINE);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.dumpProto(proto,
+                        PowerManagerServiceDumpProto.BATTERY_SAVER_STATE_MACHINE);
+            }
 
             mHandler.getLooper().dumpDebug(proto, PowerManagerServiceDumpProto.LOOPER);
 
@@ -5986,7 +5994,8 @@ public final class PowerManagerService extends SystemService
         public boolean isPowerSaveMode() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverController.isEnabled();
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.getBatterySaverController().isEnabled();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5996,7 +6005,12 @@ public final class PowerManagerService extends SystemService
         public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
+                // Return default PowerSaveState if battery saver is not supported.
+                return mBatterySaverSupported
+                        ?
+                        mBatterySaverStateMachine.getBatterySaverPolicy().getBatterySaverPolicy(
+                                serviceType)
+                        : new PowerSaveState.Builder().build();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6017,11 +6031,24 @@ public final class PowerManagerService extends SystemService
             }
         }
 
-        @Override // Binder call
-        public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+        @Override
+        public boolean isBatterySaverSupported() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.getFullBatterySaverPolicy();
+                return mBatterySaverSupported;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+            // Return default BatterySaverPolicyConfig if battery saver is not supported.
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverSupported
+                        ? mBatterySaverStateMachine.getFullBatterySaverPolicy()
+                        : new BatterySaverPolicyConfig.Builder().build();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6036,7 +6063,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setFullBatterySaverPolicy(config);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setFullBatterySaverPolicy(config);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6073,7 +6101,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setAdaptiveBatterySaverPolicy(config);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setAdaptiveBatterySaverPolicy(config);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6088,7 +6117,8 @@ public final class PowerManagerService extends SystemService
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                return mBatterySaverStateMachine.setAdaptiveBatterySaverEnabled(enabled);
+                return mBatterySaverSupported
+                        && mBatterySaverStateMachine.setAdaptiveBatterySaverEnabled(enabled);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6953,12 +6983,21 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public PowerSaveState getLowPowerState(@ServiceType int serviceType) {
-            return mBatterySaverPolicy.getBatterySaverPolicy(serviceType);
+            // Return default PowerSaveState if battery saver is not supported.
+            return mBatterySaverSupported
+                    ?
+                    mBatterySaverStateMachine.getBatterySaverPolicy().getBatterySaverPolicy(
+                            serviceType) : new PowerSaveState.Builder().build();
         }
 
         @Override
         public void registerLowPowerModeObserver(LowPowerModeListener listener) {
-            mBatterySaverController.addListener(listener);
+            if (mBatterySaverSupported) {
+                mBatterySaverStateMachine.getBatterySaverController().addListener(listener);
+            } else {
+                Slog.w(TAG,
+                        "Battery saver is not supported, no low power mode observer registered");
+            }
         }
 
         @Override

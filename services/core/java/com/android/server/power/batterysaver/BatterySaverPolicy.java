@@ -41,7 +41,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ConcurrentUtils;
-import com.android.server.power.PowerManagerService;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -283,7 +282,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     }
 
     /**
-     * Called by {@link PowerManagerService#onBootPhase}, *with no lock held.*
+     * Called by {@link BatterySaverStateMachine#systemReady()}, *with no lock held.*
      */
     public void systemReady() {
         ConcurrentUtils.wtfIfLockHeld(TAG, mLock);

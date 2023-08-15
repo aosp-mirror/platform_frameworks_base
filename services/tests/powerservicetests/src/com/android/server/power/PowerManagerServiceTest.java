@@ -108,7 +108,6 @@ import com.android.server.power.PowerManagerService.WakeLock;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
-import com.android.server.power.batterysaver.BatterySavingStats;
 import com.android.server.testutils.OffsettableClock;
 
 import com.google.testing.junit.testparameterinjector.TestParameter;
@@ -184,6 +183,7 @@ public class PowerManagerServiceTest {
     private OffsettableClock mClock;
     private long mLastElapsedRealtime;
     private TestLooper mTestLooper;
+    private boolean mIsBatterySaverSupported = true;
 
     private static class IntentFilterMatcher implements ArgumentMatcher<IntentFilter> {
         private final IntentFilter mFilter;
@@ -215,6 +215,10 @@ public class PowerManagerServiceTest {
                 .setBatterySaverEnabled(BATTERY_SAVER_ENABLED)
                 .setBrightnessFactor(BRIGHTNESS_FACTOR)
                 .build();
+        when(mBatterySaverStateMachineMock.getBatterySaverController()).thenReturn(
+                mBatterySaverControllerMock);
+        when(mBatterySaverStateMachineMock.getBatterySaverPolicy()).thenReturn(
+                mBatterySaverPolicyMock);
         when(mBatterySaverPolicyMock.getBatterySaverPolicy(
                 eq(PowerManager.ServiceType.SCREEN_BRIGHTNESS)))
                 .thenReturn(powerSaveState);
@@ -235,6 +239,7 @@ public class PowerManagerServiceTest {
         mContextSpy = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
+        setBatterySaverSupported();
 
         MockContentResolver cr = new MockContentResolver(mContextSpy);
         cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
@@ -269,21 +274,7 @@ public class PowerManagerServiceTest {
             }
 
             @Override
-            BatterySaverPolicy createBatterySaverPolicy(
-                    Object lock, Context context, BatterySavingStats batterySavingStats) {
-                return mBatterySaverPolicyMock;
-            }
-
-            @Override
-            BatterySaverController createBatterySaverController(
-                    Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
-                    BatterySavingStats batterySavingStats) {
-                return mBatterySaverControllerMock;
-            }
-
-            @Override
-            BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
-                    BatterySaverController batterySaverController) {
+            BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context) {
                 return mBatterySaverStateMachineMock;
             }
 
@@ -478,6 +469,12 @@ public class PowerManagerServiceTest {
     private void advanceTime(long timeMs) {
         mClock.fastForward(timeMs);
         mTestLooper.dispatchAll();
+    }
+
+    private void setBatterySaverSupported() {
+        when(mResourcesSpy.getBoolean(
+                com.android.internal.R.bool.config_batterySaverSupported)).thenReturn(
+                mIsBatterySaverSupported);
     }
 
     @Test
@@ -2540,6 +2537,19 @@ public class PowerManagerServiceTest {
                 mService.getBinderServiceInstance().getFullPowerSavePolicy();
         assertThat(mockReturnConfig).isEqualTo(policyConfig);
         verify(mBatterySaverStateMachineMock).getFullBatterySaverPolicy();
+    }
+
+    @Test
+    public void testGetFullPowerSavePolicy_whenNoBatterySaverSupported() {
+        mIsBatterySaverSupported = false;
+        setBatterySaverSupported();
+        createService();
+        BatterySaverPolicyConfig mockReturnConfig = new BatterySaverPolicyConfig.Builder().build();
+        assertFalse(mService.getBinderServiceInstance().setPowerSaveModeEnabled(true));
+        BatterySaverPolicyConfig policyConfig =
+                mService.getBinderServiceInstance().getFullPowerSavePolicy();
+        assertThat(mockReturnConfig.toString()).isEqualTo(policyConfig.toString());
+        verify(mBatterySaverStateMachineMock, never()).getFullBatterySaverPolicy();
     }
 
     @Test

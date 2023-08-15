@@ -26,6 +26,10 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
+    <!-- Whether or not the device supports battery saver. If false, battery saver will be
+     disabled. -->
+    <bool name="config_batterySaverSupported">true</bool>
+
     <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
     <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
 
