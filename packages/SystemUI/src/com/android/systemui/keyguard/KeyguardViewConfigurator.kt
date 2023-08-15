@@ -24,9 +24,13 @@ import com.android.keyguard.KeyguardStatusViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
+import com.android.systemui.communal.ui.adapter.CommunalWidgetViewAdapter
+import com.android.systemui.communal.ui.binder.CommunalWidgetViewBinder
+import com.android.systemui.communal.ui.viewmodel.CommunalWidgetViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
@@ -83,6 +87,9 @@ constructor(
     private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
     private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
+    private val communalWidgetViewModel: CommunalWidgetViewModel,
+    private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -106,6 +113,7 @@ constructor(
         bindRightShortcut()
         bindAmbientIndicationArea()
         bindSettingsPopupMenu()
+        bindCommunalWidgetArea()
 
         KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
         keyguardBlueprintCommandListener.start()
@@ -277,6 +285,19 @@ constructor(
                 keyguardRootView.removeView(it)
             }
         }
+    }
+
+    private fun bindCommunalWidgetArea() {
+        if (!featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
+            return
+        }
+
+        CommunalWidgetViewBinder.bind(
+            keyguardRootView,
+            communalWidgetViewModel,
+            communalWidgetViewAdapter,
+            keyguardBlueprintInteractor,
+        )
     }
 
     /**
