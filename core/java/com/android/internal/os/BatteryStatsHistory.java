@@ -185,7 +185,7 @@ public class BatteryStatsHistory {
     private boolean mHaveBatteryLevel;
     private boolean mRecordingHistory;
 
-    private static final int HISTORY_TAG_INDEX_LIMIT = 0x7ffe;
+    static final int HISTORY_TAG_INDEX_LIMIT = 0x7ffe;
     private static final int MAX_HISTORY_TAG_STRING_LENGTH = 1024;
 
     private final HashMap<HistoryTag, Integer> mHistoryTagPool = new HashMap<>();
@@ -1872,6 +1872,7 @@ public class BatteryStatsHistory {
             }
             return idx | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
         } else {
+            tag.poolIdx = HistoryTag.HISTORY_TAG_POOL_OVERFLOW;
             // Tag pool overflow: include the tag itself in the parcel
             return HISTORY_TAG_INDEX_LIMIT | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
         }
