@@ -66,7 +66,7 @@ void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets(apk_assets);
   if (config != nullptr) {
-    assetmanager.SetConfiguration(*config);
+    assetmanager.SetConfigurations({*config});
   }
 
   while (state.KeepRunning()) {

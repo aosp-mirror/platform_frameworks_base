@@ -40,7 +40,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -195,7 +195,8 @@ public class LocaleConfig implements Parcelable {
         XmlUtils.beginDocument(parser, TAG_LOCALE_CONFIG);
         int outerDepth = parser.getDepth();
         AttributeSet attrs = Xml.asAttributeSet(parser);
-        Set<String> localeNames = new HashSet<String>();
+        // LinkedHashSet to preserve insertion order
+        Set<String> localeNames = new LinkedHashSet<>();
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (TAG_LOCALE.equals(parser.getName())) {
                 final TypedArray attributes = res.obtainAttributes(

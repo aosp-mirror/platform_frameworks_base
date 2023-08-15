@@ -425,14 +425,12 @@ public class ResourcesImpl {
                     mConfiguration.setLocales(locales);
                 }
 
+                String[] selectedLocales = null;
+                String defaultLocale = null;
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
                     if (locales.size() > 1) {
                         String[] availableLocales;
-
-                        LocaleList localeList = ResourcesManager.getInstance().getLocaleList();
-                        if (!localeList.isEmpty()) {
-                            availableLocales = localeList.toLanguageTags().split(",");
-                        } else {
+                        if (ResourcesManager.getInstance().getLocaleList().isEmpty()) {
                             // The LocaleList has changed. We must query the AssetManager's
                             // available Locales and figure out the best matching Locale in the new
                             // LocaleList.
@@ -444,13 +442,35 @@ public class ResourcesImpl {
                                     availableLocales = null;
                                 }
                             }
-                        }
-                        if (availableLocales != null) {
-                            final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
-                                    availableLocales);
-                            if (bestLocale != null && bestLocale != locales.get(0)) {
-                                mConfiguration.setLocales(new LocaleList(bestLocale, locales));
+
+                            if (availableLocales != null) {
+                                final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
+                                        availableLocales);
+                                if (bestLocale != null) {
+                                    selectedLocales = new String[]{
+                                            adjustLanguageTag(bestLocale.toLanguageTag())};
+                                    if (!bestLocale.equals(locales.get(0))) {
+                                        mConfiguration.setLocales(
+                                                new LocaleList(bestLocale, locales));
+                                    }
+                                }
                             }
+                        } else {
+                            selectedLocales = locales.getIntersection(
+                                    ResourcesManager.getInstance().getLocaleList());
+                            defaultLocale = ResourcesManager.getInstance()
+                                    .getLocaleList().get(0).toLanguageTag();
+                        }
+                    }
+                }
+                if (selectedLocales == null) {
+                    if (ResourcesManager.getInstance().getLocaleList().isEmpty()) {
+                        selectedLocales = new String[]{
+                                adjustLanguageTag(locales.get(0).toLanguageTag())};
+                    } else {
+                        selectedLocales = new String[locales.size()];
+                        for (int i = 0; i < locales.size(); i++) {
+                            selectedLocales[i] = adjustLanguageTag(locales.get(i).toLanguageTag());
                         }
                     }
                 }
@@ -488,7 +508,8 @@ public class ResourcesImpl {
                 }
 
                 mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                        adjustLanguageTag(mConfiguration.getLocales().get(0).toLanguageTag()),
+                        defaultLocale,
+                        selectedLocales,
                         mConfiguration.orientation,
                         mConfiguration.touchscreen,
                         mConfiguration.densityDpi, mConfiguration.keyboard,

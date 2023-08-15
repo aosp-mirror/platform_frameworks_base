@@ -100,7 +100,7 @@ class AssetManager2 {
   using ApkAssetsWPtr = wp<const ApkAssets>;
   using ApkAssetsList = std::span<const ApkAssetsPtr>;
 
-  AssetManager2() = default;
+  AssetManager2();
   explicit AssetManager2(AssetManager2&& other) = default;
   AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration);
 
@@ -156,10 +156,14 @@ class AssetManager2 {
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
-  void SetConfiguration(const ResTable_config& configuration);
+  void SetConfigurations(std::vector<ResTable_config> configurations);
 
-  inline const ResTable_config& GetConfiguration() const {
-    return configuration_;
+  inline const std::vector<ResTable_config>& GetConfigurations() const {
+    return configurations_;
+  }
+
+  inline void SetDefaultLocale(uint32_t default_locale) {
+    default_locale_ = default_locale;
   }
 
   // Returns all configurations for which there are resources defined, or an I/O error if reading
@@ -465,9 +469,11 @@ class AssetManager2 {
   // without taking too much memory.
   std::array<uint8_t, std::numeric_limits<uint8_t>::max() + 1> package_ids_;
 
-  // The current configuration set for this AssetManager. When this changes, cached resources
+  uint32_t default_locale_;
+
+  // The current configurations set for this AssetManager. When this changes, cached resources
   // may need to be purged.
-  ResTable_config configuration_ = {};
+  std::vector<ResTable_config> configurations_;
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
