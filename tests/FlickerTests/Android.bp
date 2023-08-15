@@ -39,7 +39,11 @@ filegroup {
         "src/**/activityembedding/*.kt",
         "src/**/activityembedding/open/*.kt",
         "src/**/activityembedding/close/*.kt",
+        "src/**/activityembedding/layoutchange/*.kt",
+        "src/**/activityembedding/pip/*.kt",
         "src/**/activityembedding/rotation/*.kt",
+        "src/**/activityembedding/rtl/*.kt",
+        "src/**/activityembedding/splitscreen/*.kt",
     ],
 }
 

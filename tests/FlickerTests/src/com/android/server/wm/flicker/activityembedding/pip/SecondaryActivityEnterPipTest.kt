@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.pip
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
@@ -25,6 +25,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -38,7 +39,7 @@ import org.junit.runners.Parameterized
  * Setup: Start from a split A|B. Transition: B enters PIP, observe the window shrink to the bottom
  * right corner on screen.
  *
- * To run this test: `atest FlickerTests:SecondaryActivityEnterPipTest`
+ * To run this test: `atest FlickerTestsOther:SecondaryActivityEnterPipTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
