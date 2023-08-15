@@ -186,6 +186,14 @@ public class HearingAidDeviceManager {
             if (cachedDevice.getHiSyncId() != hiSyncId) {
                 continue;
             }
+
+            // The remote device supports CSIP, the other ear should be processed as a member
+            // device. Ignore hiSyncId grouping from ASHA here.
+            if (cachedDevice.getProfiles().stream().anyMatch(
+                    profile -> profile instanceof CsipSetCoordinatorProfile)) {
+                continue;
+            }
+
             if (firstMatchedIndex == -1) {
                 // Found the first one
                 firstMatchedIndex = i;
