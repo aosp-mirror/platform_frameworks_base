@@ -1302,7 +1302,7 @@ public interface WindowManager extends ViewManager {
      * ratio or orientation specified in the app manifest.
      *
      * <p>The aspect ratio compatibility override is exposed to users in device
-     * settings. A menu in device settings lists all apps that don't opt out of
+     * settings. A menu in device settings lists all apps that have not opted out of
      * the compatibility override. Users select apps from the menu and set the
      * app aspect ratio on a per-app basis. Typically, the menu is available
      * only on large screen devices.
@@ -1347,11 +1347,11 @@ public interface WindowManager extends ViewManager {
      * Application level
      * {@link android.content.pm.PackageManager.Property PackageManager.Property}
      * tag that (when set to false) informs the system the app has opted out of the
-     * full-screen option of the aspect ratio compatibility override. (For
-     * background information about the aspect ratio compatibility override, see
+     * full-screen option of the user aspect ratio compatibility override settings. (For
+     * background information about the user aspect ratio compatibility override, see
      * {@link #PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE}.)
      *
-     * <p>When users apply the aspect ratio compatibility override, the orientation
+     * <p>When users apply the full-screen compatibility override, the orientation
      * of the activity is forced to {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_USER}.
      *
      * <p>The user override is intended to improve the app experience on devices
