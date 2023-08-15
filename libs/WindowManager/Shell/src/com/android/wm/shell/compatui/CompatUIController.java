@@ -342,6 +342,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 if (!mActiveLetterboxEduLayout.updateCompatInfo(taskInfo, taskListener,
                         showOnDisplay(mActiveLetterboxEduLayout.getDisplayId()))) {
                     // The layout is no longer eligible to be shown, clear active layout.
+                    mActiveLetterboxEduLayout.release();
                     mActiveLetterboxEduLayout = null;
                 }
                 return;
@@ -371,15 +372,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new LetterboxEduWindowManager(context, taskInfo,
                 mSyncQueue, taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                mTransitionsLazy.get(), this::onLetterboxEduDismissed, mDockStateReader,
-                mCompatUIConfiguration);
-    }
-
-    private void onLetterboxEduDismissed(
-            Pair<TaskInfo, ShellTaskOrganizer.TaskListener> stateInfo) {
-        mActiveLetterboxEduLayout = null;
-        // We need to update the UI
-        createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second);
+                mTransitionsLazy.get(),
+                stateInfo -> createOrUpdateReachabilityEduLayout(stateInfo.first, stateInfo.second),
+                mDockStateReader, mCompatUIConfiguration);
     }
 
     private void createOrUpdateRestartDialogLayout(TaskInfo taskInfo,
@@ -448,6 +443,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
                 if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
                         showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
                     // The layout is no longer eligible to be shown, remove from active layouts.
+                    mActiveReachabilityEduLayout.release();
                     mActiveReachabilityEduLayout = null;
                 }
                 return;
