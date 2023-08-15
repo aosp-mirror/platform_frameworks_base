@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.hardware.broadcastradio.V2_0.ConfigFlag;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
+import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
@@ -267,7 +268,7 @@ class TunerSession extends ITuner.Stub {
         }
     }
 
-    void onMergedProgramListUpdateFromHal(ProgramList.Chunk mergedChunk) {
+    void onMergedProgramListUpdateFromHal(ProgramListChunk mergedChunk) {
         List<ProgramList.Chunk> clientUpdateChunks = null;
         synchronized (mLock) {
             if (mProgramInfoCache == null) {

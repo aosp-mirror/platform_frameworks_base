@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 /**
  * @hide
@@ -45,8 +45,8 @@ public final class ProgramList implements AutoCloseable {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final Map<ProgramSelector.Identifier, RadioManager.ProgramInfo> mPrograms =
-            new ArrayMap<>();
+    private final Map<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+            RadioManager.ProgramInfo>> mPrograms = new ArrayMap<>();
 
     @GuardedBy("mLock")
     private final List<ListCallback> mListCallbacks = new ArrayList<>();
@@ -193,7 +193,7 @@ public final class ProgramList implements AutoCloseable {
 
     void apply(Chunk chunk) {
         List<ProgramSelector.Identifier> removedList = new ArrayList<>();
-        List<ProgramSelector.Identifier> changedList = new ArrayList<>();
+        Set<ProgramSelector.Identifier> changedSet = new ArraySet<>();
         List<ProgramList.ListCallback> listCallbacksCopied;
         List<OnCompleteListener> onCompleteListenersCopied = new ArrayList<>();
         synchronized (mLock) {
@@ -203,19 +203,27 @@ public final class ProgramList implements AutoCloseable {
             listCallbacksCopied = new ArrayList<>(mListCallbacks);
 
             if (chunk.isPurge()) {
-                Iterator<Map.Entry<ProgramSelector.Identifier, RadioManager.ProgramInfo>>
-                        programsIterator = mPrograms.entrySet().iterator();
+                Iterator<Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+                        RadioManager.ProgramInfo>>> programsIterator =
+                        mPrograms.entrySet().iterator();
                 while (programsIterator.hasNext()) {
-                    RadioManager.ProgramInfo removed = programsIterator.next().getValue();
-                    if (removed != null) {
-                        removedList.add(removed.getSelector().getPrimaryId());
+                    Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+                            RadioManager.ProgramInfo>> removed = programsIterator.next();
+                    if (removed.getValue() != null) {
+                        removedList.add(removed.getKey());
                     }
                     programsIterator.remove();
                 }
             }
 
-            chunk.getRemoved().stream().forEach(id -> removeLocked(id, removedList));
-            chunk.getModified().stream().forEach(info -> putLocked(info, changedList));
+            Iterator<UniqueProgramIdentifier> removedIterator = chunk.getRemoved().iterator();
+            while (removedIterator.hasNext()) {
+                removeLocked(removedIterator.next(), removedList);
+            }
+            Iterator<RadioManager.ProgramInfo> modifiedIterator = chunk.getModified().iterator();
+            while (modifiedIterator.hasNext()) {
+                putLocked(modifiedIterator.next(), changedSet);
+            }
 
             if (chunk.isComplete()) {
                 mIsComplete = true;
@@ -228,9 +236,11 @@ public final class ProgramList implements AutoCloseable {
                 listCallbacksCopied.get(cbIndex).onItemRemoved(removedList.get(i));
             }
         }
-        for (int i = 0; i < changedList.size(); i++) {
+        Iterator<ProgramSelector.Identifier> changedIterator = changedSet.iterator();
+        while (changedIterator.hasNext()) {
+            ProgramSelector.Identifier changedId = changedIterator.next();
             for (int cbIndex = 0; cbIndex < listCallbacksCopied.size(); cbIndex++) {
-                listCallbacksCopied.get(cbIndex).onItemChanged(changedList.get(i));
+                listCallbacksCopied.get(cbIndex).onItemChanged(changedId);
             }
         }
         if (chunk.isComplete()) {
@@ -242,20 +252,31 @@ public final class ProgramList implements AutoCloseable {
 
     @GuardedBy("mLock")
     private void putLocked(RadioManager.ProgramInfo value,
-            List<ProgramSelector.Identifier> changedIdentifierList) {
-        ProgramSelector.Identifier key = value.getSelector().getPrimaryId();
-        mPrograms.put(Objects.requireNonNull(key), value);
-        ProgramSelector.Identifier sel = value.getSelector().getPrimaryId();
-        changedIdentifierList.add(sel);
+            Set<ProgramSelector.Identifier> changedIdentifierSet) {
+        UniqueProgramIdentifier key = new UniqueProgramIdentifier(
+                value.getSelector());
+        ProgramSelector.Identifier primaryKey = Objects.requireNonNull(key.getPrimaryId());
+        if (!mPrograms.containsKey(primaryKey)) {
+            mPrograms.put(primaryKey, new ArrayMap<>());
+        }
+        mPrograms.get(primaryKey).put(key, value);
+        changedIdentifierSet.add(primaryKey);
     }
 
     @GuardedBy("mLock")
-    private void removeLocked(ProgramSelector.Identifier key,
+    private void removeLocked(UniqueProgramIdentifier key,
             List<ProgramSelector.Identifier> removedIdentifierList) {
-        RadioManager.ProgramInfo removed = mPrograms.remove(Objects.requireNonNull(key));
+        ProgramSelector.Identifier primaryKey = Objects.requireNonNull(key.getPrimaryId());
+        if (!mPrograms.containsKey(primaryKey)) {
+            return;
+        }
+        Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries = mPrograms
+                .get(primaryKey);
+        RadioManager.ProgramInfo removed = entries.remove(Objects.requireNonNull(key));
         if (removed == null) return;
-        ProgramSelector.Identifier sel = removed.getSelector().getPrimaryId();
-        removedIdentifierList.add(sel);
+        if (entries.size() == 0) {
+            removedIdentifierList.add(primaryKey);
+        }
     }
 
     /**
@@ -264,9 +285,20 @@ public final class ProgramList implements AutoCloseable {
      * @return the new List<> object; it won't receive any further updates
      */
     public @NonNull List<RadioManager.ProgramInfo> toList() {
+        List<RadioManager.ProgramInfo> list = new ArrayList<>();
         synchronized (mLock) {
-            return mPrograms.values().stream().collect(Collectors.toList());
+            Iterator<Map.Entry<ProgramSelector.Identifier, Map<UniqueProgramIdentifier,
+                    RadioManager.ProgramInfo>>> listIterator = mPrograms.entrySet().iterator();
+            while (listIterator.hasNext()) {
+                Iterator<Map.Entry<UniqueProgramIdentifier,
+                        RadioManager.ProgramInfo>> prorgramsIterator = listIterator.next()
+                        .getValue().entrySet().iterator();
+                while (prorgramsIterator.hasNext()) {
+                    list.add(prorgramsIterator.next().getValue());
+                }
+            }
         }
+        return list;
     }
 
     /**
@@ -276,9 +308,15 @@ public final class ProgramList implements AutoCloseable {
      * @return the program info, or null if there is no such program on the list
      */
     public @Nullable RadioManager.ProgramInfo get(@NonNull ProgramSelector.Identifier id) {
+        Map<UniqueProgramIdentifier, RadioManager.ProgramInfo> entries;
         synchronized (mLock) {
-            return mPrograms.get(Objects.requireNonNull(id));
+            entries = mPrograms.get(Objects.requireNonNull(id,
+                    "Primary identifier can not be null"));
         }
+        if (entries == null) {
+            return null;
+        }
+        return entries.entrySet().iterator().next().getValue();
     }
 
     /**
@@ -404,7 +442,7 @@ public final class ProgramList implements AutoCloseable {
          * Checks, if non-tunable entries that define tree structure on the
          * program list (i.e. DAB ensembles) should be included.
          *
-         * @see {@link ProgramSelector.Identifier#isCategory()}
+         * @see ProgramSelector.Identifier#isCategoryType()
          */
         public boolean areCategoriesIncluded() {
             return mIncludeCategories;
@@ -459,11 +497,11 @@ public final class ProgramList implements AutoCloseable {
         private final boolean mPurge;
         private final boolean mComplete;
         private final @NonNull Set<RadioManager.ProgramInfo> mModified;
-        private final @NonNull Set<ProgramSelector.Identifier> mRemoved;
+        private final @NonNull Set<UniqueProgramIdentifier> mRemoved;
 
         public Chunk(boolean purge, boolean complete,
                 @Nullable Set<RadioManager.ProgramInfo> modified,
-                @Nullable Set<ProgramSelector.Identifier> removed) {
+                @Nullable Set<UniqueProgramIdentifier> removed) {
             mPurge = purge;
             mComplete = complete;
             mModified = (modified != null) ? modified : Collections.emptySet();
@@ -474,7 +512,7 @@ public final class ProgramList implements AutoCloseable {
             mPurge = in.readByte() != 0;
             mComplete = in.readByte() != 0;
             mModified = Utils.createSet(in, RadioManager.ProgramInfo.CREATOR);
-            mRemoved = Utils.createSet(in, ProgramSelector.Identifier.CREATOR);
+            mRemoved = Utils.createSet(in, UniqueProgramIdentifier.CREATOR);
         }
 
         @Override
@@ -512,7 +550,7 @@ public final class ProgramList implements AutoCloseable {
             return mModified;
         }
 
-        public @NonNull Set<ProgramSelector.Identifier> getRemoved() {
+        public @NonNull Set<UniqueProgramIdentifier> getRemoved() {
             return mRemoved;
         }
 

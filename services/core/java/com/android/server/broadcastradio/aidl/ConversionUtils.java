@@ -29,7 +29,6 @@ import android.hardware.broadcastradio.Metadata;
 import android.hardware.broadcastradio.ProgramFilter;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
-import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.Properties;
 import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
@@ -38,6 +37,7 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.Build;
 import android.os.ParcelableException;
 import android.os.ServiceSpecificException;
@@ -553,31 +553,6 @@ final class ConversionUtils {
         return hwFilter;
     }
 
-    static ProgramList.Chunk chunkFromHalProgramListChunk(ProgramListChunk chunk) {
-        Set<RadioManager.ProgramInfo> modified = new ArraySet<>(chunk.modified.length);
-        for (int i = 0; i < chunk.modified.length; i++) {
-            RadioManager.ProgramInfo modifiedInfo =
-                    programInfoFromHalProgramInfo(chunk.modified[i]);
-            if (modifiedInfo == null) {
-                Slogf.w(TAG, "Program info %s in program list chunk is not valid",
-                        chunk.modified[i]);
-                continue;
-            }
-            modified.add(modifiedInfo);
-        }
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
-        if (chunk.removed != null) {
-            for (int i = 0; i < chunk.removed.length; i++) {
-                ProgramSelector.Identifier removedId =
-                        identifierFromHalProgramIdentifier(chunk.removed[i]);
-                if (removedId != null) {
-                    removed.add(removedId);
-                }
-            }
-        }
-        return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
-    }
-
     private static boolean isNewIdentifierInU(ProgramSelector.Identifier id) {
         return id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT;
     }
@@ -630,11 +605,11 @@ final class ConversionUtils {
                 modified.add(info);
             }
         }
-        Set<ProgramSelector.Identifier> removed = new ArraySet<>();
-        Iterator<ProgramSelector.Identifier> removedIterator = chunk.getRemoved().iterator();
+        Set<UniqueProgramIdentifier> removed = new ArraySet<>();
+        Iterator<UniqueProgramIdentifier> removedIterator = chunk.getRemoved().iterator();
         while (removedIterator.hasNext()) {
-            ProgramSelector.Identifier id = removedIterator.next();
-            if (!isNewIdentifierInU(id)) {
+            UniqueProgramIdentifier id = removedIterator.next();
+            if (!isNewIdentifierInU(id.getPrimaryId())) {
                 removed.add(id);
             }
         }
