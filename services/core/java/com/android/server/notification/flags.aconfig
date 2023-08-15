@@ -1,0 +1,8 @@
+package: "com.android.server.notification"
+
+flag {
+  name: "expire_bitmaps"
+  namespace: "systemui"
+  description: "This flag controls removing expired notification bitmaps"
+  bug: "290381858"
+}
