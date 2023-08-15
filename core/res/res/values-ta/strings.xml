@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"கைரேகை அங்கீகரிக்கப்படவில்லை"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"கைரேகை அங்கீகரிக்கப்படவில்லை"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"முகத்தை அடையாளம் காண முடியவில்லை. கைரேகையைப் பயன்படுத்தவும்."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"கைரேகை அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"முகம் அங்கீகரிக்கப்பட்டது. ’உறுதிப்படுத்துக’ என்பதை அழுத்துக"</string>

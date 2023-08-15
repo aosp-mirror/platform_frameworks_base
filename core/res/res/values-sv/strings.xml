@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingeravtrycket känns inte igen"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingeravtrycket känns inte igen"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrycket har autentiserats"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet har autentiserats"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
@@ -2326,11 +2327,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillåter att en tillhörande app startar förgrundstjänster i bakgrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen är tillgänglig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen är blockerad"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dubbel skärm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dubbel skärm är på"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen är på"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> använder båda skärmarna för att visa innehåll"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheten är för varm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbel skärm kan inte användas eftersom telefonen börjar bli för varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen kan inte användas eftersom telefonen börjar bli för varm"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen är inte tillgängligt"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen kan inte användas eftersom battersparläget är aktiverat. Du kan inaktivera detta i inställningarna."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Öppna inställningarna"</string>

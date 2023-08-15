@@ -644,6 +644,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Empreinte digitale non reconnue"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Visage non reconnu. Utilisez plutôt l\'empreinte digitale."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
@@ -2327,11 +2328,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet à une application compagnon en arrière-plan de lancer des services d\'avant-plan."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Le microphone est accessible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Le microphone est bloqué"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Double écran"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Le double écran est activé"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen activé"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher le contenu"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"L\'appareil est trop chaud"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Le double écran n\'est pas accessible, car votre téléphone est trop chaud"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen n\'est pas accessible, car votre téléphone est trop chaud"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"La fonctionnalité Dual Screen n\'est pas accessible"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"La fonctionnalité Dual Screen n\'est pas accessible, car l\'économiseur de pile est activé. Vous pouvez désactiver cette option dans les paramètres."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Accéder aux paramètres"</string>
