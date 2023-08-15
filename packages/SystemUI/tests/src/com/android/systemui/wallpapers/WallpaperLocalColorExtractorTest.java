@@ -109,6 +109,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
 
         WallpaperLocalColorExtractor colorExtractor = new WallpaperLocalColorExtractor(
                 mBackgroundExecutor,
+                new Object(),
                 new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                     @Override
                     public void onColorsProcessed(List<RectF> regions,

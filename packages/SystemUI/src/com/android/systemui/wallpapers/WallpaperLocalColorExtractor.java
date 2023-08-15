@@ -61,7 +61,7 @@ public class WallpaperLocalColorExtractor {
     private int mBitmapWidth = -1;
     private int mBitmapHeight = -1;
 
-    private final Object mLock = new Object();
+    private final Object mLock;
 
     private final List<RectF> mPendingRegions = new ArrayList<>();
     private final Set<RectF> mProcessedRegions = new ArraySet<>();
@@ -102,12 +102,15 @@ public class WallpaperLocalColorExtractor {
     /**
      * Creates a new color extractor.
      * @param longExecutor the executor on which the color extraction will be performed
+     * @param lock the lock object to use for computing colors or processing the bitmap
      * @param wallpaperLocalColorExtractorCallback an interface to handle the callbacks from
      *                                        the color extractor.
      */
     public WallpaperLocalColorExtractor(@LongRunning Executor longExecutor,
+            Object lock,
             WallpaperLocalColorExtractorCallback wallpaperLocalColorExtractorCallback) {
         mLongExecutor = longExecutor;
+        mLock = lock;
         mWallpaperLocalColorExtractorCallback = wallpaperLocalColorExtractorCallback;
     }
 
@@ -149,6 +152,12 @@ public class WallpaperLocalColorExtractor {
 
     private void onBitmapChangedSynchronized(@NonNull Bitmap bitmap) {
         synchronized (mLock) {
+            if (bitmap.isRecycled()) {
+                // ImageWallpaper loaded a new bitmap before the extraction of the previous one
+                // In that case, ImageWallpaper also scheduled the extraction of the next bitmap
+                Log.i(TAG, "Wallpaper has changed; deferring color extraction");
+                return;
+            }
             if (bitmap.getWidth() <= 0 || bitmap.getHeight() <= 0) {
                 Log.e(TAG, "Attempt to extract colors from an invalid bitmap");
                 return;
