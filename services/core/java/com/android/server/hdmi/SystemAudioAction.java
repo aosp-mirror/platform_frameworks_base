@@ -113,7 +113,7 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         }
         int param = tv().getActivePath();
         return param != Constants.INVALID_PHYSICAL_ADDRESS
-                ? param : Constants.PATH_INTERNAL;
+                ? param : Constants.TV_PHYSICAL_ADDRESS;
     }
 
     private void handleSendSystemAudioModeRequestTimeout() {

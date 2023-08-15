@@ -518,6 +518,18 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
         assertRunOnServiceThread();
+        // If the device is active source and received a <Routing Change> or <Routing Information>
+        // message to a physical address in the same active path do not change the Active Source
+        // status.
+        // E.g. TV [0.0.0.0] ------ Switch [2.0.0.0] ------ OTT [2.1.0.0] (Active Source)
+        // TV sends <Routing Change>[2.0.0.0] -> OTT is still Active Source
+        // TV sends <Routing Change>[0.0.0.0] -> OTT is not Active Source anymore.
+        // TV sends <Routing Change>[3.0.0.0] -> OTT is not Active Source anymore.
+        if (HdmiUtils.isInActiveRoutingPath(mService.getPhysicalAddress(), physicalAddress)
+                && physicalAddress != Constants.TV_PHYSICAL_ADDRESS
+                && isActiveSource()) {
+            return;
+        }
         if (physicalAddress != mService.getPhysicalAddress()) {
             setActiveSource(physicalAddress,
                     "HdmiCecLocalDevicePlayback#handleRoutingChangeAndInformation()");
