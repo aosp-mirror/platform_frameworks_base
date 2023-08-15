@@ -1819,7 +1819,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityRecord activity = createActivityRecord(mDisplayContent);
         final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent);
-        recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_NOSENSOR);
         doReturn(mock(RecentsAnimationController.class)).when(mWm).getRecentsAnimationController();
 
         // Do not rotate if the recents animation is animating on top.
