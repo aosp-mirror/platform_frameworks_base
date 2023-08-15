@@ -917,4 +917,7 @@
     "$packageName" part that will be replaced by the code with the package name of the target app.
     -->
     <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
+
+    <!-- Flag controlling whether visual query attention detection has been enabled. -->
+    <bool name="config_enableVisualQueryAttentionDetection">false</bool>
 </resources>
