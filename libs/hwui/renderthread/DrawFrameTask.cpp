@@ -104,7 +104,7 @@ void DrawFrameTask::run() {
         info.forceDrawFrame = mForceDrawFrame;
         mForceDrawFrame = false;
         canUnblockUiThread = syncFrameState(info);
-        canDrawThisFrame = info.out.canDrawThisFrame;
+        canDrawThisFrame = !info.out.skippedFrameReason.has_value();
         solelyTextureViewUpdates = info.out.solelyTextureViewUpdates;
 
         if (mFrameCommitCallback) {
@@ -192,11 +192,12 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     if (CC_UNLIKELY(!hasTarget || !canDraw)) {
         if (!hasTarget) {
             mSyncResult |= SyncResult::LostSurfaceRewardIfFound;
+            info.out.skippedFrameReason = SkippedFrameReason::NoOutputTarget;
         } else {
             // If we have a surface but can't draw we must be stopped
             mSyncResult |= SyncResult::ContextIsStopped;
+            info.out.skippedFrameReason = SkippedFrameReason::ContextIsStopped;
         }
-        info.out.canDrawThisFrame = false;
     }
 
     if (info.out.hasAnimations) {
@@ -204,7 +205,7 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
             mSyncResult |= SyncResult::UIRedrawRequired;
         }
     }
-    if (!info.out.canDrawThisFrame) {
+    if (info.out.skippedFrameReason) {
         mSyncResult |= SyncResult::FrameDropped;
     }
     // If prepareTextures is false, we ran out of texture cache space

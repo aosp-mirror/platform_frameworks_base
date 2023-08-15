@@ -148,7 +148,7 @@ void FrameInfoVisualizer::initializeRects(const int baseline, const int width) {
     int fast_i = 0, janky_i = 0;
     // Set the bottom of all the shapes to the baseline
     for (int fi = mFrameSource.size() - 1; fi >= 0; fi--) {
-        if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
+        if (mFrameSource[fi].getSkippedFrameReason()) {
             continue;
         }
         float lineWidth = baseLineWidth;
@@ -181,7 +181,7 @@ void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex en
     int janky_i = (mNumJankyRects - 1) * 4;
 
     for (size_t fi = 0; fi < mFrameSource.size(); fi++) {
-        if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
+        if (mFrameSource[fi].getSkippedFrameReason()) {
             continue;
         }
 
