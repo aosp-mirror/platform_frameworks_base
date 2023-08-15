@@ -46,6 +46,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -54,35 +55,35 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class KeyguardPatternViewControllerTest : SysuiTestCase() {
-   private lateinit var mKeyguardPatternView: KeyguardPatternView
+    private lateinit var mKeyguardPatternView: KeyguardPatternView
 
-  @Mock private lateinit var mKeyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var mKeyguardUpdateMonitor: KeyguardUpdateMonitor
 
-  @Mock private lateinit var mSecurityMode: KeyguardSecurityModel.SecurityMode
+    @Mock private lateinit var mSecurityMode: KeyguardSecurityModel.SecurityMode
 
-  @Mock private lateinit var mLockPatternUtils: LockPatternUtils
+    @Mock private lateinit var mLockPatternUtils: LockPatternUtils
 
-  @Mock private lateinit var mKeyguardSecurityCallback: KeyguardSecurityCallback
+    @Mock private lateinit var mKeyguardSecurityCallback: KeyguardSecurityCallback
 
-  @Mock private lateinit var mLatencyTracker: LatencyTracker
-  private var mFalsingCollector: FalsingCollector = FalsingCollectorFake()
+    @Mock private lateinit var mLatencyTracker: LatencyTracker
+    private var mFalsingCollector: FalsingCollector = FalsingCollectorFake()
 
-  @Mock private lateinit var mEmergencyButtonController: EmergencyButtonController
+    @Mock private lateinit var mEmergencyButtonController: EmergencyButtonController
 
-  @Mock
-  private lateinit var mKeyguardMessageAreaControllerFactory: KeyguardMessageAreaController.Factory
+    @Mock
+    private lateinit var mKeyguardMessageAreaControllerFactory:
+        KeyguardMessageAreaController.Factory
 
-  @Mock
-  private lateinit var mKeyguardMessageAreaController:
-      KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    @Mock
+    private lateinit var mKeyguardMessageAreaController:
+        KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
-  @Mock private lateinit var mPostureController: DevicePostureController
+    @Mock private lateinit var mPostureController: DevicePostureController
 
-  private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
-  private lateinit var fakeFeatureFlags: FakeFeatureFlags
+    private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
+    private lateinit var fakeFeatureFlags: FakeFeatureFlags
 
-  @Captor
-  lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
+    @Captor lateinit var postureCallbackCaptor: ArgumentCaptor<DevicePostureController.Callback>
 
     @Before
     fun setup() {
@@ -91,9 +92,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
             .thenReturn(mKeyguardMessageAreaController)
         fakeFeatureFlags = FakeFeatureFlags()
         fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false)
-        mKeyguardPatternView = View.inflate(mContext, R.layout.keyguard_pattern_view, null)
-                as KeyguardPatternView
-
+        mKeyguardPatternView =
+            View.inflate(mContext, R.layout.keyguard_pattern_view, null) as KeyguardPatternView
 
         mKeyguardPatternViewController =
             KeyguardPatternViewController(
@@ -125,8 +125,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     @Test
     fun onDevicePostureChanged_deviceOpened_propagatedToPatternView() {
         overrideResource(R.dimen.half_opened_bouncer_height_ratio, 0.5f)
-        whenever(mPostureController.devicePosture)
-                .thenReturn(DEVICE_POSTURE_HALF_OPENED)
+        whenever(mPostureController.devicePosture).thenReturn(DEVICE_POSTURE_HALF_OPENED)
 
         mKeyguardPatternViewController.onViewAttached()
 
@@ -159,39 +158,37 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         return mContext.resources.getFloat(R.dimen.half_opened_bouncer_height_ratio)
     }
 
-  @Test
-  fun withFeatureFlagOn_oldMessage_isHidden() {
-    fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+    @Test
+    fun withFeatureFlagOn_oldMessage_isHidden() {
+        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
 
-    mKeyguardPatternViewController.onViewAttached()
+        mKeyguardPatternViewController.onViewAttached()
 
-    verify<KeyguardMessageAreaController<*>>(mKeyguardMessageAreaController).disable()
-  }
+        verify<KeyguardMessageAreaController<*>>(mKeyguardMessageAreaController).disable()
+    }
 
-  @Test
-  fun onPause_resetsText() {
-    mKeyguardPatternViewController.init()
-    mKeyguardPatternViewController.onPause()
-    verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
-  }
+    @Test
+    fun onPause_resetsText() {
+        mKeyguardPatternViewController.init()
+        mKeyguardPatternViewController.onPause()
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pattern)
+    }
 
-  @Test
-  fun startAppearAnimation() {
-    mKeyguardPatternViewController.startAppearAnimation()
-    verify(mKeyguardMessageAreaController)
-        .setMessage(context.resources.getString(R.string.keyguard_enter_your_pattern), false)
-  }
+    @Test
+    fun testOnViewAttached() {
+        reset(mKeyguardMessageAreaController)
+        reset(mLockPatternUtils)
+        mKeyguardPatternViewController.onViewAttached()
+        verify(mKeyguardMessageAreaController)
+            .setMessage(context.resources.getString(R.string.keyguard_enter_your_pattern), false)
+        verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
+    }
 
-  @Test
-  fun startAppearAnimation_withExistingMessage() {
-    `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
-    mKeyguardPatternViewController.startAppearAnimation()
-    verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
-  }
-
-  @Test
-  fun resume() {
-    mKeyguardPatternViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
-    verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt())
-  }
+    @Test
+    fun testOnViewAttached_withExistingMessage() {
+        reset(mKeyguardMessageAreaController)
+        `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        mKeyguardPatternViewController.onViewAttached()
+        verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
+    }
 }
