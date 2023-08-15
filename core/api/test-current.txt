@@ -2684,6 +2684,9 @@ package android.telephony.ims.feature {
     field @Deprecated protected int mCapabilities;
   }
 
+  public static class MmTelFeature.MmTelCapabilities extends android.telephony.ims.feature.ImsFeature.Capabilities {
+  }
+
 }
 
 package android.text {
