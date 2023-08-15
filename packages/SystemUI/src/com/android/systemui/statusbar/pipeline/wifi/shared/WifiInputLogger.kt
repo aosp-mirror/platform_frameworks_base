@@ -59,6 +59,8 @@ constructor(
     fun logActivity(activity: String) {
         buffer.log(TAG, LogLevel.DEBUG, { str1 = activity }, { "Activity: $str1" })
     }
+
+    fun logScanResults() = buffer.log(TAG, LogLevel.DEBUG, {}, { "onScanResultsAvailable" })
 }
 
 private const val TAG = "WifiInputLog"

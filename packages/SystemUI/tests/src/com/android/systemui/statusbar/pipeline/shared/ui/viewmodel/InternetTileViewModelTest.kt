@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.InternetTileV
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
@@ -58,9 +59,10 @@ class InternetTileViewModelTest : SysuiTestCase() {
     private val connectivityRepository = FakeConnectivityRepository()
     private val ethernetInteractor = EthernetInteractor(connectivityRepository)
     private val wifiRepository = FakeWifiRepository()
-    private val wifiInteractor = WifiInteractorImpl(connectivityRepository, wifiRepository)
     private val userSetupRepo = FakeUserSetupRepository()
     private val testScope = TestScope()
+    private val wifiInteractor =
+        WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
 
     private val tableLogBuffer: TableLogBuffer = mock()
     private val carrierConfigTracker: CarrierConfigTracker = mock()
@@ -162,6 +164,7 @@ class InternetTileViewModelTest : SysuiTestCase() {
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
             wifiRepository.setWifiNetwork(networkModel)
+            wifiRepository.wifiScanResults.value = emptyList()
 
             assertThat(latest).isEqualTo(NOT_CONNECTED_NETWORKS_UNAVAILABLE)
         }
@@ -176,15 +179,13 @@ class InternetTileViewModelTest : SysuiTestCase() {
             connectivityRepository.setWifiConnected(validated = false)
             wifiRepository.setIsWifiDefault(true)
             wifiRepository.setWifiNetwork(networkModel)
+            wifiRepository.wifiScanResults.value = listOf(WifiScanEntry("test 1"))
 
-            /*
-            TODO: enable this once we support areNetworksAvailable
             assertThat(latest?.secondaryLabel).isNull()
             assertThat(latest?.secondaryTitle)
                 .isEqualTo(context.getString(R.string.quick_settings_networks_available))
             assertThat(latest?.icon).isNull()
             assertThat(latest?.iconId).isEqualTo(R.drawable.ic_qs_no_internet_available)
-             */
         }
 
     @Test

@@ -83,8 +83,8 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
+        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository, scope)
         airplaneModeViewModel =
             AirplaneModeViewModelImpl(
                 AirplaneModeInteractor(
