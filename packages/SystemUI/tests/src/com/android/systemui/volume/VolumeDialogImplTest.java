@@ -31,6 +31,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assume.assumeNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -93,6 +94,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerVibrate;
     View mDrawerMute;
     View mDrawerNormal;
+    CaptionsToggleImageButton mODICaptionsIcon;
+
     private TestableLooper mTestableLooper;
     private ConfigurationController mConfigurationController;
     private int mOriginalOrientation;
@@ -180,6 +183,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDrawerVibrate = mDrawerContainer.findViewById(R.id.volume_drawer_vibrate);
         mDrawerMute = mDrawerContainer.findViewById(R.id.volume_drawer_mute);
         mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
+        mODICaptionsIcon = mDialog.getDialogView().findViewById(R.id.odi_captions_icon);
 
         Prefs.putInt(mContext,
                 Prefs.Key.SEEN_RINGER_GUIDANCE_COUNT,
@@ -686,6 +690,28 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     @Test
     public void ringerModeVibrate_closeDrawer_ringerContainerDescribesItsState() {
         assertRingerContainerDescribesItsState(RINGER_MODE_VIBRATE, RingerDrawerState.CLOSE);
+    }
+
+    @Test
+    public void testOnCaptionEnabledStateChanged_checkBeforeSwitchTrue_setCaptionsEnabledState() {
+        ArgumentCaptor<VolumeDialogController.Callbacks> controllerCallbackCapture =
+                ArgumentCaptor.forClass(VolumeDialogController.Callbacks.class);
+        verify(mVolumeDialogController).addCallback(controllerCallbackCapture.capture(), any());
+        VolumeDialogController.Callbacks callbacks = controllerCallbackCapture.getValue();
+
+        callbacks.onCaptionEnabledStateChanged(true, true);
+        verify(mVolumeDialogController).setCaptionsEnabledState(eq(false));
+    }
+
+    @Test
+    public void testOnCaptionEnabledStateChanged_checkBeforeSwitchFalse_getCaptionsEnabledTrue() {
+        ArgumentCaptor<VolumeDialogController.Callbacks> controllerCallbackCapture =
+                ArgumentCaptor.forClass(VolumeDialogController.Callbacks.class);
+        verify(mVolumeDialogController).addCallback(controllerCallbackCapture.capture(), any());
+        VolumeDialogController.Callbacks callbacks = controllerCallbackCapture.getValue();
+
+        callbacks.onCaptionEnabledStateChanged(true, false);
+        assertTrue(mODICaptionsIcon.getCaptionsEnabled());
     }
 
     /**
