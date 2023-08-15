@@ -456,7 +456,13 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         final List<SubscriptionInfo> subscriptionInfos = new ArrayList<>();
         Binder.withCleanCallingIdentity(
                 () -> {
-                    subscriptionInfos.addAll(subMgr.getSubscriptionsInGroup(subscriptionGroup));
+                    List<SubscriptionInfo> subsInGroup =
+                            subMgr.getSubscriptionsInGroup(subscriptionGroup);
+                    if (subsInGroup == null) {
+                        logWtf("Received null from getSubscriptionsInGroup");
+                        subsInGroup = Collections.emptyList();
+                    }
+                    subscriptionInfos.addAll(subsInGroup);
                 });
 
         for (SubscriptionInfo info : subscriptionInfos) {
