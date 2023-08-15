@@ -211,8 +211,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
 
-        mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous clocks
-        mDumpManager.registerDumpable(getClass().getSimpleName(), this);
+        if (!mOnlyClock) {
+            mDumpManager.unregisterDumpable(getClass().getSimpleName()); // unregister previous
+            mDumpManager.registerDumpable(getClass().getSimpleName(), this);
+        }
 
         if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
             mStatusArea = mView.findViewById(R.id.keyguard_status_area);
