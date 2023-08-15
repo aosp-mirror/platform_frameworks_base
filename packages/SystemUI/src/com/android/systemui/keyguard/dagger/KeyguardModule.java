@@ -46,6 +46,7 @@ import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
 import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
@@ -73,12 +74,11 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import java.util.concurrent.Executor;
+
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.concurrent.Executor;
-
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -144,7 +144,8 @@ public class KeyguardModule {
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
-            SystemPropertiesHelper systemPropertiesHelper) {
+            SystemPropertiesHelper systemPropertiesHelper,
+            Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -186,7 +187,8 @@ public class KeyguardModule {
                 systemClock,
                 mainDispatcher,
                 dreamingToLockscreenTransitionViewModel,
-                systemPropertiesHelper);
+                systemPropertiesHelper,
+                wmLockscreenVisibilityManager);
     }
 
     /** */

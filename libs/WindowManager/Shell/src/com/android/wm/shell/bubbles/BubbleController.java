@@ -25,7 +25,6 @@ import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
-import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
@@ -37,6 +36,7 @@ import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_LONGER_BUBBLE;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
 import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BUBBLES;
 
 import android.annotation.BinderThread;
@@ -85,6 +85,7 @@ import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
@@ -1004,9 +1005,7 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     private void onNotificationPanelExpandedChanged(boolean expanded) {
-        if (DEBUG_BUBBLE_GESTURE) {
-            Log.d(TAG, "onNotificationPanelExpandedChanged: expanded=" + expanded);
-        }
+        ProtoLog.d(WM_SHELL_BUBBLES, "onNotificationPanelExpandedChanged: expanded=%b", expanded);
         if (mStackView != null && mStackView.isExpanded()) {
             if (expanded) {
                 mStackView.stopMonitoringSwipeUpGesture();

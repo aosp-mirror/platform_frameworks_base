@@ -634,7 +634,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ActivityIntentHelper mActivityIntentHelper;
 
-    private final NotificationStackScrollLayoutController mStackScrollerController;
+    public final NotificationStackScrollLayoutController mStackScrollerController;
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();

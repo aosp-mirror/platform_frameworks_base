@@ -275,7 +275,7 @@ class DesktopTasksController(
      */
     fun onDesktopSplitSelectAnimComplete(taskInfo: RunningTaskInfo) {
         val wct = WindowContainerTransaction()
-        wct.setBounds(taskInfo.token, null)
+        wct.setBounds(taskInfo.token, Rect())
         shellTaskOrganizer.applyTransaction(wct)
     }
 

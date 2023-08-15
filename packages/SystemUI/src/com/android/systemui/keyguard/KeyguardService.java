@@ -73,6 +73,14 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindParamsApplier;
+import com.android.systemui.keyguard.ui.binder.KeyguardSurfaceBehindViewBinder;
+import com.android.systemui.keyguard.ui.binder.WindowManagerLockscreenVisibilityViewBinder;
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSurfaceBehindViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.WindowManagerLockscreenVisibilityViewModel;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
@@ -85,10 +93,13 @@ import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
+import kotlinx.coroutines.CoroutineScope;
+
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
 
+    private final FeatureFlags mFlags;
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
     private final ScreenOnCoordinator mScreenOnCoordinator;
@@ -291,13 +302,33 @@ public class KeyguardService extends Service {
                            KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
                            ScreenOnCoordinator screenOnCoordinator,
                            ShellTransitions shellTransitions,
-                           DisplayTracker displayTracker) {
+                           DisplayTracker displayTracker,
+                           WindowManagerLockscreenVisibilityViewModel
+                                   wmLockscreenVisibilityViewModel,
+                           WindowManagerLockscreenVisibilityManager wmLockscreenVisibilityManager,
+                           KeyguardSurfaceBehindViewModel keyguardSurfaceBehindViewModel,
+                           KeyguardSurfaceBehindParamsApplier keyguardSurfaceBehindAnimator,
+                           @Application CoroutineScope scope,
+                           FeatureFlags featureFlags) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
         mScreenOnCoordinator = screenOnCoordinator;
         mShellTransitions = shellTransitions;
         mDisplayTracker = displayTracker;
+        mFlags = featureFlags;
+
+        if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            WindowManagerLockscreenVisibilityViewBinder.bind(
+                    wmLockscreenVisibilityViewModel,
+                    wmLockscreenVisibilityManager,
+                    scope);
+
+            KeyguardSurfaceBehindViewBinder.bind(
+                    keyguardSurfaceBehindViewModel,
+                    keyguardSurfaceBehindAnimator,
+                    scope);
+        }
     }
 
     @Override

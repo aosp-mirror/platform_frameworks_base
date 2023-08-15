@@ -99,7 +99,16 @@ interface KeyguardRepository {
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
 
-    /** Observable for the signal that keyguard is about to go away. */
+    /**
+     * Observable for the signal that keyguard is about to go away.
+     *
+     * TODO(b/278086361): Remove once KEYGUARD_WM_STATE_REFACTOR flag is removed.
+     */
+    @Deprecated(
+        "Use KeyguardTransitionInteractor flows instead. The closest match for 'going " +
+            "away' is isInTransitionToState(GONE), but consider using more specific flows " +
+            "whenever possible."
+    )
     val isKeyguardGoingAway: Flow<Boolean>
 
     /** Is the always-on display available to be used? */
@@ -365,10 +374,11 @@ constructor(
 
                 awaitClose { keyguardStateController.removeCallback(callback) }
             }
+            .distinctUntilChanged()
             .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = keyguardStateController.isUnlocked,
+                scope,
+                SharingStarted.Eagerly,
+                initialValue = false,
             )
 
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {

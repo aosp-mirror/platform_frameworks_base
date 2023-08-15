@@ -567,7 +567,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
     private fun emptyInsets() = mock(WindowInsets::class.java)
 
     private fun WindowInsets.withCutout(): WindowInsets {
-        whenever(displayCutout.safeInsetBottom).thenReturn(CUTOUT_HEIGHT)
+        whenever(checkNotNull(displayCutout).safeInsetBottom).thenReturn(CUTOUT_HEIGHT)
         return this
     }
 

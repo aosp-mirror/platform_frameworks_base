@@ -52,6 +52,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
+import com.android.systemui.flags.Flags.KEYGUARD_WM_STATE_REFACTOR
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
@@ -168,7 +169,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         trustRepository = FakeTrustRepository()
-        featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(FACE_AUTH_REFACTOR, true)
+                set(KEYGUARD_WM_STATE_REFACTOR, false)
+            }
         val withDeps =
             KeyguardInteractorFactory.create(
                 featureFlags = featureFlags,
@@ -331,9 +336,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                     createDeviceEntryFaceAuthRepositoryImpl(fmOverride = null).isDetectionSupported
                 )
                 .isFalse()
-
-            whenever(faceManager.sensorPropertiesInternal).thenReturn(null)
-            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
             whenever(faceManager.sensorPropertiesInternal).thenReturn(listOf())
             assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()

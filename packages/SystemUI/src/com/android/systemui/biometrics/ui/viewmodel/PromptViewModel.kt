@@ -18,6 +18,7 @@ package com.android.systemui.biometrics.ui.viewmodel
 import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.model.BiometricModalities
@@ -67,11 +68,18 @@ constructor(
     /** If the user has successfully authenticated and confirmed (when explicitly required). */
     val isAuthenticated: Flow<PromptAuthState> = _isAuthenticated.asStateFlow()
 
+    private val _isOverlayTouched: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     /**
      * If the API caller or the user's personal preferences require explicit confirmation after
      * successful authentication.
      */
-    val isConfirmationRequired: Flow<Boolean> = interactor.isConfirmationRequired
+    val isConfirmationRequired: Flow<Boolean> =
+        combine(_isOverlayTouched, interactor.isConfirmationRequired) {
+            isOverlayTouched,
+            isConfirmationRequired ->
+            !isOverlayTouched && isConfirmationRequired
+        }
 
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = interactor.credentialKind
@@ -149,6 +157,12 @@ constructor(
                 size.isNotSmall && authState.isAuthenticated && authState.needsUserConfirmation
             }
             .distinctUntilChanged()
+
+    /** If the icon can be used as a confirmation button. */
+    val isIconConfirmButton: Flow<Boolean> =
+        combine(size, interactor.isConfirmationRequired) { size, isConfirmationRequired ->
+            size.isNotSmall && isConfirmationRequired
+        }
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =
@@ -298,8 +312,10 @@ constructor(
             if (message.isNotBlank()) PromptMessage.Help(message) else PromptMessage.Empty
         _forceMediumSize.value = true
         _legacyState.value =
-            if (alreadyAuthenticated) {
+            if (alreadyAuthenticated && isConfirmationRequired.first()) {
                 AuthBiometricView.STATE_PENDING_CONFIRMATION
+            } else if (alreadyAuthenticated && !isConfirmationRequired.first()) {
+                AuthBiometricView.STATE_AUTHENTICATED
             } else {
                 AuthBiometricView.STATE_HELP
             }
@@ -397,18 +413,10 @@ constructor(
     }
 
     private suspend fun needsExplicitConfirmation(modality: BiometricModality): Boolean {
-        val availableModalities = modalities.first()
         val confirmationRequired = isConfirmationRequired.first()
 
-        if (availableModalities.hasFaceAndFingerprint) {
-            // coex only needs confirmation when face is successful, unless it happens on the
-            // first attempt (i.e. without failure) before fingerprint scanning starts
-            val fingerprintStarted = fingerprintStartMode.first() != FingerprintStartMode.Pending
-            if (modality == BiometricModality.Face) {
-                return fingerprintStarted || confirmationRequired
-            }
-        }
-        if (availableModalities.hasFaceOnly) {
+        // Only worry about confirmationRequired if face was used to unlock
+        if (modality == BiometricModality.Face) {
             return confirmationRequired
         }
         // fingerprint only never requires confirmation
@@ -436,6 +444,26 @@ constructor(
 
         messageJob?.cancel()
         messageJob = null
+    }
+
+    /**
+     * Touch event occurred on the overlay
+     *
+     * Tracks whether a finger is currently down to set [_isOverlayTouched] to be used as user
+     * confirmation
+     */
+    fun onOverlayTouch(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            _isOverlayTouched.value = true
+
+            if (_isAuthenticated.value.needsUserConfirmation) {
+                confirmAuthenticated()
+            }
+            return true
+        } else if (event.actionMasked == MotionEvent.ACTION_UP) {
+            _isOverlayTouched.value = false
+        }
+        return false
     }
 
     /**

@@ -150,7 +150,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     private fun getPatternTopGuideline(): Float {
         val cs = ConstraintSet()
         val container =
-            mKeyguardPatternView.findViewById(R.id.pattern_container) as ConstraintLayout
+            mKeyguardPatternView.requireViewById(R.id.pattern_container) as ConstraintLayout
         cs.clone(container)
         return cs.getConstraint(R.id.pattern_top_guideline).layout.guidePercent
     }
