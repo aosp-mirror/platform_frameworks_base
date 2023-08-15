@@ -23,6 +23,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.rotation.RotationTransition
 import org.junit.FixMethodOrder
@@ -37,7 +38,7 @@ import org.junit.runners.Parameterized
  * Setup: Launch A|B in split with B being the secondary activity. Transitions: Rotate display, and
  * expect A and B to split evenly in new rotation.
  *
- * To run this test: `atest FlickerTests:RotateSplitNoChangeTest`
+ * To run this test: `atest FlickerTestsOther:RotateSplitNoChangeTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

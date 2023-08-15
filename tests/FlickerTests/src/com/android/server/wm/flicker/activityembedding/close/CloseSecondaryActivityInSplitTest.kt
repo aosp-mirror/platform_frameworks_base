@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
  * Setup: Launch A|B in split with B being the secondary activity. Transitions: Finish B and expect
  * A to become fullscreen.
  *
- * To run this test: `atest FlickerTests:CloseSecondaryActivityInSplitTest`
+ * To run this test: `atest FlickerTestsOther:CloseSecondaryActivityInSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
