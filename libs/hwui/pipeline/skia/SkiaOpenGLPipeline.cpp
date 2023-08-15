@@ -17,6 +17,7 @@
 #include "SkiaOpenGLPipeline.h"
 
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/gl/GrGLTypes.h>
 #include <GrBackendSurface.h>
 #include <SkBlendMode.h>
 #include <SkImageInfo.h>
