@@ -173,7 +173,13 @@
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
 
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
-    <string name="restart_button_description">Tap to restart this app for a better view.</string>
+    <string name="restart_button_description">Tap to restart this app for a better view</string>
+
+    <!-- Tooltip text of the button for the user aspect ratio settings. [CHAR LIMIT=NONE] -->
+    <string name="user_aspect_ratio_settings_button_hint">Change this app\'s aspect ratio in Settings</string>
+
+    <!-- Content description of the button for the user aspect ratio settings. [CHAR LIMIT=NONE] -->
+    <string name="user_aspect_ratio_settings_button_description">Change aspect ratio</string>
 
     <!-- Description of the camera compat button for applying stretched issues treatment in the hint for
          compatibility control. [CHAR LIMIT=NONE] -->
