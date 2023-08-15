@@ -6948,6 +6948,7 @@ public class RemoteViews implements Parcelable, Filter {
             // something is going to start.
             opts.setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+            opts.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
             return Pair.create(intent, opts);
         }
     }
