@@ -22,6 +22,7 @@ import static android.media.MediaRoute2Info.TYPE_DOCK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
@@ -83,7 +84,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_CAST_DEVICE,
-            MediaDeviceType.TYPE_CAST_GROUP_DEVICE})
+            MediaDeviceType.TYPE_CAST_GROUP_DEVICE,
+            MediaDeviceType.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER})
     public @interface MediaDeviceType {
         int TYPE_UNKNOWN = 0;
         int TYPE_PHONE_DEVICE = 1;
@@ -93,6 +95,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         int TYPE_BLUETOOTH_DEVICE = 5;
         int TYPE_CAST_DEVICE = 6;
         int TYPE_CAST_GROUP_DEVICE = 7;
+        int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 8;
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -160,6 +163,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             case TYPE_BLUETOOTH_A2DP:
             case TYPE_BLE_HEADSET:
                 mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
+                break;
+            case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
+                mType = MediaDeviceType.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
                 break;
             case TYPE_UNKNOWN:
             case TYPE_REMOTE_TV:
