@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.text.LineBreakConfig;
 import android.text.style.ParagraphStyle;
 
 /**
@@ -53,7 +54,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                line width
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static BoringLayout make(CharSequence source, TextPaint paint, int outerWidth,
             Alignment align, float spacingMult, float spacingAdd, BoringLayout.Metrics metrics,
             boolean includePad) {
@@ -79,7 +82,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
      *                        not used, {@code outerWidth} is used instead
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static BoringLayout make(CharSequence source, TextPaint paint, int outerWidth,
             Alignment align, float spacingmult, float spacingadd, BoringLayout.Metrics metrics,
             boolean includePad, TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
@@ -111,7 +116,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                              False for keeping the first font's line height. If some glyphs
      *                              requires larger vertical spaces, by passing true to this
      *                              argument, the layout increase the line height to fit all glyphs.
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static @NonNull BoringLayout make(
             @NonNull CharSequence source, @NonNull TextPaint paint,
             @IntRange(from = 0) int outerWidth,
@@ -247,10 +254,17 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                line width
      * @param includePad set whether to include extra space beyond font ascent and descent which is
      *                   needed to avoid clipping in some scripts
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public BoringLayout(CharSequence source, TextPaint paint, int outerwidth, Alignment align,
             float spacingMult, float spacingAdd, BoringLayout.Metrics metrics, boolean includePad) {
-        super(source, paint, outerwidth, align, spacingMult, spacingAdd);
+        super(source, paint, outerwidth, align, TextDirectionHeuristics.LTR, spacingMult,
+                spacingAdd, includePad, false /* fallbackLineSpacing */,
+                outerwidth /* ellipsizedWidth */, null /* ellipsize */, 1 /* maxLines */,
+                BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
+                null /* rightIndents */, JUSTIFICATION_MODE_NONE,
+                LineBreakConfig.NONE);
 
         mEllipsizedWidth = outerwidth;
         mEllipsizedStart = 0;
@@ -277,7 +291,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param ellipsizedWidth the width to which this Layout is ellipsizing. If {@code ellipsize} is
      *                        {@code null}, or is {@link TextUtils.TruncateAt#MARQUEE} this value is
      *                        not used, {@code outerWidth} is used instead
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public BoringLayout(CharSequence source, TextPaint paint, int outerWidth, Alignment align,
             float spacingMult, float spacingAdd, BoringLayout.Metrics metrics, boolean includePad,
             TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
@@ -306,7 +322,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                              False for keeping the first font's line height. If some glyphs
      *                              requires larger vertical spaces, by passing true to this
      *                              argument, the layout increase the line height to fit all glyphs.
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public BoringLayout(
             @NonNull CharSequence source, @NonNull TextPaint paint,
             @IntRange(from = 0) int outerWidth, @NonNull Alignment align, float spacingMult,
@@ -318,25 +336,58 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
          * but we can't use "this" for the callback until the call to
          * super() finishes.
          */
-        super(source, paint, outerWidth, align, spacingMult, spacingAdd);
+        this(source, paint, outerWidth, align, TextDirectionHeuristics.LTR, spacingMult,
+                spacingAdd, includePad, useFallbackLineSpacing,
+                ellipsizedWidth, ellipsize, 1 /* maxLines */,
+                BREAK_STRATEGY_SIMPLE, HYPHENATION_FREQUENCY_NONE, null /* leftIndents */,
+                null /* rightIndents */, JUSTIFICATION_MODE_NONE,
+                LineBreakConfig.NONE, metrics);
+    }
+
+    /* package */ BoringLayout(
+            CharSequence text,
+            TextPaint paint,
+            int width,
+            Alignment align,
+            TextDirectionHeuristic textDir,
+            float spacingMult,
+            float spacingAdd,
+            boolean includePad,
+            boolean fallbackLineSpacing,
+            int ellipsizedWidth,
+            TextUtils.TruncateAt ellipsize,
+            int maxLines,
+            int breakStrategy,
+            int hyphenationFrequency,
+            int[] leftIndents,
+            int[] rightIndents,
+            int justificationMode,
+            LineBreakConfig lineBreakConfig,
+            Metrics metrics) {
+
+        super(text, paint, width, align, textDir, spacingMult, spacingAdd, includePad,
+                fallbackLineSpacing, ellipsizedWidth, ellipsize, maxLines, breakStrategy,
+                hyphenationFrequency, leftIndents, rightIndents, justificationMode,
+                lineBreakConfig);
+
 
         boolean trust;
 
         if (ellipsize == null || ellipsize == TextUtils.TruncateAt.MARQUEE) {
-            mEllipsizedWidth = outerWidth;
+            mEllipsizedWidth = width;
             mEllipsizedStart = 0;
             mEllipsizedCount = 0;
             trust = true;
         } else {
-            replaceWith(TextUtils.ellipsize(source, paint, ellipsizedWidth, ellipsize, true, this),
-                        paint, outerWidth, align, spacingMult, spacingAdd);
+            replaceWith(TextUtils.ellipsize(text, paint, ellipsizedWidth, ellipsize, true, this),
+                        paint, width, align, spacingMult, spacingAdd);
 
             mEllipsizedWidth = ellipsizedWidth;
             trust = false;
         }
 
-        mUseFallbackLineSpacing = useFallbackLineSpacing;
-        init(getText(), paint, align, metrics, includePad, trust, useFallbackLineSpacing);
+        mUseFallbackLineSpacing = fallbackLineSpacing;
+        init(getText(), paint, align, metrics, includePad, trust, fallbackLineSpacing);
     }
 
     /* package */ void init(CharSequence source, TextPaint paint, Alignment align,
@@ -391,7 +442,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @param paint a paint
      * @return layout metric for the given text. null if given text is unable to be handled by
      *         BoringLayout.
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static Metrics isBoring(CharSequence text, TextPaint paint) {
         return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, null);
     }
@@ -406,7 +459,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * @return layout metric for the given text. If metrics is not null, this method fills values
      *         to given metrics object instead of allocating new metrics object. null if given text
      *         is unable to be handled by BoringLayout.
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static Metrics isBoring(CharSequence text, TextPaint paint, Metrics metrics) {
         return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, metrics);
     }
@@ -466,7 +521,9 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      *                              argument, the layout increase the line height to fit all glyphs.
      * @param metrics the out metrics.
      * @return metrics on success. null if text cannot be rendered by BoringLayout.
+     * @deprecated Use {@link android.text.Layout.Builder} instead.
      */
+    @Deprecated
     public static @Nullable Metrics isBoring(@NonNull CharSequence text, @NonNull TextPaint paint,
             @NonNull TextDirectionHeuristic textDir, boolean useFallbackLineSpacing,
             @Nullable Metrics metrics) {

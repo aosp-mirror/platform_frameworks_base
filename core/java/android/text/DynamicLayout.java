@@ -388,7 +388,11 @@ public class DynamicLayout extends Layout {
                          @Nullable TextUtils.TruncateAt ellipsize,
                          @IntRange(from = 0) int ellipsizedWidth) {
         super(createEllipsizer(ellipsize, display),
-              paint, width, align, textDir, spacingmult, spacingadd);
+              paint, width, align, textDir, spacingmult, spacingadd, includepad,
+                false /* fallbackLineSpacing */, ellipsizedWidth, ellipsize,
+                Integer.MAX_VALUE /* maxLines */, breakStrategy, hyphenationFrequency,
+                null /* leftIndents */, null /* rightIndents */, justificationMode,
+                lineBreakConfig);
 
         final Builder b = Builder.obtain(base, paint, width)
                 .setAlignment(align)
@@ -410,7 +414,11 @@ public class DynamicLayout extends Layout {
 
     private DynamicLayout(@NonNull Builder b) {
         super(createEllipsizer(b.mEllipsize, b.mDisplay),
-                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd,
+                b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
+                Integer.MAX_VALUE /* maxLines */, b.mBreakStrategy, b.mHyphenationFrequency,
+                null /* leftIndents */, null /* rightIndents */, b.mJustificationMode,
+                b.mLineBreakConfig);
 
         mDisplay = b.mDisplay;
         mIncludePad = b.mIncludePad;
@@ -615,7 +623,6 @@ public class DynamicLayout extends Layout {
         }
 
         if (reflowed == null) {
-            reflowed = new StaticLayout(null);
             b = StaticLayout.Builder.obtain(text, where, where + after, getPaint(), getWidth());
         }
 
@@ -631,9 +638,10 @@ public class DynamicLayout extends Layout {
                 .setHyphenationFrequency(mHyphenationFrequency)
                 .setJustificationMode(mJustificationMode)
                 .setLineBreakConfig(mLineBreakConfig)
-                .setAddLastLineLineSpacing(!islast);
+                .setAddLastLineLineSpacing(!islast)
+                .setIncludePad(false);
 
-        reflowed.generate(b, false /*includepad*/, true /*trackpad*/);
+        reflowed = b.regenerate(true /* trackpadding */, reflowed);
         int n = reflowed.getLineCount();
         // If the new layout has a blank line at the end, but it is not
         // the very end of the buffer, then we already have a line that

@@ -431,9 +431,19 @@ public class StaticLayout extends Layout {
          */
         @NonNull
         public StaticLayout build() {
-            StaticLayout result = new StaticLayout(this);
+            StaticLayout result = new StaticLayout(this, mIncludePad, mEllipsize != null
+                    ? COLUMNS_ELLIPSIZE : COLUMNS_NORMAL);
             Builder.recycle(this);
             return result;
+        }
+
+        /* package */ @NonNull StaticLayout regenerate(boolean trackpadding, StaticLayout recycle) {
+            if (recycle == null) {
+                return new StaticLayout(this, trackpadding, COLUMNS_ELLIPSIZE);
+            } else {
+                recycle.generate(this, mIncludePad, trackpadding);
+                return recycle;
+            }
         }
 
         private CharSequence mText;
@@ -515,88 +525,32 @@ public class StaticLayout extends Layout {
                         float spacingmult, float spacingadd,
                         boolean includepad,
                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
-        super((ellipsize == null)
-                ? source
-                : (source instanceof Spanned)
-                    ? new SpannedEllipsizer(source)
-                    : new Ellipsizer(source),
-              paint, outerwidth, align, textDir, spacingmult, spacingadd);
-
-        Builder b = Builder.obtain(source, bufstart, bufend, paint, outerwidth)
-            .setAlignment(align)
-            .setTextDirection(textDir)
-            .setLineSpacing(spacingadd, spacingmult)
-            .setIncludePad(includepad)
-            .setEllipsizedWidth(ellipsizedWidth)
-            .setEllipsize(ellipsize)
-            .setMaxLines(maxLines);
-        /*
-         * This is annoying, but we can't refer to the layout until superclass construction is
-         * finished, and the superclass constructor wants the reference to the display text.
-         *
-         * In other words, the two Ellipsizer classes in Layout.java need a (Dynamic|Static)Layout
-         * as a parameter to do their calculations, but the Ellipsizers also need to be the input
-         * to the superclass's constructor (Layout). In order to go around the circular
-         * dependency, we construct the Ellipsizer with only one of the parameters, the text. And
-         * we fill in the rest of the needed information (layout, width, and method) later, here.
-         *
-         * This will break if the superclass constructor ever actually cares about the content
-         * instead of just holding the reference.
-         */
-        if (ellipsize != null) {
-            Ellipsizer e = (Ellipsizer) getText();
-
-            e.mLayout = this;
-            e.mWidth = ellipsizedWidth;
-            e.mMethod = ellipsize;
-            mEllipsizedWidth = ellipsizedWidth;
-
-            mColumns = COLUMNS_ELLIPSIZE;
-        } else {
-            mColumns = COLUMNS_NORMAL;
-            mEllipsizedWidth = outerwidth;
-        }
-
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
-        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
-        mMaximumVisibleLineCount = maxLines;
-
-        generate(b, b.mIncludePad, b.mIncludePad);
-
-        Builder.recycle(b);
+        this(Builder.obtain(source, bufstart, bufend, paint, outerwidth)
+                .setAlignment(align)
+                .setTextDirection(textDir)
+                .setLineSpacing(spacingadd, spacingmult)
+                .setIncludePad(includepad)
+                .setEllipsize(ellipsize)
+                .setEllipsizedWidth(ellipsizedWidth)
+                .setMaxLines(maxLines), includepad,
+                ellipsize != null ? COLUMNS_ELLIPSIZE : COLUMNS_NORMAL);
     }
 
-    /**
-     * Used by DynamicLayout.
-     */
-    /* package */ StaticLayout(@Nullable CharSequence text) {
-        super(text, null, 0, null, 0, 0);
+    private StaticLayout(Builder b, boolean trackPadding, int columnSize) {
+        super((b.mEllipsize == null) ? b.mText : (b.mText instanceof Spanned)
+                    ? new SpannedEllipsizer(b.mText) : new Ellipsizer(b.mText),
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd,
+                b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
+                b.mMaxLines, b.mBreakStrategy, b.mHyphenationFrequency, b.mLeftIndents,
+                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig);
 
-        mColumns = COLUMNS_ELLIPSIZE;
-        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
-        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
-    }
-
-    private StaticLayout(Builder b) {
-        super((b.mEllipsize == null)
-                ? b.mText
-                : (b.mText instanceof Spanned)
-                    ? new SpannedEllipsizer(b.mText)
-                    : new Ellipsizer(b.mText),
-                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
-
+        mColumns = columnSize;
         if (b.mEllipsize != null) {
             Ellipsizer e = (Ellipsizer) getText();
 
             e.mLayout = this;
             e.mWidth = b.mEllipsizedWidth;
             e.mMethod = b.mEllipsize;
-            mEllipsizedWidth = b.mEllipsizedWidth;
-
-            mColumns = COLUMNS_ELLIPSIZE;
-        } else {
-            mColumns = COLUMNS_NORMAL;
-            mEllipsizedWidth = b.mWidth;
         }
 
         mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
@@ -605,9 +559,8 @@ public class StaticLayout extends Layout {
 
         mLeftIndents = b.mLeftIndents;
         mRightIndents = b.mRightIndents;
-        setJustificationMode(b.mJustificationMode);
 
-        generate(b, b.mIncludePad, b.mIncludePad);
+        generate(b, b.mIncludePad, trackPadding);
     }
 
     private static int getBaseHyphenationFrequency(int frequency) {
@@ -648,7 +601,7 @@ public class StaticLayout extends Layout {
         mLineCount = 0;
         mEllipsized = false;
         mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
-        mFallbackLineSpacing = b.mFallbackLineSpacing;
+        boolean isFallbackLineSpacing = b.mFallbackLineSpacing;
 
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
@@ -887,17 +840,17 @@ public class StaticLayout extends Layout {
 
                     boolean moreChars = (endPos < bufEnd);
 
-                    final int ascent = mFallbackLineSpacing
+                    final int ascent = isFallbackLineSpacing
                             ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
                             : fmAscent;
-                    final int descent = mFallbackLineSpacing
+                    final int descent = isFallbackLineSpacing
                             ? Math.max(fmDescent, Math.round(descents[breakIndex]))
                             : fmDescent;
 
                     // The fallback ascent/descent may be larger than top/bottom of the default font
                     // metrics. Adjust top/bottom with ascent/descent for avoiding unexpected
                     // clipping.
-                    if (mFallbackLineSpacing) {
+                    if (isFallbackLineSpacing) {
                         if (ascent < fmTop) {
                             fmTop = ascent;
                         }
@@ -1410,16 +1363,6 @@ public class StaticLayout extends Layout {
         return mLines[mColumns * line + ELLIPSIS_START];
     }
 
-    @Override
-    public int getEllipsizedWidth() {
-        return mEllipsizedWidth;
-    }
-
-    @Override
-    public boolean isFallbackLineSpacingEnabled() {
-        return mFallbackLineSpacing;
-    }
-
     /**
      * Return the total height of this layout.
      *
@@ -1445,8 +1388,6 @@ public class StaticLayout extends Layout {
     private int mTopPadding, mBottomPadding;
     @UnsupportedAppUsage
     private int mColumns;
-    private int mEllipsizedWidth;
-    private boolean mFallbackLineSpacing;
 
     /**
      * Keeps track if ellipsize is applied to the text.
