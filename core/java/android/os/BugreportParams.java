@@ -81,7 +81,8 @@ public final class BugreportParams {
             BUGREPORT_MODE_REMOTE,
             BUGREPORT_MODE_WEAR,
             BUGREPORT_MODE_TELEPHONY,
-            BUGREPORT_MODE_WIFI
+            BUGREPORT_MODE_WIFI,
+            BUGREPORT_MODE_ONBOARDING
     })
     public @interface BugreportMode {}
 
@@ -119,6 +120,11 @@ public final class BugreportParams {
      * Wifi.
      */
     public static final int BUGREPORT_MODE_WIFI = IDumpstate.BUGREPORT_MODE_WIFI;
+
+    /**
+     * Options for a lightweight bugreport intended to be taken for onboarding-related flows.
+     */
+    public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
 
     /**
      * Defines acceptable flags for customizing bugreport requests.
