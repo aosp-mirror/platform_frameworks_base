@@ -384,7 +384,16 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void tearDown() {
-        mWmService.mRoot.forAllDisplayPolicies(DisplayPolicy::release);
+        for (int i = mWmService.mRoot.getChildCount() - 1; i >= 0; i--) {
+            final DisplayContent dc = mWmService.mRoot.getChildAt(i);
+            // Unregister SettingsObserver.
+            dc.getDisplayPolicy().release();
+            // Unregister SensorEventListener (foldable device may register for hinge angle).
+            dc.getDisplayRotation().onDisplayRemoved();
+            if (dc.mDisplayRotationCompatPolicy != null) {
+                dc.mDisplayRotationCompatPolicy.dispose();
+            }
+        }
 
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
