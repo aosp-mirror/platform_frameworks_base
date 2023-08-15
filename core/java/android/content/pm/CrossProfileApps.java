@@ -344,15 +344,22 @@ public class CrossProfileApps {
         // If there is a label for the launcher intent, then use that as it is typically shorter.
         // Otherwise, just use the top-level application name.
         Intent launchIntent = pm.getLaunchIntentForPackage(mContext.getPackageName());
+        if (launchIntent == null) {
+            return getDefaultCallingApplicationLabel();
+        }
         List<ResolveInfo> infos =
                 pm.queryIntentActivities(
                         launchIntent, PackageManager.ResolveInfoFlags.of(MATCH_DEFAULT_ONLY));
         if (infos.size() > 0) {
             return infos.get(0).loadLabel(pm);
         }
+        return getDefaultCallingApplicationLabel();
+    }
+
+    private CharSequence getDefaultCallingApplicationLabel() {
         return mContext.getApplicationInfo()
                 .loadSafeLabel(
-                        pm,
+                        mContext.getPackageManager(),
                         /* ellipsizeDip= */ 0,
                         TextUtils.SAFE_STRING_FLAG_SINGLE_LINE
                                 | TextUtils.SAFE_STRING_FLAG_TRIM);
