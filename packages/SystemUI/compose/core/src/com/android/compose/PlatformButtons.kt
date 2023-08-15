@@ -78,6 +78,7 @@ fun PlatformTextButton(
         modifier = modifier,
         enabled = enabled,
         content = content,
+        colors = textButtonColors(),
     )
 }
 
@@ -85,26 +86,29 @@ private val ButtonPaddings = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 private fun filledButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current.deprecated
+    val colors = LocalAndroidColorScheme.current
     return ButtonDefaults.buttonColors(
-        containerColor = colors.colorAccentPrimary,
-        contentColor = colors.textColorOnAccent,
+        containerColor = colors.primary,
+        contentColor = colors.onPrimary,
     )
 }
 
 @Composable
 private fun outlineButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current.deprecated
     return ButtonDefaults.outlinedButtonColors(
-        contentColor = colors.textColorPrimary,
+        contentColor = LocalAndroidColorScheme.current.onSurface,
     )
 }
 
 @Composable
 private fun outlineButtonBorder(): BorderStroke {
-    val colors = LocalAndroidColorScheme.current.deprecated
     return BorderStroke(
         width = 1.dp,
-        color = colors.colorAccentPrimaryVariant,
+        color = LocalAndroidColorScheme.current.primary,
     )
+}
+
+@Composable
+private fun textButtonColors(): ButtonColors {
+    return ButtonDefaults.textButtonColors(contentColor = LocalAndroidColorScheme.current.primary)
 }
