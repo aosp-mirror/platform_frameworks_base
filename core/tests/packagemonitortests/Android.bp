@@ -24,6 +24,9 @@ package {
 android_test {
     name: "FrameworksCorePackageMonitorTests",
     srcs: ["src/**/*.java"],
+    exclude_srcs: [
+        "src/com/android/internal/content/withoutpermission/PackageMonitorPermissionTest.java",
+    ],
     static_libs: [
         "androidx.test.runner",
         "compatibility-device-util-axt",
@@ -38,4 +41,20 @@ android_test {
     data: [
         ":TestVisibilityApp",
     ],
+}
+
+android_test {
+    name: "FrameworksCorePackageMonitorWithoutPermissionTests",
+    srcs: ["src/com/android/internal/content/withoutpermission/PackageMonitorPermissionTest.java"],
+    manifest: "AndroidManifestNoPermission.xml",
+    static_libs: [
+        "androidx.test.runner",
+        "compatibility-device-util-axt",
+        "frameworks-base-testutils",
+    ],
+    libs: ["android.test.runner"],
+    platform_apis: true,
+    certificate: "platform",
+    test_suites: ["device-tests"],
+    test_config: "AndroidTestWithoutPermission.xml",
 }

@@ -6251,7 +6251,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public void registerPackageMonitorCallback(@NonNull IRemoteCallback callback, int userId) {
             int uid = Binder.getCallingUid();
-            mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, userId, uid);
+            int targetUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), uid,
+                    userId, true, true, "registerPackageMonitorCallback",
+                    mContext.getPackageName());
+            mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, targetUserId,
+                    uid);
         }
 
         @Override

@@ -379,7 +379,12 @@ public class LauncherAppsService extends SystemService {
                 filter.addDataScheme("package");
                 mContext.registerReceiverAsUser(mPackageRemovedListener, UserHandle.ALL, filter,
                         /* broadcastPermission= */ null, mCallbackHandler);
-                mPackageMonitor.register(mContext, UserHandle.ALL, mCallbackHandler);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mPackageMonitor.register(mContext, UserHandle.ALL, mCallbackHandler);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
                 mIsWatchingPackageBroadcasts = true;
             }
         }
