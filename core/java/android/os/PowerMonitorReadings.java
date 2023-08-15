@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 
 import java.util.Arrays;
@@ -43,8 +44,8 @@ public final class PowerMonitorReadings {
      * @param powerMonitors array of power monitor (ODPM) rails, sorted by PowerMonitor.index
      * @hide
      */
-    public PowerMonitorReadings(PowerMonitor[] powerMonitors,
-            long[] energyUws, long[] timestampsMs) {
+    public PowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors,
+            @NonNull long[] energyUws, @NonNull long[] timestampsMs) {
         mPowerMonitors = powerMonitors;
         mEnergyUws = energyUws;
         mTimestampsMs = timestampsMs;
@@ -55,7 +56,7 @@ public final class PowerMonitorReadings {
      * Does not persist across reboots.
      * Represents total energy: both on-battery and plugged-in.
      */
-    public long getConsumedEnergyUws(PowerMonitor powerMonitor) {
+    public long getConsumedEnergyUws(@NonNull PowerMonitor powerMonitor) {
         int offset = Arrays.binarySearch(mPowerMonitors, powerMonitor, POWER_MONITOR_COMPARATOR);
         if (offset >= 0) {
             return mEnergyUws[offset];
@@ -64,9 +65,10 @@ public final class PowerMonitorReadings {
     }
 
     /**
-     * Elapsed realtime when the snapshot was taken.
+     * Elapsed realtime, in milliseconds, when the snapshot was taken.
      */
-    public long getTimestampMs(PowerMonitor powerMonitor) {
+    @ElapsedRealtimeLong
+    public long getTimestamp(@NonNull PowerMonitor powerMonitor) {
         int offset = Arrays.binarySearch(mPowerMonitors, powerMonitor, POWER_MONITOR_COMPARATOR);
         if (offset >= 0) {
             return mTimestampsMs[offset];

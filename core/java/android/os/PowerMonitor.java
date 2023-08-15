@@ -23,6 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * A PowerMonitor represents either a Channel aka ODPM rail (on-device power monitor) or an
+ * EnergyConsumer, as defined in
+ * <a href="https://android.googlesource.com/platform/hardware/interfaces/+/refs/heads/main/power/stats/aidl/aidl_api/android.hardware.power.stats/current/android/hardware/power/stats">android.hardware.power.stats</a>
+ *
  * @hide
  */
 public final class PowerMonitor implements Parcelable {
@@ -92,6 +96,7 @@ public final class PowerMonitor implements Parcelable {
         return 0;
     }
 
+    @NonNull
     public static final Creator<PowerMonitor> CREATOR = new Creator<>() {
         @Override
         public PowerMonitor createFromParcel(@NonNull Parcel in) {

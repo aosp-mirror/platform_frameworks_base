@@ -24,6 +24,8 @@ import android.content.Context;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
+import android.os.Handler;
 import android.os.IPowerStatsService;
 import android.os.PowerMonitor;
 import android.os.PowerMonitorReadings;
@@ -36,8 +38,8 @@ import com.android.internal.app.IBatteryStats;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Provides access to data about how various system resources are used by applications.
@@ -62,7 +64,8 @@ public class SystemHealthManager {
     private final IBatteryStats mBatteryStats;
     @Nullable
     private final IPowerStatsService mPowerStats;
-    private PowerMonitor[] mPowerMonitorsInfo;
+    private List<PowerMonitor> mPowerMonitorsInfo;
+    private final Object mPowerMonitorsLock = new Object();
 
     /**
      * Construct a new SystemHealthManager object.
@@ -161,53 +164,68 @@ public class SystemHealthManager {
      * @hide
      */
     @NonNull
-    public PowerMonitor[] getSupportedPowerMonitors() {
-        synchronized (this) {
+    public List<PowerMonitor> getSupportedPowerMonitors() {
+        synchronized (mPowerMonitorsLock) {
             if (mPowerMonitorsInfo != null) {
                 return mPowerMonitorsInfo;
             }
+        }
+        ConditionVariable lock = new ConditionVariable();
+        // Populate mPowerMonitorsInfo by side-effect
+        getSupportedPowerMonitors(null, unused -> lock.open());
+        lock.block();
 
-            CompletableFuture<PowerMonitor[]> future = new CompletableFuture<>();
-            getSupportedPowerMonitors(future);
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
+        synchronized (mPowerMonitorsLock) {
+            return mPowerMonitorsInfo;
         }
     }
 
     /**
-     * Retrieves a list of supported power monitors, see {@link #getSupportedPowerMonitors()}
+     * Asynchronously retrieves a list of supported power monitors, see
+     * {@link #getSupportedPowerMonitors()}
+     *
+     * @param handler optional Handler to deliver the callback. If not supplied, the callback
+     *                may be invoked on an arbitrary thread.
+     * @param onResult callback for the result
      *
      * @hide
      */
-    public void getSupportedPowerMonitors(@NonNull CompletableFuture<PowerMonitor[]> future) {
-        synchronized (this) {
+    public void getSupportedPowerMonitors(@Nullable Handler handler,
+            @NonNull Consumer<List<PowerMonitor>> onResult) {
+        final List<PowerMonitor> result;
+        synchronized (mPowerMonitorsLock) {
             if (mPowerMonitorsInfo != null) {
-                future.complete(mPowerMonitorsInfo);
-                return;
+                result = mPowerMonitorsInfo;
+            } else if (mPowerStats == null) {
+                mPowerMonitorsInfo = List.of();
+                result = mPowerMonitorsInfo;
+            } else {
+                result = null;
             }
-            try {
-                if (mPowerStats == null) {
-                    mPowerMonitorsInfo = new PowerMonitor[0];
-                    future.complete(mPowerMonitorsInfo);
-                    return;
-                }
-
-                mPowerStats.getSupportedPowerMonitors(new ResultReceiver(null) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, Bundle resultData) {
-                        synchronized (this) {
-                            mPowerMonitorsInfo = resultData.getParcelableArray(
-                                    IPowerStatsService.KEY_MONITORS, PowerMonitor.class);
-                        }
-                        future.complete(mPowerMonitorsInfo);
+        }
+        if (result != null) {
+            if (handler != null) {
+                handler.post(() -> onResult.accept(result));
+            } else {
+                onResult.accept(result);
+            }
+            return;
+        }
+        try {
+            mPowerStats.getSupportedPowerMonitors(new ResultReceiver(handler) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    PowerMonitor[] array = resultData.getParcelableArray(
+                            IPowerStatsService.KEY_MONITORS, PowerMonitor.class);
+                    List<PowerMonitor> result = array != null ? Arrays.asList(array) : List.of();
+                    synchronized (mPowerMonitorsLock) {
+                        mPowerMonitorsInfo = result;
                     }
-                });
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+                    onResult.accept(result);
+                }
+            });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -215,54 +233,74 @@ public class SystemHealthManager {
      * Retrieves the accumulated power consumption reported by the specified power monitors.
      *
      * @param powerMonitors power monitors to be returned.
+     *
      * @hide
      */
     @NonNull
-    public PowerMonitorReadings getPowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors) {
-        CompletableFuture<PowerMonitorReadings> future = new CompletableFuture<>();
-        getPowerMonitorReadings(powerMonitors, future);
-        try {
-            return future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+    public PowerMonitorReadings getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors) {
+        PowerMonitorReadings[] outReadings = new PowerMonitorReadings[1];
+        RuntimeException[] outException = new RuntimeException[1];
+        ConditionVariable lock = new ConditionVariable();
+        getPowerMonitorReadings(powerMonitors, null,
+                pms -> {
+                    outReadings[0] = pms;
+                    lock.open();
+                },
+                error -> {
+                    outException[0] = error;
+                    lock.open();
+                }
+        );
+        lock.block();
+        if (outException[0] != null) {
+            throw outException[0];
         }
+        return outReadings[0];
     }
 
     private static final Comparator<PowerMonitor> POWER_MONITOR_COMPARATOR =
             Comparator.comparingInt(pm -> pm.index);
 
     /**
+     * Asynchronously retrieves the accumulated power consumption reported by the specified power
+     * monitors.
+     *
      * @param powerMonitors power monitors to be retrieved.
+     * @param handler       optional Handler to deliver the callbacks. If not supplied, the callback
+     *                      may be invoked on an arbitrary thread.
+     * @param onSuccess     callback for the result
+     * @param onError       callback invoked in case of an error
+     *
      * @hide
      */
-    public void getPowerMonitorReadings(@NonNull PowerMonitor[] powerMonitors,
-            @NonNull CompletableFuture<PowerMonitorReadings> future) {
+    public void getPowerMonitorReadings(@NonNull List<PowerMonitor> powerMonitors,
+            @Nullable Handler handler, @NonNull Consumer<PowerMonitorReadings> onSuccess,
+            @NonNull Consumer<RuntimeException> onError) {
         if (mPowerStats == null) {
-            future.completeExceptionally(
-                    new IllegalArgumentException("Unsupported power monitor"));
+            onError.accept(new IllegalArgumentException("Unsupported power monitor"));
             return;
         }
 
-        Arrays.sort(powerMonitors, POWER_MONITOR_COMPARATOR);
-        int[] indices = new int[powerMonitors.length];
-        for (int i = 0; i < powerMonitors.length; i++) {
-            indices[i] = powerMonitors[i].index;
+        PowerMonitor[] powerMonitorsArray =
+                powerMonitors.toArray(new PowerMonitor[powerMonitors.size()]);
+        Arrays.sort(powerMonitorsArray, POWER_MONITOR_COMPARATOR);
+        int[] indices = new int[powerMonitors.size()];
+        for (int i = 0; i < powerMonitors.size(); i++) {
+            indices[i] = powerMonitorsArray[i].index;
         }
         try {
-            mPowerStats.getPowerMonitorReadings(indices, new ResultReceiver(null) {
+            mPowerStats.getPowerMonitorReadings(indices, new ResultReceiver(handler) {
                 @Override
                 protected void onReceiveResult(int resultCode, Bundle resultData) {
                     if (resultCode == IPowerStatsService.RESULT_SUCCESS) {
-                        future.complete(new PowerMonitorReadings(powerMonitors,
+                        onSuccess.accept(new PowerMonitorReadings(powerMonitorsArray,
                                 resultData.getLongArray(IPowerStatsService.KEY_ENERGY),
                                 resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS)));
                     } else if (resultCode == IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR) {
-                        future.completeExceptionally(
-                                new IllegalArgumentException("Unsupported power monitor"));
+                        onError.accept(new IllegalArgumentException("Unsupported power monitor"));
                     } else {
-                        future.completeExceptionally(
-                                new IllegalStateException(
-                                        "Unrecognized result code " + resultCode));
+                        onError.accept(new IllegalStateException(
+                                "Unrecognized result code " + resultCode));
                     }
                 }
             });
