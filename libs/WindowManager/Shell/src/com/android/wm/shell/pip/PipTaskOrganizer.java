@@ -63,7 +63,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -1735,17 +1734,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 // animation.
                 // TODO(b/272819817): cleanup the null-check and extra logging.
                 final boolean hasTopActivityInfo = mTaskInfo.topActivityInfo != null;
-                if (!hasTopActivityInfo) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                            "%s: TaskInfo.topActivityInfo is null", TAG);
-                }
-                if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
-                        && hasTopActivityInfo) {
+                if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, mTaskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
                     animator.setColorContentOverlay(mContext);
                 }
             } else {
