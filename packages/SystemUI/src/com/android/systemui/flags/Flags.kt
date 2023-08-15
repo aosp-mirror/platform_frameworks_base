@@ -195,7 +195,7 @@ object Flags {
     // TODO(b/294110497): Tracking Bug
     @JvmField
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
-        unreleasedFlag("enable_wallet_contextual_loyalty_cards", teamfood = true)
+        releasedFlag("enable_wallet_contextual_loyalty_cards")
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag("wallpaper_fullscreen_preview")
