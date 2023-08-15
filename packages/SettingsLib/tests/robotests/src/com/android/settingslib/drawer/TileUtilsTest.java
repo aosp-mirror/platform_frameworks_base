@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +53,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -69,6 +71,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +92,10 @@ public class TileUtilsTest {
     private UserManager mUserManager;
     @Mock
     private ContentResolver mContentResolver;
+    @Mock
+    private Context mUserContext;
+    @Mock
+    private ContentResolver mUserContentResolver;
 
     private static final String URI_GET_SUMMARY = "content://authority/text/summary";
     private static final String URI_GET_ICON = "content://authority/icon/my_icon";
@@ -104,6 +112,8 @@ public class TileUtilsTest {
         mContentResolver = spy(application.getContentResolver());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getPackageName()).thenReturn("com.android.settings");
+        when(mUserContext.getContentResolver()).thenReturn(mUserContentResolver);
+        ShadowTileUtils.sCallRealEntryDataFromProvider = false;
     }
 
     @Test
@@ -375,6 +385,30 @@ public class TileUtilsTest {
     }
 
     @Test
+    public void loadTilesForAction_forUserProvider_getEntryDataFromProvider_inContextOfGivenUser() {
+        ShadowTileUtils.sCallRealEntryDataFromProvider = true;
+        UserHandle userHandle = new UserHandle(10);
+
+        doReturn(mUserContext).when(mContext).createContextAsUser(eq(userHandle), anyInt());
+
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
+            anyInt())).thenReturn(info);
+
+        TileUtils.loadTilesForAction(mContext, userHandle, IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+
+        verify(mUserContentResolver, atLeastOnce())
+            .acquireUnstableProvider(any(Uri.class));
+    }
+
+    @Test
     public void loadTilesForAction_withPendingIntent_updatesPendingIntentMap() {
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
@@ -472,8 +506,17 @@ public class TileUtilsTest {
 
         private static Bundle sMetaData;
 
+        private static boolean sCallRealEntryDataFromProvider;
+
         @Implementation
         protected static List<Bundle> getEntryDataFromProvider(Context context, String authority) {
+            if (sCallRealEntryDataFromProvider) {
+                return Shadow.directlyOn(
+                    TileUtils.class,
+                    "getEntryDataFromProvider",
+                    ReflectionHelpers.ClassParameter.from(Context.class, context),
+                    ReflectionHelpers.ClassParameter.from(String.class, authority));
+            }
             return Arrays.asList(sMetaData);
         }
 
