@@ -238,6 +238,12 @@ public class KeyguardPatternViewController
         }
         mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        // if the user is currently locked out, enforce it.
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
+        if (deadline != 0) {
+            handleAttemptLockout(deadline);
+        }
     }
 
     @Override
@@ -268,12 +274,6 @@ public class KeyguardPatternViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
-        // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
-                KeyguardUpdateMonitor.getCurrentUser());
-        if (deadline != 0) {
-            handleAttemptLockout(deadline);
-        }
     }
 
     @Override

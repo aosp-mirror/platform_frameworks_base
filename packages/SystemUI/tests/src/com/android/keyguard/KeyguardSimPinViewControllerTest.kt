@@ -97,6 +97,8 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Test
     fun onViewAttached() {
         underTest.onViewAttached()
+        verify(keyguardMessageAreaController)
+            .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
     }
 
     @Test
@@ -120,8 +122,6 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation() {
         underTest.startAppearAnimation()
-        verify(keyguardMessageAreaController)
-            .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
     }
 
     @Test

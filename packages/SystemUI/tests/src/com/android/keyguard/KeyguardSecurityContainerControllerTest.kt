@@ -64,6 +64,8 @@ import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argThat
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
@@ -577,18 +579,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
         underTest.onViewAttached()
         verify(configurationController).addCallback(configurationListenerArgumentCaptor.capture())
-        clearInvocations(viewFlipperController)
         configurationListenerArgumentCaptor.value.onThemeChanged()
-        verify(viewFlipperController).clearViews()
-        verify(viewFlipperController)
-            .asynchronouslyInflateView(
-                eq(SecurityMode.PIN),
-                any(),
-                onViewInflatedCallbackArgumentCaptor.capture()
-            )
-        onViewInflatedCallbackArgumentCaptor.value.onViewInflated(inputViewController)
-        verify(view).reset()
-        verify(viewFlipperController).reset()
         verify(view).reloadColors()
     }
 
@@ -598,16 +589,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
         underTest.onViewAttached()
         verify(configurationController).addCallback(configurationListenerArgumentCaptor.capture())
-        clearInvocations(viewFlipperController)
         configurationListenerArgumentCaptor.value.onUiModeChanged()
-        verify(viewFlipperController).clearViews()
-        verify(viewFlipperController)
-            .asynchronouslyInflateView(
-                eq(SecurityMode.PIN),
-                any(),
-                onViewInflatedCallbackArgumentCaptor.capture()
-            )
-        onViewInflatedCallbackArgumentCaptor.value.onViewInflated(inputViewController)
         verify(view).reloadColors()
     }
 
@@ -874,6 +856,17 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         underTest.prepareToShow()
         verify(userSwitcher).setAlpha(0f)
+    }
+
+    @Test
+    fun testOnUserSwitched() {
+        val userSwitchCallbackArgumentCaptor =
+            argumentCaptor<UserSwitcherController.UserSwitchCallback>()
+        underTest.onViewAttached()
+        verify(userSwitcherController)
+            .addUserSwitchCallback(capture(userSwitchCallbackArgumentCaptor))
+        userSwitchCallbackArgumentCaptor.value.onUserSwitched()
+        verify(viewFlipperController).asynchronouslyInflateView(any(), any(), any())
     }
 
     private val registeredSwipeListener: KeyguardSecurityContainer.SwipeListener

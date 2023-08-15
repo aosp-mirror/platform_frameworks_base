@@ -100,6 +100,8 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mDeleteButton);
         when(mPinBasedInputView.findViewById(R.id.key_enter))
                 .thenReturn(mOkButton);
+
+        when(mPinBasedInputView.getResources()).thenReturn(getContext().getResources());
         FakeFeatureFlags featureFlags = new FakeFeatureFlags();
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
 
