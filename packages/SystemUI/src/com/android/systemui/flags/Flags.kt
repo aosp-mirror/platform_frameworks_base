@@ -538,13 +538,6 @@ object Flags {
             teamfood = false
         )
 
-    // TODO(b/198643358): Tracking bug
-    @Keep
-    @JvmField
-    val ENABLE_PIP_SIZE_LARGE_SCREEN =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_size_large_screen", default = true)
-
-
     // TODO(b/293252410) : Tracking Bug
     @JvmField
     val LOCKSCREEN_ENABLE_LANDSCAPE =
