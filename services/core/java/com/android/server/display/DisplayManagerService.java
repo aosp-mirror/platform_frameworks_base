@@ -1772,7 +1772,7 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             // main display adapter
             registerDisplayAdapterLocked(mInjector.getLocalDisplayAdapter(mSyncRoot, mContext,
-                    mHandler, mDisplayDeviceRepo));
+                    mHandler, mDisplayDeviceRepo, mFlags));
 
             // Standalone VR devices rely on a virtual display as their primary display for
             // 2D UI. We register virtual display adapter along side the main display adapter
@@ -2093,8 +2093,11 @@ public final class DisplayManagerService extends SystemService {
             // Only send a request for display state if display state has already been initialized.
             if (state != Display.STATE_UNKNOWN) {
                 final BrightnessPair brightnessPair = mDisplayBrightnesses.get(displayId);
-                return device.requestDisplayStateLocked(state, brightnessPair.brightness,
-                        brightnessPair.sdrBrightness);
+                return device.requestDisplayStateLocked(
+                        state,
+                        brightnessPair.brightness,
+                        brightnessPair.sdrBrightness,
+                        display.getDisplayOffloadSessionLocked());
             }
         }
         return null;
@@ -3183,9 +3186,10 @@ public final class DisplayManagerService extends SystemService {
         }
 
         LocalDisplayAdapter getLocalDisplayAdapter(SyncRoot syncRoot, Context context,
-                                                   Handler handler,
-                                                   DisplayAdapter.Listener displayAdapterListener) {
-            return new LocalDisplayAdapter(syncRoot, context, handler, displayAdapterListener);
+                Handler handler, DisplayAdapter.Listener displayAdapterListener,
+                DisplayManagerFlags flags) {
+            return new LocalDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
+                    flags);
         }
 
         long getDefaultDisplayDelayTimeout() {
@@ -4805,6 +4809,49 @@ public final class DisplayManagerService extends SystemService {
                 });
             }
             return displayGroupIds;
+        }
+
+        @Override
+        public DisplayManagerInternal.DisplayOffloadSession registerDisplayOffloader(
+                int displayId, @NonNull DisplayManagerInternal.DisplayOffloader displayOffloader) {
+            if (!mFlags.isDisplayOffloadEnabled()) {
+                return null;
+            }
+            synchronized (mSyncRoot) {
+                LogicalDisplay logicalDisplay = mLogicalDisplayMapper.getDisplayLocked(displayId);
+                if (logicalDisplay == null) {
+                    Slog.w(TAG, "registering DisplayOffloader: LogicalDisplay for displayId="
+                            + displayId + " is not found. No Op.");
+                    return null;
+                }
+
+                DisplayPowerControllerInterface displayPowerController =
+                        mDisplayPowerControllers.get(logicalDisplay.getDisplayIdLocked());
+                if (displayPowerController == null) {
+                    Slog.w(TAG,
+                            "setting doze state override: DisplayPowerController for displayId="
+                                    + displayId + " is unavailable. No Op.");
+                    return null;
+                }
+
+                DisplayOffloadSession session =
+                        new DisplayOffloadSession() {
+                            @Override
+                            public void setDozeStateOverride(int displayState) {
+                                synchronized (mSyncRoot) {
+                                    displayPowerController.overrideDozeScreenState(displayState);
+                                }
+                            }
+
+                            @Override
+                            public DisplayOffloader getDisplayOffloader() {
+                                return displayOffloader;
+                            }
+                        };
+                logicalDisplay.setDisplayOffloadSessionLocked(session);
+                displayPowerController.setDisplayOffloadSession(session);
+                return session;
+            }
         }
     }
 

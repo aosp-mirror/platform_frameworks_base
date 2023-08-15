@@ -139,6 +139,10 @@ public interface DisplayPowerControllerInterface {
     boolean requestPowerState(DisplayManagerInternal.DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
+    void overrideDozeScreenState(int displayState);
+
+    void setDisplayOffloadSession(DisplayManagerInternal.DisplayOffloadSession session);
+
     /**
      * Sets up the temporary autobrightness adjustment when the user is yet to settle down to a
      * value.

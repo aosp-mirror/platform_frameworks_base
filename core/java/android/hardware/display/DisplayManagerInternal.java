@@ -698,4 +698,34 @@ public abstract class DisplayManagerInternal {
             return "AmbientLightSensorData(" + sensorName + ", " + sensorType + ")";
         }
     }
+
+    /**
+     * Associate a internal display to a {@link DisplayOffloader}.
+     *
+     * @param displayId the id of the internal display.
+     * @param displayOffloader the {@link DisplayOffloader} that controls offloading ops of internal
+     *                         display whose id is displayId.
+     * @return a {@link DisplayOffloadSession} associated with given displayId and displayOffloader.
+     */
+    public abstract DisplayOffloadSession registerDisplayOffloader(
+            int displayId, DisplayOffloader displayOffloader);
+
+    /** The callbacks that controls the entry & exit of display offloading. */
+    public interface DisplayOffloader {
+        boolean startOffload();
+
+        void stopOffload();
+    }
+
+    /** A session token that associates a internal display with a {@link DisplayOffloader}. */
+    public interface DisplayOffloadSession {
+        /** Provide the display state to use in place of state DOZE. */
+        void setDozeStateOverride(int displayState);
+        /** Returns the associated DisplayOffloader. */
+        DisplayOffloader getDisplayOffloader();
+        /** Returns whether displayoffload supports the given display state. */
+        static boolean isSupportedOffloadState(int displayState) {
+            return Display.isSuspendedState(displayState);
+        }
+    }
 }

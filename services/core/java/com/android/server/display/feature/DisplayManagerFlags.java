@@ -47,6 +47,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_ADAPTIVE_TONE_IMPROVEMENTS_1,
             Flags::enableAdaptiveToneImprovements1);
 
+    private final FlagState mDisplayOffloadFlagState = new FlagState(
+            Flags.FLAG_ENABLE_DISPLAY_OFFLOAD,
+            Flags::enableDisplayOffload);
+
     private final FlagState mDisplayResolutionRangeVotingState = new FlagState(
             Flags.FLAG_ENABLE_DISPLAY_RESOLUTION_RANGE_VOTING,
             Flags::enableDisplayResolutionRangeVoting);
@@ -109,6 +113,11 @@ public class DisplayManagerFlags {
      */
     public boolean isDisplaysRefreshRatesSynchronizationEnabled() {
         return mDisplaysRefreshRatesSynchronizationState.isEnabled();
+    }
+
+    /** Returns whether displayoffload is enabled on not */
+    public boolean isDisplayOffloadEnabled() {
+        return mDisplayOffloadFlagState.isEnabled();
     }
 
     private static class FlagState {

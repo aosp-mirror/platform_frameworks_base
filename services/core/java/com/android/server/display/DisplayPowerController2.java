@@ -31,6 +31,8 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.metrics.LogMaker;
@@ -470,8 +472,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             new SparseArray();
 
     private boolean mBootCompleted;
-
     private final DisplayManagerFlags mFlags;
+
+    private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
 
     /**
      * Creates the display power controller.
@@ -588,21 +591,24 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
-            boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
-                @Override
-                public void onReduceBrightColorsActivationChanged(boolean activated,
-                        boolean userInitiated) {
-                    applyReduceBrightColorsSplineAdjustment();
+            if (mCdsi != null) {
+                boolean active = mCdsi.setReduceBrightColorsListener(
+                        new ReduceBrightColorsListener() {
+                            @Override
+                            public void onReduceBrightColorsActivationChanged(boolean activated,
+                                    boolean userInitiated) {
+                                applyReduceBrightColorsSplineAdjustment();
 
-                }
+                            }
 
-                @Override
-                public void onReduceBrightColorsStrengthChanged(int strength) {
+                            @Override
+                            public void onReduceBrightColorsStrengthChanged(int strength) {
+                                applyReduceBrightColorsSplineAdjustment();
+                            }
+                        });
+                if (active) {
                     applyReduceBrightColorsSplineAdjustment();
                 }
-            });
-            if (active) {
-                applyReduceBrightColorsSplineAdjustment();
             }
         } else {
             mCdsi = null;
@@ -757,6 +763,24 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             return mDisplayReadyLocked;
         }
+    }
+
+    @Override
+    public void overrideDozeScreenState(int displayState) {
+        mHandler.postAtTime(() -> {
+            if (mDisplayOffloadSession == null
+                    || !(DisplayOffloadSession.isSupportedOffloadState(displayState)
+                    || displayState == Display.STATE_UNKNOWN)) {
+                return;
+            }
+            mDisplayStateController.overrideDozeScreenState(displayState);
+            sendUpdatePowerState();
+        }, mClock.uptimeMillis());
+    }
+
+    @Override
+    public void setDisplayOffloadSession(DisplayOffloadSession session) {
+        mDisplayOffloadSession = session;
     }
 
     @Override
