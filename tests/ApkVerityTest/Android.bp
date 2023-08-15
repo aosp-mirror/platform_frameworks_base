@@ -22,7 +22,7 @@ package {
 }
 
 java_test_host {
-    name: "ApkVerityTest",
+    name: "FsVerityTest",
     srcs: ["src/**/*.java"],
     libs: [
         "tradefed",
@@ -30,8 +30,10 @@ java_test_host {
         "compatibility-host-util",
     ],
     static_libs: [
+        "android.security.flags-aconfig-java-host",
         "block_device_writer_jar",
         "frameworks-base-hostutils",
+        "flag-junit-host",
     ],
     test_suites: [
         "general-tests",
@@ -41,14 +43,6 @@ java_test_host {
         "block_device_writer",
     ],
     data: [
-        ":ApkVerityTestCertDer",
-        ":ApkVerityTestApp",
-        ":ApkVerityTestAppFsvSig",
-        ":ApkVerityTestAppDm",
-        ":ApkVerityTestAppDmFsvSig",
-        ":ApkVerityTestAppSplit",
-        ":ApkVerityTestAppSplitFsvSig",
-        ":ApkVerityTestAppSplitDm",
-        ":ApkVerityTestAppSplitDmFsvSig",
+        ":FsVerityTestApp",
     ],
 }
