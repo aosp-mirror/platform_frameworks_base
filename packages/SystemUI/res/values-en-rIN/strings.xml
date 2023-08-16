@@ -295,6 +295,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> warning"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Work apps"</string>
+    <!-- no translation found for quick_settings_work_mode_paused_state (6681788236383735976) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"On at sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Until sunrise"</string>
@@ -864,6 +866,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Magnify part of screen"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Open magnification settings"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Close magnification settings"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Drag corner to resize"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Allow diagonal scrolling"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Resize"</string>
@@ -1133,7 +1137,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Open <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"To add the Wallet app as a shortcut, make sure that the app is installed"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"To add the Wallet app as a shortcut, make sure that at least one card has been added"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"To add the QR code scanner as a shortcut, make sure that a camera app is installed"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"To add the Home app as a shortcut, make sure that the app is installed"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• At least one device is available"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Select a default notes app to use the note-taking shortcut"</string>
@@ -1166,7 +1169,7 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant attention on"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Set default notes app in Settings"</string>
     <string name="install_app" msgid="5066668100199613936">"Install app"</string>
-    <string name="privacy_dialog_title" msgid="7839968133469098311">"Microphone &amp; Camera"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Microphone and Camera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Recent app use"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"See recent access"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Done"</string>
