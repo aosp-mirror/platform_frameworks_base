@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Bruk biometri eller skjermlås"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekreft at det er deg"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Bruk biometri for å fortsette"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Bruk fingeravtrykket for å fortsette"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Bruk ansiktet for å fortsette"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Bruk biometri eller skjermlåsen for å fortsette"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvare er utilgjengelig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen er avbrutt"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Gjenkjenner ikke fingeravtrykket"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Ansiktet gjenkjennes ikke. Bruk fingeravtrykk."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingeravtrykket er godkjent"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Ansiktet er autentisert"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet er autentisert. Trykk på Bekreft"</string>
