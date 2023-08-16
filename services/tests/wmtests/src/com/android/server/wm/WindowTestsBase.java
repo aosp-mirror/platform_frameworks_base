@@ -48,6 +48,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.IntDef;
@@ -954,6 +956,38 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
         testPlayer.mController.registerTransitionPlayer(testPlayer, null /* playerProc */);
         return testPlayer;
+    }
+
+    /** Overrides the behavior of config_reverseDefaultRotation for the given display. */
+    void setReverseDefaultRotation(DisplayContent dc, boolean reverse) {
+        final DisplayRotation displayRotation = dc.getDisplayRotation();
+        if (!Mockito.mockingDetails(displayRotation).isSpy()) {
+            spyOn(displayRotation);
+        }
+        doAnswer(invocation -> {
+            invocation.callRealMethod();
+            final int w = invocation.getArgument(0);
+            final int h = invocation.getArgument(1);
+            if (w > h) {
+                if (reverse) {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_90;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_270;
+                } else {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_270;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_90;
+                }
+            } else {
+                if (reverse) {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_270;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_90;
+                } else {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_90;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_270;
+                }
+            }
+            return null;
+        }).when(displayRotation).configure(anyInt(), anyInt());
+        displayRotation.configure(dc.mBaseDisplayWidth, dc.mBaseDisplayHeight);
     }
 
     /**
