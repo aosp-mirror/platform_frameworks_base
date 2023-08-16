@@ -147,28 +147,4 @@ public class TypefaceSerializationPerfTest {
             out.clear();
         }
     }
-
-    @ManualBenchmarkState.ManualBenchmarkTest(
-            warmupDurationNs = WARMUP_DURATION_NS,
-            targetTestDurationNs = TARGET_TEST_DURATION_NS)
-    @Test
-    public void testSetSystemFontMap() throws Exception {
-        SharedMemory memory = null;
-        ManualBenchmarkState state = mPerfManualStatusReporter.getBenchmarkState();
-
-        long elapsedTime = 0;
-        while (state.keepRunning(elapsedTime)) {
-            // Explicitly destroy lazy-loaded typefaces, so that we don't hit the mmap limit
-            // (max_map_count).
-            Typeface.destroySystemFontMap();
-            Typeface.loadPreinstalledSystemFontMap();
-            if (memory != null) {
-                memory.close();
-            }
-            memory = Typeface.serializeFontMap(Typeface.getSystemFontMap());
-            long startTime = System.nanoTime();
-            Typeface.setSystemFontMap(memory);
-            elapsedTime = System.nanoTime() - startTime;
-        }
-    }
 }
