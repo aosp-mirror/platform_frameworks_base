@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import com.android.build.api.dsl.CommonExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidBasePlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -25,7 +26,7 @@ plugins {
 }
 
 allprojects {
-    extra["jetpackComposeVersion"] = "1.6.0-alpha01"
+    extra["jetpackComposeVersion"] = "1.6.0-alpha02"
 }
 
 subprojects {
@@ -47,10 +48,10 @@ subprojects {
 
     afterEvaluate {
         plugins.withType<AndroidBasePlugin> {
-            configure<BaseExtension> {
+            the(CommonExtension::class).apply {
                 if (buildFeatures.compose == true) {
                     composeOptions {
-                        kotlinCompilerExtensionVersion = "1.4.4"
+                        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
                     }
                 }
             }
