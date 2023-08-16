@@ -1354,6 +1354,15 @@ class ProcessRecord implements WindowProcessListener {
         return false;
     }
 
+    void onProcessFrozen() {
+        mProfile.onProcessFrozen();
+    }
+
+    void onProcessUnfrozen() {
+        mProfile.onProcessUnfrozen();
+    }
+
+
     /*
      *  Delete all packages from list except the package indicated in info
      */
