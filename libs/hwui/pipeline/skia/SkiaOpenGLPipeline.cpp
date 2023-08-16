@@ -17,6 +17,7 @@
 #include "SkiaOpenGLPipeline.h"
 
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/gl/GrGLBackendSurface.h>
 #include <include/gpu/gl/GrGLTypes.h>
 #include <GrBackendSurface.h>
 #include <SkBlendMode.h>
@@ -140,7 +141,8 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
         LOG_ALWAYS_FATAL("Unsupported color type.");
     }
 
-    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE, fboInfo);
+    auto backendRT = GrBackendRenderTargets::MakeGL(frame.width(), frame.height(), 0,
+                                                    STENCIL_BUFFER_SIZE, fboInfo);
 
     SkSurfaceProps props(mColorMode == ColorMode::Default ? 0 : SkSurfaceProps::kAlwaysDither_Flag,
                          kUnknown_SkPixelGeometry);
