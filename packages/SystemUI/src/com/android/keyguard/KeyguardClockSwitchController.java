@@ -293,6 +293,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         setClock(null);
 
         mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
+        mSecureSettings.unregisterContentObserver(mShowWeatherObserver);
 
         mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
