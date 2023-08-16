@@ -20,7 +20,6 @@ import static android.view.InsetsSourceProto.FRAME;
 import static android.view.InsetsSourceProto.TYPE;
 import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
-import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 
 import android.annotation.IntDef;
@@ -48,9 +47,6 @@ public class InsetsSource implements Parcelable {
 
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
-    /** The insets source ID of the IME caption bar ("fake" IME navigation bar). */
-    static final int ID_IME_CAPTION_BAR =
-            InsetsSource.createId(null /* owner */, 1 /* index */, captionBar());
 
     /**
      * Controls whether this source suppresses the scrim. If the scrim is ignored, the system won't
@@ -219,9 +215,7 @@ public class InsetsSource implements Parcelable {
         // During drag-move and drag-resizing, the caption insets position may not get updated
         // before the app frame get updated. To layout the app content correctly during drag events,
         // we always return the insets with the corresponding height covering the top.
-        // However, with the "fake" IME navigation bar treated as a caption bar, we skip this case
-        // to set the actual insets towards the bottom of the screen.
-        if (getType() == WindowInsets.Type.captionBar() && getId() != ID_IME_CAPTION_BAR) {
+        if (getType() == WindowInsets.Type.captionBar()) {
             return Insets.of(0, frame.height(), 0, 0);
         }
         // Checks for whether there is shared edge with insets for 0-width/height window.
