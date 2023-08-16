@@ -16,6 +16,8 @@
 
 package com.android.server.audio;
 
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
 import static android.media.AudioSystem.isBluetoothDevice;
 
 import android.annotation.NonNull;
@@ -682,8 +684,20 @@ public class SpatializerHelper {
             Log.i(TAG, "no spatialization device state found for Spatial Audio device:" + ada);
             return new Pair<>(false, false);
         }
+        boolean available = true;
+        if (isBluetoothDevice(deviceType)) {
+            // only checking headphones/binaural because external speakers cannot use transaural
+            // since their physical characteristics are unknown
+            if (deviceState.getAudioDeviceCategory() == AUDIO_DEVICE_CATEGORY_UNKNOWN
+                    || deviceState.getAudioDeviceCategory() == AUDIO_DEVICE_CATEGORY_HEADPHONES) {
+                available = (spatMode == SpatializationMode.SPATIALIZER_BINAURAL)
+                        && mBinauralSupported;
+            } else {
+                available = false;
+            }
+        }
         // found the matching device state.
-        return new Pair<>(deviceState.isSAEnabled(), true /* available */);
+        return new Pair<>(deviceState.isSAEnabled(), available);
     }
 
     private synchronized void addWirelessDeviceIfNew(@NonNull AudioDeviceAttributes ada) {
@@ -740,11 +754,36 @@ public class SpatializerHelper {
         }
     }
 
+    synchronized void refreshDevice(@NonNull AudioDeviceAttributes ada) {
+        final AdiDeviceState deviceState = findSACompatibleDeviceStateForAudioDeviceAttributes(ada);
+        if (isAvailableForAdiDeviceState(deviceState)) {
+            addCompatibleAudioDevice(ada, /*forceEnable=*/deviceState.isSAEnabled());
+            setHeadTrackerEnabled(deviceState.isHeadTrackerEnabled(), ada);
+        } else {
+            removeCompatibleAudioDevice(ada);
+        }
+    }
+
     synchronized boolean isAvailableForDevice(@NonNull AudioDeviceAttributes ada) {
         if (ada.getRole() != AudioDeviceAttributes.ROLE_OUTPUT) {
             return false;
         }
-        return findSACompatibleDeviceStateForAudioDeviceAttributes(ada) != null;
+
+        return isAvailableForAdiDeviceState(
+                findSACompatibleDeviceStateForAudioDeviceAttributes(ada));
+    }
+
+    private boolean isAvailableForAdiDeviceState(AdiDeviceState deviceState) {
+        if (deviceState == null) {
+            return false;
+        }
+
+        if (isBluetoothDevice(deviceState.getInternalDeviceType())
+                && deviceState.getAudioDeviceCategory() != AUDIO_DEVICE_CATEGORY_UNKNOWN
+                && deviceState.getAudioDeviceCategory() != AUDIO_DEVICE_CATEGORY_HEADPHONES) {
+            return false;
+        }
+        return true;
     }
 
     private synchronized boolean canBeSpatializedOnDevice(@NonNull AudioAttributes attributes,
