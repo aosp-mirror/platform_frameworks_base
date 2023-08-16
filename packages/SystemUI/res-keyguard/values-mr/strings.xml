@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"लॉकडाउननंतर पिन आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"लॉकडाउननंतर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"लॉकडाउननंतर पॅटर्न आवश्यक आहे"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"डिव्हाइस वापरात नसताना अपडेट इंस्टॉल केले जाईल"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पिन अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पासवर्ड अनलॉक केला गेला नव्हता."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"अतिरिक्त सुरक्षा आवश्‍यक आहे. काही वेळेसाठी पॅटर्न अनलॉक केला गेला नव्हता."</string>

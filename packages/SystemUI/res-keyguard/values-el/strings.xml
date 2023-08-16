@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Απαιτείται PIN μετά από κλείδωμα"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Απαιτείται κωδικός πρόσβασης μετά από κλείδωμα"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Απαιτείται μοτίβο μετά από κλείδωμα"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Η ενημέρωση θα εγκατασταθεί όταν δεν χρησιμοποιείται η συσκευή"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Απαιτ. πρόσθ. ασφάλ. Το PIN έχει καιρό να χρησιμοπ."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Απαιτ. πρόσθ. ασφάλ. Ο κωδ. πρ. έχει καιρό να χρησ."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Απαιτ. πρόσθ. ασφάλ. Το μοτίβο έχει καιρό να χρησιμ."</string>
