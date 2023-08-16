@@ -1030,7 +1030,7 @@
     <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>
     <string name="empty_status" msgid="5938893404951307749">"ರಾತ್ರಿ ಚಾಟ್ ಮಾಡೋಣ!"</string>
-    <string name="status_before_loading" msgid="1500477307859631381">"ವಿಷಯ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"ಕಂಟೆಂಟ್‌ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="missed_call" msgid="4228016077700161689">"ಮಿಸ್ಡ್ ಕಾಲ್"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
