@@ -4646,6 +4646,13 @@ public class HdmiControlService extends SystemService {
                     // same keycode for all three mute options.
                     keyCode = KeyEvent.KEYCODE_VOLUME_MUTE;
                     break;
+                case AudioManager.ADJUST_SAME:
+                    // Query the current audio status of the Audio System and display UI for it
+                    // Only for TVs, because Playback devices don't display UI when using AVB
+                    if (tv() != null) {
+                        tv().requestAndUpdateAvbAudioStatus();
+                    }
+                    return;
                 default:
                     return;
             }

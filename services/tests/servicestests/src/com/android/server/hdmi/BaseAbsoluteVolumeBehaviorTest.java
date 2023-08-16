@@ -92,11 +92,11 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
 
     // Default Audio Status given by the System Audio device in its initial <Report Audio Status>
     // that triggers AVB being enabled
-    private static final AudioStatus INITIAL_SYSTEM_AUDIO_DEVICE_STATUS =
+    protected static final AudioStatus INITIAL_SYSTEM_AUDIO_DEVICE_STATUS =
             new AudioStatus(50, false);
 
     // VolumeInfo passed to AudioDeviceVolumeManager#setDeviceAbsoluteVolumeBehavior to enable AVB
-    private static final VolumeInfo ENABLE_AVB_VOLUME_INFO =
+    protected static final VolumeInfo ENABLE_AVB_VOLUME_INFO =
             new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                     .setMuted(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute())
                     .setVolumeIndex(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume())
@@ -105,6 +105,8 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
                     .build();
 
     private static final int EMPTY_FLAGS = 0;
+
+    protected static final int STREAM_MUSIC_MAX_VOLUME = 25;
 
     protected abstract HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService);
 
@@ -201,7 +203,7 @@ public abstract class BaseAbsoluteVolumeBehaviorTest {
                 Collections.singletonList(getAudioOutputDevice()));
 
         // Max volume of STREAM_MUSIC
-        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, 25);
+        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, STREAM_MUSIC_MAX_VOLUME);
 
         // Receive messages from devices to make sure they're registered in HdmiCecNetwork
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(

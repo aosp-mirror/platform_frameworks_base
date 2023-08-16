@@ -1048,6 +1048,19 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     }
 
     /**
+     * If AVB has been enabled, request the System Audio device's audio status and notify
+     * AudioService of its response.
+     */
+    @ServiceThreadOnly
+    void requestAndUpdateAvbAudioStatus() {
+        assertRunOnServiceThread();
+        for (AbsoluteVolumeAudioStatusAction action :
+                getActions(AbsoluteVolumeAudioStatusAction.class)) {
+            action.requestAndUpdateAudioStatus();
+        }
+    }
+
+    /**
      * Determines whether {@code targetAddress} supports <Set Audio Volume Level>. Does two things
      * in parallel: send <Give Features> (to get <Report Features> in response),
      * and send <Set Audio Volume Level> (to see if it gets a <Feature Abort> in response).

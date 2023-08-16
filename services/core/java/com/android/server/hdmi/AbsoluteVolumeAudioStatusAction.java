@@ -32,6 +32,10 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
 
     private int mInitialAudioStatusRetriesLeft = 2;
 
+    // Flag to notify AudioService of the next audio status reported,
+    // regardless of whether the audio status changed.
+    private boolean mForceNextAudioStatusUpdate = false;
+
     private static final int STATE_WAIT_FOR_INITIAL_AUDIO_STATUS = 1;
     private static final int STATE_MONITOR_AUDIO_STATUS = 2;
 
@@ -70,6 +74,17 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
         return false;
     }
 
+
+    /**
+     * If AVB has been enabled, send <Give Audio Status> and notify AudioService of the response.
+     */
+    void requestAndUpdateAudioStatus() {
+        if (mState == STATE_MONITOR_AUDIO_STATUS) {
+            mForceNextAudioStatusUpdate = true;
+            sendGiveAudioStatus();
+        }
+    }
+
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
         if (mTargetAddress != cmd.getSource() || cmd.getParams().length == 0) {
             return false;
@@ -89,12 +104,15 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
             localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
+            if (mForceNextAudioStatusUpdate
+                    || audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
                 localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
-            if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
+            if (mForceNextAudioStatusUpdate
+                    || audioStatus.getMute() != mLastAudioStatus.getMute()) {
                 localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }
+            mForceNextAudioStatusUpdate = false;
         }
         mLastAudioStatus = audioStatus;
 
