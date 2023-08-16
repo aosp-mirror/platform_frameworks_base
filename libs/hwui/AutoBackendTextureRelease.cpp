@@ -18,9 +18,9 @@
 
 #include <SkImage.h>
 #include <include/gpu/ganesh/SkImageGanesh.h>
-#include <include/gpu/GrBackendSurfaceMutableState.h>
 #include <include/gpu/GrDirectContext.h>
 #include <include/gpu/GrBackendSurface.h>
+#include <include/gpu/MutableTextureState.h>
 #include "renderthread/RenderThread.h"
 #include "utils/Color.h"
 #include "utils/PaintUtils.h"
@@ -142,8 +142,8 @@ void AutoBackendTextureRelease::releaseQueueOwnership(GrDirectContext* context) 
     LOG_ALWAYS_FATAL_IF(Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan);
     if (mBackendTexture.isValid()) {
         // Passing in VK_IMAGE_LAYOUT_UNDEFINED means we keep the old layout.
-        GrBackendSurfaceMutableState newState(VK_IMAGE_LAYOUT_UNDEFINED,
-                                              VK_QUEUE_FAMILY_FOREIGN_EXT);
+        skgpu::MutableTextureState newState(VK_IMAGE_LAYOUT_UNDEFINED,
+                                            VK_QUEUE_FAMILY_FOREIGN_EXT);
 
         // The unref for this ref happens in the releaseProc passed into setBackendTextureState. The
         // releaseProc callback will be made when the work to set the new state has finished on the
