@@ -386,7 +386,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             }
         }
 
-        return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
+        try {
+            return mExecutorService.schedule(syncRunnable, delayMillis, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     public synchronized Future<?> scheduleWrite() {
