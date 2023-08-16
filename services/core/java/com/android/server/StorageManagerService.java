@@ -1377,6 +1377,16 @@ class StorageManagerService extends IStorageManager.Stub
         return mVold.supportsBlockCheckpoint();
     }
 
+    private void prepareUserStorageForMoveInternal(String fromVolumeUuid, String toVolumeUuid,
+            List<UserInfo> users) throws Exception {
+
+        final int flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+        for (UserInfo user : users) {
+            prepareUserStorageInternal(fromVolumeUuid, user.id, user.serialNumber, flags);
+            prepareUserStorageInternal(toVolumeUuid, user.id, user.serialNumber, flags);
+        }
+    }
+
     @Override
     public void onAwakeStateChanged(boolean isAwake) {
         // Ignored
@@ -2986,6 +2996,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final VolumeInfo from;
         final VolumeInfo to;
+        final List<UserInfo> users;
 
         synchronized (mLock) {
             if (Objects.equals(mPrimaryStorageUuid, volumeUuid)) {
@@ -2999,7 +3010,7 @@ class StorageManagerService extends IStorageManager.Stub
             mMoveTargetUuid = volumeUuid;
 
             // We need all the users unlocked to move their primary storage
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
                 if (StorageManager.isFileEncrypted() && !isUserKeyUnlocked(user.id)) {
                     Slog.w(TAG, "Failing move due to locked user " + user.id);
@@ -3033,6 +3044,19 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
             }
+        }
+
+        // Prepare the storage before move, this is required to unlock adoptable storage (as the
+        // keys are tied to prepare user data step) & also is required for the destination files to
+        // end up with the correct SELinux labels and encryption policies for directories
+        try {
+            prepareUserStorageForMoveInternal(mPrimaryStorageUuid, volumeUuid, users);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failing move due to failure on prepare user data", e);
+            synchronized (mLock) {
+                onMoveStatusLocked(PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+            }
+            return;
         }
 
         try {
@@ -5024,5 +5048,16 @@ class StorageManagerService extends IStorageManager.Stub
             mCloudProviderChangeListeners.add(listener);
             mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener);
         }
+
+        @Override
+        public void prepareUserStorageForMove(String fromVolumeUuid, String toVolumeUuid,
+                List<UserInfo> users) {
+            try {
+                prepareUserStorageForMoveInternal(fromVolumeUuid, toVolumeUuid, users);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 }
