@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -93,6 +94,8 @@ class SceneTestUtils(
         }
     }
 
+    val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
+
     private val context = test.context
 
     fun fakeSceneContainerRepository(
@@ -126,6 +129,7 @@ class SceneTestUtils(
         return SceneInteractor(
             applicationScope = applicationScope(),
             repository = repository,
+            powerRepository = powerRepository,
             logger = mock(),
         )
     }
@@ -147,10 +151,6 @@ class SceneTestUtils(
             sceneInteractor = sceneInteractor,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
-    }
-
-    fun keyguardRepository(): FakeKeyguardRepository {
-        return keyguardRepository
     }
 
     fun keyguardInteractor(repository: KeyguardRepository): KeyguardInteractor {

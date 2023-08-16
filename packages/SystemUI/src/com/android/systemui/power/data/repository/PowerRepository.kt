@@ -39,6 +39,9 @@ interface PowerRepository {
 
     /** Wakes up the device. */
     fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int)
+
+    /** Notifies the power repository that a user touch happened. */
+    fun userTouch()
 }
 
 @SysUISingleton
@@ -80,6 +83,14 @@ constructor(
             systemClock.uptimeMillis(),
             wakeReason,
             "${applicationContext.packageName}:$why",
+        )
+    }
+
+    override fun userTouch() {
+        manager.userActivity(
+            systemClock.uptimeMillis(),
+            PowerManager.USER_ACTIVITY_EVENT_TOUCH,
+            /* flags= */ 0,
         )
     }
 

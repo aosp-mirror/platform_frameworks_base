@@ -22,7 +22,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.motionEventSpy
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ObservableTransitionState as SceneTransitionObservableTransitionState
 import com.android.compose.animation.scene.SceneKey as SceneTransitionSceneKey
@@ -56,6 +58,7 @@ import kotlinx.coroutines.flow.map
  *   must have entries in this map.
  * @param modifier A modifier.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SceneContainer(
     viewModel: SceneContainerViewModel,
@@ -79,7 +82,7 @@ fun SceneContainer(
         onChangeScene = viewModel::onSceneChanged,
         transitions = SceneContainerTransitions,
         state = state,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().motionEventSpy { viewModel.onUserInput() },
     ) {
         sceneByKey.forEach { (sceneKey, composableScene) ->
             scene(

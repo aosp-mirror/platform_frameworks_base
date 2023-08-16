@@ -61,7 +61,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         utils.authenticationInteractor(
             repository = authenticationRepository,
         )
-    private val keyguardRepository = utils.keyguardRepository()
+    private val keyguardRepository = utils.keyguardRepository
     private val keyguardInteractor =
         utils.keyguardInteractor(
             repository = keyguardRepository,

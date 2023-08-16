@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -44,6 +45,7 @@ class SceneInteractor
 constructor(
     @Application applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
+    private val powerRepository: PowerRepository,
     private val logger: SceneLogger,
 ) {
 
@@ -151,6 +153,11 @@ constructor(
      */
     fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
         repository.setTransitionState(transitionState)
+    }
+
+    /** Handles a user input event. */
+    fun onUserInput() {
+        powerRepository.userTouch()
     }
 
     /**
