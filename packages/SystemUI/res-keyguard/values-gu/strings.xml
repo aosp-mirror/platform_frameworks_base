@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"પિન પછી પાસવર્ડ આવશ્યક છે"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"લૉકડાઉન પછી પાસવર્ડ આવશ્યક છે"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"પૅટર્ન પછી પાસવર્ડ આવશ્યક છે"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"જ્યારે ડિવાઇસ ઉપયોગમાં ન હોય ત્યારે અપડેટ ઇન્સ્ટૉલ કરવામાં આવશે"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પિનનો ઉપયોગ થયો નથી."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પાસવર્ડનો ઉપયોગ થયો નથી."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"વધારાની સુરક્ષા આવશ્યક છે. થોડા સમય માટે પૅટર્નનો ઉપયોગ થયો નથી."</string>
