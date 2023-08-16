@@ -79,6 +79,10 @@ public class KeyguardPinViewController
         mPasswordEntry.setUserActivityListener(this::onUserInput);
         mView.onDevicePostureChanged(mPostureController.getDevicePosture());
         mPostureController.addCallback(mPostureCallback);
+        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
+            mPasswordEntry.setUsePinShapes(true);
+            updateAutoConfirmationState();
+        }
     }
 
     protected void onUserInput() {
@@ -100,10 +104,6 @@ public class KeyguardPinViewController
 
     @Override
     public void startAppearAnimation() {
-        if (mFeatureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)) {
-            mPasswordEntry.setUsePinShapes(true);
-            updateAutoConfirmationState();
-        }
         super.startAppearAnimation();
     }
 

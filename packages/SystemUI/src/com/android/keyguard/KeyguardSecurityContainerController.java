@@ -146,8 +146,19 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private int mLastOrientation;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
+    private int mCurrentUser = UserHandle.USER_NULL;
     private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
-            () -> showPrimarySecurityScreen(false);
+            new UserSwitcherController.UserSwitchCallback() {
+        @Override
+        public void onUserSwitched() {
+            if (mCurrentUser == KeyguardUpdateMonitor.getCurrentUser()) {
+                return;
+            }
+            mCurrentUser = KeyguardUpdateMonitor.getCurrentUser();
+            showPrimarySecurityScreen(false);
+            reinflateViewFlipper((l) -> {});
+        }
+    };
 
     @VisibleForTesting
     final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
@@ -343,7 +354,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 @Override
                 public void onThemeChanged() {
                     reloadColors();
-                    reset();
                 }
 
                 @Override
@@ -1164,7 +1174,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void reloadColors() {
-        reinflateViewFlipper(controller -> mView.reloadColors());
+        mView.reloadColors();
     }
 
     /** Handles density or font scale changes. */

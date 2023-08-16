@@ -2878,8 +2878,8 @@ class Task extends TaskFragment {
             // No need to check if allowed if it's leaving dragResize
             if (dragResizing
                     && !(getRootTask().getWindowingMode() == WINDOWING_MODE_FREEFORM)) {
-                throw new IllegalArgumentException("Drag resize not allow for root task id="
-                        + getRootTaskId());
+                Slog.e(TAG, "Drag resize isn't allowed for root task id=" + getRootTaskId());
+                return;
             }
             mDragResizing = dragResizing;
             resetDragResizingChangeReported();
@@ -3459,6 +3459,8 @@ class Task extends TaskFragment {
         info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.isUserFullscreenOverrideEnabled = top != null
+                && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
         info.isFromLetterboxDoubleTap = top != null && top.mLetterboxUiController.isFromDoubleTap();
         if (info.isLetterboxDoubleTapEnabled) {
             info.topActivityLetterboxWidth = top.getBounds().width();

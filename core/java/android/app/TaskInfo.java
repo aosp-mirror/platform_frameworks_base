@@ -248,6 +248,13 @@ public class TaskInfo {
     public boolean topActivityEligibleForUserAspectRatioButton;
 
     /**
+     * Whether the user has forced the activity to be fullscreen through the user aspect ratio
+     * settings.
+     * @hide
+     */
+    public boolean isUserFullscreenOverrideEnabled;
+
+    /**
      * Hint about the letterbox state of the top activity.
      * @hide
      */
@@ -543,7 +550,8 @@ public class TaskInfo {
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
                 && parentTaskId == that.parentTaskId
-                && Objects.equals(topActivity, that.topActivity);
+                && Objects.equals(topActivity, that.topActivity)
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
     }
 
     /**
@@ -574,7 +582,8 @@ public class TaskInfo {
                 && (!hasCompatUI() || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
                 && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
-                && (!hasCompatUI() || isVisible == that.isVisible);
+                && (!hasCompatUI() || isVisible == that.isVisible)
+                && isUserFullscreenOverrideEnabled == that.isUserFullscreenOverrideEnabled;
     }
 
     /**
@@ -630,6 +639,7 @@ public class TaskInfo {
         topActivityLetterboxHorizontalPosition = source.readInt();
         topActivityLetterboxWidth = source.readInt();
         topActivityLetterboxHeight = source.readInt();
+        isUserFullscreenOverrideEnabled = source.readBoolean();
     }
 
     /**
@@ -686,6 +696,7 @@ public class TaskInfo {
         dest.writeInt(topActivityLetterboxHorizontalPosition);
         dest.writeInt(topActivityLetterboxWidth);
         dest.writeInt(topActivityLetterboxHeight);
+        dest.writeBoolean(isUserFullscreenOverrideEnabled);
     }
 
     @Override
@@ -732,6 +743,7 @@ public class TaskInfo {
                         + topActivityLetterboxHorizontalPosition
                 + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
                 + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
+                + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " cameraCompatControlState="

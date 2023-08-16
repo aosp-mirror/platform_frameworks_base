@@ -23,6 +23,8 @@ import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.app.IVisualQueryRecognitionStatusListener;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -39,9 +41,12 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import javax.inject.Inject;
-
 import dagger.Lazy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -76,6 +81,18 @@ public class AssistManager {
          * Hides any SysUI for the assistant, but _does not_ close the assistant itself.
          */
         void hide();
+    }
+
+    /**
+     * An interface for a listener that receives notification that visual query attention has
+     * either been gained or lost.
+     */
+    public interface VisualQueryAttentionListener {
+        /** Called when visual query attention has been gained. */
+        void onAttentionGained();
+
+        /** Called when visual query attention has been lost. */
+        void onAttentionLost();
     }
 
     private static final String TAG = "AssistManager";
@@ -127,6 +144,23 @@ public class AssistManager {
     private final SecureSettings mSecureSettings;
 
     private final DeviceProvisionedController mDeviceProvisionedController;
+
+    private final List<VisualQueryAttentionListener> mVisualQueryAttentionListeners =
+            new ArrayList<>();
+
+    private final IVisualQueryDetectionAttentionListener mVisualQueryDetectionAttentionListener =
+            new IVisualQueryDetectionAttentionListener.Stub() {
+        @Override
+        public void onAttentionGained() {
+            mVisualQueryAttentionListeners.forEach(VisualQueryAttentionListener::onAttentionGained);
+        }
+
+        @Override
+        public void onAttentionLost() {
+            mVisualQueryAttentionListeners.forEach(VisualQueryAttentionListener::onAttentionLost);
+        }
+    };
+
     private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
 
@@ -157,6 +191,7 @@ public class AssistManager {
         mSecureSettings = secureSettings;
 
         registerVoiceInteractionSessionListener();
+        registerVisualQueryRecognitionStatusListener();
 
         mUiController = defaultUiController;
 
@@ -266,6 +301,24 @@ public class AssistManager {
         mAssistUtils.hideCurrentSession();
     }
 
+    /**
+     * Add the given {@link VisualQueryAttentionListener} to the list of listeners awaiting
+     * notification of gaining/losing visual query attention.
+     */
+    public void addVisualQueryAttentionListener(VisualQueryAttentionListener listener) {
+        if (!mVisualQueryAttentionListeners.contains(listener)) {
+            mVisualQueryAttentionListeners.add(listener);
+        }
+    }
+
+    /**
+     * Remove the given {@link VisualQueryAttentionListener} from the list of listeners awaiting
+     * notification of gaining/losing visual query attention.
+     */
+    public void removeVisualQueryAttentionListener(VisualQueryAttentionListener listener) {
+        mVisualQueryAttentionListeners.remove(listener);
+    }
+
     private void startAssistInternal(Bundle args, @NonNull ComponentName assistComponent,
             boolean isService) {
         if (isService) {
@@ -324,6 +377,27 @@ public class AssistManager {
         mAssistUtils.showSessionForActiveService(args,
                 VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE, mContext.getAttributionTag(),
                 null, null);
+    }
+
+    private void registerVisualQueryRecognitionStatusListener() {
+        if (!mContext.getResources()
+                .getBoolean(R.bool.config_enableVisualQueryAttentionDetection)) {
+            return;
+        }
+
+        mAssistUtils.subscribeVisualQueryRecognitionStatus(
+                new IVisualQueryRecognitionStatusListener.Stub() {
+                    @Override
+                    public void onStartPerceiving() {
+                        mAssistUtils.enableVisualQueryDetection(
+                                mVisualQueryDetectionAttentionListener);
+                    }
+
+                    @Override
+                    public void onStopPerceiving() {
+                        mAssistUtils.disableVisualQueryDetection();
+                    }
+                });
     }
 
     public void launchVoiceAssistFromKeyguard() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.rtl
 
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -22,6 +22,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -36,7 +37,7 @@ import org.junit.runners.Parameterized
  * PlaceholderPrimary, which is configured to launch with PlaceholderSecondary in RTL. Expect split
  * PlaceholderSecondary|PlaceholderPrimary covering split B|A.
  *
- * To run this test: `atest FlickerTests:RTLStartSecondaryWithPlaceholderTest`
+ * To run this test: `atest FlickerTestsOther:RTLStartSecondaryWithPlaceholderTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

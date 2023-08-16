@@ -195,7 +195,7 @@ object Flags {
     // TODO(b/294110497): Tracking Bug
     @JvmField
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
-        unreleasedFlag("enable_wallet_contextual_loyalty_cards", teamfood = true)
+        releasedFlag("enable_wallet_contextual_loyalty_cards")
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag("wallpaper_fullscreen_preview")
@@ -386,8 +386,7 @@ object Flags {
     @JvmField val NEW_BLUETOOTH_REPOSITORY = releasedFlag("new_bluetooth_repository")
 
     // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
-        unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
@@ -787,4 +786,8 @@ object Flags {
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button")
+
+    /** Enable haptic slider component in the brightness slider */
+    @JvmField
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
 }
