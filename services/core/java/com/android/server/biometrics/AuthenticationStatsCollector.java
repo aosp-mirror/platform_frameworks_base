@@ -93,8 +93,9 @@ public class AuthenticationStatsCollector {
 
     /** Update total authentication and rejected attempts. */
     public void authenticate(int userId, boolean authenticated) {
-        // Initialize mUserAuthenticationStatsMap when authenticate to ensure SharedPreferences
-        // are ready for application use and avoid ramdump issue.
+        // SharedPreference is not ready when starting system server, initialize
+        // mUserAuthenticationStatsMap in authentication to ensure SharedPreference
+        // is ready for application use.
         if (mUserAuthenticationStatsMap.isEmpty()) {
             initializeUserAuthenticationStatsMap();
         }
