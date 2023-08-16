@@ -576,12 +576,6 @@ public class InputMethodService extends AbstractInputMethodService {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long DISALLOW_INPUT_METHOD_INTERFACE_OVERRIDE = 148086656L;
 
-    /**
-     * Enable the logic to allow hiding the IME caption bar ("fake" IME navigation bar).
-     * @hide
-     */
-    public static final boolean ENABLE_HIDE_IME_CAPTION_BAR = false;
-
     LayoutInflater mInflater;
     TypedArray mThemeAttrs;
     @UnsupportedAppUsage

@@ -6132,8 +6132,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mVisibilityStateComputer.dump(pw);
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
-            p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
-                    + InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR);
             p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mStylusIds=" + (mStylusIds != null
                     ? Arrays.toString(mStylusIds.toArray()) : ""));
