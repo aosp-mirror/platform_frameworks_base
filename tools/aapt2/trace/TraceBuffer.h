@@ -17,10 +17,11 @@
 #ifndef AAPT_TRACEBUFFER_H
 #define AAPT_TRACEBUFFER_H
 
-#include <string>
-#include <vector>
-
 #include <androidfw/StringPiece.h>
+
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace aapt {
 
@@ -28,30 +29,38 @@ namespace aapt {
 // This is an in-process ftrace which has the advantage of being platform independent.
 // These methods are NOT thread-safe since aapt2 is not multi-threaded.
 
-// Convenience RIAA object to automatically finish an event when object goes out of scope.
+// Convenience RAII object to automatically finish an event when object goes out of scope.
 class Trace {
 public:
-  Trace(const std::string& tag);
-  Trace(const std::string& tag, const std::vector<android::StringPiece>& args);
-  ~Trace();
+ Trace(const char* tag);
+ Trace(std::string tag);
+ Trace(std::string_view tag, const std::vector<android::StringPiece>& args);
+ ~Trace();
+
+ static bool enable(bool value = true);
+
+private:
+ std::string tag_;
 };
 
 // Manual markers.
-void BeginTrace(const std::string& tag);
-void EndTrace();
+void BeginTrace(std::string tag);
+void EndTrace(std::string tag);
 
 // A main trace is required to flush events to disk. Events are formatted in systrace
 // json format.
 class FlushTrace {
 public:
-  explicit FlushTrace(const std::string& basepath, const std::string& tag);
-  explicit FlushTrace(const std::string& basepath, const std::string& tag,
-      const std::vector<android::StringPiece>& args);
-  explicit FlushTrace(const std::string& basepath, const std::string& tag,
-      const std::vector<std::string>& args);
-  ~FlushTrace();
+ explicit FlushTrace(std::string_view basepath, std::string_view tag);
+ explicit FlushTrace(std::string_view basepath, std::string_view tag,
+                     const std::vector<android::StringPiece>& args);
+ explicit FlushTrace(std::string_view basepath, std::string_view tag,
+                     const std::vector<std::string>& args);
+ ~FlushTrace();
+
 private:
   std::string basepath_;
+  std::string tag_;
 };
 
 #define TRACE_CALL() Trace __t(__func__)
