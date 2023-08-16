@@ -1555,7 +1555,7 @@ public class Build {
         String attestProp = getString(
                 TextUtils.formatSimple("ro.product.%s_for_attestation", property));
         return attestProp.equals(UNKNOWN)
-                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : UNKNOWN;
+                ? getString(TextUtils.formatSimple("ro.product.vendor.%s", property)) : attestProp;
     }
 
     private static String[] getStringList(String property, String separator) {
