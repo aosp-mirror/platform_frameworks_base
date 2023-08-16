@@ -28,8 +28,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 public final class InteractionJankMonitorWrapper {
-    private static final String TAG = "JankMonitorWrapper";
-
     // Launcher journeys.
     public static final int CUJ_APP_LAUNCH_FROM_RECENTS =
             InteractionJankMonitor.CUJ_LAUNCHER_APP_LAUNCH_FROM_RECENTS;
@@ -37,6 +35,8 @@ public final class InteractionJankMonitorWrapper {
             InteractionJankMonitor.CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON;
     public static final int CUJ_APP_CLOSE_TO_HOME =
             InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_HOME;
+    public static final int CUJ_APP_CLOSE_TO_HOME_FALLBACK =
+            InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK;
     public static final int CUJ_APP_CLOSE_TO_PIP =
             InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP;
     public static final int CUJ_QUICK_SWITCH =
@@ -68,6 +68,7 @@ public final class InteractionJankMonitorWrapper {
             CUJ_APP_LAUNCH_FROM_RECENTS,
             CUJ_APP_LAUNCH_FROM_ICON,
             CUJ_APP_CLOSE_TO_HOME,
+            CUJ_APP_CLOSE_TO_HOME_FALLBACK,
             CUJ_APP_CLOSE_TO_PIP,
             CUJ_QUICK_SWITCH,
             CUJ_APP_LAUNCH_FROM_WIDGET,
