@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Limită de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Avertizare: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplicații pentru lucru"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Întreruptă"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Lumină de noapte"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Activată la apus"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Până la răsărit"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Mărește o parte a ecranului"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Deschide setările pentru mărire"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Închide setările de mărire"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Trage de colț pentru a redimensiona"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permite derularea pe diagonală"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionează"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Deschide <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Pentru a adăuga aplicația Portofel drept comandă rapidă, asigură-te că aplicația este instalată"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Pentru a adăuga aplicația Portofel drept comandă rapidă, asigură-te că ai adăugat cel puțin un card"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Pentru a adăuga Scanner de coduri QR drept comandă rapidă, asigură-te că este instalată o aplicație pentru camera foto"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Pentru a adăuga aplicația Home drept comandă rapidă, asigură-te că aplicația este instalată"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Este disponibil cel puțin un dispozitiv"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selectează o aplicație prestabilită pentru note ca să folosești comanda rapidă de luat note"</string>
@@ -1167,7 +1169,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Setează aplicația prestabilită de note din Setări"</string>
     <string name="install_app" msgid="5066668100199613936">"Instalează aplicația"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Microfon și cameră"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Folosit recent de aplicații"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Utilizare recentă în aplicații"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Vezi accesarea recentă"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Gata"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Extinde și afișează opțiunile"</string>
@@ -1178,10 +1180,10 @@
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Gestionează accesul"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Folosit de un apel telefonic"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Folosit recent într-un apel telefonic"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Folosit de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Folosit recent de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Folosit de <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Se folosește pentru <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"S-a folosit recent de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Se folosește pentru <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Folosit recent de <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
-    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Folosit de <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Se folosește pentru <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Folosit recent de <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

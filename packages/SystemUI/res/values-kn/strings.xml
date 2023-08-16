@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಮಿತಿ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ಎಚ್ಚರಿಕೆ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
@@ -864,6 +865,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ಸ್ಕ್ರೀನ್‌ನ ಅರ್ಧಭಾಗವನ್ನು ಝೂಮ್ ಮಾಡಿ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ಹಿಗ್ಗಿಸುವಿಕೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"ಮ್ಯಾಗ್ನಿಫಿಕೇಶನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುಚ್ಚಿರಿ"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"ಎಡಿಟ್ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ಮರುಗಾತ್ರಗೊಳಿಸಲು ಮೂಲೆಯನ್ನು ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ಡಯಾಗನಲ್ ಸ್ಕ್ರೋಲಿಂಗ್ ಅನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
@@ -1038,7 +1040,7 @@
     <string name="game_status" msgid="1340694320630973259">"ಪ್ಲೇ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"ಸ್ನೇಹಿತರು"</string>
     <string name="empty_status" msgid="5938893404951307749">"ರಾತ್ರಿ ಚಾಟ್ ಮಾಡೋಣ!"</string>
-    <string name="status_before_loading" msgid="1500477307859631381">"ವಿಷಯ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
+    <string name="status_before_loading" msgid="1500477307859631381">"ಕಂಟೆಂಟ್‌ ಶೀಘ್ರದಲ್ಲೇ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="missed_call" msgid="4228016077700161689">"ಮಿಸ್ಡ್ ಕಾಲ್"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ಇತ್ತೀಚಿನ ಸಂದೇಶಗಳು, ಮಿಸ್ಡ್ ಕಾಲ್‌ಗಳು ಮತ್ತು ಸ್ಥಿತಿ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
@@ -1133,7 +1135,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ವಾಲೆಟ್ ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಕನಿಷ್ಠ ಒಂದು ಕಾರ್ಡ್ ಅನ್ನು ಸೇರಿಸಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR ಕೋಡ್ ಸ್ಕ್ಯಾನರ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಕ್ಯಾಮರಾ ಆ್ಯಪ್ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ಆ್ಯಪ್ ಅನ್ನು ಶಾರ್ಟ್‌ಕಟ್ ಆಗಿ ಸೇರಿಸಲು, ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಆಗಿದೆಯೇ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ಕನಿಷ್ಠ ಒಂದು ಸಾಧನ ಲಭ್ಯವಿದೆ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ನೋಟ್ಸ್ ಮಾಡಿಕೊಳ್ಳುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸಲು ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಆಯ್ಕೆಮಾಡಿ"</string>
