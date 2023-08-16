@@ -2188,11 +2188,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             MediaSessionRecordImpl session = isGlobalPriorityActiveLocked() ? mGlobalPrioritySession
                     : mCurrentFullUserRecord.mPriorityStack.getDefaultVolumeSession();
 
-            boolean preferSuggestedStream = false;
-            if (isValidLocalStreamType(suggestedStream)
-                    && AudioSystem.isStreamActive(suggestedStream, 0)) {
-                preferSuggestedStream = true;
-            }
+            boolean preferSuggestedStream =
+                    isValidLocalStreamType(suggestedStream)
+                            && AudioSystem.isStreamActive(suggestedStream, 0);
+
             if (session == null || preferSuggestedStream) {
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Adjusting suggestedStream=" + suggestedStream + " by " + direction
