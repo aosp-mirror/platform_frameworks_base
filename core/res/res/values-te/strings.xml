@@ -618,8 +618,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"బయోమెట్రిక్స్‌ను లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఇది మీరేనని వెరిఫై చేసుకోండి"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"కొనసాగించడానికి, మీ బయోమెట్రిక్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"కొనసాగించడానికి మీ ముఖాన్ని ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"కొనసాగించడానికి మీ బయోమెట్రిక్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"బయోమెట్రిక్ హార్డ్‌వేర్‌ అందుబాటులో లేదు"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
@@ -645,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"వేలిముద్ర గుర్తించబడలేదు"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"వేలిముద్ర గుర్తించబడలేదు"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ముఖం గుర్తించలేము. బదులుగా వేలిముద్ర ఉపయోగించండి."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ముఖం ప్రమాణీకరించబడింది"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ముఖం ప్రమాణీకరించబడింది, దయచేసి ధృవీకరించును నొక్కండి"</string>
