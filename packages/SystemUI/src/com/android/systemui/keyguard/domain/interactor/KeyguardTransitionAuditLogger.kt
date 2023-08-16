@@ -95,5 +95,11 @@ constructor(
                 logger.log(TAG, VERBOSE, "Doze transition", it)
             }
         }
+
+        scope.launch {
+            keyguardInteractor.onCameraLaunchDetected.collect {
+                logger.log(TAG, VERBOSE, "onCameraLaunchDetected", it)
+            }
+        }
     }
 }
