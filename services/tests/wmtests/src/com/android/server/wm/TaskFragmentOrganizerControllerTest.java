@@ -143,6 +143,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        removeGlobalMinSizeRestriction();
         mWindowOrganizerController = mAtm.mWindowOrganizerController;
         mTransitionController = mWindowOrganizerController.mTransitionController;
         mController = mWindowOrganizerController.mTaskFragmentOrganizerController;
