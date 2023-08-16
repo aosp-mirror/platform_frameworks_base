@@ -971,7 +971,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         // A TaskFragment isn't translucent if it has at least one visible activity that occludes
         // this TaskFragment.
         return mTaskSupervisor.mOpaqueActivityHelper.getVisibleOpaqueActivity(this,
-                starting) == null;
+                starting, true /* ignoringKeyguard */) == null;
     }
 
     /**
@@ -984,7 +984,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return true;
         }
         // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
-        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this) == null;
+        return mTaskSupervisor.mOpaqueActivityHelper.getOpaqueActivity(this,
+                true /* ignoringKeyguard */) == null;
+    }
+
+    /**
+     * Like {@link  #isTranslucent(ActivityRecord)} but evaluating the actual visibility of the
+     * windows rather than their visibility ignoring keyguard.
+     */
+    boolean isTranslucentAndVisible() {
+        if (!isAttached() || isForceHidden() || isForceTranslucent()) {
+            return true;
+        }
+        return mTaskSupervisor.mOpaqueActivityHelper.getVisibleOpaqueActivity(this, null,
+                false /* ignoringKeyguard */) == null;
     }
 
     ActivityRecord getTopNonFinishingActivity() {

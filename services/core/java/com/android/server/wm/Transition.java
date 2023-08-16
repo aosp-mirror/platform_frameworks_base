@@ -418,8 +418,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (transientRoot == null) continue;
             final WindowContainer<?> rootParent = transientRoot.getParent();
             if (rootParent == null || rootParent.getTopChild() == transientRoot) continue;
-            final ActivityRecord topOpaque = mController.mAtm.mTaskSupervisor
-                    .mOpaqueActivityHelper.getOpaqueActivity(rootParent);
+            final ActivityRecord topOpaque = mController.mAtm.mTaskSupervisor.mOpaqueActivityHelper
+                    .getOpaqueActivity(rootParent, true /* ignoringKeyguard */);
             if (transientRoot.compareTo(topOpaque.getRootTask()) < 0) {
                 occludedCount++;
             }
