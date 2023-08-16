@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> मर्यादा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावणी"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"कामाशी संबंधित अ‍ॅप्स"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"थांबवले आहे"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"रात्रीचा प्रकाश"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"संध्याकाळी सुरू असते"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सूर्योदयापर्यंत"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीनचा काही भाग मॅग्निफाय करा"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"मॅग्निफिकेशन सेटिंग्ज उघडा"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"मॅग्निफिकेशन सेटिंग्ज बंद करा"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"आकार बदलण्यासाठी कोपरा ड्रॅग करा"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरपे स्क्रोल करण्याची अनुमती द्या"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"आकार बदला"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> उघडा"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ॲप शॉर्टकट म्हणून जोडण्यासाठी ॲप इंस्टॉल केले असल्याची खात्री करा"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ॲप शॉर्टकट म्हणून जोडण्यासाठी किमान एक कार्ड जोडले असल्याची खात्री करा"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR कोड स्कॅनर शॉर्टकट म्हणून जोडण्यासाठी कॅमेरा ॲप इंस्टॉल केले असल्याची खात्री करा"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home अ‍ॅप शॉर्टकट म्हणून जोडण्यासाठी ॲप इंस्टॉल केले असल्याची खात्री करा"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• किमान एक डिव्हाइस उपलब्ध करणे"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"टिपा घेण्यासंबंधित शॉर्टकट वापरण्याकरिता टिपांसाठीचे डीफॉल्ट अ‍ॅप निवडा"</string>

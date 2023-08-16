@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"ដែន​កំណត់ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ការ​ព្រមាន"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"កម្មវិធីការងារ"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"បានផ្អាក"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ពន្លឺពេលយប់"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"បើក​នៅពេល​ថ្ងៃលិច"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"រហូត​ដល់​ពេល​ថ្ងៃរះ"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"បើកការកំណត់​ការពង្រីក"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"បិទការកំណត់ការពង្រីក"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"អូសជ្រុងដើម្បីប្ដូរទំហំ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"អនុញ្ញាត​ការរំកិលបញ្ឆិត"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ប្ដូរ​ទំហំ"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"បើក <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ដើម្បីបញ្ចូល​កម្មវិធី Wallet ជាផ្លូវកាត់ សូមប្រាកដថា​បានបញ្ចូលកាត​យ៉ាងហោចណាស់មួយ"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"ដើម្បីបញ្ចូលកម្មវិធី​ស្កេនកូដ QR ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីកាមេរ៉ាត្រូវបានដំឡើង"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ដើម្បីបញ្ចូល​កម្មវិធី Home ជាផ្លូវកាត់ សូមប្រាកដថា​កម្មវិធីត្រូវបានដំឡើង"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ជ្រើសរើសកម្មវិធីកំណត់ចំណាំលំនាំដើម ដើម្បីប្រើផ្លូវកាត់សម្រាប់ការកត់ចំណាំ"</string>

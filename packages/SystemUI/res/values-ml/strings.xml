@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> പരിധി"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ഔദ്യോഗിക ആപ്പുകൾ"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"തൽക്കാലം നിർത്തി"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"നൈറ്റ് ലൈറ്റ്"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"സൂര്യാസ്‌തമയത്തിന്"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"സൂര്യോദയം വരെ"</string>
@@ -864,6 +865,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"സ്‌ക്രീനിന്റെ ഭാഗം മാഗ്നിഫൈ ചെയ്യുക"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം തുറക്കുക"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"മാഗ്നിഫിക്കേഷൻ ക്രമീകരണം അടയ്‌ക്കുക"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"എഡിറ്റ് മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"വലുപ്പം മാറ്റാൻ മൂല വലിച്ചിടുക"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ഡയഗണൽ സ്‌ക്രോളിംഗ് അനുവദിക്കുക"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"വലുപ്പം മാറ്റുക"</string>
@@ -1133,7 +1135,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> തുറക്കുക"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"കുറുക്കുവഴിയായി Wallet ആപ്പ് ചേർക്കാൻ, ഒരു കാർഡെങ്കിലും ചേർത്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"കുറുക്കുവഴിയായി QR കോഡ് സ്‌കാനർ ചേർക്കാൻ, ക്യാമറാ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"കുറുക്കുവഴിയായി Home ആപ്പ് ചേർക്കാൻ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ഒരു ഉപകരണമെങ്കിലും ലഭ്യമാണ്"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"കുറിപ്പ് രേഖപ്പെടുത്തൽ കുറുക്കുവഴി ഉപയോഗിക്കുന്നതിന് ഒരു ഡിഫോൾട്ട് കുറിപ്പ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
