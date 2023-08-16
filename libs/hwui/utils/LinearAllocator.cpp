@@ -31,15 +31,11 @@
 #include <utils/Log.h>
 #include <utils/Macros.h>
 
-// The ideal size of a page allocation (these need to be multiples of 8)
-#define INITIAL_PAGE_SIZE ((size_t)512)  // 512b
-#define MAX_PAGE_SIZE ((size_t)131072)   // 128kb
-
 // The maximum amount of wasted space we can have per page
 // Allocations exceeding this will have their own dedicated page
 // If this is too low, we will malloc too much
 // Too high, and we may waste too much space
-// Must be smaller than INITIAL_PAGE_SIZE
+// Must be smaller than kInitialPageSize
 #define MAX_WASTE_RATIO (0.5f)
 
 #if LOG_NDEBUG
@@ -75,6 +71,10 @@ static void _addAllocation(int count) {
 namespace android {
 namespace uirenderer {
 
+// The ideal size of a page allocation (these need to be multiples of 8)
+static constexpr size_t kInitialPageSize = 512;  // 512b
+static constexpr size_t kMaxPageSize = 131072;   // 128kb
+
 class LinearAllocator::Page {
 public:
     Page* next() { return mNextPage; }
@@ -94,8 +94,8 @@ private:
 };
 
 LinearAllocator::LinearAllocator()
-        : mPageSize(INITIAL_PAGE_SIZE)
-        , mMaxAllocSize(INITIAL_PAGE_SIZE * MAX_WASTE_RATIO)
+        : mPageSize(kInitialPageSize)
+        , mMaxAllocSize(kInitialPageSize * MAX_WASTE_RATIO)
         , mNext(0)
         , mCurrentPage(0)
         , mPages(0)
@@ -135,8 +135,8 @@ bool LinearAllocator::fitsInCurrentPage(size_t size) {
 void LinearAllocator::ensureNext(size_t size) {
     if (fitsInCurrentPage(size)) return;
 
-    if (mCurrentPage && mPageSize < MAX_PAGE_SIZE) {
-        mPageSize = min(MAX_PAGE_SIZE, mPageSize * 2);
+    if (mCurrentPage && mPageSize < kMaxPageSize) {
+        mPageSize = min(kMaxPageSize, mPageSize * 2);
         mMaxAllocSize = mPageSize * MAX_WASTE_RATIO;
         mPageSize = ALIGN(mPageSize);
     }
