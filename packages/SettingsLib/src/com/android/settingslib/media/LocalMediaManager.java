@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
@@ -520,9 +521,13 @@ public class LocalMediaManager implements BluetoothCallback {
                     if (type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE
                             || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
                             || type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE) {
-                        MediaDevice mutingExpectedDevice = getMutingExpectedDevice();
-                        if (mutingExpectedDevice != null) {
-                            mMediaDevices.add(mutingExpectedDevice);
+                        if (isTv()) {
+                            mMediaDevices.addAll(buildDisconnectedBluetoothDevice());
+                        } else {
+                            MediaDevice mutingExpectedDevice = getMutingExpectedDevice();
+                            if (mutingExpectedDevice != null) {
+                                mMediaDevices.add(mutingExpectedDevice);
+                            }
                         }
                         break;
                     }
@@ -540,6 +545,12 @@ public class LocalMediaManager implements BluetoothCallback {
                         MediaDeviceState.STATE_CONNECTED);
                 mOnTransferBluetoothDevice = null;
             }
+        }
+
+        private boolean isTv() {
+            PackageManager pm = mContext.getPackageManager();
+            return pm.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+                    || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
         }
 
         private MediaDevice getMutingExpectedDevice() {
