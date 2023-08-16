@@ -891,7 +891,7 @@ public class CompanionDeviceManagerService extends SystemService {
             }
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // timestamp.
-            association = AssociationInfo.builder(association)
+            association = (new AssociationInfo.Builder(association))
                     .setLastTimeConnected(System.currentTimeMillis())
                     .build();
             mAssociationStore.updateAssociation(association);
@@ -945,7 +945,7 @@ public class CompanionDeviceManagerService extends SystemService {
 
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // flag.
-            association = AssociationInfo.builder(association)
+            association = (new AssociationInfo.Builder(association))
                     .setNotifyOnDeviceNearby(active)
                     .build();
             // Do not need to call {@link BleCompanionDeviceScanner#restartScan()} since it will
@@ -1016,7 +1016,7 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void setAssociationTag(int associationId, String tag) {
             AssociationInfo association = getAssociationWithCallerChecks(associationId);
-            association = AssociationInfo.builder(association).setTag(tag).build();
+            association = (new AssociationInfo.Builder(association)).setTag(tag).build();
             mAssociationStore.updateAssociation(association);
         }
 
@@ -1255,7 +1255,7 @@ public class CompanionDeviceManagerService extends SystemService {
      */
     private void addToPendingRoleHolderRemoval(@NonNull AssociationInfo association) {
         // First: set revoked flag.
-        association = AssociationInfo.builder(association)
+        association = (new AssociationInfo.Builder(association))
                 .setRevoked(true)
                 .build();
 
