@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkod krävs efter låsning"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Lösenord krävs efter låsning"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mönster krävs efter låsning"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Uppdateringen installeras när enheten inte används"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Ökad säkerhet krävs. Pinkoden har inte använts på länge."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Ökad säkerhet krävs. Lösenordet har inte använts på länge."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Ökad säkerhet krävs. Mönstret har inte använts på länge."</string>
