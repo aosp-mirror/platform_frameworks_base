@@ -33,7 +33,7 @@
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"借助通行密钥，您不必依赖密码就能登录。您只需使用指纹、人脸识别功能、PIN 码或滑动图案便可验证您的身份并创建通行密钥。"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"公钥加密"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"根据 FIDO 联盟（成员包括 Google、Apple、Microsoft 等）和 W3C 的标准，通行密钥使用加密密钥对。不同于“用户名+密码字符串”的传统登录凭据，采用通行密钥时，系统会为应用或网站创建一个私钥-公钥对。私钥会安全地存储在您的设备上或密码管理工具中，用于证实您的身份。公钥会被共享给应用或网站服务器。您只要使用相应密钥，就能瞬间注册并登录。"</string>
-    <string name="improved_account_security_title" msgid="1069841917893513424">"提升了帐号安全性"</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"提升了账号安全性"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"每个密钥都是专为特定应用或网站创建的，且仅与各自对应的网站或应用关联，因此您绝不会错误地登录任何欺诈性应用或网站。另外，由于服务器只保留公钥，黑客入侵的难度会大大增加。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"无缝转换"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"在我们向无密码未来迈进的过程中，密码仍会与通行密钥并行使用。"</string>
