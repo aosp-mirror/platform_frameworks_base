@@ -19,18 +19,25 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.android.compose.nestedscroll.PriorityPostNestedScrollConnection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -70,23 +77,38 @@ internal fun Modifier.swipeToScene(
     // the same as SwipeableV2Defaults.PositionalThreshold.
     val positionalThreshold = with(LocalDensity.current) { 56.dp.toPx() }
 
-    return draggable(
-        orientation = orientation,
-        enabled = enabled,
-        startDragImmediately = startDragImmediately,
-        onDragStarted = { onDragStarted(layoutImpl, transition, orientation) },
-        state =
-            rememberDraggableState { delta -> onDrag(layoutImpl, transition, orientation, delta) },
-        onDragStopped = { velocity ->
-            onDragStopped(
-                layoutImpl,
-                transition,
-                velocity,
-                velocityThreshold,
-                positionalThreshold,
-            )
-        },
-    )
+    val draggableState = rememberDraggableState { delta ->
+        onDrag(layoutImpl, transition, orientation, delta)
+    }
+
+    return nestedScroll(
+            connection =
+                rememberSwipeToSceneNestedScrollConnection(
+                    orientation = orientation,
+                    coroutineScope = rememberCoroutineScope(),
+                    draggableState = draggableState,
+                    transition = transition,
+                    layoutImpl = layoutImpl,
+                    velocityThreshold = velocityThreshold,
+                    positionalThreshold = positionalThreshold
+                ),
+        )
+        .draggable(
+            state = draggableState,
+            orientation = orientation,
+            enabled = enabled,
+            startDragImmediately = startDragImmediately,
+            onDragStarted = { onDragStarted(layoutImpl, transition, orientation) },
+            onDragStopped = { velocity ->
+                onDragStopped(
+                    layoutImpl = layoutImpl,
+                    transition = transition,
+                    velocity = velocity,
+                    velocityThreshold = velocityThreshold,
+                    positionalThreshold = positionalThreshold,
+                )
+            },
+        )
 }
 
 private class SwipeTransition(initialScene: Scene) : TransitionState.Transition {
@@ -417,3 +439,110 @@ private fun shouldCommitSwipe(
  * which the animation can stop.
  */
 private const val OffsetVisibilityThreshold = 0.5f
+
+@Composable
+private fun rememberSwipeToSceneNestedScrollConnection(
+    orientation: Orientation,
+    coroutineScope: CoroutineScope,
+    draggableState: DraggableState,
+    transition: SwipeTransition,
+    layoutImpl: SceneTransitionLayoutImpl,
+    velocityThreshold: Float,
+    positionalThreshold: Float,
+): PriorityPostNestedScrollConnection {
+    val scrollConnection =
+        remember(
+            orientation,
+            coroutineScope,
+            draggableState,
+            transition,
+            layoutImpl,
+            velocityThreshold,
+            positionalThreshold,
+        ) {
+            fun Offset.toAmount() =
+                when (orientation) {
+                    Orientation.Horizontal -> x
+                    Orientation.Vertical -> y
+                }
+
+            fun Velocity.toAmount() =
+                when (orientation) {
+                    Orientation.Horizontal -> x
+                    Orientation.Vertical -> y
+                }
+
+            fun Float.toOffset() =
+                when (orientation) {
+                    Orientation.Horizontal -> Offset(x = this, y = 0f)
+                    Orientation.Vertical -> Offset(x = 0f, y = this)
+                }
+
+            // The next potential scene is calculated during the canStart
+            var nextScene: SceneKey? = null
+
+            // This is the scene on which we will have priority during the scroll gesture.
+            var priorityScene: SceneKey? = null
+
+            PriorityPostNestedScrollConnection(
+                canStart = { offsetAvailable ->
+                    val amount = offsetAvailable.toAmount()
+                    if (amount == 0f) return@PriorityPostNestedScrollConnection false
+
+                    val fromScene = layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
+                    nextScene =
+                        when {
+                            amount < 0f -> fromScene.upOrLeft(orientation)
+                            amount > 0f -> fromScene.downOrRight(orientation)
+                            else -> null
+                        }
+
+                    nextScene != null
+                },
+                canContinueScroll = { priorityScene == transition._toScene.key },
+                onStart = {
+                    priorityScene = nextScene
+
+                    onDragStarted(layoutImpl, transition, orientation)
+                },
+                onScroll = { offsetAvailable ->
+                    val amount = offsetAvailable.toAmount()
+
+                    // Appends a new coroutine to attempt to drag by [amount] px. In this case we
+                    // are assuming that the [coroutineScope] is tied to the main thread and that
+                    // calls to [launch] are therefore queued.
+                    coroutineScope.launch { draggableState.drag { dragBy(amount) } }
+
+                    amount.toOffset()
+                },
+                onStop = { velocityAvailable ->
+                    priorityScene = null
+
+                    coroutineScope.onDragStopped(
+                        layoutImpl = layoutImpl,
+                        transition = transition,
+                        velocity = velocityAvailable.toAmount(),
+                        velocityThreshold = velocityThreshold,
+                        positionalThreshold = positionalThreshold,
+                    )
+
+                    // The onDragStopped animation consumes any remaining velocity.
+                    velocityAvailable
+                },
+                onPostFling = { velocityAvailable ->
+                    // We will handle the overscroll here
+                    Velocity.Zero
+                },
+            )
+        }
+    DisposableEffect(scrollConnection) {
+        onDispose {
+            coroutineScope.launch {
+                // This should ensure that the draggableState is in a consistent state and that it
+                // does not cause any unexpected behavior.
+                scrollConnection.reset()
+            }
+        }
+    }
+    return scrollConnection
+}
