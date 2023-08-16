@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"需要輸入 PIN 才能解除鎖定"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"需要輸入密碼解才能解除鎖定"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"需要畫出解鎖圖案才能解除鎖定"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"系統會在裝置未使用時安裝更新"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"需要加強安全設定：已有一段時間沒有使用 PIN。"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"需要加強安全設定：已有一段時間沒有使用密碼。"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"需要加強安全設定：已有一段時間沒有使用解鎖圖案。"</string>

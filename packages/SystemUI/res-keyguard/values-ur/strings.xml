@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"‏لاک ڈاؤن کے بعد PIN کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"لاک ڈاؤن کے بعد پاس ورڈ کی ضرورت ہوتی ہے"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"لاک ڈاؤن کے بعد پیٹرن کی ضرورت ہوتی ہے"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"آلہ استعمال میں نہ ہونے پر اپ ڈیٹ انسٹال ہو جائے گی"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"‏مزید سیکیورٹی چاہیے۔ PIN کچھ عرصے اسے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"مزید سیکیورٹی چاہیے۔ پاس ورڈ کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"مزید سیکیورٹی چاہیے۔ پیٹرن کچھ عرصے سے استعمال نہیں ہوا ہے۔"</string>

@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Nach einer Sperre muss die PIN eingegeben werden"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Nach einer Sperre muss das Passwort eingegeben werden"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Nach einer Sperre muss das Muster gezeichnet werden"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update wird installiert, wenn das Gerät nicht verwendet wird"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Zusätzliche Sicherheitsmaßnahme erforderlich. Die PIN wurde länger nicht genutzt."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Zusätzliche Sicherheitsmaßnahme erforderlich. Passwort wurde länger nicht genutzt."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Zusätzliche Sicherheitsmaßnahme erforderlich. Muster wurde länger nicht genutzt."</string>
