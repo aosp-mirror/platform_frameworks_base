@@ -22,6 +22,8 @@ package com.android.server.biometrics;
  */
 public class AuthenticationStats {
 
+    private static final float FRR_NOT_ENOUGH_ATTEMPTS = -1.0f;
+
     private final int mUserId;
     private int mTotalAttempts;
     private int mRejectedAttempts;
@@ -70,7 +72,7 @@ public class AuthenticationStats {
         if (mTotalAttempts > 0) {
             return mRejectedAttempts / (float) mTotalAttempts;
         } else {
-            return -1.0f;
+            return FRR_NOT_ENOUGH_ATTEMPTS;
         }
     }
 
@@ -86,5 +88,33 @@ public class AuthenticationStats {
     public void resetData() {
         mTotalAttempts = 0;
         mRejectedAttempts = 0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof AuthenticationStats)) {
+            return false;
+        }
+
+        AuthenticationStats target = (AuthenticationStats) obj;
+        return this.getUserId() == target.getUserId()
+                && this.getTotalAttempts()
+                == target.getTotalAttempts()
+                && this.getRejectedAttempts()
+                == target.getRejectedAttempts()
+                && this.getEnrollmentNotifications()
+                == target.getEnrollmentNotifications()
+                && this.getModality() == target.getModality();
+    }
+
+    @Override
+    public int hashCode() {
+        return String.format("userId: %d, totalAttempts: %d, rejectedAttempts: %d, "
+                + "enrollmentNotifications: %d, modality: %d", mUserId, mTotalAttempts,
+                mRejectedAttempts, mEnrollmentNotifications, mModality).hashCode();
     }
 }

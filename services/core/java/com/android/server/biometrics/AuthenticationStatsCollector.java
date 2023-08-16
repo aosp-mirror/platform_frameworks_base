@@ -37,23 +37,42 @@ public class AuthenticationStatsCollector {
 
     // The minimum number of attempts that will calculate the FRR and trigger the notification.
     private static final int MINIMUM_ATTEMPTS = 500;
+    // Upload the data every 50 attempts (average number of daily authentications).
+    private static final int AUTHENTICATION_UPLOAD_INTERVAL = 50;
     // The maximum number of eligible biometric enrollment notification can be sent.
     private static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
+
+    @NonNull private final Context mContext;
 
     private final float mThreshold;
     private final int mModality;
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
+    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+
     public AuthenticationStatsCollector(@NonNull Context context, int modality) {
+        mContext = context;
         mThreshold = context.getResources()
                 .getFraction(R.fraction.config_biometricNotificationFrrThreshold, 1, 1);
         mUserAuthenticationStatsMap = new HashMap<>();
         mModality = modality;
     }
 
+    private void initializeUserAuthenticationStatsMap() {
+        mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
+        for (AuthenticationStats stats : mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
+            mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
+        }
+    }
+
     /** Update total authentication and rejected attempts. */
     public void authenticate(int userId, boolean authenticated) {
+        // Initialize mUserAuthenticationStatsMap when authenticate to ensure SharedPreferences
+        // are ready for application use and avoid ramdump issue.
+        if (mUserAuthenticationStatsMap.isEmpty()) {
+            initializeUserAuthenticationStatsMap();
+        }
         // Check if this is a new user.
         if (!mUserAuthenticationStatsMap.containsKey(userId)) {
             mUserAuthenticationStatsMap.put(userId, new AuthenticationStats(userId, mModality));
@@ -82,8 +101,12 @@ public class AuthenticationStatsCollector {
 
     private void persistDataIfNeeded(int userId) {
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
-        if (authenticationStats.getTotalAttempts() % 50 == 0) {
-            // TODO(wenhuiy): Persist data.
+        if (authenticationStats.getTotalAttempts() % AUTHENTICATION_UPLOAD_INTERVAL == 0) {
+            mAuthenticationStatsPersister.persistFrrStats(authenticationStats.getUserId(),
+                    authenticationStats.getTotalAttempts(),
+                    authenticationStats.getRejectedAttempts(),
+                    authenticationStats.getEnrollmentNotifications(),
+                    authenticationStats.getModality());
         }
     }
 
