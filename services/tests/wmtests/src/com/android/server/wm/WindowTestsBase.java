@@ -963,6 +963,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      * @see DisplayRotation#updateRotationUnchecked
      */
     void unblockDisplayRotation(DisplayContent dc) {
+        dc.mOpeningApps.clear();
+        mWm.mAppsFreezingScreen = 0;
         mWm.stopFreezingDisplayLocked();
         // The rotation animation won't actually play, it needs to be cleared manually.
         dc.setRotationAnimation(null);
