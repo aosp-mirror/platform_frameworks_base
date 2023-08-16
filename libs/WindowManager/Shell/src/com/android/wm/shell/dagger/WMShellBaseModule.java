@@ -20,6 +20,7 @@ import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HAN
 
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
@@ -56,6 +57,7 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
@@ -317,6 +319,17 @@ public abstract class WMShellBaseModule {
                             backgroundHandler, context, backAnimationBackground));
         }
         return Optional.empty();
+    }
+
+    //
+    // PiP (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
+            PackageManager packageManager) {
+        return new PipUiEventLogger(uiEventLogger, packageManager);
     }
 
 
