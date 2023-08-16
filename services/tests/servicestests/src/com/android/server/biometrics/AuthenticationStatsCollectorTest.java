@@ -16,11 +16,18 @@
 
 package com.android.server.biometrics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.emptySet;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 
 import com.android.internal.R;
@@ -29,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.File;
 
 public class AuthenticationStatsCollectorTest {
 
@@ -40,6 +49,8 @@ public class AuthenticationStatsCollectorTest {
     private Context mContext;
     @Mock
     private Resources mResources;
+    @Mock
+    private SharedPreferences mSharedPreferences;
 
     @Before
     public void setUp() {
@@ -48,6 +59,9 @@ public class AuthenticationStatsCollectorTest {
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getFraction(R.fraction.config_biometricNotificationFrrThreshold, 1, 1))
                 .thenReturn(FRR_THRESHOLD);
+        when(mContext.getSharedPreferences(any(File.class), anyInt()))
+                .thenReturn(mSharedPreferences);
+        when(mSharedPreferences.getStringSet(anyString(), anySet())).thenReturn(emptySet());
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
                 0 /* modality */);
@@ -57,30 +71,31 @@ public class AuthenticationStatsCollectorTest {
     @Test
     public void authenticate_authenticationSucceeded_mapShouldBeUpdated() {
         // Assert that the user doesn't exist in the map initially.
-        assertNull(mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1));
+        assertThat(mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1)).isNull();
 
         mAuthenticationStatsCollector.authenticate(USER_ID_1, true /* authenticated*/);
 
         AuthenticationStats authenticationStats =
                 mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1);
-        assertEquals(USER_ID_1, authenticationStats.getUserId());
-        assertEquals(1, authenticationStats.getTotalAttempts());
-        assertEquals(0, authenticationStats.getRejectedAttempts());
-        assertEquals(0, authenticationStats.getEnrollmentNotifications());
+        assertThat(authenticationStats.getUserId()).isEqualTo(USER_ID_1);
+        assertThat(authenticationStats.getTotalAttempts()).isEqualTo(1);
+        assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
     }
 
     @Test
     public void authenticate_authenticationFailed_mapShouldBeUpdated() {
         // Assert that the user doesn't exist in the map initially.
-        assertNull(mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1));
+        assertThat(mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1)).isNull();
 
         mAuthenticationStatsCollector.authenticate(USER_ID_1, false /* authenticated*/);
 
         AuthenticationStats authenticationStats =
                 mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1);
-        assertEquals(USER_ID_1, authenticationStats.getUserId());
-        assertEquals(1, authenticationStats.getTotalAttempts());
-        assertEquals(1, authenticationStats.getRejectedAttempts());
-        assertEquals(0, authenticationStats.getEnrollmentNotifications());
+
+        assertThat(authenticationStats.getUserId()).isEqualTo(USER_ID_1);
+        assertThat(authenticationStats.getTotalAttempts()).isEqualTo(1);
+        assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(1);
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
     }
 }
