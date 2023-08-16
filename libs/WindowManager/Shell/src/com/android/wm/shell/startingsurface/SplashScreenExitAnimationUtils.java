@@ -71,11 +71,10 @@ public class SplashScreenExitAnimationUtils {
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
             int appRevealDelay, int appRevealDuration, Animator.AnimatorListener animatorListener,
             float roundedCornerRadius) {
-        ValueAnimator animator =
-                createAnimator(splashScreenView, firstWindowSurface, mainWindowShiftLength,
-                        transactionPool, firstWindowFrame, animationDuration, iconFadeOutDuration,
-                        iconStartAlpha, brandingStartAlpha, appRevealDelay, appRevealDuration,
-                        animatorListener, roundedCornerRadius);
+        ValueAnimator animator = createRadialVanishSlideUpAnimator(splashScreenView,
+                firstWindowSurface, mainWindowShiftLength, transactionPool, firstWindowFrame,
+                animationDuration, iconFadeOutDuration, iconStartAlpha, brandingStartAlpha,
+                appRevealDelay, appRevealDuration, animatorListener, roundedCornerRadius);
         animator.start();
     }
 
@@ -99,7 +98,7 @@ public class SplashScreenExitAnimationUtils {
      * Creates the animator to fade out the icon, reveal the app, and shift up main window.
      * @hide
      */
-    private static ValueAnimator createAnimator(ViewGroup splashScreenView,
+    private static ValueAnimator createRadialVanishSlideUpAnimator(ViewGroup splashScreenView,
             SurfaceControl firstWindowSurface, int mMainWindowShiftLength,
             TransactionPool transactionPool, Rect firstWindowFrame, int animationDuration,
             int iconFadeOutDuration, float iconStartAlpha, float brandingStartAlpha,
@@ -208,6 +207,20 @@ public class SplashScreenExitAnimationUtils {
         Configuration configuration = context.getResources().getConfiguration();
         int nightMode = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    static void startFadeOutAnimation(ViewGroup splashScreenView,
+            int animationDuration, Animator.AnimatorListener animatorListener) {
+        final ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
+        animator.setDuration(animationDuration);
+        animator.setInterpolator(Interpolators.LINEAR);
+        animator.addUpdateListener(animation -> {
+            splashScreenView.setAlpha((float) animation.getAnimatedValue());
+        });
+        if (animatorListener != null) {
+            animator.addListener(animatorListener);
+        }
+        animator.start();
     }
 
     /**
