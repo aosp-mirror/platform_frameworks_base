@@ -410,9 +410,11 @@ public class ConversationLayout extends FrameLayout
         // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
         // if they exist
         final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, false /* isHistoric */);
+                createMessages(newMessages, /* isHistoric= */false,
+                        /* usePrecomputedText= */false);
         final List<MessagingMessage> newHistoricMessagingMessages =
-                createMessages(newHistoricMessages, true /* isHistoric */);
+                createMessages(newHistoricMessages, /* isHistoric= */true,
+                        /* usePrecomputedText= */false);
         // bind it, baby
         bindViews(user, showSpinner, unreadCount,
                 newMessagingMessages,
@@ -981,15 +983,17 @@ public class ConversationLayout extends FrameLayout
      * @param newMessages the messages to parse.
      */
     private List<MessagingMessage> createMessages(
-            List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
+            List<Notification.MessagingStyle.Message> newMessages, boolean isHistoric,
+            boolean usePrecomputedText) {
         List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m, mImageResolver);
+                message = MessagingMessage.createMessage(this, m,
+                        mImageResolver, usePrecomputedText);
             }
-            message.setIsHistoric(historic);
+            message.setIsHistoric(isHistoric);
             result.add(message);
         }
         return result;
