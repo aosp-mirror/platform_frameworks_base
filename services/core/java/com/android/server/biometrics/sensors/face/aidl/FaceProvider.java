@@ -56,6 +56,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -177,7 +178,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mDaemon = daemon;
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FACE);
+                BiometricsProtoEnums.MODALITY_FACE, new BiometricNotificationImpl());
 
         for (SensorProps prop : props) {
             final int sensorId = prop.commonProps.sensorId;
