@@ -20,9 +20,12 @@ import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.UserHandle;
 
@@ -45,6 +48,25 @@ public class PackageMonitorVisibilityTest {
             TEST_DATA_PATH + "TestVisibilityApp.apk";
     private static final String TEAT_APK_PACKAGE_NAME = "com.example.android.testvisibilityapp";
     private static final int WAIT_CALLBACK_CALLED_IN_SECONDS = 1;
+
+    @Test
+    public void testPackageMonitorCallbackMultipleRegisterThrowsException() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        final IRemoteCallback callback = new IRemoteCallback.Stub() {
+            @Override
+            public void sendResult(android.os.Bundle bundle) {
+                // do-nothing
+            }
+        };
+        try {
+            context.getPackageManager().registerPackageMonitorCallback(callback, 0);
+            assertThrows(IllegalStateException.class,
+                    () -> context.getPackageManager().registerPackageMonitorCallback(callback, 0));
+        } finally {
+            context.getPackageManager().unregisterPackageMonitorCallback(callback);
+        }
+    }
+
     @Test
     public void testPackageMonitorPackageVisible() throws Exception {
         TestVisibilityPackageMonitor testPackageMonitor = new TestVisibilityPackageMonitor();

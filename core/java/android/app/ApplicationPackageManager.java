@@ -179,6 +179,10 @@ public class ApplicationPackageManager extends PackageManager {
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
 
+    @NonNull
+    @GuardedBy("mPackageMonitorCallbacks")
+    private final ArraySet<IRemoteCallback> mPackageMonitorCallbacks = new ArraySet<>();
+
     UserManager getUserManager() {
         if (mUserManager == null) {
             mUserManager = UserManager.get(mContext);
@@ -3926,6 +3930,14 @@ public class ApplicationPackageManager extends PackageManager {
         Objects.requireNonNull(callback);
         try {
             mPM.registerPackageMonitorCallback(callback, userId);
+            synchronized (mPackageMonitorCallbacks) {
+                if (mPackageMonitorCallbacks.contains(callback)) {
+                    throw new IllegalStateException(
+                            "registerPackageMonitorCallback: callback already registered: "
+                                    + callback);
+                }
+                mPackageMonitorCallbacks.add(callback);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3936,6 +3948,9 @@ public class ApplicationPackageManager extends PackageManager {
         Objects.requireNonNull(callback);
         try {
             mPM.unregisterPackageMonitorCallback(callback);
+            synchronized (mPackageMonitorCallbacks) {
+                mPackageMonitorCallbacks.remove(callback);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
