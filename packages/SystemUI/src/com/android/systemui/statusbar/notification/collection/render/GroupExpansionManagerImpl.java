@@ -67,18 +67,29 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
      * Cleanup entries from mExpandedGroups that no longer exist in the pipeline.
      */
     private final OnBeforeRenderListListener mNotifTracker = (entries) -> {
+        if (mExpandedGroups.isEmpty()) {
+            return; // nothing to do
+        }
+
         final Set<NotificationEntry> renderingSummaries = new HashSet<>();
         for (ListEntry entry : entries) {
             if (entry instanceof GroupEntry) {
                 renderingSummaries.add(entry.getRepresentativeEntry());
             }
         }
-        mExpandedGroups.removeIf(expandedGroup -> !renderingSummaries.contains(expandedGroup));
+
+        // Create a copy of mExpandedGroups so we can modify it in a thread-safe way.
+        final var currentExpandedGroups = new HashSet<>(mExpandedGroups);
+        for (NotificationEntry entry : currentExpandedGroups) {
+            setExpanded(entry, renderingSummaries.contains(entry));
+        }
     };
 
     public void attach(NotifPipeline pipeline) {
-        mDumpManager.registerDumpable(this);
-        pipeline.addOnBeforeRenderListListener(mNotifTracker);
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
+            mDumpManager.registerDumpable(this);
+            pipeline.addOnBeforeRenderListListener(mNotifTracker);
+        }
     }
 
     @Override
@@ -94,11 +105,24 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Dumpabl
     @Override
     public void setGroupExpanded(NotificationEntry entry, boolean expanded) {
         final NotificationEntry groupSummary = mGroupMembershipManager.getGroupSummary(entry);
+        setExpanded(groupSummary, expanded);
+    }
+
+    /**
+     * Add or remove {@code entry} to/from {@code mExpandedGroups} and notify listeners if
+     * something changed. This assumes that {@code entry} is a group summary.
+     * <p>
+     * TODO(b/293434635): Currently, in spite of its docs,
+     * {@code mGroupMembershipManager.getGroupSummary(entry)} returns null if {@code entry} is
+     * already a summary. Instead of needing this helper method to bypass that, we probably want to
+     * move this code back to {@code setGroupExpanded} and use that everywhere.
+     */
+    private void setExpanded(NotificationEntry entry, boolean expanded) {
         boolean changed;
         if (expanded) {
-            changed = mExpandedGroups.add(groupSummary);
+            changed = mExpandedGroups.add(entry);
         } else {
-            changed = mExpandedGroups.remove(groupSummary);
+            changed = mExpandedGroups.remove(entry);
         }
 
         // Only notify listeners if something changed.
