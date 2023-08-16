@@ -11114,6 +11114,19 @@ public final class Settings {
                 "navigation_mode";
 
         /**
+         * The value is from another(source) device's {@link #NAVIGATION_MODE} during restore.
+         * It's supposed to be written only by
+         * {@link com.android.providers.settings.SettingsHelper}.
+         * This setting should not be added into backup array.
+         * <p>Value: -1 = Can't get value from restore(default),
+         *  0 = 3 button,
+         *  1 = 2 button,
+         *  2 = fully gestural.
+         * @hide
+         */
+        public static final String NAVIGATION_MODE_RESTORE = "navigation_mode_restore";
+
+        /**
          * Scale factor for the back gesture inset size on the left side of the screen.
          * @hide
          */
