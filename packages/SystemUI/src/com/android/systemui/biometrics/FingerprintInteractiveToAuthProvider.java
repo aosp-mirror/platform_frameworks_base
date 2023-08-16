@@ -16,6 +16,8 @@
 
 package com.android.systemui.biometrics;
 
+import android.hardware.biometrics.common.AuthenticateReason;
+
 /** Provides the status of the interactive to auth feature. */
 public interface FingerprintInteractiveToAuthProvider {
     /**
@@ -24,4 +26,11 @@ public interface FingerprintInteractiveToAuthProvider {
      * @return true if the InteractiveToAuthFeature is enabled, false if disabled.
      */
     boolean isEnabled(int userId);
+
+    /**
+     *
+     * @param userId the user Id.
+     * @return Vendor extension if needed for authentication.
+     */
+    AuthenticateReason.Vendor getVendorExtension(int userId);
 }

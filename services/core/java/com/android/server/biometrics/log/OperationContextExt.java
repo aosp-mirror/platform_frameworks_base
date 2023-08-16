@@ -103,8 +103,14 @@ public class OperationContextExt {
      */
     @NonNull
     public OperationContext toAidlContext(@NonNull FingerprintAuthenticateOptions options) {
-        mAidlContext.authenticateReason = AuthenticateReason
-                .fingerprintAuthenticateReason(getAuthReason(options));
+        if (options.getVendorReason() != null) {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .vendorAuthenticateReason(options.getVendorReason());
+
+        } else {
+            mAidlContext.authenticateReason = AuthenticateReason
+                    .fingerprintAuthenticateReason(getAuthReason(options));
+        }
         mAidlContext.wakeReason = getWakeReason(options);
 
         return mAidlContext;

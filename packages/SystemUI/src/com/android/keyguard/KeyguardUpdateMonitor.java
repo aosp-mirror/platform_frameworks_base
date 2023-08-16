@@ -3128,18 +3128,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !strongerAuthRequired
                 && userDoesNotHaveTrust);
 
-        boolean shouldListenSideFpsState = true;
-        if (isSideFps) {
-            final boolean interactiveToAuthEnabled =
-                    mFingerprintInteractiveToAuthProvider != null &&
-                            mFingerprintInteractiveToAuthProvider.isEnabled(getCurrentUser());
-            shouldListenSideFpsState =
-                    interactiveToAuthEnabled ? isDeviceInteractive() && !mGoingToSleep : true;
-        }
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
-                && shouldListenBouncerState && shouldListenUdfpsState
-                && shouldListenSideFpsState;
+                && shouldListenBouncerState && shouldListenUdfpsState;
         logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
@@ -3160,7 +3151,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     isKeyguardVisible(),
                     mKeyguardOccluded,
                     mOccludingAppRequestingFp,
-                    shouldListenSideFpsState,
                     shouldListenForFingerprintAssistant,
                     strongerAuthRequired,
                     mSwitchingUser,
@@ -3314,6 +3304,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         mFingerprintDetectionCallback,
                         new FingerprintAuthenticateOptions.Builder()
                                 .setUserId(userId)
+                                .setVendorReason(
+                                        mFingerprintInteractiveToAuthProvider.getVendorExtension(
+                                                getCurrentUser()))
                                 .build());
             } else {
                 mLogger.v("startListeningForFingerprint");
@@ -3322,6 +3315,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         null /* handler */,
                         new FingerprintAuthenticateOptions.Builder()
                                 .setUserId(userId)
+                                .setVendorReason(
+                                        mFingerprintInteractiveToAuthProvider.getVendorExtension(
+                                                getCurrentUser()))
                                 .build()
                 );
             }
@@ -4497,14 +4493,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else if (isSfpsSupported()) {
                 pw.println("        sfpsEnrolled=" + isSfpsEnrolled());
                 pw.println("        shouldListenForSfps=" + shouldListenForFingerprint(false));
-                if (isSfpsEnrolled()) {
-                    final boolean interactiveToAuthEnabled =
-                                    mFingerprintInteractiveToAuthProvider != null &&
-                                            mFingerprintInteractiveToAuthProvider
-                                            .isEnabled(getCurrentUser());
-                    pw.println("        interactiveToAuthEnabled="
-                            + interactiveToAuthEnabled);
-                }
             }
             new DumpsysTableLogger(
                     "KeyguardFingerprintListen",
