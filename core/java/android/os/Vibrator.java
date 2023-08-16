@@ -216,9 +216,7 @@ public abstract class Vibrator {
      */
     @TestApi
     public boolean hasFrequencyControl() {
-        // We currently can only control frequency of the vibration using the compose PWLE method.
-        return getInfo().hasCapability(
-                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        return getInfo().hasFrequencyControl();
     }
 
     /**
@@ -240,7 +238,7 @@ public abstract class Vibrator {
      * @hide
      */
     public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
-        return effect.areVibrationFeaturesSupported(this);
+        return getInfo().areVibrationFeaturesSupported(effect);
     }
 
     /**
