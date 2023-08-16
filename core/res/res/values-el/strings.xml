@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Το πρόσωπο δεν αναγνωρίζεται. Χρησιμ. δακτ. αποτ."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Η ταυτότητα του δακτυλικού αποτυπώματος ελέγχθηκε"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Έγινε έλεγχος ταυτότητας προσώπου, πατήστε \"Επιβεβαίωση\""</string>

@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"지문을 인식할 수 없습니다."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"얼굴이 인증되었습니다. 확인을 누르세요"</string>

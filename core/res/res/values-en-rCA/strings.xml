@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingerprint not recognized"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingerprint not recognized"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Can’t recognize face. Use fingerprint instead."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerprint authenticated"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Face authenticated"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Face authenticated, please press confirm"</string>

@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ez da ezagutu hatz-marka"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Ez da ezagutu hatz-marka"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
@@ -2326,11 +2327,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Aurreko planoko zerbitzuak atzeko planotik abiarazteko baimena ematen die aplikazio osagarriei."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Erabilgarri dago mikrofonoa"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Blokeatuta dago mikrofonoa"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Bi pantailako modua"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Bi pantailako modua aktibatuta dago"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen aktibatuta dago"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bi pantailak erabiltzen ari da edukia erakusteko"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gailua beroegi dago"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Bi pantailako modua ez dago erabilgarri telefonoa berotzen ari delako"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ez dago erabilgarri telefonoa berotzen ari delako"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ez dago erabilgarri"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ez dago erabilgarri, bateria-aurreztailea aktibatuta dagoelako. Aukera hori desaktibatzeko, joan ezarpenetara."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Joan Ezarpenak atalera"</string>
