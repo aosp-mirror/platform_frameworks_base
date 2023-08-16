@@ -18,6 +18,7 @@ package com.android.wm.shell.dagger.pip;
 
 import android.annotation.Nullable;
 
+import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip2.PipTransition;
 
@@ -26,9 +27,9 @@ import dagger.Provides;
 
 /**
  * Provides dependencies from {@link com.android.wm.shell.pip2}, this implementation is meant to be
- * the successor of its sibling {@link Pip1SharedModule}.
+ * the successor of its sibling {@link Pip1Module}.
  */
-@Module
+@Module(includes = WMShellBaseModule.class)
 public abstract class Pip2Module {
     @WMSingleton
     @Provides

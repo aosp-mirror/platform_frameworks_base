@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,68 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.wm.shell.common.pip
 
-package com.android.wm.shell.pip;
-
-import android.app.TaskInfo;
-import android.content.pm.PackageManager;
-
-import com.android.internal.logging.UiEvent;
-import com.android.internal.logging.UiEventLogger;
+import android.app.TaskInfo
+import android.content.pm.PackageManager
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger
 
 /**
  * Helper class that ends PiP log to UiEvent, see also go/uievent
  */
-public class PipUiEventLogger {
-
-    private static final int INVALID_PACKAGE_UID = -1;
-
-    private final UiEventLogger mUiEventLogger;
-    private final PackageManager mPackageManager;
-
-    private String mPackageName;
-    private int mPackageUid = INVALID_PACKAGE_UID;
-
-    public PipUiEventLogger(UiEventLogger uiEventLogger, PackageManager packageManager) {
-        mUiEventLogger = uiEventLogger;
-        mPackageManager = packageManager;
-    }
-
-    public void setTaskInfo(TaskInfo taskInfo) {
-        if (taskInfo != null && taskInfo.topActivity != null) {
-            mPackageName = taskInfo.topActivity.getPackageName();
-            mPackageUid = getUid(mPackageName, taskInfo.userId);
+class PipUiEventLogger(
+    private val mUiEventLogger: UiEventLogger,
+    private val mPackageManager: PackageManager
+) {
+    private var mPackageName: String? = null
+    private var mPackageUid = INVALID_PACKAGE_UID
+    fun setTaskInfo(taskInfo: TaskInfo?) {
+        if (taskInfo?.topActivity != null) {
+            // safe because topActivity is guaranteed non-null here
+            mPackageName = taskInfo.topActivity!!.packageName
+            mPackageUid = getUid(mPackageName!!, taskInfo.userId)
         } else {
-            mPackageName = null;
-            mPackageUid = INVALID_PACKAGE_UID;
+            mPackageName = null
+            mPackageUid = INVALID_PACKAGE_UID
         }
     }
 
     /**
      * Sends log via UiEvent, reference go/uievent for how to debug locally
      */
-    public void log(PipUiEventEnum event) {
+    fun log(event: PipUiEventEnum?) {
         if (mPackageName == null || mPackageUid == INVALID_PACKAGE_UID) {
-            return;
+            return
         }
-        mUiEventLogger.log(event, mPackageUid, mPackageName);
+        mUiEventLogger.log(event!!, mPackageUid, mPackageName)
     }
 
-    private int getUid(String packageName, int userId) {
-        int uid = INVALID_PACKAGE_UID;
+    private fun getUid(packageName: String, userId: Int): Int {
+        var uid = INVALID_PACKAGE_UID
         try {
             uid = mPackageManager.getApplicationInfoAsUser(
-                    packageName, 0 /* ApplicationInfoFlags */, userId).uid;
-        } catch (PackageManager.NameNotFoundException e) {
+                packageName, 0 /* ApplicationInfoFlags */, userId
+            ).uid
+        } catch (e: PackageManager.NameNotFoundException) {
             // do nothing.
         }
-        return uid;
+        return uid
     }
 
     /**
      * Enums for logging the PiP events to UiEvent
      */
-    public enum PipUiEventEnum implements UiEventLogger.UiEventEnum {
+    enum class PipUiEventEnum(private val mId: Int) : UiEventLogger.UiEventEnum {
         @UiEvent(doc = "Activity enters picture-in-picture mode")
         PICTURE_IN_PICTURE_ENTER(603),
 
@@ -99,8 +90,10 @@ public class PipUiEventLogger {
         @UiEvent(doc = "Hides picture-in-picture menu")
         PICTURE_IN_PICTURE_HIDE_MENU(608),
 
-        @UiEvent(doc = "Changes the aspect ratio of picture-in-picture window. This is inherited"
-                + " from previous Tron-based logging and currently not in use.")
+        @UiEvent(
+            doc = "Changes the aspect ratio of picture-in-picture window. This is inherited" +
+                    " from previous Tron-based logging and currently not in use."
+        )
         PICTURE_IN_PICTURE_CHANGE_ASPECT_RATIO(609),
 
         @UiEvent(doc = "User resize of the picture-in-picture window")
@@ -121,15 +114,12 @@ public class PipUiEventLogger {
         @UiEvent(doc = "Closes PiP with app-provided close action")
         PICTURE_IN_PICTURE_CUSTOM_CLOSE(1058);
 
-        private final int mId;
-
-        PipUiEventEnum(int id) {
-            mId = id;
+        override fun getId(): Int {
+            return mId
         }
+    }
 
-        @Override
-        public int getId() {
-            return mId;
-        }
+    companion object {
+        private const val INVALID_PACKAGE_UID = -1
     }
 }
