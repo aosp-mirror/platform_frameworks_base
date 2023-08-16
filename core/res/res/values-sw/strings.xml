@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Tumia bayometriki au mbinu ya kufunga skrini"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Thibitisha kuwa ni wewe"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Tumia bayometriki yako ili uendelee"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Tumia alama ya kidole chako ili uendelee"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Tumia uso wako ili uendelee"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Tumia bayometriki au mbinu yako ya kufunga skrini ili uendelee"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Maunzi ya bayometriki hayapatikani"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Imeghairi uthibitishaji"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Alama ya kidole haijatambuliwa"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Alama ya kidole haijatambuliwa"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Imeshindwa kutambua uso. Tumia alama ya kidole."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Imethibitisha alama ya kidole"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Uso umethibitishwa"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Uso umethibitishwa, tafadhali bonyeza thibitisha"</string>
@@ -2327,12 +2326,12 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Maikrofoni inapatikana"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Maikrofoni imezuiwa"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Umewasha kipengele cha hali ya skrini mbili"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen imewasha"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumia skrini zote kuonyesha maudhui"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Kifaa kina joto sana"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kipengele cha Hali ya Skrini Mbili hakipatikani kwa sababu simu yako inapata joto sana"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Kipengele cha Hali ya Skrini Mbili hakipatikani"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kipengele cha Hali ya Skrini Mbili hakipatikani kwa sababu kipengele cha Kiokoa Betri kimewashwa. Unaweza kuzima kipengele hiki katika Mipangilio."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kipengele cha Dual Screen hakipatikani kwa sababu simu yako inapata joto sana"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen haipatikani"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kipengele cha Dual Screen hakipatikani kwa sababu Kiokoa Betri kimewashwa. Unaweza kukizima katika Mipangilio."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Nenda kwenye Mipangilio"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Zima"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> imewekewa mipangilio"</string>

@@ -617,8 +617,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"שימוש במידע ביומטרי בנעילת מסך"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"אימות הזהות שלך"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"יש להשתמש במידע ביומטרי כדי להמשיך"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"צריך להשתמש בטביעת האצבע כדי להמשיך"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"צריך להשתמש בזיהוי הפנים כדי להמשיך"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"יש להשתמש במידע הביומטרי או בנעילת המסך כדי להמשיך"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"חומרה ביומטרית לא זמינה"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"האימות בוטל"</string>
@@ -644,6 +642,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"טביעת האצבע לא זוהתה"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"טביעת האצבע לא זוהתה"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"לא ניתן לזהות את הפנים. יש להשתמש בטביעת אצבע במקום."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"טביעת האצבע אומתה"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"זיהוי הפנים בוצע"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"זיהוי הפנים בוצע. יש ללחוץ על אישור"</string>

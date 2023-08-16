@@ -617,8 +617,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utiliser la biométrie ou le verrouillage de l\'écran"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmez votre identité"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilisez la biométrie pour continuer"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Utilisez votre empreinte digitale pour continuer"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Utilisez la reconnaissance faciale pour continuer"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilisez la biométrie ou le verrouillage de l\'écran pour continuer"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
@@ -644,6 +642,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Empreinte digitale non reconnue"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Empreinte digitale non reconnue"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Visage non reconnu. Utilisez votre empreinte."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
