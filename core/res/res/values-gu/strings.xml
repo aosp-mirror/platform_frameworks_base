@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"ચાલુ રાખવા માટે તમારી ફિંગરપ્રિન્ટનો ઉપયોગ કરો"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"ચાલુ રાખવા માટે તમારા ચહેરાનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ચાલુ રાખવા માટે તમારા બાયોમેટ્રિક ડેટા અથવા સ્ક્રીન લૉક સુવિધાનો ઉપયોગ કરો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"પ્રમાણીકરણ રદ કર્યું"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ચહેરો ઓળખી શકતા નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -2330,9 +2329,9 @@
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen ચાલુ છે"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"કન્ટેન્ટ બતાવવા માટે <xliff:g id="APP_NAME">%1$s</xliff:g> બન્ને ડિસ્પ્લેનો ઉપયોગ કરી રહી છે"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ડિવાઇસ ખૂબ જ ગરમ છે"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે કારણ કે તમારો ફોન ખૂબ જ ગરમ થઈ રહ્યો છે"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"બૅટરી સેવર ચાલુ હોવાને કારણે ડ્યૂઅલ સ્ક્રીન અનુપલબ્ધ છે. તમે સેટિંગમાં જઈને આને બંધ કરી શકો છો."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ઉપલબ્ધ નથી કારણ કે તમારો ફોન ખૂબ જ ગરમ થઈ રહ્યો છે"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ઉપલબ્ધ નથી"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"બૅટરી સેવર ચાલુ હોવાને કારણે Dual Screen ઉપલબ્ધ નથી. તમે સેટિંગમાં જઈને આને બંધ કરી શકો છો."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"સેટિંગ પર જાઓ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"બંધ કરો"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>ની ગોઠવણી કરવામાં આવી છે"</string>

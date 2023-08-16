@@ -27,7 +27,8 @@ import android.text.TextUtils;
 import com.android.systemui.R;
 
 class IntentCreator {
-    private static final String EXTRA_EDIT_SOURCE_CLIPBOARD = "edit_source_clipboard";
+    private static final String EXTRA_EDIT_SOURCE = "edit_source";
+    private static final String EDIT_SOURCE_CLIPBOARD = "clipboard";
     private static final String REMOTE_COPY_ACTION = "android.intent.action.REMOTE_COPY";
 
     static Intent getTextEditorIntent(Context context) {
@@ -74,7 +75,7 @@ class IntentCreator {
         editIntent.setDataAndType(uri, "image/*");
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        editIntent.putExtra(EXTRA_EDIT_SOURCE_CLIPBOARD, true);
+        editIntent.putExtra(EXTRA_EDIT_SOURCE, EDIT_SOURCE_CLIPBOARD);
         return editIntent;
     }
 

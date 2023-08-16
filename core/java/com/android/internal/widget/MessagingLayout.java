@@ -178,9 +178,9 @@ public class MessagingLayout extends FrameLayout
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
 
         final List<MessagingMessage> historicMessagingMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
+                /* isHistoric= */true, /* usePrecomputedText= */ false);
         final List<MessagingMessage> newMessagingMessages =
-                createMessages(newMessages, false /* isHistoric */);
+                createMessages(newMessages, /* isHistoric= */false, /* usePrecomputedText= */false);
         bindViews(user, showSpinner, historicMessagingMessages, newMessagingMessages);
     }
 
@@ -518,15 +518,17 @@ public class MessagingLayout extends FrameLayout
      * @param newMessages the messages to parse.
      */
     private List<MessagingMessage> createMessages(
-            List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
+            List<Notification.MessagingStyle.Message> newMessages, boolean isHistoric,
+            boolean usePrecomputedText) {
         List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m, mImageResolver);
+                message = MessagingMessage.createMessage(this, m,
+                        mImageResolver, usePrecomputedText);
             }
-            message.setIsHistoric(historic);
+            message.setIsHistoric(isHistoric);
             result.add(message);
         }
         return result;

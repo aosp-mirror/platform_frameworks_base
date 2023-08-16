@@ -221,36 +221,15 @@ constructor(
     override val activityInVisible: Flow<Boolean> =
         activity
             .map { it?.hasActivityIn ?: false }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                iconInteractor.tableLogBuffer,
-                columnPrefix = "",
-                columnName = "activityInVisible",
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val activityOutVisible: Flow<Boolean> =
         activity
             .map { it?.hasActivityOut ?: false }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                iconInteractor.tableLogBuffer,
-                columnPrefix = "",
-                columnName = "activityOutVisible",
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val activityContainerVisible: Flow<Boolean> =
         activity
             .map { it != null && (it.hasActivityIn || it.hasActivityOut) }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                iconInteractor.tableLogBuffer,
-                columnPrefix = "",
-                columnName = "activityContainerVisible",
-                initialValue = false,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 }

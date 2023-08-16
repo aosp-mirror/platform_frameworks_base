@@ -19,10 +19,10 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.os.Trace
 import android.util.Log
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.launch
@@ -31,19 +31,19 @@ class KeyguardBlueprintViewBinder {
     companion object {
         private const val TAG = "KeyguardBlueprintViewBinder"
 
-        fun bind(keyguardRootView: KeyguardRootView, viewModel: KeyguardBlueprintViewModel) {
-            keyguardRootView.repeatWhenAttached {
+        fun bind(constraintLayout: ConstraintLayout, viewModel: KeyguardBlueprintViewModel) {
+            constraintLayout.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
                         viewModel.blueprint.collect { blueprint ->
                             Trace.beginSection("KeyguardBlueprintController#applyBlueprint")
                             Log.d(TAG, "applying blueprint: $blueprint")
                             ConstraintSet().apply {
-                                clone(keyguardRootView)
+                                clone(constraintLayout)
                                 val emptyLayout = ConstraintSet.Layout()
                                 knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
                                 blueprint?.apply(this)
-                                applyTo(keyguardRootView)
+                                applyTo(constraintLayout)
                             }
                             Trace.endSection()
                         }

@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biyometri veya ekran kilidi kullan"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Siz olduğunuzu doğrulayın"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Devam etmek için biyometri kullanın"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Devam etmek için parmak izinizi kullanın"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Devam etmek için yüzünüzü kullanın"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Devam etmek için biyometrik kimlik bilginizi veya ekran kilidinizi kullanın"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biyometrik donanım kullanılamıyor"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Kimlik doğrulama iptal edildi"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Parmak izi tanınmadı"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Parmak izi tanınmadı"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Yüz tanınamadı. Bunun yerine parmak izi kullanın."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Yüz kimliği doğrulandı"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
@@ -2326,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tamamlayıcı uygulamanın arka plandan ön plan hizmetlerini başlatmasına izin verir."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon kullanılabilir"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon engellenmiş"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Çift ekran"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Çift ekran açık"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen açık"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Cihaz çok ısındı"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Çift Ekran kullanılamıyor"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Dual Screen kullanılamıyor"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen kullanılamıyor"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Pil Tasarrufu açık olduğundan Dual Screen kullanılamıyor. Bu özelliği Ayarlar\'dan kapatabilirsiniz."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ayarlar\'a git"</string>

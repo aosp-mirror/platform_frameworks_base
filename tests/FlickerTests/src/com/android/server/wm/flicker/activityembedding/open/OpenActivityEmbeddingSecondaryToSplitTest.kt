@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
 /**
  * Test opening a secondary activity that will split with the main activity.
  *
- * To run this test: `atest FlickerTests:OpenActivityEmbeddingSecondaryToSplitTest`
+ * To run this test: `atest FlickerTestsOther:OpenActivityEmbeddingSecondaryToSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

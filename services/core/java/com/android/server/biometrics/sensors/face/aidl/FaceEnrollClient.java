@@ -109,7 +109,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
     public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
-        BiometricNotificationUtils.cancelReEnrollNotification(getContext());
+        BiometricNotificationUtils.cancelFaceEnrollNotification(getContext());
+        BiometricNotificationUtils.cancelFaceReEnrollNotification(getContext());
     }
 
     @NonNull

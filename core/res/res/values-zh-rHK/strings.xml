@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"使用生物識別或螢幕鎖定"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"驗證是你本人"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"如要繼續操作，請使用使用生物識別驗證身分"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"如要繼續操作，請使用你的指紋驗證身分"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"如要繼續操作，請使用你的面孔驗證身分"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"請使用生物識別或螢幕鎖定功能驗證身分，才能繼續操作"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物識別硬件"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"無法辨識指紋"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"無法辨識指紋"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"無法辨識面孔，請改用指紋完成驗證。"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"驗證咗指紋"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"面孔已經驗證"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"面孔已經驗證，請㩒一下 [確認]"</string>

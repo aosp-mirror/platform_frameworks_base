@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> hámark"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> viðvörun"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Vinnuforrit"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Hlé"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Næturljós"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Kveikt við sólsetur"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Til sólarupprásar"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Stækka hluta skjásins"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Opna stillingar stækkunar"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Loka stillingum stækkunar"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Dragðu horn til að breyta stærð"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Leyfa skáflettingu"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Breyta stærð"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Opna <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Til að bæta Veskisforritinu við sem flýtileið skaltu ganga úr skugga um að hafa bætt að minnsta kosti einu korti við"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Til að bæta QR-kóðaskanna við sem flýtileið skaltu ganga úr skugga um að myndavélarforrit sé uppsett"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Til að bæta Home-forritinu við sem flýtileið skaltu ganga úr skugga um að forritið sé uppsett"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Að minnsta kosti eitt tæki er tiltækt"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Veldu sjálfgefið glósuforrit til að nota flýtileið fyrir glósugerð"</string>

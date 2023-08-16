@@ -2,7 +2,6 @@ package com.android.systemui.scene.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -37,14 +36,6 @@ class SceneWindowRootView(
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)
             }
         )
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return event?.let {
-            viewModel.onRemoteUserInput(event)
-            true
-        }
-            ?: false
     }
 
     override fun setVisibility(visibility: Int) {

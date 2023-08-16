@@ -18,10 +18,18 @@ package com.android.server.biometrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.UserHandle;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.sensors.BiometricNotification;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,23 +45,58 @@ public class AuthenticationStatsCollector {
 
     // The minimum number of attempts that will calculate the FRR and trigger the notification.
     private static final int MINIMUM_ATTEMPTS = 500;
+    // Upload the data every 50 attempts (average number of daily authentications).
+    private static final int AUTHENTICATION_UPLOAD_INTERVAL = 50;
     // The maximum number of eligible biometric enrollment notification can be sent.
     private static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
+
+    @NonNull private final Context mContext;
 
     private final float mThreshold;
     private final int mModality;
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
-    public AuthenticationStatsCollector(@NonNull Context context, int modality) {
+    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    @NonNull private BiometricNotification mBiometricNotification;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId != UserHandle.USER_NULL
+                    && intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
+                onUserRemoved(userId);
+            }
+        }
+    };
+
+    public AuthenticationStatsCollector(@NonNull Context context, int modality,
+            @NonNull BiometricNotification biometricNotification) {
+        mContext = context;
         mThreshold = context.getResources()
                 .getFraction(R.fraction.config_biometricNotificationFrrThreshold, 1, 1);
         mUserAuthenticationStatsMap = new HashMap<>();
         mModality = modality;
+        mBiometricNotification = biometricNotification;
+
+        context.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
+    }
+
+    private void initializeUserAuthenticationStatsMap() {
+        mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
+        for (AuthenticationStats stats : mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
+            mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
+        }
     }
 
     /** Update total authentication and rejected attempts. */
     public void authenticate(int userId, boolean authenticated) {
+        // Initialize mUserAuthenticationStatsMap when authenticate to ensure SharedPreferences
+        // are ready for application use and avoid ramdump issue.
+        if (mUserAuthenticationStatsMap.isEmpty()) {
+            initializeUserAuthenticationStatsMap();
+        }
         // Check if this is a new user.
         if (!mUserAuthenticationStatsMap.containsKey(userId)) {
             mUserAuthenticationStatsMap.put(userId, new AuthenticationStats(userId, mModality));
@@ -67,24 +110,62 @@ public class AuthenticationStatsCollector {
         sendNotificationIfNeeded(userId);
     }
 
+    /** Check if a notification should be sent after a calculation cycle. */
     private void sendNotificationIfNeeded(int userId) {
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
-        if (authenticationStats.getTotalAttempts() >= MINIMUM_ATTEMPTS) {
-            // Send notification if FRR exceeds the threshold
-            if (authenticationStats.getEnrollmentNotifications() < MAXIMUM_ENROLLMENT_NOTIFICATIONS
-                    && authenticationStats.getFrr() >= mThreshold) {
-                // TODO(wenhuiy): Send notifications.
-            }
+        if (authenticationStats.getTotalAttempts() < MINIMUM_ATTEMPTS) {
+            return;
+        }
 
+        // Don't send notification if FRR below the threshold.
+        if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS
+                || authenticationStats.getFrr() < mThreshold) {
             authenticationStats.resetData();
+            return;
+        }
+
+        authenticationStats.resetData();
+
+        final PackageManager packageManager = mContext.getPackageManager();
+
+        // Don't send notification to single-modality devices.
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
+                || !packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return;
+        }
+
+        final FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        final boolean hasEnrolledFace = faceManager.hasEnrolledTemplates(userId);
+
+        final FingerprintManager fingerprintManager = mContext
+                .getSystemService(FingerprintManager.class);
+        final boolean hasEnrolledFingerprint = fingerprintManager.hasEnrolledTemplates(userId);
+
+        // Don't send notification when both face and fingerprint are enrolled.
+        if (hasEnrolledFace && hasEnrolledFingerprint) {
+            return;
+        }
+        if (hasEnrolledFace && !hasEnrolledFingerprint) {
+            mBiometricNotification.sendFpEnrollNotification(mContext);
+        } else if (!hasEnrolledFace && hasEnrolledFingerprint) {
+            mBiometricNotification.sendFaceEnrollNotification(mContext);
         }
     }
 
     private void persistDataIfNeeded(int userId) {
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
-        if (authenticationStats.getTotalAttempts() % 50 == 0) {
-            // TODO(wenhuiy): Persist data.
+        if (authenticationStats.getTotalAttempts() % AUTHENTICATION_UPLOAD_INTERVAL == 0) {
+            mAuthenticationStatsPersister.persistFrrStats(authenticationStats.getUserId(),
+                    authenticationStats.getTotalAttempts(),
+                    authenticationStats.getRejectedAttempts(),
+                    authenticationStats.getEnrollmentNotifications(),
+                    authenticationStats.getModality());
         }
+    }
+
+    private void onUserRemoved(final int userId) {
+        mUserAuthenticationStatsMap.remove(userId);
+        mAuthenticationStatsPersister.removeFrrStats(userId);
     }
 
     /**
