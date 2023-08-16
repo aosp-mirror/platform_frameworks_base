@@ -250,15 +250,6 @@ public interface WindowInsetsController {
     void setCaptionInsetsHeight(int height);
 
     /**
-     * Sets the insets height for the IME caption bar, which corresponds to the
-     * "fake" IME navigation bar.
-     *
-     * @param height the insets height of the IME caption bar.
-     * @hide
-     */
-    void setImeCaptionBarInsetsHeight(int height);
-
-    /**
      * Controls the behavior of system bars.
      *
      * @param behavior Determines how the bars behave when being hidden by the application.
