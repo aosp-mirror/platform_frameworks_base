@@ -2876,16 +2876,25 @@ public class ApplicationPackageManager extends PackageManager {
         final SuspendDialogInfo dialogInfo = !TextUtils.isEmpty(dialogMessage)
                 ? new SuspendDialogInfo.Builder().setMessage(dialogMessage).build()
                 : null;
-        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras, dialogInfo);
+        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras,
+                dialogInfo, 0);
     }
 
     @Override
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             SuspendDialogInfo dialogInfo) {
+        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras,
+                dialogInfo, 0);
+    }
+
+    @Override
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            SuspendDialogInfo dialogInfo, int flags) {
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
-                    launcherExtras, dialogInfo, mContext.getOpPackageName(),
+                    launcherExtras, dialogInfo, flags, mContext.getOpPackageName(),
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

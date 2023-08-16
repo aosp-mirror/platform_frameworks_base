@@ -288,9 +288,11 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "unhide":
                     return runSetHiddenSetting(false);
                 case "suspend":
-                    return runSuspend(true);
+                    return runSuspend(true, 0);
+                case "suspend-quarantine":
+                    return runSuspend(true, PackageManager.FLAG_SUSPEND_QUARANTINED);
                 case "unsuspend":
-                    return runSuspend(false);
+                    return runSuspend(false, 0);
                 case "set-distracting-restriction":
                     return runSetDistractingRestriction();
                 case "get-distracting-restriction":
@@ -2644,7 +2646,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runSuspend(boolean suspendedState) {
+    private int runSuspend(boolean suspendedState, int flags) {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
         String dialogMessage = null;
@@ -2712,7 +2714,7 @@ class PackageManagerShellCommand extends ShellCommand {
             mInterface.setPackagesSuspendedAsUser(packageNames.toArray(new String[] {}),
                     suspendedState, ((appExtras.size() > 0) ? appExtras : null),
                     ((launcherExtras.size() > 0) ? launcherExtras : null),
-                    info, callingPackage, translatedUserId);
+                    info, flags, callingPackage, translatedUserId);
             for (int i = 0; i < packageNames.size(); i++) {
                 final String packageName = packageNames.get(i);
                 pw.println("Package " + packageName + " new suspended state: "

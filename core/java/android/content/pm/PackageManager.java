@@ -834,6 +834,7 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
+            FILTER_OUT_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ComponentInfoFlagsBits {}
@@ -857,7 +858,8 @@ public abstract class PackageManager {
             GET_DISABLED_COMPONENTS,
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
-            MATCH_CLONE_PROFILE
+            MATCH_CLONE_PROFILE,
+            FILTER_OUT_QUARANTINED_COMPONENTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResolveInfoFlagsBits {}
@@ -1231,6 +1233,11 @@ public abstract class PackageManager {
      * {@link PackageInfo} flag: return all attributions declared in the package manifest
      */
     public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
+
+    /**
+     * @hide
+     */
+    public static final long FILTER_OUT_QUARANTINED_COMPONENTS = 0x100000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
@@ -1685,7 +1692,7 @@ public abstract class PackageManager {
     /** @hide */
     @IntDef(flag = true, value = {
             DONT_KILL_APP,
-            SYNCHRONOUS
+            SYNCHRONOUS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EnabledFlags {}
@@ -1706,6 +1713,24 @@ public abstract class PackageManager {
      * this flag should be run on a background thread.
      */
     public static final int SYNCHRONOUS = 0x00000002;
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_SUSPEND_QUARANTINED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SuspendedFlags {}
+
+    /**
+     * Flag parameter {@link #setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, android.content.pm.SuspendDialogInfo, int)}:
+     * Apps in this state not only appear suspended for all user visible purposes (eg, Launcher,
+     * ShareSheet), but also individual components of the app can behave as disabled depending on
+     * the importance of the calling app.
+     *
+     * @hide
+     */
+    public static final int FLAG_SUSPEND_QUARANTINED = 0x00000001;
 
     /** @hide */
     @IntDef(prefix = { "INSTALL_REASON_" }, value = {
@@ -9650,6 +9675,63 @@ public abstract class PackageManager {
     public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,
             @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
             @Nullable SuspendDialogInfo dialogInfo) {
+        throw new UnsupportedOperationException("setPackagesSuspended not implemented");
+    }
+
+    /**
+     * Puts the given packages in a suspended state, where attempts at starting activities are
+     * denied.
+     *
+     * <p>The suspended application's notifications and all of its windows will be hidden, any
+     * of its started activities will be stopped and it won't be able to ring the device.
+     * It doesn't remove the data or the actual package file.
+     *
+     * <p>When the user tries to launch a suspended app, a system dialog alerting them that the app
+     * is suspended will be shown instead.
+     * The caller can optionally customize the dialog by passing a {@link SuspendDialogInfo} object
+     * to this API. This dialog will have a button that starts the
+     * {@link Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS} intent if the suspending app declares an
+     * activity which handles this action.
+     *
+     * <p>The packages being suspended must already be installed. If a package is uninstalled, it
+     * will no longer be suspended.
+     *
+     * <p>Optionally, the suspending app can provide extra information in the form of
+     * {@link PersistableBundle} objects to be shared with the apps being suspended and the
+     * launcher to support customization that they might need to handle the suspended state.
+     *
+     * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API except for
+     * device owner and profile owner.
+     *
+     * @param packageNames The names of the packages to set the suspended status.
+     * @param suspended If set to {@code true}, the packages will be suspended, if set to
+     * {@code false}, the packages will be unsuspended.
+     * @param appExtras An optional {@link PersistableBundle} that the suspending app can provide
+     *                  which will be shared with the apps being suspended. Ignored if
+     *                  {@code suspended} is false.
+     * @param launcherExtras An optional {@link PersistableBundle} that the suspending app can
+     *                       provide which will be shared with the launcher. Ignored if
+     *                       {@code suspended} is false.
+     * @param dialogInfo An optional {@link SuspendDialogInfo} object describing the dialog that
+     *                   should be shown to the user when they try to launch a suspended app.
+     *                   Ignored if {@code suspended} is false.
+     * @param flags Optional behavior flags.
+     *
+     * @return an array of package names for which the suspended status could not be set as
+     * requested in this method. Returns {@code null} if {@code packageNames} was {@code null}.
+     *
+     * @see #isPackageSuspended
+     * @see SuspendDialogInfo
+     * @see SuspendDialogInfo.Builder
+     * @see Intent#ACTION_SHOW_SUSPENDED_APP_DETAILS
+     *
+     * @hide
+     */
+    @RequiresPermission(value=Manifest.permission.SUSPEND_APPS, conditional=true)
+    @Nullable
+    public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,
+            @Nullable PersistableBundle appExtras, @Nullable PersistableBundle launcherExtras,
+            @Nullable SuspendDialogInfo dialogInfo, @SuspendedFlags int flags) {
         throw new UnsupportedOperationException("setPackagesSuspended not implemented");
     }
 

@@ -509,7 +509,8 @@ public class ContentProviderHelper {
                             checkTime(startTime,
                                     "getContentProviderImpl: before set stopped state");
                             mService.mPackageManagerInt.notifyComponentUsed(
-                                    cpr.appInfo.packageName, userId, callingPackage);
+                                    cpr.appInfo.packageName, userId, callingPackage,
+                                    cpr.toString());
                             checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "

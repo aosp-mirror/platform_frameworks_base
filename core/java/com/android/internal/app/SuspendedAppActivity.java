@@ -297,7 +297,7 @@ public class SuspendedAppActivity extends AlertActivity
                         final IPackageManager ipm = AppGlobals.getPackageManager();
                         try {
                             final String[] errored = ipm.setPackagesSuspendedAsUser(
-                                    new String[]{mSuspendedPackage}, false, null, null, null,
+                                    new String[]{mSuspendedPackage}, false, null, null, null, 0,
                                     mSuspendingPackage, mUserId);
                             if (ArrayUtils.contains(errored, mSuspendedPackage)) {
                                 Slog.e(TAG, "Could not unsuspend " + mSuspendedPackage);

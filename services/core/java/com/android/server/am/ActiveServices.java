@@ -3601,6 +3601,8 @@ public final class ActiveServices {
                 || (flags & Context.BIND_EXTERNAL_SERVICE_LONG) != 0;
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
         final boolean inSharedIsolatedProcess = (flags & Context.BIND_SHARED_ISOLATED_PROCESS) != 0;
+        final boolean filterOutQuarantined =
+                (flags & Context.BIND_FILTER_OUT_QUARANTINED_COMPONENTS) != 0;
 
         ProcessRecord attributedApp = null;
         if (sdkSandboxClientAppUid > 0) {
@@ -3610,7 +3612,7 @@ public final class ActiveServices {
                 isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
                 resolvedType, callingPackage, callingPid, callingUid, userId, true, callerFg,
                 isBindExternal, allowInstant, null /* fgsDelegateOptions */,
-                inSharedIsolatedProcess);
+                inSharedIsolatedProcess, filterOutQuarantined);
         if (res == null) {
             return 0;
         }
@@ -4119,6 +4121,20 @@ public final class ActiveServices {
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant, ForegroundServiceDelegationOptions fgsDelegateOptions,
             boolean inSharedIsolatedProcess) {
+        return retrieveServiceLocked(service, instanceName, isSdkSandboxService,
+                sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, callingPackage,
+                callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
+                allowInstant, fgsDelegateOptions, inSharedIsolatedProcess,
+                false /* filterOutQuarantined */);
+    }
+
+    private ServiceLookupResult retrieveServiceLocked(Intent service,
+            String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
+            String sdkSandboxClientAppPackage, String resolvedType,
+            String callingPackage, int callingPid, int callingUid, int userId,
+            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
+            boolean allowInstant, ForegroundServiceDelegationOptions fgsDelegateOptions,
+            boolean inSharedIsolatedProcess, boolean filterOutQuarantined) {
         if (isSdkSandboxService && instanceName == null) {
             throw new IllegalArgumentException("No instanceName provided for sdk sandbox process");
         }
@@ -4235,10 +4251,13 @@ public final class ActiveServices {
 
         if (r == null) {
             try {
-                int flags = ActivityManagerService.STOCK_PM_FLAGS
+                long flags = ActivityManagerService.STOCK_PM_FLAGS
                         | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
                 if (allowInstant) {
                     flags |= PackageManager.MATCH_INSTANT;
+                }
+                if (filterOutQuarantined) {
+                    flags |= PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
                 }
                 // TODO: come back and remove this assumption to triage all services
                 ResolveInfo rInfo = mAm.getPackageManagerInternal().resolveService(service,
@@ -5118,7 +5137,7 @@ public final class ActiveServices {
 
         try {
             mAm.mPackageManagerInt.notifyComponentUsed(
-                    r.packageName, r.userId, r.mRecentCallingPackage);
+                    r.packageName, r.userId, r.mRecentCallingPackage, r.toString());
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + r.packageName + ": " + e);

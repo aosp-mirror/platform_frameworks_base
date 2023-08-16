@@ -7527,7 +7527,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .cancel(eq(SystemMessageProto.SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED));
         // Verify that the apps are NOT unsuspeded.
         verify(getServices().ipackageManager, never()).setPackagesSuspendedAsUser(
-                any(), eq(false), any(), any(), any(), any(), anyInt());
+                any(), eq(false), any(), any(), any(), anyInt(), any(), anyInt());
         // Verify that DPC is invoked to check policy compliance.
         verify(mContext.spiedContext).startActivityAsUser(
                 MockUtils.checkIntentAction(ACTION_CHECK_POLICY_COMPLIANCE),

@@ -6383,6 +6383,15 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.changed_uid_list";
 
     /**
+     * This field is part of
+     * {@link android.content.Intent#ACTION_PACKAGES_SUSPENDED},
+     * and only present if the packages were quarantined.
+     * @hide
+     */
+    public static final String EXTRA_QUARANTINED =
+            "android.intent.extra.quarantined";
+
+    /**
      * An integer denoting a bitwise combination of restrictions set on distracting packages via
      * {@link PackageManager#setDistractingPackageRestrictions(String[], int)}
      *

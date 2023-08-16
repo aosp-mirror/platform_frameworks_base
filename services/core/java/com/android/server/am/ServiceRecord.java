@@ -1531,7 +1531,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         sb.append("ServiceRecord{")
             .append(Integer.toHexString(System.identityHashCode(this)))
             .append(" u").append(userId)
-            .append(' ').append(shortInstanceName).append('}');
+            .append(' ').append(shortInstanceName);
+        if (mRecentCallingPackage != null) {
+            sb.append(" c:").append(mRecentCallingPackage);
+        }
+        sb.append('}');
         return stringName = sb.toString();
     }
 

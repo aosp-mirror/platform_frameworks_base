@@ -1329,7 +1329,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     .notifyBeforePackageUnstopped(next.packageName);
             mAtmService.getPackageManagerInternalLocked().notifyComponentUsed(
                     next.packageName, next.mUserId,
-                    next.packageName); /* TODO: Verify if correct userid */
+                    next.packageName, next.toString()); /* TODO: Verify if correct userid */
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Failed trying to unstop package "
                     + next.packageName + ": " + e);
