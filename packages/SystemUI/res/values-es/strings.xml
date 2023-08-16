@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Límite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplicaciones de trabajo"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"En pausa"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Luz nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Al atardecer"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Hasta el amanecer"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Abrir ajustes de ampliación"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Cerrar ajustes de ampliación"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Arrastra la esquina para cambiar el tamaño"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir ir en diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Cambiar tamaño"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Abrir <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Para añadir la aplicación Wallet como acceso directo, asegúrate de que está instalada"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Para añadir la aplicación Wallet como acceso directo, asegúrate de haber añadido al menos una tarjeta"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Para añadir el escáner de códigos QR como acceso directo, asegúrate de que hay instalada una aplicación de cámara"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Para añadir la aplicación Home como acceso directo, asegúrate de que está instalada"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Al menos un dispositivo debe estar disponible"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecciona una aplicación de notas predeterminada para usar el acceso directo de toma de notas"</string>

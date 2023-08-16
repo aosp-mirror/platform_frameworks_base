@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> حد"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> وارننگ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"دفتری ایپس"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"موقوف ہے"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"نائٹ لائٹ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"غروب آفتاب کے وقت آن ہوگی"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"طلوع آفتاب تک"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"اسکرین کا حصہ بڑا کریں"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"میگنیفکیشن کی ترتیبات کھولیں"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"میگنیفکیشن کی ترتیبات بند کریں"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"سائز تبدیل کرنے کے لیے کونے کو گھسیٹیں"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"وتری سکرولنگ کی اجازت دیں"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"سائز تبدیل کریں"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> کھولیں"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"والٹ ایپ کو شارٹ کٹ کے طور پر شامل کرنے کے لیے، یقینی بنائیں کہ ایپ انسٹال ہے"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"والٹ ایپ کو شارٹ کٹ کے طور پر شامل کرنے کے لیے، یقینی بنائیں کہ کم از کم ایک کارڈ شامل کیا گیا ہے"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"‏QR کوڈ اسکینر کو شارٹ کٹ کے طور پر شامل کرنے کے لیے، یقینی بنائیں کہ کیمرا ایپ انسٹال ہے"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ہوم ایپ کو شارٹ کٹ کے طور پر شامل کرنے کے لیے، یقینی بنائیں کہ ایپ انسٹال ہے"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• کم از کم ایک آلہ دستیاب ہے"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"نوٹ لینے والے شارٹ کٹ کا استعمال کرنے کے لیے ڈیفالٹ نوٹس ایپ منتخب کریں"</string>
@@ -1178,8 +1180,8 @@
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"رسائی کا نظم کریں"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"فون کال کے زیر استعمال"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"فون کال میں حال ہی میں استعمال کیا گیا"</string>
-    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے زیر استعمال"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"<xliff:g id="APP_NAME">%1$s</xliff:g> کے ذریعے حال ہی میں استعمال کیا گیا"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> کے زیر استعمال"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"حال ہی میں <xliff:g id="APP_NAME">%1$s</xliff:g> نے استعمال کیا"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) کے زیر استعمال"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) کے ذریعے حال ہی میں استعمال کیا گیا"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) کے زیر استعمال"</string>

@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> සීමිත"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> අවවාද කිරීම"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"කාර්යාල යෙදුම්"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"විරාමයි"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"රාත්‍රී ආලෝකය"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"හිරු බැසීමේදී ක්‍රි."</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"හිරු නගින තෙක්"</string>
@@ -864,6 +865,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"තිරයේ කොටසක් විශාලනය කරන්න"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"විශාලන සැකසීම් විවෘත කරන්න"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"විශාලන සැකසීම් වසන්න"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"ප්‍රමාණය වෙනස් කිරීමට කොන අදින්න"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"විකර්ණ අනුචලනයට ඉඩ දෙන්න"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"ප්‍රතිප්‍රමාණය කරන්න"</string>
@@ -1133,7 +1136,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> විවෘත කරන්න"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"කෙටිමඟක් ලෙස Wallet යෙදුම එක් කිරීම සඳහා, යෙදුම ස්ථාපනය කර ඇති බවට වග බලා ගන්න"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"කෙටිමඟක් ලෙස Wallet යෙදුම එක් කිරීම සඳහා, අවම වශයෙන් එක් කාඩ්පතක් එක් කර ඇති බවට වග බලා ගන්න"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"කෙටිමඟක් ලෙස QR කේත ස්කෑනරය එක් කිරීම සඳහා, කැමරා යෙදුමක් ස්ථාපනය කර ඇති බවට වග බලා ගන්න"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home යෙදුම කෙටිමඟක් ලෙස එක් කිරීම සඳහා, යෙදුම ස්ථාපනය කර ඇති බව සහතික කර ගන්න"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"සටහන් ගැනීමේ කෙටිමඟ භාවිතා කිරීමට පෙරනිමි සටහන් යෙදුමක් තෝරන්න"</string>
