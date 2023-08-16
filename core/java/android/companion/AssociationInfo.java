@@ -17,7 +17,9 @@ package android.companion;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.net.MacAddress;
 import android.os.Parcel;
@@ -41,23 +43,24 @@ public final class AssociationInfo implements Parcelable {
     private static final String LAST_TIME_CONNECTED_NONE = "None";
     /**
      * A unique ID of this Association record.
-     * Disclosed to the clients (ie. companion applications) for referring to this record (eg. in
+     * Disclosed to the clients (i.e. companion applications) for referring to this record (e.g. in
      * {@code disassociate()} API call).
      */
     private final int mId;
-
-    private final @UserIdInt int mUserId;
-    private final @NonNull String mPackageName;
-
-    private final @Nullable MacAddress mDeviceMacAddress;
-    private final @Nullable CharSequence mDisplayName;
-    private final @Nullable String mDeviceProfile;
-    private final @Nullable AssociatedDevice mAssociatedDevice;
-
+    @UserIdInt
+    private final int mUserId;
+    @NonNull
+    private final String mPackageName;
+    @Nullable
+    private final MacAddress mDeviceMacAddress;
+    @Nullable
+    private final CharSequence mDisplayName;
+    @Nullable
+    private final String mDeviceProfile;
+    @Nullable
+    private final AssociatedDevice mAssociatedDevice;
     private final boolean mSelfManaged;
     private final boolean mNotifyOnDeviceNearby;
-    private final int mSystemDataSyncFlags;
-
     /**
      * Indicates that the association has been revoked (removed), but we keep the association
      * record for final clean up (e.g. removing the app from the list of the role holders).
@@ -71,6 +74,7 @@ public final class AssociationInfo implements Parcelable {
      * Default value is Long.MAX_VALUE.
      */
     private final long mLastTimeConnectedMs;
+    private final int mSystemDataSyncFlags;
 
     /**
      * Creates a new Association.
@@ -80,8 +84,8 @@ public final class AssociationInfo implements Parcelable {
     public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
-            boolean selfManaged, boolean notifyOnDeviceNearby, boolean revoked,
-            long timeApprovedMs, long lastTimeConnectedMs, int systemDataSyncFlags) {
+            boolean selfManaged, boolean notifyOnDeviceNearby, boolean revoked, long timeApprovedMs,
+            long lastTimeConnectedMs, int systemDataSyncFlags) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -91,15 +95,12 @@ public final class AssociationInfo implements Parcelable {
         }
 
         mId = id;
-
         mUserId = userId;
         mPackageName = packageName;
-
         mDeviceMacAddress = macAddress;
         mDisplayName = displayName;
         mDeviceProfile = deviceProfile;
         mAssociatedDevice = associatedDevice;
-
         mSelfManaged = selfManaged;
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
         mRevoked = revoked;
@@ -119,7 +120,8 @@ public final class AssociationInfo implements Parcelable {
      * @return the ID of the user who "owns" this association.
      * @hide
      */
-    public @UserIdInt int getUserId() {
+    @UserIdInt
+    public int getUserId() {
         return mUserId;
     }
 
@@ -128,19 +130,22 @@ public final class AssociationInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    public @NonNull String getPackageName() {
+    @NonNull
+    public String getPackageName() {
         return mPackageName;
     }
 
     /**
      * @return the MAC address of the device.
      */
-    public @Nullable MacAddress getDeviceMacAddress() {
+    @Nullable
+    public MacAddress getDeviceMacAddress() {
         return mDeviceMacAddress;
     }
 
     /** @hide */
-    public @Nullable String getDeviceMacAddressAsString() {
+    @Nullable
+    public String getDeviceMacAddressAsString() {
         return mDeviceMacAddress != null ? mDeviceMacAddress.toString().toUpperCase() : null;
     }
 
@@ -150,7 +155,8 @@ public final class AssociationInfo implements Parcelable {
      *
      * @see AssociationRequest.Builder#setDisplayName(CharSequence)
      */
-    public @Nullable CharSequence getDisplayName() {
+    @Nullable
+    public CharSequence getDisplayName() {
         return mDisplayName;
     }
 
@@ -159,7 +165,8 @@ public final class AssociationInfo implements Parcelable {
      *         association, or {@code null} if no specific profile was used.
      * @see AssociationRequest.Builder#setDeviceProfile(String)
      */
-    public @Nullable String getDeviceProfile() {
+    @Nullable
+    public String getDeviceProfile() {
         return mDeviceProfile;
     }
 
@@ -176,7 +183,8 @@ public final class AssociationInfo implements Parcelable {
      * @return the companion device that was associated, or {@code null} if the device is
      *         self-managed or this association info was retrieved from persistent storage.
      */
-    public @Nullable AssociatedDevice getAssociatedDevice() {
+    @Nullable
+    public AssociatedDevice getAssociatedDevice() {
         return mAssociatedDevice;
     }
 
@@ -217,14 +225,14 @@ public final class AssociationInfo implements Parcelable {
      * @return the last time self reported disconnected for selfManaged only.
      * @hide
      */
-    public Long getLastTimeConnectedMs() {
+    public long getLastTimeConnectedMs() {
         return mLastTimeConnectedMs;
     }
 
     /**
      * @return Enabled system data sync flags set via
-     * {@link CompanionDeviceManager#enableSystemDataSync(int, int)} and
-     * {@link CompanionDeviceManager#disableSystemDataSync(int, int)}.
+     * {@link CompanionDeviceManager#enableSystemDataSyncForTypes(int, int)} (int, int)} and
+     * {@link CompanionDeviceManager#disableSystemDataSyncForTypes(int, int)} (int, int)}.
      * Or by default all flags are 1 (enabled).
      */
     public int getSystemDataSyncFlags() {
@@ -268,7 +276,8 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /** @hide */
-    public @NonNull String toShortString() {
+    @NonNull
+    public String toShortString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("id=").append(mId);
         if (mDeviceMacAddress != null) {
@@ -337,15 +346,12 @@ public final class AssociationInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mId);
-
         dest.writeInt(mUserId);
         dest.writeString(mPackageName);
-
         dest.writeTypedObject(mDeviceMacAddress, 0);
         dest.writeCharSequence(mDisplayName);
         dest.writeString(mDeviceProfile);
         dest.writeTypedObject(mAssociatedDevice, 0);
-
         dest.writeBoolean(mSelfManaged);
         dest.writeBoolean(mNotifyOnDeviceNearby);
         dest.writeBoolean(mRevoked);
@@ -356,15 +362,12 @@ public final class AssociationInfo implements Parcelable {
 
     private AssociationInfo(@NonNull Parcel in) {
         mId = in.readInt();
-
         mUserId = in.readInt();
         mPackageName = in.readString();
-
         mDeviceMacAddress = in.readTypedObject(MacAddress.CREATOR);
         mDisplayName = in.readCharSequence();
         mDeviceProfile = in.readString();
         mAssociatedDevice = in.readTypedObject(AssociatedDevice.CREATOR);
-
         mSelfManaged = in.readBoolean();
         mNotifyOnDeviceNearby = in.readBoolean();
         mRevoked = in.readBoolean();
@@ -388,43 +391,127 @@ public final class AssociationInfo implements Parcelable {
     };
 
     /**
-     * Use this method to obtain a builder that you can use to create a copy of the
-     * given {@link AssociationInfo} with modified values of {@code mLastTimeConnected}
-     * or {@code mNotifyOnDeviceNearby}.
-     * <p>
-     *     Note that you <b>must</b> call either {@link Builder#setLastTimeConnected(long)
-     *     setLastTimeConnected} or {@link Builder#setNotifyOnDeviceNearby(boolean)
-     *     setNotifyOnDeviceNearby} before you will be able to call {@link Builder#build() build}.
-     *
-     *     This is ensured statically at compile time.
+     * Builder for {@link AssociationInfo}
      *
      * @hide
      */
-    @NonNull
-    public static NonActionableBuilder builder(@NonNull AssociationInfo info) {
-        return new Builder(info);
-    }
-
-    /** @hide */
-    public static final class Builder implements NonActionableBuilder {
-        @NonNull
-        private final AssociationInfo mOriginalInfo;
+    @TestApi
+    public static final class Builder {
+        private final int mId;
+        private final int mUserId;
+        private final String mPackageName;
+        private MacAddress mDeviceMacAddress;
+        private CharSequence mDisplayName;
+        private String mDeviceProfile;
+        private AssociatedDevice mAssociatedDevice;
+        private boolean mSelfManaged;
         private boolean mNotifyOnDeviceNearby;
         private boolean mRevoked;
+        private long mTimeApprovedMs;
         private long mLastTimeConnectedMs;
         private int mSystemDataSyncFlags;
 
-        private Builder(@NonNull AssociationInfo info) {
-            mOriginalInfo = info;
+        /** @hide */
+        @TestApi
+        public Builder(int id, int userId, @NonNull String packageName) {
+            mId = id;
+            mUserId = userId;
+            mPackageName = packageName;
+        }
+
+        /** @hide */
+        @TestApi
+        public Builder(@NonNull AssociationInfo info) {
+            mId = info.mId;
+            mUserId = info.mUserId;
+            mPackageName = info.mPackageName;
+            mDeviceMacAddress = info.mDeviceMacAddress;
+            mDisplayName = info.mDisplayName;
+            mDeviceProfile = info.mDeviceProfile;
+            mAssociatedDevice = info.mAssociatedDevice;
+            mSelfManaged = info.mSelfManaged;
             mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
             mRevoked = info.mRevoked;
+            mTimeApprovedMs = info.mTimeApprovedMs;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
             mSystemDataSyncFlags = info.mSystemDataSyncFlags;
         }
 
         /** @hide */
-        @Override
+        @TestApi
         @NonNull
+        public Builder setDeviceMacAddress(@Nullable MacAddress deviceMacAddress) {
+            mDeviceMacAddress = deviceMacAddress;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        public Builder setDisplayName(@Nullable CharSequence displayName) {
+            mDisplayName = displayName;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        public Builder setDeviceProfile(@Nullable String deviceProfile) {
+            mDeviceProfile = deviceProfile;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        public Builder setAssociatedDevice(@Nullable AssociatedDevice associatedDevice) {
+            mAssociatedDevice = associatedDevice;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        public Builder setSelfManaged(boolean selfManaged) {
+            mSelfManaged = selfManaged;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
+            mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setRevoked(boolean revoked) {
+            mRevoked = revoked;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
+        public Builder setTimeApproved(long timeApprovedMs) {
+            if (timeApprovedMs < 0) {
+                throw new IllegalArgumentException("timeApprovedMs must be positive. Was given ("
+                        + timeApprovedMs + ")");
+            }
+            mTimeApprovedMs = timeApprovedMs;
+            return this;
+        }
+
+        /** @hide */
+        @TestApi
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder")
         public Builder setLastTimeConnected(long lastTimeConnectedMs) {
             if (lastTimeConnectedMs < 0) {
                 throw new IllegalArgumentException(
@@ -436,23 +523,7 @@ public final class AssociationInfo implements Parcelable {
         }
 
         /** @hide */
-        @Override
-        @NonNull
-        public Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby) {
-            mNotifyOnDeviceNearby = notifyOnDeviceNearby;
-            return this;
-        }
-
-        /** @hide */
-        @Override
-        @NonNull
-        public Builder setRevoked(boolean revoked) {
-            mRevoked = revoked;
-            return this;
-        }
-
-        /** @hide */
-        @Override
+        @TestApi
         @NonNull
         public Builder setSystemDataSyncFlags(int flags) {
             mSystemDataSyncFlags = flags;
@@ -460,53 +531,31 @@ public final class AssociationInfo implements Parcelable {
         }
 
         /** @hide */
+        @TestApi
         @NonNull
         public AssociationInfo build() {
+            if (mId <= 0) {
+                throw new IllegalArgumentException("Association ID should be greater than 0");
+            }
+            if (mDeviceMacAddress == null && mDisplayName == null) {
+                throw new IllegalArgumentException("MAC address and the display name must NOT be "
+                        + "null at the same time");
+            }
             return new AssociationInfo(
-                    mOriginalInfo.mId,
-                    mOriginalInfo.mUserId,
-                    mOriginalInfo.mPackageName,
-                    mOriginalInfo.mDeviceMacAddress,
-                    mOriginalInfo.mDisplayName,
-                    mOriginalInfo.mDeviceProfile,
-                    mOriginalInfo.mAssociatedDevice,
-                    mOriginalInfo.mSelfManaged,
+                    mId,
+                    mUserId,
+                    mPackageName,
+                    mDeviceMacAddress,
+                    mDisplayName,
+                    mDeviceProfile,
+                    mAssociatedDevice,
+                    mSelfManaged,
                     mNotifyOnDeviceNearby,
                     mRevoked,
-                    mOriginalInfo.mTimeApprovedMs,
+                    mTimeApprovedMs,
                     mLastTimeConnectedMs,
                     mSystemDataSyncFlags
             );
         }
-    }
-
-    /**
-     * This interface is returned from the
-     * {@link AssociationInfo#builder(android.companion.AssociationInfo) builder} entry point
-     * to indicate that this builder is not yet in a state that can produce a meaningful
-     * {@link AssociationInfo} object that is different from the one originally passed in.
-     *
-     * <p>
-     * Only by calling one of the setter methods is this builder turned into one where calling
-     * {@link Builder#build() build()} makes sense.
-     *
-     * @hide
-     */
-    public interface NonActionableBuilder {
-        /** @hide */
-        @NonNull
-        Builder setNotifyOnDeviceNearby(boolean notifyOnDeviceNearby);
-
-        /** @hide */
-        @NonNull
-        Builder setLastTimeConnected(long lastTimeConnectedMs);
-
-        /** @hide */
-        @NonNull
-        Builder setRevoked(boolean revoked);
-
-        /** @hide */
-        @NonNull
-        Builder setSystemDataSyncFlags(int flags);
     }
 }
