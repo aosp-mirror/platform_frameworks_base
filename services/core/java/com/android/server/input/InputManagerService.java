@@ -390,6 +390,8 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mFocusEventDebugViewLock")
     @Nullable
     private FocusEventDebugView mFocusEventDebugView;
+    private boolean mShowKeyPresses = false;
+    private boolean mShowRotaryInput = false;
 
     /** Point of injection for test dependencies. */
     @VisibleForTesting
@@ -2476,7 +2478,7 @@ public class InputManagerService extends IInputManager.Stub
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
         synchronized (mFocusEventDebugViewLock) {
             if (mFocusEventDebugView != null) {
-                mFocusEventDebugView.reportEvent(event);
+                mFocusEventDebugView.reportKeyEvent(event);
             }
         }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
@@ -3396,14 +3398,45 @@ public class InputManagerService extends IInputManager.Stub
         mWindowManagerCallbacks.notifyPointerLocationChanged(enabled);
     }
 
-    void updateFocusEventDebugViewEnabled(boolean enabled) {
+    void updateShowKeyPresses(boolean enabled) {
+        if (mShowKeyPresses == enabled) {
+            return;
+        }
+
+        mShowKeyPresses = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowKeyPresses(enabled);
+            }
+        }
+    }
+
+    void updateShowRotaryInput(boolean enabled) {
+        if (mShowRotaryInput == enabled) {
+            return;
+        }
+
+        mShowRotaryInput = enabled;
+        updateFocusEventDebugViewEnabled();
+
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.updateShowRotaryInput(enabled);
+            }
+        }
+    }
+
+    private void updateFocusEventDebugViewEnabled() {
+        boolean enabled = mShowKeyPresses || mShowRotaryInput;
         FocusEventDebugView view;
         synchronized (mFocusEventDebugViewLock) {
             if (enabled == (mFocusEventDebugView != null)) {
                 return;
             }
             if (enabled) {
-                mFocusEventDebugView = new FocusEventDebugView(mContext);
+                mFocusEventDebugView = new FocusEventDebugView(mContext, this);
                 view = mFocusEventDebugView;
             } else {
                 view = mFocusEventDebugView;

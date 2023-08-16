@@ -22,17 +22,20 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.InputEvent;
+import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.RoundedCorner;
 import android.view.View;
 import android.view.WindowInsets;
@@ -64,42 +67,31 @@ class FocusEventDebugView extends LinearLayout {
     private static final int KEY_VIEW_MIN_WIDTH_DP = 32;
     private static final int KEY_VIEW_TEXT_SIZE_SP = 12;
 
+    private final InputManagerService mService;
     private final int mOuterPadding;
 
     // Tracks all keys that are currently pressed/down.
     private final Map<Pair<Integer /*deviceId*/, Integer /*scanCode*/>, PressedKeyView>
             mPressedKeys = new HashMap<>();
 
-    private final PressedKeyContainer mPressedKeyContainer;
-    private final PressedKeyContainer mPressedModifierContainer;
+    @Nullable
+    private FocusEventDebugGlobalMonitor mFocusEventDebugGlobalMonitor;
+    @Nullable
+    private PressedKeyContainer mPressedKeyContainer;
+    @Nullable
+    private PressedKeyContainer mPressedModifierContainer;
 
-    FocusEventDebugView(Context c) {
+    FocusEventDebugView(Context c, InputManagerService service) {
         super(c);
         setFocusableInTouchMode(true);
 
+        mService = service;
         final var dm = mContext.getResources().getDisplayMetrics();
         mOuterPadding = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, OUTER_PADDING_DP, dm);
 
         setOrientation(HORIZONTAL);
         setLayoutDirection(LAYOUT_DIRECTION_RTL);
         setGravity(Gravity.START | Gravity.BOTTOM);
-
-        mPressedKeyContainer = new PressedKeyContainer(mContext);
-        mPressedKeyContainer.setOrientation(HORIZONTAL);
-        mPressedKeyContainer.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
-        mPressedKeyContainer.setLayoutDirection(LAYOUT_DIRECTION_LTR);
-        final var scroller = new HorizontalScrollView(mContext);
-        scroller.addView(mPressedKeyContainer);
-        scroller.setHorizontalScrollBarEnabled(false);
-        scroller.addOnLayoutChangeListener(
-                (view, l, t, r, b, ol, ot, or, ob) -> scroller.fullScroll(View.FOCUS_RIGHT));
-        scroller.setHorizontalFadingEdgeEnabled(true);
-        addView(scroller, new LayoutParams(0, WRAP_CONTENT, 1));
-
-        mPressedModifierContainer = new PressedKeyContainer(mContext);
-        mPressedModifierContainer.setOrientation(VERTICAL);
-        mPressedModifierContainer.setGravity(Gravity.LEFT | Gravity.BOTTOM);
-        addView(mPressedModifierContainer, new LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
     }
 
     @Override
@@ -135,17 +127,82 @@ class FocusEventDebugView extends LinearLayout {
         return super.dispatchKeyEvent(event);
     }
 
-    /** Report an input event to the debug view. */
     @AnyThread
-    public void reportEvent(InputEvent event) {
-        if (!(event instanceof KeyEvent)) {
-            // TODO: Support non-pointer MotionEvents.
+    public void updateShowKeyPresses(boolean enabled) {
+        post(() -> handleUpdateShowKeyPresses(enabled));
+    }
+
+    @AnyThread
+    public void updateShowRotaryInput(boolean enabled) {
+        post(() -> handleUpdateShowRotaryInput(enabled));
+    }
+
+    private void handleUpdateShowKeyPresses(boolean enabled) {
+        if (enabled == showKeyPresses()) {
             return;
         }
+
+        if (!enabled) {
+            removeView(mPressedKeyContainer);
+            mPressedKeyContainer = null;
+            removeView(mPressedModifierContainer);
+            mPressedModifierContainer = null;
+            return;
+        }
+
+        mPressedKeyContainer = new PressedKeyContainer(mContext);
+        mPressedKeyContainer.setOrientation(HORIZONTAL);
+        mPressedKeyContainer.setGravity(Gravity.RIGHT | Gravity.BOTTOM);
+        mPressedKeyContainer.setLayoutDirection(LAYOUT_DIRECTION_LTR);
+        final var scroller = new HorizontalScrollView(mContext);
+        scroller.addView(mPressedKeyContainer);
+        scroller.setHorizontalScrollBarEnabled(false);
+        scroller.addOnLayoutChangeListener(
+                (view, l, t, r, b, ol, ot, or, ob) -> scroller.fullScroll(View.FOCUS_RIGHT));
+        scroller.setHorizontalFadingEdgeEnabled(true);
+        addView(scroller, new LayoutParams(0, WRAP_CONTENT, 1));
+
+        mPressedModifierContainer = new PressedKeyContainer(mContext);
+        mPressedModifierContainer.setOrientation(VERTICAL);
+        mPressedModifierContainer.setGravity(Gravity.LEFT | Gravity.BOTTOM);
+        addView(mPressedModifierContainer, new LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+    }
+
+    private void handleUpdateShowRotaryInput(boolean enabled) {
+        if (enabled == showRotaryInput()) {
+            return;
+        }
+
+        if (!enabled) {
+            mFocusEventDebugGlobalMonitor.dispose();
+            mFocusEventDebugGlobalMonitor = null;
+            return;
+        }
+
+        mFocusEventDebugGlobalMonitor = new FocusEventDebugGlobalMonitor(this, mService);
+    }
+
+    /** Report a key event to the debug view. */
+    @AnyThread
+    public void reportKeyEvent(KeyEvent event) {
         post(() -> handleKeyEvent(KeyEvent.obtain((KeyEvent) event)));
     }
 
+    /** Report a motion event to the debug view. */
+    @AnyThread
+    public void reportMotionEvent(MotionEvent event) {
+        if (event.getSource() != InputDevice.SOURCE_ROTARY_ENCODER) {
+            return;
+        }
+
+        post(() -> handleRotaryInput(MotionEvent.obtain((MotionEvent) event)));
+    }
+
     private void handleKeyEvent(KeyEvent keyEvent) {
+        if (!showKeyPresses()) {
+            return;
+        }
+
         final var identifier = new Pair<>(keyEvent.getDeviceId(), keyEvent.getScanCode());
         final var container = KeyEvent.isModifierKey(keyEvent.getKeyCode())
                 ? mPressedModifierContainer
@@ -183,6 +240,18 @@ class FocusEventDebugView extends LinearLayout {
                 break;
         }
         keyEvent.recycle();
+    }
+
+    private void handleRotaryInput(MotionEvent motionEvent) {
+        if (!showRotaryInput()) {
+            return;
+        }
+
+        float scrollAxisValue = motionEvent.getAxisValue(MotionEvent.AXIS_SCROLL);
+        // TODO(b/286086154): replace log with visualization.
+        Log.d(TAG, "ROTARY INPUT: " + String.valueOf(scrollAxisValue));
+
+        motionEvent.recycle();
     }
 
     private static String getLabel(KeyEvent event) {
@@ -230,6 +299,16 @@ class FocusEventDebugView extends LinearLayout {
             return label.substring(8);
         }
         return label;
+    }
+
+    /** Determine whether to show key presses by checking one of the key-related objects. */
+    private boolean showKeyPresses() {
+        return mPressedKeyContainer != null;
+    }
+
+    /** Determine whether to show rotary input by checking one of the rotary-related objects. */
+    private boolean showRotaryInput() {
+        return mFocusEventDebugGlobalMonitor != null;
     }
 
     private static class PressedKeyView extends TextView {
