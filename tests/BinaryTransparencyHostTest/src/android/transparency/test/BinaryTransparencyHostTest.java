@@ -91,20 +91,20 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
     public void testCollectAllSilentInstalledMbaInfo() throws Exception {
         try {
             new InstallMultiple()
-                .addFile("ApkVerityTestApp.apk")
-                .addFile("ApkVerityTestAppSplit.apk")
+                .addFile("FeatureSplitBase.apk")
+                .addFile("FeatureSplit1.apk")
                 .run();
             updatePreloadApp();
-            assertNotNull(getDevice().getAppPackageInfo("com.android.apkverity"));
+            assertNotNull(getDevice().getAppPackageInfo("com.android.test.split.feature"));
             assertNotNull(getDevice().getAppPackageInfo("com.android.egg"));
 
             assertTrue(getDevice().setProperty("debug.transparency.bg-install-apps",
-                        "com.android.apkverity,com.android.egg"));
+                        "com.android.test.split.feature,com.android.egg"));
             runDeviceTest("testCollectAllSilentInstalledMbaInfo");
         } finally {
             // No need to wait until job complete, since we can't verifying very meaningfully.
             cancelPendingJob();
-            uninstallPackage("com.android.apkverity");
+            uninstallPackage("com.android.test.split.feature");
             uninstallPackage("com.android.egg");
         }
     }
