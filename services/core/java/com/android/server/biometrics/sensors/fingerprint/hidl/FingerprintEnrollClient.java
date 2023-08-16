@@ -81,6 +81,13 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         }
     }
 
+    @Override
+    public void start(@NonNull ClientMonitorCallback callback) {
+        super.start(callback);
+
+        BiometricNotificationUtils.cancelFingerprintEnrollNotification(getContext());
+    }
+
     @NonNull
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {

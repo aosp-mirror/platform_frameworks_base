@@ -66,6 +66,7 @@ import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -354,7 +355,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+                BiometricsProtoEnums.MODALITY_FINGERPRINT, new BiometricNotificationImpl());
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);

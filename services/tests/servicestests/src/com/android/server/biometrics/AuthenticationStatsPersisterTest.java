@@ -211,6 +211,20 @@ public class AuthenticationStatsPersisterTest {
         assertThat(mStringSetArgumentCaptor.getValue()).contains(expectedFrrStats);
     }
 
+    @Test
+    public void removeFrrStats_existingUser_shouldUpdateRecord() throws JSONException {
+        AuthenticationStats authenticationStats = new AuthenticationStats(USER_ID_1,
+                300 /* totalAttempts */, 10 /* rejectedAttempts */,
+                0 /* enrollmentNotifications */, BiometricsProtoEnums.MODALITY_FACE);
+        when(mSharedPreferences.getStringSet(eq(KEY), anySet())).thenReturn(
+                Set.of(buildFrrStats(authenticationStats)));
+
+        mAuthenticationStatsPersister.removeFrrStats(USER_ID_1);
+
+        verify(mEditor).putStringSet(eq(KEY), mStringSetArgumentCaptor.capture());
+        assertThat(mStringSetArgumentCaptor.getValue()).doesNotContain(authenticationStats);
+    }
+
     private String buildFrrStats(AuthenticationStats authenticationStats)
             throws JSONException {
         if (authenticationStats.getModality() == BiometricsProtoEnums.MODALITY_FACE) {
