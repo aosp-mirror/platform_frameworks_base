@@ -35,6 +35,8 @@ java_test_host {
     data: [
         ":BinaryTransparencyTestApp",
         ":EasterEgg",
+        ":FeatureSplitBase",
+        ":FeatureSplit1",
         ":com.android.apex.cts.shim.v2_rebootless_prebuilt",
     ],
     test_suites: [
