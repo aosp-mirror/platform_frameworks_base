@@ -977,6 +977,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayContent.onRequestedOverrideConfigurationChanged(c);
     }
 
+    /** Used for the tests that assume the display is portrait by default. */
+    static void makeDisplayPortrait(DisplayContent displayContent) {
+        if (displayContent.mBaseDisplayHeight <= displayContent.mBaseDisplayWidth) {
+            resizeDisplay(displayContent, 500, 1000);
+        }
+    }
+
     // The window definition for UseTestDisplay#addWindows. The test can declare to add only
     // necessary windows, that avoids adding unnecessary overhead of unused windows.
     static final int W_NOTIFICATION_SHADE = TYPE_NOTIFICATION_SHADE;
