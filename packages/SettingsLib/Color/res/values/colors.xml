@@ -16,8 +16,6 @@
   -->
 
 <resources>
-    <color name="settingslib_protection_color">@android:color/white</color>
-
     <!-- Dynamic colors-->
     <color name="settingslib_color_blue600">#1a73e8</color>
     <color name="settingslib_color_blue400">#669df6</color>
