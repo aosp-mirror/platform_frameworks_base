@@ -109,6 +109,7 @@ public class ImageWallpaper extends WallpaperService {
         private WallpaperManager mWallpaperManager;
         private final WallpaperLocalColorExtractor mWallpaperLocalColorExtractor;
         private SurfaceHolder mSurfaceHolder;
+        private boolean mDrawn = false;
         @VisibleForTesting
         static final int MIN_SURFACE_WIDTH = 128;
         @VisibleForTesting
@@ -238,6 +239,7 @@ public class ImageWallpaper extends WallpaperService {
 
         private void drawFrameSynchronized() {
             synchronized (mLock) {
+                if (mDrawn) return;
                 drawFrameInternal();
             }
         }
@@ -275,6 +277,7 @@ public class ImageWallpaper extends WallpaperService {
                 Rect dest = mSurfaceHolder.getSurfaceFrame();
                 try {
                     canvas.drawBitmap(bitmap, null, dest, null);
+                    mDrawn = true;
                 } finally {
                     surface.unlockCanvasAndPost(canvas);
                 }
