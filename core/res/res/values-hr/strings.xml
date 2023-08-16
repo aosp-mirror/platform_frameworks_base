@@ -753,8 +753,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Aplikaciji omogućuje registriranje novih telekomunikacijskih veza."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"upravljanje telekomunikacijskim vezama"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Aplikaciji omogućuje upravljanje telekomunikacijskim vezama."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interakcija sa zaslonom tijekom poziva"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Omogućuje aplikaciji upravljanje vremenom i načinom na koji se korisniku prikazuje zaslon tijekom poziva."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interakcija s filtriranjem poziva"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Omogućuje aplikaciji kada se i kako korisniku prikazuje zaslon filtriranja poziva."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"interakcija s telefonskim uslugama"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Omogućuje aplikacijama interakciju s telefonskim uslugama za uspostavljanje i primanje poziva."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"pružanje korisničkog iskustva tijekom poziva"</string>
@@ -2329,8 +2329,8 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> upotrebljava oba zaslona za prikazivanje sadržaja"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Uređaj se pregrijao"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvostruki zaslon nije podržan jer se vaš telefon pregrijao"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Značajka Dual Screen nije dostupna"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Značajka Dual Screen nije dostupna jer je uključena štednja baterije. To možete isključiti u postavkama."</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dvostruki zaslon nije dostupan"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dvostruki zaslon nije dostupan jer je uključena štednja baterije. Možete je isključiti u postavkama."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Otvorite Postavke"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Isključi"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Konfiguriran je uređaj <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
