@@ -490,6 +490,11 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         final TaskDisplayArea tda = task.getDisplayArea();
+        // Ensure the display is not a large screen
+        if (tda.getConfiguration().smallestScreenWidthDp
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            resizeDisplay(activity.mDisplayContent, 500, 800);
+        }
 
         // Ignore the activity min width/height for determine multi window eligibility.
         mAtm.mRespectsActivityMinWidthHeightMultiWindow = -1;
