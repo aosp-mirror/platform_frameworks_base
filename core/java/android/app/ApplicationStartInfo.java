@@ -39,12 +39,17 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Provide information related to a processes startup.
+ * Describes information related to an application process's startup.
+ *
+ * <p>
+ * Many aspects concerning why and how an applications process was started are valuable for apps
+ * both for logging and for potential behavior changes. Reason for process start, start type,
+ * start times, throttling, and other useful diagnostic data can be obtained from
+ * {@link ApplicationStartInfo} records.
+ * </p>
  */
 @FlaggedApi(Flags.FLAG_APP_START_INFO)
 public final class ApplicationStartInfo implements Parcelable {
@@ -552,13 +557,12 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeInt(mDefiningUid);
         dest.writeString(mProcessName);
         dest.writeInt(mReason);
-        dest.writeInt(mStartupTimestampsNs.size());
-        Set<Map.Entry<Integer, Long>> timestampEntrySet = mStartupTimestampsNs.entrySet();
-        Iterator<Map.Entry<Integer, Long>> iter = timestampEntrySet.iterator();
-        while (iter.hasNext()) {
-            Map.Entry<Integer, Long> entry = iter.next();
-            dest.writeInt(entry.getKey());
-            dest.writeLong(entry.getValue());
+        dest.writeInt(mStartupTimestampsNs == null ? 0 : mStartupTimestampsNs.size());
+        if (mStartupTimestampsNs != null) {
+            for (int i = 0; i < mStartupTimestampsNs.size(); i++) {
+                dest.writeInt(mStartupTimestampsNs.keyAt(i));
+                dest.writeLong(mStartupTimestampsNs.valueAt(i));
+            }
         }
         dest.writeInt(mStartType);
         dest.writeParcelable(mStartIntent, flags);
@@ -740,13 +744,11 @@ public final class ApplicationStartInfo implements Parcelable {
             sb.append(" intent=").append(mStartIntent.toString())
                 .append('\n');
         }
-        if (mStartupTimestampsNs.size() > 0) {
+        if (mStartupTimestampsNs != null && mStartupTimestampsNs.size() > 0) {
             sb.append(" timestamps: ");
-            Set<Map.Entry<Integer, Long>> timestampEntrySet = mStartupTimestampsNs.entrySet();
-            Iterator<Map.Entry<Integer, Long>> iter = timestampEntrySet.iterator();
-            while (iter.hasNext()) {
-                Map.Entry<Integer, Long> entry = iter.next();
-                sb.append(entry.getKey()).append("=").append(entry.getValue()).append(" ");
+            for (int i = 0; i < mStartupTimestampsNs.size(); i++) {
+                sb.append(mStartupTimestampsNs.keyAt(i)).append("=").append(mStartupTimestampsNs
+                        .valueAt(i)).append(" ");
             }
             sb.append('\n');
         }
