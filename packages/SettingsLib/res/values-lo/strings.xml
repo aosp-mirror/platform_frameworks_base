@@ -107,8 +107,10 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"ແບ່ງປັນລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ປະຫວັດການໂທ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"ໃຊ້ສໍາລັບແບ່ງປັນລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ປະຫວັດການໂທ"</string>
+    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
+    <skip />
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ຂໍ້ຄວາມ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ການ​ເຂົ້າ​ເຖິງ SIM"</string>
