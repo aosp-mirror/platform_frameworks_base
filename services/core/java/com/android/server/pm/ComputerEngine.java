@@ -4925,8 +4925,8 @@ public class ComputerEngine implements Computer {
         }
     }
 
-    @Override
-    public boolean isPackageSuspendedForUser(@NonNull String packageName, int userId) {
+    private PackageUserStateInternal getUserStageOrDefaultForUser(@NonNull String packageName,
+            int userId) {
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "isPackageSuspendedForUser for user " + userId);
@@ -4934,7 +4934,17 @@ public class ComputerEngine implements Computer {
         if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
             throw new IllegalArgumentException("Unknown target package: " + packageName);
         }
-        return ps.getUserStateOrDefault(userId).isSuspended();
+        return ps.getUserStateOrDefault(userId);
+    }
+
+    @Override
+    public boolean isPackageSuspendedForUser(@NonNull String packageName, int userId) {
+        return getUserStageOrDefaultForUser(packageName, userId).isSuspended();
+    }
+
+    @Override
+    public boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId) {
+        return getUserStageOrDefaultForUser(packageName, userId).isQuarantined();
     }
 
     @Override
