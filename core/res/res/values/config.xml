@@ -3036,14 +3036,15 @@
          on the headphone/microphone jack. When false use the older uevent framework. -->
     <bool name="config_useDevInputEventForAudioJack">false</bool>
 
-    <!-- Whether safe headphone volume is enabled or not (country specific). -->
+    <!-- Whether safe headphone hearing is enforced by any regulation (e.g.
+         EN50332-3, EN50332-2) or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not
-         (country specific). This value should only be overlaid to true
-         when a vendor supports offload and has the HAL sound dose
-         interfaces implemented. Otherwise, this can lead to a compliance
-         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    <!-- Whether safe headphone sound dosage warning is enabled or not.
+         This value should only be overlaid to true when a vendor supports
+         offload and has the HAL sound dose interfaces implemented.
+         Otherwise, this can lead to a compliance issue with the safe
+         hearing standards EN50332-3 and IEC62368-1.
     -->
     <bool name="config_safe_sound_dosage_enabled">false</bool>
 
