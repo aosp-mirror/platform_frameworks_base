@@ -116,8 +116,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperSizeWithFixedTransform() {
         // No wallpaper
         final DisplayContent dc = mDisplayContent;
-        if (dc.mBaseDisplayHeight == dc.mBaseDisplayWidth) {
-            // Make sure the size is different when changing orientation.
+        if (dc.mBaseDisplayHeight <= dc.mBaseDisplayWidth) {
+            // Make sure the display size is portrait.
             resizeDisplay(dc, 500, 1000);
         }
 

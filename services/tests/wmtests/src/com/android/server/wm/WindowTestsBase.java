@@ -971,6 +971,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     static void resizeDisplay(DisplayContent displayContent, int width, int height) {
         displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
                 displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
+        displayContent.getDisplayRotation().configure(width, height);
         final Configuration c = new Configuration();
         displayContent.computeScreenConfiguration(c);
         displayContent.onRequestedOverrideConfigurationChanged(c);
