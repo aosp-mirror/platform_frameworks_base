@@ -133,6 +133,7 @@ public class ImageWallpaper extends WallpaperService {
             setShowForAllUsers(true);
             mWallpaperLocalColorExtractor = new WallpaperLocalColorExtractor(
                     mLongExecutor,
+                    mLock,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
