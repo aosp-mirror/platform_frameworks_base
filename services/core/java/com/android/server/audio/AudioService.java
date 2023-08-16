@@ -10743,6 +10743,7 @@ public class AudioService extends IAudioService.Stub
         mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
         mDeviceBroker.persistAudioDeviceSettings();
 
+        mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes());
         mSoundDoseHelper.setAudioDeviceCategory(addr, internalType,
                 btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES);
     }
