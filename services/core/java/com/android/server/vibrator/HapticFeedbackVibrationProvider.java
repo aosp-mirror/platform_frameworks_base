@@ -22,6 +22,7 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
+import android.os.vibrator.Flags;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
@@ -58,6 +59,8 @@ public final class HapticFeedbackVibrationProvider {
     @Nullable private final SparseArray<VibrationEffect> mHapticCustomizations;
     private final FeatureFlags mViewFeatureFlags;
 
+    private float mKeyboardVibrationFixedAmplitude;
+
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
         this(res, vibrator.getInfo());
@@ -91,6 +94,11 @@ public final class HapticFeedbackVibrationProvider {
                         : VibrationSettings.createEffectFromResource(
                                 res,
                                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
+        mKeyboardVibrationFixedAmplitude = res.getFloat(
+                com.android.internal.R.dimen.config_keyboardHapticFeedbackFixedAmplitude);
+        if (mKeyboardVibrationFixedAmplitude < 0 || mKeyboardVibrationFixedAmplitude > 1) {
+            mKeyboardVibrationFixedAmplitude = -1;
+        }
     }
 
     /**
@@ -120,6 +128,9 @@ public final class HapticFeedbackVibrationProvider {
                 return getVibration(effectId, VibrationEffect.EFFECT_TEXTURE_TICK);
 
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
+            case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
+                return getKeyboardVibration(effectId);
+
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
@@ -128,7 +139,6 @@ public final class HapticFeedbackVibrationProvider {
                         VibrationEffect.EFFECT_TICK,
                         /* fallbackForPredefinedEffect= */ false);
 
-            case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
             case HapticFeedbackConstants.VIRTUAL_KEY:
             case HapticFeedbackConstants.EDGE_RELEASE:
             case HapticFeedbackConstants.CALENDAR_DATE:
@@ -204,6 +214,10 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.SCROLL_LIMIT:
                 attrs = HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
                 break;
+            case HapticFeedbackConstants.KEYBOARD_TAP:
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
+                attrs = createKeyboardVibrationAttributes();
+                break;
             default:
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
@@ -214,6 +228,9 @@ public final class HapticFeedbackVibrationProvider {
         }
         if (shouldBypassInterruptionPolicy(effectId, mViewFeatureFlags)) {
             flags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+        }
+        if (shouldBypassIntensityScale(effectId)) {
+            flags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_SCALE;
         }
 
         return flags == 0 ? attrs : new VibrationAttributes.Builder(attrs).setFlags(flags).build();
@@ -293,6 +310,64 @@ public final class HapticFeedbackVibrationProvider {
 
     private boolean effectHasCustomization(int effectId) {
         return mHapticCustomizations != null && mHapticCustomizations.contains(effectId);
+    }
+
+    private VibrationEffect getKeyboardVibration(int effectId) {
+        if (effectHasCustomization(effectId)) {
+            return mHapticCustomizations.get(effectId);
+        }
+
+        int primitiveId;
+        int predefinedEffectId;
+        boolean predefinedEffectFallback;
+
+        switch (effectId) {
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
+                primitiveId = VibrationEffect.Composition.PRIMITIVE_TICK;
+                predefinedEffectId = VibrationEffect.EFFECT_TICK;
+                predefinedEffectFallback = false;
+                break;
+            case HapticFeedbackConstants.KEYBOARD_TAP:
+            default:
+                primitiveId = VibrationEffect.Composition.PRIMITIVE_CLICK;
+                predefinedEffectId = VibrationEffect.EFFECT_CLICK;
+                predefinedEffectFallback = true;
+        }
+        if (Flags.keyboardCategoryEnabled() && mKeyboardVibrationFixedAmplitude > 0) {
+            if (mVibratorInfo.isPrimitiveSupported(primitiveId)) {
+                return VibrationEffect.startComposition()
+                        .addPrimitive(primitiveId, mKeyboardVibrationFixedAmplitude)
+                        .compose();
+            }
+        }
+        return getVibration(effectId, predefinedEffectId,
+                /* fallbackForPredefinedEffect= */ predefinedEffectFallback);
+    }
+
+    private boolean shouldBypassIntensityScale(int effectId) {
+        if (!Flags.keyboardCategoryEnabled() || mKeyboardVibrationFixedAmplitude < 0) {
+            // shouldn't bypass if not support keyboard category or no fixed amplitude
+            return false;
+        }
+        switch (effectId) {
+            case HapticFeedbackConstants.KEYBOARD_TAP:
+                return mVibratorInfo.isPrimitiveSupported(
+                        VibrationEffect.Composition.PRIMITIVE_CLICK);
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
+                return mVibratorInfo.isPrimitiveSupported(
+                        VibrationEffect.Composition.PRIMITIVE_TICK);
+        }
+        return false;
+    }
+
+    private static VibrationAttributes createKeyboardVibrationAttributes() {
+        if (!Flags.keyboardCategoryEnabled()) {
+            return TOUCH_VIBRATION_ATTRIBUTES;
+        }
+
+        return new VibrationAttributes.Builder(TOUCH_VIBRATION_ATTRIBUTES)
+                .setCategory(VibrationAttributes.CATEGORY_KEYBOARD)
+                .build();
     }
 
     @Nullable

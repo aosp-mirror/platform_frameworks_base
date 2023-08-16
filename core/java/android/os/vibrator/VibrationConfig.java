@@ -65,6 +65,8 @@ public class VibrationConfig {
     @VibrationIntensity
     private final int mDefaultRingVibrationIntensity;
 
+    private final boolean mDefaultKeyboardVibrationEnabled;
+
     /** @hide */
     public VibrationConfig(@Nullable Resources resources) {
         mHapticChannelMaxVibrationAmplitude = loadFloat(resources,
@@ -76,6 +78,8 @@ public class VibrationConfig {
 
         mIgnoreVibrationsOnWirelessCharger = loadBoolean(resources,
                 com.android.internal.R.bool.config_ignoreVibrationsOnWirelessCharger, false);
+        mDefaultKeyboardVibrationEnabled = loadBoolean(resources,
+                com.android.internal.R.bool.config_defaultKeyboardVibrationEnabled, true);
 
         mDefaultAlarmVibrationIntensity = loadDefaultIntensity(resources,
                 com.android.internal.R.integer.config_defaultAlarmVibrationIntensity);
@@ -155,6 +159,14 @@ public class VibrationConfig {
      */
     public boolean ignoreVibrationsOnWirelessCharger() {
         return mIgnoreVibrationsOnWirelessCharger;
+    }
+
+    /**
+     * Whether keyboard vibration settings is enabled by default.
+     * @hide
+     */
+    public boolean isDefaultKeyboardVibrationEnabled() {
+        return mDefaultKeyboardVibrationEnabled;
     }
 
     /** Get the default vibration intensity for given usage. */
