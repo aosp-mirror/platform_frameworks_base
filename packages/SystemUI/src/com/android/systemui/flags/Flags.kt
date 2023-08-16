@@ -512,11 +512,6 @@ object Flags {
     val ENABLE_FLING_TO_DISMISS_PIP =
         sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
 
-    @Keep
-    @JvmField
-    val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_keep_clear_algorithm", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
