@@ -7571,6 +7571,10 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile profile for device "
                     + previousDevice + " -> " + newDevice + ". Got: " + profile);
         }
+
+        sDeviceLogger.enqueue(new EventLogger.StringEvent("BlutoothActiveDeviceChanged for "
+                + BluetoothProfile.getProfileName(profile) + ", device update " + previousDevice
+                + " -> " + newDevice));
         AudioDeviceBroker.BtDeviceChangedData data =
                 new AudioDeviceBroker.BtDeviceChangedData(newDevice, previousDevice, info,
                         "AudioService");
@@ -9615,6 +9619,9 @@ public class AudioService extends IAudioService.Stub
                 }
             } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+                sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                        "BluetoothAdapter ACTION_STATE_CHANGED with state " + state));
+
                 if (state == BluetoothAdapter.STATE_OFF ||
                         state == BluetoothAdapter.STATE_TURNING_OFF) {
                     mDeviceBroker.disconnectAllBluetoothProfiles();
