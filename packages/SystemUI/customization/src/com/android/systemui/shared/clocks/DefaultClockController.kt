@@ -65,7 +65,7 @@ class DefaultClockController(
     protected var onSecondaryDisplay: Boolean = false
 
     override val events: DefaultClockEvents
-    override val config = ClockConfig()
+    override val config = ClockConfig(DEFAULT_CLOCK_ID)
 
     init {
         val parent = FrameLayout(ctx)

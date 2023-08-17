@@ -223,10 +223,14 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 }
                 .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_SLOW_IN),
             true /* animate */)
-        interactionJankMonitor.begin(
-                notifShadeWindowControllerLazy.get().windowRootView,
-            CUJ_SCREEN_OFF_SHOW_AOD
-        )
+        val builder = InteractionJankMonitor.Configuration.Builder
+            .withView(
+                    InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD,
+                    notifShadeWindowControllerLazy.get().windowRootView
+            )
+            .setTag(statusBarStateControllerImpl.getClockId())
+
+        interactionJankMonitor.begin(builder)
     }
 
     override fun onStartedWakingUp() {
