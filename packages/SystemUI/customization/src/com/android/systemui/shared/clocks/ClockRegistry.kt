@@ -401,6 +401,18 @@ open class ClockRegistry(
             scope.launch(bgDispatcher) { mutateSetting { it.copy(seedColor = value) } }
         }
 
+    // Returns currentClockId if clock is connected, otherwise DEFAULT_CLOCK_ID. Since this
+    // is dependent on which clocks are connected, it may change when a clock is installed or
+    // removed from the device (unlike currentClockId).
+    // TODO: Merge w/ CurrentClockId when we convert to a flow. We shouldn't need both behaviors.
+    val activeClockId: String
+        get() {
+            if (!availableClocks.containsKey(currentClockId)) {
+                return DEFAULT_CLOCK_ID
+            }
+            return currentClockId
+        }
+
     init {
         // Register default clock designs
         for (clock in defaultClockProvider.getClocks()) {
