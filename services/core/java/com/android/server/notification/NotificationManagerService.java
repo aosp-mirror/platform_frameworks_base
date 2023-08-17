@@ -1194,7 +1194,9 @@ public class NotificationManagerService extends SystemService {
                 mNotificationRecordLogger.log(
                         NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
                                 generatedByAssistant, action.isContextual()), r);
-                EventLogTags.writeNotificationActionClicked(key, actionIndex,
+                EventLogTags.writeNotificationActionClicked(key,
+                        action.actionIntent.getTarget().toString(),
+                        action.actionIntent.getIntent().toString(), actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                         nv.rank, nv.count);
                 nv.recycle();

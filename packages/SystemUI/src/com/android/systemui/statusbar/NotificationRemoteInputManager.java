@@ -119,11 +119,14 @@ public class NotificationRemoteInputManager implements Dumpable {
             mPowerInteractor.wakeUpIfDozing(
                     "NOTIFICATION_CLICK", PowerManager.WAKE_REASON_GESTURE);
 
+            Integer actionIndex = (Integer)
+                    view.getTag(com.android.internal.R.id.notification_action_index_tag);
+
             final NotificationEntry entry = getNotificationForParent(view.getParent());
-            mLogger.logInitialClick(entry, pendingIntent);
+            mLogger.logInitialClick(entry, actionIndex, pendingIntent);
 
             if (handleRemoteInput(view, pendingIntent)) {
-                mLogger.logRemoteInputWasHandled(entry);
+                mLogger.logRemoteInputWasHandled(entry, actionIndex);
                 return true;
             }
 
@@ -141,9 +144,9 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
             Notification.Action action = getActionFromView(view, entry, pendingIntent);
             return mCallback.handleRemoteViewClick(view, pendingIntent,
-                    action == null ? false : action.isAuthenticationRequired(), () -> {
+                    action == null ? false : action.isAuthenticationRequired(), actionIndex, () -> {
                     Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
-                    mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent);
+                    mLogger.logStartingIntentWithDefaultHandler(entry, pendingIntent, actionIndex);
                     boolean started = RemoteViews.startPendingIntent(view, pendingIntent, options);
                     if (started) releaseNotificationIfKeptForRemoteInputHistory(entry);
                     return started;
@@ -692,11 +695,13 @@ public class NotificationRemoteInputManager implements Dumpable {
          * @param view
          * @param pendingIntent
          * @param appRequestedAuth
+         * @param actionIndex
          * @param defaultHandler
          * @return  true iff the click was handled
          */
         boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-                boolean appRequestedAuth, ClickHandler defaultHandler);
+                boolean appRequestedAuth, @Nullable Integer actionIndex,
+                ClickHandler defaultHandler);
     }
 
     /**
