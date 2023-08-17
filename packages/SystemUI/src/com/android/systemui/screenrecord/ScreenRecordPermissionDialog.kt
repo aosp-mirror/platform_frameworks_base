@@ -63,6 +63,7 @@ class ScreenRecordPermissionDialog(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
+        setTitle(R.string.screenrecord_title)
         setStartButtonText(R.string.screenrecord_permission_dialog_continue)
         setStartButtonOnClickListener { v: View? ->
             onStartRecordingClicked?.run()
