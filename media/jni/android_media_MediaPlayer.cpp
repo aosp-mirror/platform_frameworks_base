@@ -260,7 +260,7 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
     status_t opStatus =
         mp->setDataSource(
                 httpService,
-                pathStr,
+                pathStr.c_str(),
                 headersVector.size() > 0? &headersVector : NULL);
 
     process_media_player_call(

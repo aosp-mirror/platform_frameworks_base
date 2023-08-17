@@ -1040,7 +1040,7 @@ static jthrowable createCodecException(
     CHECK(ctor != NULL);
 
     ScopedLocalRef<jstring> msgObj(
-            env, env->NewStringUTF(msg != NULL ? msg : String8::format("Error %#x", err)));
+            env, env->NewStringUTF(msg != NULL ? msg : String8::format("Error %#x", err).c_str()));
 
     // translate action code to Java equivalent
     switch (actionCode) {
@@ -2912,7 +2912,7 @@ static void android_media_MediaCodec_setVideoScalingMode(
     if (mode != NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW
             && mode != NATIVE_WINDOW_SCALING_MODE_SCALE_CROP) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                          String8::format("Unrecognized mode: %d", mode));
+                          String8::format("Unrecognized mode: %d", mode).c_str());
         return;
     }
 
@@ -3337,27 +3337,27 @@ static void android_media_MediaCodec_native_setup(
     if (err == NAME_NOT_FOUND) {
         // fail and do not try again.
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                String8::format("Failed to initialize %s, error %#x (NAME_NOT_FOUND)", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NAME_NOT_FOUND)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err == NO_MEMORY) {
         throwCodecException(env, err, ACTION_CODE_TRANSIENT,
-                String8::format("Failed to initialize %s, error %#x (NO_MEMORY)", tmp, err));
+                String8::format("Failed to initialize %s, error %#x (NO_MEMORY)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err == PERMISSION_DENIED) {
         jniThrowException(env, "java/lang/SecurityException",
                 String8::format("Failed to initialize %s, error %#x (PERMISSION_DENIED)", tmp,
-                err));
+                err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }
     if (err != OK) {
         // believed possible to try again
         jniThrowException(env, "java/io/IOException",
-                String8::format("Failed to find matching codec %s, error %#x (?)", tmp, err));
+                String8::format("Failed to find matching codec %s, error %#x (?)", tmp, err).c_str());
         env->ReleaseStringUTFChars(name, tmp);
         return;
     }

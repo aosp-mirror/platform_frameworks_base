@@ -897,7 +897,7 @@ std::string AssetManager2::GetLastResourceResolution() const {
 
   log_stream << "\nBest matching is from "
              << (last_resolution_.best_config_name.empty() ? "default"
-                                                   : last_resolution_.best_config_name)
+                    : last_resolution_.best_config_name.c_str())
              << " configuration of " << last_resolution_.best_package_name;
   return log_stream.str();
 }

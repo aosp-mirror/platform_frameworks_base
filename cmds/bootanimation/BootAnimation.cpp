@@ -1790,7 +1790,7 @@ BootAnimation::Animation* BootAnimation::loadAnimation(const String8& fn) {
             fn.c_str());
         return nullptr;
     }
-    ZipFileRO *zip = ZipFileRO::open(fn);
+    ZipFileRO *zip = ZipFileRO::open(fn.c_str());
     if (zip == nullptr) {
         SLOGE("Failed to open animation zip \"%s\": %s",
             fn.c_str(), strerror(errno));

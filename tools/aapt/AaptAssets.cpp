@@ -99,7 +99,7 @@ static bool isHidden(const char *root, const char *path)
 
     String8 fullPath(root);
     appendPath(fullPath, String8(path));
-    FileType type = getFileType(fullPath);
+    FileType type = getFileType(fullPath.c_str());
 
     int plen = strlen(path);
 
@@ -287,19 +287,19 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
         Vector<String8> subtags = AaptUtil::splitAndLowerCase(part, '+');
         subtags.removeItemsAt(0);
         if (subtags.size() == 1) {
-            setLanguage(subtags[0]);
+            setLanguage(subtags[0].c_str());
         } else if (subtags.size() == 2) {
-            setLanguage(subtags[0]);
+            setLanguage(subtags[0].c_str());
 
             // The second tag can either be a region, a variant or a script.
             switch (subtags[1].size()) {
                 case 2:
                 case 3:
-                    setRegion(subtags[1]);
+                    setRegion(subtags[1].c_str());
                     break;
                 case 4:
                     if (isAlpha(subtags[1])) {
-                        setScript(subtags[1]);
+                        setScript(subtags[1].c_str());
                         break;
                     }
                     // This is not alphabetical, so we fall through to variant
@@ -308,7 +308,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
                 case 6:
                 case 7:
                 case 8:
-                    setVariant(subtags[1]);
+                    setVariant(subtags[1].c_str());
                     break;
                 default:
                     fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name %s\n",
@@ -317,14 +317,14 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
             }
         } else if (subtags.size() == 3) {
             // The language is always the first subtag.
-            setLanguage(subtags[0]);
+            setLanguage(subtags[0].c_str());
 
             // The second subtag can either be a script or a region code.
             // If its size is 4, it's a script code, else it's a region code.
             if (subtags[1].size() == 4) {
-                setScript(subtags[1]);
+                setScript(subtags[1].c_str());
             } else if (subtags[1].size() == 2 || subtags[1].size() == 3) {
-                setRegion(subtags[1]);
+                setRegion(subtags[1].c_str());
             } else {
                 fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name %s\n", part.c_str());
                 return -1;
@@ -333,15 +333,15 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
             // The third tag can either be a region code (if the second tag was
             // a script), else a variant code.
             if (subtags[2].size() >= 4) {
-                setVariant(subtags[2]);
+                setVariant(subtags[2].c_str());
             } else {
-                setRegion(subtags[2]);
+                setRegion(subtags[2].c_str());
             }
         } else if (subtags.size() == 4) {
-            setLanguage(subtags[0]);
-            setScript(subtags[1]);
-            setRegion(subtags[2]);
-            setVariant(subtags[3]);
+            setLanguage(subtags[0].c_str());
+            setScript(subtags[1].c_str());
+            setRegion(subtags[2].c_str());
+            setVariant(subtags[3].c_str());
         } else {
             fprintf(stderr, "ERROR: Invalid BCP 47 tag in directory name: %s\n", part.c_str());
             return -1;
@@ -351,7 +351,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
     } else {
         if ((part.length() == 2 || part.length() == 3)
                && isAlpha(part) && strcmp("car", part.c_str())) {
-            setLanguage(part);
+            setLanguage(part.c_str());
             if (++currentIndex == size) {
                 return size;
             }

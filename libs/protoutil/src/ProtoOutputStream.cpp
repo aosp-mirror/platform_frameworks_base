@@ -170,13 +170,13 @@ ProtoOutputStream::write(uint64_t fieldId, bool val)
 }
 
 bool
-ProtoOutputStream::write(uint64_t fieldId, std::string val)
+ProtoOutputStream::write(uint64_t fieldId, std::string_view val)
 {
     if (mCompact) return false;
     const uint32_t id = (uint32_t)fieldId;
     switch (fieldId & FIELD_TYPE_MASK) {
         case FIELD_TYPE_STRING:
-            writeUtf8StringImpl(id, val.c_str(), val.size());
+            writeUtf8StringImpl(id, val.data(), val.size());
             return true;
         default:
             ALOGW("Field type %" PRIu64 " is not supported when writing string val.",

@@ -559,7 +559,7 @@ status_t parseXMLResource(const sp<AaptFile>& file, ResXMLTree* outTree,
     root->removeWhitespace(stripAll, cDataTags);
 
     if (kIsDebug) {
-        printf("Input XML from %s:\n", (const char*)file->getPrintableSource());
+        printf("Input XML from %s:\n", file->getPrintableSource().c_str());
         root->print();
     }
     sp<AaptFile> rsc = new AaptFile(String8(), AaptGroupEntry(), String8());
