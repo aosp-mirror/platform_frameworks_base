@@ -56,7 +56,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.StatFs;
 import android.os.SystemClock;
-import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.Postsubmit;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.system.ErrnoException;
@@ -94,7 +94,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
-@Presubmit
+@Postsubmit
 public class PackageManagerTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
 
