@@ -149,6 +149,32 @@ public class HintManagerServiceTest {
     }
 
     @Test
+    public void testCreateHintSession_exceedsLimit() throws Exception {
+        HintManagerService service = createService();
+        IBinder token1 = new Binder();
+        IBinder token2 = new Binder();
+
+        for (int i = 0; i < 10; i++) {
+            IHintSession a = service.getBinderServiceInstance().createHintSession(token1,
+                    SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+            assertNotNull(a);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            IHintSession b = service.getBinderServiceInstance().createHintSession(token2,
+                    SESSION_TIDS_B, DEFAULT_TARGET_DURATION);
+            assertNotNull(b);
+        }
+
+        assertThrows(IllegalStateException.class,
+                () -> service.getBinderServiceInstance().createHintSession(token1, SESSION_TIDS_A,
+                        DEFAULT_TARGET_DURATION));
+        assertThrows(IllegalStateException.class,
+                () -> service.getBinderServiceInstance().createHintSession(token2, SESSION_TIDS_B,
+                        DEFAULT_TARGET_DURATION));
+    }
+
+    @Test
     public void testPauseResumeHintSession() throws Exception {
         HintManagerService service = createService();
         IBinder token = new Binder();
