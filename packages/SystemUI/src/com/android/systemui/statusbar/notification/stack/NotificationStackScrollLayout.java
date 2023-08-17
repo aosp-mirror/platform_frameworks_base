@@ -92,6 +92,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -3455,6 +3456,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
 
         return super.onTouchEvent(ev);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(TAG, ev, super.dispatchTouchEvent(ev));
     }
 
     void dispatchDownEventToScroller(MotionEvent ev) {
