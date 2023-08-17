@@ -67,6 +67,8 @@ import java.util.stream.Collectors;
 @RunWith(AndroidJUnit4.class)
 public final class UpdatableFontDirTest {
 
+    private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
+
     /**
      * A {@link UpdatableFontDir.FontFileParser} for testing. Instead of using real font files,
      * this test uses fake font files. A fake font file has its PostScript naem and revision as the
@@ -140,7 +142,7 @@ public final class UpdatableFontDirTest {
     private List<File> mPreinstalledFontDirs;
     private final Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
     private final Function<Map<String, File>, FontConfig> mConfigSupplier =
-            (map) -> SystemFonts.getSystemFontConfig(map, 0, 0);
+            (map) -> SystemFonts.getSystemFontConfigForTesting(LEGACY_FONTS_XML, map, 0, 0);
     private FakeFontFileParser mParser;
     private FakeFsverityUtil mFakeFsverityUtil;
 

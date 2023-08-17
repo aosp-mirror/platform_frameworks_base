@@ -235,6 +235,22 @@ public final class SystemFonts {
     }
 
     /**
+     * Get the updated FontConfig.
+     *
+     * @param updatableFontMap a font mapping of updated font files.
+     * @hide
+     */
+    public static @NonNull FontConfig getSystemFontConfigForTesting(
+            @NonNull String fontsXml,
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion
+    ) {
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+                updatableFontMap, lastModifiedDate, configVersion);
+    }
+
+    /**
      * Get the system preinstalled FontConfig.
      * @hide
      */
