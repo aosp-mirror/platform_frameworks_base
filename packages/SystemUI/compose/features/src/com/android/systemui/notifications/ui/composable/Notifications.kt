@@ -48,6 +48,7 @@ fun SceneScope.Notifications(
     Column(
         modifier =
             modifier
+                .element(key = Notifications.Elements.Notifications)
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 300.dp)
                 .clip(RoundedCornerShape(32.dp))
