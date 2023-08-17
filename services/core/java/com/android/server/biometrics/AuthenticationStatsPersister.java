@@ -94,12 +94,35 @@ public class AuthenticationStatsPersister {
     }
 
     /**
+     * Remove frr data for a specific user.
+     */
+    public void removeFrrStats(int userId) {
+        try {
+            // Copy into a new HashSet to allow modification.
+            Set<String> frrStatsSet = new HashSet<>(readFrrStats());
+
+            // Remove the old authentication stat for the user if it exists.
+            for (Iterator<String> iterator = frrStatsSet.iterator(); iterator.hasNext();) {
+                String frrStats = iterator.next();
+                JSONObject frrStatJson = new JSONObject(frrStats);
+                if (getValue(frrStatJson, USER_ID).equals(String.valueOf(userId))) {
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            mSharedPreferences.edit().putStringSet(KEY, frrStatsSet).apply();
+        } catch (JSONException ignored) {
+        }
+    }
+
+    /**
      * Persist frr data for a specific user.
      */
     public void persistFrrStats(int userId, int totalAttempts, int rejectedAttempts,
             int enrollmentNotifications, int modality) {
         try {
-            // Copy into a new HashSet to avoid iterator exception.
+            // Copy into a new HashSet to allow modification.
             Set<String> frrStatsSet = new HashSet<>(readFrrStats());
 
             // Remove the old authentication stat for the user if it exists.
