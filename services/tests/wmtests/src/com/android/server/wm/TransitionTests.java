@@ -39,6 +39,7 @@ import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
 
@@ -2382,6 +2383,37 @@ public class TransitionTests extends WindowTestsBase {
 
         // Now nothing should be collecting
         assertFalse(controller.isCollecting());
+    }
+
+    @Test
+    public void testNoSyncFlagIfOneTrack() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitC = createTestTransition(TRANSIT_OPEN, controller);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {});
+        controller.startCollectOrQueue(transitB, (deferred) -> {});
+        controller.startCollectOrQueue(transitC, (deferred) -> {});
+
+        // Verify that, as-long as there is <= 1 track, we won't get a SYNC flag
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
+        transitB.start();
+        transitB.setAllReady();
+        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
+        transitC.start();
+        transitC.setAllReady();
+        mSyncEngine.tryFinishForTest(transitC.getSyncId());
+        assertTrue((player.mLastReady.getFlags() & FLAG_SYNC) == 0);
     }
 
     private static void makeTaskOrganized(Task... tasks) {
