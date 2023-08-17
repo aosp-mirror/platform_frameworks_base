@@ -19,29 +19,37 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
-import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardRootViewModel
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
-    private val keyguardQuickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel
-)
-{
+) {
+
+    data class PreviewMode(val isInPreviewMode: Boolean = false)
+
+    /**
+     * Whether this view-model instance is powering the preview experience that renders exclusively
+     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
+     * experience.
+     */
+    private val previewMode = MutableStateFlow(PreviewMode())
+
     /** Represents the current state of the KeyguardRootView visibility */
     val keyguardRootViewVisibilityState: Flow<KeyguardRootViewVisibilityState> =
         keyguardInteractor.keyguardRootViewVisibilityState
 
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
-        keyguardInteractor.previewMode.flatMapLatest {
+        previewMode.flatMapLatest {
             if (it.isInPreviewMode) {
                 flowOf(1f)
             } else {
@@ -53,23 +61,9 @@ constructor(
      * Puts this view-model in "preview mode", which means it's being used for UI that is rendering
      * the lock screen preview in wallpaper picker / settings and not the real experience on the
      * lock screen.
-     *
-     * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
-     * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
-     *   highlighted (while all others are dimmed to make the selected one stand out).
      */
-    fun enablePreviewMode(
-        initiallySelectedSlotId: String?,
-        shouldHighlightSelectedAffordance: Boolean,
-    ) {
-        keyguardInteractor.previewMode.value =
-            KeyguardInteractor.PreviewMode(
-                isInPreviewMode = true,
-                shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
-            )
-        keyguardQuickAffordancesCombinedViewModel.onPreviewSlotSelected(
-            initiallySelectedSlotId ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
-        )
+    fun enablePreviewMode() {
+        val newPreviewMode = PreviewMode(true)
+        previewMode.value = newPreviewMode
     }
-
 }

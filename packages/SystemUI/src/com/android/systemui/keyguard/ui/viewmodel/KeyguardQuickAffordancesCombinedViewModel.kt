@@ -18,22 +18,20 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardQuickAffordancesCombinedViewModel
@@ -42,6 +40,18 @@ constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
+
+    data class PreviewMode(
+        val isInPreviewMode: Boolean = false,
+        val shouldHighlightSelectedAffordance: Boolean = false,
+    )
+
+    /**
+     * Whether this view-model instance is powering the preview experience that renders exclusively
+     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
+     * experience.
+     */
+    private val previewMode = MutableStateFlow(PreviewMode())
 
     /**
      * ID of the slot that's currently selected in the preview that renders exclusively in the
@@ -85,39 +95,63 @@ constructor(
         selectedPreviewSlotId.value = slotId
     }
 
+    /**
+     * Puts this view-model in "preview mode", which means it's being used for UI that is rendering
+     * the lock screen preview in wallpaper picker / settings and not the real experience on the
+     * lock screen.
+     *
+     * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
+     * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
+     *   highlighted (while all others are dimmed to make the selected one stand out).
+     */
+    fun enablePreviewMode(
+        initiallySelectedSlotId: String?,
+        shouldHighlightSelectedAffordance: Boolean,
+    ) {
+        val newPreviewMode =
+            PreviewMode(
+                isInPreviewMode = true,
+                shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
+            )
+        onPreviewSlotSelected(
+            initiallySelectedSlotId ?: KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
+        )
+        previewMode.value = newPreviewMode
+    }
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
-        return keyguardInteractor.previewMode.flatMapLatest { previewMode ->
+        return previewMode.flatMapLatest { previewMode ->
             combine(
-                if (previewMode.isInPreviewMode) {
-                    quickAffordanceInteractor.quickAffordanceAlwaysVisible(position = position)
-                } else {
-                    quickAffordanceInteractor.quickAffordance(position = position)
-                },
-                keyguardInteractor.animateDozingTransitions.distinctUntilChanged(),
-                areQuickAffordancesFullyOpaque,
-                selectedPreviewSlotId,
-                quickAffordanceInteractor.useLongPress(),
-            ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
-                val slotId = position.toSlotId()
-                val isSelected = selectedPreviewSlotId == slotId
-                model.toViewModel(
-                    animateReveal = !previewMode.isInPreviewMode && animateReveal,
-                    isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
-                    isSelected =
-                    previewMode.isInPreviewMode &&
-                        previewMode.shouldHighlightSelectedAffordance &&
-                        isSelected,
-                    isDimmed =
-                    previewMode.isInPreviewMode &&
-                        previewMode.shouldHighlightSelectedAffordance &&
-                        !isSelected,
-                    forceInactive = previewMode.isInPreviewMode,
-                    slotId = slotId,
-                    useLongPress = useLongPress,
-                )
-            }
+                    if (previewMode.isInPreviewMode) {
+                        quickAffordanceInteractor.quickAffordanceAlwaysVisible(position = position)
+                    } else {
+                        quickAffordanceInteractor.quickAffordance(position = position)
+                    },
+                    keyguardInteractor.animateDozingTransitions.distinctUntilChanged(),
+                    areQuickAffordancesFullyOpaque,
+                    selectedPreviewSlotId,
+                    quickAffordanceInteractor.useLongPress(),
+                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
+                    val slotId = position.toSlotId()
+                    val isSelected = selectedPreviewSlotId == slotId
+                    model.toViewModel(
+                        animateReveal = !previewMode.isInPreviewMode && animateReveal,
+                        isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
+                        isSelected =
+                            previewMode.isInPreviewMode &&
+                                previewMode.shouldHighlightSelectedAffordance &&
+                                isSelected,
+                        isDimmed =
+                            previewMode.isInPreviewMode &&
+                                previewMode.shouldHighlightSelectedAffordance &&
+                                !isSelected,
+                        forceInactive = previewMode.isInPreviewMode,
+                        slotId = slotId,
+                        useLongPress = useLongPress,
+                    )
+                }
                 .distinctUntilChanged()
         }
     }
@@ -167,8 +201,6 @@ constructor(
         // time, we don't want the number to be too close to 1.0 such that there is a chance that we
         // never treat the affordance UI as "fully opaque" as that would risk making it forever not
         // clickable.
-        @VisibleForTesting
-        const val AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD = 0.95f
+        @VisibleForTesting const val AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD = 0.95f
     }
-
 }
