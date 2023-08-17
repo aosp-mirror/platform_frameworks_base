@@ -71,6 +71,7 @@ import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -200,6 +201,19 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @Override
     public void setSplitScreenController(SplitScreenController splitScreenController) {
         mSplitScreenController = splitScreenController;
+        mSplitScreenController.registerSplitScreenListener(new SplitScreen.SplitScreenListener() {
+            @Override
+            public void onTaskStageChanged(int taskId, int stage, boolean visible) {
+                if (visible) {
+                    DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
+                    if (decor != null && DesktopModeStatus.isActive(mContext)
+                            && decor.mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                        mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(false));
+                        mDesktopTasksController.ifPresent(c -> c.moveToSplit(decor.mTaskInfo));
+                    }
+                }
+            }
+        });
     }
 
     @Override
