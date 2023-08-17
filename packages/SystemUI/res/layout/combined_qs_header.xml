@@ -127,6 +127,8 @@ frame when animating QS <-> QQS transition
         android:gravity="center_vertical"
         android:paddingStart="@dimen/shade_header_system_icons_padding_start"
         android:paddingEnd="@dimen/shade_header_system_icons_padding_end"
+        android:paddingTop="@dimen/shade_header_system_icons_padding_top"
+        android:paddingBottom="@dimen/shade_header_system_icons_padding_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/privacy_container"
         app:layout_constraintTop_toTopOf="@id/clock">

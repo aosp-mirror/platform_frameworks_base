@@ -263,9 +263,11 @@ constructor(
                     resources.getDimensionPixelSize(
                         R.dimen.shade_header_system_icons_padding_start
                     ),
-                    systemIcons.paddingTop,
+                    resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_top),
                     resources.getDimensionPixelSize(R.dimen.shade_header_system_icons_padding_end),
-                    systemIcons.paddingBottom
+                    resources.getDimensionPixelSize(
+                        R.dimen.shade_header_system_icons_padding_bottom
+                    )
                 )
             }
 
