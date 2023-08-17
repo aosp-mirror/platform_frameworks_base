@@ -222,4 +222,10 @@
 
     <!-- Communal mode -->
     <item type="id" name="communal_widget_wrapper" />
+
+    <!--
+    Used to tag views programmatically added to the smartspace area so they can be more easily
+    removed later.
+    -->
+    <item type="id" name="tag_smartspace_view" />
 </resources>
