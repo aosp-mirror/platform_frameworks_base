@@ -46,7 +46,7 @@ public class BatteryUsageStatsProvider {
     private static final String TAG = "BatteryUsageStatsProv";
     private final Context mContext;
     private final BatteryStats mStats;
-    private final BatteryUsageStatsStore mBatteryUsageStatsStore;
+    private final PowerStatsStore mPowerStatsStore;
     private final PowerProfile mPowerProfile;
     private final CpuScalingPolicies mCpuScalingPolicies;
     private final Object mLock = new Object();
@@ -58,10 +58,10 @@ public class BatteryUsageStatsProvider {
 
     @VisibleForTesting
     public BatteryUsageStatsProvider(Context context, BatteryStats stats,
-            BatteryUsageStatsStore batteryUsageStatsStore) {
+            PowerStatsStore powerStatsStore) {
         mContext = context;
         mStats = stats;
-        mBatteryUsageStatsStore = batteryUsageStatsStore;
+        mPowerStatsStore = powerStatsStore;
         mPowerProfile = stats instanceof BatteryStatsImpl
                 ? ((BatteryStatsImpl) stats).getPowerProfile()
                 : new PowerProfile(context);
@@ -314,20 +314,52 @@ public class BatteryUsageStatsProvider {
         final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
                 customEnergyConsumerNames, includePowerModels, includeProcessStateData,
                 minConsumedPowerThreshold);
-        if (mBatteryUsageStatsStore == null) {
-            Log.e(TAG, "BatteryUsageStatsStore is unavailable");
+        if (mPowerStatsStore == null) {
+            Log.e(TAG, "PowerStatsStore is unavailable");
             return builder.build();
         }
 
-        final long[] timestamps = mBatteryUsageStatsStore.listBatteryUsageStatsTimestamps();
-        for (long timestamp : timestamps) {
-            if (timestamp > query.getFromTimestamp() && timestamp <= query.getToTimestamp()) {
-                final BatteryUsageStats snapshot =
-                        mBatteryUsageStatsStore.loadBatteryUsageStats(timestamp);
-                if (snapshot == null) {
-                    continue;
-                }
+        List<PowerStatsSpan.Metadata> toc = mPowerStatsStore.getTableOfContents();
+        for (PowerStatsSpan.Metadata spanMetadata : toc) {
+            if (!spanMetadata.getSections().contains(BatteryUsageStatsSection.TYPE)) {
+                continue;
+            }
 
+            // BatteryUsageStatsQuery is expressed in terms of wall-clock time range for the
+            // session end time.
+            //
+            // The following algorithm is correct when there is only one time frame in the span.
+            // When the wall-clock time is adjusted in the middle of an stats span,
+            // constraining it by wall-clock time becomes ambiguous. In this case, the algorithm
+            // only covers some situations, but not others.  When using the resulting data for
+            // analysis, we should always pay attention to the full set of included timeframes.
+            // TODO(b/298459065): switch to monotonic clock
+            long minTime = Long.MAX_VALUE;
+            long maxTime = 0;
+            for (PowerStatsSpan.TimeFrame timeFrame : spanMetadata.getTimeFrames()) {
+                long spanEndTime = timeFrame.startTime + timeFrame.duration;
+                minTime = Math.min(minTime, spanEndTime);
+                maxTime = Math.max(maxTime, spanEndTime);
+            }
+
+            // Per BatteryUsageStatsQuery API, the "from" timestamp is *exclusive*,
+            // while the "to" timestamp is *inclusive*.
+            boolean isInRange =
+                    (query.getFromTimestamp() == 0 || minTime > query.getFromTimestamp())
+                    && (query.getToTimestamp() == 0 || maxTime <= query.getToTimestamp());
+            if (!isInRange) {
+                continue;
+            }
+
+            PowerStatsSpan powerStatsSpan = mPowerStatsStore.loadPowerStatsSpan(
+                    spanMetadata.getId(), BatteryUsageStatsSection.TYPE);
+            if (powerStatsSpan == null) {
+                continue;
+            }
+
+            for (PowerStatsSpan.Section section : powerStatsSpan.getSections()) {
+                BatteryUsageStats snapshot =
+                        ((BatteryUsageStatsSection) section).getBatteryUsageStats();
                 if (!Arrays.equals(snapshot.getCustomPowerComponentNames(),
                         customEnergyConsumerNames)) {
                     Log.w(TAG, "Ignoring older BatteryUsageStats snapshot, which has different "

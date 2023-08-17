@@ -300,6 +300,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * @param fromTimestamp Exclusive starting timestamp, as per System.currentTimeMillis()
          * @param toTimestamp Inclusive ending timestamp, as per System.currentTimeMillis()
          */
+        // TODO(b/298459065): switch to monotonic clock
         public Builder aggregateSnapshots(long fromTimestamp, long toTimestamp) {
             mFromTimestamp = fromTimestamp;
             mToTimestamp = toTimestamp;
