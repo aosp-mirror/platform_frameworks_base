@@ -30,9 +30,6 @@ class FakeShadeRepository : ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion = _qsExpansion
 
-    private val _expansion = MutableStateFlow(0f)
-    override val expansion = _expansion
-
     private val _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress = _udfpsTransitionToFullShadeProgress
 
@@ -42,10 +39,6 @@ class FakeShadeRepository : ShadeRepository {
 
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
-    }
-
-    override fun setExpansion(expansion: Float) {
-        _expansion.value = expansion
     }
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {

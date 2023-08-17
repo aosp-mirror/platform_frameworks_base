@@ -49,7 +49,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
@@ -171,7 +170,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         mShadeInteractor =
                 new ShadeInteractor(
                         mTestScope.getBackgroundScope(),
-                        new FakeShadeRepository(),
                         mDisableFlagsRepository,
                         mKeyguardRepository,
                         new FakeUserSetupRepository(),
