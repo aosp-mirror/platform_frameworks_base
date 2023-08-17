@@ -38,6 +38,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUICallback;
+import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 
 import java.util.function.Consumer;
 
@@ -234,16 +235,5 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     private boolean shouldShowCameraControl() {
         return mCameraCompatControlState != CAMERA_COMPAT_CONTROL_HIDDEN
                 && mCameraCompatControlState != CAMERA_COMPAT_CONTROL_DISMISSED;
-    }
-
-    /**
-     * A class holding the state of the compat UI hints, which is shared between all compat UI
-     * window managers.
-     */
-    static class CompatUIHintsState {
-        @VisibleForTesting
-        boolean mHasShownSizeCompatHint;
-        @VisibleForTesting
-        boolean mHasShownCameraCompatHint;
     }
 }

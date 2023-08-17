@@ -260,8 +260,8 @@
         + compat_button_margin - compat_hint_corner_radius - compat_hint_point_width / 2). -->
     <dimen name="compat_hint_padding_end">7dp</dimen>
 
-    <!-- The width of the size compat hint. -->
-    <dimen name="size_compat_hint_width">188dp</dimen>
+    <!-- The width of the compat hint. -->
+    <dimen name="compat_hint_width">188dp</dimen>
 
     <!-- The width of the camera compat hint. -->
     <dimen name="camera_compat_hint_width">143dp</dimen>
