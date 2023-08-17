@@ -1291,6 +1291,12 @@ public class BubbleStackView extends FrameLayout
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show manage edu: " + shouldShow);
         }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show manage edu, but it is forced hidden");
+            }
+            return false;
+        }
         return shouldShow;
     }
 
@@ -1322,6 +1328,12 @@ public class BubbleStackView extends FrameLayout
         final boolean shouldShow = !seen || BubbleDebugConfig.forceShowUserEducation(mContext);
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show stack edu: " + shouldShow);
+        }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show stack edu, but it is forced hidden");
+            }
+            return false;
         }
         return shouldShow;
     }
