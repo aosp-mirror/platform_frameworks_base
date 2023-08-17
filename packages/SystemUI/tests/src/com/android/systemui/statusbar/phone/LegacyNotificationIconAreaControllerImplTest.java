@@ -48,7 +48,7 @@ import java.util.Optional;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class NotificationIconAreaControllerTest extends SysuiTestCase {
+public class LegacyNotificationIconAreaControllerImplTest extends SysuiTestCase {
 
     @Mock
     private NotificationListener mListener;
@@ -70,7 +70,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     StatusBarWindowController mStatusBarWindowController;
     @Mock
     ScreenOffAnimationController mScreenOffAnimationController;
-    private NotificationIconAreaController mController;
+    private LegacyNotificationIconAreaControllerImpl mController;
     @Mock
     private Bubbles mBubbles;
     @Mock private DemoModeController mDemoModeController;
@@ -82,7 +82,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mController = new NotificationIconAreaController(
+        mController = new LegacyNotificationIconAreaControllerImpl(
                 mContext,
                 mStatusBarStateController,
                 mWakeUpCoordinator,
