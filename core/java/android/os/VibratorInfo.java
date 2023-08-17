@@ -242,6 +242,17 @@ public class VibratorInfo implements Parcelable {
     }
 
     /**
+     * Check whether the vibrator has frequency control.
+     *
+     * @return True if the hardware can control the frequency of the vibrations, otherwise false.
+     */
+    public boolean hasFrequencyControl() {
+        // We currently can only control frequency of the vibration using the compose PWLE method.
+        return hasCapability(
+                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+    }
+
+    /**
      * Returns a default value to be applied to composed PWLE effects for braking.
      *
      * @return a supported braking value, one of android.hardware.vibrator.Braking.*
@@ -320,6 +331,23 @@ public class VibratorInfo implements Parcelable {
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)
                 && (mSupportedPrimitives.indexOfKey(primitiveId) >= 0);
+    }
+
+    /**
+     * Query whether or not the vibrator supports all components of a given {@link VibrationEffect}
+     * (i.e. the vibrator can play the given effect as intended).
+     *
+     * <p>See {@link Vibrator#areVibrationFeaturesSupported(VibrationEffect)} for more
+     * information on how the vibrator support is determined.
+     *
+     * @param effect the {@link VibrationEffect} to check if it is supported
+     * @return {@code true} if the vibrator can play the given {@code effect} as intended,
+     *         {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean areVibrationFeaturesSupported(@NonNull VibrationEffect effect) {
+        return effect.areVibrationFeaturesSupported(this);
     }
 
     /**
