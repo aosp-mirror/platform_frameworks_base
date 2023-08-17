@@ -18,14 +18,10 @@ package com.android.server.biometrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.UserHandle;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -60,17 +56,6 @@ public class AuthenticationStatsCollector {
     @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
     @NonNull private BiometricNotification mBiometricNotification;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-            if (userId != UserHandle.USER_NULL
-                    && intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
-                onUserRemoved(userId);
-            }
-        }
-    };
-
     public AuthenticationStatsCollector(@NonNull Context context, int modality,
             @NonNull BiometricNotification biometricNotification) {
         mContext = context;
@@ -79,8 +64,6 @@ public class AuthenticationStatsCollector {
         mUserAuthenticationStatsMap = new HashMap<>();
         mModality = modality;
         mBiometricNotification = biometricNotification;
-
-        context.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
     }
 
     private void initializeUserAuthenticationStatsMap() {
@@ -161,11 +144,6 @@ public class AuthenticationStatsCollector {
                     authenticationStats.getEnrollmentNotifications(),
                     authenticationStats.getModality());
         }
-    }
-
-    private void onUserRemoved(final int userId) {
-        mUserAuthenticationStatsMap.remove(userId);
-        mAuthenticationStatsPersister.removeFrrStats(userId);
     }
 
     /**
