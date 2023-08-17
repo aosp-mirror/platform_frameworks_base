@@ -177,9 +177,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mActiveRinger = mDialog.getDialogView().findViewById(
                 R.id.volume_new_ringer_active_icon_container);
         mDrawerContainer = mDialog.getDialogView().findViewById(R.id.volume_drawer_container);
-        mDrawerVibrate = mDrawerContainer.findViewById(R.id.volume_drawer_vibrate);
-        mDrawerMute = mDrawerContainer.findViewById(R.id.volume_drawer_mute);
-        mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
+
+        // Drawer is not always available, e.g. on TVs
+        if (mDrawerContainer != null) {
+            mDrawerVibrate = mDrawerContainer.findViewById(R.id.volume_drawer_vibrate);
+            mDrawerMute = mDrawerContainer.findViewById(R.id.volume_drawer_mute);
+            mDrawerNormal = mDrawerContainer.findViewById(R.id.volume_drawer_normal);
+        }
         mODICaptionsIcon = mDialog.getDialogView().findViewById(R.id.odi_captions_icon);
 
         Prefs.putInt(mContext,
@@ -187,6 +191,10 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumePrefs.SHOW_RINGER_TOAST_COUNT + 1);
 
         Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
+    }
+
+    private void assumeHasDrawer() {
+        assumeNotNull("Layout does not contain drawer", mDrawerContainer);
     }
 
     private State createShellState() {
@@ -360,6 +368,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectVibrateFromDrawer() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
@@ -375,6 +385,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectVibrateFromDrawer_OnewayAPI_On() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
@@ -390,6 +402,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectMuteFromDrawer() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
@@ -405,6 +419,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectMuteFromDrawer_OnewayAPI_On() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
@@ -420,6 +436,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectNormalFromDrawer() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
@@ -435,6 +453,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testSelectNormalFromDrawer_OnewayAPI_On() {
+        assumeHasDrawer();
+
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
