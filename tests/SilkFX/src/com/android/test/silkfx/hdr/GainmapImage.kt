@@ -16,10 +16,6 @@
 
 package com.android.test.silkfx.hdr
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -46,7 +42,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     private var selectedImage = -1
     private var outputMode = R.id.output_hdr
     private var bitmap: Bitmap? = null
-    private var gainmap: Gainmap? = null
+    private var originalGainmap: Gainmap? = null
     private var gainmapVisualizer: Bitmap? = null
     private lateinit var imageView: SubsamplingScaleImageView
     private lateinit var gainmapMetadataEditor: GainmapMetadataEditor
@@ -70,7 +66,6 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             it.check(outputMode)
             it.setOnCheckedChangeListener { _, checkedId ->
                 outputMode = checkedId
-                // Intentionally don't do anything fancy so that mode A/B comparisons are easy
                 updateDisplay()
             }
         }
@@ -101,41 +96,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
 
         imageView.apply {
             isClickable = true
-            // Example of animating between SDR and HDR using gainmap params; animates HDR->SDR->HDR
-            // with a brief pause on SDR. The key thing here is that the gainmap's
-            // minDisplayRatioForHdrTransition is animated between its original value (for full HDR)
-            // and displayRatioForFullHdr (for full SDR). The view must also be invalidated during
-            // the animation for the updates to take effect.
             setOnClickListener {
-                if (gainmap != null && (outputMode == R.id.output_hdr ||
-                                        outputMode == R.id.output_hdr_test)) {
-                    val animationLengthMs: Long = 500
-                    val updateListener = object : AnimatorUpdateListener {
-                        override fun onAnimationUpdate(animation: ValueAnimator) {
-                            imageView.invalidate()
-                        }
-                    }
-                    val hdrToSdr = ObjectAnimator.ofFloat(
-                      gainmap, "minDisplayRatioForHdrTransition",
-                      gainmap!!.minDisplayRatioForHdrTransition,
-                      gainmap!!.displayRatioForFullHdr).apply {
-                        duration = animationLengthMs
-                        addUpdateListener(updateListener)
-                    }
-                    val sdrToHdr = ObjectAnimator.ofFloat(
-                      gainmap, "minDisplayRatioForHdrTransition",
-                      gainmap!!.displayRatioForFullHdr,
-                      gainmap!!.minDisplayRatioForHdrTransition).apply {
-                        duration = animationLengthMs
-                        addUpdateListener(updateListener)
-                    }
-
-                    AnimatorSet().apply {
-                        play(hdrToSdr)
-                        play(sdrToHdr).after(animationLengthMs)
-                        start()
-                    }
-                }
+                animate().alpha(.5f).withEndAction {
+                    animate().alpha(1f).start()
+                }.start()
             }
         }
     }
@@ -149,7 +113,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
     }
 
     private fun doDecode(source: ImageDecoder.Source) {
-        gainmap = null
+        originalGainmap = null
         bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, source ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }
@@ -167,9 +131,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
             findViewById<TextView>(R.id.error_msg)!!.visibility = View.GONE
             findViewById<RadioGroup>(R.id.output_mode)!!.visibility = View.VISIBLE
 
-            gainmap = bitmap!!.gainmap
-            gainmapMetadataEditor.setGainmap(gainmap)
-            val map = gainmap!!.gainmapContents
+            val gainmap = bitmap!!.gainmap!!
+            originalGainmap = gainmap
+            gainmapMetadataEditor.setGainmap(Gainmap(gainmap, gainmap.gainmapContents))
+            val map = gainmap.gainmapContents
             if (map.config != Bitmap.Config.ALPHA_8) {
                 gainmapVisualizer = map
             } else {
@@ -198,14 +163,12 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
 
         imageView.setImage(ImageSource.cachedBitmap(when (outputMode) {
             R.id.output_hdr -> {
-                gainmapMetadataEditor.useOriginalMetadata()
-                bitmap!!.gainmap = gainmap
+                bitmap!!.gainmap = originalGainmap
                 bitmap!!
             }
 
             R.id.output_hdr_test -> {
-                gainmapMetadataEditor.useEditMetadata()
-                bitmap!!.gainmap = gainmap
+                bitmap!!.gainmap = gainmapMetadataEditor.editedGainmap()
                 bitmap!!
             }
 
