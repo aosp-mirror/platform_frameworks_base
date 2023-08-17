@@ -156,6 +156,16 @@ public class VibratorInfo implements Parcelable {
             return false;
         }
         VibratorInfo that = (VibratorInfo) o;
+        return mId == that.mId && equalContent(that);
+    }
+
+    /**
+     * Returns {@code true} only if the properties and capabilities of the provided info, except for
+     * the ID, equals to this info. Returns {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean equalContent(VibratorInfo that) {
         int supportedPrimitivesCount = mSupportedPrimitives.size();
         if (supportedPrimitivesCount != that.mSupportedPrimitives.size()) {
             return false;
@@ -168,7 +178,7 @@ public class VibratorInfo implements Parcelable {
                 return false;
             }
         }
-        return mId == that.mId && mCapabilities == that.mCapabilities
+        return mCapabilities == that.mCapabilities
                 && mPrimitiveDelayMax == that.mPrimitiveDelayMax
                 && mCompositionSizeMax == that.mCompositionSizeMax
                 && mPwlePrimitiveDurationMax == that.mPwlePrimitiveDurationMax
@@ -445,7 +455,8 @@ public class VibratorInfo implements Parcelable {
         return mFrequencyProfile;
     }
 
-    protected long getCapabilities() {
+    /** Returns a single int representing all the capabilities of the vibrator. */
+    public long getCapabilities() {
         return mCapabilities;
     }
 

@@ -257,8 +257,13 @@ public class VibratorInfoTest {
 
     @Test
     public void testEquals() {
-        VibratorInfo.Builder completeBuilder = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
-                .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
+        VibratorInfo.Builder completeBuilder = new VibratorInfo.Builder(TEST_VIBRATOR_ID);
+        // Create a builder with a different ID, but same properties the same as the first one.
+        VibratorInfo.Builder completeBuilder2 = new VibratorInfo.Builder(TEST_VIBRATOR_ID + 2);
+
+        for (VibratorInfo.Builder builder :
+                new VibratorInfo.Builder[] {completeBuilder, completeBuilder2}) {
+            builder.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
                 .setSupportedEffects(VibrationEffect.EFFECT_CLICK)
                 .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 20)
                 .setPrimitiveDelayMax(100)
@@ -268,31 +273,43 @@ public class VibratorInfoTest {
                 .setPwleSizeMax(20)
                 .setQFactor(2f)
                 .setFrequencyProfile(TEST_FREQUENCY_PROFILE);
+        }
         VibratorInfo complete = completeBuilder.build();
 
         assertEquals(complete, complete);
+        assertTrue(complete.equalContent(complete));
         assertEquals(complete, completeBuilder.build());
+        assertTrue(complete.equalContent(completeBuilder.build()));
         assertEquals(complete.hashCode(), completeBuilder.build().hashCode());
+
+        // The infos from the two builders should have equal content, but should not be equal due to
+        // their different IDs.
+        assertNotEquals(complete, completeBuilder2.build());
+        assertTrue(complete.equalContent(completeBuilder2.build()));
 
         VibratorInfo completeWithComposeControl = completeBuilder
                 .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS)
                 .build();
         assertNotEquals(complete, completeWithComposeControl);
+        assertFalse(complete.equalContent(completeWithComposeControl));
 
         VibratorInfo completeWithNoEffects = completeBuilder
                 .setSupportedEffects(new int[0])
                 .build();
         assertNotEquals(complete, completeWithNoEffects);
+        assertFalse(complete.equalContent(completeWithNoEffects));
 
         VibratorInfo completeWithUnknownEffects = completeBuilder
                 .setSupportedEffects(null)
                 .build();
         assertNotEquals(complete, completeWithUnknownEffects);
+        assertFalse(complete.equalContent(completeWithUnknownEffects));
 
         VibratorInfo completeWithDifferentPrimitiveDuration = completeBuilder
                 .setSupportedPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 10)
                 .build();
         assertNotEquals(complete, completeWithDifferentPrimitiveDuration);
+        assertFalse(complete.equalContent(completeWithDifferentPrimitiveDuration));
 
         VibratorInfo completeWithDifferentFrequencyProfile = completeBuilder
                 .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
@@ -302,31 +319,37 @@ public class VibratorInfoTest {
                         TEST_AMPLITUDE_MAP))
                 .build();
         assertNotEquals(complete, completeWithDifferentFrequencyProfile);
+        assertFalse(complete.equalContent(completeWithDifferentFrequencyProfile));
 
         VibratorInfo completeWithEmptyFrequencyProfile = completeBuilder
                 .setFrequencyProfile(EMPTY_FREQUENCY_PROFILE)
                 .build();
         assertNotEquals(complete, completeWithEmptyFrequencyProfile);
+        assertFalse(complete.equalContent(completeWithEmptyFrequencyProfile));
 
         VibratorInfo completeWithUnknownQFactor = completeBuilder.setQFactor(Float.NaN).build();
         assertNotEquals(complete, completeWithUnknownQFactor);
+        assertFalse(complete.equalContent(completeWithUnknownQFactor));
 
         VibratorInfo completeWithDifferentQFactor = completeBuilder
                 .setQFactor(complete.getQFactor() + 3f)
                 .build();
         assertNotEquals(complete, completeWithDifferentQFactor);
+        assertFalse(complete.equalContent(completeWithDifferentQFactor));
 
         VibratorInfo unknownEffectSupport = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         VibratorInfo knownEmptyEffectSupport = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setSupportedEffects(new int[0])
                 .build();
         assertNotEquals(unknownEffectSupport, knownEmptyEffectSupport);
+        assertFalse(unknownEffectSupport.equalContent(knownEmptyEffectSupport));
 
         VibratorInfo unknownBrakingSupport = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         VibratorInfo knownEmptyBrakingSupport = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
                 .setSupportedBraking(new int[0])
                 .build();
         assertNotEquals(unknownBrakingSupport, knownEmptyBrakingSupport);
+        assertFalse(unknownBrakingSupport.equalContent(knownEmptyBrakingSupport));
     }
 
     @Test
