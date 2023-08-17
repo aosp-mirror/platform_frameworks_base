@@ -985,6 +985,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Make sure the clock is in the correct position after the unlock animation
         // so that it's not in the wrong place when we show the keyguard again.
         positionClockAndNotifications(true /* forceClockUpdate */);
+        mScrimController.onUnlockAnimationFinished();
     }
 
     private void unlockAnimationStarted(
