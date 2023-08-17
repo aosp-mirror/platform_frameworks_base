@@ -86,6 +86,8 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
         return false
     }
     override fun startTrackingExpansionFromStatusBar() {}
+    override fun performHapticFeedback(constant: Int) {}
+
     override val shadeHeadsUpTracker = ShadeHeadsUpTrackerEmptyImpl()
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
 }

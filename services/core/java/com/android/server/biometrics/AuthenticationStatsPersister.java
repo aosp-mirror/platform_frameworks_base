@@ -98,7 +98,7 @@ public class AuthenticationStatsPersister {
      */
     public void removeFrrStats(int userId) {
         try {
-            // Copy into a new HashSet to avoid iterator exception.
+            // Copy into a new HashSet to allow modification.
             Set<String> frrStatsSet = new HashSet<>(readFrrStats());
 
             // Remove the old authentication stat for the user if it exists.
@@ -122,7 +122,7 @@ public class AuthenticationStatsPersister {
     public void persistFrrStats(int userId, int totalAttempts, int rejectedAttempts,
             int enrollmentNotifications, int modality) {
         try {
-            // Copy into a new HashSet to avoid iterator exception.
+            // Copy into a new HashSet to allow modification.
             Set<String> frrStatsSet = new HashSet<>(readFrrStats());
 
             // Remove the old authentication stat for the user if it exists.

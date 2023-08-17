@@ -1,10 +1,5 @@
 package com.android.keyguard;
 
-import static android.view.View.ALPHA;
-import static android.view.View.SCALE_X;
-import static android.view.View.SCALE_Y;
-import static android.view.View.TRANSLATION_Y;
-
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_X_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_DESIGN;
 import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_SIZE;
@@ -44,6 +39,7 @@ import java.lang.annotation.RetentionPolicy;
 public class KeyguardClockSwitch extends RelativeLayout {
 
     private static final String TAG = "KeyguardClockSwitch";
+    public static final String MISSING_CLOCK_ID = "CLOCK_MISSING";
 
     private static final long CLOCK_OUT_MILLIS = 133;
     private static final long CLOCK_IN_MILLIS = 167;
@@ -145,6 +141,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
         updateStatusArea(/* animate= */false);
     }
 
+    /** Sets whether the large clock is being shown on a connected display. */
+    public void setLargeClockOnSecondaryDisplay(boolean onSecondaryDisplay) {
+        if (mClock != null) {
+            mClock.getLargeClock().getEvents().onSecondaryDisplayChanged(onSecondaryDisplay);
+        }
+    }
+
     /**
      * Enable or disable split shade specific positioning
      */
@@ -188,6 +191,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public LogBuffer getLogBuffer() {
         return mLogBuffer;
+    }
+
+    /** Returns the id of the currently rendering clock */
+    public String getClockId() {
+        if (mClock == null) {
+            return MISSING_CLOCK_ID;
+        }
+        return mClock.getConfig().getId();
     }
 
     void setClock(ClockController clock, int statusBarState) {

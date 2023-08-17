@@ -87,11 +87,11 @@ public class BiometricNotificationUtils {
     public static void showFaceEnrollNotification(@NonNull Context context) {
 
         final String name =
-                context.getString(R.string.face_recalibrate_notification_name);
+                context.getString(R.string.device_unlock_notification_name);
         final String title =
-                context.getString(R.string.fingerprint_setup_notification_title);
+                context.getString(R.string.alternative_unlock_setup_notification_title);
         final String content =
-                context.getString(R.string.face_setup_notification_title);
+                context.getString(R.string.alternative_face_setup_notification_content);
 
         final Intent intent = new Intent(FACE_ENROLL_ACTION);
         intent.setPackage(SETTINGS_PACKAGE);
@@ -112,11 +112,11 @@ public class BiometricNotificationUtils {
     public static void showFingerprintEnrollNotification(@NonNull Context context) {
 
         final String name =
-                context.getString(R.string.fingerprint_recalibrate_notification_name);
+                context.getString(R.string.device_unlock_notification_name);
         final String title =
-                context.getString(R.string.fingerprint_setup_notification_title);
+                context.getString(R.string.alternative_unlock_setup_notification_title);
         final String content =
-                context.getString(R.string.fingerprint_setup_notification_content);
+                context.getString(R.string.alternative_fp_setup_notification_content);
 
         final Intent intent = new Intent(FINGERPRINT_ENROLL_ACTION);
         intent.setPackage(SETTINGS_PACKAGE);

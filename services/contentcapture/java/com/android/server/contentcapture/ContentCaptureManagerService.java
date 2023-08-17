@@ -1225,15 +1225,13 @@ public class ContentCaptureManagerService extends
         public ContentCaptureOptions getOptions(@UserIdInt int userId,
                 @NonNull String packageName) {
             boolean isContentCaptureReceiverEnabled;
-            boolean isContentProtectionReceiverEnabled;
+            boolean isContentProtectionReceiverEnabled =
+                    isContentProtectionReceiverEnabled(userId, packageName);
             ArraySet<ComponentName> whitelistedComponents = null;
 
             synchronized (mGlobalWhitelistStateLock) {
                 isContentCaptureReceiverEnabled =
                         isContentCaptureReceiverEnabled(userId, packageName);
-                isContentProtectionReceiverEnabled =
-                        isContentProtectionReceiverEnabled(userId, packageName);
-
                 if (!isContentCaptureReceiverEnabled) {
                     // Full package is not allowlisted: check individual components next
                     whitelistedComponents = getWhitelistedComponents(userId, packageName);

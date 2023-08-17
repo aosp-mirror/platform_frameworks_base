@@ -256,7 +256,8 @@ public interface WindowInsetsController {
      * @param height the insets height of the IME caption bar.
      * @hide
      */
-    void setImeCaptionBarInsetsHeight(int height);
+    default void setImeCaptionBarInsetsHeight(int height) {
+    }
 
     /**
      * Controls the behavior of system bars.

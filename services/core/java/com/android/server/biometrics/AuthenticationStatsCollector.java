@@ -57,7 +57,8 @@ public class AuthenticationStatsCollector {
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
-    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    // TODO(b/295582896): Find a way to make this NonNull
+    @Nullable private AuthenticationStatsPersister mAuthenticationStatsPersister;
     @NonNull private BiometricNotification mBiometricNotification;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -92,8 +93,9 @@ public class AuthenticationStatsCollector {
 
     /** Update total authentication and rejected attempts. */
     public void authenticate(int userId, boolean authenticated) {
-        // Initialize mUserAuthenticationStatsMap when authenticate to ensure SharedPreferences
-        // are ready for application use and avoid ramdump issue.
+        // SharedPreference is not ready when starting system server, initialize
+        // mUserAuthenticationStatsMap in authentication to ensure SharedPreference
+        // is ready for application use.
         if (mUserAuthenticationStatsMap.isEmpty()) {
             initializeUserAuthenticationStatsMap();
         }
@@ -164,6 +166,9 @@ public class AuthenticationStatsCollector {
     }
 
     private void onUserRemoved(final int userId) {
+        if (mAuthenticationStatsPersister == null) {
+            initializeUserAuthenticationStatsMap();
+        }
         mUserAuthenticationStatsMap.remove(userId);
         mAuthenticationStatsPersister.removeFrrStats(userId);
     }

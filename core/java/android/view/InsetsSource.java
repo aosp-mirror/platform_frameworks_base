@@ -219,10 +219,12 @@ public class InsetsSource implements Parcelable {
         // During drag-move and drag-resizing, the caption insets position may not get updated
         // before the app frame get updated. To layout the app content correctly during drag events,
         // we always return the insets with the corresponding height covering the top.
-        // However, with the "fake" IME navigation bar treated as a caption bar, we skip this case
-        // to set the actual insets towards the bottom of the screen.
-        if (getType() == WindowInsets.Type.captionBar() && getId() != ID_IME_CAPTION_BAR) {
-            return Insets.of(0, frame.height(), 0, 0);
+        // However, with the "fake" IME navigation bar treated as a caption bar, we return the
+        // insets with the corresponding height the bottom.
+        if (getType() == WindowInsets.Type.captionBar()) {
+            return getId() == ID_IME_CAPTION_BAR
+                    ? Insets.of(0, 0, 0, frame.height())
+                    : Insets.of(0, frame.height(), 0, 0);
         }
         // Checks for whether there is shared edge with insets for 0-width/height window.
         final boolean hasIntersection = relativeFrame.isEmpty()

@@ -36,6 +36,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.biometrics.sensors.BiometricNotification;
@@ -47,6 +50,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 
+@Presubmit
+@SmallTest
 public class AuthenticationStatsCollectorTest {
 
     private AuthenticationStatsCollector mAuthenticationStatsCollector;
