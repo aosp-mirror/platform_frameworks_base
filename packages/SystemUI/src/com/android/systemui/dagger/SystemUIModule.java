@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationRowCom
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LetterboxModule;
+import com.android.systemui.statusbar.phone.NotificationIconAreaControllerModule;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -184,6 +185,7 @@ import javax.inject.Named;
             MediaProjectionModule.class,
             MediaProjectionTaskSwitcherModule.class,
             MotionToolModule.class,
+            NotificationIconAreaControllerModule.class,
             PeopleHubModule.class,
             PeopleModule.class,
             PluginModule.class,
