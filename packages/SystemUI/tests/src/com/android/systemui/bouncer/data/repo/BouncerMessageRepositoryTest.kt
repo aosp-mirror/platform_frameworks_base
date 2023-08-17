@@ -101,14 +101,15 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
         fingerprintRepository = FakeDeviceEntryFingerprintAuthRepository()
         testScope = TestScope()
 
-        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(false)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(false)
         whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(PIN)
         underTest =
             BouncerMessageRepositoryImpl(
                 trustRepository = trustRepository,
                 biometricSettingsRepository = biometricSettingsRepository,
                 updateMonitor = updateMonitor,
-                bouncerMessageFactory = BouncerMessageFactory(updateMonitor, securityModel),
+                bouncerMessageFactory =
+                    BouncerMessageFactory(biometricSettingsRepository, securityModel),
                 userRepository = userRepository,
                 fingerprintAuthRepository = fingerprintRepository,
                 systemPropertiesHelper = systemPropertiesHelper
@@ -222,8 +223,7 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
             whenever(systemPropertiesHelper.get("sys.boot.reason.last"))
                 .thenReturn("reboot,mainline_update")
             userRepository.setSelectedUserInfo(PRIMARY_USER)
-            biometricSettingsRepository.setFaceEnrolled(true)
-            biometricSettingsRepository.setIsFaceAuthEnabled(true)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
 
             verifyMessagesForAuthFlag(
                 STRONG_AUTH_REQUIRED_AFTER_BOOT to
@@ -236,8 +236,8 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(PRIMARY_USER)
             trustRepository.setCurrentUserTrustManaged(false)
-            biometricSettingsRepository.setFaceEnrolled(false)
-            biometricSettingsRepository.setFingerprintEnrolled(false)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
 
             verifyMessagesForAuthFlag(
                 STRONG_AUTH_NOT_REQUIRED to null,
@@ -258,8 +258,8 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
     fun authFlagsChanges_withTrustManaged_providesDifferentMessages() =
         testScope.runTest {
             userRepository.setSelectedUserInfo(PRIMARY_USER)
-            biometricSettingsRepository.setFaceEnrolled(false)
-            biometricSettingsRepository.setFingerprintEnrolled(false)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
 
             trustRepository.setCurrentUserTrustManaged(true)
 
@@ -290,10 +290,9 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(PRIMARY_USER)
             trustRepository.setCurrentUserTrustManaged(false)
-            biometricSettingsRepository.setFingerprintEnrolled(false)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
 
-            biometricSettingsRepository.setIsFaceAuthEnabled(true)
-            biometricSettingsRepository.setFaceEnrolled(true)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(true)
 
             verifyMessagesForAuthFlag(
                 STRONG_AUTH_NOT_REQUIRED to null,
@@ -320,11 +319,9 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             userRepository.setSelectedUserInfo(PRIMARY_USER)
             trustRepository.setCurrentUserTrustManaged(false)
-            biometricSettingsRepository.setIsFaceAuthEnabled(false)
-            biometricSettingsRepository.setFaceEnrolled(false)
+            biometricSettingsRepository.setIsFaceAuthEnrolledAndEnabled(false)
 
-            biometricSettingsRepository.setFingerprintEnrolled(true)
-            biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(true)
+            biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
 
             verifyMessagesForAuthFlag(
                 STRONG_AUTH_NOT_REQUIRED to null,
