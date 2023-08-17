@@ -49,7 +49,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -902,17 +901,13 @@ public class PipTransition extends PipTransitionController {
                 // animation.
                 // TODO(b/272819817): cleanup the null-check and extra logging.
                 final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
-                if (!hasTopActivityInfo) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                            "%s: TaskInfo.topActivityInfo is null", TAG);
-                }
-                if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
-                        && hasTopActivityInfo) {
+                if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, taskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
                     animator.setColorContentOverlay(mContext);
                 }
             } else {

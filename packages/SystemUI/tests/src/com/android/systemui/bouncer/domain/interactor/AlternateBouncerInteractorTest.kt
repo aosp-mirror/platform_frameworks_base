@@ -94,9 +94,9 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun canShowAlternateBouncerForFingerprint_noFingerprintsEnrolled() {
+    fun canShowAlternateBouncerForFingerprint_ifFingerprintIsNotUsuallyAllowed() {
         givenCanShowAlternateBouncer()
-        biometricSettingsRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -104,15 +104,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_strongBiometricNotAllowed() {
         givenCanShowAlternateBouncer()
-        biometricSettingsRepository.setStrongBiometricAllowed(false)
-
-        assertFalse(underTest.canShowAlternateBouncerForFingerprint())
-    }
-
-    @Test
-    fun canShowAlternateBouncerForFingerprint_devicePolicyDoesNotAllowFingerprint() {
-        givenCanShowAlternateBouncer()
-        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(false)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(false)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -189,14 +181,13 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
 
     private fun givenCanShowAlternateBouncer() {
         bouncerRepository.setAlternateBouncerUIAvailable(true)
-        biometricSettingsRepository.setFingerprintEnrolled(true)
-        biometricSettingsRepository.setStrongBiometricAllowed(true)
-        biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(true)
+        biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
         whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
         whenever(keyguardStateController.isUnlocked).thenReturn(false)
     }
 
     private fun givenCannotShowAlternateBouncer() {
-        biometricSettingsRepository.setFingerprintEnrolled(false)
+        biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(false)
     }
 }

@@ -84,6 +84,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.domain.interactor.UserInteractor;
@@ -411,6 +412,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UserInteractor mUserInteractor;
     private final Provider<AuthenticationInteractor> mAuthenticationInteractor;
     private final Provider<JavaAdapter> mJavaAdapter;
+    private final DeviceProvisionedController mDeviceProvisionedController;
     @Nullable private Job mSceneTransitionCollectionJob;
 
     @Inject
@@ -439,6 +441,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             BouncerMessageInteractor bouncerMessageInteractor,
             Provider<JavaAdapter> javaAdapter,
             UserInteractor userInteractor,
+            DeviceProvisionedController deviceProvisionedController,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             Provider<AuthenticationInteractor> authenticationInteractor
@@ -473,6 +476,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mAuthenticationInteractor = authenticationInteractor;
         mJavaAdapter = javaAdapter;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mDeviceProvisionedController = deviceProvisionedController;
     }
 
     @Override
@@ -857,9 +861,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
                     boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser());
-                    if (securityMode == SecurityMode.None || isLockscreenDisabled) {
-                        finish = isLockscreenDisabled;
+                            KeyguardUpdateMonitor.getCurrentUser())
+                            || !mDeviceProvisionedController.isUserSetup(targetUserId);
+
+                    if (securityMode == SecurityMode.None && isLockscreenDisabled) {
+                        finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
                     } else {

@@ -83,9 +83,7 @@ constructor(
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
         return bouncerRepository.alternateBouncerUIAvailable.value &&
-            biometricSettingsRepository.isFingerprintEnrolled.value &&
-            biometricSettingsRepository.isStrongBiometricAllowed.value &&
-            biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
+            biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed.value &&
             !keyguardUpdateMonitor.isFingerprintLockedOut &&
             !keyguardStateController.isUnlocked &&
             !statusBarStateController.isDozing

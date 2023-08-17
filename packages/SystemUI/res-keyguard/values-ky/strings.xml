@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Бекем кулпулангандан кийин PIN код талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Бекем кулпулангандан кийин сырсөз талап кылынат"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Бекем кулпулангандан кийн грфикалык ачкыч талп клынт"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Жаңыртуу түзмөк колдонулбай турганда орнотулат"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Кошмча кпсуздук тлап клнат. PIN код бир нче убкыт бою клднулгн эмeс."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Кошмча кпсуздук тлап клнат. Сырсз бир нче убкыт бою клднулгн эмeс."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Кошмча кпсуздук тлап клнат. Грфиклык ачкч бир нче убкыт бою клднулгн эмeс."</string>

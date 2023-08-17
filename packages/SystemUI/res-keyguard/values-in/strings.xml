@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"PIN diperlukan setelah kunci total"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Sandi diperlukan setelah kunci total"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Pola diperlukan setelah kunci total"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"Update akan diinstal saat perangkat sedang tidak digunakan"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Perlu keamanan tambahan. PIN tidak digunakan selama beberapa waktu."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Perlu keamanan tambahan. Sandi tidak digunakan selama beberapa waktu."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Perlu keamanan tambahan. Pola tidak digunakan selama beberapa waktu."</string>

@@ -544,12 +544,6 @@ object Flags {
     val ENABLE_PIP_SIZE_LARGE_SCREEN =
         sysPropBooleanFlag("persist.wm.debug.enable_pip_size_large_screen", default = true)
 
-    // TODO(b/265998256): Tracking bug
-    @Keep
-    @JvmField
-    val ENABLE_PIP_APP_ICON_OVERLAY =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_app_icon_overlay", default = true)
-
 
     // TODO(b/293252410) : Tracking Bug
     @JvmField

@@ -76,8 +76,7 @@
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"ຕ້ອງໃສ່ PIN ຫຼັງຈາກທີ່ລັອກໄວ້"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"ຕ້ອງໃສ່ລະຫັດຜ່ານຫຼັງຈາກທີ່ລັອກໄວ້"</string>
     <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"ຕ້ອງແຕ້ມຮູບແບບຫຼັງຈາກທີ່ລັອກໄວ້"</string>
-    <!-- no translation found for kg_prompt_unattended_update (4366635751738712452) -->
-    <skip />
+    <string name="kg_prompt_unattended_update" msgid="4366635751738712452">"ລະບົບຈະຕິດຕັ້ງການອັບເດດເມື່ອບໍ່ມີການນຳໃຊ້ອຸປະກອນ"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ PIN ມາໄລຍະໜຶ່ງແລ້ວ."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ລະຫັດຜ່ານມາໄລຍະໜຶ່ງແລ້ວ."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"ຕ້ອງເພີ່ມຄວາມປອດໄພ. ບໍ່ໄດ້ໃຊ້ຮູບແບບມາໄລຍະໜຶ່ງແລ້ວ."</string>

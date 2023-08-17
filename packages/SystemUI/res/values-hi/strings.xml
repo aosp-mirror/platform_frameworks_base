@@ -295,6 +295,8 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"वर्क ऐप्लिकेशन"</string>
+    <!-- no translation found for quick_settings_work_mode_paused_state (6681788236383735976) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"नाइट लाइट"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सुबह तक चालू रहेगी"</string>
@@ -864,6 +866,8 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रीन के किसी हिस्से को ज़ूम करें"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"ज़ूम करने की सुविधा वाली सेटिंग खोलें"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"ज़ूम करने की सुविधा वाली सेटिंग को बंद करें"</string>
+    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
+    <skip />
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"साइज़ बदलने के लिए, कोने को खींचें और छोड़ें"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"तिरछी दिशा में स्क्रोल करने की अनुमति दें"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"साइज़ बदलें"</string>
@@ -1133,7 +1137,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि कम से कम एक कार्ड जोड़ा गया हो"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"क्यूआर कोड स्कैनर को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि कैमरा ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ऐप्लिकेशन को शॉर्टकट के तौर पर जोड़ने के लिए, पक्का करें कि ऐप्लिकेशन इंस्टॉल किया गया हो"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• कम से कम एक डिवाइस उपलब्ध है"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"नोट लेने से जुड़ा शॉर्टकट इस्तेमाल करने के लिए, नोट लेने का डिफ़ॉल्ट ऐप्लिकेशन चुनें"</string>
@@ -1168,7 +1171,7 @@
     <string name="install_app" msgid="5066668100199613936">"ऐप्लिकेशन इंस्टॉल करें"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"माइक्रोफ़ोन और कैमरा"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"हाल ही में इस्तेमाल करने वाला ऐप्लिकेशन"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल ही का ऐक्सेस देखें"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"हाल में ऐक्सेस करने वाले ऐप"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"हो गया"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"बड़ा करें और विकल्प दिखाएं"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"छोटा करें"</string>
@@ -1179,7 +1182,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"फ़ोन कॉल पर इस्तेमाल किया जा रहा है"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"हाल ही में, फ़ोन कॉल में इस्तेमाल किया गया"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर इस्तेमाल किया जा रहा है"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"हाल ही में, <xliff:g id="APP_NAME">%1$s</xliff:g> ने इस्तेमाल किया"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"हाल ही में <xliff:g id="APP_NAME">%1$s</xliff:g> पर इस्तेमाल किया गया"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) पर इस्तेमाल किया जा रहा है"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"हाल ही में, <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ने इस्तेमाल किया"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) पर इस्तेमाल किया जा रहा है"</string>

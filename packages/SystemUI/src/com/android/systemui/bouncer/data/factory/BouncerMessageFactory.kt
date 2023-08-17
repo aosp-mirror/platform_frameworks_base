@@ -36,7 +36,6 @@ import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINL
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R.string.bouncer_face_not_recognized
 import com.android.systemui.R.string.keyguard_enter_password
 import com.android.systemui.R.string.keyguard_enter_pattern
@@ -80,13 +79,14 @@ import com.android.systemui.R.string.kg_wrong_pin_try_again
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import javax.inject.Inject
 
 @SysUISingleton
 class BouncerMessageFactory
 @Inject
 constructor(
-    private val updateMonitor: KeyguardUpdateMonitor,
+    private val biometricSettingsRepository: BiometricSettingsRepository,
     private val securityModel: KeyguardSecurityModel,
 ) {
 
@@ -99,7 +99,7 @@ constructor(
             getBouncerMessage(
                 reason,
                 securityModel.getSecurityMode(userId),
-                updateMonitor.isUnlockingWithFingerprintAllowed
+                biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed.value
             )
         return pair?.let {
             BouncerMessageModel(

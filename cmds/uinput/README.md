@@ -153,6 +153,38 @@ Example:
 }
 ```
 
+4. `sync`
+
+A command used to get a response once the command is processed. When several `inject` and `delay`
+commands are used in a row, the `sync` command can be used to track the progress of the command
+queue.
+
+|    Field    |  Type   | Description                                  |
+|:-----------:|:-------:|:---------------------------------------------|
+|    `id`     | integer | Device ID                                    |
+|  `command`  | string  | Must be set to "sync"                        |
+| `syncToken` | string  | The token used to identify this sync command |
+
+Example:
+
+```json5
+{
+  "id": 1,
+  "command": "syncToken",
+  "syncToken": "finished_injecting_events"
+}
+```
+
+This command will result in the following response when it is processed:
+
+```json5
+{
+  "id": 1,
+  "result": "sync",
+  "syncToken": "finished_injecting_events"
+}
+```
+
 ### Notes
 1. As soon as EOF is reached (either in interactive mode, or in file mode),
 the device that was created will be unregistered. There is no

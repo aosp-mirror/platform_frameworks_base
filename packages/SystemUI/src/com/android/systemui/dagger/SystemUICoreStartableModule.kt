@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.statusbar.phone.LockscreenWallpaper
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.StatusBarHeadsUpChangeListener
 import com.android.systemui.stylus.StylusUsiPowerStartable
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.theme.ThemeOverlayController
@@ -331,4 +332,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(ScrimController::class)
     abstract fun bindScrimController(impl: ScrimController): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBarHeadsUpChangeListener::class)
+    abstract fun bindStatusBarHeadsUpChangeListener(
+        impl: StatusBarHeadsUpChangeListener
+    ): CoreStartable
 }

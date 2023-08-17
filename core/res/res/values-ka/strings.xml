@@ -616,8 +616,6 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"გამოიყენეთ ბიომეტრიული სისტემა ან ეკრანის დაბლოკვა"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"დაადასტურეთ ვინაობა"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"გასაგრძელებლად გამოიყენეთ თქვენი ბიომეტრიული მონაცემები"</string>
-    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"გასაგრძელებლად გამოიყენეთ თქვენი თითის ანაბეჭდი"</string>
-    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"გასაგრძელებლად გამოიყენეთ სახის ამოცნობა"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"გასაგრძელებლად გამოიყენეთ თქვენი ბიომეტრიული მონაცემები ან ეკრანის განბლოკვის ნიმუში"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ბიომეტრიული აპარატურა მიუწვდომელია"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ავტორიზაცია გაუქმდა"</string>
@@ -643,6 +641,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"სახის ამოცნობა ვერ ხერხდება. სანაცვლოდ თითის ანაბეჭდი გამოიყენეთ."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"თითის ანაბეჭდი ავტორიზებულია"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"სახე ავტორიზებულია"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"სახე ავტორიზებულია, დააჭირეთ დადასტურებას"</string>

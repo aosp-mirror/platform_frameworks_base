@@ -27,7 +27,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
@@ -77,7 +77,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var shadeControllerImpl: ShadeControllerImpl
     @Mock
-    private lateinit var sceneInteractor: Provider<SceneInteractor>
+    private lateinit var windowRootView: Provider<WindowRootView>
     @Mock
     private lateinit var shadeLogger: ShadeLogger
     @Mock
@@ -203,7 +203,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             centralSurfacesImpl,
             shadeControllerImpl,
             shadeViewController,
-            sceneInteractor,
+            windowRootView,
             shadeLogger,
             viewUtil,
             configurationController,
