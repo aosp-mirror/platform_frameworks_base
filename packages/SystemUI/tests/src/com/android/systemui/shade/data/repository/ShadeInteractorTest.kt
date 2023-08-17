@@ -67,6 +67,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     private val featureFlags = FakeFeatureFlags()
     private val userSetupRepository = FakeUserSetupRepository()
     private val userRepository = FakeUserRepository()
+    private val shadeRepository = FakeShadeRepository()
     private val disableFlagsRepository = FakeDisableFlagsRepository()
     private val keyguardRepository = FakeKeyguardRepository()
 
@@ -138,6 +139,7 @@ class ShadeInteractorTest : SysuiTestCase() {
         underTest =
             ShadeInteractor(
                 testScope.backgroundScope,
+                shadeRepository,
                 disableFlagsRepository,
                 keyguardRepository,
                 userSetupRepository,
