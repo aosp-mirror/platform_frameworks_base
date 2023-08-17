@@ -6172,6 +6172,9 @@
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
 
+    <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
+    <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
+
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->
     <integer translatable="false" name="config_hotwordDetectedResultMaxBundleSize">0</integer>
