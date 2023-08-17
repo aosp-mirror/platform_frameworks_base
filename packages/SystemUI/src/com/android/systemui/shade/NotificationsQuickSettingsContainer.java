@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 
@@ -171,6 +172,12 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         // Let's now find the order that the view has when drawing regularly by sorting
         mLayoutDrawingOrder.sort(mIndexComparator);
         super.dispatchDraw(canvas);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch("NotificationsQuickSettingsContainer", ev,
+                super.dispatchTouchEvent(ev));
     }
 
     @Override

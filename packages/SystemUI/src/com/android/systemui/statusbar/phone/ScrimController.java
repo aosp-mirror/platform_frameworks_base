@@ -360,6 +360,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimBehind = behindScrim;
         mScrimInFront = scrimInFront;
         updateThemeColors();
+        mNotificationsScrim.setScrimName(getScrimName(mNotificationsScrim));
+        mScrimBehind.setScrimName(getScrimName(mScrimBehind));
+        mScrimInFront.setScrimName(getScrimName(mScrimInFront));
 
         behindScrim.enableBottomEdgeConcave(mClipsQsScrim);
         mNotificationsScrim.enableRoundedCorners(true);
