@@ -703,7 +703,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
                  Settings.Secure.ATTENTIVE_TIMEOUT,
-                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // setting not controllable by user
+                 Settings.Secure.AUDIO_DEVICE_INVENTORY, // not controllable by user
+                 Settings.Secure.AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED, // not controllable by user
                  Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
