@@ -66,6 +66,12 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     }
 }
 
+void SkiaDisplayList::visit(std::function<void(const RenderNode&)> func) const {
+    for (auto& child : mChildNodes) {
+        child.getRenderNode()->visit(func);
+    }
+}
+
 static bool intersects(const SkISize screenSize, const Matrix4& mat, const SkRect& bounds) {
     Vector3 points[] = { Vector3 {bounds.fLeft, bounds.fTop, 0},
                          Vector3 {bounds.fRight, bounds.fTop, 0},
