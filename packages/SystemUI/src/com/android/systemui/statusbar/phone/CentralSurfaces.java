@@ -196,8 +196,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
 
-    int getStatusBarHeight();
-
     boolean isLaunchingActivityOverLockscreen();
 
     void onKeyguardViewManagerStatesUpdated();

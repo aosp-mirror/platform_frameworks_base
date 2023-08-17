@@ -128,11 +128,11 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.RingerModeTracker;
@@ -141,7 +141,6 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -244,6 +243,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final IStatusBarService mStatusBarService;
     protected final LightBarController mLightBarController;
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final StatusBarWindowController mStatusBarWindowController;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private final RingerModeTracker mRingerModeTracker;
@@ -251,7 +251,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
     private int mOrientation;
-    private final Optional<CentralSurfaces> mCentralSurfacesOptional;
     private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
@@ -356,13 +355,13 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             IStatusBarService statusBarService,
             LightBarController lightBarController,
             NotificationShadeWindowController notificationShadeWindowController,
+            StatusBarWindowController statusBarWindowController,
             IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
             RingerModeTracker ringerModeTracker,
             @Main Handler handler,
             PackageManager packageManager,
-            Optional<CentralSurfaces> centralSurfacesOptional,
             ShadeController shadeController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DialogLaunchAnimator dialogLaunchAnimator) {
@@ -390,13 +389,13 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mStatusBarService = statusBarService;
         mLightBarController = lightBarController;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mStatusBarWindowController = statusBarWindowController;
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mRingerModeTracker = ringerModeTracker;
         mMainHandler = handler;
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
         mOrientation = resources.getConfiguration().orientation;
-        mCentralSurfacesOptional = centralSurfacesOptional;
         mShadeController = shadeController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
@@ -447,10 +446,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
     protected UiEventLogger getEventLogger() {
         return mUiEventLogger;
-    }
-
-    protected Optional<CentralSurfaces> getCentralSurfaces() {
-        return mCentralSurfacesOptional;
     }
 
     protected KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
@@ -701,12 +696,21 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected ActionsDialogLite createDialog() {
         initDialogItems();
 
-        ActionsDialogLite dialog = new ActionsDialogLite(mContext,
+        ActionsDialogLite dialog = new ActionsDialogLite(
+                mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
-                mAdapter, mOverflowAdapter, mSysuiColorExtractor, mStatusBarService,
+                mAdapter,
+                mOverflowAdapter,
+                mSysuiColorExtractor,
+                mStatusBarService,
                 mLightBarController,
-                mNotificationShadeWindowController, this::onRefresh, mKeyguardShowing,
-                mPowerAdapter, mUiEventLogger, mCentralSurfacesOptional,
+                mKeyguardStateController,
+                mNotificationShadeWindowController,
+                mStatusBarWindowController,
+                this::onRefresh,
+                mKeyguardShowing,
+                mPowerAdapter,
+                mUiEventLogger,
                 mShadeController,
                 mKeyguardUpdateMonitor,
                 mLockPatternUtils);
@@ -2208,13 +2212,14 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private boolean mKeyguardShowing;
         protected float mScrimAlpha;
         protected final LightBarController mLightBarController;
+        private final KeyguardStateController mKeyguardStateController;
         protected final NotificationShadeWindowController mNotificationShadeWindowController;
+        private final StatusBarWindowController mStatusBarWindowController;
         private ListPopupWindow mOverflowPopup;
         private Dialog mPowerOptionsDialog;
         protected final Runnable mOnRefreshCallback;
         private UiEventLogger mUiEventLogger;
         private GestureDetector mGestureDetector;
-        private Optional<CentralSurfaces> mCentralSurfacesOptional;
         private final ShadeController mShadeController;
         private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
         private LockPatternUtils mLockPatternUtils;
@@ -2248,8 +2253,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
                             float distanceY) {
                         if (distanceY < 0 && distanceY > distanceX
-                                && e1.getY() <= mCentralSurfacesOptional.map(
-                                        CentralSurfaces::getStatusBarHeight).orElse(0)) {
+                                && e1.getY() <= mStatusBarWindowController.getStatusBarHeight()) {
                             // Downwards scroll from top
                             openShadeAndDismiss();
                             return true;
@@ -2261,8 +2265,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
                             float velocityY) {
                         if (velocityY > 0 && Math.abs(velocityY) > Math.abs(velocityX)
-                                && e1.getY() <= mCentralSurfacesOptional.map(
-                                        CentralSurfaces::getStatusBarHeight).orElse(0)) {
+                                && e1.getY() <= mStatusBarWindowController.getStatusBarHeight()) {
                             // Downwards fling from top
                             openShadeAndDismiss();
                             return true;
@@ -2281,14 +2284,20 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mOverriddenBackDispatcher = mockDispatcher;
         }
 
-        ActionsDialogLite(Context context, int themeRes, MyAdapter adapter,
+        ActionsDialogLite(Context context,
+                int themeRes,
+                MyAdapter adapter,
                 MyOverflowAdapter overflowAdapter,
-                SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
+                SysuiColorExtractor sysuiColorExtractor,
+                IStatusBarService statusBarService,
                 LightBarController lightBarController,
+                KeyguardStateController keyguardStateController,
                 NotificationShadeWindowController notificationShadeWindowController,
-                Runnable onRefreshCallback, boolean keyguardShowing,
-                MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
-                Optional<CentralSurfaces> centralSurfacesOptional,
+                StatusBarWindowController statusBarWindowController,
+                Runnable onRefreshCallback,
+                boolean keyguardShowing,
+                MyPowerOptionsAdapter powerAdapter,
+                UiEventLogger uiEventLogger,
                 ShadeController shadeController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
                 LockPatternUtils lockPatternUtils) {
@@ -2302,11 +2311,12 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
             mLightBarController = lightBarController;
+            mKeyguardStateController = keyguardStateController;
             mNotificationShadeWindowController = notificationShadeWindowController;
+            mStatusBarWindowController = statusBarWindowController;
             mOnRefreshCallback = onRefreshCallback;
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
-            mCentralSurfacesOptional = centralSurfacesOptional;
             mShadeController = shadeController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
@@ -2355,7 +2365,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         private void openShadeAndDismiss() {
             mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
-            if (mCentralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
+            if (mKeyguardStateController.isShowing()) {
                 // match existing lockscreen behavior to open QS when swiping from status bar
                 mShadeController.animateExpandQs();
             } else {
