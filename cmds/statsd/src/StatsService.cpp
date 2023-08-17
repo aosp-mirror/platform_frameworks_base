@@ -163,12 +163,15 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
     init_system_properties();
 
     if (mEventQueue != nullptr) {
-        std::thread pushedEventThread([this] { readLogs(); });
-        pushedEventThread.detach();
+        mLogsReaderThread = std::make_unique<std::thread>([this] { readLogs(); });
     }
 }
 
 StatsService::~StatsService() {
+    if (mEventQueue != nullptr) {
+        stopReadingLogs();
+        mLogsReaderThread->join();
+    }
 }
 
 /* Runs on a dedicated thread to process pushed events. */
@@ -177,6 +180,13 @@ void StatsService::readLogs() {
     while (1) {
         // Block until an event is available.
         auto event = mEventQueue->waitPop();
+
+        // Below flag will be set when statsd is exiting and log event will be pushed to break
+        // out of waitPop.
+        if (mIsStopRequested) {
+            break;
+        }
+
         // Pass it to StatsLogProcess to all configs/metrics
         // At this point, the LogEventQueue is not blocked, so that the socketListener
         // can read events from the socket and write to buffer to avoid data drop.
@@ -1333,6 +1343,15 @@ void StatsService::statsCompanionServiceDiedImpl() {
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
     mPullerManager->SetStatsCompanionService(nullptr);
+}
+
+void StatsService::stopReadingLogs() {
+    mIsStopRequested = true;
+    // Push this event so that readLogs will process and break out of the loop
+    // after the stop is requested.
+    int64_t timeStamp;
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    mEventQueue->push(std::move(logEvent), &timeStamp);
 }
 
 }  // namespace statsd
