@@ -662,9 +662,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** Set of inset types for which an animation was started since last resetting this field */
     private @InsetsType int mLastStartedAnimTypes;
 
-    /** Set of inset types which cannot be controlled by the user animation */
-    private @InsetsType int mDisabledUserAnimationInsetsTypes;
-
     /** Set of inset types which are existing */
     private @InsetsType int mExistingTypes = 0;
 
@@ -877,21 +874,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         mState.set(newState, 0 /* types */);
         @InsetsType int existingTypes = 0;
         @InsetsType int visibleTypes = 0;
-        @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (int i = 0, size = newState.sourceSize(); i < size; i++) {
             final InsetsSource source = newState.sourceAt(i);
             @InsetsType int type = source.getType();
             @AnimationType int animationType = getAnimationType(type);
-            if (!source.isUserControllable()) {
-                // The user animation is not allowed when visible frame is empty.
-                disabledUserAnimationTypes |= type;
-                if (animationType == ANIMATION_TYPE_USER) {
-                    // Existing user animation needs to be cancelled.
-                    animationType = ANIMATION_TYPE_NONE;
-                    cancelledUserAnimationTypes[0] |= type;
-                }
-            }
             final InsetsSourceConsumer consumer = mSourceConsumers.get(source.getId());
             if (consumer != null) {
                 consumer.updateSource(source, animationType);
@@ -921,25 +908,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         InsetsState.traverse(mState, newState, mRemoveGoneSources);
 
-        updateDisabledUserAnimationTypes(disabledUserAnimationTypes);
-
         if (cancelledUserAnimationTypes[0] != 0) {
             mHandler.post(() -> show(cancelledUserAnimationTypes[0]));
-        }
-    }
-
-    private void updateDisabledUserAnimationTypes(@InsetsType int disabledUserAnimationTypes) {
-        @InsetsType int diff = mDisabledUserAnimationInsetsTypes ^ disabledUserAnimationTypes;
-        if (diff != 0) {
-            for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-                InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-                if (consumer.getControl() != null && (consumer.getType() & diff) != 0) {
-                    mHandler.removeCallbacks(mInvokeControllableInsetsChangedListeners);
-                    mHandler.post(mInvokeControllableInsetsChangedListeners);
-                    break;
-                }
-            }
-            mDisabledUserAnimationInsetsTypes = disabledUserAnimationTypes;
         }
     }
 
@@ -1315,26 +1285,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     + Type.toString(types)
                     + " while an existing " + Type.toString(mTypesBeingCancelled)
                     + " is being cancelled.");
-        }
-        if (animationType == ANIMATION_TYPE_USER) {
-            final @InsetsType int disabledTypes = types & mDisabledUserAnimationInsetsTypes;
-            if (DEBUG) Log.d(TAG, "user animation disabled types: " + disabledTypes);
-            types &= ~mDisabledUserAnimationInsetsTypes;
-
-            if ((disabledTypes & ime()) != 0) {
-                ImeTracker.forLogging().onFailed(statsToken,
-                        ImeTracker.PHASE_CLIENT_DISABLED_USER_ANIMATION);
-
-                if (fromIme
-                        && !mState.isSourceOrDefaultVisible(mImeSourceConsumer.getId(), ime())) {
-                    // We've requested IMM to show IME, but the IME is not controllable. We need to
-                    // cancel the request.
-                    setRequestedVisibleTypes(0 /* visibleTypes */, ime());
-                    if (mImeSourceConsumer.onAnimationStateChanged(false /* running */)) {
-                        notifyVisibilityChanged();
-                    }
-                }
-            }
         }
         if (types == 0) {
             // nothing to animate.
@@ -1908,7 +1858,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
             InsetsSource source = mState.peekSource(consumer.getId());
-            if (consumer.getControl() != null && source != null && source.isUserControllable()) {
+            if (consumer.getControl() != null && source != null) {
                 result |= consumer.getType();
             }
         }
