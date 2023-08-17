@@ -1132,6 +1132,12 @@ bool CanvasContext::shouldDither() {
     return self->mColorMode != ColorMode::Default;
 }
 
+void CanvasContext::visitAllRenderNodes(std::function<void(const RenderNode&)> func) const {
+    for (auto node : mRenderNodes) {
+        node->visit(func);
+    }
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
