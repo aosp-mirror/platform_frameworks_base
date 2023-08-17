@@ -57,7 +57,8 @@ public class AuthenticationStatsCollector {
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
-    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    // TODO(b/295582896): Find a way to make this NonNull
+    @Nullable private AuthenticationStatsPersister mAuthenticationStatsPersister;
     @NonNull private BiometricNotification mBiometricNotification;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -164,6 +165,9 @@ public class AuthenticationStatsCollector {
     }
 
     private void onUserRemoved(final int userId) {
+        if (mAuthenticationStatsPersister == null) {
+            initializeUserAuthenticationStatsMap();
+        }
         mUserAuthenticationStatsMap.remove(userId);
         mAuthenticationStatsPersister.removeFrrStats(userId);
     }
