@@ -228,9 +228,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** */
     boolean getCommandQueuePanelsEnabled();
 
-    /** */
-    int getStatusBarWindowState();
-
     BiometricUnlockController getBiometricUnlockController();
 
     void showWirelessChargingAnimation(int batteryLevel);

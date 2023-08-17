@@ -1818,11 +1818,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public int getStatusBarWindowState() {
-        return mStatusBarWindowState;
-    }
-
-    @Override
     public BiometricUnlockController getBiometricUnlockController() {
         return mBiometricUnlockController;
     }
