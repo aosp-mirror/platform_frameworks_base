@@ -647,11 +647,11 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @After
     public void teardown() {
-        cleanUp(mDialog);
         setOrientation(mOriginalOrientation);
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         mTestableLooper.processAllMessages();
         reset(mPostureController);
+        cleanUp(mDialog);
     }
 
     private void cleanUp(VolumeDialogImpl dialog) {
