@@ -34,7 +34,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.provider.DeviceConfig;
 import android.util.Size;
 import android.view.DisplayCutout;
@@ -72,14 +71,6 @@ public class PipTouchHandler {
 
     private static final String TAG = "PipTouchHandler";
     private static final float DEFAULT_STASH_VELOCITY_THRESHOLD = 18000.f;
-
-    private boolean mEnablePipKeepClearAlgorithm =
-            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", true);
-
-    @VisibleForTesting
-    void setEnablePipKeepClearAlgorithm(boolean value) {
-        mEnablePipKeepClearAlgorithm = value;
-    }
 
     // Allow PIP to resize to a slightly bigger state upon touch
     private boolean mEnableResize;
@@ -429,48 +420,6 @@ public class PipTouchHandler {
         int extraOffset = Math.max(
                 mIsImeShowing ? mImeOffset : 0,
                 !mIsImeShowing && mIsShelfShowing ? mShelfHeight : 0);
-
-        // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
-        // occluded by the IME or shelf.
-        if (fromImeAdjustment || fromShelfAdjustment) {
-            if (mTouchState.isUserInteracting() && mTouchState.isDragging()) {
-                // Defer the update of the current movement bounds until after the user finishes
-                // touching the screen
-            } else if (mEnablePipKeepClearAlgorithm) {
-                // Ignore moving PiP if keep clear algorithm is enabled, since IME and shelf height
-                // now are accounted for in the keep clear algorithm calculations
-            } else {
-                final boolean isExpanded = mMenuState == MENU_STATE_FULL && willResizeMenu();
-                final Rect toMovementBounds = new Rect();
-                mPipBoundsAlgorithm.getMovementBounds(curBounds, insetBounds,
-                        toMovementBounds, mIsImeShowing ? mImeHeight : 0);
-                final int prevBottom = mPipBoundsState.getMovementBounds().bottom
-                        - mMovementBoundsExtraOffsets;
-                // This is to handle landscape fullscreen IMEs, don't apply the extra offset in this
-                // case
-                final int toBottom = toMovementBounds.bottom < toMovementBounds.top
-                        ? toMovementBounds.bottom
-                        : toMovementBounds.bottom - extraOffset;
-
-                if (isExpanded) {
-                    curBounds.set(mPipBoundsState.getExpandedBounds());
-                    mPipBoundsAlgorithm.getSnapAlgorithm().applySnapFraction(curBounds,
-                            toMovementBounds, mSavedSnapFraction);
-                }
-
-                if (prevBottom < toBottom) {
-                    // The movement bounds are expanding
-                    if (curBounds.top > prevBottom - mBottomOffsetBufferPx) {
-                        mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
-                    }
-                } else if (prevBottom > toBottom) {
-                    // The movement bounds are shrinking
-                    if (curBounds.top > toBottom - mBottomOffsetBufferPx) {
-                        mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
-                    }
-                }
-            }
-        }
 
         // Update the movement bounds after doing the calculations based on the old movement bounds
         // above

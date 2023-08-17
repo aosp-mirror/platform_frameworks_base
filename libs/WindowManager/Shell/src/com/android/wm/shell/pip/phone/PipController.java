@@ -123,14 +123,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private static final long PIP_KEEP_CLEAR_AREAS_DELAY =
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
 
-    private boolean mEnablePipKeepClearAlgorithm =
-            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", true);
-
-    @VisibleForTesting
-    void setEnablePipKeepClearAlgorithm(boolean value) {
-        mEnablePipKeepClearAlgorithm = value;
-    }
-
     private Context mContext;
     protected ShellExecutor mMainExecutor;
     private DisplayController mDisplayController;
@@ -166,10 +158,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             // early bail out if the change was caused by keyguard showing up
             return;
         }
-        if (!mEnablePipKeepClearAlgorithm) {
-            // early bail out if the keep clear areas feature is disabled
-            return;
-        }
         if (mPipBoundsState.isStashed()) {
             // don't move when stashed
             return;
@@ -187,10 +175,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void updatePipPositionForKeepClearAreas() {
-        if (!mEnablePipKeepClearAlgorithm) {
-            // early bail out if the keep clear areas feature is disabled
-            return;
-        }
         if (mIsKeyguardShowingOrAnimating) {
             // early bail out if the change was caused by keyguard showing up
             return;
@@ -343,19 +327,17 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
                         Set<Rect> unrestricted) {
                     if (mPipDisplayLayoutState.getDisplayId() == displayId) {
-                        if (mEnablePipKeepClearAlgorithm) {
-                            mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
+                        mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
 
-                            mMainExecutor.removeCallbacks(
-                                    mMovePipInResponseToKeepClearAreasChangeCallback);
-                            mMainExecutor.executeDelayed(
-                                    mMovePipInResponseToKeepClearAreasChangeCallback,
-                                    PIP_KEEP_CLEAR_AREAS_DELAY);
+                        mMainExecutor.removeCallbacks(
+                                mMovePipInResponseToKeepClearAreasChangeCallback);
+                        mMainExecutor.executeDelayed(
+                                mMovePipInResponseToKeepClearAreasChangeCallback,
+                                PIP_KEEP_CLEAR_AREAS_DELAY);
 
-                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                    "onKeepClearAreasChanged: restricted=%s, unrestricted=%s",
-                                    restricted, unrestricted);
-                        }
+                        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                "onKeepClearAreasChanged: restricted=%s, unrestricted=%s",
+                                restricted, unrestricted);
                     }
                 }
             };
@@ -660,25 +642,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             // there's a keyguard present
                             return;
                         }
-                        int oldMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
                         onDisplayChangedUncheck(mDisplayController
                                         .getDisplayLayout(mPipDisplayLayoutState.getDisplayId()),
                                 false /* saveRestoreSnapFraction */);
-                        int newMaxMovementBound = mPipBoundsState.getMovementBounds().bottom;
-                        if (!mEnablePipKeepClearAlgorithm) {
-                            // offset PiP to adjust for bottom inset change
-                            int pipTop = mPipBoundsState.getBounds().top;
-                            int diff = newMaxMovementBound - oldMaxMovementBound;
-                            if (diff < 0 && pipTop > newMaxMovementBound) {
-                                // bottom inset has increased, move PiP up if it is too low
-                                mPipMotionHelper.animateToOffset(mPipBoundsState.getBounds(),
-                                        newMaxMovementBound - pipTop);
-                            }
-                            if (diff > 0 && oldMaxMovementBound == pipTop) {
-                                // bottom inset has decreased, move PiP down if it was by the edge
-                                mPipMotionHelper.animateToOffset(mPipBoundsState.getBounds(), diff);
-                            }
-                        }
                     }
                 });
 
@@ -947,14 +913,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Sets both shelf visibility and its height.
      */
     private void setShelfHeight(boolean visible, int height) {
-        if (mEnablePipKeepClearAlgorithm) {
-            // turn this into Launcher keep clear area registration instead
-            setLauncherKeepClearAreaHeight(visible, height);
-            return;
-        }
-        if (!mIsKeyguardShowingOrAnimating) {
-            setShelfHeightLocked(visible, height);
-        }
+        // turn this into Launcher keep clear area registration instead
+        setLauncherKeepClearAreaHeight(visible, height);
     }
 
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
@@ -1015,16 +975,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
             PictureInPictureParams pictureInPictureParams,
             int launcherRotation, Rect hotseatKeepClearArea) {
-
-        if (mEnablePipKeepClearAlgorithm) {
-            // preemptively add the keep clear area for Hotseat, so that it is taken into account
-            // when calculating the entry destination bounds of PiP window
-            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
-                    hotseatKeepClearArea);
-        } else {
-            int shelfHeight = hotseatKeepClearArea.height();
-            setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
-        }
+        // preemptively add the keep clear area for Hotseat, so that it is taken into account
+        // when calculating the entry destination bounds of PiP window
+        mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
+                hotseatKeepClearArea);
         onDisplayRotationChangedNotInPip(mContext, launcherRotation);
         final Rect entryBounds = mPipTaskOrganizer.startSwipePipToHome(componentName, activityInfo,
                 pictureInPictureParams);
