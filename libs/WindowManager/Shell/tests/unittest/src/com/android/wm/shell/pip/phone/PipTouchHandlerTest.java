@@ -18,7 +18,6 @@ package com.android.wm.shell.pip.phone;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -173,17 +172,5 @@ public class PipTouchHandlerTest extends ShellTestCase {
 
         verify(mPipResizeGestureHandler, times(1))
                 .updateMaxSize(expectedMaxSize.getWidth(), expectedMaxSize.getHeight());
-    }
-
-    @Test
-    public void updateMovementBounds_withImeAdjustment_movesPip() {
-        mPipTouchHandler.setEnablePipKeepClearAlgorithm(false);
-        mFromImeAdjustment = true;
-        mPipTouchHandler.onImeVisibilityChanged(true /* imeVisible */, mImeHeight);
-
-        mPipTouchHandler.onMovementBoundsChanged(mInsetBounds, mPipBounds, mCurBounds,
-                mFromImeAdjustment, mFromShelfAdjustment, mDisplayRotation);
-
-        verify(mMotionHelper, times(1)).animateToOffset(any(), anyInt());
     }
 }

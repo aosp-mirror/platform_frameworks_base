@@ -76,7 +76,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
@@ -329,21 +328,7 @@ public class PipControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void onKeepClearAreasChanged_featureDisabled_pipBoundsStateDoesntChange() {
-        mPipController.setEnablePipKeepClearAlgorithm(false);
-        final int displayId = 1;
-        final Rect keepClearArea = new Rect(0, 0, 10, 10);
-        when(mMockPipDisplayLayoutState.getDisplayId()).thenReturn(displayId);
-
-        mPipController.mDisplaysChangedListener.onKeepClearAreasChanged(
-                displayId, Set.of(keepClearArea), Set.of());
-
-        verify(mMockPipBoundsState, never()).setKeepClearAreas(Mockito.anySet(), Mockito.anySet());
-    }
-
-    @Test
-    public void onKeepClearAreasChanged_featureEnabled_updatesPipBoundsState() {
-        mPipController.setEnablePipKeepClearAlgorithm(true);
+    public void onKeepClearAreasChanged_updatesPipBoundsState() {
         final int displayId = 1;
         final Rect keepClearArea = new Rect(0, 0, 10, 10);
         when(mMockPipDisplayLayoutState.getDisplayId()).thenReturn(displayId);
