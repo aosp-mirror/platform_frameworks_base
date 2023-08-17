@@ -4907,6 +4907,11 @@ public class UserManagerService extends IUserManager.Stub {
                                 USER_OPERATION_ERROR_UNKNOWN);
                     }
                 }
+                if (isMainUser && getMainUserIdUnchecked() != UserHandle.USER_NULL) {
+                    throwCheckedUserOperationException(
+                            "Cannot add user with FLAG_MAIN as main user already exists.",
+                            UserManager.USER_OPERATION_ERROR_MAX_USERS);
+                }
                 if (!preCreate && !canAddMoreUsersOfType(userTypeDetails)) {
                     throwCheckedUserOperationException(
                             "Cannot add more users of type " + userType
