@@ -29,6 +29,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +48,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+@Presubmit
+@SmallTest
 public class AuthenticationStatsPersisterTest {
 
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -209,6 +214,20 @@ public class AuthenticationStatsPersisterTest {
                 .put(FACE_REJECTIONS, newAuthenticationStats.getRejectedAttempts()).toString();
         verify(mEditor).putStringSet(eq(KEY), mStringSetArgumentCaptor.capture());
         assertThat(mStringSetArgumentCaptor.getValue()).contains(expectedFrrStats);
+    }
+
+    @Test
+    public void removeFrrStats_existingUser_shouldUpdateRecord() throws JSONException {
+        AuthenticationStats authenticationStats = new AuthenticationStats(USER_ID_1,
+                300 /* totalAttempts */, 10 /* rejectedAttempts */,
+                0 /* enrollmentNotifications */, BiometricsProtoEnums.MODALITY_FACE);
+        when(mSharedPreferences.getStringSet(eq(KEY), anySet())).thenReturn(
+                Set.of(buildFrrStats(authenticationStats)));
+
+        mAuthenticationStatsPersister.removeFrrStats(USER_ID_1);
+
+        verify(mEditor).putStringSet(eq(KEY), mStringSetArgumentCaptor.capture());
+        assertThat(mStringSetArgumentCaptor.getValue()).doesNotContain(authenticationStats);
     }
 
     private String buildFrrStats(AuthenticationStats authenticationStats)

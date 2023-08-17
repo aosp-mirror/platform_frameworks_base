@@ -18,10 +18,14 @@ package com.android.server.biometrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.UserHandle;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -53,8 +57,20 @@ public class AuthenticationStatsCollector {
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
-    @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    // TODO(b/295582896): Find a way to make this NonNull
+    @Nullable private AuthenticationStatsPersister mAuthenticationStatsPersister;
     @NonNull private BiometricNotification mBiometricNotification;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId != UserHandle.USER_NULL
+                    && intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
+                onUserRemoved(userId);
+            }
+        }
+    };
 
     public AuthenticationStatsCollector(@NonNull Context context, int modality,
             @NonNull BiometricNotification biometricNotification) {
@@ -64,6 +80,8 @@ public class AuthenticationStatsCollector {
         mUserAuthenticationStatsMap = new HashMap<>();
         mModality = modality;
         mBiometricNotification = biometricNotification;
+
+        context.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
     }
 
     private void initializeUserAuthenticationStatsMap() {
@@ -75,8 +93,9 @@ public class AuthenticationStatsCollector {
 
     /** Update total authentication and rejected attempts. */
     public void authenticate(int userId, boolean authenticated) {
-        // Initialize mUserAuthenticationStatsMap when authenticate to ensure SharedPreferences
-        // are ready for application use and avoid ramdump issue.
+        // SharedPreference is not ready when starting system server, initialize
+        // mUserAuthenticationStatsMap in authentication to ensure SharedPreference
+        // is ready for application use.
         if (mUserAuthenticationStatsMap.isEmpty()) {
             initializeUserAuthenticationStatsMap();
         }
@@ -144,6 +163,14 @@ public class AuthenticationStatsCollector {
                     authenticationStats.getEnrollmentNotifications(),
                     authenticationStats.getModality());
         }
+    }
+
+    private void onUserRemoved(final int userId) {
+        if (mAuthenticationStatsPersister == null) {
+            initializeUserAuthenticationStatsMap();
+        }
+        mUserAuthenticationStatsMap.remove(userId);
+        mAuthenticationStatsPersister.removeFrrStats(userId);
     }
 
     /**
