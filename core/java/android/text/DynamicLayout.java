@@ -622,7 +622,7 @@ public class DynamicLayout extends Layout {
             sBuilder = null;
         }
 
-        if (reflowed == null) {
+        if (b == null) {
             b = StaticLayout.Builder.obtain(text, where, where + after, getPaint(), getWidth());
         }
 
@@ -641,7 +641,7 @@ public class DynamicLayout extends Layout {
                 .setAddLastLineLineSpacing(!islast)
                 .setIncludePad(false);
 
-        reflowed = b.regenerate(true /* trackpadding */, reflowed);
+        reflowed = b.buildPartialStaticLayoutForDynamicLayout(true /* trackpadding */, reflowed);
         int n = reflowed.getLineCount();
         // If the new layout has a blank line at the end, but it is not
         // the very end of the buffer, then we already have a line that
