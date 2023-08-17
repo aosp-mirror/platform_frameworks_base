@@ -2854,10 +2854,10 @@ public final class DisplayManagerService extends SystemService {
     // Delivers display event notifications to callbacks.
     private void deliverDisplayEvent(int displayId, ArraySet<Integer> uids,
             @DisplayEvent int event) {
-        if (DEBUG) {
+        //if (DEBUG) {
             Slog.d(TAG, "Delivering display event: displayId="
                     + displayId + ", event=" + event);
-        }
+        //}
 
         // Grab the lock and copy the callbacks.
         final int count;
