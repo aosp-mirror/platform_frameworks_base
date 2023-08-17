@@ -28,7 +28,6 @@ import static com.android.systemui.statusbar.notification.stack.NotificationStac
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_HIGH_PRIORITY;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.SelectedRows;
-import static com.android.systemui.statusbar.phone.NotificationIconAreaController.HIGH_PRIORITY;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
@@ -150,6 +149,7 @@ import javax.inject.Named;
 public class NotificationStackScrollLayoutController {
     private static final String TAG = "StackScrollerController";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final String HIGH_PRIORITY = "high_priority";
 
     private final boolean mAllowLongPress;
     private final NotificationGutsManager mNotificationGutsManager;
