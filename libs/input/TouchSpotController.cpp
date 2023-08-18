@@ -98,8 +98,8 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
 #endif
 
     std::scoped_lock lock(mLock);
-    sp<SpriteController> spriteController = mContext.getSpriteController();
-    spriteController->openTransaction();
+    auto& spriteController = mContext.getSpriteController();
+    spriteController.openTransaction();
 
     // Add or move spots for fingers that are down.
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
@@ -125,7 +125,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
         }
     }
 
-    spriteController->closeTransaction();
+    spriteController.closeTransaction();
 }
 
 void TouchSpotController::clearSpots() {
@@ -167,7 +167,7 @@ TouchSpotController::Spot* TouchSpotController::createAndAddSpotLocked(uint32_t 
         sprite = mLocked.recycledSprites.back();
         mLocked.recycledSprites.pop_back();
     } else {
-        sprite = mContext.getSpriteController()->createSprite();
+        sprite = mContext.getSpriteController().createSprite();
     }
 
     // Return the new spot.

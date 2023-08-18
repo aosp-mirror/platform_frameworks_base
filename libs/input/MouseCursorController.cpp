@@ -47,7 +47,7 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.pointerX = 0;
     mLocked.pointerY = 0;
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
-    mLocked.pointerSprite = mContext.getSpriteController()->createSprite();
+    mLocked.pointerSprite = mContext.getSpriteController().createSprite();
     mLocked.updatePointerIcon = false;
     mLocked.requestedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
     mLocked.resolvedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
@@ -325,8 +325,8 @@ bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(
     }
 
     if (timestamp - mLocked.lastFrameUpdatedTime > iter->second.durationPerFrame) {
-        sp<SpriteController> spriteController = mContext.getSpriteController();
-        spriteController->openTransaction();
+        auto& spriteController = mContext.getSpriteController();
+        spriteController.openTransaction();
 
         int incr = (timestamp - mLocked.lastFrameUpdatedTime) / iter->second.durationPerFrame;
         mLocked.animationFrameIndex += incr;
@@ -336,7 +336,7 @@ bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(
         }
         mLocked.pointerSprite->setIcon(iter->second.animationFrames[mLocked.animationFrameIndex]);
 
-        spriteController->closeTransaction();
+        spriteController.closeTransaction();
     }
     // Keep animating.
     return true;
@@ -346,8 +346,8 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
     if (!mLocked.viewport.isValid()) {
         return;
     }
-    sp<SpriteController> spriteController = mContext.getSpriteController();
-    spriteController->openTransaction();
+    auto& spriteController = mContext.getSpriteController();
+    spriteController.openTransaction();
 
     mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
     mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
@@ -392,7 +392,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
         mLocked.updatePointerIcon = false;
     }
 
-    spriteController->closeTransaction();
+    spriteController.closeTransaction();
 }
 
 void MouseCursorController::loadResourcesLocked(bool getAdditionalMouseResources) REQUIRES(mLock) {

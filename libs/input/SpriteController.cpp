@@ -37,10 +37,10 @@ SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLaye
     mLocked.deferredSpriteUpdate = false;
 }
 
-void SpriteController::setHandlerController(const sp<android::SpriteController>& controller) {
-    // Initialize the weak message handler outside the constructor, because we cannot get a strong
-    // pointer to self in the constructor as the initial ref count is only incremented after
-    // construction.
+void SpriteController::setHandlerController(
+        const std::shared_ptr<android::SpriteController>& controller) {
+    // Initialize the weak message handler outside the constructor, because we cannot get a shared
+    // pointer to self in the constructor.
     mHandler->spriteController = controller;
 }
 
@@ -54,7 +54,7 @@ SpriteController::~SpriteController() {
 }
 
 sp<Sprite> SpriteController::createSprite() {
-    return sp<SpriteImpl>::make(sp<SpriteController>::fromExisting(this));
+    return sp<SpriteImpl>::make(*this);
 }
 
 void SpriteController::openTransaction() {
@@ -352,7 +352,7 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
 // --- SpriteController::Handler ---
 
 void SpriteController::Handler::handleMessage(const android::Message& message) {
-    auto controller = spriteController.promote();
+    auto controller = spriteController.lock();
     if (!controller) {
         return;
     }
@@ -369,22 +369,21 @@ void SpriteController::Handler::handleMessage(const android::Message& message) {
 
 // --- SpriteController::SpriteImpl ---
 
-SpriteController::SpriteImpl::SpriteImpl(const sp<SpriteController>& controller)
-      : mController(controller) {}
+SpriteController::SpriteImpl::SpriteImpl(SpriteController& controller) : mController(controller) {}
 
 SpriteController::SpriteImpl::~SpriteImpl() {
-    AutoMutex _m(mController->mLock);
+    AutoMutex _m(mController.mLock);
 
     // Let the controller take care of deleting the last reference to sprite
     // surfaces so that we do not block the caller on an IPC here.
     if (mLocked.state.surfaceControl != NULL) {
-        mController->disposeSurfaceLocked(mLocked.state.surfaceControl);
+        mController.disposeSurfaceLocked(mLocked.state.surfaceControl);
         mLocked.state.surfaceControl.clear();
     }
 }
 
 void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     uint32_t dirty;
     if (icon.isValid()) {
@@ -414,7 +413,7 @@ void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
 }
 
 void SpriteController::SpriteImpl::setVisible(bool visible) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.visible != visible) {
         mLocked.state.visible = visible;
@@ -423,7 +422,7 @@ void SpriteController::SpriteImpl::setVisible(bool visible) {
 }
 
 void SpriteController::SpriteImpl::setPosition(float x, float y) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.positionX != x || mLocked.state.positionY != y) {
         mLocked.state.positionX = x;
@@ -433,7 +432,7 @@ void SpriteController::SpriteImpl::setPosition(float x, float y) {
 }
 
 void SpriteController::SpriteImpl::setLayer(int32_t layer) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.layer != layer) {
         mLocked.state.layer = layer;
@@ -442,7 +441,7 @@ void SpriteController::SpriteImpl::setLayer(int32_t layer) {
 }
 
 void SpriteController::SpriteImpl::setAlpha(float alpha) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.alpha != alpha) {
         mLocked.state.alpha = alpha;
@@ -452,7 +451,7 @@ void SpriteController::SpriteImpl::setAlpha(float alpha) {
 
 void SpriteController::SpriteImpl::setTransformationMatrix(
         const SpriteTransformationMatrix& matrix) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.transformationMatrix != matrix) {
         mLocked.state.transformationMatrix = matrix;
@@ -461,7 +460,7 @@ void SpriteController::SpriteImpl::setTransformationMatrix(
 }
 
 void SpriteController::SpriteImpl::setDisplayId(int32_t displayId) {
-    AutoMutex _l(mController->mLock);
+    AutoMutex _l(mController.mLock);
 
     if (mLocked.state.displayId != displayId) {
         mLocked.state.displayId = displayId;
@@ -474,7 +473,7 @@ void SpriteController::SpriteImpl::invalidateLocked(uint32_t dirty) {
     mLocked.state.dirty |= dirty;
 
     if (!wasDirty) {
-        mController->invalidateSpriteLocked(sp<SpriteImpl>::fromExisting(this));
+        mController.invalidateSpriteLocked(sp<SpriteImpl>::fromExisting(this));
     }
 }
 
