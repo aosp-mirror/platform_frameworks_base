@@ -43,6 +43,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import java.io.PrintWriter;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -499,6 +500,26 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
+    }
+
+    /**
+     * Dumps debugging information about the VirtualDeviceParams
+     * @hide
+     */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "mName=" + mName);
+        pw.println(prefix + "mLockState=" + mLockState);
+        pw.println(prefix + "mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts);
+        pw.println(prefix + "mAllowedCrossTaskNavigations=" + mAllowedCrossTaskNavigations);
+        pw.println(prefix + "mBlockedCrossTaskNavigations=" + mBlockedCrossTaskNavigations);
+        pw.println(prefix + "mAllowedActivities=" + mAllowedActivities);
+        pw.println(prefix + "mBlockedActivities=" + mBlockedActivities);
+        pw.println(prefix + "mDevicePolicies=" + mDevicePolicies);
+        pw.println(prefix + "mDefaultNavigationPolicy=" + mDefaultNavigationPolicy);
+        pw.println(prefix + "mDefaultActivityPolicy=" + mDefaultActivityPolicy);
+        pw.println(prefix + "mVirtualSensorConfigs=" + mVirtualSensorConfigs);
+        pw.println(prefix + "mAudioPlaybackSessionId=" + mAudioPlaybackSessionId);
+        pw.println(prefix + "mAudioRecordingSessionId=" + mAudioRecordingSessionId);
     }
 
     @NonNull

@@ -61,6 +61,7 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
+import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -1729,7 +1730,9 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
             VirtualDeviceParams params) {
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, mVdms, new Binder(), ownerUid, virtualDeviceId,
+                mAssociationInfo, mVdms, new Binder(),
+                new AttributionSource(ownerUid, "com.android.virtualdevice.test", "virtualdevice"),
+                virtualDeviceId,
                 mInputController, mCameraAccessController,
                 mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
                 mRunningAppsChangedCallback, params, new DisplayManagerGlobal(mIDisplayManager));

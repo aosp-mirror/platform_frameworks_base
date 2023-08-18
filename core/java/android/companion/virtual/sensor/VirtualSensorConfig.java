@@ -104,6 +104,11 @@ public final class VirtualSensorConfig implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
+    @Override
+    public String toString() {
+        return "VirtualSensorConfig{" + "mType=" + mType + ", mName='" + mName + '\'' + '}';
+    }
+
     /**
      * Returns the type of the sensor.
      *
