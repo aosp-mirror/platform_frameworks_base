@@ -467,7 +467,7 @@ public class KeySyncTaskTest {
         verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
                 .isTestOnlyCertificateAlias(eq(TEST_ROOT_CERT_ALIAS));
 
-        // no whitelists check
+        // no allowlists check
         verify(mTestOnlyInsecureCertificateHelper, never())
                 .doesCredentialSupportInsecureMode(anyInt(), any());
         verify(mTestOnlyInsecureCertificateHelper, never())
