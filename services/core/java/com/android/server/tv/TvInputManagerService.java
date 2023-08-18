@@ -3055,10 +3055,10 @@ public final class TvInputManagerService extends SystemService {
         TvInputInfo tvInputInfo = tvInputState.info;
         int inputState = tvInputState.state;
         int inputType = tvInputInfo.getType();
-        // For non-CEC input, the value of vendorId is 0.
-        int vendorId = 0;
-        // For non-HDMI input, the value of hdmiPort is 0.
-        int hdmiPort = 0;
+        // For non-CEC input, the value of vendorId is 0xFFFFFF (16777215 in decimal).
+        int vendorId = 16777215;
+        // For non-HDMI input, the value of hdmiPort is -1.
+        int hdmiPort = -1;
         String tifSessionId = sessionState.sessionId;
 
         if (tvInputInfo.getType() == TvInputInfo.TYPE_HDMI) {
