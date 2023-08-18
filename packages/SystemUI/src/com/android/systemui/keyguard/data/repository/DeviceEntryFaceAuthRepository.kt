@@ -52,6 +52,7 @@ import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import java.io.PrintWriter
 import java.util.Arrays
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -200,7 +202,7 @@ constructor(
     private val keyguardSessionId: InstanceId?
         get() = sessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD)
 
-    private val _canRunFaceAuth = MutableStateFlow(true)
+    private val _canRunFaceAuth = MutableStateFlow(false)
     override val canRunFaceAuth: StateFlow<Boolean>
         get() = _canRunFaceAuth
 
@@ -281,7 +283,9 @@ constructor(
                 } else {
                     keyguardRepository.isKeyguardGoingAway
                 },
-                userRepository.userSwitchingInProgress,
+                userRepository.selectedUser.map {
+                    it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
+                },
             )
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {
@@ -325,6 +329,7 @@ constructor(
                     cancelDetection()
                 }
             }
+            .flowOn(mainDispatcher)
             .logDiffsForTable(faceDetectLog, "", "canFaceDetectRun", false)
             .launchIn(applicationScope)
     }
@@ -410,6 +415,7 @@ constructor(
                     cancel()
                 }
             }
+            .flowOn(mainDispatcher)
             .logDiffsForTable(faceAuthLog, "", "canFaceAuthRun", false)
             .launchIn(applicationScope)
     }

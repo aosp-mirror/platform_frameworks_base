@@ -259,35 +259,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUser!!.selectionStatus).isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
     }
 
-    @Test
-    fun userSwitchingInProgress_registersUserTrackerCallback() = runSelfCancelingTest {
-        underTest = create(this)
-
-        underTest.userSwitchingInProgress.launchIn(this)
-        underTest.userSwitchingInProgress.launchIn(this)
-        underTest.userSwitchingInProgress.launchIn(this)
-
-        // Two callbacks registered - one for observing user switching and one for observing the
-        // selected user
-        assertThat(tracker.callbacks.size).isEqualTo(2)
-    }
-
-    @Test
-    fun userSwitchingInProgress_propagatesStateFromUserTracker() = runSelfCancelingTest {
-        underTest = create(this)
-        assertThat(tracker.callbacks.size).isEqualTo(2)
-
-        tracker.onUserChanging(0)
-
-        var mostRecentSwitchingValue = false
-        underTest.userSwitchingInProgress.onEach { mostRecentSwitchingValue = it }.launchIn(this)
-
-        assertThat(mostRecentSwitchingValue).isTrue()
-
-        tracker.onUserChanged(0)
-        assertThat(mostRecentSwitchingValue).isFalse()
-    }
-
     private fun createUserInfo(
         id: Int,
         isGuest: Boolean,

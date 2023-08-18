@@ -20,7 +20,10 @@ package com.android.systemui.biometrics.data.repository
 import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback
+import android.util.Log
+import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.biometrics.shared.model.toLockoutMode
 import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow
@@ -29,16 +32,18 @@ import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
 /** A repository for the global state of Face sensor. */
 interface FacePropertyRepository {
     /** Face sensor information, null if it is not available. */
-    val sensorInfo: Flow<FaceSensorInfo?>
+    val sensorInfo: StateFlow<FaceSensorInfo?>
+
+    /** Get the current lockout mode for the user. This makes a binder based service call. */
+    suspend fun getLockoutMode(userId: Int): LockoutMode
 }
 
 /** Describes a biometric sensor */
@@ -49,33 +54,39 @@ private const val TAG = "FaceSensorPropertyRepositoryImpl"
 @SysUISingleton
 class FacePropertyRepositoryImpl
 @Inject
-constructor(@Application private val applicationScope: CoroutineScope, faceManager: FaceManager?) :
-    FacePropertyRepository {
+constructor(
+    @Application private val applicationScope: CoroutineScope,
+    private val faceManager: FaceManager?
+) : FacePropertyRepository {
 
-    private val sensorProps: Flow<List<FaceSensorPropertiesInternal>> =
-        faceManager?.let {
-            ConflatedCallbackFlow.conflatedCallbackFlow {
-                    val callback =
-                        object : IFaceAuthenticatorsRegisteredCallback.Stub() {
-                            override fun onAllAuthenticatorsRegistered(
-                                sensors: List<FaceSensorPropertiesInternal>
-                            ) {
-                                trySendWithFailureLogging(
-                                    sensors,
-                                    TAG,
-                                    "onAllAuthenticatorsRegistered"
-                                )
-                            }
+    override val sensorInfo: StateFlow<FaceSensorInfo?> =
+        ConflatedCallbackFlow.conflatedCallbackFlow {
+                val callback =
+                    object : IFaceAuthenticatorsRegisteredCallback.Stub() {
+                        override fun onAllAuthenticatorsRegistered(
+                            sensors: List<FaceSensorPropertiesInternal>,
+                        ) {
+                            if (sensors.isEmpty()) return
+                            trySendWithFailureLogging(
+                                FaceSensorInfo(
+                                    sensors.first().sensorId,
+                                    sensors.first().sensorStrength.toSensorStrength()
+                                ),
+                                TAG,
+                                "onAllAuthenticatorsRegistered"
+                            )
                         }
-                    it.addAuthenticatorsRegisteredCallback(callback)
-                    awaitClose {}
-                }
-                .shareIn(applicationScope, SharingStarted.Eagerly)
-        }
-            ?: flowOf(emptyList())
+                    }
+                faceManager?.addAuthenticatorsRegisteredCallback(callback)
+                awaitClose {}
+            }
+            .onEach { Log.d(TAG, "sensorProps changed: $it") }
+            .stateIn(applicationScope, SharingStarted.Eagerly, null)
 
-    override val sensorInfo: Flow<FaceSensorInfo?> =
-        sensorProps
-            .map { it.firstOrNull() }
-            .map { it?.let { FaceSensorInfo(it.sensorId, it.sensorStrength.toSensorStrength()) } }
+    override suspend fun getLockoutMode(userId: Int): LockoutMode {
+        if (sensorInfo.value == null || faceManager == null) {
+            return LockoutMode.NONE
+        }
+        return faceManager.getLockoutModeForUser(sensorInfo.value!!.id, userId).toLockoutMode()
+    }
 }

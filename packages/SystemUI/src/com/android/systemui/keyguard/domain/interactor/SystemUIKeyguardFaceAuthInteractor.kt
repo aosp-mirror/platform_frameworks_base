@@ -22,6 +22,8 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
+import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
@@ -51,6 +54,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 /**
  * Encapsulates business logic related face authentication being triggered for device entry from
@@ -72,6 +76,7 @@ constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val userRepository: UserRepository,
+    private val facePropertyRepository: FacePropertyRepository,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -92,7 +97,7 @@ constructor(
                 faceAuthenticationLogger.bouncerVisibilityChanged()
                 runFaceAuth(
                     FaceAuthUiEvent.FACE_AUTH_UPDATED_PRIMARY_BOUNCER_SHOWN,
-                    fallbackToDetect = true
+                    fallbackToDetect = false
                 )
             }
             .launchIn(applicationScope)
@@ -134,16 +139,25 @@ constructor(
 
         // User switching should stop face auth and then when it is complete we should trigger face
         // auth so that the switched user can unlock the device with face auth.
-        userRepository.userSwitchingInProgress
-            .pairwise(false)
-            .onEach { (wasSwitching, isSwitching) ->
+        userRepository.selectedUser
+            .pairwise()
+            .onEach { (previous, curr) ->
+                val wasSwitching = previous.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
+                val isSwitching = curr.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 if (!wasSwitching && isSwitching) {
                     repository.pauseFaceAuth()
                 } else if (wasSwitching && !isSwitching) {
+                    val lockoutMode = facePropertyRepository.getLockoutMode(curr.userInfo.id)
+                    if (lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED) {
+                        repository.lockoutFaceAuth()
+                    }
                     repository.resumeFaceAuth()
+                    yield()
                     runFaceAuth(
                         FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
-                        fallbackToDetect = true
+                        // Fallback to detection if bouncer is not showing so that we can detect a
+                        // face and then show the bouncer to the user if face auth can't run
+                        fallbackToDetect = !primaryBouncerInteractor.isBouncerShowing()
                     )
                 }
             }

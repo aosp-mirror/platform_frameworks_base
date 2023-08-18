@@ -71,6 +71,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.FakeKeyguardStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.captureMany
@@ -295,6 +296,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun faceAuthDoesNotRunWhileItIsAlreadyRunning() =
         testScope.runTest {
             initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -311,6 +313,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             initCollectors()
             verify(faceManager).addLockoutResetCallback(faceLockoutResetCallback.capture())
+            allPreconditionsToRunFaceAuthAreTrue()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -364,6 +367,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun cancelStopsFaceAuthentication() =
         testScope.runTest {
             initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -417,6 +421,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun faceAuthShouldWaitAndRunIfTriggeredWhileCancelling() =
         testScope.runTest {
             initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -492,6 +497,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             )
             underTest = createDeviceEntryFaceAuthRepositoryImpl()
             initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
@@ -803,7 +809,10 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             assertThat(authenticated()).isTrue()
 
-            fakeUserRepository.setUserSwitching(true)
+            fakeUserRepository.setSelectedUserInfo(
+                primaryUser,
+                SelectionStatus.SELECTION_IN_PROGRESS
+            )
 
             assertThat(authenticated()).isFalse()
         }
