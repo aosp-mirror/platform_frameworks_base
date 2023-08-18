@@ -37,12 +37,15 @@ import com.android.internal.R;
  * Icon.loadDrawable().
  */
 @RemoteViews.RemoteView
-public class BigPictureNotificationImageView extends ImageView {
+public class BigPictureNotificationImageView extends ImageView implements
+        NotificationDrawableConsumer {
 
     private static final String TAG = BigPictureNotificationImageView.class.getSimpleName();
 
     private final int mMaximumDrawableWidth;
     private final int mMaximumDrawableHeight;
+
+    private NotificationIconManager mIconManager;
 
     public BigPictureNotificationImageView(@NonNull Context context) {
         this(context, null, 0, 0);
@@ -69,6 +72,19 @@ public class BigPictureNotificationImageView extends ImageView {
                         : R.dimen.notification_big_picture_max_height);
     }
 
+
+    /**
+     * Sets an {@link NotificationIconManager} on this ImageView, which handles the loading of
+     * icons, instead of using the {@link LocalImageResolver} directly.
+     * If set, it overrides the behaviour of {@link #setImageIconAsync} and {@link #setImageIcon},
+     * and it expects that the content of this imageView is only updated calling these two methods.
+     *
+     * @param iconManager to be called, when the icon is updated
+     */
+    public void setIconManager(NotificationIconManager iconManager) {
+        mIconManager = iconManager;
+    }
+
     @Override
     @android.view.RemotableViewMethod(asyncImpl = "setImageURIAsync")
     public void setImageURI(@Nullable Uri uri) {
@@ -84,11 +100,20 @@ public class BigPictureNotificationImageView extends ImageView {
     @Override
     @android.view.RemotableViewMethod(asyncImpl = "setImageIconAsync")
     public void setImageIcon(@Nullable Icon icon) {
+        if (mIconManager != null) {
+            mIconManager.updateIcon(this, icon).run();
+            return;
+        }
+        // old code path
         setImageDrawable(loadImage(icon));
     }
 
     /** @hide **/
     public Runnable setImageIconAsync(@Nullable Icon icon) {
+        if (mIconManager != null) {
+            return mIconManager.updateIcon(this, icon);
+        }
+        // old code path
         final Drawable drawable = loadImage(icon);
         return () -> setImageDrawable(drawable);
     }
