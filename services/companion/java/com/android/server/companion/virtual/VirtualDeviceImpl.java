@@ -126,6 +126,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceManagerService mService;
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
+    private final VirtualDeviceLog mVirtualDeviceLog;
     private final String mOwnerPackageName;
     private int mDeviceId;
     private @Nullable String mPersistentDeviceId;
@@ -197,6 +198,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             Context context,
             AssociationInfo associationInfo,
             VirtualDeviceManagerService service,
+            VirtualDeviceLog virtualDeviceLog,
             IBinder token,
             AttributionSource attributionSource,
             int deviceId,
@@ -210,6 +212,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 context,
                 associationInfo,
                 service,
+                virtualDeviceLog,
                 token,
                 attributionSource,
                 deviceId,
@@ -228,6 +231,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             Context context,
             AssociationInfo associationInfo,
             VirtualDeviceManagerService service,
+            VirtualDeviceLog virtualDeviceLog,
             IBinder token,
             AttributionSource attributionSource,
             int deviceId,
@@ -240,6 +244,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             VirtualDeviceParams params,
             DisplayManagerGlobal displayManager) {
         super(PermissionEnforcer.fromContext(context));
+        mVirtualDeviceLog = virtualDeviceLog;
         mOwnerPackageName = attributionSource.getPackageName();
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
@@ -271,6 +276,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        mVirtualDeviceLog.logCreated(deviceId, mOwnerUid);
     }
 
     @VisibleForTesting
@@ -405,6 +411,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
         boolean removed = mService.removeVirtualDevice(mDeviceId);
+        mVirtualDeviceLog.logClosed(mDeviceId, mOwnerUid);
         mDeviceId = Context.DEVICE_ID_INVALID;
 
         // Device is already closed.

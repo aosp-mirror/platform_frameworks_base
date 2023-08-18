@@ -226,6 +226,7 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceManagerService mVdms;
     private VirtualDeviceManagerInternal mLocalService;
     private VirtualDeviceManagerService.VirtualDeviceManagerImpl mVdm;
+    private VirtualDeviceLog mVirtualDeviceLog;
     @Mock
     private InputController.NativeWrapper mNativeWrapperMock;
     @Mock
@@ -370,6 +371,7 @@ public class VirtualDeviceManagerServiceTest {
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
+        mVirtualDeviceLog = new VirtualDeviceLog(mContext);
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1);
         mSensorController = mDeviceImpl.getSensorControllerForTest();
     }
@@ -1730,7 +1732,7 @@ public class VirtualDeviceManagerServiceTest {
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid,
             VirtualDeviceParams params) {
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
-                mAssociationInfo, mVdms, new Binder(),
+                mAssociationInfo, mVdms, mVirtualDeviceLog, new Binder(),
                 new AttributionSource(ownerUid, "com.android.virtualdevice.test", "virtualdevice"),
                 virtualDeviceId,
                 mInputController, mCameraAccessController,
