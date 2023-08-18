@@ -154,6 +154,38 @@ public class MediaOutputMetricLogger {
     }
 
     /**
+     * Do the metric logging of muting device.
+     */
+    public void logInteractionMute(MediaDevice source) {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - Mute");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__MUTE,
+                getInteractionDeviceType(source),
+                getLoggingPackageName(),
+                source.isSuggestedDevice());
+    }
+
+    /**
+     * Do the metric logging of unmuting device.
+     */
+    public void logInteractionUnmute(MediaDevice source) {
+        if (DEBUG) {
+            Log.d(TAG, "logInteraction - Unmute");
+        }
+
+        SysUiStatsLog.write(
+                SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__UNMUTE,
+                getInteractionDeviceType(source),
+                getLoggingPackageName(),
+                source.isSuggestedDevice());
+    }
+
+    /**
      * Do the metric logging of content switching failure.
      *
      * @param deviceItemList media item list for device count updating
