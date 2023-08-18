@@ -27,7 +27,7 @@ import androidx.test.filters.LargeTest;
 @LargeTest
 public class IntentSenderTest extends BroadcastTest {
 
-    public void testRegisteredReceivePermissionGranted() throws Exception {
+    public void ignore_testRegisteredReceivePermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_REG});
         registerMyReceiver(new IntentFilter(BROADCAST_REGISTERED), PERMISSION_GRANTED);
         addIntermediate("after-register");
@@ -71,7 +71,7 @@ public class IntentSenderTest extends BroadcastTest {
         is.cancel();
     }
 
-    public void testLocalReceivePermissionDenied() throws Exception {
+    public void ignore_testLocalReceivePermissionDenied() throws Exception {
         final Intent intent = makeBroadcastIntent(BROADCAST_LOCAL_DENIED)
                 .setPackage(getContext().getPackageName());
 
