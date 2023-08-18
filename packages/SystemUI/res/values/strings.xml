@@ -2830,6 +2830,8 @@
     <string name="controls_media_resume">Resume</string>
     <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
     <string name="controls_media_settings_button">Settings</string>
+    <!-- Placeholder title to inform user that an app has posted media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_empty_title"><xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g> is running</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
