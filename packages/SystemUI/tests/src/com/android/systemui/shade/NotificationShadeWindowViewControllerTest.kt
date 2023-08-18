@@ -18,6 +18,7 @@ package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
@@ -38,6 +39,7 @@ import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -118,6 +120,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
+    @Mock lateinit var keyEventInteractor: KeyEventInteractor
     private val notificationExpansionRepository = NotificationExpansionRepository()
 
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
@@ -188,7 +191,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                         CountDownTimerUtil(),
                         featureFlags
                     ),
-                    BouncerLogger(logcatLogBuffer("BouncerLog"))
+                    BouncerLogger(logcatLogBuffer("BouncerLog")),
+                    keyEventInteractor,
             )
         underTest.setupExpandedStatusBar()
 
@@ -344,6 +348,27 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             underTest.keyguardMessageArea
             verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
         }
+
+    @Test
+    fun forwardsDispatchKeyEvent() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_B)
+        interactionEventHandler.dispatchKeyEvent(keyEvent)
+        verify(keyEventInteractor).dispatchKeyEvent(keyEvent)
+    }
+
+    @Test
+    fun forwardsDispatchKeyEventPreIme() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_B)
+        interactionEventHandler.dispatchKeyEventPreIme(keyEvent)
+        verify(keyEventInteractor).dispatchKeyEventPreIme(keyEvent)
+    }
+
+    @Test
+    fun forwardsInterceptMediaKey() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
+        interactionEventHandler.interceptMediaKey(keyEvent)
+        verify(keyEventInteractor).interceptMediaKey(keyEvent)
+    }
 
     companion object {
         private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
