@@ -45,6 +45,7 @@ public class BatteryStatus {
     private static final int EXTREME_LOW_BATTERY_THRESHOLD = 3;
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
+    public static final int BATTERY_LEVEL_UNKNOWN = -1;
     public static final int CHARGING_UNKNOWN = -1;
     public static final int CHARGING_SLOWLY = 0;
     public static final int CHARGING_REGULAR = 1;
@@ -186,12 +187,13 @@ public class BatteryStatus {
     /** Gets the battery level from the intent. */
     public static int getBatteryLevel(Intent batteryChangedIntent) {
         if (batteryChangedIntent == null) {
-            return -1; /*invalid battery level*/
+            return BATTERY_LEVEL_UNKNOWN;
         }
-        final int level = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        final int level =
+                batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, BATTERY_LEVEL_UNKNOWN);
         final int scale = batteryChangedIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
         return scale == 0
-                ? -1 /*invalid battery level*/
+                ? BATTERY_LEVEL_UNKNOWN
                 : Math.round((level / (float) scale) * 100f);
     }
 
