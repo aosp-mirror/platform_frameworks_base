@@ -736,6 +736,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
      */
     private void assertRingerContainerDescribesItsState(int ringerMode,
             RingerDrawerState drawerState) {
+        assumeHasDrawer();
+
         State state = createShellState();
         state.ringerModeInternal = ringerMode;
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
