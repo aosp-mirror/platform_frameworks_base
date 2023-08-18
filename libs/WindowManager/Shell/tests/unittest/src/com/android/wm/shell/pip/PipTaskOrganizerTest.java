@@ -53,6 +53,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
