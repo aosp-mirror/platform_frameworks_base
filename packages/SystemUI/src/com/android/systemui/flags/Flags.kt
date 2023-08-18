@@ -355,7 +355,7 @@ object Flags {
 
     // TODO(b/278068252): Tracking Bug
     @JvmField
-    val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = false)
+    val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = true)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
