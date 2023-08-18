@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
+import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -51,11 +52,13 @@ import android.util.DebugUtils;
 import android.util.Slog;
 import android.widget.Toast;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
 
 import java.lang.annotation.Retention;
+import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -73,6 +76,9 @@ public class BackgroundActivityStartController {
     public static final String VERDICT_ALLOWED = "Activity start allowed";
     public static final String VERDICT_WOULD_BE_ALLOWED_IF_SENDER_GRANTS_BAL =
             "Activity start would be allowed if the sender granted BAL privileges";
+
+    private static final long ASM_GRACEPERIOD_TIMEOUT_MS = TIMEOUT_MS;
+    private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
 
     private final ActivityTaskManagerService mService;
     private final ActivityTaskSupervisor mSupervisor;
@@ -156,6 +162,11 @@ public class BackgroundActivityStartController {
                 throw new IllegalArgumentException("Unexpected value: " + balCode);
         }
     }
+
+    @GuardedBy("mService.mGlobalLock")
+    private HashMap<Integer, FinishedActivityEntry> mTaskIdToFinishedActivity = new HashMap<>();
+    @GuardedBy("mService.mGlobalLock")
+    private FinishedActivityEntry mTopFinishedActivity = null;
 
     BackgroundActivityStartController(
             final ActivityTaskManagerService service, final ActivityTaskSupervisor supervisor) {
@@ -593,7 +604,7 @@ public class BackgroundActivityStartController {
      * create a new task or bring an existing one into the foreground
      */
     boolean checkActivityAllowedToStart(@Nullable ActivityRecord sourceRecord,
-            @NonNull ActivityRecord targetRecord, boolean newTask, @Nullable Task targetTask,
+            @NonNull ActivityRecord targetRecord, boolean newTask, @NonNull Task targetTask,
             int launchFlags, int balCode, int callingUid, int realCallingUid) {
         // BAL Exception allowed in all cases
         if (balCode == BAL_ALLOW_ALLOWLISTED_UID) {
@@ -613,6 +624,19 @@ public class BackgroundActivityStartController {
                     || balCode == BAL_ALLOW_SAW_PERMISSION
                     || balCode == BAL_ALLOW_VISIBLE_WINDOW) {
                 return true;
+            }
+        }
+
+        if (balCode == BAL_ALLOW_GRACE_PERIOD) {
+            if (taskToFront && mTopFinishedActivity != null
+                    && mTopFinishedActivity.mUid == callingUid) {
+                return true;
+            } else if (!taskToFront) {
+                FinishedActivityEntry finishedEntry =
+                        mTaskIdToFinishedActivity.get(targetTask.mTaskId);
+                if (finishedEntry != null && finishedEntry.mUid == callingUid) {
+                    return true;
+                }
             }
         }
 
@@ -655,7 +679,6 @@ public class BackgroundActivityStartController {
             int realCallingUid, boolean newTask, Task targetTask, ActivityRecord targetRecord,
             @BalCode int balCode, int launchFlags, BlockActivityStart bas, boolean taskToFront) {
 
-        // ASM rules have failed. Log why
         ActivityRecord targetTopActivity = targetTask == null ? null
                 : targetTask.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
 
@@ -884,13 +907,13 @@ public class BackgroundActivityStartController {
     }
 
     /**
-     *  For the purpose of ASM, ‘Top UID” for a task is defined as an activity UID
-     *  1. Which is top of the stack in z-order
-     *      a. Excluding any activities with the flag ‘isAlwaysOnTop’ and
-     *      b. Excluding any activities which are `finishing`
-     *  2. Or top of an adjacent task fragment to (1)
-     *
-     *  The 'sourceRecord' can be considered top even if it is 'finishing'
+     * For the purpose of ASM, ‘Top UID” for a task is defined as an activity UID
+     * 1. Which is top of the stack in z-order
+     * a. Excluding any activities with the flag ‘isAlwaysOnTop’ and
+     * b. Excluding any activities which are `finishing`
+     * 2. Or top of an adjacent task fragment to (1)
+     * <p>
+     * The 'sourceRecord' can be considered top even if it is 'finishing'
      *
      * Returns a class where the elements are:
      * <pre>
@@ -998,7 +1021,9 @@ public class BackgroundActivityStartController {
                 .BlockActivityStart(restrictActivitySwitch, true);
     }
 
-    /** Only called when an activity launch may be blocked, which should happen very rarely */
+    /**
+     * Only called when an activity launch may be blocked, which should happen very rarely
+     */
     private String getDebugInfoForActivitySecurity(@NonNull String action,
             @Nullable ActivityRecord sourceRecord, @NonNull ActivityRecord targetRecord,
             @Nullable Task targetTask, @Nullable ActivityRecord targetTopActivity,
@@ -1144,6 +1169,53 @@ public class BackgroundActivityStartController {
         }
     }
 
+    /**
+     * Called whenever an activity finishes. Stores the record, so it can be used by ASM grace
+     * period checks.
+     */
+    void onActivityRequestedFinishing(@NonNull ActivityRecord finishActivity) {
+        // We only update the entry if the passed in activity
+        // 1. Has been chained less than a set max AND
+        // 2. Is visible or top
+        FinishedActivityEntry entry =
+                mTaskIdToFinishedActivity.get(finishActivity.getTask().mTaskId);
+        if (entry != null && finishActivity.isUid(entry.mUid)
+                && entry.mLaunchCount > ASM_GRACEPERIOD_MAX_REPEATS) {
+            return;
+        }
+
+        if (!finishActivity.mVisibleRequested
+                && finishActivity != finishActivity.getTask().getTopMostActivity()) {
+            return;
+        }
+
+        FinishedActivityEntry newEntry = new FinishedActivityEntry(finishActivity);
+        mTaskIdToFinishedActivity.put(finishActivity.getTask().mTaskId, newEntry);
+        if (finishActivity.getTask().mVisibleRequested) {
+            mTopFinishedActivity = newEntry;
+        }
+    }
+
+    /**
+     * Called whenever an activity starts. Updates the record so the activity is no longer
+     * considered for ASM grace period checks
+     */
+    void onNewActivityLaunched(ActivityRecord activityStarted) {
+        if (activityStarted.getTask() == null) {
+            return;
+        }
+
+        if (activityStarted.getTask().mVisibleRequested) {
+            mTopFinishedActivity = null;
+        }
+
+        FinishedActivityEntry entry =
+                mTaskIdToFinishedActivity.get(activityStarted.getTask().mTaskId);
+        if (entry != null && activityStarted.getTask().isTaskId(entry.mTaskId)) {
+            mTaskIdToFinishedActivity.remove(entry.mTaskId);
+        }
+    }
+
     static class BlockActivityStart {
         // We should block if feature flag is enabled
         private final boolean mBlockActivityStartIfFlagEnabled;
@@ -1155,6 +1227,32 @@ public class BackgroundActivityStartController {
                 boolean wouldBlockActivityStartIgnoringFlags) {
             this.mBlockActivityStartIfFlagEnabled = shouldBlockActivityStart;
             this.mWouldBlockActivityStartIgnoringFlag = wouldBlockActivityStartIgnoringFlags;
+        }
+    }
+
+    private class FinishedActivityEntry {
+        int mUid;
+        int mTaskId;
+        int mLaunchCount;
+
+        FinishedActivityEntry(ActivityRecord ar) {
+            FinishedActivityEntry entry = mTaskIdToFinishedActivity.get(ar.getTask().mTaskId);
+            int taskId = ar.getTask().mTaskId;
+            this.mUid = ar.getUid();
+            this.mTaskId = taskId;
+            this.mLaunchCount = entry == null || !ar.isUid(entry.mUid) ? 1 : entry.mLaunchCount + 1;
+
+            mService.mH.postDelayed(() -> {
+                synchronized (mService.mGlobalLock) {
+                    if (mTaskIdToFinishedActivity.get(taskId) == this) {
+                        mTaskIdToFinishedActivity.remove(taskId);
+                    }
+
+                    if (mTopFinishedActivity == this) {
+                        mTopFinishedActivity = null;
+                    }
+                }
+            }, ASM_GRACEPERIOD_TIMEOUT_MS);
         }
     }
 }

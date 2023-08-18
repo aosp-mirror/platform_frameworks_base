@@ -492,6 +492,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final boolean res;
                 final boolean finishWithRootActivity =
                         finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY;
+                mTaskSupervisor.getBackgroundActivityLaunchController()
+                        .onActivityRequestedFinishing(r);
                 if (finishTask == Activity.FINISH_TASK_WITH_ACTIVITY
                         || (finishWithRootActivity && r == rootR)) {
                     // If requested, remove the task that is associated to this activity only if it

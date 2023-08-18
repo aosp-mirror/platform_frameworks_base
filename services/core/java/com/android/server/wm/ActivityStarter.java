@@ -1825,6 +1825,9 @@ class ActivityStarter {
                     sourceRecord, "launch-into-pip");
         }
 
+        mSupervisor.getBackgroundActivityLaunchController()
+                .onNewActivityLaunched(mStartActivity);
+
         return START_SUCCESS;
     }
 
