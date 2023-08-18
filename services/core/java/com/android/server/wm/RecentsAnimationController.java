@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -546,7 +547,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 contentInsets = mTmpRect;
             }
             mRunner.onAnimationStart(mController, appTargets, wallpaperTargets, contentInsets,
-                    null);
+                    null, new Bundle());
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                     "startAnimation(): Notify animation start: %s",
                     mPendingAnimations.stream()
