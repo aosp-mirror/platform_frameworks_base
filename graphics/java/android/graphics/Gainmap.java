@@ -124,8 +124,6 @@ public final class Gainmap implements Parcelable {
     /**
      * Creates a new gainmap using the provided gainmap as the metadata source and the provided
      * bitmap as the replacement for the gainmapContents
-     * TODO: Make public, it's useful
-     * @hide
      */
     public Gainmap(@NonNull Gainmap gainmap, @NonNull Bitmap gainmapContents) {
         this(gainmapContents, nCreateCopy(gainmap.mNativePtr));
