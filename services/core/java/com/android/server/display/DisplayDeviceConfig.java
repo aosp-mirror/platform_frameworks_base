@@ -2093,7 +2093,7 @@ public class DisplayDeviceConfig {
 
     /** Loads the refresh rate profiles. */
     private void loadRefreshRateZoneProfiles(RefreshRateConfigs refreshRateConfigs) {
-        if (refreshRateConfigs == null) {
+        if (refreshRateConfigs == null || refreshRateConfigs.getRefreshRateZoneProfiles() == null) {
             return;
         }
         for (RefreshRateZone zone :
