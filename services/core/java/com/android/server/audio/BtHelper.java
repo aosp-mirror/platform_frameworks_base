@@ -329,7 +329,7 @@ public class BtHelper {
             default:
                 break;
         }
-        if(broadcast) {
+        if (broadcast) {
             broadcastScoConnectionState(scoAudioState);
             //FIXME: this is to maintain compatibility with deprecated intent
             // AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED. Remove when appropriate.
@@ -718,8 +718,10 @@ public class BtHelper {
         checkScoAudioState();
         if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
             // Make sure that the state transitions to CONNECTING even if we cannot initiate
-            // the connection.
-            broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTING);
+            // the connection except if already connected internally
+            if (mScoAudioState != SCO_STATE_ACTIVE_INTERNAL) {
+                broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTING);
+            }
             switch (mScoAudioState) {
                 case SCO_STATE_INACTIVE:
                     mScoAudioMode = scoAudioMode;
@@ -775,7 +777,7 @@ public class BtHelper {
                     broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTED);
                     break;
                 case SCO_STATE_ACTIVE_INTERNAL:
-                    Log.w(TAG, "requestScoState: already in ACTIVE mode, simply return");
+                    // Already in ACTIVE mode, simply return
                     break;
                 case SCO_STATE_ACTIVE_EXTERNAL:
                     /* Confirm SCO Audio connection to requesting app as it is already connected
