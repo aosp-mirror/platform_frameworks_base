@@ -4,7 +4,7 @@
             "name": "CtsAppOpsTestCases",
             "options": [
                 {
-                  "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                  "exclude-annotation": "androidx.test.filters.FlakyTest"
                 }
             ]
         },
@@ -31,7 +31,7 @@
             "name": "CtsPermissionTestCases",
             "options": [
                 {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
                 },
                 {
                     "include-filter": "android.permission.cts.BackgroundPermissionsTest"
