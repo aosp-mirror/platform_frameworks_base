@@ -58,6 +58,8 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,8 +67,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import dagger.Lazy;
 
 /**
  * Tests for {@link CompatUIController}.
@@ -82,21 +82,36 @@ public class CompatUIControllerTest extends ShellTestCase {
 
     private CompatUIController mController;
     private ShellInit mShellInit;
-    private @Mock ShellController mMockShellController;
-    private @Mock DisplayController mMockDisplayController;
-    private @Mock DisplayInsetsController mMockDisplayInsetsController;
-    private @Mock DisplayLayout mMockDisplayLayout;
-    private @Mock DisplayImeController mMockImeController;
-    private @Mock ShellTaskOrganizer.TaskListener mMockTaskListener;
-    private @Mock SyncTransactionQueue mMockSyncQueue;
-    private @Mock ShellExecutor mMockExecutor;
-    private @Mock Lazy<Transitions> mMockTransitionsLazy;
-    private @Mock CompatUIWindowManager mMockCompatLayout;
-    private @Mock LetterboxEduWindowManager mMockLetterboxEduLayout;
-    private @Mock RestartDialogWindowManager mMockRestartDialogLayout;
-    private @Mock DockStateReader mDockStateReader;
-    private @Mock CompatUIConfiguration mCompatUIConfiguration;
-    private @Mock CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+    @Mock
+    private ShellController mMockShellController;
+    @Mock
+    private DisplayController mMockDisplayController;
+    @Mock
+    private DisplayInsetsController mMockDisplayInsetsController;
+    @Mock
+    private DisplayLayout mMockDisplayLayout;
+    @Mock
+    private DisplayImeController mMockImeController;
+    @Mock
+    private ShellTaskOrganizer.TaskListener mMockTaskListener;
+    @Mock
+    private SyncTransactionQueue mMockSyncQueue;
+    @Mock
+    private ShellExecutor mMockExecutor;
+    @Mock
+    private Lazy<Transitions> mMockTransitionsLazy;
+    @Mock
+    private CompatUIWindowManager mMockCompatLayout;
+    @Mock
+    private LetterboxEduWindowManager mMockLetterboxEduLayout;
+    @Mock
+    private RestartDialogWindowManager mMockRestartDialogLayout;
+    @Mock
+    private DockStateReader mDockStateReader;
+    @Mock
+    private CompatUIConfiguration mCompatUIConfiguration;
+    @Mock
+    private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;

@@ -62,7 +62,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.BiometricNotificationUtils;
+import com.android.server.biometrics.sensors.BiometricNotificationImpl;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -367,7 +367,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         });
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
-                BiometricsProtoEnums.MODALITY_FACE);
+                BiometricsProtoEnums.MODALITY_FACE, new BiometricNotificationImpl());
 
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, TAG);
@@ -614,8 +614,6 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
-
-            BiometricNotificationUtils.cancelReEnrollNotification(mContext);
 
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,

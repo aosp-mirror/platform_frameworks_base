@@ -1880,6 +1880,11 @@ public class SizeCompatTests extends WindowTestsBase {
         final int dh = 2500;
         final int notchHeight = 200;
         setUpApp(new TestDisplayContent.Builder(mAtm, dw, dh).setNotch(notchHeight).build());
+        // The test assumes the notch will be at left side when the orientation is landscape.
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_reverseDefaultRotation)) {
+            setReverseDefaultRotation(mActivity.mDisplayContent, false);
+        }
         addStatusBar(mActivity.mDisplayContent);
 
         mActivity.setVisible(false);

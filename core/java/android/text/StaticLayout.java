@@ -437,13 +437,25 @@ public class StaticLayout extends Layout {
             return result;
         }
 
-        /* package */ @NonNull StaticLayout regenerate(boolean trackpadding, StaticLayout recycle) {
+        /**
+         * DO NOT USE THIS METHOD OTHER THAN DynamicLayout.
+         *
+         * This class generates a very weird StaticLayout only for getting a result of line break.
+         * Since DynamicLayout keeps StaticLayout reference in the static context for object
+         * recycling but keeping text reference in static context will end up with leaking Context
+         * due to TextWatcher via TextView.
+         *
+         * So, this is a dirty work around that creating StaticLayout without passing text reference
+         * to the super constructor, but calculating the text layout by calling generate function
+         * directly.
+         */
+        /* package */ @NonNull StaticLayout buildPartialStaticLayoutForDynamicLayout(
+                boolean trackpadding, StaticLayout recycle) {
             if (recycle == null) {
-                return new StaticLayout(this, trackpadding, COLUMNS_ELLIPSIZE);
-            } else {
-                recycle.generate(this, mIncludePad, trackpadding);
-                return recycle;
+                recycle = new StaticLayout();
             }
+            recycle.generate(this, mIncludePad, trackpadding);
+            return recycle;
         }
 
         private CharSequence mText;
@@ -471,6 +483,37 @@ public class StaticLayout extends Layout {
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
+    }
+
+    /**
+     * DO NOT USE THIS CONSTRUCTOR OTHER THAN FOR DYNAMIC LAYOUT.
+     * See Builder#buildPartialStaticLayoutForDynamicLayout for the reason of this constructor.
+     */
+    private StaticLayout() {
+        super(
+                null,  // text
+                null,  // paint
+                0,  // width
+                null, // alignment
+                null, // textDir
+                1, // spacing multiplier
+                0, // spacing amount
+                false, // include font padding
+                false, // fallback line spacing
+                0,  // ellipsized width
+                null, // ellipsize
+                1,  // maxLines
+                BREAK_STRATEGY_SIMPLE,
+                HYPHENATION_FREQUENCY_NONE,
+                null,  // leftIndents
+                null,  // rightIndents
+                JUSTIFICATION_MODE_NONE,
+                null  // lineBreakConfig
+        );
+
+        mColumns = COLUMNS_ELLIPSIZE;
+        mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2);
+        mLines  = ArrayUtils.newUnpaddedIntArray(2 * mColumns);
     }
 
     /**

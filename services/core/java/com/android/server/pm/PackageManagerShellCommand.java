@@ -226,6 +226,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runPath();
                 case "dump":
                     return runDump();
+                case "dump-package":
+                    return runDumpPackage();
                 case "list":
                     return runList();
                 case "gc":
@@ -978,6 +980,7 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean listInstaller = false;
         boolean showUid = false;
         boolean showVersionCode = false;
+        boolean listQuarantinedOnly = false;
         boolean listApexOnly = false;
         boolean showStopped = false;
         int uid = -1;
@@ -1007,6 +1010,9 @@ class PackageManagerShellCommand extends ShellCommand {
                         break;
                     case "-s":
                         listSystem = true;
+                        break;
+                    case "-q":
+                        listQuarantinedOnly = true;
                         break;
                     case "-U":
                         showUid = true;
@@ -1091,6 +1097,10 @@ class PackageManagerShellCommand extends ShellCommand {
                         || (listSystem && !isSystem)
                         || (listThirdParty && isSystem)
                         || (listApexOnly && !isApex)) {
+                    continue;
+                }
+                if (listQuarantinedOnly && !mInterface.isPackageQuarantinedForUser(info.packageName,
+                        translatedUserId)) {
                     continue;
                 }
 
@@ -3598,6 +3608,23 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runDumpPackage() {
+        String pkg = getNextArg();
+        if (pkg == null) {
+            getErrPrintWriter().println("Error: no package specified");
+            return 1;
+        }
+        try {
+            ((IBinder) mInterface).dump(getOutFileDescriptor(), new String[]{pkg});
+        } catch (Throwable e) {
+            PrintWriter pw = getErrPrintWriter();
+            pw.println("Failure dumping service:");
+            e.printStackTrace(pw);
+            pw.flush();
+        }
+        return 0;
+    }
+
     private int runSetHarmfulAppWarning() throws RemoteException {
         int userId = UserHandle.USER_CURRENT;
 
@@ -4282,6 +4309,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  dump PACKAGE");
         pw.println("    Print various system state associated with the given PACKAGE.");
         pw.println("");
+        pw.println("  dump-package PACKAGE");
+        pw.println("    Print package manager state associated with the given PACKAGE.");
+        pw.println("");
         pw.println("  has-feature FEATURE_NAME [version]");
         pw.println("    Prints true and returns exit status 0 when system has a FEATURE_NAME,");
         pw.println("    otherwise prints false and returns exit status 1");
@@ -4299,7 +4329,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Options:");
         pw.println("      -v: shows the location of the library in the device's filesystem");
         pw.println("");
-        pw.println("  list packages [-f] [-d] [-e] [-s] [-3] [-i] [-l] [-u] [-U] ");
+        pw.println("  list packages [-f] [-d] [-e] [-s] [-q] [-3] [-i] [-l] [-u] [-U] ");
         pw.println("      [--show-versioncode] [--apex-only] [--factory-only]");
         pw.println("      [--uid UID] [--user USER_ID] [FILTER]");
         pw.println("    Prints all packages; optionally only those whose name contains");
@@ -4309,6 +4339,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: filter to only show disabled packages");
         pw.println("      -e: filter to only show enabled packages");
         pw.println("      -s: filter to only show system packages");
+        pw.println("      -q: filter to only show quarantined packages");
         pw.println("      -3: filter to only show third party packages");
         pw.println("      -i: see the installer for the packages");
         pw.println("      -l: ignored (used for compatibility with older releases)");

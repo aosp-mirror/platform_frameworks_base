@@ -123,20 +123,11 @@ constructor(
     fingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
 ) : BouncerMessageRepository {
 
-    private val isFaceEnrolledAndEnabled =
-        and(
-            biometricSettingsRepository.isFaceAuthenticationEnabled,
-            biometricSettingsRepository.isFaceEnrolled
-        )
-
-    private val isFingerprintEnrolledAndEnabled =
-        and(
-            biometricSettingsRepository.isFingerprintEnabledByDevicePolicy,
-            biometricSettingsRepository.isFingerprintEnrolled
-        )
-
     private val isAnyBiometricsEnabledAndEnrolled =
-        or(isFaceEnrolledAndEnabled, isFingerprintEnrolledAndEnabled)
+        or(
+            biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
+            biometricSettingsRepository.isFingerprintEnrolledAndEnabled,
+        )
 
     private val wasRebootedForMainlineUpdate
         get() = systemPropertiesHelper.get(SYS_BOOT_REASON_PROP) == REBOOT_MAINLINE_UPDATE
@@ -334,9 +325,6 @@ constructor(
         const val TAG = "BouncerDetailedMessageRepository"
     }
 }
-
-private fun and(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
-    flow.combine(anotherFlow) { a, b -> a && b }
 
 private fun or(flow: Flow<Boolean>, anotherFlow: Flow<Boolean>) =
     flow.combine(anotherFlow) { a, b -> a || b }

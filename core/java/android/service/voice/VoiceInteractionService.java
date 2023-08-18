@@ -965,7 +965,7 @@ public class VoiceInteractionService extends Service {
             }
 
             VisualQueryDetector visualQueryDetector =
-                    new VisualQueryDetector(mSystemService, executor, callback,
+                    new VisualQueryDetector(mSystemService, executor, callback, this,
                             getAttributionTag());
             HotwordDetector visualQueryDetectorInitializationDelegate =
                     visualQueryDetector.getInitializationDelegate();

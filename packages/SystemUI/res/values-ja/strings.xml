@@ -295,6 +295,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"仕事用アプリ"</string>
+    <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"一時停止中"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"夜間モード"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"日の出まで"</string>
@@ -864,6 +865,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"画面の一部を拡大します"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"画面の拡大設定を開く"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"拡大の設定を閉じる"</string>
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"編集モードを終了"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"サイズを変更するには角をドラッグ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"斜めスクロールを許可"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"サイズ変更"</string>
@@ -1133,7 +1135,6 @@
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> を開く"</string>
     <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ウォレット アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
     <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ウォレット アプリをショートカットとして追加するには、カードが 1 枚以上追加されていることを確認してください"</string>
-    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR コードスキャナをショートカットとして追加するには、カメラアプリがインストールされていることを確認してください"</string>
     <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Google Home アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• 利用できるデバイスが 1 台以上ある"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"メモのショートカットを使用するデフォルトのメモアプリを選択してください"</string>

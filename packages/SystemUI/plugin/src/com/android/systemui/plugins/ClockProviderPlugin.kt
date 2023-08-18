@@ -177,6 +177,9 @@ interface ClockFaceEvents {
      * targetRegion is relative to the parent view.
      */
     fun onTargetRegionChanged(targetRegion: Rect?)
+
+    /** Called to notify the clock about its display. */
+    fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean)
 }
 
 /** Tick rates for clocks */

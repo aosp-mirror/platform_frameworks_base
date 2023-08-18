@@ -10,6 +10,5 @@ fun TransitionBuilder.shadeToQuickSettingsTransition() {
     spec = tween(durationMillis = 500)
 
     translate(Notifications.Elements.Notifications, Edge.Bottom)
-    fade(Notifications.Elements.Notifications)
     timestampRange(endMillis = 83) { fade(QuickSettings.Elements.FooterActions) }
 }

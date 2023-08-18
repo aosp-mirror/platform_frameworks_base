@@ -115,7 +115,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change", teamfood = false)
+            unreleasedFlag("notification_group_expansion_change", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -195,7 +195,7 @@ object Flags {
     // TODO(b/294110497): Tracking Bug
     @JvmField
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
-        unreleasedFlag("enable_wallet_contextual_loyalty_cards", teamfood = true)
+        releasedFlag("enable_wallet_contextual_loyalty_cards")
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag("wallpaper_fullscreen_preview")
@@ -386,8 +386,7 @@ object Flags {
     @JvmField val NEW_BLUETOOTH_REPOSITORY = releasedFlag("new_bluetooth_repository")
 
     // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
-        unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
 
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
@@ -544,12 +543,6 @@ object Flags {
     @JvmField
     val ENABLE_PIP_SIZE_LARGE_SCREEN =
         sysPropBooleanFlag("persist.wm.debug.enable_pip_size_large_screen", default = true)
-
-    // TODO(b/265998256): Tracking bug
-    @Keep
-    @JvmField
-    val ENABLE_PIP_APP_ICON_OVERLAY =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
 
     // TODO(b/293252410) : Tracking Bug
@@ -776,6 +769,10 @@ object Flags {
     @JvmField
     val ONE_WAY_HAPTICS_API_MIGRATION = unreleasedFlag("oneway_haptics_api_migration")
 
+    /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
+    @JvmField
+    val ENABLE_CLOCK_KEYGUARD_PRESENTATION = unreleasedFlag("enable_clock_keyguard_presentation")
+
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
     val COMPOSE_PEOPLE_SPACE = unreleasedFlag("compose_people_space")
@@ -787,4 +784,8 @@ object Flags {
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
     val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button")
+
+    /** Enable haptic slider component in the brightness slider */
+    @JvmField
+    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider")
 }

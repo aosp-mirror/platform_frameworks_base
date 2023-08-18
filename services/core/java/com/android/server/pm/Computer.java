@@ -487,6 +487,8 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId);
 
+    boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId);
+
     boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
 
     @NonNull

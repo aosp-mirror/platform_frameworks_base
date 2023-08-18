@@ -63,6 +63,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.io.File;
+
 /**
  * Run as {@code atest FrameworksMockingServicesTests:com.android.server.pm.UserManagerServiceTest}
  */
@@ -107,6 +109,8 @@ public final class UserManagerServiceTest {
             .getTargetContext();
     private final SparseArray<UserData> mUsers = new SparseArray<>();
 
+    private File mTestDir;
+
     private Context mSpiedContext;
 
     private @Mock PackageManagerService mMockPms;
@@ -144,17 +148,23 @@ public final class UserManagerServiceTest {
         doNothing().when(mSpiedContext).sendBroadcastAsUser(any(), any(), any());
 
         // Must construct UserManagerService in the UiThread
+        mTestDir = new File(mRealContext.getDataDir(), "umstest");
+        mTestDir.mkdirs();
         mUms = new UserManagerService(mSpiedContext, mMockPms, mMockUserDataPreparer,
-                mPackagesLock, mRealContext.getDataDir(), mUsers);
+                mPackagesLock, mTestDir, mUsers);
         mUmi = LocalServices.getService(UserManagerInternal.class);
         assertWithMessage("LocalServices.getService(UserManagerInternal.class)").that(mUmi)
                 .isNotNull();
     }
 
     @After
-    public void resetUserManagerInternal() {
+    public void tearDown() {
         // LocalServices follows the "Highlander rule" - There can be only one!
         LocalServices.removeServiceForTest(UserManagerInternal.class);
+
+        // Clean up test dir to remove persisted user files.
+        assertThat(deleteRecursive(mTestDir)).isTrue();
+        mUsers.clear();
     }
 
     @Test
@@ -496,6 +506,14 @@ public final class UserManagerServiceTest {
 
     @Test
     public void testMainUser_hasNoCallsOrSMSRestrictionsByDefault() {
+        // Remove the main user so we can add another one
+        for (int i = 0; i < mUsers.size(); i++) {
+            UserData userData = mUsers.valueAt(i);
+            if (userData.info.isMain()) {
+                mUsers.delete(i);
+                break;
+            }
+        }
         UserInfo mainUser = mUms.createUserWithThrow("main user", USER_TYPE_FULL_SECONDARY,
                 UserInfo.FLAG_FULL | UserInfo.FLAG_MAIN);
 
@@ -619,6 +637,18 @@ public final class UserManagerServiceTest {
     private void setLastForegroundTime(@UserIdInt int userId, long timeMillis) {
         UserData userData = mUsers.get(userId);
         userData.mLastEnteredForegroundTimeMillis = timeMillis;
+    }
+
+    public boolean deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            for (File item : file.listFiles()) {
+                boolean success = deleteRecursive(item);
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return file.delete();
     }
 
     private static final class TestUserData extends UserData {

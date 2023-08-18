@@ -34,13 +34,34 @@ interface ShadeRepository {
     /** ShadeModel information regarding shade expansion events */
     val shadeModel: Flow<ShadeModel>
 
-    /** Amount qs has expanded. Quick Settings can be expanded without the full shade expansion. */
+    /**
+     * Value from `0` to `1` representing the amount the shade has expanded where `1` is fully
+     * expanded and `0` is fully collapsed. Quick Settings can be expanded without a fully expanded
+     * shade.
+     */
     val qsExpansion: StateFlow<Float>
+
+    /**
+     * Value from `0` to `1` representing the amount the shade has expanded where `1` is fully
+     * expanded and `0` is fully collapsed.
+     */
+    val expansion: StateFlow<Float>
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
+    /**
+     * Set shade expansion to a value from `0` to `1` representing the amount the shade has expanded
+     * where `1` is fully expanded and `0` is fully collapsed.
+     */
+    fun setExpansion(expansion: Float)
+
+    /**
+     * Set quick settings expansion to a value from `0` to `1` representing the amount quick
+     * settings has expanded where `1` is fully expanded and `0` is fully collapsed.
+     */
     fun setQsExpansion(qsExpansion: Float)
+
     fun setUdfpsTransitionToFullShadeProgress(progress: Float)
 }
 
@@ -78,9 +99,17 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
+    private val _expansion = MutableStateFlow(0f)
+    override val expansion: StateFlow<Float> = _expansion.asStateFlow()
+
     private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
+
+    override fun setExpansion(expansion: Float) {
+        _expansion.value = expansion
+    }
+
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
     }

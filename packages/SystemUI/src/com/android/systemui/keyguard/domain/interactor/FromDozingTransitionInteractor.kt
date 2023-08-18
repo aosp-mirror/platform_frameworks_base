@@ -47,6 +47,7 @@ constructor(
     override fun start() {
         listenForDozingToLockscreenOrOccluded()
         listenForDozingToGone()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     private fun listenForDozingToLockscreenOrOccluded() {

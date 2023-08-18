@@ -321,4 +321,98 @@ public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
                         getLogicalAddress(), getSystemAudioDeviceLogicalAddress(),
                         Constants.AUDIO_VOLUME_STATUS_UNKNOWN));
     }
+
+    /**
+     * Tests that a volume adjustment command with direction ADJUST_SAME causes HdmiControlService
+     * to request the System Audio device's audio status, and notify AudioService of the
+     * audio status.
+     */
+    @Test
+    public void avbEnabled_audioDeviceVolumeAdjusted_adjustSame_updatesAudioService() {
+        enableAbsoluteVolumeBehavior();
+        mNativeWrapper.clearResultMessages();
+
+        // HdmiControlService receives a volume adjustment with direction ADJUST_SAME
+        mHdmiControlService.getAbsoluteVolumeChangedListener().onAudioDeviceVolumeAdjusted(
+                getAudioOutputDevice(),
+                ENABLE_AVB_VOLUME_INFO,
+                AudioManager.ADJUST_SAME,
+                AudioDeviceVolumeManager.ADJUST_MODE_NORMAL
+        );
+        mTestLooper.dispatchAll();
+
+        // Device sends <Give Audio Status>
+        assertThat(mNativeWrapper.getResultMessages()).contains(
+                HdmiCecMessageBuilder.buildGiveAudioStatus(getLogicalAddress(),
+                        getSystemAudioDeviceLogicalAddress()));
+
+        clearInvocations(mAudioManager);
+
+        // Device receives <Report Audio Status> with a new volume and mute state
+        mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildReportAudioStatus(
+                getSystemAudioDeviceLogicalAddress(),
+                getLogicalAddress(),
+                80,
+                true));
+        mTestLooper.dispatchAll();
+
+        // HdmiControlService calls setStreamVolume and adjustStreamVolume to trigger volume UI
+        verify(mAudioManager).setStreamVolume(
+                eq(AudioManager.STREAM_MUSIC),
+                // Volume level is rescaled to the max volume of STREAM_MUSIC
+                eq(80 * STREAM_MUSIC_MAX_VOLUME / AudioStatus.MAX_VOLUME),
+                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
+        verify(mAudioManager).adjustStreamVolume(
+                eq(AudioManager.STREAM_MUSIC),
+                eq(AudioManager.ADJUST_MUTE),
+                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
+    }
+
+    /**
+     * Tests that a volume adjustment command with direction ADJUST_SAME causes HdmiControlService
+     * to request the System Audio device's audio status, and notify AudioService of the
+     * audio status, even if it's unchanged from the previous one.
+     */
+    @Test
+    public void avbEnabled_audioDeviceVolumeAdjusted_adjustSame_noChange_updatesAudioService() {
+        enableAbsoluteVolumeBehavior();
+        mNativeWrapper.clearResultMessages();
+
+        // HdmiControlService receives a volume adjustment with direction ADJUST_SAME
+        mHdmiControlService.getAbsoluteVolumeChangedListener().onAudioDeviceVolumeAdjusted(
+                getAudioOutputDevice(),
+                ENABLE_AVB_VOLUME_INFO,
+                AudioManager.ADJUST_SAME,
+                AudioDeviceVolumeManager.ADJUST_MODE_NORMAL
+        );
+        mTestLooper.dispatchAll();
+
+        // Device sends <Give Audio Status>
+        assertThat(mNativeWrapper.getResultMessages()).contains(
+                HdmiCecMessageBuilder.buildGiveAudioStatus(getLogicalAddress(),
+                        getSystemAudioDeviceLogicalAddress()));
+
+        clearInvocations(mAudioManager);
+
+        // Device receives <Report Audio Status> with the same volume level and mute state that
+        // as when AVB was enabled
+        mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildReportAudioStatus(
+                getSystemAudioDeviceLogicalAddress(),
+                getLogicalAddress(),
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume(),
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute()));
+        mTestLooper.dispatchAll();
+
+        // HdmiControlService calls setStreamVolume and adjustStreamVolume to trigger volume UI
+        verify(mAudioManager).setStreamVolume(
+                eq(AudioManager.STREAM_MUSIC),
+                // Volume level is rescaled to the max volume of STREAM_MUSIC
+                eq(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume()
+                        * STREAM_MUSIC_MAX_VOLUME / AudioStatus.MAX_VOLUME),
+                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
+        verify(mAudioManager).adjustStreamVolume(
+                eq(AudioManager.STREAM_MUSIC),
+                eq(AudioManager.ADJUST_UNMUTE),
+                eq(AudioManager.FLAG_ABSOLUTE_VOLUME | AudioManager.FLAG_SHOW_UI));
+    }
 }

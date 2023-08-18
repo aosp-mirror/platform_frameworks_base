@@ -2597,6 +2597,12 @@
   <!-- Biometric FRR config -->
   <java-symbol type="fraction" name="config_biometricNotificationFrrThreshold" />
 
+  <!-- Biometric FRR notification messages -->
+  <java-symbol type="string" name="device_unlock_notification_name" />
+  <java-symbol type="string" name="alternative_unlock_setup_notification_title" />
+  <java-symbol type="string" name="alternative_face_setup_notification_content" />
+  <java-symbol type="string" name="alternative_fp_setup_notification_content" />
+
   <!-- Device credential strings for BiometricManager -->
   <java-symbol type="string" name="screen_lock_app_setting_name" />
   <java-symbol type="string" name="screen_lock_dialog_default_subtitle" />
@@ -4167,11 +4173,17 @@
   <java-symbol type="array" name="config_displayWhiteBalanceIncreaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceDecreaseThresholds" />
   <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBrightnesses" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBrightnessesStrong" />
   <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBiases" />
+  <java-symbol type="array" name="config_displayWhiteBalanceLowLightAmbientBiasesStrong" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperature" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceLowLightAmbientColorTemperatureStrong" />
   <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBrightnesses" />
+  <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBrightnessesStrong" />
   <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBiases" />
+  <java-symbol type="array" name="config_displayWhiteBalanceHighLightAmbientBiasesStrong" />
   <java-symbol type="dimen" name="config_displayWhiteBalanceHighLightAmbientColorTemperature" />
+  <java-symbol type="dimen" name="config_displayWhiteBalanceHighLightAmbientColorTemperatureStrong" />
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceStrongAmbientColorTemperatures" />
@@ -5185,6 +5197,7 @@
   <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" />
 
   <java-symbol type="drawable" name="focus_event_pressed_key_background" />
+  <java-symbol type="drawable" name="focus_event_rotary_input_background" />
   <java-symbol type="string" name="config_defaultShutdownVibrationFile" />
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 

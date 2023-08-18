@@ -23,6 +23,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 
 import java.util.Objects;
 
@@ -77,8 +78,8 @@ public final class PrebakedSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
-    public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
-        if (vibrator.areAllEffectsSupported(mEffectId) == Vibrator.VIBRATION_EFFECT_SUPPORT_YES) {
+    public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
+        if (vibratorInfo.isEffectSupported(mEffectId) == Vibrator.VIBRATION_EFFECT_SUPPORT_YES) {
             return true;
         }
         if (!mFallback) {

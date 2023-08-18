@@ -39,8 +39,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.RemoteUserInput
-import com.android.systemui.scene.shared.model.RemoteUserInputAction
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -196,15 +194,6 @@ class SceneTestUtils(
     }
 
     companion object {
-        val REMOTE_INPUT_DOWN_GESTURE =
-            listOf(
-                RemoteUserInput(10f, 10f, RemoteUserInputAction.DOWN),
-                RemoteUserInput(10f, 20f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 30f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 40f, RemoteUserInputAction.MOVE),
-                RemoteUserInput(10f, 40f, RemoteUserInputAction.UP),
-            )
-
         fun DomainLayerAuthenticationMethodModel.toDataLayer(): DataLayerAuthenticationMethodModel {
             return when (this) {
                 DomainLayerAuthenticationMethodModel.None -> DataLayerAuthenticationMethodModel.None

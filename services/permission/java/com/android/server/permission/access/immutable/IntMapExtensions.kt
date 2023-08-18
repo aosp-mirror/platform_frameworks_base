@@ -77,7 +77,7 @@ inline fun <T> MutableIntMap<T>.getOrPut(key: Int, defaultValue: () -> T): T {
 }
 
 operator fun <T> MutableIntMap<T>.minusAssign(key: Int) {
-    array.remove(key)
+    array.remove(key).also { array.gc() }
 }
 
 fun <T> MutableIntMap<T>.putWithDefault(key: Int, value: T, defaultValue: T): T {

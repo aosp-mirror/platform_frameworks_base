@@ -104,8 +104,6 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private DumpManager mDumpManager;
-    @Mock
-    private Handler mHandler;
 
 
     @Before
@@ -130,7 +128,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 mBroadcastDispatcher, mRingerModeTracker, mThreadFactory, mAudioManager,
                 mNotificationManager, mVibrator, mIAudioService, mAccessibilityManager,
                 mPackageManager, mWakefullnessLifcycle, mKeyguardManager,
-                mActivityManager, mUserTracker, mDumpManager, mHandler, mCallback);
+                mActivityManager, mUserTracker, mDumpManager, mCallback);
         mVolumeController.setEnableDialogs(true, true);
     }
 
@@ -245,12 +243,11 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 ActivityManager activityManager,
                 UserTracker userTracker,
                 DumpManager dumpManager,
-                Handler mainHandler,
                 C callback) {
             super(context, broadcastDispatcher, ringerModeTracker, theadFactory, audioManager,
                     notificationManager, optionalVibrator, iAudioService, accessibilityManager,
                     packageManager, wakefulnessLifecycle, keyguardManager,
-                    activityManager, userTracker, dumpManager, mainHandler);
+                    activityManager, userTracker, dumpManager);
             mCallbacks = callback;
 
             ArgumentCaptor<WakefulnessLifecycle.Observer> observerCaptor =

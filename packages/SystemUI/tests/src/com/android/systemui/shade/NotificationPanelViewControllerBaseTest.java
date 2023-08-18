@@ -73,6 +73,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconViewController;
+import com.android.keyguard.TestScopeProvider;
 import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
@@ -119,6 +120,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
@@ -134,6 +136,7 @@ import com.android.systemui.statusbar.QsFrameTranslateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -164,14 +167,17 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.user.domain.interactor.UserInteractor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
@@ -358,6 +364,16 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFakeKeyguardRepository = keyguardInteractorDeps.getRepository();
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
+        mShadeRepository = new FakeShadeRepository();
+        mShadeInteractor = new ShadeInteractor(
+                TestScopeProvider.getTestScope(),
+                mShadeRepository,
+                new FakeDisableFlagsRepository(),
+                new FakeKeyguardRepository(),
+                new FakeUserSetupRepository(),
+                mock(DeviceProvisionedController.class),
+                mock(UserInteractor.class)
+        );
 
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger, mDumpManager,
@@ -584,19 +600,33 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mMainHandler,
                 mLayoutInflater,
                 mFeatureFlags,
-                coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
-                mFalsingManager, new FalsingCollectorFake(),
+                coordinator,
+                expansionHandler,
+                mDynamicPrivacyController,
+                mKeyguardBypassController,
+                mFalsingManager,
+                new FalsingCollectorFake(),
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarWindowStateController,
                 mNotificationShadeWindowController,
-                mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
-                mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
+                mDozeLog,
+                mDozeParameters,
+                mCommandQueue,
+                mVibratorHelper,
+                mLatencyTracker,
+                mPowerManager,
+                mAccessibilityManager,
+                0,
+                mUpdateMonitor,
                 mMetricsLogger,
                 mShadeLog,
+                mShadeInteractor,
                 mConfigurationController,
-                () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
-                mConversationNotificationManager, mMediaHierarchyManager,
+                () -> flingAnimationUtilsBuilder,
+                mStatusBarTouchableRegionManager,
+                mConversationNotificationManager,
+                mMediaHierarchyManager,
                 mStatusBarKeyguardViewManager,
                 mGutsManager,
                 mNotificationsQSContainerController,

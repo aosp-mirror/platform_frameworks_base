@@ -107,8 +107,10 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"파일 전송"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"입력 장치"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"인터넷 액세스"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"연락처 및 통화 기록 공유"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"연락처 및 통화 기록 공유에 사용"</string>
+    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
+    <skip />
+    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
+    <skip />
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"인터넷 연결 공유"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"문자 메시지"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM 액세스"</string>

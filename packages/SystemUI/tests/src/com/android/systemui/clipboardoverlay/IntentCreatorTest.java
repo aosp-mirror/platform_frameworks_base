@@ -80,6 +80,7 @@ public class IntentCreatorTest extends SysuiTestCase {
         assertEquals(Intent.ACTION_EDIT, intent.getAction());
         assertEquals("image/*", intent.getType());
         assertEquals(null, intent.getComponent());
+        assertEquals("clipboard", intent.getStringExtra("edit_source"));
         assertFlags(intent, EXTERNAL_INTENT_FLAGS);
 
         // try again with an editor component
