@@ -33,8 +33,7 @@ import javax.inject.Named
     SettingsUtilModule::class,
 ])
 abstract class FlagsModule {
-    @Binds
-    abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsDebug): FeatureFlags
+    @Binds abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsClassicDebug): FeatureFlagsClassic
 
     @Binds
     @IntoSet

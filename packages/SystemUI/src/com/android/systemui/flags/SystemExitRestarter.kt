@@ -26,12 +26,12 @@ constructor(
     private val barService: IStatusBarService,
 ) : Restarter {
     override fun restartAndroid(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "Restarting Android: " + reason)
+        Log.d(FeatureFlagsClassicDebug.TAG, "Restarting Android: " + reason)
         barService.restart()
     }
 
     override fun restartSystemUI(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "Restarting SystemUI: " + reason)
+        Log.d(FeatureFlagsClassicDebug.TAG, "Restarting SystemUI: " + reason)
         System.exit(0)
     }
 }

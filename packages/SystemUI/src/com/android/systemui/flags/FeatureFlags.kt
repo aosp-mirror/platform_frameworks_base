@@ -23,6 +23,21 @@ import android.util.Dumpable
  *
  * See [Flags] for instructions on defining new flags.
  */
+interface FeatureFlagsClassic : FeatureFlags
+
+/**
+ * Class to manage simple DeviceConfig-based feature flags.
+ *
+ * See [Flags] for instructions on defining new flags.
+ */
+@Deprecated(
+    message = "Use FeatureFlagsClassic instead.",
+    replaceWith =
+        ReplaceWith(
+            "FeatureFlagsClassic",
+            "com.android.systemui.flags.FeatureFlagsClassic",
+        ),
+)
 interface FeatureFlags : FlagListenable, Dumpable {
     /** Returns a boolean value for the given flag.  */
     fun isEnabled(flag: UnreleasedFlag): Boolean

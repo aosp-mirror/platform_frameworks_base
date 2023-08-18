@@ -30,7 +30,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class FlagCommandTest : SysuiTestCase() {
 
-    @Mock private lateinit var featureFlags: FeatureFlagsDebug
+    @Mock private lateinit var featureFlags: FeatureFlagsClassicDebug
     @Mock private lateinit var pw: PrintWriter
     private val flagMap = mutableMapOf<String, Flag<*>>()
     private val flagA = UnreleasedFlag("500", "test")

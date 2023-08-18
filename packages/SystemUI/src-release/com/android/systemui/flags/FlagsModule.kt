@@ -29,7 +29,7 @@ import javax.inject.Named
 ])
 abstract class FlagsModule {
     @Binds
-    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsRelease): FeatureFlags
+    abstract fun bindsFeatureFlagRelease(impl: FeatureFlagsClassicRelease): FeatureFlagsClassic
 
     @Binds
     @IntoSet
