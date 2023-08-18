@@ -6915,13 +6915,59 @@ public class AudioManager {
 
     /**
      * @hide
-     * Returns whether CSD is enabled and supported by the HAL on this device.
+     * Returns whether CSD is enabled and supported by the current active audio module HAL.
+     * This method will return {@code false) for setups in which CSD as a feature is available
+     * (see {@link AudioManager#isCsdAsAFeatureAvailable()}) and not enabled (see
+     * {@link AudioManager#isCsdAsAFeatureEnabled()}).
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isCsdEnabled() {
         try {
             return getService().isCsdEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether CSD as a feature can be manipulated by a client. This method
+     * returns {@code true} in countries where there isn't a safe hearing regulation
+     * enforced.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureAvailable() {
+        try {
+            return getService().isCsdAsAFeatureAvailable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the client has enabled CSD. This function should only
+     * be called if {@link AudioManager#isCsdAsAFeatureAvailable()} returns {@code true}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureEnabled() {
+        try {
+            return getService().isCsdAsAFeatureEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Enables/disables the CSD feature. This function should only be called if
+     * {@link AudioManager#isCsdAsAFeatureAvailable()} returns {@code true}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setCsdAsAFeatureEnabled(boolean csdToggleValue) {
+        try {
+            getService().setCsdAsAFeatureEnabled(csdToggleValue);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

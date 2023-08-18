@@ -16,10 +16,12 @@
 
 package android.view;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsSource.ID_IME;
+import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
 import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
@@ -40,6 +42,7 @@ import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -652,6 +655,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mLastWindowingMode;
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
+    private int mImeCaptionBarInsetsHeight = 0;
     private boolean mAnimationsDisabled;
     private boolean mCompatSysUiVisibilityStaled;
 
@@ -691,6 +695,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 @Override
                 public void onIdNotFoundInState2(int index1, InsetsSource source1) {
                     if (!CAPTION_ON_SHELL && source1.getType() == captionBar()) {
+                        return;
+                    }
+                    if (source1.getId() == ID_IME_CAPTION_BAR) {
                         return;
                     }
 
@@ -822,6 +829,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public void onFrameChanged(Rect frame) {
         if (mFrame.equals(frame)) {
             return;
+        }
+        if (mImeCaptionBarInsetsHeight != 0) {
+            setImeCaptionBarInsetsHeight(mImeCaptionBarInsetsHeight);
         }
         mHost.notifyInsetsChanged();
         mFrame.set(frame);
@@ -1007,6 +1017,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // Ensure to update all existing source consumers
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if (consumer.getId() == ID_IME_CAPTION_BAR) {
+                // The inset control for the IME caption bar will never be dispatched
+                // by the server.
+                continue;
+            }
+
             final InsetsSourceControl control = mTmpControlArray.get(consumer.getId());
             if (control != null) {
                 controllableTypes |= control.getType();
@@ -1499,7 +1515,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 continue;
             }
             final InsetsSourceControl control = consumer.getControl();
-            if (control != null && control.getLeash() != null) {
+            if (control != null
+                    && (control.getLeash() != null || control.getId() == ID_IME_CAPTION_BAR)) {
                 controls.put(control.getId(), new InsetsSourceControl(control));
                 typesReady |= consumer.getType();
             }
@@ -1879,6 +1896,35 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         mFrame.left, mFrame.top, mFrame.right, mFrame.top + mCaptionInsetsHeight);
             } else {
                 mState.removeSource(ID_CAPTION_BAR);
+            }
+            mHost.notifyInsetsChanged();
+        }
+    }
+
+    @Override
+    public void setImeCaptionBarInsetsHeight(int height) {
+        if (!ENABLE_HIDE_IME_CAPTION_BAR) {
+            return;
+        }
+        Rect newFrame = new Rect(mFrame.left, mFrame.bottom - height, mFrame.right, mFrame.bottom);
+        InsetsSource source = mState.peekSource(ID_IME_CAPTION_BAR);
+        if (mImeCaptionBarInsetsHeight != height
+                || (source != null && !newFrame.equals(source.getFrame()))) {
+            mImeCaptionBarInsetsHeight = height;
+            if (mImeCaptionBarInsetsHeight != 0) {
+                mState.getOrCreateSource(ID_IME_CAPTION_BAR, captionBar())
+                        .setFrame(newFrame);
+                getSourceConsumer(ID_IME_CAPTION_BAR, captionBar()).setControl(
+                        new InsetsSourceControl(ID_IME_CAPTION_BAR, captionBar(),
+                                null /* leash */, false /* initialVisible */,
+                                new Point(), Insets.NONE),
+                        new int[1], new int[1]);
+            } else {
+                mState.removeSource(ID_IME_CAPTION_BAR);
+                InsetsSourceConsumer sourceConsumer = mSourceConsumers.get(ID_IME_CAPTION_BAR);
+                if (sourceConsumer != null) {
+                    sourceConsumer.setControl(null, new int[1], new int[1]);
+                }
             }
             mHost.notifyInsetsChanged();
         }

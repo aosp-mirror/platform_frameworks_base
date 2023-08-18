@@ -115,7 +115,7 @@ object Flags {
     // TODO(b/292213543): Tracking Bug
     @JvmField
     val NOTIFICATION_GROUP_EXPANSION_CHANGE =
-            unreleasedFlag("notification_group_expansion_change", teamfood = false)
+            unreleasedFlag("notification_group_expansion_change", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -512,11 +512,6 @@ object Flags {
     val ENABLE_FLING_TO_DISMISS_PIP =
         sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
 
-    @Keep
-    @JvmField
-    val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_keep_clear_algorithm", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
@@ -768,6 +763,10 @@ object Flags {
     // TODO(b/290213663): Tracking Bug
     @JvmField
     val ONE_WAY_HAPTICS_API_MIGRATION = unreleasedFlag("oneway_haptics_api_migration")
+
+    /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
+    @JvmField
+    val ENABLE_CLOCK_KEYGUARD_PRESENTATION = unreleasedFlag("enable_clock_keyguard_presentation")
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField

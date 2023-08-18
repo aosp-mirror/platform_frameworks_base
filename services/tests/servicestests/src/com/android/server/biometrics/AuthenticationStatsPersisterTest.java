@@ -29,6 +29,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +48,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+@Presubmit
+@SmallTest
 public class AuthenticationStatsPersisterTest {
 
     @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();

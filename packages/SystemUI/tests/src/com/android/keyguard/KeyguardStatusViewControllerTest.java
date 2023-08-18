@@ -77,7 +77,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     public void updatePosition_primaryClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig(false, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", false, true));
 
         mController.updatePosition(10, 15, 20f, true);
 
@@ -92,7 +92,7 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
     public void updatePosition_alternateClockAnimation() {
         ClockController mockClock = mock(ClockController.class);
         when(mKeyguardClockSwitchController.getClock()).thenReturn(mockClock);
-        when(mockClock.getConfig()).thenReturn(new ClockConfig(true, true));
+        when(mockClock.getConfig()).thenReturn(new ClockConfig("MOCK", true, true));
 
         mController.updatePosition(10, 15, 20f, true);
 

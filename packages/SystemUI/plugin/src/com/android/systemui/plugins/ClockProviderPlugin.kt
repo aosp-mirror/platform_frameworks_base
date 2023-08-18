@@ -177,6 +177,9 @@ interface ClockFaceEvents {
      * targetRegion is relative to the parent view.
      */
     fun onTargetRegionChanged(targetRegion: Rect?)
+
+    /** Called to notify the clock about its display. */
+    fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean)
 }
 
 /** Tick rates for clocks */
@@ -196,6 +199,8 @@ data class ClockMetadata(
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
+    val id: String,
+
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 

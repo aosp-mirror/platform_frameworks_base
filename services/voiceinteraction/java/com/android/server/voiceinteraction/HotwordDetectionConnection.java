@@ -54,6 +54,7 @@ import android.provider.DeviceConfig;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
+import android.service.voice.IDetectorSessionStorageService;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
@@ -69,6 +70,7 @@ import android.view.contentcapture.IContentCaptureManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -157,6 +159,8 @@ final class HotwordDetectionConnection {
     @NonNull private ServiceConnection mRemoteVisualQueryDetectionService;
     @GuardedBy("mLock")
     @Nullable private IBinder mAudioFlinger;
+
+    @Nullable private IHotwordRecognitionStatusCallback mHotwordRecognitionCallback;
     @GuardedBy("mLock")
     private boolean mDebugHotwordLogging = false;
 
@@ -694,6 +698,7 @@ final class HotwordDetectionConnection {
             updateContentCaptureManager(connection);
             updateSpeechService(connection);
             updateServiceIdentity(connection);
+            updateStorageService(connection);
             return connection;
         }
     }
@@ -910,6 +915,7 @@ final class HotwordDetectionConnection {
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
                     mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
         }
+        mHotwordRecognitionCallback = callback;
         mDetectorSessions.put(detectorType, session);
         session.initialize(options, sharedMemory);
     }
@@ -1033,6 +1039,23 @@ final class HotwordDetectionConnection {
                 addServiceUidForAudioPolicy(uid);
             }
         }));
+    }
+
+    private void updateStorageService(ServiceConnection connection) {
+        connection.run(service -> {
+            service.registerRemoteStorageService(new IDetectorSessionStorageService.Stub() {
+                @Override
+                public void openFile(String filename, AndroidFuture future)
+                        throws RemoteException {
+                    Slog.v(TAG, "BinderCallback#onFileOpen");
+                    try {
+                        mHotwordRecognitionCallback.onOpenFile(filename, future);
+                    } catch (RemoteException e) {
+                        e.rethrowFromSystemServer();
+                    }
+                }
+            });
+        });
     }
 
     private void addServiceUidForAudioPolicy(int uid) {

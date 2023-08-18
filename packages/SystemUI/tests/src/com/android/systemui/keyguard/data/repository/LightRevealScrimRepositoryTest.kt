@@ -17,8 +17,8 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
@@ -47,7 +47,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RoboPilotTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl

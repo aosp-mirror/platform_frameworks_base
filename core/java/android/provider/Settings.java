@@ -9975,6 +9975,13 @@ public final class Settings {
         public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
 
         /**
+         * Stores a boolean that defines whether the CSD as a feature is enabled or not.
+         * @hide
+         */
+        public static final String AUDIO_SAFE_CSD_AS_A_FEATURE_ENABLED =
+                "audio_safe_csd_as_a_feature_enabled";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -10489,6 +10496,14 @@ public final class Settings {
          */
         public static final String ASSIST_LONG_PRESS_HOME_ENABLED =
                 "assist_long_press_home_enabled";
+
+        /**
+         * Whether press and hold on nav handle can trigger search.
+         *
+         * @hide
+         */
+        public static final String SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED =
+                "search_press_hold_nav_handle_enabled";
 
         /**
          * Control whether Trust Agents are in active unlock or extend unlock mode.
@@ -11112,6 +11127,19 @@ public final class Settings {
         @Readable
         public static final String NAVIGATION_MODE =
                 "navigation_mode";
+
+        /**
+         * The value is from another(source) device's {@link #NAVIGATION_MODE} during restore.
+         * It's supposed to be written only by
+         * {@link com.android.providers.settings.SettingsHelper}.
+         * This setting should not be added into backup array.
+         * <p>Value: -1 = Can't get value from restore(default),
+         *  0 = 3 button,
+         *  1 = 2 button,
+         *  2 = fully gestural.
+         * @hide
+         */
+        public static final String NAVIGATION_MODE_RESTORE = "navigation_mode_restore";
 
         /**
          * Scale factor for the back gesture inset size on the left side of the screen.

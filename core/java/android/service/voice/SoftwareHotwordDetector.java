@@ -36,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.infra.AndroidFuture;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -298,6 +299,11 @@ class SoftwareHotwordDetector extends AbstractDetector {
             Slog.v(TAG, "onProcessRestarted()");
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
                     () -> mCallback.onHotwordDetectionServiceRestarted()));
+        }
+
+        @Override
+        public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
+            throw new UnsupportedOperationException("Hotword cannot access files from the disk.");
         }
     }
 

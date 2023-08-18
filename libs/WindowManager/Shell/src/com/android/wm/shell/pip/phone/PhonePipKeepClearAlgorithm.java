@@ -40,6 +40,7 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
                     "persist.wm.debug.enable_pip_keep_clear_algorithm_gravity", false);
 
     protected int mKeepClearAreasPadding;
+    private int mImeOffset;
 
     public PhonePipKeepClearAlgorithm(Context context) {
         reloadResources(context);
@@ -48,6 +49,7 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
     private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mKeepClearAreasPadding = res.getDimensionPixelSize(R.dimen.pip_keep_clear_areas_padding);
+        mImeOffset = res.getDimensionPixelSize(R.dimen.pip_ime_offset);
     }
 
     /**
@@ -61,7 +63,7 @@ public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterfac
         Rect insets = new Rect();
         pipBoundsAlgorithm.getInsetBounds(insets);
         if (pipBoundsState.isImeShowing()) {
-            insets.bottom -= pipBoundsState.getImeHeight();
+            insets.bottom -= (pipBoundsState.getImeHeight() + mImeOffset);
         }
         // if PiP is stashed we only adjust the vertical position if it's outside of insets and
         // ignore all keep clear areas, since it's already on the side

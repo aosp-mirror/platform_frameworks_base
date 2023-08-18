@@ -16,12 +16,28 @@
 
 package com.android.server.wm;
 
+import android.annotation.IntDef;
+
 import com.android.server.wm.StartingSurfaceController.StartingSurface;
 
 /**
  * Represents the model about how a starting window should be constructed.
  */
 public abstract class StartingData {
+
+    /** Nothing need to do after transaction */
+    static final int AFTER_TRANSACTION_IDLE = 0;
+    /** Remove the starting window directly after transaction done. */
+    static final int AFTER_TRANSACTION_REMOVE_DIRECTLY = 1;
+    /** Do copy splash screen to client after transaction done. */
+    static final int AFTER_TRANSACTION_COPY_TO_CLIENT = 2;
+
+    @IntDef(prefix = { "AFTER_TRANSACTION" }, value = {
+            AFTER_TRANSACTION_IDLE,
+            AFTER_TRANSACTION_REMOVE_DIRECTLY,
+            AFTER_TRANSACTION_COPY_TO_CLIENT,
+    })
+    @interface AfterTransaction {}
 
     protected final WindowManagerService mService;
     protected final int mTypeParams;
@@ -60,7 +76,7 @@ public abstract class StartingData {
      * This starting window should be removed after applying the start transaction of transition,
      * which ensures the app window has shown.
      */
-    boolean mRemoveAfterTransaction;
+    @AfterTransaction int mRemoveAfterTransaction;
 
     /** Whether to prepare the removal animation. */
     boolean mPrepareRemoveAnimation;
