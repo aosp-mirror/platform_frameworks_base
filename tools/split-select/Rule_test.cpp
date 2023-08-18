@@ -68,7 +68,7 @@ TEST(RuleTest, generatesValidJson) {
     expected.erase(std::remove_if(expected.begin(), expected.end(), ::isspace), expected.end());
 
     // Result
-    std::string result(rule.toJson().string());
+    std::string result(rule.toJson().c_str());
     result.erase(std::remove_if(result.begin(), result.end(), ::isspace), result.end());
 
     ASSERT_EQ(expected, result);
