@@ -30,7 +30,6 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
-import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -1446,9 +1445,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final boolean dragResizingChanged = !mDragResizingChangeReported && isDragResizeChanged();
-
-        final boolean attachedFrameChanged = LOCAL_LAYOUT
-                && mLayoutAttached && getParentWindow().frameChanged();
+        final boolean attachedFrameChanged = mLayoutAttached && getParentWindow().frameChanged();
 
         if (DEBUG) {
             Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged

@@ -322,13 +322,6 @@ public final class ViewRootImpl implements ViewParent,
             SystemProperties.getBoolean("persist.wm.debug.client_immersive_confirmation", false);
 
     /**
-     * Whether the client should compute the window frame on its own.
-     * @hide
-     */
-    public static final boolean LOCAL_LAYOUT =
-            SystemProperties.getBoolean("persist.debug.local_layout", true);
-
-    /**
      * Set this system property to true to force the view hierarchy to render
      * at 60 Hz. This can be used to measure the potential framerate.
      */
@@ -1912,8 +1905,8 @@ public final class ViewRootImpl implements ViewParent,
         final float compatScale = frames.compatScale;
         final boolean frameChanged = !mWinFrame.equals(frame);
         final boolean configChanged = !mLastReportedMergedConfiguration.equals(mergedConfiguration);
-        final boolean attachedFrameChanged = LOCAL_LAYOUT
-                && !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
+        final boolean attachedFrameChanged =
+                !Objects.equals(mTmpFrames.attachedFrame, attachedFrame);
         final boolean displayChanged = mDisplay.getDisplayId() != displayId;
         final boolean compatScaleChanged = mTmpFrames.compatScale != compatScale;
         final boolean dragResizingChanged = mPendingDragResizing != dragResizing;
@@ -8309,8 +8302,7 @@ public final class ViewRootImpl implements ViewParent,
         final int measuredWidth = mMeasuredWidth;
         final int measuredHeight = mMeasuredHeight;
         final boolean relayoutAsync;
-        if (LOCAL_LAYOUT
-                && (mViewFrameInfo.flags & FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED) == 0
+        if ((mViewFrameInfo.flags & FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED) == 0
                 && mWindowAttributes.type != TYPE_APPLICATION_STARTING
                 && mSyncSeqId <= mLastSyncSeqId
                 && winConfigFromAm.diff(winConfigFromWm, false /* compareUndefined */) == 0) {
