@@ -34,4 +34,7 @@ data class SubscriptionModel(
 
     /** Subscriptions in the same group may be filtered or treated as a single subscription */
     val groupUuid: ParcelUuid? = null,
+
+    /** Text representing the name for this connection */
+    val carrierName: String,
 )

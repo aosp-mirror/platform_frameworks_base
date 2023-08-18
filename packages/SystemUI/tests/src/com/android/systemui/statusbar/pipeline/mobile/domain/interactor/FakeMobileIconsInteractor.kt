@@ -64,6 +64,8 @@ class FakeMobileIconsInteractor(
 
     override val mobileIsDefault = MutableStateFlow(false)
 
+    override val isSingleCarrier = MutableStateFlow(true)
+
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping
 

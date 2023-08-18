@@ -18,7 +18,13 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * A view model for an individual mobile icon that embeds the notion of a [StatusBarLocation]. This
@@ -26,12 +32,12 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
  *
  * @param commonImpl for convenience, this class wraps a base interface that can provides all of the
  *   common implementations between locations. See [MobileIconViewModel]
- * @property locationName the name of the location of this VM, used for logging.
+ * @property location the [StatusBarLocation] of this VM.
  * @property verboseLogger an optional logger to log extremely verbose view updates.
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,
-    val locationName: String,
+    val location: StatusBarLocation,
     val verboseLogger: VerboseMobileViewLogger?,
 ) : MobileIconViewModelCommon by commonImpl {
     val defaultColor: Int = Color.WHITE
@@ -39,10 +45,12 @@ abstract class LocationBasedMobileViewModel(
     companion object {
         fun viewModelForLocation(
             commonImpl: MobileIconViewModelCommon,
+            interactor: MobileIconInteractor,
             verboseMobileViewLogger: VerboseMobileViewLogger,
-            loc: StatusBarLocation,
+            location: StatusBarLocation,
+            scope: CoroutineScope,
         ): LocationBasedMobileViewModel =
-            when (loc) {
+            when (location) {
                 StatusBarLocation.HOME ->
                     HomeMobileIconViewModel(
                         commonImpl,
@@ -50,6 +58,12 @@ abstract class LocationBasedMobileViewModel(
                     )
                 StatusBarLocation.KEYGUARD -> KeyguardMobileIconViewModel(commonImpl)
                 StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl)
+                StatusBarLocation.SHADE_CARRIER_GROUP ->
+                    ShadeCarrierGroupMobileIconViewModel(
+                        commonImpl,
+                        interactor,
+                        scope,
+                    )
             }
     }
 }
@@ -61,7 +75,7 @@ class HomeMobileIconViewModel(
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        locationName = "Home",
+        location = StatusBarLocation.HOME,
         verboseMobileViewLogger,
     )
 
@@ -71,10 +85,32 @@ class QsMobileIconViewModel(
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        locationName = "QS",
+        location = StatusBarLocation.QS,
         // Only do verbose logging for the Home location.
         verboseLogger = null,
     )
+
+class ShadeCarrierGroupMobileIconViewModel(
+    commonImpl: MobileIconViewModelCommon,
+    interactor: MobileIconInteractor,
+    scope: CoroutineScope,
+) :
+    MobileIconViewModelCommon,
+    LocationBasedMobileViewModel(
+        commonImpl,
+        location = StatusBarLocation.SHADE_CARRIER_GROUP,
+        // Only do verbose logging for the Home location.
+        verboseLogger = null,
+    ) {
+    private val isSingleCarrier = interactor.isSingleCarrier
+    val carrierName = interactor.carrierName
+
+    override val isVisible: StateFlow<Boolean> =
+        combine(super.isVisible, isSingleCarrier) { isVisible, isSingleCarrier ->
+                if (isSingleCarrier) false else isVisible
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), super.isVisible.value)
+}
 
 class KeyguardMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
@@ -82,7 +118,7 @@ class KeyguardMobileIconViewModel(
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        locationName = "Keyguard",
+        location = StatusBarLocation.KEYGUARD,
         // Only do verbose logging for the Home location.
         verboseLogger = null,
     )

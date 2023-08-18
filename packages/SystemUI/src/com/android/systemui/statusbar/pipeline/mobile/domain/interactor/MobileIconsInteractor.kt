@@ -76,6 +76,9 @@ interface MobileIconsInteractor {
     /** True if the CDMA level should be preferred over the primary level. */
     val alwaysUseCdmaLevel: StateFlow<Boolean>
 
+    /** True if there is only one active subscription. */
+    val isSingleCarrier: StateFlow<Boolean>
+
     /** The icon mapping from network type to [MobileIconGroup] for the default subscription */
     val defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>
 
@@ -252,6 +255,17 @@ constructor(
             .mapLatest { it.alwaysShowCdmaRssi }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
+    override val isSingleCarrier: StateFlow<Boolean> =
+        mobileConnectionsRepo.subscriptions
+            .map { it.size == 1 }
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = LOGGING_PREFIX,
+                columnName = "isSingleCarrier",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     /** If there is no mapping in [defaultMobileIconMapping], then use this default icon group */
     override val defaultMobileIconGroup: StateFlow<MobileIconGroup> =
         mobileConnectionsRepo.defaultMobileIconGroup.stateIn(
@@ -298,6 +312,7 @@ constructor(
             activeDataConnectionHasDataEnabled,
             alwaysShowDataRatIcon,
             alwaysUseCdmaLevel,
+            isSingleCarrier,
             mobileIsDefault,
             defaultMobileIconMapping,
             defaultMobileIconGroup,

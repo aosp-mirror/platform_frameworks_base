@@ -108,6 +108,8 @@ class CarrierMergedConnectionRepository(
                 NetworkNameModel.SimDerived(telephonyManager.simOperatorName),
             )
 
+    override val carrierName: StateFlow<NetworkNameModel> = networkName
+
     override val numberOfLevels: StateFlow<Int> =
         wifiRepository.wifiNetwork
             .map {
