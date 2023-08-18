@@ -33,6 +33,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
@@ -89,10 +91,11 @@ public class DeviceStateNotificationControllerTest {
     @Before
     public void setup() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        Handler handler = mock(Handler.class);
         PackageManager packageManager = mock(PackageManager.class);
         Runnable cancelStateRunnable = mock(Runnable.class);
         ApplicationInfo applicationInfo = mock(ApplicationInfo.class);
+
+        Handler handler = new DeviceStateNotificationControllerTestHandler(Looper.getMainLooper());
 
         final SparseArray<DeviceStateNotificationController.NotificationInfo> notificationInfos =
                 new SparseArray<>();
@@ -258,5 +261,17 @@ public class DeviceStateNotificationControllerTest {
         verify(mNotificationInfoProvider).refreshNotificationInfos(eq(Locale.ITALY));
         assertEquals(Locale.ITALY, mNotificationInfoProvider.getCachedLocale());
         clearInvocations(mNotificationInfoProvider);
+    }
+
+    private static class DeviceStateNotificationControllerTestHandler extends Handler {
+        DeviceStateNotificationControllerTestHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+            msg.getCallback().run();
+            return true;
+        }
     }
 }
