@@ -189,7 +189,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
                                                          &mRenderThread.renderState());
-            ALOGE("%s", cachesOutput.string());
+            ALOGE("%s", cachesOutput.c_str());
             if (errorHandler) {
                 std::ostringstream err;
                 err << "Unable to create layer for " << node->getName();

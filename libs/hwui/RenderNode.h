@@ -115,7 +115,7 @@ public:
         return mDisplayList.containsProjectionReceiver();
     }
 
-    const char* getName() const { return mName.string(); }
+    const char* getName() const { return mName.c_str(); }
 
     void setName(const char* name) {
         if (name) {
