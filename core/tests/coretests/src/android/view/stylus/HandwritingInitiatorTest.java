@@ -245,7 +245,7 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_tryAcceptDelegation_delegatorCallbackCreatesInputConnection() {
-        View delegateView = new View(mContext);
+        View delegateView = new EditText(mContext);
         delegateView.setIsHandwritingDelegate(true);
 
         mTestView1.setHandwritingDelegatorCallback(
@@ -266,7 +266,7 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_tryAcceptDelegation_delegatorCallbackFocusesDelegate() {
-        View delegateView = new View(mContext);
+        View delegateView = new EditText(mContext);
         delegateView.setIsHandwritingDelegate(true);
         mHandwritingInitiator.onInputConnectionCreated(delegateView);
         reset(mHandwritingInitiator);
