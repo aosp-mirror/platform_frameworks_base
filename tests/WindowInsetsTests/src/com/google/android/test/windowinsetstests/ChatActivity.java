@@ -18,6 +18,7 @@ package com.google.android.test.windowinsetstests;
 
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -41,10 +42,10 @@ import android.view.WindowInsetsAnimationController;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -148,7 +149,7 @@ public class ChatActivity extends AppCompatActivity {
                 inset = min(inset, shown);
                 mAnimationController.setInsetsAndAlpha(
                         Insets.of(0, 0, 0, inset),
-                        1f, (inset - start) / (float)(end - start));
+                        1f, start == end ? 1f : (inset - start) / (float) (end - start));
             }
         });
 
