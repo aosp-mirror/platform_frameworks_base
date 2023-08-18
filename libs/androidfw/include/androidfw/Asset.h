@@ -135,7 +135,7 @@ public:
      * This is NOT intended to be used for anything except debug output.
      * DO NOT try to parse this or use it to open a file.
      */
-    const char* getAssetSource(void) const { return mAssetSource.string(); }
+    const char* getAssetSource(void) const { return mAssetSource.c_str(); }
 
     /*
      * Create the asset from a file descriptor.

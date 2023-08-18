@@ -453,7 +453,7 @@ bool BinaryResourceParser::ParseLibrary(const ResChunk_header* chunk) {
   const size_t count = entries.size();
   for (size_t i = 0; i < count; i++) {
     table_->included_packages_[entries.valueAt(i)] =
-        android::util::Utf16ToUtf8(StringPiece16(entries.keyAt(i).string()));
+        android::util::Utf16ToUtf8(StringPiece16(entries.keyAt(i).c_str()));
   }
   return true;
 }

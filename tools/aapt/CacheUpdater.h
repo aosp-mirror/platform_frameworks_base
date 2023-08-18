@@ -66,7 +66,7 @@ public:
         // Check optomistically to see if all directories exist.
         // If something in the path doesn't exist, then walk the path backwards
         // and find the place to start creating directories forward.
-        if (stat(path.string(),&s) == -1) {
+        if (stat(path.c_str(),&s) == -1) {
             // Walk backwards to find place to start creating directories
             existsPath = path;
             do {
@@ -74,7 +74,7 @@ public:
                 // the string of paths to create.
                 toCreate = existsPath.getPathLeaf().appendPath(toCreate);
                 existsPath = existsPath.getPathDir();
-            } while (stat(existsPath.string(),&s) == -1);
+            } while (stat(existsPath.c_str(),&s) == -1);
 
             // Walk forwards and build directories as we go
             do {
@@ -82,9 +82,9 @@ public:
                 existsPath.appendPath(toCreate.walkPath(&remains));
                 toCreate = remains;
 #ifdef _WIN32
-                _mkdir(existsPath.string());
+                _mkdir(existsPath.c_str());
 #else
-                mkdir(existsPath.string(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
+                mkdir(existsPath.c_str(), S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP);
 #endif
             } while (remains.length() > 0);
         } //if
@@ -93,8 +93,8 @@ public:
     // Delete a file
     virtual void deleteFile(String8 path)
     {
-        if (remove(path.string()) != 0)
-            fprintf(stderr,"ERROR DELETING %s\n",path.string());
+        if (remove(path.c_str()) != 0)
+            fprintf(stderr,"ERROR DELETING %s\n",path.c_str());
     };
 
     // Process an image from source out to dest

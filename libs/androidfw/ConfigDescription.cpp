@@ -905,7 +905,7 @@ std::string ConfigDescription::GetBcp47LanguageTag(bool canonicalize) const {
 
 std::string ConfigDescription::to_string() const {
   const String8 str = toString();
-  return std::string(str.string(), str.size());
+  return std::string(str.c_str(), str.size());
 }
 
 bool ConfigDescription::Dominates(const ConfigDescription& o) const {
