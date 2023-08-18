@@ -340,7 +340,7 @@ public final class SmsManager {
     }
 
     /**
-     * Get {@link Context#getOpPackageName()} if this manager has a context, otherwise a dummy
+     * Get {@link Context#getOpPackageName()} if this manager has a context, otherwise a placeholder
      * value.
      *
      * @return The package name to be used for app-ops checks
