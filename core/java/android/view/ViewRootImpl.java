@@ -1438,6 +1438,11 @@ public final class ViewRootImpl implements ViewParent,
                 // We should update mAttachInfo.mDisplayState after registerDisplayListener
                 // because displayState might be changed before registerDisplayListener.
                 mAttachInfo.mDisplayState = mDisplay.getState();
+                if (mBasePackageName != null
+                        && mBasePackageName.equals("com.google.android.dialer")) {
+                    Slog.w(mTag, "(" + mBasePackageName + ") Initial DisplayState: "
+                            + mAttachInfo.mDisplayState, new Throwable());
+                }
                 if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
                     mUseBLASTAdapter = true;
                 }
@@ -1522,6 +1527,7 @@ public final class ViewRootImpl implements ViewParent,
      * Register any kind of listeners if setView was success.
      */
     private void registerListeners() {
+        Slog.i(mTag, "Register listeners: " + mBasePackageName);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager, mHandler);
         mAccessibilityManager.addHighTextContrastStateChangeListener(
@@ -1547,6 +1553,7 @@ public final class ViewRootImpl implements ViewParent,
         DisplayManagerGlobal
                 .getInstance()
                 .unregisterDisplayListener(mDisplayListener);
+        Slog.w(mTag, "Unregister listeners: " + mBasePackageName, new Throwable());
     }
 
     private void setTag() {
@@ -1950,9 +1957,13 @@ public final class ViewRootImpl implements ViewParent,
     private final DisplayListener mDisplayListener = new DisplayListener() {
         @Override
         public void onDisplayChanged(int displayId) {
+            if (mBasePackageName != null && mBasePackageName.equals("com.google.android.dialer")) {
+                Slog.i(mTag, "Received onDisplayChanged - " + mView);
+            }
             if (mView != null && mDisplay.getDisplayId() == displayId) {
                 final int oldDisplayState = mAttachInfo.mDisplayState;
                 final int newDisplayState = mDisplay.getState();
+                Slog.i(mTag, "DisplayState - old: " + oldDisplayState + ", new: " + newDisplayState);
                 if (oldDisplayState != newDisplayState) {
                     mAttachInfo.mDisplayState = newDisplayState;
                     pokeDrawLockIfNeeded();
