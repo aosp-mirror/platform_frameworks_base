@@ -43,6 +43,7 @@ class KeyguardBlueprintViewBinder {
                                 val emptyLayout = ConstraintSet.Layout()
                                 knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
                                 blueprint?.apply(this)
+                                blueprint?.removeUnConstrainedViews(constraintLayout, this)
                                 applyTo(constraintLayout)
                             }
                             Trace.endSection()
