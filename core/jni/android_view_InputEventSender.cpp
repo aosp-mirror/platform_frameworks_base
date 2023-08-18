@@ -334,7 +334,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject senderWeak,
     if (status) {
         String8 message;
         message.appendFormat("Failed to initialize input event sender.  status=%d", status);
-        jniThrowRuntimeException(env, message.string());
+        jniThrowRuntimeException(env, message.c_str());
         return 0;
     }
 
