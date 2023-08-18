@@ -2596,9 +2596,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // When a task is locked, dismiss the root pinned task if it exists
-            mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
-
             getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
