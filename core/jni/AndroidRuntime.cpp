@@ -352,7 +352,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     JNIEnv* env;
     jmethodID methodId;
 
-    ALOGD("Calling main entry %s", className.string());
+    ALOGD("Calling main entry %s", className.c_str());
 
     env = getJNIEnv();
     if (clazz == NULL || env == NULL) {
@@ -361,7 +361,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 
     methodId = env->GetStaticMethodID(clazz, "main", "([Ljava/lang/String;)V");
     if (methodId == NULL) {
-        ALOGE("ERROR: could not find method %s.main(String[])\n", className.string());
+        ALOGE("ERROR: could not find method %s.main(String[])\n", className.c_str());
         return UNKNOWN_ERROR;
     }
 
@@ -377,7 +377,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     strArray = env->NewObjectArray(numArgs, stringClass, NULL);
 
     for (size_t i = 0; i < numArgs; i++) {
-        jstring argStr = env->NewStringUTF(args[i].string());
+        jstring argStr = env->NewStringUTF(args[i].c_str());
         env->SetObjectArrayElement(strArray, i, argStr);
     }
 
@@ -1268,7 +1268,7 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
     env->SetObjectArrayElement(strArray, 0, classNameStr);
 
     for (size_t i = 0; i < options.size(); ++i) {
-        jstring optionsStr = env->NewStringUTF(options.itemAt(i).string());
+        jstring optionsStr = env->NewStringUTF(options.itemAt(i).c_str());
         assert(optionsStr != NULL);
         env->SetObjectArrayElement(strArray, i + 1, optionsStr);
     }
