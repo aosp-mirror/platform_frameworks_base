@@ -23,6 +23,7 @@ import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
 import android.app.usage.UsageStatsManager;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -746,8 +747,10 @@ public class AppStateTrackerImpl implements AppStateTracker {
         public void opChanged(int op, int uid, String packageName) throws RemoteException {
             boolean restricted = false;
             try {
-                restricted = mAppOpsService.checkOperation(TARGET_OP,
-                        uid, packageName) != AppOpsManager.MODE_ALLOWED;
+                final AttributionSource attributionSource =
+                        new AttributionSource.Builder(uid).setPackageName(packageName).build();
+                restricted = mAppOpsService.checkOperationWithState(TARGET_OP,
+                        attributionSource.asState()) != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 // Shouldn't happen
             }
