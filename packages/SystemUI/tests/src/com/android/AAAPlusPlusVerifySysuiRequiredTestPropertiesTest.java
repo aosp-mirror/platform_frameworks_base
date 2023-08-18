@@ -131,7 +131,7 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
         // with the main process dependency graph because it will not exist
         // at runtime and could lead to incorrect tests which assume
         // the main SystemUI process. Therefore, exclude this package
-        // from the base class whitelist.
+        // from the base class allowlist.
         filter.add(s -> !s.startsWith("com.android.systemui.screenshot"));
         return filter;
     }
