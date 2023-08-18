@@ -149,6 +149,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
 
+        when(mResources.getInteger(com.android.internal.R.integer.config_doublelineClockDefault))
+                .thenReturn(1);
+
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
         when(mSmallClockView.getContext()).thenReturn(getContext());
@@ -309,6 +312,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         // When a settings change has occurred to the small clock, make sure the view is adjusted
         reset(mView);
+        when(mView.getResources()).thenReturn(mResources);
         observer.onChange(true);
         mExecutor.runAllReady();
         verify(mView).switchToClock(KeyguardClockSwitch.SMALL, /* animate */ true);
