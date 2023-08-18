@@ -466,6 +466,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/PromptInfo.java)
 
         /**
+         * Set if emergency call button should show, for example if biometrics are
+         * required to access the dialer app
+         * @param showEmergencyCallButton if true, shows emergency call button
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setShowEmergencyCallButton(boolean showEmergencyCallButton) {
+            mPromptInfo.setShowEmergencyCallButton(showEmergencyCallButton);
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
