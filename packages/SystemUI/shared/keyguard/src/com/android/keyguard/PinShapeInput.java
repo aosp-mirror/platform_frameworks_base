@@ -44,6 +44,14 @@ public interface PinShapeInput {
     void reset();
 
     /**
+     * This is the method that is triggered for resetting the view with error If it doesn't have to
+     * show something regarding error, just reset
+     */
+    default void resetWithError() {
+        reset();
+    }
+
+    /**
      * This is the method that is triggered for getting the view
      */
     View getView();
