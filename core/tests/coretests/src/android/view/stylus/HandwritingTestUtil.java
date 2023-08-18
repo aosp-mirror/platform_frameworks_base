@@ -21,7 +21,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -45,7 +47,7 @@ public class HandwritingTestUtil {
             float handwritingBoundsOffsetRight, float handwritingBoundsOffsetBottom) {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         final Context context = instrumentation.getTargetContext();
-        // mock a parent so that HandwritingInitiator can get
+        // mock a parent so that HandwritingInitiator can get visible rect and hit region.
         final ViewGroup parent = new ViewGroup(context) {
             @Override
             protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -54,6 +56,14 @@ public class HandwritingTestUtil {
             @Override
             public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
                 r.set(handwritingArea);
+                return true;
+            }
+
+            @Override
+            public boolean getChildLocalHitRegion(View child, Region region, Matrix matrix,
+                    boolean isHover) {
+                matrix.reset();
+                region.set(handwritingArea);
                 return true;
             }
         };
