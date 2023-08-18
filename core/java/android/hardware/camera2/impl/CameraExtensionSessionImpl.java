@@ -91,7 +91,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private final Set<CaptureRequest.Key> mSupportedRequestKeys;
     private final Set<CaptureResult.Key> mSupportedResultKeys;
     private final ExtensionSessionStatsAggregator mStatsAggregator;
-    private final IBinder mToken;
+    private IBinder mToken = null;
     private boolean mCaptureResultsSupported;
 
     private CameraCaptureSession mCaptureSession = null;
@@ -119,6 +119,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     // will do so internally.
     private boolean mInternalRepeatingRequestEnabled = true;
 
+    private final Context mContext;
+
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock;
 
@@ -135,14 +137,9 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @NonNull Map<String, CameraCharacteristics> characteristicsMap,
             @NonNull Context ctx,
             @NonNull ExtensionSessionConfiguration config,
-            int sessionId)
+            int sessionId,
+            @NonNull IBinder token)
             throws CameraAccessException, RemoteException {
-        final IBinder token = new Binder(TAG + " : " + sessionId);
-        boolean success = CameraExtensionCharacteristics.registerClient(ctx, token);
-        if (!success) {
-            throw new UnsupportedOperationException("Unsupported extension!");
-        }
-
         String cameraId = cameraDevice.getId();
         CameraExtensionCharacteristics extensionChars = new CameraExtensionCharacteristics(ctx,
                 cameraId, characteristicsMap);
@@ -234,6 +231,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 characteristicsMap.get(cameraId).getNativeMetadata());
 
         CameraExtensionSessionImpl session = new CameraExtensionSessionImpl(
+                ctx,
                 extenders.second,
                 extenders.first,
                 supportedPreviewSizes,
@@ -256,7 +254,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         return session;
     }
 
-    public CameraExtensionSessionImpl(@NonNull IImageCaptureExtenderImpl imageExtender,
+    public CameraExtensionSessionImpl(Context ctx, @NonNull IImageCaptureExtenderImpl imageExtender,
             @NonNull IPreviewExtenderImpl previewExtender,
             @NonNull List<Size> previewSizes,
             @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
@@ -269,6 +267,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @NonNull IBinder token,
             @NonNull Set<CaptureRequest.Key> requestKeys,
             @Nullable Set<CaptureResult.Key> resultKeys) {
+        mContext = ctx;
         mImageExtender = imageExtender;
         mPreviewExtender = previewExtender;
         mCameraDevice = cameraDevice;
@@ -878,12 +877,15 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         + " respond!");
             }
 
-            CameraExtensionCharacteristics.unregisterClient(mToken);
-            if (mInitialized || (mCaptureSession != null)) {
-                notifyClose = true;
-                CameraExtensionCharacteristics.releaseSession();
+            if (mToken != null) {
+                if (mInitialized || (mCaptureSession != null)) {
+                    notifyClose = true;
+                    CameraExtensionCharacteristics.releaseSession();
+                }
+                CameraExtensionCharacteristics.unregisterClient(mContext, mToken);
             }
             mInitialized = false;
+            mToken = null;
 
             if (mRepeatingRequestImageCallback != null) {
                 mRepeatingRequestImageCallback.close();

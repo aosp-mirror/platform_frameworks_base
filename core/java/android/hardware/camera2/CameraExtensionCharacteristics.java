@@ -236,9 +236,10 @@ public final class CameraExtensionCharacteristics {
         private static final CameraExtensionManagerGlobal GLOBAL_CAMERA_MANAGER =
                 new CameraExtensionManagerGlobal();
         private final Object mLock = new Object();
-        private final int PROXY_SERVICE_DELAY_MS = 1000;
+        private final int PROXY_SERVICE_DELAY_MS = 2000;
         private InitializerFuture mInitFuture = null;
         private ServiceConnection mConnection = null;
+        private int mConnectionCount = 0;
         private ICameraExtensionsProxyService mProxy = null;
         private boolean mSupportsAdvancedExtensions = false;
 
@@ -247,6 +248,15 @@ public final class CameraExtensionCharacteristics {
 
         public static CameraExtensionManagerGlobal get() {
             return GLOBAL_CAMERA_MANAGER;
+        }
+
+        private void releaseProxyConnectionLocked(Context ctx) {
+            if (mConnection != null ) {
+                ctx.unbindService(mConnection);
+                mConnection = null;
+                mProxy = null;
+                mConnectionCount = 0;
+            }
         }
 
         private void connectToProxyLocked(Context ctx) {
@@ -270,7 +280,6 @@ public final class CameraExtensionCharacteristics {
                 mConnection = new ServiceConnection() {
                     @Override
                     public void onServiceDisconnected(ComponentName component) {
-                        mInitFuture.setStatus(false);
                         mConnection = null;
                         mProxy = null;
                     }
@@ -348,23 +357,32 @@ public final class CameraExtensionCharacteristics {
 
         public boolean registerClient(Context ctx, IBinder token) {
             synchronized (mLock) {
+                boolean ret = false;
                 connectToProxyLocked(ctx);
                 if (mProxy == null) {
                     return false;
                 }
+                mConnectionCount++;
 
                 try {
-                    return mProxy.registerClient(token);
+                    ret = mProxy.registerClient(token);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to initialize extension! Extension service does "
                             + " not respond!");
                 }
+                if (!ret) {
+                    mConnectionCount--;
+                }
 
-                return false;
+                if (mConnectionCount <= 0) {
+                    releaseProxyConnectionLocked(ctx);
+                }
+
+                return ret;
             }
         }
 
-        public void unregisterClient(IBinder token) {
+        public void unregisterClient(Context ctx, IBinder token) {
             synchronized (mLock) {
                 if (mProxy != null) {
                     try {
@@ -372,6 +390,11 @@ public final class CameraExtensionCharacteristics {
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to de-initialize extension! Extension service does"
                                 + " not respond!");
+                    } finally {
+                        mConnectionCount--;
+                        if (mConnectionCount <= 0) {
+                            releaseProxyConnectionLocked(ctx);
+                        }
                     }
                 }
             }
@@ -446,8 +469,8 @@ public final class CameraExtensionCharacteristics {
     /**
      * @hide
      */
-    public static void unregisterClient(IBinder token) {
-        CameraExtensionManagerGlobal.get().unregisterClient(token);
+    public static void unregisterClient(Context ctx, IBinder token) {
+        CameraExtensionManagerGlobal.get().unregisterClient(ctx, token);
     }
 
     /**
@@ -578,7 +601,7 @@ public final class CameraExtensionCharacteristics {
                 }
             }
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return Collections.unmodifiableList(ret);
@@ -626,7 +649,7 @@ public final class CameraExtensionCharacteristics {
             Log.e(TAG, "Failed to query the extension for postview availability! Extension "
                     + "service does not respond!");
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return false;
@@ -722,7 +745,7 @@ public final class CameraExtensionCharacteristics {
                     + "service does not respond!");
             return Collections.emptyList();
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
     }
 
@@ -791,7 +814,7 @@ public final class CameraExtensionCharacteristics {
                     + " not respond!");
             return new ArrayList<>();
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
     }
 
@@ -872,7 +895,7 @@ public final class CameraExtensionCharacteristics {
                     }
                 }
             } finally {
-                unregisterClient(token);
+                unregisterClient(mContext, token);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension supported sizes! Extension service does"
@@ -957,7 +980,7 @@ public final class CameraExtensionCharacteristics {
             Log.e(TAG, "Failed to query the extension capture latency! Extension service does"
                     + " not respond!");
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return null;
@@ -998,7 +1021,7 @@ public final class CameraExtensionCharacteristics {
             Log.e(TAG, "Failed to query the extension progress callbacks! Extension service does"
                     + " not respond!");
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return false;
@@ -1075,7 +1098,7 @@ public final class CameraExtensionCharacteristics {
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to query the available capture request keys!");
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return Collections.unmodifiableSet(ret);
@@ -1155,7 +1178,7 @@ public final class CameraExtensionCharacteristics {
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to query the available capture result keys!");
         } finally {
-            unregisterClient(token);
+            unregisterClient(mContext, token);
         }
 
         return Collections.unmodifiableSet(ret);
