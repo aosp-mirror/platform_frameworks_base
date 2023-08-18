@@ -38,6 +38,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.LooperMode;
 import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
@@ -167,6 +168,7 @@ public class MetricsFeatureProviderTest {
     }
 
     @Test
+    @LooperMode(LooperMode.Mode.PAUSED)
     public void getAttribution_notSet_shouldReturnUnknown() {
         final Activity activity = Robolectric.setupActivity(Activity.class);
 

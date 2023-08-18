@@ -16,23 +16,27 @@
 
 package com.android.settingslib.testutils.shadow;
 
+import static android.os.Build.VERSION_CODES.O;
+
 import android.app.ActivityManager;
+import android.app.IActivityManager;
 
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
+import org.robolectric.util.ReflectionHelpers;
 
 @Implements(ActivityManager.class)
 public class ShadowActivityManager {
     private static int sCurrentUserId = 0;
-    private int mUserSwitchedTo = -1;
+    private static int sUserSwitchedTo = -1;
 
     @Resetter
-    public void reset() {
+    public static void reset() {
         sCurrentUserId = 0;
-        mUserSwitchedTo = 0;
+        sUserSwitchedTo = 0;
     }
 
     @Implementation
@@ -42,16 +46,21 @@ public class ShadowActivityManager {
 
     @Implementation
     protected boolean switchUser(int userId) {
-        mUserSwitchedTo = userId;
+        sUserSwitchedTo = userId;
         return true;
     }
 
+    @Implementation(minSdk = O)
+    protected static IActivityManager getService() {
+        return ReflectionHelpers.createNullProxy(IActivityManager.class);
+    }
+
     public boolean getSwitchUserCalled() {
-        return mUserSwitchedTo != -1;
+        return sUserSwitchedTo != -1;
     }
 
     public int getUserSwitchedTo() {
-        return mUserSwitchedTo;
+        return sUserSwitchedTo;
     }
 
     public static void setCurrentUser(int userId) {
