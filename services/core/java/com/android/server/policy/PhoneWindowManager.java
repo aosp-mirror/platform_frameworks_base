@@ -208,7 +208,6 @@ import com.android.internal.policy.LogDecelerateInterpolator;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.ExtconStateObserver;
@@ -622,8 +621,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mAllowTheaterModeWakeFromLidSwitch;
     private boolean mAllowTheaterModeWakeFromWakeGesture;
 
-    // Whether to support long press from power button in non-interactive mode
+    // If true, the power button long press behavior will be invoked even if the default display is
+    // non-interactive. If false, the power button long press behavior will be skipped if the
+    // default display is non-interactive.
     private boolean mSupportLongPressPowerWhenNonInteractive;
+
+    // If true, the power button short press behavior will be always invoked as long as the default
+    // display is on, even if the display is not interactive. If false, the power button short press
+    // behavior will be skipped if the default display is non-interactive.
+    private boolean mSupportShortPressPowerWhenDefaultDisplayOn;
 
     // Whether to go to sleep entering theater mode from power button
     private boolean mGoToSleepOnButtonPressTheaterMode;
@@ -1041,7 +1047,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void powerPress(long eventTime, int count, boolean beganFromNonInteractive) {
+    private void powerPress(long eventTime, int count) {
         // SideFPS still needs to know about suppressed power buttons, in case it needs to block
         // an auth attempt.
         if (count == 1) {
@@ -1055,9 +1061,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final boolean interactive = mDefaultDisplayPolicy.isAwake();
 
-        Slog.d(TAG, "powerPress: eventTime=" + eventTime + " interactive=" + interactive
-                + " count=" + count + " beganFromNonInteractive=" + beganFromNonInteractive
-                + " mShortPressOnPowerBehavior=" + mShortPressOnPowerBehavior);
+        Slog.d(
+                TAG,
+                "powerPress: eventTime="
+                        + eventTime
+                        + " interactive="
+                        + interactive
+                        + " count="
+                        + count
+                        + " mShortPressOnPowerBehavior="
+                        + mShortPressOnPowerBehavior);
 
         if (count == 2) {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
@@ -1065,12 +1078,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
             Slog.d(TAG, "No behavior defined for power press count " + count);
-        } else if (count == 1 && interactive && !beganFromNonInteractive) {
-            if (mSideFpsEventHandler.shouldConsumeSinglePress(eventTime)) {
-                Slog.i(TAG, "Suppressing power key because the user is interacting with the "
-                        + "fingerprint sensor");
-                return;
-            }
+        } else if (count == 1 && shouldHandleShortPressPowerAction(interactive, eventTime)) {
             switch (mShortPressOnPowerBehavior) {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
@@ -1116,6 +1124,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+    }
+
+    private boolean shouldHandleShortPressPowerAction(boolean interactive, long eventTime) {
+        if (mSupportShortPressPowerWhenDefaultDisplayOn) {
+            final boolean defaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
+            final boolean beganFromDefaultDisplayOn =
+                    mSingleKeyGestureDetector.beganFromDefaultDisplayOn();
+            if (!defaultDisplayOn || !beganFromDefaultDisplayOn) {
+                Slog.v(
+                        TAG,
+                        "Ignoring short press of power button because the default display is not"
+                                + " on. defaultDisplayOn="
+                                + defaultDisplayOn
+                                + ", beganFromDefaultDisplayOn="
+                                + beganFromDefaultDisplayOn);
+                return false;
+            }
+            return true;
+        }
+        final boolean beganFromNonInteractive = mSingleKeyGestureDetector.beganFromNonInteractive();
+        if (!interactive || beganFromNonInteractive) {
+            Slog.v(
+                    TAG,
+                    "Ignoring short press of power button because the device is not interactive."
+                            + " interactive="
+                            + interactive
+                            + ", beganFromNonInteractive="
+                            + beganFromNonInteractive);
+            return false;
+        }
+        if (mSideFpsEventHandler.shouldConsumeSinglePress(eventTime)) {
+            Slog.i(
+                    TAG,
+                    "Suppressing power key because the user is interacting with the "
+                            + "fingerprint sensor");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -2231,6 +2277,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mSupportLongPressPowerWhenNonInteractive = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportLongPressPowerWhenNonInteractive);
+        mSupportShortPressPowerWhenDefaultDisplayOn =
+                mContext.getResources()
+                        .getBoolean(
+                                com.android.internal.R.bool
+                                        .config_supportShortPressPowerWhenDefaultDisplayOn);
 
         mLongPressOnBackBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnBackBehavior);
@@ -2518,8 +2569,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onPress(long downTime) {
-            powerPress(downTime, 1 /*count*/,
-                    mSingleKeyGestureDetector.beganFromNonInteractive());
+            powerPress(downTime, 1 /*count*/);
         }
 
         @Override
@@ -2550,7 +2600,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onMultiPress(long downTime, int count) {
-            powerPress(downTime, count, mSingleKeyGestureDetector.beganFromNonInteractive());
+            powerPress(downTime, count);
         }
     }
 
@@ -4323,10 +4373,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // This could prevent some wrong state in multi-displays environment,
         // the default display may turned off but interactive is true.
-        final boolean isDefaultDisplayOn = mDefaultDisplayPolicy.isAwake();
-        final boolean interactiveAndOn = interactive && isDefaultDisplayOn;
+        final boolean isDefaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
+        final boolean isDefaultDisplayAwake = mDefaultDisplayPolicy.isAwake();
+        final boolean interactiveAndAwake = interactive && isDefaultDisplayAwake;
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            handleKeyGesture(event, interactiveAndOn);
+            handleKeyGesture(event, interactiveAndAwake, isDefaultDisplayOn);
         }
 
         // Enable haptics if down and virtual key without multiple repetitions. If this is a hard
@@ -4479,7 +4530,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
                 if (down) {
-                    interceptPowerKeyDown(event, interactiveAndOn);
+                    interceptPowerKeyDown(event, interactiveAndAwake);
                 } else {
                     interceptPowerKeyUp(event, canceled);
                 }
@@ -4695,7 +4746,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return result;
     }
 
-    private void handleKeyGesture(KeyEvent event, boolean interactive) {
+    private void handleKeyGesture(KeyEvent event, boolean interactive, boolean defaultDisplayOn) {
         if (mKeyCombinationManager.interceptKey(event, interactive)) {
             // handled by combo keys manager.
             mSingleKeyGestureDetector.reset();
@@ -4711,7 +4762,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        mSingleKeyGestureDetector.interceptKey(event, interactive);
+        mSingleKeyGestureDetector.interceptKey(event, interactive, defaultDisplayOn);
     }
 
     // The camera gesture will be detected by GestureLauncherService.
@@ -6166,6 +6217,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix);
                 pw.print("mTriplePressOnPowerBehavior=");
                 pw.println(multiPressOnPowerBehaviorToString(mTriplePressOnPowerBehavior));
+        pw.print(prefix);
+                pw.print("mSupportShortPressPowerWhenDefaultDisplayOn=");
+                pw.println(mSupportShortPressPowerWhenDefaultDisplayOn);
         pw.print(prefix);
         pw.print("mPowerVolUpBehavior=");
         pw.println(powerVolumeUpBehaviorToString(mPowerVolUpBehavior));

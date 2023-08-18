@@ -170,10 +170,15 @@ public class SingleKeyGestureTests {
     }
 
     private void pressKey(int keyCode, long pressTime, boolean interactive) {
+        pressKey(keyCode, pressTime, interactive, false /* defaultDisplayOn */);
+    }
+
+    private void pressKey(
+            int keyCode, long pressTime, boolean interactive, boolean defaultDisplayOn) {
         long eventTime = SystemClock.uptimeMillis();
         final KeyEvent keyDown = new KeyEvent(eventTime, eventTime, ACTION_DOWN,
                 keyCode, 0 /* repeat */, 0 /* metaState */);
-        mDetector.interceptKey(keyDown, interactive);
+        mDetector.interceptKey(keyDown, interactive, defaultDisplayOn);
 
         // keep press down.
         try {
@@ -186,7 +191,7 @@ public class SingleKeyGestureTests {
         final KeyEvent keyUp = new KeyEvent(eventTime, eventTime, ACTION_UP,
                 keyCode, 0 /* repeat */, 0 /* metaState */);
 
-        mDetector.interceptKey(keyUp, interactive);
+        mDetector.interceptKey(keyUp, interactive, defaultDisplayOn);
     }
 
     @Test

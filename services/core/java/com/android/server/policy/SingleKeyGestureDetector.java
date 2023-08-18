@@ -43,6 +43,7 @@ public final class SingleKeyGestureDetector {
 
     private int mKeyPressCounter;
     private boolean mBeganFromNonInteractive = false;
+    private boolean mBeganFromDefaultDisplayOn = false;
 
     private final ArrayList<SingleKeyRule> mRules = new ArrayList();
     private SingleKeyRule mActiveRule = null;
@@ -194,11 +195,12 @@ public final class SingleKeyGestureDetector {
         mRules.remove(rule);
     }
 
-    void interceptKey(KeyEvent event, boolean interactive) {
+    void interceptKey(KeyEvent event, boolean interactive, boolean defaultDisplayOn) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            // Store the non interactive state when first down.
+            // Store the non interactive state and display on state when first down.
             if (mDownKeyCode == KeyEvent.KEYCODE_UNKNOWN || mDownKeyCode != event.getKeyCode()) {
                 mBeganFromNonInteractive = !interactive;
+                mBeganFromDefaultDisplayOn = defaultDisplayOn;
             }
             interceptKeyDown(event);
         } else {
@@ -386,6 +388,10 @@ public final class SingleKeyGestureDetector {
 
     boolean beganFromNonInteractive() {
         return mBeganFromNonInteractive;
+    }
+
+    boolean beganFromDefaultDisplayOn() {
+        return mBeganFromDefaultDisplayOn;
     }
 
     void dump(String prefix, PrintWriter pw) {
