@@ -23,6 +23,12 @@ package {
 
 cc_library_shared {
     name: "libinputservice",
+    defaults: [
+        // Build using the same flags and configurations as inputflinger.
+        "inputflinger_defaults",
+    ],
+    host_supported: false,
+
     srcs: [
         "PointerController.cpp",
         "PointerControllerContext.cpp",
@@ -50,12 +56,4 @@ cc_library_shared {
     ],
 
     include_dirs: ["frameworks/native/services"],
-
-    cflags: [
-        "-Wall",
-        "-Wextra",
-        "-Werror",
-        "-Wthread-safety",
-    ],
-
 }

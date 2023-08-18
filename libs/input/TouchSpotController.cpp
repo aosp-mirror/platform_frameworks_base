@@ -39,15 +39,15 @@ namespace android {
 
 // --- Spot ---
 
-void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float x, float y,
+void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float newX, float newY,
                                              int32_t displayId) {
     sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
     sprite->setAlpha(alpha);
     sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
-    sprite->setPosition(x, y);
+    sprite->setPosition(newX, newY);
     sprite->setDisplayId(displayId);
-    this->x = x;
-    this->y = y;
+    x = newX;
+    y = newY;
 
     if (icon != mLastIcon) {
         mLastIcon = icon;
