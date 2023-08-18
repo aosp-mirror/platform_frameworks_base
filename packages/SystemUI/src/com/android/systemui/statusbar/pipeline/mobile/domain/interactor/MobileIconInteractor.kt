@@ -92,6 +92,22 @@ interface MobileIconInteractor {
      */
     val networkName: StateFlow<NetworkNameModel>
 
+    /**
+     * Provider name for this network connection. The name can be one of 3 values:
+     * 1. The default network name, if one is configured
+     * 2. A name provided by the [SubscriptionModel] of this network connection
+     * 3. Or, in the case where the repository sends us the default network name, we check for an
+     *    override in [connectionInfo.operatorAlphaShort], a value that is derived from
+     *    [ServiceState]
+     *
+     * TODO(b/296600321): De-duplicate this field with [networkName] after determining the data
+     *   provided is identical
+     */
+    val carrierName: StateFlow<String>
+
+    /** True if there is only one active subscription. */
+    val isSingleCarrier: StateFlow<Boolean>
+
     /** True if this line of service is emergency-only */
     val isEmergencyOnly: StateFlow<Boolean>
 
@@ -126,6 +142,7 @@ class MobileIconInteractorImpl(
     defaultSubscriptionHasDataEnabled: StateFlow<Boolean>,
     override val alwaysShowDataRatIcon: StateFlow<Boolean>,
     override val alwaysUseCdmaLevel: StateFlow<Boolean>,
+    override val isSingleCarrier: StateFlow<Boolean>,
     override val mobileIsDefault: StateFlow<Boolean>,
     defaultMobileIconMapping: StateFlow<Map<String, MobileIconGroup>>,
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
@@ -169,6 +186,22 @@ class MobileIconInteractorImpl(
                 scope,
                 SharingStarted.WhileSubscribed(),
                 connectionRepository.networkName.value
+            )
+
+    override val carrierName =
+        combine(connectionRepository.operatorAlphaShort, connectionRepository.carrierName) {
+                operatorAlphaShort,
+                networkName ->
+                if (networkName is NetworkNameModel.Default && operatorAlphaShort != null) {
+                    operatorAlphaShort
+                } else {
+                    networkName.name
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                connectionRepository.carrierName.value.name
             )
 
     /** What the mobile icon would be before carrierId overrides */

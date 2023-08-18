@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.CarrierMergedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
@@ -40,6 +41,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -56,6 +58,15 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy, mock())
+
+    private val subscriptionModel =
+        MutableStateFlow(
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                carrierName = DEFAULT_NAME,
+            )
+        )
+
     private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -432,7 +443,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun networkName_usesOperatorAlphaShotWhenNonNullAndRepoIsDefault() =
+    fun networkName_usesOperatorAlphaShortWhenNonNullAndRepoIsDefault() =
         testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
@@ -440,7 +451,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             val testOperatorName = "operatorAlphaShort"
 
             // Default network name, operator name is non-null, uses the operator name
-            connectionRepository.networkName.value = DEFAULT_NAME
+            connectionRepository.networkName.value = DEFAULT_NAME_MODEL
             connectionRepository.operatorAlphaShort.value = testOperatorName
 
             assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived(testOperatorName))
@@ -448,13 +459,57 @@ class MobileIconInteractorTest : SysuiTestCase() {
             // Default network name, operator name is null, uses the default
             connectionRepository.operatorAlphaShort.value = null
 
+            assertThat(latest).isEqualTo(DEFAULT_NAME_MODEL)
+
+            // Derived network name, operator name non-null, uses the derived name
+            connectionRepository.networkName.value = DERIVED_NAME_MODEL
+            connectionRepository.operatorAlphaShort.value = testOperatorName
+
+            assertThat(latest).isEqualTo(DERIVED_NAME_MODEL)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkNameForSubId_usesOperatorAlphaShortWhenNonNullAndRepoIsDefault() =
+        testScope.runTest {
+            var latest: String? = null
+            val job = underTest.carrierName.onEach { latest = it }.launchIn(this)
+
+            val testOperatorName = "operatorAlphaShort"
+
+            // Default network name, operator name is non-null, uses the operator name
+            connectionRepository.carrierName.value = DEFAULT_NAME_MODEL
+            connectionRepository.operatorAlphaShort.value = testOperatorName
+
+            assertThat(latest).isEqualTo(testOperatorName)
+
+            // Default network name, operator name is null, uses the default
+            connectionRepository.operatorAlphaShort.value = null
+
             assertThat(latest).isEqualTo(DEFAULT_NAME)
 
             // Derived network name, operator name non-null, uses the derived name
-            connectionRepository.networkName.value = DERIVED_NAME
+            connectionRepository.carrierName.value =
+                NetworkNameModel.SubscriptionDerived(DERIVED_NAME)
             connectionRepository.operatorAlphaShort.value = testOperatorName
 
             assertThat(latest).isEqualTo(DERIVED_NAME)
+
+            job.cancel()
+        }
+
+    @Test
+    fun isSingleCarrier_matchesParent() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isSingleCarrier.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.isSingleCarrier.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.isSingleCarrier.value = false
+            assertThat(latest).isFalse()
 
             job.cancel()
         }
@@ -494,6 +549,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             mobileIconsInteractor.activeDataConnectionHasDataEnabled,
             mobileIconsInteractor.alwaysShowDataRatIcon,
             mobileIconsInteractor.alwaysUseCdmaLevel,
+            mobileIconsInteractor.isSingleCarrier,
             mobileIconsInteractor.mobileIsDefault,
             mobileIconsInteractor.defaultMobileIconMapping,
             mobileIconsInteractor.defaultMobileIconGroup,
@@ -510,7 +566,9 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
         private const val SUB_1_ID = 1
 
-        private val DEFAULT_NAME = NetworkNameModel.Default("test default name")
-        private val DERIVED_NAME = NetworkNameModel.IntentDerived("test derived name")
+        private val DEFAULT_NAME = "test default name"
+        private val DEFAULT_NAME_MODEL = NetworkNameModel.Default(DEFAULT_NAME)
+        private val DERIVED_NAME = "test derived name"
+        private val DERIVED_NAME_MODEL = NetworkNameModel.IntentDerived(DERIVED_NAME)
     }
 }

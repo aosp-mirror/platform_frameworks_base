@@ -398,6 +398,10 @@ object Flags {
     // TODO(b/294588085): Tracking Bug
     val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
 
+    // TODO(b/290676905): Tracking Bug
+    val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
+        unreleasedFlag("new_shade_carrier_group_mobile_icons")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag("ongoing_call_status_bar_chip")

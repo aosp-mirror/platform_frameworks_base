@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameMode
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.UnknownNetworkType
+import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfig
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toDataConnectionType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
@@ -80,6 +81,7 @@ import kotlinx.coroutines.flow.stateIn
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileConnectionRepositoryImpl(
     override val subId: Int,
+    subscriptionModel: StateFlow<SubscriptionModel?>,
     defaultNetworkName: NetworkNameModel,
     networkNameSeparator: String,
     private val telephonyManager: TelephonyManager,
@@ -281,6 +283,14 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
+    override val carrierName =
+        subscriptionModel
+            .map {
+                it?.let { model -> NetworkNameModel.SubscriptionDerived(model.carrierName) }
+                    ?: defaultNetworkName
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+
     /**
      * There are a few cases where we will need to poll [TelephonyManager] so we can update some
      * internal state where callbacks aren't provided. Any of those events should be merged into
@@ -350,11 +360,13 @@ class MobileConnectionRepositoryImpl(
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
+            subscriptionModel: StateFlow<SubscriptionModel?>,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
         ): MobileConnectionRepository {
             return MobileConnectionRepositoryImpl(
                 subId,
+                subscriptionModel,
                 defaultNetworkName,
                 networkNameSeparator,
                 telephonyManager.createForSubscriptionId(subId),
