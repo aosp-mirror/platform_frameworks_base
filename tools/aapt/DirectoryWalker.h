@@ -57,7 +57,7 @@ public:
     virtual bool openDir(String8 path) {
         mBasePath = path;
         dir = NULL;
-        dir = opendir(mBasePath.string() );
+        dir = opendir(mBasePath.c_str() );
 
         if (dir == NULL)
             return false;
@@ -78,7 +78,7 @@ public:
         mEntry = *entryPtr;
         // Get stats
         String8 fullPath = mBasePath.appendPathCopy(mEntry.d_name);
-        stat(fullPath.string(),&mStats);
+        stat(fullPath.c_str(),&mStats);
         return &mEntry;
     };
     // Get the stats for the current entry

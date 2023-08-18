@@ -213,7 +213,7 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   }
   std::vector<std::string> sanitized_config_names;
   for (const auto &config : constraints.configs) {
-    sanitized_config_names.push_back(MakePackageSafeName(config.toString().string()));
+    sanitized_config_names.push_back(MakePackageSafeName(config.toString().c_str()));
   }
   split_name << "config." << util::Joiner(sanitized_config_names, "_");
 

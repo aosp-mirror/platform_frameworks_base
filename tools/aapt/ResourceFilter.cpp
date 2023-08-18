@@ -32,7 +32,7 @@ WeakResourceFilter::parse(const String8& str)
             // only specify locale in the standard 'en_US' format.
             val.writeTo(&entry.first);
         } else if (!AaptConfig::parse(part, &entry.first)) {
-            fprintf(stderr, "Invalid configuration: %s\n", part.string());
+            fprintf(stderr, "Invalid configuration: %s\n", part.c_str());
             return UNKNOWN_ERROR;
         }
 
@@ -43,7 +43,7 @@ WeakResourceFilter::parse(const String8& str)
 
         // Ignore any densities. Those are best handled in --preferred-density
         if ((entry.second & ResTable_config::CONFIG_DENSITY) != 0) {
-            fprintf(stderr, "warning: ignoring flag -c %s. Use --preferred-density instead.\n", entry.first.toString().string());
+            fprintf(stderr, "warning: ignoring flag -c %s. Use --preferred-density instead.\n", entry.first.toString().c_str());
             entry.first.density = 0;
             entry.second &= ~ResTable_config::CONFIG_DENSITY;
         }
@@ -148,7 +148,7 @@ StrongResourceFilter::parse(const String8& str) {
     mConfigs.clear();
     for (size_t i = 0; i < configStrs.size(); i++) {
         if (!AaptConfig::parse(configStrs[i], &config)) {
-            fprintf(stderr, "Invalid configuration: %s\n", configStrs[i].string());
+            fprintf(stderr, "Invalid configuration: %s\n", configStrs[i].c_str());
             return UNKNOWN_ERROR;
         }
         mConfigs.insert(config);
