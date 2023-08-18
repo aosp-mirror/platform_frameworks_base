@@ -105,7 +105,14 @@ public class NotificationShadeWindowViewController {
     private boolean mTouchActive;
     private boolean mTouchCancelled;
     private MotionEvent mDownEvent;
+    // TODO rename to mLaunchAnimationRunning
     private boolean mExpandAnimationRunning;
+    /**
+     *  When mExpandAnimationRunning is true and the touch dispatcher receives a down even after
+     *  uptime exceeds this, the dispatcher will stop blocking touches for the launch animation,
+     *  which has presumabely not completed due to an error.
+     */
+    private long mLaunchAnimationTimeout;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
@@ -266,7 +273,12 @@ public class NotificationShadeWindowViewController {
                     return logDownDispatch(ev, "touch cancelled", false);
                 }
                 if (mExpandAnimationRunning) {
-                    return logDownDispatch(ev, "expand animation running", false);
+                    if (isDown && mClock.uptimeMillis() > mLaunchAnimationTimeout) {
+                        mShadeLogger.d("NSWVC: launch animation timed out");
+                        setExpandAnimationRunning(false);
+                    } else {
+                        return logDownDispatch(ev, "expand animation running", false);
+                    }
                 }
 
                 if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
@@ -548,6 +560,9 @@ public class NotificationShadeWindowViewController {
 
     public void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
+            if (running) {
+                mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
+            }
             mExpandAnimationRunning = running;
             mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);
         }
