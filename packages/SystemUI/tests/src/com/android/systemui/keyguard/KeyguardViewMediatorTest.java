@@ -333,10 +333,34 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
-    public void wakeupFromDreamingWhenKeyguardHides() {
+    public void wakeupFromDreamingWhenKeyguardHides_orderUnlockAndWakeOff() {
+        createAndStartViewMediator(false);
+
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
+        // Given device is dreaming
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // When keyguard is going away
+        mKeyguardStateController.notifyKeyguardGoingAway(true);
+
+        // And keyguard is disabled which will call #handleHide
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+
+        // Then dream should wake up
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(),
+                eq("com.android.systemui:UNLOCK_DREAMING"));
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void wakeupFromDreamingWhenKeyguardHides_orderUnlockAndWakeOn() {
+        createAndStartViewMediator(true);
+
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
         when(mPowerManager.isInteractive()).thenReturn(true);
 
         // Given device is dreaming
@@ -726,6 +750,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -755,6 +782,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlockingOverDream_signalAuthenticateIfStillShowing() {
+        // Ensure ordering unlock and wake is enabled.
+        createAndStartViewMediator(true);
+
         // Send signal to wake
         mViewMediator.onWakeAndUnlocking(true);
 
@@ -916,6 +946,13 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         verify(mStatusBarKeyguardViewManager).reset(true);
     }
     private void createAndStartViewMediator() {
+        createAndStartViewMediator(false);
+    }
+
+    private void createAndStartViewMediator(boolean orderUnlockAndWake) {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
+
         mViewMediator = new KeyguardViewMediator(
                 mContext,
                 mUiEventLogger,
