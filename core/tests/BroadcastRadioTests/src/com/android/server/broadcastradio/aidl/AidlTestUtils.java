@@ -25,6 +25,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -149,12 +150,12 @@ final class AidlTestUtils {
 
     static ProgramList.Chunk makeChunk(boolean purge, boolean complete,
             List<RadioManager.ProgramInfo> modified,
-            List<ProgramSelector.Identifier> removed) throws RemoteException {
+            List<UniqueProgramIdentifier> removed) throws RemoteException {
         ArraySet<RadioManager.ProgramInfo> modifiedSet = new ArraySet<>();
         if (modified != null) {
             modifiedSet.addAll(modified);
         }
-        ArraySet<ProgramSelector.Identifier> removedSet = new ArraySet<>();
+        ArraySet<UniqueProgramIdentifier> removedSet = new ArraySet<>();
         if (removed != null) {
             removedSet.addAll(removed);
         }
