@@ -140,7 +140,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 state.resumeTiming();
             }
 
-            // Sanity check
+            // Check for no errors
             callback.assertNoAsyncErrors();
         } finally {
             mAfm.unregisterCallback(callback);
@@ -190,7 +190,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 state.resumeTiming();
             }
 
-            // Sanity check
+            // Check for no errors
             callback.assertNoAsyncErrors();
         } finally {
             mAfm.unregisterCallback(callback);
@@ -303,7 +303,7 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 callback.expectEvent(mPassword, EVENT_INPUT_SHOWN);
             }
 
-            // Sanity check
+            // Check for no errors
             callback.assertNoAsyncErrors();
         } finally {
             mAfm.unregisterCallback(callback);
