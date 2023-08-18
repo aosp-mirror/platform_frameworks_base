@@ -173,6 +173,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final VibratorHelper mVibratorHelper;
     private final BiometricUnlockLogger mLogger;
     private final SystemClock mSystemClock;
+    private final boolean mOrderUnlockAndWake;
 
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
@@ -308,6 +309,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mVibratorHelper = vibrator;
         mLogger = biometricUnlockLogger;
         mSystemClock = systemClock;
+        mOrderUnlockAndWake = resources.getBoolean(
+                com.android.internal.R.bool.config_orderUnlockAndWake);
 
         dumpManager.registerDumpable(getClass().getName(), this);
     }
@@ -462,10 +465,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             Trace.endSection();
         };
 
-        final boolean wakingFromDream = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
-                && mPowerManager.isInteractive();
+        final boolean wakeInKeyguard = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
+                && mPowerManager.isInteractive() && mOrderUnlockAndWake
+                && mOrderUnlockAndWake;
 
-        if (mMode != MODE_NONE && !wakingFromDream) {
+        if (mMode != MODE_NONE && !wakeInKeyguard) {
             wakeUp.run();
         }
         switch (mMode) {
@@ -501,7 +505,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     // later to awaken.
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
-                mKeyguardViewMediator.onWakeAndUnlocking(wakingFromDream);
+                mKeyguardViewMediator.onWakeAndUnlocking(wakeInKeyguard);
                 Trace.endSection();
                 break;
             case MODE_ONLY_WAKE:
