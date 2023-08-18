@@ -515,11 +515,13 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setOnTouchListener((v, event) -> false);
             updateIconAreaClickListener((v) -> {
                 if (device.getCurrentVolume() == 0) {
+                    mController.logInteractionUnmuteDevice(device);
                     mSeekBar.setVolume(UNMUTE_DEFAULT_VOLUME);
                     mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
                     updateUnmutedVolumeIcon();
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> false));
                 } else {
+                    mController.logInteractionMuteDevice(device);
                     mSeekBar.resetVolume();
                     mController.adjustVolume(device, 0);
                     updateMutedVolumeIcon();
