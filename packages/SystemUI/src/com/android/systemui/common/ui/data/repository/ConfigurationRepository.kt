@@ -43,6 +43,9 @@ interface ConfigurationRepository {
     val scaleForResolution: Flow<Float>
 
     fun getResolutionScale(): Float
+
+    /** Convience to context.resources.getDimensionPixelSize() */
+    fun getDimensionPixelSize(id: Int): Int
 }
 
 @ExperimentalCoroutinesApi
@@ -114,5 +117,9 @@ constructor(
             return if (scaleFactor == Float.POSITIVE_INFINITY) 1f else scaleFactor
         }
         return 1f
+    }
+
+    override fun getDimensionPixelSize(id: Int): Int {
+        return context.resources.getDimensionPixelSize(id)
     }
 }

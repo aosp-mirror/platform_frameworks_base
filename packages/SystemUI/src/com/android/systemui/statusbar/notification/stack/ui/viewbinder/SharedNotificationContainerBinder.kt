@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import kotlinx.coroutines.launch
@@ -30,9 +31,10 @@ object SharedNotificationContainerBinder {
     fun bind(
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
+        controller: NotificationStackScrollLayoutController,
     ) {
         view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
                     viewModel.configurationBasedDimensions.collect {
                         view.updateConstraints(
@@ -42,8 +44,29 @@ object SharedNotificationContainerBinder {
                             marginEnd = it.marginEnd,
                             marginBottom = it.marginBottom,
                         )
+
+                        controller.setOverExpansion(0f)
+                        controller.setOverScrollAmount(0)
+                        controller.updateFooter()
                     }
                 }
+
+                launch {
+                    viewModel.maxNotifications.collect {
+                        controller.setMaxDisplayedNotifications(it)
+                    }
+                }
+
+                launch {
+                    viewModel.position.collect {
+                        controller.updateTopPadding(
+                            it.top,
+                            controller.isAddOrRemoveAnimationPending()
+                        )
+                    }
+                }
+
+                launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
             }
         }
     }

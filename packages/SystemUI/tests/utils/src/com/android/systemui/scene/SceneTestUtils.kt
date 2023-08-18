@@ -41,6 +41,7 @@ import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.mockito.mock
@@ -158,7 +159,8 @@ class SceneTestUtils(
             commandQueue = FakeCommandQueue(),
             featureFlags = featureFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
-            configurationRepository = FakeConfigurationRepository()
+            configurationRepository = FakeConfigurationRepository(),
+            shadeRepository = FakeShadeRepository(),
         )
     }
 

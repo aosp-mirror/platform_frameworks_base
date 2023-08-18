@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.util.mockito.mock
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +30,7 @@ object KeyguardTransitionInteractorFactory {
     @JvmStatic
     fun create(
         scope: CoroutineScope,
-        repository: KeyguardTransitionRepository = FakeKeyguardTransitionRepository(),
+        repository: FakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository(),
         keyguardInteractor: KeyguardInteractor =
             KeyguardInteractorFactory.create().keyguardInteractor,
         fromLockscreenTransitionInteractor: Lazy<FromLockscreenTransitionInteractor> = Lazy {
@@ -58,7 +57,7 @@ object KeyguardTransitionInteractorFactory {
     }
 
     data class WithDependencies(
-        val repository: KeyguardTransitionRepository,
+        val repository: FakeKeyguardTransitionRepository,
         val keyguardInteractor: KeyguardInteractor,
         val fromLockscreenTransitionInteractor: Lazy<FromLockscreenTransitionInteractor>,
         val fromPrimaryBouncerTransitionInteractor: Lazy<FromPrimaryBouncerTransitionInteractor>,
