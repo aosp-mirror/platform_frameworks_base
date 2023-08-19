@@ -119,6 +119,13 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return MOBILE_RADIO_POWER_STATE_UPDATE_FREQ_MS;
     }
 
+    public MockBatteryStatsImpl setBatteryStatsConfig(BatteryStatsConfig config) {
+        synchronized (this) {
+            mBatteryStatsConfig = config;
+        }
+        return this;
+    }
+
     public MockBatteryStatsImpl setNetworkStats(NetworkStats networkStats) {
         mNetworkStats = networkStats;
         return this;
