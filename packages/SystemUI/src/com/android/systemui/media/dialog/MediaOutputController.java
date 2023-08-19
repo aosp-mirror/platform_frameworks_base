@@ -843,6 +843,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger.logInteractionAdjustVolume(device);
     }
 
+    void logInteractionMuteDevice(MediaDevice device) {
+        mMetricLogger.logInteractionMute(device);
+    }
+
+    void logInteractionUnmuteDevice(MediaDevice device) {
+        mMetricLogger.logInteractionUnmute(device);
+    }
+
     String getPackageName() {
         return mPackageName;
     }

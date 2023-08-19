@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.dagger.pip;
+package android.service.voice;
 
-import android.annotation.Nullable;
-
-import com.android.wm.shell.dagger.WMShellBaseModule;
-import com.android.wm.shell.dagger.WMSingleton;
-import com.android.wm.shell.pip2.PipTransition;
-
-import dagger.Module;
-import dagger.Provides;
+import com.android.internal.infra.AndroidFuture;
 
 /**
- * Provides dependencies from {@link com.android.wm.shell.pip2}, this implementation is meant to be
- * the successor of its sibling {@link Pip1Module}.
+ * @hide
  */
-@Module(includes = WMShellBaseModule.class)
-public abstract class Pip2Module {
-    @WMSingleton
-    @Provides
-    @Nullable
-    static PipTransition providePipTransition() {
-        return null;
-    }
+oneway interface IDetectorSessionStorageService {
+    /**
+     * Called when a file open request is sent. Only files with the given names under the internal
+     * app storage, i.e., {@link Context#getFilesDir()} can be opened.
+     */
+    void openFile(in String filename, in AndroidFuture future);
 }

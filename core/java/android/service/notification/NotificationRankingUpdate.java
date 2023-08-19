@@ -92,6 +92,7 @@ public class NotificationRankingUpdate implements Parcelable {
                 mapParcel.recycle();
                 if (buffer != null) {
                     mRankingMapFd.unmap(buffer);
+                    mRankingMapFd.close();
                 }
             }
         } else {

@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.dagger.pip;
+package android.view;
 
 import android.annotation.Nullable;
+import android.app.Activity;
+import android.os.Bundle;
 
-import com.android.wm.shell.dagger.WMShellBaseModule;
-import com.android.wm.shell.dagger.WMSingleton;
-import com.android.wm.shell.pip2.PipTransition;
+import com.android.frameworks.coretests.R;
 
-import dagger.Module;
-import dagger.Provides;
-
-/**
- * Provides dependencies from {@link com.android.wm.shell.pip2}, this implementation is meant to be
- * the successor of its sibling {@link Pip1Module}.
- */
-@Module(includes = WMShellBaseModule.class)
-public abstract class Pip2Module {
-    @WMSingleton
-    @Provides
-    @Nullable
-    static PipTransition providePipTransition() {
-        return null;
+public class ViewGroupTestActivity extends Activity {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.viewgroup_test);
     }
 }

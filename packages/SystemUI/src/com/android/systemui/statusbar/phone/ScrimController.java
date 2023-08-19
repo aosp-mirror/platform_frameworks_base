@@ -709,6 +709,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
+    public void onUnlockAnimationFinished() {
+        mAnimatingPanelExpansionOnUnlock = false;
+        applyAndDispatchState();
+    }
+
     /**
      * Set the amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full

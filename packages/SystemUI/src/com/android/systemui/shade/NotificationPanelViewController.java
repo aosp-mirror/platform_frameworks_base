@@ -985,6 +985,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Make sure the clock is in the correct position after the unlock animation
         // so that it's not in the wrong place when we show the keyguard again.
         positionClockAndNotifications(true /* forceClockUpdate */);
+        mScrimController.onUnlockAnimationFinished();
     }
 
     private void unlockAnimationStarted(
@@ -1243,6 +1244,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.init();
         }
         mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+        mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int oldHeight = oldBottom - oldTop;
+                    if (v.getHeight() != oldHeight) {
+                        mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
+                    }
+                });
 
         updateClockAppearance();
 
