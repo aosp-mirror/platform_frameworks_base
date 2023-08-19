@@ -506,16 +506,6 @@ object Flags {
     val WM_CAPTION_ON_SHELL =
         sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
 
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_BUBBLE =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_bubble", default = true)
-
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_PIP =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
