@@ -124,6 +124,7 @@ import com.android.internal.os.KernelMemoryBandwidthStats;
 import com.android.internal.os.KernelSingleUidTimeReader;
 import com.android.internal.os.LongArrayMultiStateCounter;
 import com.android.internal.os.LongMultiStateCounter;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 import com.android.internal.os.RailStats;
@@ -1718,14 +1719,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mMaxLearnedBatteryCapacityUah;
     }
 
-    public BatteryStatsImpl() {
-        this(Clock.SYSTEM_CLOCK);
-    }
-
-    public BatteryStatsImpl(Clock clock) {
-        this(clock, null);
-    }
-
+    @VisibleForTesting
     public BatteryStatsImpl(Clock clock, File historyDirectory) {
         init(clock);
         mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
@@ -1737,12 +1731,14 @@ public class BatteryStatsImpl extends BatteryStats {
             mCheckinFile = null;
             mStatsFile = null;
             mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock,
+                    new MonotonicClock(0, mClock));
         } else {
             mCheckinFile = new AtomicFile(new File(historyDirectory, "batterystats-checkin.bin"));
             mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
             mHistory = new BatteryStatsHistory(historyDirectory, mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock,
+                    new MonotonicClock(0, mClock));
         }
         mPlatformIdleStateCallback = null;
         mEnergyConsumerRetriever = null;
@@ -10906,18 +10902,10 @@ public class BatteryStatsImpl extends BatteryStats {
         return mTmpCpuTimeInFreq;
     }
 
-    public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @Nullable File systemDir,
+    public BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
+            @NonNull MonotonicClock monotonicClock, @Nullable File systemDir,
             @NonNull Handler handler, @Nullable PlatformIdleStateCallback cb,
             @Nullable EnergyStatsRetriever energyStatsCb,
-            @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
-            @NonNull CpuScalingPolicies cpuScalingPolicies) {
-        this(config, Clock.SYSTEM_CLOCK, systemDir, handler, cb, energyStatsCb, userInfoProvider,
-                powerProfile, cpuScalingPolicies);
-    }
-
-    private BatteryStatsImpl(@NonNull BatteryStatsConfig config, @NonNull Clock clock,
-            @Nullable File systemDir, @NonNull Handler handler,
-            @Nullable PlatformIdleStateCallback cb, @Nullable EnergyStatsRetriever energyStatsCb,
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
             @NonNull CpuScalingPolicies cpuScalingPolicies) {
         init(clock);
@@ -10936,13 +10924,13 @@ public class BatteryStatsImpl extends BatteryStats {
             mCheckinFile = null;
             mDailyFile = null;
             mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock, monotonicClock);
         } else {
             mStatsFile = new AtomicFile(new File(systemDir, "batterystats.bin"));
             mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
             mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
             mHistory = new BatteryStatsHistory(systemDir, mConstants.MAX_HISTORY_FILES,
-                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock, monotonicClock);
         }
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mCpuScalingPolicies, mPowerProfile,

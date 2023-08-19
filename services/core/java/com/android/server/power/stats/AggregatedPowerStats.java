@@ -16,7 +16,6 @@
 
 package com.android.server.power.stats;
 
-import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
@@ -36,7 +35,7 @@ import java.util.Set;
 class AggregatedPowerStats {
     private final PowerComponentAggregatedPowerStats[] mPowerComponentStats;
 
-    @CurrentTimeMillisLong
+    // See MonotonicClock
     private long mStartTime;
 
     @DurationMillisLong
@@ -46,11 +45,16 @@ class AggregatedPowerStats {
         this.mPowerComponentStats = powerComponentAggregatedPowerStats;
     }
 
-    void setStartTime(@CurrentTimeMillisLong long startTime) {
+    /**
+     * @param startTime monotonic time
+     */
+    void setStartTime(long startTime) {
         mStartTime = startTime;
     }
 
-    @CurrentTimeMillisLong
+    /**
+     * Start time according to {@link com.android.internal.os.MonotonicClock}
+     */
     public long getStartTime() {
         return mStartTime;
     }

@@ -1854,7 +1854,7 @@ public abstract class BatteryStats {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         public HistoryItem next;
 
-        // The time of this event in milliseconds, as per SystemClock.elapsedRealtime().
+        // The time of this event in milliseconds, as per MonotonicClock.monotonicTime().
         @UnsupportedAppUsage
         public long time;
 

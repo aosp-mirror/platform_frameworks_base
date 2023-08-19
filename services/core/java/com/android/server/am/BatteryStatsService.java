@@ -99,8 +99,10 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.CpuScalingPolicyReader;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
@@ -159,6 +161,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     private final CpuScalingPolicies mCpuScalingPolicies;
+    private final MonotonicClock mMonotonicClock;
     private final BatteryStatsImpl.BatteryStatsConfig mBatteryStatsConfig;
     final BatteryStatsImpl mStats;
     final CpuWakeupStats mCpuWakeupStats;
@@ -376,6 +379,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
+        mMonotonicClock = new MonotonicClock(new File(systemDir, "monotonic_clock.xml"));
         mPowerProfile = new PowerProfile(context);
         mCpuScalingPolicies = new CpuScalingPolicyReader().read();
 
@@ -391,8 +395,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
                         .setPowerStatsThrottlePeriodCpu(powerStatsThrottlePeriodCpu)
                         .build();
-        mStats = new BatteryStatsImpl(mBatteryStatsConfig, systemDir, handler, this,
-                this, mUserManagerUserInfoProvider, mPowerProfile, mCpuScalingPolicies);
+        mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
+                systemDir, handler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
+                mCpuScalingPolicies);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
@@ -639,6 +644,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         // Shutdown the thread we made.
         mWorker.shutdown();
+
+        // To insure continuity, write the monotonic timeshift after writing the last history event
+        mMonotonicClock.write();
     }
 
     public static IBatteryStats getService() {
@@ -2951,7 +2959,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        mBatteryStatsConfig,
+                                        mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
                                         mCpuScalingPolicies);
@@ -2993,7 +3001,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.unmarshall(raw, 0, raw.length);
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
-                                        mBatteryStatsConfig,
+                                        mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
                                         mCpuScalingPolicies);

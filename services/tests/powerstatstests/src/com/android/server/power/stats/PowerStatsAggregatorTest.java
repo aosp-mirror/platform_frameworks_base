@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 
 import org.junit.Before;
@@ -36,16 +37,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PowerStatsAggregatorTest {
     private static final int TEST_POWER_COMPONENT = 77;
     private static final int TEST_UID = 42;
+    private static final long START_TIME = 1234;
 
     private final MockClock mClock = new MockClock();
-    private long mStartTime;
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(START_TIME, mClock);
     private BatteryStatsHistory mHistory;
     private PowerStatsAggregator mAggregator;
     private int mAggregatedStatsCount;
@@ -53,10 +54,8 @@ public class PowerStatsAggregatorTest {
     @Before
     public void setup() throws ParseException {
         mHistory = new BatteryStatsHistory(32, 1024,
-                mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock);
-        mStartTime = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-                .parse("2008-09-23 08:00").getTime();
-        mClock.currentTime = mStartTime;
+                mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
+                mMonotonicClock);
 
         PowerStatsAggregator.Builder builder = new PowerStatsAggregator.Builder(mHistory);
         builder.trackPowerComponent(TEST_POWER_COMPONENT)
@@ -106,7 +105,7 @@ public class PowerStatsAggregatorTest {
 
         mAggregator.aggregateBatteryStats(0, 0, stats -> {
             assertThat(mAggregatedStatsCount++).isEqualTo(0);
-            assertThat(stats.getStartTime()).isEqualTo(mStartTime);
+            assertThat(stats.getStartTime()).isEqualTo(START_TIME);
             assertThat(stats.getDuration()).isEqualTo(5000);
 
             long[] values = new long[1];
@@ -188,7 +187,7 @@ public class PowerStatsAggregatorTest {
                     stats.getPowerComponentStats(TEST_POWER_COMPONENT);
 
             if (mAggregatedStatsCount == 0) {
-                assertThat(stats.getStartTime()).isEqualTo(mStartTime);
+                assertThat(stats.getStartTime()).isEqualTo(START_TIME);
                 assertThat(stats.getDuration()).isEqualTo(2000);
 
                 assertThat(powerComponentStats.getDeviceStats(values, new int[]{
@@ -203,7 +202,7 @@ public class PowerStatsAggregatorTest {
                         .isTrue();
                 assertThat(values).isEqualTo(new long[]{1234});
             } else if (mAggregatedStatsCount == 1) {
-                assertThat(stats.getStartTime()).isEqualTo(mStartTime + 2000);
+                assertThat(stats.getStartTime()).isEqualTo(START_TIME + 2000);
                 assertThat(stats.getDuration()).isEqualTo(1000);
 
                 assertThat(powerComponentStats.getDeviceStats(values, new int[]{

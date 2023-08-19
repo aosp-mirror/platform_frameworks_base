@@ -41,6 +41,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 
 import org.junit.Before;
@@ -69,6 +70,7 @@ public class BatteryStatsHistoryTest {
     private File mSystemDir;
     private File mHistoryDir;
     private final MockClock mClock = new MockClock();
+    private final MonotonicClock mMonotonicClock = new MonotonicClock(0, mClock);
     private BatteryStatsHistory mHistory;
     private BatteryStats.HistoryPrinter mHistoryPrinter;
     @Mock
@@ -94,7 +96,7 @@ public class BatteryStatsHistoryTest {
         mClock.realtime = 123;
 
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mTracer) {
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer) {
             @Override
             public boolean readFileToParcel(Parcel out, AtomicFile file) {
                 mReadFiles.add(file.getBaseFile().getName());
@@ -210,7 +212,7 @@ public class BatteryStatsHistoryTest {
             mClock.realtime = 1000 * i;
             fileList.add(mClock.realtime + ".bh");
 
-            mHistory.startNextFile();
+            mHistory.startNextFile(mClock.realtime);
             createActiveFile(mHistory);
             verifyFileNames(mHistory, fileList);
             verifyActiveFile(mHistory, mClock.realtime + ".bh");
@@ -218,7 +220,7 @@ public class BatteryStatsHistoryTest {
 
         // create file 32
         mClock.realtime = 1000 * 32;
-        mHistory.startNextFile();
+        mHistory.startNextFile(mClock.realtime);
         createActiveFile(mHistory);
         fileList.add("32000.bh");
         fileList.remove(0);
@@ -229,7 +231,7 @@ public class BatteryStatsHistoryTest {
 
         // create file 33
         mClock.realtime = 1000 * 33;
-        mHistory.startNextFile();
+        mHistory.startNextFile(mClock.realtime);
         createActiveFile(mHistory);
         // verify file 1 is deleted
         fileList.add("33000.bh");
@@ -240,7 +242,7 @@ public class BatteryStatsHistoryTest {
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
         BatteryStatsHistory history2 = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                null, mClock, mTracer);
+                null, mClock, mMonotonicClock, mTracer);
         // verify constructor can pick up all files from file system.
         verifyFileNames(history2, fileList);
         verifyActiveFile(history2, "33000.bh");
@@ -262,7 +264,7 @@ public class BatteryStatsHistoryTest {
         // create file 1.
         mClock.realtime = 2345678;
 
-        history2.startNextFile();
+        history2.startNextFile(mClock.realtime);
         createActiveFile(history2);
         verifyFileNames(history2, Arrays.asList("1234567.bh", "2345678.bh"));
         verifyActiveFile(history2, "2345678.bh");
@@ -336,14 +338,14 @@ public class BatteryStatsHistoryTest {
         mHistory.recordEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.EVENT_JOB_START, "job", 42);
 
-        mHistory.startNextFile();       // 1000.bh
+        mHistory.startNextFile(mClock.realtime);       // 1000.bh
 
         mClock.realtime = 2000;
         mClock.uptime = 2000;
         mHistory.recordEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.EVENT_JOB_FINISH, "job", 42);
 
-        mHistory.startNextFile();       // 2000.bh
+        mHistory.startNextFile(mClock.realtime);       // 2000.bh
 
         mClock.realtime = 3000;
         mClock.uptime = 3000;
@@ -351,7 +353,7 @@ public class BatteryStatsHistoryTest {
                 HistoryItem.EVENT_ALARM, "alarm", 42);
 
         // Flush accumulated history to disk
-        mHistory.startNextFile();
+        mHistory.startNextFile(mClock.realtime);
     }
 
     private void verifyActiveFile(BatteryStatsHistory history, String file) {
@@ -518,7 +520,7 @@ public class BatteryStatsHistoryTest {
         // Keep the preserved part of history short - we only need to capture the very tail of
         // history.
         mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 1, 6000,
-                mStepDetailsCalculator, mClock, mTracer);
+                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer);
 
         mHistory.forceRecordAllHistory();
 

@@ -96,7 +96,7 @@ class PowerStatsAggregator {
                 BatteryStats.HistoryItem item = iterator.next();
 
                 if (baseTime < 0) {
-                    mStats.setStartTime(item.currentTime);
+                    mStats.setStartTime(item.time);
                     baseTime = item.time;
                 }
 
@@ -128,7 +128,7 @@ class PowerStatsAggregator {
                         mStats.setDuration(lastTime - baseTime);
                         consumer.accept(mStats);
                         mStats.reset();
-                        mStats.setStartTime(item.currentTime);
+                        mStats.setStartTime(item.time);
                         baseTime = lastTime = item.time;
                     }
                     mStats.addPowerStats(item.powerStats, item.time);
