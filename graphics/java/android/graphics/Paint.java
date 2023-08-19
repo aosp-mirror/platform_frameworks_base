@@ -3172,6 +3172,32 @@ public class Paint {
     public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
+        return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
+                advances, advancesIndex, null);
+    }
+
+    /**
+     * Measure the advance of each character within a run of text and also return the cursor
+     * position within the run.
+     *
+     * @see #getRunAdvance(char[], int, int, int, int, boolean, int) for more details.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the start index of the range to measure, inclusive
+     * @param end the end index of the range to measure, exclusive
+     * @param contextStart the start index of the shaping context, inclusive
+     * @param contextEnd the end index of the shaping context, exclusive
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @return width measurement between start and offset
+     * @hide
+     */
+    public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3201,7 +3227,7 @@ public class Paint {
         }
 
         return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
-                isRtl, offset, advances, advancesIndex);
+                isRtl, offset, advances, advancesIndex, drawBounds);
     }
 
     /**
@@ -3228,6 +3254,29 @@ public class Paint {
     public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, int offset,
             @Nullable float[] advances, int advancesIndex) {
+        return getRunCharacterAdvance(text, start, end, contextStart, contextEnd, isRtl, offset,
+                advances, advancesIndex, null);
+    }
+
+    /**
+     * @see #getRunCharacterAdvance(char[], int, int, int, int, boolean, int, float[], int)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @param drawBounds the output parameter for the bounding box of drawing text, optional
+     * @return width measurement between start and offset
+     * @hide
+     */
+    public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
+            int contextStart, int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex, @Nullable RectF drawBounds) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -3260,7 +3309,7 @@ public class Paint {
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
         final float result = getRunCharacterAdvance(buf, start - contextStart, end - contextStart,
                 0, contextEnd - contextStart, isRtl, offset - contextStart,
-                advances, advancesIndex);
+                advances, advancesIndex, drawBounds);
         TemporaryBuffer.recycle(buf);
         return result;
     }
@@ -3378,7 +3427,7 @@ public class Paint {
             int contextStart, int contextEnd, boolean isRtl, int offset);
     private static native float nGetRunCharacterAdvance(long paintPtr, char[] text, int start,
             int end, int contextStart, int contextEnd, boolean isRtl, int offset, float[] advances,
-            int advancesIndex);
+            int advancesIndex, RectF drawingBounds);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
     private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,
