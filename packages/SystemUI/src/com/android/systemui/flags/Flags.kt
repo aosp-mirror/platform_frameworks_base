@@ -398,6 +398,10 @@ object Flags {
     // TODO(b/294588085): Tracking Bug
     val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
 
+    // TODO(b/290676905): Tracking Bug
+    val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
+        unreleasedFlag("new_shade_carrier_group_mobile_icons")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag("ongoing_call_status_bar_chip")
@@ -501,16 +505,6 @@ object Flags {
     @JvmField
     val WM_CAPTION_ON_SHELL =
         sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
-
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_BUBBLE =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_bubble", default = true)
-
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_PIP =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
 
     // TODO(b/256873975): Tracking Bug
     @JvmField

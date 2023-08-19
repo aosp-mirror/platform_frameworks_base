@@ -46,7 +46,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Choreographer;
@@ -108,12 +107,6 @@ import java.util.stream.Collectors;
  */
 public class BubbleStackView extends FrameLayout
         implements ViewTreeObserver.OnComputeInternalInsetsListener {
-
-    // LINT.IfChange
-    public static final boolean ENABLE_FLING_TO_DISMISS_BUBBLE =
-            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_bubble", true);
-    // LINT.ThenChange(com/android/launcher3/taskbar/bubbles/BubbleDismissController.java)
-
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
     /** How far the flyout needs to be dragged before it's dismissed regardless of velocity. */

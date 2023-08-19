@@ -44,12 +44,16 @@ class FakeMobileIconInteractor(
 
     override val mobileIsDefault = MutableStateFlow(true)
 
+    override val isSingleCarrier = MutableStateFlow(true)
+
     override val networkTypeIconGroup =
         MutableStateFlow<NetworkTypeIconModel>(
             NetworkTypeIconModel.DefaultIcon(TelephonyIcons.THREE_G)
         )
 
     override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo mode"))
+
+    override val carrierName = MutableStateFlow("demo mode")
 
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly

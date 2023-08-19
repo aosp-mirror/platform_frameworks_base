@@ -319,10 +319,17 @@ constructor(
 
     @VisibleForTesting fun getSubIdRepoCache() = subIdRepositoryCache
 
+    private fun subscriptionModelForSubId(subId: Int): StateFlow<SubscriptionModel?> {
+        return subscriptions
+            .map { list -> list.firstOrNull { model -> model.subscriptionId == subId } }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+    }
+
     private fun createRepositoryForSubId(subId: Int): FullMobileConnectionRepository {
         return fullMobileRepoFactory.build(
             subId,
             isCarrierMerged(subId),
+            subscriptionModelForSubId(subId),
             defaultNetworkName,
             networkNameSeparator,
         )
@@ -373,6 +380,7 @@ constructor(
             subscriptionId = subscriptionId,
             isOpportunistic = isOpportunistic,
             groupUuid = groupUuid,
+            carrierName = carrierName.toString(),
         )
 
     companion object {

@@ -60,6 +60,19 @@ sealed interface NetworkNameModel : Diffable<NetworkNameModel> {
         }
     }
 
+    /** This name has been derived from SubscriptionModel. see [SubscriptionModel] */
+    data class SubscriptionDerived(override val name: String) : NetworkNameModel {
+        override fun logDiffs(prevVal: NetworkNameModel, row: TableRowLogger) {
+            if (prevVal !is SubscriptionDerived || prevVal.name != name) {
+                row.logChange(COL_NETWORK_NAME, "SubscriptionDerived($name)")
+            }
+        }
+
+        override fun logFull(row: TableRowLogger) {
+            row.logChange(COL_NETWORK_NAME, "SubscriptionDerived($name)")
+        }
+    }
+
     /**
      * This name has been derived from the sim via
      * [android.telephony.TelephonyManager.getSimOperatorName].
