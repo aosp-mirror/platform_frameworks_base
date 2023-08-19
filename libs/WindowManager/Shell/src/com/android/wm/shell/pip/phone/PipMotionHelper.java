@@ -33,7 +33,6 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.os.SystemProperties;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
@@ -48,19 +47,16 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
-import java.util.function.Consumer;
-
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+
+import java.util.function.Consumer;
 
 /**
  * A helper to animate and manipulate the PiP.
  */
 public class PipMotionHelper implements PipAppOpsListener.Callback,
         FloatingContentCoordinator.FloatingContent {
-
-    public static final boolean ENABLE_FLING_TO_DISMISS_PIP =
-            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_pip", false);
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
 
@@ -707,7 +703,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     loc[1] = animatedPipBounds.top;
                 }
             };
-            mMagnetizedPip.setFlingToTargetEnabled(ENABLE_FLING_TO_DISMISS_PIP);
+            mMagnetizedPip.setFlingToTargetEnabled(false);
         }
 
         return mMagnetizedPip;
