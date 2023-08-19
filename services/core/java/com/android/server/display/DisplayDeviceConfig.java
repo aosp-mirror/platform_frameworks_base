@@ -282,6 +282,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>
  *      <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
  *      <screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>
+ *      <screenBrightnessRampSlowDecreaseIdle>0.05</screenBrightnessRampSlowDecreaseIdle>
+ *      <screenBrightnessRampSlowIncreaseIdle>0.06</screenBrightnessRampSlowIncreaseIdle>
  *
  *      <screenBrightnessRampIncreaseMaxMillis>2000</screenBrightnessRampIncreaseMaxMillis>
  *      <screenBrightnessRampDecreaseMaxMillis>3000</screenBrightnessRampDecreaseMaxMillis>
@@ -597,6 +599,8 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private float mBrightnessRampSlowDecreaseIdle = Float.NaN;
+    private float mBrightnessRampSlowIncreaseIdle = Float.NaN;
     private long mBrightnessRampDecreaseMaxMillis = 0;
     private long mBrightnessRampIncreaseMaxMillis = 0;
     private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
@@ -1037,6 +1041,14 @@ public class DisplayDeviceConfig {
 
     public float getBrightnessRampSlowIncrease() {
         return mBrightnessRampSlowIncrease;
+    }
+
+    public float getBrightnessRampSlowDecreaseIdle() {
+        return mBrightnessRampSlowDecreaseIdle;
+    }
+
+    public float getBrightnessRampSlowIncreaseIdle() {
+        return mBrightnessRampSlowIncreaseIdle;
     }
 
     public long getBrightnessRampDecreaseMaxMillis() {
@@ -1654,6 +1666,8 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mBrightnessRampSlowDecreaseIdle=" + mBrightnessRampSlowDecreaseIdle
+                + ", mBrightnessRampSlowIncreaseIdle=" + mBrightnessRampSlowIncreaseIdle
                 + ", mBrightnessRampDecreaseMaxMillis=" + mBrightnessRampDecreaseMaxMillis
                 + ", mBrightnessRampIncreaseMaxMillis=" + mBrightnessRampIncreaseMaxMillis
                 + "\n"
@@ -1845,6 +1859,8 @@ public class DisplayDeviceConfig {
         mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampSlowDecreaseIdle = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampSlowIncreaseIdle = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampDecreaseMaxMillis = 0;
         mBrightnessRampIncreaseMaxMillis = 0;
         setSimpleMappingStrategyValues();
@@ -2665,6 +2681,12 @@ public class DisplayDeviceConfig {
     }
 
     private void loadBrightnessRamps(DisplayConfiguration config) {
+        // Interactive must come first, since idle falls back to it when values are unspecified.
+        loadBrightnessRampsInteractive(config);
+        loadBrightnessRampsIdle(config);
+    }
+
+    private void loadBrightnessRampsInteractive(DisplayConfiguration config) {
         // Priority 1: Value in the display device config (float)
         // Priority 2: Value in the config.xml (int)
         final BigDecimal fastDownDecimal = config.getScreenBrightnessRampFastDecrease();
@@ -2694,6 +2716,27 @@ public class DisplayDeviceConfig {
         final BigInteger decreaseMax = config.getScreenBrightnessRampDecreaseMaxMillis();
         if (decreaseMax != null) {
             mBrightnessRampDecreaseMaxMillis = decreaseMax.intValue();
+        }
+    }
+
+    private void loadBrightnessRampsIdle(DisplayConfiguration config) {
+        // Priority 1: Idle value in the display device config (float)
+        // Priority 2: Fallback - Interactive value from wherever.
+        final BigDecimal slowDownDecimalIdle = config.getScreenBrightnessRampSlowDecreaseIdle();
+        final BigDecimal slowUpDecimalIdle = config.getScreenBrightnessRampSlowIncreaseIdle();
+
+        if (slowDownDecimalIdle != null && slowUpDecimalIdle != null) {
+            mBrightnessRampSlowDecreaseIdle = slowDownDecimalIdle.floatValue();
+            mBrightnessRampSlowIncreaseIdle = slowUpDecimalIdle.floatValue();
+        } else {
+            if (slowDownDecimalIdle != null || slowUpDecimalIdle != null) {
+                Slog.w(TAG, "Per display idle brightness ramp values ignored because not all "
+                        + "values are present in display device config");
+            }
+            // If these values don't exist, fall back to interactive mode values, since
+            // there are no idle ramp values in config.xml
+            mBrightnessRampSlowDecreaseIdle = mBrightnessRampSlowDecrease;
+            mBrightnessRampSlowIncreaseIdle = mBrightnessRampSlowIncrease;
         }
     }
 
