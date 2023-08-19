@@ -2465,7 +2465,7 @@
                duration of the vector animation automatically. -->
         <attr name="windowSplashScreenAnimationDuration" format="integer"/>
 
-        <!-- Place an drawable image in the bottom of the starting window, it can be used to
+        <!-- Place a drawable image in the bottom of the starting window. The image can be used to
              represent the branding of the application. -->
         <attr name="windowSplashScreenBrandingImage" format="reference"/>
         <!-- Set a background behind the splash screen icon. This is useful if there is not enough
@@ -3245,7 +3245,7 @@
 
         <!-- Specifies the id of a view for which this view serves as a label for
              accessibility purposes. For example, a TextView before an EditText in
-             the UI usually specifies what infomation is contained in the EditText.
+             the UI usually specifies what information is contained in the EditText.
              Hence, the TextView is a label for the EditText. -->
         <attr name="labelFor" format="reference" />
 
@@ -6787,7 +6787,7 @@
              edges of a bitmap when rotated. Default value is false. -->
         <attr name="antialias" format="boolean" />
         <!-- Enables or disables bitmap filtering. Filtering is used when the bitmap is
-             shrunk or stretched to smooth its apperance. Default value is true. -->
+             shrunk or stretched to smooth its appearance. Default value is true. -->
         <attr name="filter" format="boolean" />
         <!-- Enables or disables dithering of the bitmap if the bitmap does not have the
              same pixel configuration as the screen (for instance: a ARGB 8888 bitmap with
