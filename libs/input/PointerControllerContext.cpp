@@ -32,7 +32,7 @@ namespace android {
 
 PointerControllerContext::PointerControllerContext(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController, PointerController& controller)
+        SpriteController& spriteController, PointerController& controller)
       : mPolicy(policy),
         mLooper(looper),
         mSpriteController(spriteController),
@@ -93,7 +93,7 @@ sp<PointerControllerPolicyInterface> PointerControllerContext::getPolicy() {
     return mPolicy;
 }
 
-sp<SpriteController> PointerControllerContext::getSpriteController() {
+SpriteController& PointerControllerContext::getSpriteController() {
     return mSpriteController;
 }
 

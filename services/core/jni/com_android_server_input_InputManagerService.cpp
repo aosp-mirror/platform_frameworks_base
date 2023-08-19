@@ -400,7 +400,7 @@ private:
         PointerCaptureRequest pointerCaptureRequest{};
 
         // Sprite controller singleton, created on first use.
-        sp<SpriteController> spriteController{};
+        std::shared_ptr<SpriteController> spriteController{};
 
         // Pointer controller singleton, created and destroyed as needed.
         std::weak_ptr<PointerController> pointerController{};
@@ -709,7 +709,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerCon
     if (controller == nullptr) {
         ensureSpriteControllerLocked();
 
-        controller = PointerController::create(this, mLooper, mLocked.spriteController);
+        controller = PointerController::create(this, mLooper, *mLocked.spriteController);
         mLocked.pointerController = controller;
         updateInactivityTimeoutLocked();
     }
@@ -738,17 +738,21 @@ sp<SurfaceControl> NativeInputManager::getParentSurfaceForPointers(int displayId
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
-    if (mLocked.spriteController == nullptr) {
-        JNIEnv* env = jniEnv();
-        jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
-        if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
-            layer = -1;
-        }
-        mLocked.spriteController = new SpriteController(mLooper, layer, [this](int displayId) {
-            return getParentSurfaceForPointers(displayId);
-        });
-        mLocked.spriteController->setHandlerController(mLocked.spriteController);
+    if (mLocked.spriteController) {
+        return;
     }
+    JNIEnv* env = jniEnv();
+    jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
+    if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
+        layer = -1;
+    }
+    mLocked.spriteController =
+            std::make_shared<SpriteController>(mLooper, layer, [this](int displayId) {
+                return getParentSurfaceForPointers(displayId);
+            });
+    // The SpriteController needs to be shared pointer because the handler callback needs to hold
+    // a weak reference so that we can avoid racy conditions when the controller is being destroyed.
+    mLocked.spriteController->setHandlerController(mLocked.spriteController);
 }
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {

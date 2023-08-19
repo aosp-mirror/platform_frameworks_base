@@ -157,7 +157,7 @@ protected:
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
-    sp<MockSpriteController> mSpriteController;
+    std::unique_ptr<MockSpriteController> mSpriteController;
     std::shared_ptr<PointerController> mPointerController;
 
 private:
@@ -175,14 +175,13 @@ private:
 
 PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<MockSprite>),
         mLooper(new MyLooper), mThread(&PointerControllerTest::loopThread, this) {
-
-    mSpriteController = new NiceMock<MockSpriteController>(mLooper);
+    mSpriteController.reset(new NiceMock<MockSpriteController>(mLooper));
     mPolicy = new MockPointerControllerPolicyInterface();
 
     EXPECT_CALL(*mSpriteController, createSprite())
             .WillOnce(Return(mPointerSprite));
 
-    mPointerController = PointerController::create(mPolicy, mLooper, mSpriteController);
+    mPointerController = PointerController::create(mPolicy, mLooper, *mSpriteController);
 }
 
 PointerControllerTest::~PointerControllerTest() {
@@ -319,10 +318,9 @@ class PointerControllerWindowInfoListenerTest : public Test {};
 class TestPointerController : public PointerController {
 public:
     TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
-                          const sp<Looper>& looper)
+                          const sp<Looper>& looper, SpriteController& spriteController)
           : PointerController(
-                    new MockPointerControllerPolicyInterface(), looper,
-                    new NiceMock<MockSpriteController>(looper),
+                    new MockPointerControllerPolicyInterface(), looper, spriteController,
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
                         // Register listener
                         registeredListener = listener;
@@ -335,10 +333,12 @@ public:
 
 TEST_F(PointerControllerWindowInfoListenerTest,
        doesNotCrashIfListenerCalledAfterPointerControllerDestroyed) {
+    sp<Looper> looper = new Looper(false);
+    auto spriteController = NiceMock<MockSpriteController>(looper);
     sp<android::gui::WindowInfosListener> registeredListener;
     sp<android::gui::WindowInfosListener> localListenerCopy;
     {
-        TestPointerController pointerController(registeredListener, new Looper(false));
+        TestPointerController pointerController(registeredListener, looper, spriteController);
         ASSERT_NE(nullptr, registeredListener) << "WindowInfosListener was not registered";
         localListenerCopy = registeredListener;
     }
