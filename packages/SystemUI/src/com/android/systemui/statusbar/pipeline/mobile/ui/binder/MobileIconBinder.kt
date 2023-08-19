@@ -50,6 +50,7 @@ object MobileIconBinder {
     fun bind(
         view: ViewGroup,
         viewModel: LocationBasedMobileViewModel,
+        @StatusBarIconView.VisibleState initialVisibilityState: Int = STATE_HIDDEN,
         logger: MobileViewLogger,
     ): ModernStatusBarViewBinding {
         val mobileGroupView = view.requireViewById<ViewGroup>(R.id.mobile_group)
@@ -68,12 +69,12 @@ object MobileIconBinder {
 
         // TODO(b/238425913): We should log this visibility state.
         @StatusBarIconView.VisibleState
-        val visibilityState: MutableStateFlow<Int> = MutableStateFlow(STATE_HIDDEN)
+        val visibilityState: MutableStateFlow<Int> = MutableStateFlow(initialVisibilityState)
 
         val iconTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
         val decorTint: MutableStateFlow<Int> = MutableStateFlow(viewModel.defaultColor)
 
-        var isCollecting: Boolean = false
+        var isCollecting = false
 
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -539,6 +539,23 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void onKeyguardStatusViewHeightChange_animatesNextTopPaddingChangeForNSSL() {
+        ArgumentCaptor<View.OnLayoutChangeListener> captor =
+                ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
+        verify(mKeyguardStatusView).addOnLayoutChangeListener(captor.capture());
+        View.OnLayoutChangeListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackScrollLayoutController);
+
+        when(mKeyguardStatusView.getHeight()).thenReturn(0);
+        listener.onLayoutChange(mKeyguardStatusView, /* left= */ 0, /* top= */ 0, /* right= */
+                0, /* bottom= */ 0, /* oldLeft= */ 0, /* oldTop= */ 0, /* oldRight= */
+                0, /* oldBottom = */ 200);
+
+        verify(mNotificationStackScrollLayoutController).animateNextTopPaddingChange();
+    }
+
+    @Test
     public void testCanCollapsePanelOnTouch_trueForKeyGuard() {
         mStatusBarStateController.setState(KEYGUARD);
 

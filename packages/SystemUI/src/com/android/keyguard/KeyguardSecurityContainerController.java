@@ -27,6 +27,7 @@ import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_PRIMARY;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_WORK_PROFILE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES;
 
 import android.app.ActivityManager;
@@ -370,8 +371,12 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
                 @Override
                 public void onOrientationChanged(int orientation) {
-                    KeyguardSecurityContainerController.this
+                    if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
+                        // TODO(b/295603468)
+                        // Fix reinflation of views when flag is enabled.
+                        KeyguardSecurityContainerController.this
                             .onDensityOrFontScaleOrOrientationChanged();
+                    }
                 }
             };
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =

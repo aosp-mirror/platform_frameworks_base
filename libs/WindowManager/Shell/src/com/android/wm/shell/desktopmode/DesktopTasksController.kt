@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.R
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.WindowConfiguration
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -294,6 +295,24 @@ class DesktopTasksController(
 
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /** Move a desktop app to split screen. */
+    fun moveToSplit(task: RunningTaskInfo) {
+        KtProtoLog.v(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTasksController: moveToSplit taskId=%d",
+            task.taskId
+        )
+        val wct = WindowContainerTransaction()
+        wct.setWindowingMode(task.token, WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW)
+        wct.setBounds(task.token, null)
+        wct.setDensityDpi(task.token, getDefaultDensityDpi())
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
         } else {

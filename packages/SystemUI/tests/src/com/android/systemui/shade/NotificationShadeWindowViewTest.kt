@@ -38,6 +38,7 @@ import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
@@ -198,7 +199,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                     CountDownTimerUtil(),
                     featureFlags
                 ),
-                BouncerLogger(logcatLogBuffer("BouncerLog"))
+                BouncerLogger(logcatLogBuffer("BouncerLog")),
+                Mockito.mock(KeyEventInteractor::class.java),
             )
 
         controller.setupExpandedStatusBar()

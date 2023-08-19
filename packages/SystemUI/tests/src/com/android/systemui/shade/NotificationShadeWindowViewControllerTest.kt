@@ -18,6 +18,7 @@ package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
@@ -38,6 +39,7 @@ import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -118,8 +120,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
+    @Mock lateinit var keyEventInteractor: KeyEventInteractor
     private val notificationExpansionRepository = NotificationExpansionRepository()
 
+    private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
 
@@ -148,6 +152,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
 
         testScope = TestScope()
+        fakeClock = FakeSystemClock()
         underTest =
             NotificationShadeWindowViewController(
                     lockscreenShadeTransitionController,
@@ -180,7 +185,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                     primaryBouncerToGoneTransitionViewModel,
                     notificationExpansionRepository,
                     featureFlags,
-                    FakeSystemClock(),
+                    fakeClock,
                     BouncerMessageInteractor(
                         FakeBouncerMessageRepository(),
                         mock(BouncerMessageFactory::class.java),
@@ -188,7 +193,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                         CountDownTimerUtil(),
                         featureFlags
                     ),
-                    BouncerLogger(logcatLogBuffer("BouncerLog"))
+                    BouncerLogger(logcatLogBuffer("BouncerLog")),
+                    keyEventInteractor,
             )
         underTest.setupExpandedStatusBar()
 
@@ -328,6 +334,33 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun handleDispatchTouchEvent_launchAnimationRunningTimesOut() =
+        testScope.runTest {
+            // GIVEN touch dispatcher in a state that returns true
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()).thenReturn(
+                true
+            )
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isTrue()
+
+            // WHEN launch animation is running for 2 seconds
+            fakeClock.setUptimeMillis(10000)
+            underTest.setExpandAnimationRunning(true)
+            fakeClock.advanceTime(2000)
+
+            // THEN touch is ignored
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isFalse()
+
+            // WHEN Launch animation is running for 6 seconds
+            fakeClock.advanceTime(4000)
+
+            // THEN move is ignored, down is handled, and window is notified
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(MOVE_EVENT)).isFalse()
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isTrue()
+            verify(notificationShadeWindowController).setLaunchingActivity(false)
+        }
+
+    @Test
     fun shouldInterceptTouchEvent_statusBarKeyguardViewManagerShouldIntercept() {
         // down event should be intercepted by keyguardViewManager
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
@@ -345,8 +378,30 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
         }
 
+    @Test
+    fun forwardsDispatchKeyEvent() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_B)
+        interactionEventHandler.dispatchKeyEvent(keyEvent)
+        verify(keyEventInteractor).dispatchKeyEvent(keyEvent)
+    }
+
+    @Test
+    fun forwardsDispatchKeyEventPreIme() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_B)
+        interactionEventHandler.dispatchKeyEventPreIme(keyEvent)
+        verify(keyEventInteractor).dispatchKeyEventPreIme(keyEvent)
+    }
+
+    @Test
+    fun forwardsInterceptMediaKey() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
+        interactionEventHandler.interceptMediaKey(keyEvent)
+        verify(keyEventInteractor).interceptMediaKey(keyEvent)
+    }
+
     companion object {
         private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private const val VIEW_BOTTOM = 100
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package android.view;
 
-/** An enumeration of the different locations that host a status bar. */
-enum class StatusBarLocation {
-    /** Home screen or in-app. */
-    HOME,
-    /** Keyguard (aka lockscreen). */
-    KEYGUARD,
-    /** Quick settings (inside the shade). */
-    QS,
-    /** ShadeCarrierGroup (above QS status bar in expanded mode). */
-    SHADE_CARRIER_GROUP,
+import android.annotation.Nullable;
+import android.app.Activity;
+import android.os.Bundle;
+
+import com.android.frameworks.coretests.R;
+
+public class ViewGroupTestActivity extends Activity {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.viewgroup_test);
+    }
 }

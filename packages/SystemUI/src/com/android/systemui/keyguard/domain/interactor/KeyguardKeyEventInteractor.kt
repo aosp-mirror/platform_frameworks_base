@@ -54,7 +54,11 @@ constructor(
         if (event.handleAction()) {
             when (event.keyCode) {
                 KeyEvent.KEYCODE_MENU -> return dispatchMenuKeyEvent()
-                KeyEvent.KEYCODE_SPACE -> return dispatchSpaceEvent()
+                KeyEvent.KEYCODE_SPACE,
+                KeyEvent.KEYCODE_ENTER ->
+                    if (isDeviceInteractive()) {
+                        return collapseShadeLockedOrShowPrimaryBouncer()
+                    }
             }
         }
         return false
@@ -90,16 +94,22 @@ constructor(
                 (statusBarStateController.state != StatusBarState.SHADE) &&
                 statusBarKeyguardViewManager.shouldDismissOnMenuPressed()
         if (shouldUnlockOnMenuPressed) {
-            shadeController.animateCollapseShadeForced()
-            return true
+            return collapseShadeLockedOrShowPrimaryBouncer()
         }
         return false
     }
 
-    private fun dispatchSpaceEvent(): Boolean {
-        if (isDeviceInteractive() && statusBarStateController.state != StatusBarState.SHADE) {
-            shadeController.animateCollapseShadeForced()
-            return true
+    private fun collapseShadeLockedOrShowPrimaryBouncer(): Boolean {
+        when (statusBarStateController.state) {
+            StatusBarState.SHADE -> return false
+            StatusBarState.SHADE_LOCKED -> {
+                shadeController.animateCollapseShadeForced()
+                return true
+            }
+            StatusBarState.KEYGUARD -> {
+                statusBarKeyguardViewManager.showPrimaryBouncer(true)
+                return true
+            }
         }
         return false
     }
