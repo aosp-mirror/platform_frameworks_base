@@ -28,7 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import javax.inject.Inject
 
 class DefaultAmbientIndicationAreaSection

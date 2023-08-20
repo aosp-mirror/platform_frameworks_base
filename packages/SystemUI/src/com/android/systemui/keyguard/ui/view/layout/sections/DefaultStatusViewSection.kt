@@ -18,20 +18,18 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
-import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
-import javax.inject.Inject
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.constraintlayout.widget.ConstraintSet.END
+import com.android.systemui.R
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import javax.inject.Inject
 
-class DefaultStatusViewSection @Inject constructor(private val context: Context) :
-    KeyguardSection {
+class DefaultStatusViewSection @Inject constructor(private val context: Context) : KeyguardSection {
     private val statusViewId = R.id.keyguard_status_view
 
     override fun apply(constraintSet: ConstraintSet) {

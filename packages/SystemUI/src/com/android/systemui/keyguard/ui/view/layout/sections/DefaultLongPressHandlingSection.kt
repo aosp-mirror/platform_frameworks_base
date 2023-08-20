@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,34 @@
  * limitations under the License.
  */
 
-package com.android.systemui.communal.ui.view.layout.sections
+package com.android.systemui.keyguard.ui.view.layout.sections
 
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
-import androidx.constraintlayout.widget.ConstraintSet.END
-import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import com.android.systemui.R
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import javax.inject.Inject
 
-class DefaultCommunalWidgetSection @Inject constructor() : KeyguardSection {
-    private val widgetAreaViewId = R.id.communal_widget_wrapper
-
+/** Positions the long-press handling view in the keyguard. */
+class DefaultLongPressHandlingSection @Inject constructor() : KeyguardSection {
     override fun apply(constraintSet: ConstraintSet) {
-        constraintSet.apply {
-            constrainWidth(widgetAreaViewId, WRAP_CONTENT)
-            constrainHeight(widgetAreaViewId, WRAP_CONTENT)
-            connect(widgetAreaViewId, BOTTOM, PARENT_ID, BOTTOM)
-            connect(widgetAreaViewId, END, PARENT_ID, END)
-        }
+        constraintSet.fillMaxSize(R.id.keyguard_long_press)
+    }
+
+    private fun ConstraintSet.fillMaxSize(@IdRes viewId: Int) {
+        listOf(
+                ConstraintSet.START,
+                ConstraintSet.TOP,
+                ConstraintSet.END,
+                ConstraintSet.BOTTOM,
+            )
+            .forEach { side ->
+                connect(
+                    viewId,
+                    side,
+                    ConstraintSet.PARENT_ID,
+                    side,
+                )
+            }
     }
 }
