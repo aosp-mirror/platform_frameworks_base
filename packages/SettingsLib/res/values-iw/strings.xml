@@ -316,7 +316,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"‏יש לבחור תצורת USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"אפשרות של מיקומים מדומים"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"אפשרות של מיקומים מדומים"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"לאפשר בדיקת תכונת תצוגה"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"‏לאפשר את הבדיקה של מאפיינים של ה-View"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏השארת חבילת הגלישה פעילה תמיד, גם כש-Wi‑Fi פעיל (למעבר מהיר בין רשתות)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"אם השירות זמין, יש להשתמש בשיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏לאפשר ניפוי באגים של USB?"</string>
@@ -343,7 +343,7 @@
     <string name="select_application" msgid="2543228890535466325">"בחירת אפליקציה"</string>
     <string name="no_application" msgid="9038334538870247690">"אף אחת"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"יש להמתין לכלי לניפוי באגים"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"אפליקציה שנוקו בה הבאגים ממתינה למנקה הבאגים לצירוף לפני ביצוע"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"האפליקציה שמתבצע בה ניקוי באגים ממתינה שהכלי לניפוי באגים יתחבר אליה לפני הריצה"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"קלט"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"שרטוט"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"עיבוד מואץ של חומרה"</string>
