@@ -2324,12 +2324,12 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Maikrofoni inapatikana"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Maikrofoni imezuiwa"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Umewasha kipengele cha hali ya skrini mbili"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen imewasha"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> inatumia skrini zote kuonyesha maudhui"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Kifaa kina joto sana"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kipengele cha Hali ya Skrini Mbili hakipatikani kwa sababu simu yako inapata joto sana"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Kipengele cha Hali ya Skrini Mbili hakipatikani"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kipengele cha Hali ya Skrini Mbili hakipatikani kwa sababu kipengele cha Kiokoa Betri kimewashwa. Unaweza kuzima kipengele hiki katika Mipangilio."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kipengele cha Dual Screen hakipatikani kwa sababu simu yako inapata joto sana"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen haipatikani"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kipengele cha Dual Screen hakipatikani kwa sababu Kiokoa Betri kimewashwa. Unaweza kukizima katika Mipangilio."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Nenda kwenye Mipangilio"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Zima"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> imewekewa mipangilio"</string>
