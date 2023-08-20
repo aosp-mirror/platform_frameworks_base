@@ -17,7 +17,11 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.annotation.SuppressLint
+import android.graphics.Rect
+import android.view.MotionEvent
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.view.LongPressHandlingView
@@ -35,6 +39,9 @@ object KeyguardLongPressViewBinder {
      * @param onSingleTap A callback to invoke when the system decides that there was a single tap.
      * @param falsingManager [FalsingManager] for making sure the long-press didn't just happen in
      *   the user's pocket.
+     * @param settingsMenuView The [View] for the settings menu that shows up when the long-press is
+     *   detected. The [view] will be monitored for all touch to know when to actually hide the
+     *   settings menu after it had been shown due to an outside touch.
      */
     @JvmStatic
     fun bind(
@@ -42,6 +49,7 @@ object KeyguardLongPressViewBinder {
         viewModel: KeyguardLongPressViewModel,
         onSingleTap: () -> Unit,
         falsingManager: FalsingManager,
+        settingsMenuView: View,
     ) {
         view.listener =
             object : LongPressHandlingView.Listener {
@@ -62,6 +70,12 @@ object KeyguardLongPressViewBinder {
                 }
             }
 
+        listenForTouchOutsideDismissals(
+            outsideView = view,
+            settingsMenuView = settingsMenuView,
+            onTouchedOutsideSettingsMenu = viewModel::onTouchedOutside,
+        )
+
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -69,6 +83,29 @@ object KeyguardLongPressViewBinder {
                         view.setLongPressHandlingEnabled(isEnabled)
                     }
                 }
+            }
+        }
+    }
+
+    /** Listens for and handles touches outside the settings menu view, to dismiss it. */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun listenForTouchOutsideDismissals(
+        outsideView: View,
+        settingsMenuView: View,
+        onTouchedOutsideSettingsMenu: () -> Unit,
+    ) {
+        outsideView.setOnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN && settingsMenuView.isVisible) {
+                val hitRect = Rect()
+                settingsMenuView.getHitRect(hitRect)
+                if (!hitRect.contains(event.x.toInt(), event.y.toInt())) {
+                    onTouchedOutsideSettingsMenu()
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
             }
         }
     }

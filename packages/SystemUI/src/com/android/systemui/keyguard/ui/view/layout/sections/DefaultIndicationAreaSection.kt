@@ -21,7 +21,7 @@ import android.content.Context
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import javax.inject.Inject
 
 class DefaultIndicationAreaSection @Inject constructor(private val context: Context) :
