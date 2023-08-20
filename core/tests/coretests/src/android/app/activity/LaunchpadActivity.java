@@ -438,6 +438,7 @@ public class LaunchpadActivity extends Activity {
     private Intent makeBroadcastIntent(String action) {
         Intent intent = new Intent(action, null);
         intent.putExtra("caller", mCallTarget);
+        intent.setPackage(getPackageName());
         return intent;
     }
 
@@ -466,7 +467,7 @@ public class LaunchpadActivity extends Activity {
     private void registerMyReceiver(IntentFilter filter) {
         mReceiverRegistered = true;
         //System.out.println("Registering: " + mReceiver);
-        registerReceiver(mReceiver, filter);
+        registerReceiver(mReceiver, filter, Context.RECEIVER_EXPORTED);
     }
 
     private void unregisterMyReceiver() {
