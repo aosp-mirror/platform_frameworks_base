@@ -135,19 +135,6 @@ class EmbeddedWindowController {
         return mWindowsByWindowToken.get(windowToken);
     }
 
-    void onActivityRemoved(ActivityRecord activityRecord) {
-        for (int i = mWindows.size() - 1; i >= 0; i--) {
-            final EmbeddedWindow window = mWindows.valueAt(i);
-            if (window.mHostActivityRecord == activityRecord) {
-                final WindowProcessController processController =
-                        mAtmService.getProcessController(window.mOwnerPid, window.mOwnerUid);
-                if (processController != null) {
-                    processController.removeHostActivity(activityRecord);
-                }
-            }
-        }
-    }
-
     static class EmbeddedWindow implements InputTarget {
         final IWindow mClient;
         @Nullable final WindowState mHostWindowState;
@@ -229,6 +216,13 @@ class EmbeddedWindowController {
                 mWmService.mInputManager.removeInputChannel(mInputChannel.getToken());
                 mInputChannel.dispose();
                 mInputChannel = null;
+            }
+            if (mHostActivityRecord != null) {
+                final WindowProcessController wpc =
+                        mWmService.mAtmService.getProcessController(mOwnerPid, mOwnerUid);
+                if (wpc != null) {
+                    wpc.removeHostActivity(mHostActivityRecord);
+                }
             }
         }
 
