@@ -16,9 +16,13 @@
 
 package android.app.servertransaction;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
 
+import android.app.Activity;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -32,24 +36,24 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link WindowContextWindowRemovalItem}.
+ * Tests for {@link ActivityConfigurationChangeItem}.
  *
  * Build/Install/Run:
- *  atest FrameworksCoreTests:WindowContextWindowRemovalItemTest
+ *  atest FrameworksCoreTests:ActivityConfigurationChangeItemTest
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public class WindowContextWindowRemovalItemTest {
+public class ActivityConfigurationChangeItemTest {
 
     @Mock
     private ClientTransactionHandler mHandler;
     @Mock
     private IBinder mToken;
     @Mock
-    private PendingTransactionActions mPendingActions;
-    @Mock
-    private IBinder mClientToken;
+    private Activity mActivity;
+    // Can't mock final class.
+    private final Configuration mConfiguration = new Configuration();
 
     @Before
     public void setup() {
@@ -57,11 +61,13 @@ public class WindowContextWindowRemovalItemTest {
     }
 
     @Test
-    public void testExecute() {
-        final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
-                mClientToken);
-        item.execute(mHandler, mToken, mPendingActions);
+    public void testGetContextToUpdate() {
+        doReturn(mActivity).when(mHandler).getActivity(mToken);
 
-        verify(mHandler).handleWindowContextWindowRemoval(mClientToken);
+        final ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem
+                .obtain(mConfiguration);
+        final Context context = item.getContextToUpdate(mHandler, mToken);
+
+        assertEquals(mActivity, context);
     }
 }

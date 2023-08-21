@@ -36,6 +36,7 @@ import android.os.Parcelable;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.WindowManager;
@@ -66,6 +67,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * the display level. Lower levels can override these values to provide custom bounds to enforce
      * features such as a max aspect ratio.
      */
+    @Nullable
     private Rect mAppBounds;
 
     /**
@@ -269,7 +271,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * Sets the bounds to the provided {@link Rect}.
      * @param rect the new bounds value.
      */
-    public void setBounds(Rect rect) {
+    public void setBounds(@Nullable Rect rect) {
         if (rect == null) {
             mBounds.setEmpty();
             return;
@@ -283,7 +285,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @param rect The rect value to set {@link #mAppBounds} to.
      * @see #getAppBounds()
      */
-    public void setAppBounds(Rect rect) {
+    public void setAppBounds(@Nullable Rect rect) {
         if (rect == null) {
             mAppBounds = null;
             return;
@@ -356,11 +358,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /** @see #setAppBounds(Rect) */
+    @Nullable
     public Rect getAppBounds() {
         return mAppBounds;
     }
 
     /** @see #setBounds(Rect) */
+    @NonNull
     public Rect getBounds() {
         return mBounds;
     }
@@ -903,6 +907,23 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     public static boolean supportSplitScreenWindowingMode(int activityType) {
         return activityType != ACTIVITY_TYPE_ASSISTANT && activityType != ACTIVITY_TYPE_DREAM;
+    }
+
+    /**
+     * Checks if the two {@link Configuration}s are equal to each other for the fields that are read
+     * by {@link Display}.
+     * @hide
+     */
+    public static boolean areConfigurationsEqualForDisplay(@NonNull Configuration newConfig,
+            @NonNull Configuration oldConfig) {
+        // Only report different if max bounds and display rotation is changed, so that it will not
+        // report on Task resizing.
+        if (!newConfig.windowConfiguration.getMaxBounds().equals(
+                oldConfig.windowConfiguration.getMaxBounds())) {
+            return false;
+        }
+        return newConfig.windowConfiguration.getDisplayRotation()
+                == oldConfig.windowConfiguration.getDisplayRotation();
     }
 
     /** @hide */

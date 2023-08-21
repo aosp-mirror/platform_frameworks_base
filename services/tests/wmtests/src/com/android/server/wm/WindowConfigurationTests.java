@@ -30,6 +30,7 @@ import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_MAX_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
+import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.view.Surface.ROTATION_270;
 
@@ -268,5 +269,44 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final int justWindowingMode = WINDOW_CONFIG_WINDOWING_MODE;
         config.setTo(other, justWindowingMode);
         assertEquals(WINDOWING_MODE_UNDEFINED, config.getWindowingMode());
+    }
+
+    @Test
+    public void testAreConfigurationsEqualForDisplay() {
+        final Configuration config0 = new Configuration();
+        final Configuration config1 = new Configuration();
+
+        assertTrue(areConfigurationsEqualForDisplay(config0, config1));
+
+        // Only compare fields read in Display.
+        config0.densityDpi = 1;
+        config1.densityDpi = 2;
+
+        assertTrue(areConfigurationsEqualForDisplay(config0, config1));
+
+        // MaxBounds
+        final Rect bounds0 = new Rect(0, 0, 500, 1000);
+        final Rect bounds1 = new Rect(0, 0, 1000, 500);
+
+        config0.windowConfiguration.setMaxBounds(bounds0);
+        config1.windowConfiguration.setMaxBounds(bounds1);
+
+        assertFalse(areConfigurationsEqualForDisplay(config0, config1));
+
+        config0.windowConfiguration.setMaxBounds(null);
+        config1.windowConfiguration.setMaxBounds(null);
+
+        assertTrue(areConfigurationsEqualForDisplay(config0, config1));
+
+        // DisplayRotation
+        config0.windowConfiguration.setDisplayRotation(0);
+        config1.windowConfiguration.setDisplayRotation(1);
+
+        assertFalse(areConfigurationsEqualForDisplay(config0, config1));
+
+        config0.windowConfiguration.setDisplayRotation(2);
+        config1.windowConfiguration.setDisplayRotation(2);
+
+        assertTrue(areConfigurationsEqualForDisplay(config0, config1));
     }
 }

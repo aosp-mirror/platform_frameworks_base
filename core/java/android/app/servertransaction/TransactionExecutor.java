@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import static android.app.WindowConfiguration.areConfigurationsEqualForDisplay;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_DESTROY;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
@@ -30,10 +31,16 @@ import static android.app.servertransaction.TransactionExecutorHelper.lastCallba
 import static android.app.servertransaction.TransactionExecutorHelper.tId;
 import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
 
+import static com.android.window.flags.Flags.syncWindowConfigUpdateFlag;
+
+import android.annotation.NonNull;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.IBinder;
+import android.os.Process;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -51,12 +58,12 @@ public class TransactionExecutor {
     private static final boolean DEBUG_RESOLVER = false;
     private static final String TAG = "TransactionExecutor";
 
-    private ClientTransactionHandler mTransactionHandler;
-    private PendingTransactionActions mPendingActions = new PendingTransactionActions();
-    private TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
+    private final ClientTransactionHandler mTransactionHandler;
+    private final PendingTransactionActions mPendingActions = new PendingTransactionActions();
+    private final TransactionExecutorHelper mHelper = new TransactionExecutorHelper();
 
     /** Initialize an instance with transaction handler, that will execute all requested actions. */
-    public TransactionExecutor(ClientTransactionHandler clientTransactionHandler) {
+    public TransactionExecutor(@NonNull ClientTransactionHandler clientTransactionHandler) {
         mTransactionHandler = clientTransactionHandler;
     }
 
@@ -122,6 +129,9 @@ public class TransactionExecutor {
         // Index of the last callback that requests some post-execution state.
         final int lastCallbackRequestingState = lastCallbackRequestingState(transaction);
 
+        // Keep track of display ids whose Configuration got updated with this transaction.
+        ArraySet<Integer> configUpdatedDisplays = null;
+
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) {
             final ClientTransactionItem item = callbacks.get(i);
@@ -136,7 +146,29 @@ public class TransactionExecutor {
                 }
             }
 
+            // Can't read flag from isolated process.
+            final boolean isSyncWindowConfigUpdateFlagEnabled = !Process.isIsolated()
+                    && syncWindowConfigUpdateFlag();
+            final Context configUpdatedContext = isSyncWindowConfigUpdateFlagEnabled
+                    ? item.getContextToUpdate(mTransactionHandler, token)
+                    : null;
+            final Configuration preExecutedConfig = configUpdatedContext != null
+                    ? new Configuration(configUpdatedContext.getResources().getConfiguration())
+                    : null;
+
             item.execute(mTransactionHandler, token, mPendingActions);
+
+            if (configUpdatedContext != null) {
+                final Configuration postExecutedConfig = configUpdatedContext.getResources()
+                        .getConfiguration();
+                if (!areConfigurationsEqualForDisplay(postExecutedConfig, preExecutedConfig)) {
+                    if (configUpdatedDisplays == null) {
+                        configUpdatedDisplays = new ArraySet<>();
+                    }
+                    configUpdatedDisplays.add(configUpdatedContext.getDisplayId());
+                }
+            }
+
             item.postExecute(mTransactionHandler, token, mPendingActions);
             if (r == null) {
                 // Launch activity request will create an activity record.
@@ -148,6 +180,13 @@ public class TransactionExecutor {
                 final boolean shouldExcludeLastTransition =
                         i == lastCallbackRequestingState && finalState == postExecutionState;
                 cycleToPath(r, postExecutionState, shouldExcludeLastTransition, transaction);
+            }
+        }
+
+        if (configUpdatedDisplays != null) {
+            final int displayCount = configUpdatedDisplays.size();
+            for (int i = 0; i < displayCount; i++) {
+                // TODO(b/260873529): trigger onDisplayChanged.
             }
         }
     }

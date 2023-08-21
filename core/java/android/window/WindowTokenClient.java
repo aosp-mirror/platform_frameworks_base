@@ -22,6 +22,7 @@ import static android.window.ConfigurationHelper.shouldUpdateResources;
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
 import android.content.Context;
@@ -88,6 +89,15 @@ public class WindowTokenClient extends Binder {
         mContextRef = new WeakReference<>(context);
         mShouldDumpConfigForIme = Build.IS_DEBUGGABLE
                 && context instanceof AbstractInputMethodService;
+    }
+
+    /**
+     * Gets the {@link Context} that this {@link WindowTokenClient} is attached through
+     * {@link #attachContext(Context)}.
+     */
+    @Nullable
+    public Context getContext() {
+        return mContextRef != null ? mContextRef.get() : null;
     }
 
     /**
