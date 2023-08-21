@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.server.wm.CtsWindowInfoUtils.dumpWindowsOnScreen;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowFocus;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowVisible;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -63,6 +64,8 @@ import java.util.concurrent.CountDownLatch;
 @SmallTest
 @RunWith(WindowTestRunner.class)
 public class SurfaceControlViewHostTests {
+    private static final String TAG = "SurfaceControlViewHostTests";
+
     private final ActivityTestRule<TestActivity> mActivityRule = new ActivityTestRule<>(
             TestActivity.class);
     private Instrumentation mInstrumentation;
@@ -120,8 +123,17 @@ public class SurfaceControlViewHostTests {
             mScvh2.setView(mView2, lp2);
         });
 
-        assertTrue("Failed to wait for view1", waitForWindowVisible(mView1));
-        assertTrue("Failed to wait for view2", waitForWindowVisible(mView2));
+        boolean wasVisible = waitForWindowVisible(mView1);
+        if (!wasVisible) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+        }
+        assertTrue("Failed to wait for view1", wasVisible);
+
+        wasVisible = waitForWindowVisible(mView2);
+        if (!wasVisible) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+        }
+        assertTrue("Failed to wait for view2", wasVisible);
 
         IWindow window = IWindow.Stub.asInterface(mActivity.mSurfaceView.getWindowToken());
 
