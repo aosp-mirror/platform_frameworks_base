@@ -52,6 +52,7 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleController mBubbleController;
     private final BubblePositioner mPositioner;
     private final BubbleBarAnimationHelper mAnimationHelper;
+    private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
 
     @Nullable
@@ -80,6 +81,10 @@ public class BubbleBarLayerView extends FrameLayout
 
         mAnimationHelper = new BubbleBarAnimationHelper(context,
                 this, mPositioner);
+        mEducationViewController = new BubbleEducationViewController(context, (boolean visible) -> {
+            if (mExpandedView == null) return;
+            mExpandedView.setObscured(visible);
+        });
 
         mScrimView = new View(getContext());
         mScrimView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -90,9 +95,7 @@ public class BubbleBarLayerView extends FrameLayout
         mScrimView.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
 
-        setOnClickListener(view -> {
-            mBubbleController.collapseStack();
-        });
+        setOnClickListener(view -> hideMenuOrCollapse());
     }
 
     @Override
@@ -108,6 +111,7 @@ public class BubbleBarLayerView extends FrameLayout
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
 
         if (mExpandedView != null) {
+            mEducationViewController.hideManageEducation(/* animated = */ false);
             removeView(mExpandedView);
             mExpandedView = null;
         }
@@ -162,14 +166,27 @@ public class BubbleBarLayerView extends FrameLayout
             final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
             final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
             mExpandedView.setVisibility(GONE);
-            mExpandedView.setUnBubbleConversationCallback(mUnBubbleConversationCallback);
+            mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
             mExpandedView.setLayerBoundsSupplier(() -> new Rect(0, 0, getWidth(), getHeight()));
-            mExpandedView.setUnBubbleConversationCallback(bubbleKey -> {
-                if (mUnBubbleConversationCallback != null) {
-                    mUnBubbleConversationCallback.accept(bubbleKey);
+            mExpandedView.setListener(new BubbleBarExpandedView.Listener() {
+                @Override
+                public void onTaskCreated() {
+                    mEducationViewController.maybeShowManageEducation(b, mExpandedView);
+                }
+
+                @Override
+                public void onUnBubbleConversation(String bubbleKey) {
+                    if (mUnBubbleConversationCallback != null) {
+                        mUnBubbleConversationCallback.accept(bubbleKey);
+                    }
+                }
+
+                @Override
+                public void onBackPressed() {
+                    hideMenuOrCollapse();
                 }
             });
-            mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
+
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
         }
 
@@ -193,6 +210,7 @@ public class BubbleBarLayerView extends FrameLayout
     public void collapse() {
         mIsExpanded = false;
         final BubbleBarExpandedView viewToRemove = mExpandedView;
+        mEducationViewController.hideManageEducation(/* animated = */ true);
         mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
@@ -204,6 +222,17 @@ public class BubbleBarLayerView extends FrameLayout
     public void setUnBubbleConversationCallback(
             @Nullable Consumer<String> unBubbleConversationCallback) {
         mUnBubbleConversationCallback = unBubbleConversationCallback;
+    }
+
+    /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
+    private void hideMenuOrCollapse() {
+        if (mEducationViewController.isManageEducationVisible()) {
+            mEducationViewController.hideManageEducation(/* animated = */ true);
+        } else if (isExpanded() && mExpandedView != null) {
+            mExpandedView.hideMenuOrCollapse();
+        } else {
+            mBubbleController.collapseStack();
+        }
     }
 
     /** Updates the expanded view size and position. */
