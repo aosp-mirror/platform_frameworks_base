@@ -70,7 +70,7 @@
         <activity android:name=".SeamlessRotationActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SeamlessRotationActivity"
                   android:theme="@style/CutoutShortEdges"
-                  android:configChanges="orientation|screenSize"
+                  android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
                   android:label="SeamlessActivity"
                   android:exported="true">
             <intent-filter>
