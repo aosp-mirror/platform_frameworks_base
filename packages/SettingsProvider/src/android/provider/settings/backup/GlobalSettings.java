@@ -24,7 +24,7 @@ public class GlobalSettings {
     /**
      * These keys may be mentioned in the SETTINGS_TO_BACKUP arrays in SystemSettings
      * and SecureSettings as well.  This is because those tables drive both backup and
-     * restore, and restore needs to properly whitelist keys that used to live
+     * restore, and restore needs to properly allowlist keys that used to live
      * in those namespaces.
      *
      * NOTE: Settings are backed up and restored in the order they appear
