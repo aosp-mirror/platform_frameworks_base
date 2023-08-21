@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.filter
 /**
  * An action when run, hides the keyboard if it's open.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun hideKeyboardAction(): () -> Unit {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -41,7 +39,6 @@ fun hideKeyboardAction(): () -> Unit {
  *
  * And when user scrolling the lazy list, hides the keyboard if it's open.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun rememberLazyListStateAndHideKeyboardWhenStartScroll(): LazyListState {
     val listState = rememberLazyListState()

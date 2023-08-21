@@ -30,7 +30,7 @@ android_library {
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
         "androidx.lifecycle_lifecycle-runtime-testing",
-        "mockito",
+        "mockito-kotlin2",
         "truth-prebuilt",
     ],
     kotlincflags: [
