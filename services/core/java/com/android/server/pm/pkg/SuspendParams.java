@@ -24,6 +24,7 @@ import android.util.Slog;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.pm.Flags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -141,7 +142,8 @@ public final class SuspendParams {
         PersistableBundle readAppExtras = null;
         PersistableBundle readLauncherExtras = null;
 
-        final boolean quarantined = in.getAttributeBoolean(null, ATTR_QUARANTINED, false);
+        final boolean quarantined = in.getAttributeBoolean(null, ATTR_QUARANTINED, false)
+                && Flags.quarantinedEnabled();
 
         final int currentDepth = in.getDepth();
         int type;
