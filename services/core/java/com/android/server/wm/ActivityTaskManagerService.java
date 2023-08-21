@@ -4588,6 +4588,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
+     * Updates the {@link ApplicationInfo}s of the package activities th that are attached in the
+     * WM hierarchy.
+     */
+    public void updateActivityApplicationInfo(int userId,
+            ArrayMap<String, ApplicationInfo> applicationInfoByPackage) {
+        synchronized (mGlobalLock) {
+            if (mRootWindowContainer != null) {
+                mRootWindowContainer.updateActivityApplicationInfo(userId,
+                        applicationInfoByPackage);
+            }
+        }
+    }
+
+    /**
      * Update the asset configuration and increase the assets sequence number.
      * @param processes the processes that needs to update the asset configuration
      */

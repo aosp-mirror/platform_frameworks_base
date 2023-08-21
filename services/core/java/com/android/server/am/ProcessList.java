@@ -4907,6 +4907,18 @@ public final class ProcessList {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     void updateApplicationInfoLOSP(List<String> packagesToUpdate, int userId,
             boolean updateFrameworkRes) {
+        final ArrayMap<String, ApplicationInfo> applicationInfoByPackage = new ArrayMap<>();
+        for (int i = packagesToUpdate.size() - 1; i >= 0; i--) {
+            final String packageName = packagesToUpdate.get(i);
+            final ApplicationInfo ai = mService.getPackageManagerInternal().getApplicationInfo(
+                    packageName, STOCK_PM_FLAGS, Process.SYSTEM_UID, userId);
+            if (ai != null) {
+                applicationInfoByPackage.put(packageName, ai);
+            }
+        }
+        mService.mActivityTaskManager.updateActivityApplicationInfo(userId,
+                applicationInfoByPackage);
+
         final ArrayList<WindowProcessController> targetProcesses = new ArrayList<>();
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
@@ -4921,8 +4933,7 @@ public final class ProcessList {
             app.getPkgList().forEachPackage(packageName -> {
                 if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
-                        final ApplicationInfo ai = AppGlobals.getPackageManager()
-                                .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
+                        final ApplicationInfo ai = applicationInfoByPackage.get(packageName);
                         if (ai != null) {
                             if (ai.packageName.equals(app.info.packageName)) {
                                 app.info = ai;
