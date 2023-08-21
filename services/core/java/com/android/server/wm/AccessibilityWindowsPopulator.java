@@ -161,9 +161,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
             final boolean isNotClone = (window.inputConfig & InputConfig.CLONE) == 0;
             final boolean hasTouchableRegion = !window.touchableRegion.isEmpty();
-            final boolean hasNonEmptyFrame =
-                    (window.frameBottom != window.frameTop) && (window.frameLeft
-                            != window.frameRight);
+            final boolean hasNonEmptyFrame = !window.frame.isEmpty();
             if (visible && isNotClone && hasTouchableRegion && hasNonEmptyFrame) {
                 tempVisibleWindows.add(window);
             }
@@ -694,9 +692,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
             instance.mIgnoreDuetoRecentsAnimation = windowState != null && controller != null
                     && controller.shouldIgnoreForAccessibility(windowState);
 
-            final Rect windowFrame = new Rect(inputWindowHandle.frameLeft,
-                    inputWindowHandle.frameTop, inputWindowHandle.frameRight,
-                    inputWindowHandle.frameBottom);
+            final Rect windowFrame = new Rect(inputWindowHandle.frame);
             getTouchableRegionInWindow(instance.mShouldMagnify, inputWindowHandle.touchableRegion,
                     instance.mTouchableRegionInWindow, windowFrame, magnificationInverseMatrix,
                     displayMatrix);

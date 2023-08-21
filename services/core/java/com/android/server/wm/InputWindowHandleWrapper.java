@@ -227,18 +227,6 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setFrame(int left, int top, int right, int bottom) {
-        if (mHandle.frameLeft == left && mHandle.frameTop == top && mHandle.frameRight == right
-                && mHandle.frameBottom == bottom) {
-            return;
-        }
-        mHandle.frameLeft = left;
-        mHandle.frameTop = top;
-        mHandle.frameRight = right;
-        mHandle.frameBottom = bottom;
-        mChanged = true;
-    }
-
     void setSurfaceInset(int inset) {
         if (mHandle.surfaceInset == inset) {
             return;
