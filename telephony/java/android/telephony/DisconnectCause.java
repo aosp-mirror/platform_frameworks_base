@@ -362,7 +362,6 @@ public final class DisconnectCause {
 
     /**
      * Indicates that the call was unable to be made because the satellite modem is enabled.
-     * @hide
      */
     public static final int SATELLITE_ENABLED = 82;
 
