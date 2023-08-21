@@ -92,7 +92,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.flags.FakeFeatureFlags;
@@ -176,8 +175,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private PromptCredentialInteractor mBiometricPromptCredentialInteractor;
     @Mock
     private PromptSelectorInteractor mPromptSelectionInteractor;
-    @Mock
-    private AuthBiometricFingerprintViewModel mAuthBiometricFingerprintViewModel;
     @Mock
     private CredentialViewModel mCredentialViewModel;
     @Mock
@@ -1095,11 +1092,10 @@ public class AuthControllerTest extends SysuiTestCase {
                     mFingerprintManager, mFaceManager, () -> mUdfpsController,
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
                     mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
-                    mLogContextInteractor, () -> mAuthBiometricFingerprintViewModel,
-                    () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
-                    () -> mCredentialViewModel, () -> mPromptViewModel,
-                    mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mUdfpsUtils, mVibratorHelper);
+                    mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
+                    () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
+                    () -> mPromptViewModel, mInteractionJankMonitor, mHandler, mBackgroundExecutor,
+                    mUdfpsUtils, mVibratorHelper);
         }
 
         @Override
