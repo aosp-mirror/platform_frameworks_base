@@ -124,23 +124,26 @@ constructor(
 
             return field
         }
-        private set
 
     override fun start() {
-        initializeViews()
-        bindKeyguardRootView()
-        val notificationPanel =
-            notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
-        unbindKeyguardBottomArea(notificationPanel)
-        bindIndicationArea()
-        bindLockIconView(notificationPanel)
-        bindKeyguardStatusView(notificationPanel)
-        setupNotificationStackScrollLayout(notificationPanel)
-        bindLeftShortcut()
-        bindRightShortcut()
-        bindAmbientIndicationArea()
-        bindSettingsPopupMenu()
-        bindCommunalWidgetArea()
+        if (featureFlags.isEnabled(Flags.LAZY_INFLATE_KEYGUARD)) {
+            keyguardRootView.removeAllViews()
+            initializeViews()
+        } else {
+            bindKeyguardRootView()
+            val notificationPanel =
+                notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
+            unbindKeyguardBottomArea(notificationPanel)
+            bindIndicationArea()
+            bindLockIconView(notificationPanel)
+            bindKeyguardStatusView(notificationPanel)
+            setupNotificationStackScrollLayout(notificationPanel)
+            bindLeftShortcut()
+            bindRightShortcut()
+            bindAmbientIndicationArea()
+            bindSettingsPopupMenu()
+            bindCommunalWidgetArea()
+        }
 
         KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
         keyguardBlueprintCommandListener.start()

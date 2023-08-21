@@ -18,23 +18,17 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
-import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
-import javax.inject.Inject
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
-import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import androidx.constraintlayout.widget.ConstraintSet.START
-import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
+import com.android.systemui.R
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import javax.inject.Inject
 
-class SplitShadeGuidelines @Inject constructor(private val context: Context) :
-    KeyguardSection {
+class SplitShadeGuidelines @Inject constructor(private val context: Context) : KeyguardSection {
+    override fun addViews(constraintLayout: ConstraintLayout) {}
 
-    override fun apply(constraintSet: ConstraintSet) {
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
             // For use on large screens, it will provide a guideline vertically in the center to
             // enable items to be aligned on the left or right sides

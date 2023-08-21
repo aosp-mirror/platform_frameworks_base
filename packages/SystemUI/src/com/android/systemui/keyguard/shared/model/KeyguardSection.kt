@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,18 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.ui.viewmodel
+package com.android.systemui.keyguard.shared.model
 
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
-import javax.inject.Inject
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 
-class KeyguardBlueprintViewModel
-@Inject
-constructor(keyguardBlueprintInteractor: KeyguardBlueprintInteractor) {
-    var currentBluePrint: KeyguardBlueprint? = null
-    val blueprint = keyguardBlueprintInteractor.blueprint
+/**
+ * Lower level modules that determine constraints for a particular section in the lockscreen root
+ * view.
+ */
+interface KeyguardSection {
+    fun addViews(constraintLayout: ConstraintLayout)
+    fun applyConstraints(constraintSet: ConstraintSet)
+    fun onDestroy() {}
 }

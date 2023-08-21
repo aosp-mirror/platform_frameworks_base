@@ -34,6 +34,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
@@ -45,12 +46,12 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
@@ -109,6 +110,7 @@ constructor(
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
     private val keyguardStateController: KeyguardStateController,
+    private val defaultShortcutsSection: DefaultShortcutsSection,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -119,6 +121,7 @@ constructor(
             KeyguardPreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
             false,
         )
+
     /** [shouldHideClock] here means that we never create and bind the clock views */
     private val shouldHideClock: Boolean =
         bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
@@ -176,7 +179,6 @@ constructor(
 
             if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                 setupKeyguardRootView(rootView)
-                setupShortcuts(rootView)
             } else {
                 setUpBottomArea(rootView)
             }
@@ -348,14 +350,14 @@ constructor(
                 FrameLayout.LayoutParams.MATCH_PARENT,
             ),
         )
-        KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
-        keyguardBlueprintInteractor.refreshBlueprint()
+        setupShortcuts(keyguardRootView)
     }
 
-    private fun setupShortcuts(rootView: FrameLayout) {
+    private fun setupShortcuts(keyguardRootView: ConstraintLayout) {
+        defaultShortcutsSection.addShortcutViews(keyguardRootView)
         shortcutsBindings.add(
             KeyguardQuickAffordanceViewBinder.bind(
-                rootView.requireViewById(R.id.start_button),
+                keyguardRootView.requireViewById(R.id.start_button),
                 quickAffordancesCombinedViewModel.startButton,
                 keyguardRootViewModel.alpha,
                 falsingManager,
@@ -367,7 +369,7 @@ constructor(
 
         shortcutsBindings.add(
             KeyguardQuickAffordanceViewBinder.bind(
-                rootView.requireViewById(R.id.end_button),
+                keyguardRootView.requireViewById(R.id.end_button),
                 quickAffordancesCombinedViewModel.endButton,
                 keyguardRootViewModel.alpha,
                 falsingManager,
@@ -516,11 +518,11 @@ constructor(
             // is dark or a light.
             // TODO(b/277832214) we can potentially simplify this code by checking for
             // wallpaperColors being null in the if clause above and removing the many ?.
-            val wallpaperColorScheme =
-                wallpaperColors?.let { ColorScheme(it, /* darkTheme= */ false) }
+            val wallpaperColorScheme = wallpaperColors?.let { ColorScheme(it, darkTheme = false) }
             val lightClockColor = wallpaperColorScheme?.accent1?.s100
             val darkClockColor = wallpaperColorScheme?.accent2?.s600
-            /** Note that when [wallpaperColors] is null, isWallpaperDark is true. */
+
+            // Note that when [wallpaperColors] is null, isWallpaperDark is true.
             val isWallpaperDark: Boolean =
                 (wallpaperColors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) == 0
             clock.events.onSeedColorChanged(

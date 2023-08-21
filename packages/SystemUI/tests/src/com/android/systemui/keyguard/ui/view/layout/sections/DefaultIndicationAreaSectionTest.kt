@@ -22,20 +22,45 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.statusbar.KeyguardIndicationController
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @RunWith(JUnit4::class)
 @SmallTest
 class DefaultIndicationAreaSectionTest : SysuiTestCase() {
-    private val underTest = DefaultIndicationAreaSection(context)
+    @Mock private lateinit var keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel
+    @Mock private lateinit var keyguardRootViewModel: KeyguardRootViewModel
+    @Mock private lateinit var indicationController: KeyguardIndicationController
+    @Mock private lateinit var featureFlags: FeatureFlags
+
+    private lateinit var underTest: DefaultIndicationAreaSection
+
+    @Before
+    fun setup() {
+        MockitoAnnotations.initMocks(this)
+        underTest =
+            DefaultIndicationAreaSection(
+                context,
+                keyguardIndicationAreaViewModel,
+                keyguardRootViewModel,
+                indicationController,
+                featureFlags,
+            )
+    }
 
     @Test
     fun apply() {
         val cs = ConstraintSet()
-        underTest.apply(cs)
+        underTest.applyConstraints(cs)
 
         val constraint = cs.getConstraint(R.id.keyguard_indication_area)
 
