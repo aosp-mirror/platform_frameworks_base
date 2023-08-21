@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
+import com.android.systemui.keyguard.ui.view.KeyguardIndicationArea
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
@@ -96,6 +97,7 @@ constructor(
     private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
     private val notificationStackScrollerLayoutController: NotificationStackScrollLayoutController,
     private val context: Context,
+    private val keyguardIndicationController: KeyguardIndicationController,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -122,6 +124,7 @@ constructor(
         private set
 
     override fun start() {
+        initializeViews()
         bindKeyguardRootView()
         val notificationPanel =
             notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
@@ -181,6 +184,12 @@ constructor(
                 indicationController,
                 featureFlags,
             )
+    }
+
+    /** Initialize views so that corresponding controllers have a view set. */
+    private fun initializeViews() {
+        val indicationArea = KeyguardIndicationArea(context, null)
+        keyguardIndicationController.setIndicationArea(indicationArea)
     }
 
     private fun bindKeyguardRootView() {
