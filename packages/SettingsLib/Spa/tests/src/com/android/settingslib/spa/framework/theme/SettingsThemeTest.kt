@@ -31,10 +31,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.anyInt
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class SettingsThemeTest {
@@ -55,7 +55,7 @@ class SettingsThemeTest {
     @Before
     fun setUp() {
         whenever(context.resources).thenReturn(resources)
-        whenever(resources.getString(anyInt())).thenReturn("")
+        whenever(resources.getString(any())).thenReturn("")
     }
 
     private fun mockAndroidConfig(configName: String, configValue: String) {
