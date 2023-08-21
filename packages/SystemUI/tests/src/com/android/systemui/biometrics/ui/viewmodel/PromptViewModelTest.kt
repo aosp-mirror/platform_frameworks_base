@@ -312,10 +312,13 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(messageVisible).isFalse()
         }
+        val clearIconError = !restart
         assertThat(legacyState)
             .isEqualTo(
                 if (restart) {
                     AuthBiometricView.STATE_AUTHENTICATING
+                } else if (clearIconError) {
+                    AuthBiometricView.STATE_IDLE
                 } else {
                     AuthBiometricView.STATE_HELP
                 }
