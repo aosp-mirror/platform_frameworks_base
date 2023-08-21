@@ -516,6 +516,13 @@ final class ResolveIntentHelper {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
+
+        // Only if the service query is coming from the system process,
+        // it should be allowed to match quarantined components
+        if (callingUid != Process.SYSTEM_UID) {
+            flags |= PackageManager.FILTER_OUT_QUARANTINED_COMPONENTS;
+        }
+
         final String instantAppPkgName = computer.getInstantAppPackageName(callingUid);
         flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
