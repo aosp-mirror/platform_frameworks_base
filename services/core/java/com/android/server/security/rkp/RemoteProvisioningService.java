@@ -105,14 +105,27 @@ public class RemoteProvisioningService extends SystemService {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
-            new RemoteProvisioningShellCommand().dump(pw);
+            final int callerUid = Binder.getCallingUidOrThrow();
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                new RemoteProvisioningShellCommand(getContext(), callerUid).dump(pw);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
         }
 
         @Override
         public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
                 ParcelFileDescriptor err, String[] args) {
-            return new RemoteProvisioningShellCommand().exec(this, in.getFileDescriptor(),
-                    out.getFileDescriptor(), err.getFileDescriptor(), args);
+            final int callerUid = Binder.getCallingUidOrThrow();
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                return new RemoteProvisioningShellCommand(getContext(), callerUid).exec(this,
+                        in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
+                        args);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
         }
     }
 }
