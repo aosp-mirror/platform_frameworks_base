@@ -172,10 +172,9 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 if (recents != null && recents.isNavigationBarAttachedToApp()) {
                     return;
                 }
-            } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS) {
+            } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS
+                    || mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
                 action = Operation.ACTION_SEAMLESS;
-            } else if (mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
-                return;
             }
             mTargetWindowTokens.put(w.mToken, new Operation(action));
             return;
@@ -294,6 +293,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             finishOp(mTargetWindowTokens.keyAt(i));
         }
         mTargetWindowTokens.clear();
+        onAllCompleted();
+    }
+
+    private void onAllCompleted() {
+        if (DEBUG) Slog.d(TAG, "onAllCompleted");
         if (mTimeoutRunnable != null) {
             mService.mH.removeCallbacks(mTimeoutRunnable);
         }
@@ -333,7 +337,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             if (DEBUG) Slog.d(TAG, "Complete directly " + token.getTopChild());
             finishOp(token);
             if (mTargetWindowTokens.isEmpty()) {
-                if (mTimeoutRunnable != null) mService.mH.removeCallbacks(mTimeoutRunnable);
+                onAllCompleted();
                 return true;
             }
         }
@@ -411,14 +415,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mDisplayContent.mInputMethodWindow == null) return;
         final WindowToken imeWindowToken = mDisplayContent.mInputMethodWindow.mToken;
         if (isTargetToken(imeWindowToken)) return;
+        hideImmediately(imeWindowToken, Operation.ACTION_TOGGLE_IME);
+        if (DEBUG) Slog.d(TAG, "hideImeImmediately " + imeWindowToken.getTopChild());
+    }
+
+    private void hideImmediately(WindowToken token, @Operation.Action int action) {
         final boolean original = mHideImmediately;
         mHideImmediately = true;
-        final Operation op = new Operation(Operation.ACTION_TOGGLE_IME);
-        mTargetWindowTokens.put(imeWindowToken, op);
-        fadeWindowToken(false /* show */, imeWindowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
-        op.mLeash = imeWindowToken.getAnimationLeash();
+        final Operation op = new Operation(action);
+        mTargetWindowTokens.put(token, op);
+        fadeWindowToken(false /* show */, token, ANIMATION_TYPE_TOKEN_TRANSFORM);
+        op.mLeash = token.getAnimationLeash();
         mHideImmediately = original;
-        if (DEBUG) Slog.d(TAG, "hideImeImmediately " + imeWindowToken.getTopChild());
     }
 
     /** Returns {@code true} if the window will rotate independently. */
@@ -428,9 +436,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 || isTargetToken(w.mToken);
     }
 
-    /** Returns {@code true} if the controller will run fade animations on the window. */
+    /**
+     * Returns {@code true} if the rotation transition appearance of the window is currently
+     * managed by this controller.
+     */
     boolean isTargetToken(WindowToken token) {
         return mTargetWindowTokens.containsKey(token);
+    }
+
+    /** Returns {@code true} if the controller will run fade animations on the window. */
+    boolean hasFadeOperation(WindowToken token) {
+        final Operation op = mTargetWindowTokens.get(token);
+        return op != null && op.mAction == Operation.ACTION_FADE;
     }
 
     /**
@@ -564,7 +581,18 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);
-        if (op == null) return false;
+        if (op == null) {
+            // If a window becomes visible after the rotation transition is requested but before
+            // the transition is ready, hide it by an animation leash so it won't be flickering
+            // by drawing the rotated content before applying projection transaction of display.
+            // And it will fade in after the display transition is finished.
+            if (mTransitionOp == OP_APP_SWITCH && !mIsStartTransactionCommitted
+                    && canBeAsync(w.mToken)) {
+                hideImmediately(w.mToken, Operation.ACTION_FADE);
+                if (DEBUG) Slog.d(TAG, "Hide on finishDrawing " + w.mToken.getTopChild());
+            }
+            return false;
+        }
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
         if (postDrawTransaction == null || !mIsSyncDrawRequested
                 || canDrawBeforeStartTransaction(op)) {

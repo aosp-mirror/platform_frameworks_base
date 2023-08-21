@@ -1191,6 +1191,7 @@ public class TransitionTests extends WindowTestsBase {
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
         final ActivityRecord app = createActivityRecord(mDisplayContent);
         final Transition transition = app.mTransitionController.createTransition(TRANSIT_OPEN);
         app.mTransitionController.requestStartTransition(transition, app.getTask(),
@@ -1220,9 +1221,17 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.mTransitionController.dispatchLegacyAppTransitionFinished(app);
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
+        // The bar was invisible so it is not handled by the controller. But if it becomes visible
+        // and drawn before the transition starts,
+        assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
+        navBar.finishDrawing(null /* postDrawTransaction */, Integer.MAX_VALUE);
+        assertTrue(asyncRotationController.isTargetToken(navBar.mToken));
+
         player.startTransition();
         // Non-app windows should not be collected.
         assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
+        // Avoid DeviceStateController disturbing the test by triggering another rotation change.
+        doReturn(false).when(mDisplayContent).updateRotationUnchecked();
 
         onRotationTransactionReady(player, mWm.mTransactionFactory.get()).onTransactionCommitted();
         assertEquals(ROTATION_ANIMATION_SEAMLESS, player.mLastReady.getChange(
