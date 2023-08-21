@@ -497,8 +497,7 @@ public class RotationButtonController {
     boolean canShowRotationButton() {
         return mIsNavigationBarShowing
             || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT
-            || isGesturalMode(mNavBarMode)
-            || mTaskBarVisible;
+            || isGesturalMode(mNavBarMode);
     }
 
     @DrawableRes
