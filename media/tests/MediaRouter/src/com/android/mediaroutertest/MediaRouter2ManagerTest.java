@@ -872,7 +872,7 @@ public class MediaRouter2ManagerTest {
         CountDownLatch addedLatch = new CountDownLatch(1);
         CountDownLatch preferenceLatch = new CountDownLatch(1);
 
-        // A dummy callback is required to send route feature info.
+        // A placeholder callback is required to send route feature info.
         RouteCallback routeCallback = new RouteCallback() {};
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
