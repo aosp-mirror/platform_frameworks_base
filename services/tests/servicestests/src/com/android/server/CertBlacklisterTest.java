@@ -34,10 +34,10 @@ import libcore.io.IoUtils;
  */
 public class CertBlacklisterTest extends AndroidTestCase {
 
-    private static final String BLACKLIST_ROOT = System.getenv("ANDROID_DATA") + "/misc/keychain/";
+    private static final String DENYLIST_ROOT = System.getenv("ANDROID_DATA") + "/misc/keychain/";
 
-    public static final String PUBKEY_PATH = BLACKLIST_ROOT + "pubkey_blacklist.txt";
-    public static final String SERIAL_PATH = BLACKLIST_ROOT + "serial_blacklist.txt";
+    public static final String PUBKEY_PATH = DENYLIST_ROOT + "pubkey_blacklist.txt";
+    public static final String SERIAL_PATH = DENYLIST_ROOT + "serial_blacklist.txt";
 
     public static final String PUBKEY_KEY = "pubkey_blacklist";
     public static final String SERIAL_KEY = "serial_blacklist";
