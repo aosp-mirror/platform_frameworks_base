@@ -27,6 +27,7 @@ import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
+import com.android.settingslib.utils.ThreadUtils;
 
 /**
  * Preference controller for bluetooth address
@@ -74,13 +75,18 @@ public abstract class AbstractBluetoothAddressPreferenceController
     protected void updateConnectivity() {
         BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
         if (bluetooth != null && mBtAddress != null) {
-            String address = bluetooth.isEnabled() ? bluetooth.getAddress() : null;
-            if (!TextUtils.isEmpty(address)) {
-                // Convert the address to lowercase for consistency with the wifi MAC address.
-                mBtAddress.setSummary(address.toLowerCase());
-            } else {
-                mBtAddress.setSummary(R.string.status_unavailable);
-            }
+            ThreadUtils.postOnBackgroundThread(() -> {
+                String address = bluetooth.isEnabled() ? bluetooth.getAddress() : null;
+                ThreadUtils.postOnMainThread(() -> {
+                    if (!TextUtils.isEmpty(address)) {
+                        // Convert the address to lowercase for consistency with the wifi MAC
+                        // address.
+                        mBtAddress.setSummary(address.toLowerCase());
+                    } else {
+                        mBtAddress.setSummary(R.string.status_unavailable);
+                    }
+                });
+            });
         }
     }
 }
