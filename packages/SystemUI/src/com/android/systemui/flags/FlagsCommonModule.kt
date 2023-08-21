@@ -25,6 +25,8 @@ import javax.inject.Named
 interface FlagsCommonModule {
     @Binds fun bindsRestarter(impl: ConditionalRestarter): Restarter
 
+    @Binds fun bindsClassic(impl: FeatureFlagsClassic): FeatureFlags
+
     companion object {
         const val ALL_FLAGS = "all_flags"
 

@@ -43,7 +43,7 @@ import javax.inject.Named;
  * how to set flags.
  */
 @SysUISingleton
-public class FeatureFlagsRelease implements FeatureFlags {
+public class FeatureFlagsClassicRelease implements FeatureFlagsClassic {
     static final String TAG = "SysUIFlags";
 
     private final Resources mResources;
@@ -89,7 +89,7 @@ public class FeatureFlagsRelease implements FeatureFlags {
             };
 
     @Inject
-    public FeatureFlagsRelease(
+    public FeatureFlagsClassicRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
             ServerFlagReader serverFlagReader,

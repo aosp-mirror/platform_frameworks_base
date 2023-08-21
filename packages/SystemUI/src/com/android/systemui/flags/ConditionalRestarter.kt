@@ -44,12 +44,12 @@ constructor(
     private var androidRestartRequested = false
 
     override fun restartSystemUI(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "SystemUI Restart requested. Restarting when idle.")
+        Log.d(FeatureFlagsClassicDebug.TAG, "SystemUI Restart requested. Restarting when idle.")
         scheduleRestart(reason)
     }
 
     override fun restartAndroid(reason: String) {
-        Log.d(FeatureFlagsDebug.TAG, "Android Restart requested. Restarting when idle.")
+        Log.d(FeatureFlagsClassicDebug.TAG, "Android Restart requested. Restarting when idle.")
         androidRestartRequested = true
         scheduleRestart(reason)
     }

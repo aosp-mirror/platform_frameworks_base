@@ -67,7 +67,7 @@ import javax.inject.Named;
  * To restore a flag back to its default, leave the `--ez value <0|1>` off of the command.
  */
 @SysUISingleton
-public class FeatureFlagsDebug implements FeatureFlags {
+public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
     static final String TAG = "SysUIFlags";
 
     private final FlagManager mFlagManager;
@@ -116,7 +116,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
             };
 
     @Inject
-    public FeatureFlagsDebug(
+    public FeatureFlagsClassicDebug(
             FlagManager flagManager,
             Context context,
             GlobalSettings globalSettings,
