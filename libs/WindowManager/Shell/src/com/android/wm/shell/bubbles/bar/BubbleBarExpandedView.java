@@ -39,7 +39,6 @@ import com.android.wm.shell.bubbles.BubbleTaskViewHelper;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.taskview.TaskView;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -48,6 +47,18 @@ import java.util.function.Supplier;
  * {@link BubbleController#isShowingAsBubbleBar()}
  */
 public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskViewHelper.Listener {
+    /**
+     * The expanded view listener notifying the {@link BubbleBarLayerView} about the internal
+     * actions and events
+     */
+    public interface Listener {
+        /** Called when the task view task is first created. */
+        void onTaskCreated();
+        /** Called when expanded view needs to un-bubble the given conversation */
+        void onUnBubbleConversation(String bubbleKey);
+        /** Called when expanded view task view back button pressed */
+        void onBackPressed();
+    }
 
     private static final String TAG = BubbleBarExpandedView.class.getSimpleName();
     private static final int INVALID_TASK_ID = -1;
@@ -57,7 +68,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
     private @Nullable Supplier<Rect> mLayerBoundsSupplier;
-    private @Nullable Consumer<String> mUnBubbleConversationCallback;
+    private @Nullable Listener mListener;
 
     private BubbleBarHandleView mHandleView = new BubbleBarHandleView(getContext());
     private @Nullable TaskView mTaskView;
@@ -145,15 +156,13 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mMenuViewController.setListener(new BubbleBarMenuViewController.Listener() {
             @Override
             public void onMenuVisibilityChanged(boolean visible) {
-                if (mTaskView == null || mLayerBoundsSupplier == null) return;
-                // Updates the obscured touchable region for the task surface.
-                mTaskView.setObscuredTouchRect(visible ? mLayerBoundsSupplier.get() : null);
+                setObscured(visible);
             }
 
             @Override
             public void onUnBubbleConversation(Bubble bubble) {
-                if (mUnBubbleConversationCallback != null) {
-                    mUnBubbleConversationCallback.accept(bubble.getKey());
+                if (mListener != null) {
+                    mListener.onUnBubbleConversation(bubble.getKey());
                 }
             }
 
@@ -231,6 +240,9 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     public void onTaskCreated() {
         setContentVisibility(true);
         updateHandleColor(false /* animated */);
+        if (mListener != null) {
+            mListener.onTaskCreated();
+        }
     }
 
     @Override
@@ -240,7 +252,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
 
     @Override
     public void onBackPressed() {
-        mController.collapseStack();
+        if (mListener == null) return;
+        mListener.onBackPressed();
     }
 
     /** Cleans up task view, should be called when the bubble is no longer active. */
@@ -252,6 +265,18 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
             mBubbleTaskViewHelper.cleanUpTaskView();
         }
         mMenuViewController.hideMenu(false /* animated */);
+    }
+
+    /**
+     * Hides the current modal menu view or collapses the bubble stack.
+     * Called from {@link BubbleBarLayerView}
+     */
+    public void hideMenuOrCollapse() {
+        if (mMenuViewController.isMenuVisible()) {
+            mMenuViewController.hideMenu(/* animated = */ true);
+        } else {
+            mController.collapseStack();
+        }
     }
 
     /** Updates the bubble shown in the expanded view. */
@@ -270,10 +295,16 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mLayerBoundsSupplier = supplier;
     }
 
-    /** Sets the function to call to un-bubble the given conversation. */
-    public void setUnBubbleConversationCallback(
-            @Nullable Consumer<String> unBubbleConversationCallback) {
-        mUnBubbleConversationCallback = unBubbleConversationCallback;
+    /** Sets expanded view listener */
+    void setListener(@Nullable Listener listener) {
+        mListener = listener;
+    }
+
+    /** Sets whether the view is obscured by some modal view */
+    void setObscured(boolean obscured) {
+        if (mTaskView == null || mLayerBoundsSupplier == null) return;
+        // Updates the obscured touchable region for the task surface.
+        mTaskView.setObscuredTouchRect(obscured ? mLayerBoundsSupplier.get() : null);
     }
 
     /**
