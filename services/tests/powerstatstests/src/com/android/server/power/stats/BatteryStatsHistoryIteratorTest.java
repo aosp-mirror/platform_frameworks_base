@@ -32,6 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Future;
 
@@ -49,6 +51,7 @@ public class BatteryStatsHistoryIteratorTest {
     @Before
     public void setup() {
         final File historyDir = createTemporaryDirectory(getClass().getSimpleName());
+        mMockClock.currentTime = 3000;
         mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
         mBatteryStats.setDummyExternalStatsSync(mExternalStatsSync);
         mBatteryStats.setRecordAllHistoryLocked(true);
@@ -70,20 +73,10 @@ public class BatteryStatsHistoryIteratorTest {
     }
 
     @Test
-    public void testIterator() {
-        mMockClock.realtime = 1000;
-        mMockClock.uptime = 1000;
+    public void unconstrainedIteration() {
+        prepareHistory();
 
-        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
-                100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
-                1_000_000, 1_000_000);
-        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
-                100, /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0, 2_000_000,
-                2_000_000, 2_000_000);
-        mBatteryStats.noteAlarmStartLocked("foo", null, APP_UID, 3_000_000, 2_000_000);
-        mBatteryStats.noteAlarmFinishLocked("foo", null, APP_UID, 3_001_000, 2_001_000);
-
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory();
+        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
 
         BatteryStats.HistoryItem item;
 
@@ -116,23 +109,75 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(iterator.next()).isNull();
     }
 
-    // Test history that spans multiple buffers and uses more than 32k different strings.
     @Test
-    public void tagsLongHistory() {
+    public void constrainedIteration() {
+        prepareHistory();
+
+        // Initial time is 3000
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 0),
+                3_000L, 3_000L, 1003_000L, 2003_000L, 2004_000L);
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(1000_000, 0),
+                1003_000L, 2003_000L, 2004_000L);
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 2000_000L),
+                3_000L, 3_000L, 1003_000L);
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(1003_000L, 2004_000L),
+                1003_000L, 2003_000L);
+    }
+
+    private void prepareHistory() {
+        mMockClock.realtime = 1000;
+        mMockClock.uptime = 1000;
+        mMockClock.currentTime = 3000;
+
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
                 1_000_000, 1_000_000);
+        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
+                100, /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0, 2_000_000,
+                2_000_000, 2_000_000);
+        mBatteryStats.noteAlarmStartLocked("foo", null, APP_UID, 3_000_000, 2_000_000);
+        mBatteryStats.noteAlarmFinishLocked("foo", null, APP_UID, 3_001_000, 2_001_000);
+    }
+
+    private void assertIncludedEvents(BatteryStatsHistoryIterator iterator,
+            Long... expectedTimestamps) {
+        ArrayList<Long> actualTimestamps = new ArrayList<>();
+        while (iterator.hasNext()) {
+            BatteryStats.HistoryItem item = iterator.next();
+            actualTimestamps.add(item.currentTime);
+        }
+        assertThat(actualTimestamps).isEqualTo(Arrays.asList(expectedTimestamps));
+    }
+
+    // Test history that spans multiple buffers and uses more than 32k different strings.
+    @Test
+    public void tagsLongHistory() {
+        mMockClock.currentTime = 1_000_000;
+        mMockClock.realtime = 1_000_000;
+        mMockClock.uptime = 1_000_000;
+
+        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
+                100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, mMockClock.realtime,
+                mMockClock.uptime, mMockClock.currentTime);
 
         // More than 32k strings
         final int eventCount = 0x7FFF + 100;
         for (int i = 0; i < eventCount; i++) {
             // Names repeat in order to verify de-duping of identical history tags.
             String name = "a" + (i % 10);
-            mBatteryStats.noteAlarmStartLocked(name, null, APP_UID, 3_000_000, 2_000_000);
-            mBatteryStats.noteAlarmFinishLocked(name, null, APP_UID, 3_500_000, 2_500_000);
+            mMockClock.currentTime += 1_000_000;
+            mMockClock.realtime += 1_000_000;
+            mMockClock.uptime += 1_000_000;
+            mBatteryStats.noteAlarmStartLocked(name, null, APP_UID,
+                    mMockClock.realtime, mMockClock.uptime);
+            mMockClock.currentTime += 500_000;
+            mMockClock.realtime += 500_000;
+            mMockClock.uptime += 500_000;
+            mBatteryStats.noteAlarmFinishLocked(name, null, APP_UID,
+                    mMockClock.realtime, mMockClock.uptime);
         }
 
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory();
+        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
 
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull();
@@ -145,12 +190,6 @@ public class BatteryStatsHistoryIteratorTest {
         assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_NONE);
         assertThat(item.eventTag).isNull();
         assertThat(item.time).isEqualTo(1_000_000);
-
-        assertThat(item = iterator.next()).isNotNull();
-        assertThat(item.cmd).isEqualTo((int) BatteryStats.HistoryItem.CMD_UPDATE);
-        assertThat(item.eventCode).isEqualTo(BatteryStats.HistoryItem.EVENT_NONE);
-        assertThat(item.eventTag).isNull();
-        assertThat(item.time).isEqualTo(2_000_000);
 
         for (int i = 0; i < eventCount; i++) {
             String name = "a" + (i % 10);
@@ -205,7 +244,7 @@ public class BatteryStatsHistoryIteratorTest {
 
         mExternalStatsSync.updateCpuStats(300, 7_100_000, 4_100_000);
 
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory();
+        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
 
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull();

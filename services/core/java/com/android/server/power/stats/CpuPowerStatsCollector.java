@@ -16,7 +16,9 @@
 
 package com.android.server.power.stats;
 
+import android.os.BatteryConsumer;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.Keep;
@@ -42,7 +44,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
     private final int mUidStatsSize;
     // Reusable instance
-    private final PowerStats mCpuPowerStats = new PowerStats();
+    private final PowerStats mCpuPowerStats;
     private long mLastUpdateTimestampNanos;
 
     public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
@@ -69,6 +71,10 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         }
         mUidStatsSize = powerProfile.getCpuPowerBracketCount();
         mTempUidStats = new long[mUidStatsSize];
+
+        mCpuPowerStats = new PowerStats(
+                new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 0, mUidStatsSize,
+                        new PersistableBundle()));
     }
 
     /**

@@ -23,6 +23,7 @@ android_test {
         "androidx.test.uiautomator_uiautomator",
         "mockito-target-minus-junit4",
         "servicestests-utils",
+        "platform-test-annotations",
         "flag-junit",
     ],
 

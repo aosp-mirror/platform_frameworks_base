@@ -687,12 +687,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                     BatteryStats.HistoryItem.EVENT_COLLECT_EXTERNAL_STATS,
                     reason, 0);
 
-            if (energyConsumerDeltas != null && !energyConsumerDeltas.isEmpty()
-                    && mStats.isUsageHistoryEnabled()) {
-                mStats.recordEnergyConsumerDetailsLocked(elapsedRealtime, uptime,
-                        mEnergyConsumerSnapshot.getEnergyConsumerDetails(energyConsumerDeltas));
-            }
-
             if ((updateFlags & UPDATE_CPU) != 0) {
                 if (useLatestStates) {
                     onBattery = mStats.isOnBatteryLocked();

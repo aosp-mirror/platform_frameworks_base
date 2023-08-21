@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -49,7 +50,7 @@ public class PowerStatsCollectorTest {
                 mMockClock) {
             @Override
             protected PowerStats collectStats() {
-                return new PowerStats();
+                return new PowerStats(new PowerStats.Descriptor(0, 0, 0, new PersistableBundle()));
             }
         };
         mCollector.addConsumer(stats -> mCollectedStats = stats);
