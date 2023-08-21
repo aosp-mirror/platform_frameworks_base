@@ -7361,6 +7361,90 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getChildLocalHitRegion(@NonNull View child, @NonNull Region region,
+            @NonNull Matrix matrix, boolean isHover) {
+        if (!child.hasIdentityMatrix()) {
+            matrix.preConcat(child.getInverseMatrix());
+        }
+
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
+        matrix.preTranslate(-dx, -dy);
+
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
+        // Map the bounds of this view into the region's coordinates and clip the region.
+        final RectF rect = mAttachInfo != null ? mAttachInfo.mTmpTransformRect : new RectF();
+        rect.set(0, 0, width, height);
+        matrix.mapRect(rect);
+
+        boolean notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                Math.round(rect.right), Math.round(rect.bottom), Region.Op.INTERSECT);
+
+        if (isHover) {
+            HoverTarget target = mFirstHoverTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final HoverTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit) {
+                target = mFirstHoverTarget;
+                while (notEmpty && target != null) {
+                    final HoverTarget next = target.next;
+                    final View hoveredView = target.child;
+
+                    rect.set(hoveredView.mLeft, hoveredView.mTop, hoveredView.mRight,
+                            hoveredView.mBottom);
+                    matrix.mapRect(rect);
+                    notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                            Math.round(rect.right), Math.round(rect.bottom), Region.Op.DIFFERENCE);
+                    target = next;
+                }
+            }
+        } else {
+            TouchTarget target = mFirstTouchTarget;
+            boolean childIsHit = false;
+            while (target != null) {
+                final TouchTarget next = target.next;
+                if (target.child == child) {
+                    childIsHit = true;
+                    break;
+                }
+                target = next;
+            }
+            if (!childIsHit) {
+                target = mFirstTouchTarget;
+                while (notEmpty && target != null) {
+                    final TouchTarget next = target.next;
+                    final View touchedView = target.child;
+
+                    rect.set(touchedView.mLeft, touchedView.mTop, touchedView.mRight,
+                            touchedView.mBottom);
+                    matrix.mapRect(rect);
+                    notEmpty = region.op(Math.round(rect.left), Math.round(rect.top),
+                            Math.round(rect.right), Math.round(rect.bottom), Region.Op.DIFFERENCE);
+                    target = next;
+                }
+            }
+        }
+
+        if (notEmpty && mParent != null) {
+            notEmpty = mParent.getChildLocalHitRegion(this, region, matrix, isHover);
+        }
+        return notEmpty;
+    }
+
+
     private static void applyOpToRegionByBounds(Region region, View view, Region.Op op) {
         final int[] locationInWindow = new int[2];
         view.getLocationInWindow(locationInWindow);

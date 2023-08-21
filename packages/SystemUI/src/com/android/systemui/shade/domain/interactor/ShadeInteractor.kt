@@ -19,7 +19,6 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -39,28 +38,17 @@ class ShadeInteractor
 @Inject
 constructor(
     @Application scope: CoroutineScope,
-    private val shadeRepository: ShadeRepository,
     disableFlagsRepository: DisableFlagsRepository,
     keyguardRepository: KeyguardRepository,
     userSetupRepository: UserSetupRepository,
     deviceProvisionedController: DeviceProvisionedController,
     userInteractor: UserInteractor,
 ) {
-    /**
-     * Value from `0` to `1` representing the amount the shade has expanded where `1` is fully
-     * expanded and `0` is fully collapsed.
-     */
-    val expansion = shadeRepository.expansion
-
     /** Emits true if the shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
             .map { it.isShadeEnabled() }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
-
-    fun setExpansion(expansion: Float) {
-        shadeRepository.setExpansion(expansion)
-    }
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =

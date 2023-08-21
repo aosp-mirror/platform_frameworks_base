@@ -64,6 +64,7 @@ public final class Tile implements Parcelable {
     private IBinder mToken;
     private Icon mIcon;
     private CharSequence mLabel;
+    private CharSequence mDefaultLabel;
     private CharSequence mSubtitle;
     private CharSequence mContentDescription;
     private CharSequence mStateDescription;
@@ -142,7 +143,22 @@ public final class Tile implements Parcelable {
      * Gets the current label for the tile.
      */
     public CharSequence getLabel() {
+        return mLabel != null ? mLabel : mDefaultLabel;
+    }
+
+    /**
+     * @hide
+     * @return
+     */
+    public CharSequence getCustomLabel() {
         return mLabel;
+    }
+
+    /**
+     * @hide
+     */
+    public void setDefaultLabel(CharSequence defaultLabel) {
+        mDefaultLabel = defaultLabel;
     }
 
     /**
@@ -267,6 +283,7 @@ public final class Tile implements Parcelable {
         }
         dest.writeInt(mState);
         TextUtils.writeToParcel(mLabel, dest, flags);
+        TextUtils.writeToParcel(mDefaultLabel, dest, flags);
         TextUtils.writeToParcel(mSubtitle, dest, flags);
         TextUtils.writeToParcel(mContentDescription, dest, flags);
         TextUtils.writeToParcel(mStateDescription, dest, flags);
@@ -285,6 +302,7 @@ public final class Tile implements Parcelable {
         }
         mState = source.readInt();
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+        mDefaultLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mStateDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

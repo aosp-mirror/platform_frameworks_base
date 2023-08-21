@@ -542,6 +542,9 @@
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
+    <!-- If this is true, short press on power button will be available whenever the default display
+         is on even if the device is non-interactive (dreaming). -->
+    <bool name="config_supportShortPressPowerWhenDefaultDisplayOn">false</bool>
 
     <!-- If this is true, then keep dreaming when unplugging.
          This config was formerly known as config_keepDreamingWhenUndocking.
@@ -6171,6 +6174,9 @@
     <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
     <bool name="config_assistTouchGestureEnabledDefault">true</bool>
+
+    <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
+    <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
 
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->

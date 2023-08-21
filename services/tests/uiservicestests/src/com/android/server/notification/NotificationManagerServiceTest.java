@@ -7753,7 +7753,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnNotificationActionClick() {
         final int actionIndex = 2;
         final Notification.Action action =
-                new Notification.Action.Builder(null, "text", null).build();
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
         final boolean generatedByAssistant = false;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
@@ -7777,7 +7778,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testOnAssistantNotificationActionClick() {
         final int actionIndex = 1;
         final Notification.Action action =
-                new Notification.Action.Builder(null, "text", null).build();
+                new Notification.Action.Builder(null, "text", PendingIntent.getActivity(
+                        mContext, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE)).build();
         final boolean generatedByAssistant = true;
 
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);

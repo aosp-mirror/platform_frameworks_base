@@ -113,7 +113,7 @@ internal fun writeToString(tile: Tile): String {
     return with(tile) {
         JSONObject()
             .put(STATE, state)
-            .put(LABEL, label)
+            .put(LABEL, customLabel)
             .put(SUBTITLE, subtitle)
             .put(CONTENT_DESCRIPTION, contentDescription)
             .put(STATE_DESCRIPTION, stateDescription)

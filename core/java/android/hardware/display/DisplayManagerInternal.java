@@ -370,8 +370,9 @@ public abstract class DisplayManagerInternal {
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
+     * is not provided for layer mirroring by SurfaceFlinger. Size is rotated to reflect the current
+     * display device orientation.
+     * Used for mirroring from MediaProjection, or a physical display based on display flags.
      */
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
 

@@ -36,8 +36,8 @@ PointerControllerContext::PointerControllerContext(
       : mPolicy(policy),
         mLooper(looper),
         mSpriteController(spriteController),
-        mHandler(new MessageHandler()),
-        mCallback(new LooperCallback()),
+        mHandler(sp<MessageHandler>::make()),
+        mCallback(sp<LooperCallback>::make()),
         mController(controller),
         mAnimator(*this) {
     std::scoped_lock lock(mLock);

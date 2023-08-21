@@ -21,8 +21,6 @@ import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.app.StatusBarManager;
-import android.media.AudioManager;
-import android.media.session.MediaSessionLegacyHelper;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -47,6 +45,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionState;
@@ -101,13 +100,21 @@ public class NotificationShadeWindowViewController {
     private final NotificationInsetsController mNotificationInsetsController;
     private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlags mFeatureFlags;
+    private final KeyEventInteractor mKeyEventInteractor;
     private GestureDetector mPulsingWakeupGestureHandler;
     private GestureDetector mDreamingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
     private MotionEvent mDownEvent;
+    // TODO rename to mLaunchAnimationRunning
     private boolean mExpandAnimationRunning;
+    /**
+     *  When mExpandAnimationRunning is true and the touch dispatcher receives a down even after
+     *  uptime exceeds this, the dispatcher will stop blocking touches for the launch animation,
+     *  which has presumabely not completed due to an error.
+     */
+    private long mLaunchAnimationTimeout;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
@@ -164,7 +171,8 @@ public class NotificationShadeWindowViewController {
             FeatureFlags featureFlags,
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
-            BouncerLogger bouncerLogger) {
+            BouncerLogger bouncerLogger,
+            KeyEventInteractor keyEventInteractor) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
@@ -190,6 +198,7 @@ public class NotificationShadeWindowViewController {
         mNotificationInsetsController = notificationInsetsController;
         mIsTrackpadCommonEnabled = featureFlags.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlags = featureFlags;
+        mKeyEventInteractor = keyEventInteractor;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -278,7 +287,12 @@ public class NotificationShadeWindowViewController {
                     return logDownDispatch(ev, "touch cancelled", false);
                 }
                 if (mExpandAnimationRunning) {
-                    return logDownDispatch(ev, "expand animation running", false);
+                    if (isDown && mClock.uptimeMillis() > mLaunchAnimationTimeout) {
+                        mShadeLogger.d("NSWVC: launch animation timed out");
+                        setExpandAnimationRunning(false);
+                    } else {
+                        return logDownDispatch(ev, "expand animation running", false);
+                    }
                 }
 
                 if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
@@ -457,44 +471,17 @@ public class NotificationShadeWindowViewController {
 
             @Override
             public boolean interceptMediaKey(KeyEvent event) {
-                return mService.interceptMediaKey(event);
+                return mKeyEventInteractor.interceptMediaKey(event);
             }
 
             @Override
             public boolean dispatchKeyEventPreIme(KeyEvent event) {
-                return mService.dispatchKeyEventPreIme(event);
+                return mKeyEventInteractor.dispatchKeyEventPreIme(event);
             }
 
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
-                boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
-                switch (event.getKeyCode()) {
-                    case KeyEvent.KEYCODE_BACK:
-                        if (!down) {
-                            mBackActionInteractor.onBackRequested();
-                        }
-                        return true;
-                    case KeyEvent.KEYCODE_MENU:
-                        if (!down) {
-                            return mService.onMenuPressed();
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_SPACE:
-                        if (!down) {
-                            return mService.onSpacePressed();
-                        }
-                        break;
-                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    case KeyEvent.KEYCODE_VOLUME_UP:
-                        if (mStatusBarStateController.isDozing()) {
-                            MediaSessionLegacyHelper.getHelper(mView.getContext())
-                                    .sendVolumeKeyEvent(
-                                            event, AudioManager.USE_DEFAULT_STREAM_TYPE, true);
-                            return true;
-                        }
-                        break;
-                }
-                return false;
+                return mKeyEventInteractor.dispatchKeyEvent(event);
             }
         });
 
@@ -555,8 +542,12 @@ public class NotificationShadeWindowViewController {
         pw.println(mTouchActive);
     }
 
-    private void setExpandAnimationRunning(boolean running) {
+    @VisibleForTesting
+    void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
+            if (running) {
+                mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
+            }
             mExpandAnimationRunning = running;
             mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);
         }

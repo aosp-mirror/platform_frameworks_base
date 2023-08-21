@@ -747,6 +747,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
         mLocked.spriteController = new SpriteController(mLooper, layer, [this](int displayId) {
             return getParentSurfaceForPointers(displayId);
         });
+        mLocked.spriteController->setHandlerController(mLocked.spriteController);
     }
 }
 

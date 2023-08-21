@@ -42,6 +42,7 @@ import com.android.systemui.qs.pipeline.data.repository.FakeInstalledTilesCompon
 import com.android.systemui.qs.pipeline.data.repository.FakeTileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.domain.model.TileModel
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import com.android.systemui.qs.toProto
@@ -79,6 +80,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     private val customTileAddedRepository: CustomTileAddedRepository =
         FakeCustomTileAddedRepository()
     private val featureFlags = FakeFeatureFlags()
+    private val pipelineFlags = QSPipelineFlagsRepository(featureFlags)
     private val tileLifecycleManagerFactory = TLMFactory()
 
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
@@ -120,7 +122,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                 backgroundDispatcher = testDispatcher,
                 scope = testScope.backgroundScope,
                 logger = logger,
-                featureFlags = featureFlags,
+                featureFlags = pipelineFlags,
             )
     }
 

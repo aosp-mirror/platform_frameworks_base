@@ -20,7 +20,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.TextView
+import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.ImageFloatingTextView
+import com.android.internal.widget.MessagingLayout
 import javax.inject.Inject
 
 class PrecomputedTextViewFactory @Inject constructor() : NotifRemoteViewsFactory {
@@ -35,6 +37,10 @@ class PrecomputedTextViewFactory @Inject constructor() : NotifRemoteViewsFactory
             TextView::class.java.simpleName -> PrecomputedTextView(context, attrs)
             ImageFloatingTextView::class.java.name ->
                 PrecomputedImageFloatingTextView(context, attrs)
+            MessagingLayout::class.java.name ->
+                MessagingLayout(context, attrs).apply { setPrecomputedTextEnabled(true) }
+            ConversationLayout::class.java.name ->
+                ConversationLayout(context, attrs).apply { setPrecomputedTextEnabled(true) }
             else -> null
         }
     }

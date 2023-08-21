@@ -1628,6 +1628,14 @@ public class Notification implements Parcelable
      */
     public static final int GROUP_ALERT_CHILDREN = 2;
 
+    /**
+     * Constant for the {@link Builder#setGroup(String) group key} that is added to notifications
+     * that are not already grouped when {@link Builder#setSilent()} is used.
+     *
+     * @hide
+     */
+    public static final String GROUP_KEY_SILENT = "silent";
+
     private int mGroupAlertBehavior = GROUP_ALERT_ALL;
 
     /**
@@ -4285,6 +4293,35 @@ public class Notification implements Parcelable
             mN.setSmallIcon(icon);
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 mN.icon = icon.getResId();
+            }
+            return this;
+        }
+
+        /**
+         * If {@code true}, silences this instance of the notification, regardless of the sounds or
+         * vibrations set on the notification or notification channel. If {@code false}, then the
+         * normal sound and vibration logic applies.
+         *
+         * @hide
+         */
+        public @NonNull Builder setSilent(boolean silent) {
+            if (!silent) {
+                return this;
+            }
+            if (mN.isGroupSummary()) {
+                setGroupAlertBehavior(GROUP_ALERT_CHILDREN);
+            } else {
+                setGroupAlertBehavior(GROUP_ALERT_SUMMARY);
+            }
+
+            setVibrate(null);
+            setSound(null);
+            mN.defaults &= ~DEFAULT_SOUND;
+            mN.defaults &= ~DEFAULT_VIBRATE;
+            setDefaults(mN.defaults);
+
+            if (TextUtils.isEmpty(mN.mGroupKey)) {
+                setGroup(GROUP_KEY_SILENT);
             }
             return this;
         }

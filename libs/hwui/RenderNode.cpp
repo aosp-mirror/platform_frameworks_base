@@ -109,6 +109,13 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     output << std::endl;
 }
 
+void RenderNode::visit(std::function<void(const RenderNode&)> func) const {
+    func(*this);
+    if (mDisplayList) {
+        mDisplayList.visit(func);
+    }
+}
+
 int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
     size += mStagingDisplayList.getUsedSize();

@@ -355,7 +355,7 @@ object Flags {
 
     // TODO(b/278068252): Tracking Bug
     @JvmField
-    val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = false)
+    val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = true)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
@@ -512,11 +512,6 @@ object Flags {
     val ENABLE_FLING_TO_DISMISS_PIP =
         sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
 
-    @Keep
-    @JvmField
-    val ENABLE_PIP_KEEP_CLEAR_ALGORITHM =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_keep_clear_algorithm", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
@@ -537,13 +532,6 @@ object Flags {
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
             teamfood = false
         )
-
-    // TODO(b/198643358): Tracking bug
-    @Keep
-    @JvmField
-    val ENABLE_PIP_SIZE_LARGE_SCREEN =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip_size_large_screen", default = true)
-
 
     // TODO(b/293252410) : Tracking Bug
     @JvmField
@@ -627,6 +615,10 @@ object Flags {
 
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
+
+    /** TODO(b/295143676): Tracking bug. When enable, captures a screenshot for each display. */
+    @JvmField
+    val MULTI_DISPLAY_SCREENSHOT = unreleasedFlag("multi_display_screenshot")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug

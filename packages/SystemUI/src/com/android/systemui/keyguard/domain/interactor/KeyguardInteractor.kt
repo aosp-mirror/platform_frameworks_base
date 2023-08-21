@@ -40,10 +40,10 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
+import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import javax.inject.Inject
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -68,18 +67,6 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
 ) {
-
-    data class PreviewMode(
-        val isInPreviewMode: Boolean = false,
-        val shouldHighlightSelectedAffordance: Boolean = false,
-    )
-
-    /**
-     * Whether this view-model instance is powering the preview experience that renders exclusively
-     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
-     * experience.
-     */
-    val previewMode = MutableStateFlow(PreviewMode())
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.

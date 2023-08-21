@@ -281,11 +281,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
             underTest.onPreviewSlotSelected(
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             )
-            keyguardInteractor.previewMode.value =
-                KeyguardInteractor.PreviewMode(
-                    isInPreviewMode = true,
-                    shouldHighlightSelectedAffordance = true,
-                )
+            underTest.enablePreviewMode(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START, true)
 
             repository.setKeyguardShowing(false)
             val latest = collectLastValue(underTest.startButton)
@@ -330,11 +326,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
             underTest.onPreviewSlotSelected(
                 KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             )
-            keyguardInteractor.previewMode.value =
-                KeyguardInteractor.PreviewMode(
-                    isInPreviewMode = true,
-                    shouldHighlightSelectedAffordance = true,
-                )
+            underTest.enablePreviewMode(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START, true)
 
             repository.setKeyguardShowing(false)
             val endButton = collectLastValue(underTest.endButton)

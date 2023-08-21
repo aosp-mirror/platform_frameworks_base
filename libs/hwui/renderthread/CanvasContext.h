@@ -238,6 +238,8 @@ public:
 
     static bool shouldDither();
 
+    void visitAllRenderNodes(std::function<void(const RenderNode&)>) const;
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline,

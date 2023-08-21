@@ -136,7 +136,11 @@ public class NotificationRankingUpdateTest {
         NotificationListenerService.RankingMap retrievedRankings =
                 retrievedRankingUpdate.getRankingMap();
         assertNotNull(retrievedRankings);
-        assertTrue(retrievedRankingUpdate.isFdNotNullAndClosed());
+        // The rankingUpdate file descriptor is only non-null in the new path.
+        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(
+                SystemUiSystemPropertiesFlags.NotificationFlags.RANKING_UPDATE_ASHMEM)) {
+            assertTrue(retrievedRankingUpdate.isFdNotNullAndClosed());
+        }
         NotificationListenerService.Ranking retrievedRanking =
                 new NotificationListenerService.Ranking();
         assertTrue(retrievedRankings.getRanking(TEST_KEY, retrievedRanking));

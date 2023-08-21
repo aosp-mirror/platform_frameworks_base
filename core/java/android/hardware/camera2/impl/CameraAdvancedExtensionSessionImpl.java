@@ -90,7 +90,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private final HashMap<Integer, ImageReader> mReaderMap = new HashMap<>();
     private RequestProcessor mRequestProcessor = new RequestProcessor();
     private final int mSessionId;
-    private final IBinder mToken;
+    private IBinder mToken = null;
 
     private Surface mClientRepeatingRequestSurface;
     private Surface mClientCaptureSurface;
@@ -103,6 +103,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private boolean mInitialized;
     private boolean mSessionClosed;
 
+    private final Context mContext;
+
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock;
 
@@ -113,14 +115,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     public static CameraAdvancedExtensionSessionImpl createCameraAdvancedExtensionSession(
             @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
             @NonNull Map<String, CameraCharacteristics> characteristicsMap,
-            @NonNull Context ctx, @NonNull ExtensionSessionConfiguration config, int sessionId)
+            @NonNull Context ctx, @NonNull ExtensionSessionConfiguration config, int sessionId,
+            @NonNull IBinder token)
             throws CameraAccessException, RemoteException {
-        final IBinder token = new Binder(TAG + " : " + sessionId);
-        boolean success = CameraExtensionCharacteristics.registerClient(ctx, token);
-        if (!success) {
-            throw new UnsupportedOperationException("Unsupported extension!");
-        }
-
         String cameraId = cameraDevice.getId();
         CameraExtensionCharacteristics extensionChars = new CameraExtensionCharacteristics(ctx,
                 cameraId, characteristicsMap);
@@ -204,8 +201,9 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         IAdvancedExtenderImpl extender = CameraExtensionCharacteristics.initializeAdvancedExtension(
                 config.getExtension());
         extender.init(cameraId, characteristicsMapNative);
-        CameraAdvancedExtensionSessionImpl ret = new CameraAdvancedExtensionSessionImpl(extender,
-                cameraDevice, characteristicsMapNative, repeatingRequestSurface,
+
+        CameraAdvancedExtensionSessionImpl ret = new CameraAdvancedExtensionSessionImpl(ctx,
+                extender, cameraDevice, characteristicsMapNative, repeatingRequestSurface,
                 burstCaptureSurface, postviewSurface, config.getStateCallback(),
                 config.getExecutor(), sessionId, token);
 
@@ -217,13 +215,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         return ret;
     }
 
-    private CameraAdvancedExtensionSessionImpl(@NonNull IAdvancedExtenderImpl extender,
+    private CameraAdvancedExtensionSessionImpl(Context ctx,
+            @NonNull IAdvancedExtenderImpl extender,
             @NonNull CameraDeviceImpl cameraDevice,
             Map<String, CameraMetadataNative> characteristicsMap,
             @Nullable Surface repeatingRequestSurface, @Nullable Surface burstCaptureSurface,
             @Nullable Surface postviewSurface,
             @NonNull StateCallback callback, @NonNull Executor executor,
-            int sessionId, @NonNull IBinder token) {
+            int sessionId,
+            @NonNull IBinder token) {
+        mContext = ctx;
         mAdvancedExtender = extender;
         mCameraDevice = cameraDevice;
         mCharacteristicsMap = characteristicsMap;
@@ -578,12 +579,16 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 mSessionProcessor = null;
             }
 
-            CameraExtensionCharacteristics.unregisterClient(mToken);
-            if (mInitialized || (mCaptureSession != null)) {
-                notifyClose = true;
-                CameraExtensionCharacteristics.releaseSession();
+
+            if (mToken != null) {
+                if (mInitialized || (mCaptureSession != null)) {
+                    notifyClose = true;
+                    CameraExtensionCharacteristics.releaseSession();
+                }
+                CameraExtensionCharacteristics.unregisterClient(mContext, mToken);
             }
             mInitialized = false;
+            mToken = null;
 
             for (ImageReader reader : mReaderMap.values()) {
                 reader.close();

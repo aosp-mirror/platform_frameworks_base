@@ -386,6 +386,8 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Button text shown on an authentication screen giving the user the option to make an emergency call without unlocking their device [CHAR LIMIT=20] -->
+    <string name="work_challenge_emergency_button_text">Emergency</string>
 
     <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
     <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>

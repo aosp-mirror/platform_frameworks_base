@@ -10,6 +10,7 @@ per-file PowerManagerInternal.java = michaelwr@google.com, santoscordon@google.c
 # BatteryStats
 per-file *BatteryConsumer* = file:/BATTERY_STATS_OWNERS
 per-file BatteryManager* = file:/BATTERY_STATS_OWNERS
+per-file PowerMonitor* = file:/BATTERY_STATS_OWNERS
 per-file PowerComponents.java = file:/BATTERY_STATS_OWNERS
 per-file *Stats* = file:/BATTERY_STATS_OWNERS
 

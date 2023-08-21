@@ -2550,19 +2550,32 @@ public class CameraDeviceImpl extends CameraDevice
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
                 mPhysicalIdsToChars);
         characteristicsMap.put(mCameraId, mCharacteristics);
+        boolean initializationFailed = true;
+        IBinder token = new Binder(TAG + " : " + mNextSessionId++);
         try {
+            boolean ret = CameraExtensionCharacteristics.registerClient(mContext, token);
+            if (!ret) {
+                token = null;
+                throw new UnsupportedOperationException("Unsupported extension!");
+            }
+
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
                                 this, characteristicsMap, mContext, extensionConfiguration,
-                                mNextSessionId++);
+                                mNextSessionId, token);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
                         this, characteristicsMap, mContext, extensionConfiguration,
-                        mNextSessionId++);
+                        mNextSessionId, token);
             }
+            initializationFailed = false;
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+        } finally {
+            if (initializationFailed && (token != null)) {
+                CameraExtensionCharacteristics.unregisterClient(mContext, token);
+            }
         }
     }
 }

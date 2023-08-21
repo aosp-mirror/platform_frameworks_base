@@ -2,6 +2,7 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
@@ -46,6 +47,7 @@ object CredentialViewBinder {
         val descriptionView: TextView = view.requireViewById(R.id.description)
         val iconView: ImageView? = view.findViewById(R.id.icon)
         val errorView: TextView = view.requireViewById(R.id.error)
+        val emergencyButtonView: Button = view.requireViewById(R.id.emergencyCallButton)
 
         var errorTimer: Job? = null
 
@@ -74,6 +76,13 @@ object CredentialViewBinder {
                         descriptionView.textOrHide = header.description
 
                         iconView?.setImageDrawable(header.icon)
+
+                        if (header.showEmergencyCallButton) {
+                            emergencyButtonView.visibility = View.VISIBLE
+                            emergencyButtonView.setOnClickListener {
+                                viewModel.doEmergencyCall(view.context)
+                            }
+                        }
 
                         // Only animate this if we're transitioning from a biometric view.
                         if (viewModel.animateContents.value) {

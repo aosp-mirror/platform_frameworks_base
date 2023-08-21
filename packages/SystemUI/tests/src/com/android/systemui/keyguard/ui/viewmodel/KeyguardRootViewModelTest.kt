@@ -45,7 +45,6 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
-    @Mock private lateinit var keyguardQuickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel
 
     @Before
     fun setUp() {
@@ -63,10 +62,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         keyguardInteractor = withDeps.keyguardInteractor
         repository = withDeps.repository
 
-        underTest = KeyguardRootViewModel(
-            keyguardInteractor,
-            keyguardQuickAffordancesCombinedViewModel,
-        )
+        underTest = KeyguardRootViewModel(keyguardInteractor)
     }
 
     @Test
@@ -89,10 +85,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     fun alpha_inPreviewMode_doesNotChange() =
         testScope.runTest {
             val value = collectLastValue(underTest.alpha)
-            underTest.enablePreviewMode(
-                initiallySelectedSlotId = null,
-                shouldHighlightSelectedAffordance = false,
-            )
+            underTest.enablePreviewMode()
 
             Truth.assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.1f)

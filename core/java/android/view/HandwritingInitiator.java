@@ -19,7 +19,10 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
@@ -78,11 +81,17 @@ public class HandwritingInitiator {
     private int mConnectionCount = 0;
     private final InputMethodManager mImm;
 
+    private final RectF mTempRectF = new RectF();
+
+    private final Region mTempRegion = new Region();
+
+    private final Matrix mTempMatrix = new Matrix();
+
     /**
      * The handwrite-able View that is currently the target of a hovering stylus pointer. This is
      * used to help determine whether the handwriting PointerIcon should be shown in
      * {@link #onResolvePointerIcon(Context, MotionEvent)} so that we can reduce the number of calls
-     * to {@link #findBestCandidateView(float, float)}.
+     * to {@link #findBestCandidateView(float, float, boolean)}.
      */
     @Nullable
     private WeakReference<View> mCachedHoverTarget = null;
@@ -184,8 +193,8 @@ public class HandwritingInitiator {
                 final float y = motionEvent.getY(pointerIndex);
                 if (largerThanTouchSlop(x, y, mState.mStylusDownX, mState.mStylusDownY)) {
                     mState.mExceedHandwritingSlop = true;
-                    View candidateView =
-                            findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY);
+                    View candidateView = findBestCandidateView(mState.mStylusDownX,
+                            mState.mStylusDownY, /* isHover */ false);
                     if (candidateView != null) {
                         if (candidateView == getConnectedView()) {
                             if (!candidateView.hasFocus()) {
@@ -393,13 +402,14 @@ public class HandwritingInitiator {
             final View cachedHoverTarget = getCachedHoverTarget();
             if (cachedHoverTarget != null) {
                 final Rect handwritingArea = getViewHandwritingArea(cachedHoverTarget);
-                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, cachedHoverTarget)
+                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, cachedHoverTarget,
+                        /* isHover */ true)
                         && shouldTriggerStylusHandwritingForView(cachedHoverTarget)) {
                     return cachedHoverTarget;
                 }
             }
 
-            final View candidateView = findBestCandidateView(hoverX, hoverY);
+            final View candidateView = findBestCandidateView(hoverX, hoverY, /* isHover */ true);
 
             if (candidateView != null) {
                 mCachedHoverTarget = new WeakReference<>(candidateView);
@@ -429,14 +439,14 @@ public class HandwritingInitiator {
      * @param y the y coordinates of the stylus event, in the coordinates of the window.
      */
     @Nullable
-    private View findBestCandidateView(float x, float y) {
+    private View findBestCandidateView(float x, float y, boolean isHover) {
         // If the connectedView is not null and do not set any handwriting area, it will check
         // whether the connectedView's boundary contains the initial stylus position. If true,
         // directly return the connectedView.
         final View connectedView = getConnectedView();
         if (connectedView != null) {
             Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (isInHandwritingArea(handwritingArea, x, y, connectedView)
+            if (isInHandwritingArea(handwritingArea, x, y, connectedView, isHover)
                     && shouldTriggerStylusHandwritingForView(connectedView)) {
                 return connectedView;
             }
@@ -450,7 +460,7 @@ public class HandwritingInitiator {
         for (HandwritableViewInfo viewInfo : handwritableViewInfos) {
             final View view = viewInfo.getView();
             final Rect handwritingArea = viewInfo.getHandwritingArea();
-            if (!isInHandwritingArea(handwritingArea, x, y, view)
+            if (!isInHandwritingArea(handwritingArea, x, y, view, isHover)
                     || !shouldTriggerStylusHandwritingForView(view)) {
                 continue;
             }
@@ -546,15 +556,48 @@ public class HandwritingInitiator {
      * Return true if the (x, y) is inside by the given {@link Rect} with the View's
      * handwriting bounds with offsets applied.
      */
-    private static boolean isInHandwritingArea(@Nullable Rect handwritingArea,
-            float x, float y, View view) {
+    private boolean isInHandwritingArea(@Nullable Rect handwritingArea,
+            float x, float y, View view, boolean isHover) {
         if (handwritingArea == null) return false;
 
-        return contains(handwritingArea, x, y,
+        if (!contains(handwritingArea, x, y,
                 view.getHandwritingBoundsOffsetLeft(),
                 view.getHandwritingBoundsOffsetTop(),
                 view.getHandwritingBoundsOffsetRight(),
-                view.getHandwritingBoundsOffsetBottom());
+                view.getHandwritingBoundsOffsetBottom())) {
+            return false;
+        }
+
+        // The returned handwritingArea computed by ViewParent#getChildVisibleRect didn't consider
+        // the case where a view is stacking on top of the editor. (e.g. DrawerLayout, popup)
+        // We must check the hit region of the editor again, and avoid the case where another
+        // view on top of the editor is handling MotionEvents.
+        ViewParent parent = view.getParent();
+        if (parent == null) {
+            return true;
+        }
+
+        Region region = mTempRegion;
+        mTempRegion.set(0, 0, view.getWidth(), view.getHeight());
+        Matrix matrix = mTempMatrix;
+        matrix.reset();
+        if (!parent.getChildLocalHitRegion(view, region, matrix, isHover)) {
+            return false;
+        }
+
+        // It's not easy to extend the region by the given handwritingBoundsOffset. Instead, we
+        // create a rectangle surrounding the motion event location and check if this rectangle
+        // overlaps with the hit region of the editor.
+        float left = x - view.getHandwritingBoundsOffsetRight();
+        float top = y - view.getHandwritingBoundsOffsetBottom();
+        float right = Math.max(x + view.getHandwritingBoundsOffsetLeft(), left + 1);
+        float bottom =  Math.max(y + view.getHandwritingBoundsOffsetTop(), top + 1);
+        RectF rectF = mTempRectF;
+        rectF.set(left, top, right, bottom);
+        matrix.mapRect(rectF);
+
+        return region.op(Math.round(rectF.left), Math.round(rectF.top),
+                Math.round(rectF.right), Math.round(rectF.bottom), Region.Op.INTERSECT);
     }
 
     /**
