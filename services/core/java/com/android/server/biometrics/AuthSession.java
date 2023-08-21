@@ -150,6 +150,10 @@ public final class AuthSession implements IBinder.DeathRecipient {
     // Timestamp when hardware authentication occurred
     private long mAuthenticatedTimeMs;
 
+    @NonNull
+    private final OperationContextExt mOperationContext;
+
+
     AuthSession(@NonNull Context context,
             @NonNull BiometricContext biometricContext,
             @NonNull IStatusBarService statusBarService,
@@ -215,6 +219,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mFingerprintSensorProperties = fingerprintSensorProperties;
         mCancelled = false;
         mBiometricFrameworkStatsLogger = logger;
+        mOperationContext = new OperationContextExt(true /* isBP */);
 
         try {
             mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
@@ -581,6 +586,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
         } else {
             Slog.d(TAG, "delaying fingerprint sensor start");
         }
+
+        mBiometricContext.updateContext(mOperationContext, isCrypto());
     }
 
     // call once anytime after onDialogAnimatedIn() to indicate it's appropriate to start the
@@ -743,12 +750,12 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", RequireConfirmation: " + mPreAuthInfo.confirmationRequested
                         + ", State: " + FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED
-                        + ", Latency: " + latency);
+                        + ", Latency: " + latency
+                        + ", SessionId: " + mOperationContext.getId());
             }
 
             mBiometricFrameworkStatsLogger.authenticate(
-                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
-                            isCrypto()),
+                    mOperationContext,
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
@@ -780,13 +787,13 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
                         + ", Reason: " + reason
                         + ", Error: " + error
-                        + ", Latency: " + latency);
+                        + ", Latency: " + latency
+                        + ", SessionId: " + mOperationContext.getId());
             }
             // Auth canceled
             if (error != 0) {
                 mBiometricFrameworkStatsLogger.error(
-                        mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
-                                isCrypto()),
+                        mOperationContext,
                         statsModality(),
                         BiometricsProtoEnums.ACTION_AUTHENTICATE,
                         BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
