@@ -39,6 +39,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -76,6 +77,8 @@ public class RotationButtonController {
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private static final int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
+    private static final boolean OEM_DISALLOW_ROTATION_IN_SUW =
+            SystemProperties.getBoolean("ro.setupwizard.rotation_locked", false);
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
     private static final int NUM_ACCEPTED_ROTATION_SUGGESTIONS_FOR_INTRODUCTION = 3;
@@ -375,6 +378,12 @@ public class RotationButtonController {
     }
 
     public void onRotationProposal(int rotation, boolean isValid) {
+        boolean isUserSetupComplete = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, 0) != 0;
+        if (!isUserSetupComplete && OEM_DISALLOW_ROTATION_IN_SUW) {
+            return;
+        }
+
         int windowRotation = mWindowRotationProvider.get();
 
         if (!mRotationButton.acceptRotationProposal()) {
