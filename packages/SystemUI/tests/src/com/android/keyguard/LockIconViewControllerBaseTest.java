@@ -24,7 +24,6 @@ import static com.android.systemui.flags.Flags.MIGRATE_LOCK_ICON;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -148,7 +147,6 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(MIGRATE_LOCK_ICON, false);
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mUnderTest = new LockIconViewController(
-                mLockIconView,
                 mStatusBarStateController,
                 mKeyguardUpdateMonitor,
                 mKeyguardViewController,
@@ -167,7 +165,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                                 .getKeyguardTransitionInteractor(),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags,
-                mPrimaryBouncerInteractor
+                mPrimaryBouncerInteractor,
+                mContext
         );
     }
 
@@ -228,9 +227,6 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
 
     protected void init(boolean useMigrationFlag) {
         mFeatureFlags.set(DOZING_MIGRATION_1, useMigrationFlag);
-        mUnderTest.init();
-
-        verify(mLockIconView, atLeast(1)).addOnAttachStateChangeListener(mAttachCaptor.capture());
-        mAttachCaptor.getValue().onViewAttachedToWindow(mLockIconView);
+        mUnderTest.setLockIconView(mLockIconView);
     }
 }

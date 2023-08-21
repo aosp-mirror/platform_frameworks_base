@@ -142,11 +142,13 @@ public class LockIconView extends FrameLayout implements Dumpable {
                 mLockIconCenter.y + mRadius);
 
         final FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        lp.width = (int) (mSensorRect.right - mSensorRect.left);
-        lp.height = (int) (mSensorRect.bottom - mSensorRect.top);
-        lp.topMargin = (int) mSensorRect.top;
-        lp.setMarginStart((int) mSensorRect.left);
-        setLayoutParams(lp);
+        if (lp != null) {
+            lp.width = (int) (mSensorRect.right - mSensorRect.left);
+            lp.height = (int) (mSensorRect.bottom - mSensorRect.top);
+            lp.topMargin = (int) mSensorRect.top;
+            lp.setMarginStart((int) mSensorRect.left);
+            setLayoutParams(lp);
+        }
     }
 
     @Override

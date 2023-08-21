@@ -28,6 +28,7 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLE
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -74,7 +75,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.io.PrintWriter;
@@ -90,7 +90,7 @@ import javax.inject.Inject;
  * icon will show a set distance from the bottom of the device.
  */
 @SysUISingleton
-public class LockIconViewController extends ViewController<LockIconView> implements Dumpable {
+public class LockIconViewController implements Dumpable {
     private static final String TAG = "LockIconViewController";
     private static final float sDefaultDensity =
             (float) DisplayMetrics.DENSITY_DEVICE_STABLE / (float) DisplayMetrics.DENSITY_DEFAULT;
@@ -109,6 +109,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final ConfigurationController mConfigurationController;
     @NonNull private final DelayableExecutor mExecutor;
     private boolean mUdfpsEnrolled;
+    private Resources mResources;
+    private Context mContext;
 
     @NonNull private final AnimatedStateListDrawable mIcon;
 
@@ -120,6 +122,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @NonNull private final KeyguardTransitionInteractor mTransitionInteractor;
     @NonNull private final KeyguardInteractor mKeyguardInteractor;
+    @NonNull private final View.AccessibilityDelegate mAccessibilityDelegate;
 
     // Tracks the velocity of a touch to help filter out the touches that move too fast.
     private VelocityTracker mVelocityTracker;
@@ -154,6 +157,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private boolean mDownDetected;
     private final Rect mSensorTouchLocation = new Rect();
+    private LockIconView mView;
 
     @VisibleForTesting
     final Consumer<TransitionStep> mDozeTransitionCallback = (TransitionStep step) -> {
@@ -178,7 +182,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     @Inject
     public LockIconViewController(
-            @Nullable LockIconView view,
             @NonNull StatusBarStateController statusBarStateController,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
             @NonNull KeyguardViewController keyguardViewController,
@@ -195,9 +198,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             @NonNull KeyguardTransitionInteractor transitionInteractor,
             @NonNull KeyguardInteractor keyguardInteractor,
             @NonNull FeatureFlags featureFlags,
-            PrimaryBouncerInteractor primaryBouncerInteractor
+            PrimaryBouncerInteractor primaryBouncerInteractor,
+            Context context
     ) {
-        super(view);
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mAuthController = authController;
@@ -218,16 +221,40 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mMaxBurnInOffsetY = resources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
 
         mIcon = (AnimatedStateListDrawable)
-                resources.getDrawable(R.drawable.super_lock_icon, mView.getContext().getTheme());
-        mView.setImageDrawable(mIcon);
+                resources.getDrawable(R.drawable.super_lock_icon, context.getTheme());
         mUnlockedLabel = resources.getString(R.string.accessibility_unlock_button);
         mLockedLabel = resources.getString(R.string.accessibility_lock_icon);
         mLongPressTimeout = resources.getInteger(R.integer.config_lockIconLongPress);
         dumpManager.registerDumpable(TAG, this);
+        mResources = resources;
+        mContext = context;
+
+        mAccessibilityDelegate = new View.AccessibilityDelegate() {
+            private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityAuthenticateHint =
+                    new AccessibilityNodeInfo.AccessibilityAction(
+                            AccessibilityNodeInfoCompat.ACTION_CLICK,
+                            mResources.getString(R.string.accessibility_authenticate_hint));
+            private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityEnterHint =
+                    new AccessibilityNodeInfo.AccessibilityAction(
+                            AccessibilityNodeInfoCompat.ACTION_CLICK,
+                            mResources.getString(R.string.accessibility_enter_hint));
+            public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(v, info);
+                if (isActionable()) {
+                    if (mShowLockIcon) {
+                        info.addAction(mAccessibilityAuthenticateHint);
+                    } else if (mShowUnlockIcon) {
+                        info.addAction(mAccessibilityEnterHint);
+                    }
+                }
+            }
+        };
     }
 
-    @Override
-    protected void onInit() {
+    /** Sets the LockIconView to the controller and rebinds any that depend on it. */
+    public void setLockIconView(LockIconView lockIconView) {
+        mView = lockIconView;
+        mView.setImageDrawable(mIcon);
         mView.setAccessibilityDelegate(mAccessibilityDelegate);
 
         if (mFeatureFlags.isEnabled(DOZING_MIGRATION_1)) {
@@ -240,10 +267,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             collectFlow(mView, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
                     mIsActiveDreamLockscreenHostedCallback);
         }
-    }
 
-    @Override
-    protected void onViewAttached() {
         updateIsUdfpsEnrolled();
         updateConfiguration();
         updateKeyguardShowing();
@@ -256,19 +280,49 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mStatusBarState = mStatusBarStateController.getState();
 
         updateColors();
-        mConfigurationController.addCallback(mConfigurationListener);
-
-        mAuthController.addCallback(mAuthControllerCallback);
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mKeyguardStateController.addCallback(mKeyguardStateCallback);
         mDownDetected = false;
         updateBurnInOffsets();
         updateVisibility();
 
+        updateAccessibility();
+
+        lockIconView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View view) {
+                registerCallbacks();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View view) {
+                unregisterCallbacks();
+            }
+        });
+
+        if (lockIconView.isAttachedToWindow()) {
+            registerCallbacks();
+        }
+    }
+
+    private void registerCallbacks() {
+        mConfigurationController.addCallback(mConfigurationListener);
+        mAuthController.addCallback(mAuthControllerCallback);
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mKeyguardStateController.addCallback(mKeyguardStateCallback);
         mAccessibilityManager.addAccessibilityStateChangeListener(
                 mAccessibilityStateChangeListener);
-        updateAccessibility();
+
+    }
+
+    private void unregisterCallbacks() {
+        mAuthController.removeCallback(mAuthControllerCallback);
+        mConfigurationController.removeCallback(mConfigurationListener);
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
+        mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mKeyguardStateController.removeCallback(mKeyguardStateCallback);
+        mAccessibilityManager.removeAccessibilityStateChangeListener(
+                mAccessibilityStateChangeListener);
+
     }
 
     private void updateAccessibility() {
@@ -277,18 +331,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             mView.setOnClickListener(null);
         }
-    }
-
-    @Override
-    protected void onViewDetached() {
-        mAuthController.removeCallback(mAuthControllerCallback);
-        mConfigurationController.removeCallback(mConfigurationListener);
-        mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
-        mKeyguardStateController.removeCallback(mKeyguardStateCallback);
-
-        mAccessibilityManager.removeAccessibilityStateChangeListener(
-                mAccessibilityStateChangeListener);
     }
 
     public float getTop() {
@@ -363,28 +405,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     }
 
-    private final View.AccessibilityDelegate mAccessibilityDelegate =
-            new View.AccessibilityDelegate() {
-        private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityAuthenticateHint =
-                new AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_CLICK,
-                        getResources().getString(R.string.accessibility_authenticate_hint));
-        private final AccessibilityNodeInfo.AccessibilityAction mAccessibilityEnterHint =
-                new AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_CLICK,
-                        getResources().getString(R.string.accessibility_enter_hint));
-        public void onInitializeAccessibilityNodeInfo(View v, AccessibilityNodeInfo info) {
-            super.onInitializeAccessibilityNodeInfo(v, info);
-            if (isActionable()) {
-                if (mShowLockIcon) {
-                    info.addAction(mAccessibilityAuthenticateHint);
-                } else if (mShowUnlockIcon) {
-                    info.addAction(mAccessibilityEnterHint);
-                }
-            }
-        }
-    };
-
     private boolean isLockScreen() {
         return !mIsDozing
                 && !mIsBouncerShowing
@@ -401,18 +421,15 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     }
 
     private void updateConfiguration() {
-        WindowManager windowManager = getContext().getSystemService(WindowManager.class);
+        WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
         mWidthPixels = bounds.right;
         mHeightPixels = bounds.bottom;
-        mBottomPaddingPx = getResources().getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
-        mDefaultPaddingPx =
-                getResources().getDimensionPixelSize(R.dimen.lock_icon_padding);
-
-        mUnlockedLabel = mView.getContext().getResources().getString(
+        mBottomPaddingPx = mResources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom);
+        mDefaultPaddingPx = mResources.getDimensionPixelSize(R.dimen.lock_icon_padding);
+        mUnlockedLabel = mResources.getString(
                 R.string.accessibility_unlock_button);
-        mLockedLabel = mView.getContext()
-                .getResources().getString(R.string.accessibility_lock_icon);
+        mLockedLabel = mResources.getString(R.string.accessibility_lock_icon);
         updateLockIconLocation();
     }
 
@@ -755,7 +772,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             mVibrator.vibrate(
                     Process.myUid(),
-                    getContext().getOpPackageName(),
+                    mContext.getOpPackageName(),
                     UdfpsController.EFFECT_CLICK,
                     "lock-icon-down",
                     TOUCH_VIBRATION_ATTRIBUTES);
@@ -769,7 +786,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         } else {
             mVibrator.vibrate(
                     Process.myUid(),
-                    getContext().getOpPackageName(),
+                    mContext.getOpPackageName(),
                     UdfpsController.EFFECT_CLICK,
                     "lock-screen-lock-icon-longpress",
                     TOUCH_VIBRATION_ATTRIBUTES);

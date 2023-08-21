@@ -24,6 +24,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
+import com.android.keyguard.LockIconView
+import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
@@ -98,6 +100,7 @@ constructor(
     private val notificationStackScrollerLayoutController: NotificationStackScrollLayoutController,
     private val context: Context,
     private val keyguardIndicationController: KeyguardIndicationController,
+    private val lockIconViewController: LockIconViewController,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -190,6 +193,8 @@ constructor(
     private fun initializeViews() {
         val indicationArea = KeyguardIndicationArea(context, null)
         keyguardIndicationController.setIndicationArea(indicationArea)
+
+        lockIconViewController.setLockIconView(LockIconView(context, null))
     }
 
     private fun bindKeyguardRootView() {
@@ -213,6 +218,9 @@ constructor(
         } else {
             keyguardRootView.findViewById<View?>(R.id.lock_icon_view)?.let {
                 keyguardRootView.removeView(it)
+            }
+            legacyParent.requireViewById<LockIconView>(R.id.lock_icon_view).let {
+                lockIconViewController.setLockIconView(it)
             }
         }
     }
