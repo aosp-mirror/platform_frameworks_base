@@ -17,9 +17,12 @@
 
 package com.android.systemui.keyguard
 
+import android.content.Context
 import android.content.res.Configuration
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.KeyguardStatusViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
@@ -92,6 +95,7 @@ constructor(
     private val communalWidgetViewModel: CommunalWidgetViewModel,
     private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
     private val notificationStackScrollerLayoutController: NotificationStackScrollLayoutController,
+    private val context: Context,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -100,7 +104,22 @@ constructor(
     private var rightShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
     private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
     private var settingsPopupMenuHandle: DisposableHandle? = null
-    private var keyguardStatusViewController: KeyguardStatusViewController? = null
+    var keyguardStatusViewController: KeyguardStatusViewController? = null
+        get() {
+            if (field == null) {
+                val statusViewComponent =
+                    keyguardStatusViewComponentFactory.build(
+                        LayoutInflater.from(context).inflate(R.layout.keyguard_status_view, null)
+                            as KeyguardStatusView
+                    )
+                val controller = statusViewComponent.keyguardStatusViewController
+                controller.init()
+                field = controller
+            }
+
+            return field
+        }
+        private set
 
     override fun start() {
         bindKeyguardRootView()
@@ -307,6 +326,5 @@ constructor(
      * Temporary, to allow NotificationPanelViewController to use the same instance while code is
      * migrated: b/288242803
      */
-    fun getKeyguardStatusViewController() = keyguardStatusViewController
     fun getKeyguardRootView() = keyguardRootView
 }
