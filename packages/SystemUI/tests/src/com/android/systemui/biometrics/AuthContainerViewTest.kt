@@ -39,13 +39,13 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.flags.FakeFeatureFlags
@@ -109,6 +109,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
+    private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
     private val bpCredentialInteractor = PromptCredentialInteractor(
@@ -118,10 +119,12 @@ open class AuthContainerViewTest : SysuiTestCase() {
     )
     private val promptSelectorInteractor by lazy {
         PromptSelectorInteractorImpl(
+            fingerprintRepository,
             biometricPromptRepository,
             lockPatternUtils,
         )
     }
+
     private val displayStateInteractor = DisplayStateInteractorImpl(
         testScope.backgroundScope,
         mContext,
@@ -129,9 +132,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         rearDisplayStateRepository
     )
 
-    private val authBiometricFingerprintViewModel = AuthBiometricFingerprintViewModel(
-        displayStateInteractor
-    )
+
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
     private var authContainer: TestAuthContainerView? = null
@@ -524,10 +525,14 @@ open class AuthContainerViewTest : SysuiTestCase() {
         userManager,
         lockPatternUtils,
         interactionJankMonitor,
-        { authBiometricFingerprintViewModel },
         { promptSelectorInteractor },
         { bpCredentialInteractor },
-        PromptViewModel(promptSelectorInteractor, vibrator, featureFlags),
+        PromptViewModel(
+            displayStateInteractor,
+            promptSelectorInteractor,
+            vibrator,
+            featureFlags
+        ),
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
         fakeExecutor,

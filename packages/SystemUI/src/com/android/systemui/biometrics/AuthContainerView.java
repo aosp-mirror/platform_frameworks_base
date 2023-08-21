@@ -73,9 +73,7 @@ import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteracto
 import com.android.systemui.biometrics.domain.model.BiometricModalities;
 import com.android.systemui.biometrics.ui.BiometricPromptLayout;
 import com.android.systemui.biometrics.ui.CredentialView;
-import com.android.systemui.biometrics.ui.binder.AuthBiometricFingerprintViewBinder;
 import com.android.systemui.biometrics.ui.binder.BiometricViewBinder;
-import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -142,8 +140,6 @@ public class AuthContainerView extends LinearLayout
 
     // TODO: these should be migrated out once ready
     private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
-    private final Provider<AuthBiometricFingerprintViewModel>
-            mAuthBiometricFingerprintViewModelProvider;
     private final @NonNull Provider<PromptSelectorInteractor> mPromptSelectorInteractorProvider;
     // TODO(b/251476085): these should be migrated out of the view
     private final Provider<CredentialViewModel> mCredentialViewModelProvider;
@@ -283,8 +279,6 @@ public class AuthContainerView extends LinearLayout
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
-            @NonNull Provider<AuthBiometricFingerprintViewModel>
-                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractor,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractor,
             @NonNull PromptViewModel promptViewModel,
@@ -293,9 +287,9 @@ public class AuthContainerView extends LinearLayout
             @NonNull VibratorHelper vibratorHelper) {
         this(config, featureFlags, applicationCoroutineScope, fpProps, faceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                jankMonitor, authBiometricFingerprintViewModelProvider, promptSelectorInteractor,
-                promptCredentialInteractor, promptViewModel, credentialViewModelProvider,
-                new Handler(Looper.getMainLooper()), bgExecutor, vibratorHelper);
+                jankMonitor, promptSelectorInteractor, promptCredentialInteractor, promptViewModel,
+                credentialViewModelProvider, new Handler(Looper.getMainLooper()), bgExecutor,
+                vibratorHelper);
     }
 
     @VisibleForTesting
@@ -309,8 +303,6 @@ public class AuthContainerView extends LinearLayout
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull InteractionJankMonitor jankMonitor,
-            @NonNull Provider<AuthBiometricFingerprintViewModel>
-                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<PromptCredentialInteractor> credentialInteractor,
             @NonNull PromptViewModel promptViewModel,
@@ -359,7 +351,6 @@ public class AuthContainerView extends LinearLayout
         mBackgroundExecutor = bgExecutor;
         mInteractionJankMonitor = jankMonitor;
         mPromptCredentialInteractor = credentialInteractor;
-        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
         mPromptSelectorInteractorProvider = promptSelectorInteractorProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
         mPromptViewModel = promptViewModel;
@@ -442,9 +433,6 @@ public class AuthContainerView extends LinearLayout
                 fingerprintAndFaceView.updateOverrideIconLayoutParamsSize();
                 fingerprintAndFaceView.setFaceClass3(
                         faceProperties.sensorStrength == STRENGTH_STRONG);
-                final AuthBiometricFingerprintViewModel fpAndFaceViewModel =
-                        mAuthBiometricFingerprintViewModelProvider.get();
-                AuthBiometricFingerprintViewBinder.bind(fingerprintAndFaceView, fpAndFaceViewModel);
                 mBiometricView = fingerprintAndFaceView;
             } else if (fpProperties != null) {
                 final AuthBiometricFingerprintView fpView =
@@ -453,9 +441,6 @@ public class AuthContainerView extends LinearLayout
                 fpView.setSensorProperties(fpProperties);
                 fpView.setScaleFactorProvider(config.mScaleProvider);
                 fpView.updateOverrideIconLayoutParamsSize();
-                final AuthBiometricFingerprintViewModel fpViewModel =
-                        mAuthBiometricFingerprintViewModelProvider.get();
-                AuthBiometricFingerprintViewBinder.bind(fpView, fpViewModel);
                 mBiometricView = fpView;
             } else if (faceProperties != null) {
                 mBiometricView = (AuthBiometricFaceView) layoutInflater.inflate(
