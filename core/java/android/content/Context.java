@@ -4081,6 +4081,7 @@ public abstract class Context {
             VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
+            THREAD_NETWORK_SERVICE,
             CONNECTIVITY_SERVICE,
             PAC_PROXY_SERVICE,
             VCN_MANAGEMENT_SERVICE,
@@ -4753,6 +4754,20 @@ public abstract class Context {
      */
     @SystemApi
     public static final String TETHERING_SERVICE = "tethering";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.thread.ThreadNetworkManager}.
+     *
+     * <p>On devices without {@link PackageManager#FEATURE_THREAD_NETWORK} system feature
+     * the {@link #getSystemService(String)} will return {@code null}.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.thread.ThreadNetworkManager
+     * @hide
+     */
+    @SystemApi
+    public static final String THREAD_NETWORK_SERVICE = "thread_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
