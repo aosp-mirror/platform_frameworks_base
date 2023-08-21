@@ -58,6 +58,7 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.common.pip.PipMediaController;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
@@ -341,6 +342,13 @@ public abstract class WMShellBaseModule {
     static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
             PackageManager packageManager) {
         return new PipUiEventLogger(uiEventLogger, packageManager);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipMediaController providePipMediaController(Context context,
+            @ShellMainThread Handler mainHandler) {
+        return new PipMediaController(context, mainHandler);
     }
 
 

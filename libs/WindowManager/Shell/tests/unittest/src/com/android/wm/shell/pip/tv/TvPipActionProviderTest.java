@@ -38,7 +38,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipMediaController;
 
 import org.junit.Before;
 import org.junit.Test;
