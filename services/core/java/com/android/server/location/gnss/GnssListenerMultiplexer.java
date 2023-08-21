@@ -201,10 +201,10 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
             this::onProviderEnabledChanged;
     private final SettingsHelper.GlobalSettingChangedListener
             mBackgroundThrottlePackageWhitelistChangedListener =
-            this::onBackgroundThrottlePackageWhitelistChanged;
+            this::onBackgroundThrottlePackageAllowlistChanged;
     private final SettingsHelper.UserSettingChangedListener
             mLocationPackageBlacklistChangedListener =
-            this::onLocationPackageBlacklistChanged;
+            this::onLocationPackageDenylistChanged;
     private final LocationPermissionsHelper.LocationPermissionsListener
             mLocationPermissionsListener =
             new LocationPermissionsHelper.LocationPermissionsListener() {
@@ -407,11 +407,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
-    private void onBackgroundThrottlePackageWhitelistChanged() {
+    private void onBackgroundThrottlePackageAllowlistChanged() {
         updateRegistrations(registration -> true);
     }
 
-    private void onLocationPackageBlacklistChanged(int userId) {
+    private void onLocationPackageDenylistChanged(int userId) {
         updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
