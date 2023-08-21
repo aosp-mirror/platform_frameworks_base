@@ -33,7 +33,6 @@ import android.os.Handler
 import android.os.HandlerExecutor
 import android.os.UserHandle
 import com.android.wm.shell.R
-import com.android.wm.shell.pip.PipUtils
 import java.util.function.Consumer
 
 /**
