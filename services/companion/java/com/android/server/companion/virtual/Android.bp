@@ -1,0 +1,12 @@
+java_aconfig_library {
+    name: "virtualdevice_flags_lib",
+    aconfig_declarations: "virtualdevice_flags",
+}
+
+aconfig_declarations {
+    name: "virtualdevice_flags",
+    package: "com.android.server.companion.virtual",
+    srcs: [
+        "flags.aconfig",
+    ],
+}
