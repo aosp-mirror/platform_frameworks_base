@@ -69,7 +69,6 @@ public class LogicalDisplayTest {
         mDisplayDeviceInfo.copyFrom(new DisplayDeviceInfo());
         mDisplayDeviceInfo.width = DISPLAY_WIDTH;
         mDisplayDeviceInfo.height = DISPLAY_HEIGHT;
-        mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
         mDisplayDeviceInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
         mDisplayDeviceInfo.modeId = MODE_ID;
         mDisplayDeviceInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
@@ -112,8 +111,18 @@ public class LogicalDisplayTest {
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
         assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
 
-        expectedPosition.set(40, -20);
         DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = DISPLAY_WIDTH;
+        displayInfo.logicalHeight = DISPLAY_HEIGHT;
+        // Rotation doesn't matter when the FLAG_ROTATES_WITH_CONTENT is absent.
+        displayInfo.rotation = Surface.ROTATION_90;
+        mLogicalDisplay.setDisplayInfoOverrideFromWindowManagerLocked(displayInfo);
+        mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
+        assertEquals(expectedPosition, mLogicalDisplay.getDisplayPosition());
+
+        expectedPosition.set(40, -20);
+        mDisplayDeviceInfo.flags = DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
+        mLogicalDisplay.updateLocked(mDeviceRepo);
         displayInfo.logicalWidth = DISPLAY_HEIGHT;
         displayInfo.logicalHeight = DISPLAY_WIDTH;
         displayInfo.rotation = Surface.ROTATION_90;

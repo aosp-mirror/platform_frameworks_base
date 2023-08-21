@@ -60,7 +60,6 @@ import java.util.concurrent.Executor;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-@VisibleForTesting
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 

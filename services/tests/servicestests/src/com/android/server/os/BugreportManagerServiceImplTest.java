@@ -35,6 +35,7 @@ import android.util.Pair;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,6 +67,27 @@ public class BugreportManagerServiceImplTest {
         mService = new BugreportManagerServiceImpl(
                 new BugreportManagerServiceImpl.Injector(mContext, mAllowlistedPackages));
         mBugreportFileManager = new BugreportManagerServiceImpl.BugreportFileManager();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        // Changes to RoleManager persist between tests, so we need to clear out any funny
+        // business we did in previous tests.
+        RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        CallbackFuture future = new CallbackFuture();
+        runWithShellPermissionIdentity(
+                () -> {
+                    roleManager.setBypassingRoleQualification(false);
+                    roleManager.removeRoleHolderAsUser(
+                            "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION",
+                            mContext.getPackageName(),
+                            /* flags= */ 0,
+                            Process.myUserHandle(),
+                            mContext.getMainExecutor(),
+                            future);
+                });
+
+        assertThat(future.get()).isEqualTo(true);
     }
 
     @Test
@@ -131,14 +153,17 @@ public class BugreportManagerServiceImplTest {
                 new BugreportManagerServiceImpl.Injector(mContext, new ArraySet<>()));
         RoleManager roleManager = mContext.getSystemService(RoleManager.class);
         CallbackFuture future = new CallbackFuture();
-        runWithShellPermissionIdentity(() -> roleManager.setBypassingRoleQualification(true));
-        runWithShellPermissionIdentity(() -> roleManager.addRoleHolderAsUser(
-                "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION",
-                mContext.getPackageName(),
-                /* flags= */ 0,
-                Process.myUserHandle(),
-                mContext.getMainExecutor(),
-                future));
+        runWithShellPermissionIdentity(
+                () -> {
+                    roleManager.setBypassingRoleQualification(true);
+                    roleManager.addRoleHolderAsUser(
+                            "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION",
+                            mContext.getPackageName(),
+                            /* flags= */ 0,
+                            Process.myUserHandle(),
+                            mContext.getMainExecutor(),
+                            future);
+                });
 
         assertThat(future.get()).isEqualTo(true);
         mService.cancelBugreport(Binder.getCallingUid(), mContext.getPackageName());
