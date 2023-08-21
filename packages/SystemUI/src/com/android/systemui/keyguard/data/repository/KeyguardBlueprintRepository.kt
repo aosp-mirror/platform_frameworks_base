@@ -17,7 +17,10 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -96,8 +99,16 @@ constructor(
 /** Determines the constraints for the ConstraintSet in the lockscreen root view. */
 interface KeyguardBlueprint {
     val id: String
+    val shouldRemoveUnconstrainedViews: Boolean
+        get() = true
 
-    fun apply(constraintSet: ConstraintSet)
+    fun apply(constraintLayout: ConstraintSet)
+    fun removeUnConstrainedViews(constraintLayout: ConstraintLayout, constraintSet: ConstraintSet) {
+        constraintLayout.children
+            .map { it.id }
+            .filterNot { constraintSet.knownIds.contains(it) }
+            .forEach { constraintSet.setVisibility(it, View.GONE) }
+    }
 }
 
 /**
