@@ -80,7 +80,6 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.view.LaunchableLinearLayout;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -412,8 +411,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mKeyguardBottomAreaViewController.getView()).thenReturn(mKeyguardBottomArea);
         when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
         when(mKeyguardBottomArea.animate()).thenReturn(mViewPropertyAnimator);
-        when(mKeyguardBottomArea.requireViewById(R.id.keyguard_settings_button))
-            .thenReturn(mock(LaunchableLinearLayout.class));
         when(mView.animate()).thenReturn(mViewPropertyAnimator);
         when(mKeyguardStatusView.animate()).thenReturn(mViewPropertyAnimator);
         when(mViewPropertyAnimator.translationX(anyFloat())).thenReturn(mViewPropertyAnimator);

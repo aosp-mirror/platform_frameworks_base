@@ -22,7 +22,7 @@ import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import com.android.systemui.R
-import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.data.repository.KeyguardSection
 import javax.inject.Inject
 
 class DefaultCommunalWidgetSection @Inject constructor() : KeyguardSection {
