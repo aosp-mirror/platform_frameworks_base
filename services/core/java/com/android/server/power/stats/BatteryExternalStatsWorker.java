@@ -342,20 +342,24 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
     @Override
     public Future<?> scheduleCleanupDueToRemovedUser(int userId) {
         synchronized (BatteryExternalStatsWorker.this) {
-            // Initial quick clean-up after a user removal
-            mExecutorService.schedule(() -> {
-                synchronized (mStats) {
-                    mStats.clearRemovedUserUidsLocked(userId);
-                }
-            }, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+            try {
+                // Initial quick clean-up after a user removal
+                mExecutorService.schedule(() -> {
+                    synchronized (mStats) {
+                        mStats.clearRemovedUserUidsLocked(userId);
+                    }
+                }, UID_QUICK_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
 
-            // Final clean-up after a user removal, to take care of UIDs that were running longer
-            // than expected
-            return mExecutorService.schedule(() -> {
-                synchronized (mStats) {
-                    mStats.clearRemovedUserUidsLocked(userId);
-                }
-            }, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+                // Final clean-up after a user removal, to take care of UIDs that were running
+                // longer than expected
+                return mExecutorService.schedule(() -> {
+                    synchronized (mStats) {
+                        mStats.clearRemovedUserUidsLocked(userId);
+                    }
+                }, UID_FINAL_REMOVAL_AFTER_USER_REMOVAL_DELAY_MILLIS, TimeUnit.MILLISECONDS);
+            } catch (RejectedExecutionException e) {
+                return CompletableFuture.failedFuture(e);
+            }
         }
     }
 
@@ -401,7 +405,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         scheduleSyncLocked("write", UPDATE_ALL);
         // Since we use a single threaded executor, we can assume the next scheduled task's
         // Future finishes after the sync.
-        return mExecutorService.submit(mWriteTask);
+        try {
+            return mExecutorService.submit(mWriteTask);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**
@@ -429,7 +437,11 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
         if (mCurrentFuture == null) {
             mUpdateFlags = flags;
             mCurrentReason = reason;
-            mCurrentFuture = mExecutorService.submit(mSyncTask);
+            try {
+                mCurrentFuture = mExecutorService.submit(mSyncTask);
+            } catch (RejectedExecutionException e) {
+                return CompletableFuture.failedFuture(e);
+            }
         }
         mUpdateFlags |= flags;
         return mCurrentFuture;
