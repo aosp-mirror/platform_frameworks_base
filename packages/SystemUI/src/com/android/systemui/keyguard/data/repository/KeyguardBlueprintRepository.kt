@@ -99,11 +99,3 @@ interface KeyguardBlueprint {
 
     fun apply(constraintSet: ConstraintSet)
 }
-
-/**
- * Lower level modules that determine constraints for a particular section in the lockscreen root
- * view.
- */
-interface KeyguardSection {
-    fun apply(constraintSet: ConstraintSet)
-}

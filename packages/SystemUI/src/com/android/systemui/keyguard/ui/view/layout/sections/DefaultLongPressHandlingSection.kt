@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,26 +12,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
-import android.content.Context
+import androidx.annotation.IdRes
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
 import com.android.systemui.R
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import javax.inject.Inject
 
-class SplitShadeGuidelines @Inject constructor(private val context: Context) : KeyguardSection {
-
+/** Positions the long-press handling view in the keyguard. */
+class DefaultLongPressHandlingSection @Inject constructor() : KeyguardSection {
     override fun apply(constraintSet: ConstraintSet) {
-        constraintSet.apply {
-            // For use on large screens, it will provide a guideline vertically in the center to
-            // enable items to be aligned on the left or right sides
-            create(R.id.split_shade_guideline, VERTICAL)
-            setGuidelinePercent(R.id.split_shade_guideline, 0.5f)
-        }
+        constraintSet.fillMaxSize(R.id.keyguard_long_press)
+    }
+
+    private fun ConstraintSet.fillMaxSize(@IdRes viewId: Int) {
+        listOf(
+                ConstraintSet.START,
+                ConstraintSet.TOP,
+                ConstraintSet.END,
+                ConstraintSet.BOTTOM,
+            )
+            .forEach { side ->
+                connect(
+                    viewId,
+                    side,
+                    ConstraintSet.PARENT_ID,
+                    side,
+                )
+            }
     }
 }
