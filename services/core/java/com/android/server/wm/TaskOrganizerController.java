@@ -652,7 +652,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (rootTask == null || activity.mStartingData == null) {
             return false;
         }
-        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        final ITaskOrganizer lastOrganizer = getTaskOrganizer();
         if (lastOrganizer == null) {
             return false;
         }
@@ -672,12 +672,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return true;
     }
 
-    void removeStartingWindow(Task task, boolean prepareAnimation) {
+    void removeStartingWindow(Task task, ITaskOrganizer taskOrganizer, boolean prepareAnimation) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null) {
             return;
         }
-        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        final ITaskOrganizer lastOrganizer = taskOrganizer != null ? taskOrganizer
+                : getTaskOrganizer();
         if (lastOrganizer == null) {
             return;
         }
@@ -771,12 +772,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    boolean copySplashScreenView(Task task) {
+    boolean copySplashScreenView(Task task, ITaskOrganizer taskOrganizer) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null) {
             return false;
         }
-        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        final ITaskOrganizer lastOrganizer = taskOrganizer != null ? taskOrganizer
+                : getTaskOrganizer();
         if (lastOrganizer == null) {
             return false;
         }
@@ -799,12 +801,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
      * @see com.android.wm.shell.ShellTaskOrganizer#onAppSplashScreenViewRemoved(int)
      * @see SplashScreenView#remove()
      */
-    public void onAppSplashScreenViewRemoved(Task task) {
+    public void onAppSplashScreenViewRemoved(Task task, ITaskOrganizer organizer) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null) {
             return;
         }
-        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        final ITaskOrganizer lastOrganizer = organizer != null ? organizer : getTaskOrganizer();
         if (lastOrganizer == null) {
             return;
         }
