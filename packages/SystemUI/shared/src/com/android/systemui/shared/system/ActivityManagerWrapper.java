@@ -200,11 +200,12 @@ public class ActivityManagerWrapper {
                     @Override
                     public void onAnimationStart(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
-                            Rect homeContentInsets, Rect minimizedHomeBounds) {
+                            Rect homeContentInsets, Rect minimizedHomeBounds,
+                            Bundle extras) {
                         final RecentsAnimationControllerCompat controllerCompat =
                                 new RecentsAnimationControllerCompat(controller);
                         animationHandler.onAnimationStart(controllerCompat, apps,
-                                wallpapers, homeContentInsets, minimizedHomeBounds);
+                                wallpapers, homeContentInsets, minimizedHomeBounds, extras);
                     }
 
                     @Override
