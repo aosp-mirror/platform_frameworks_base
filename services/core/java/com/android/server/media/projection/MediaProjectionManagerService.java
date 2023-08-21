@@ -735,12 +735,9 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override //Binder call
+        @EnforcePermission(MANAGE_MEDIA_PROJECTION)
         public void addCallback(final IMediaProjectionWatcherCallback callback) {
-            if (mContext.checkCallingPermission(MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
-                        + "projection callbacks");
-            }
+            addCallback_enforcePermission();
             final long token = Binder.clearCallingIdentity();
             try {
                 MediaProjectionManagerService.this.addCallback(callback);
