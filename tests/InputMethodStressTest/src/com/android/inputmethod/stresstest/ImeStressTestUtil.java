@@ -154,7 +154,7 @@ public final class ImeStressTestUtil {
      * <p>The given {@code pred} will be called on the main thread.
      */
     public static void waitOnMainUntil(String message, Callable<Boolean> pred) {
-        eventually(() -> assertWithMessage(message).that(pred.call()).isTrue(), TIMEOUT);
+        eventually(() -> assertWithMessage(message).that(callOnMainSync(pred)).isTrue(), TIMEOUT);
     }
 
     /** Waits until IME is shown, or throws on timeout. */
