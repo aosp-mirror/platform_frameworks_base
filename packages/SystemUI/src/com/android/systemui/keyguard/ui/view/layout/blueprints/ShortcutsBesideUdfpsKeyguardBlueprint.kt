@@ -25,7 +25,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdf
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLongPressHandlingSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
@@ -41,7 +40,6 @@ constructor(
     private val defaultIndicationAreaSection: DefaultIndicationAreaSection,
     private val defaultLockIconSection: DefaultLockIconSection,
     private val defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
-    private val defaultLongPressHandlingSection: DefaultLongPressHandlingSection,
     private val defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     private val alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
     private val defaultShortcutsSection: DefaultShortcutsSection,
@@ -54,7 +52,6 @@ constructor(
         defaultIndicationAreaSection.apply(constraintSet)
         defaultLockIconSection.apply(constraintSet)
         defaultAmbientIndicationAreaSection.apply(constraintSet)
-        defaultLongPressHandlingSection.apply(constraintSet)
         defaultSettingsPopupMenuSection.apply(constraintSet)
         if (keyguardUpdateMonitor.isUdfpsSupported) {
             alignShortcutsToUdfpsSection.apply(constraintSet)
