@@ -44,13 +44,15 @@ struct TracePoint {
 
 std::vector<TracePoint> traces;
 bool enabled = true;
+constinit std::chrono::steady_clock::time_point startTime = {};
 
 int64_t GetTime() noexcept {
   auto now = std::chrono::steady_clock::now();
-  return std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count();
+  if (startTime == decltype(tracebuffer::startTime){}) {
+    startTime = now;
+  }
+  return std::chrono::duration_cast<std::chrono::microseconds>(now - startTime).count();
 }
-
-} // namespace anonymous
 
 void AddWithTime(std::string tag, char type, int64_t time) noexcept {
   TracePoint t = {type, getpid(), time, std::move(tag)};
@@ -76,7 +78,7 @@ void Flush(const std::string& basePath) {
 
   // Wrap the trace in a JSON array [] to make Chrome/Perfetto UI handle it.
   char delimiter = '[';
-  for(const TracePoint& trace : traces) {
+  for (const TracePoint& trace : traces) {
     fprintf(f,
             "%c{\"ts\" : \"%" PRIu64
             "\", \"ph\" : \"%c\", \"tid\" : \"%d\" , \"pid\" : \"%d\", \"name\" : \"%s\" }\n",
@@ -89,6 +91,8 @@ void Flush(const std::string& basePath) {
   fclose(f);
   traces.clear();
 }
+
+}  // namespace
 
 } // namespace tracebuffer
 
@@ -166,7 +170,7 @@ FlushTrace::FlushTrace(std::string_view basepath, std::string_view tag,
 
 FlushTrace::~FlushTrace() {
   if (!tracebuffer::enabled) return;
-  tracebuffer::Add(tag_, tracebuffer::kEnd);
+  tracebuffer::Add(std::move(tag_), tracebuffer::kEnd);
   tracebuffer::Flush(basepath_);
 }
 
