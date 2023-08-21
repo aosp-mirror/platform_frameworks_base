@@ -3071,7 +3071,7 @@ public class ParsingPackageUtils {
      *
      * TODO(b/155513789): Remove this in favor of collecting certificates during the original parse
      *  call if requested. Leaving this as an optional method for the caller means we have to
-     *  construct a dummy ParseInput.
+     *  construct a placeholder ParseInput.
      */
     @CheckResult
     public static ParseResult<SigningDetails> getSigningDetails(ParseInput input,
