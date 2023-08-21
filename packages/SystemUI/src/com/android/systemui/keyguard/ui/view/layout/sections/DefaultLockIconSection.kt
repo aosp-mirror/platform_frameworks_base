@@ -27,7 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.data.repository.KeyguardSection
 import javax.inject.Inject
 
 class DefaultLockIconSection

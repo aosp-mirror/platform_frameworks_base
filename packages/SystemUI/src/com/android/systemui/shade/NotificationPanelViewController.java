@@ -546,7 +546,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final NPVCDownEventState.Buffer mLastDownEvents;
     private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
-    private final KeyguardLongPressViewModel mKeyguardLongPressViewModel;
     private float mMinExpandHeight;
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mHasVibratedOnOpen = false;
@@ -950,7 +949,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
-        mKeyguardLongPressViewModel = keyguardLongPressViewModel;
+        KeyguardLongPressViewBinder.bind(
+                mView.requireViewById(R.id.keyguard_long_press),
+                keyguardLongPressViewModel,
+                () -> {
+                    onEmptySpaceClick();
+                    return Unit.INSTANCE;
+                },
+                mFalsingManager);
         mActivityStarter = activityStarter;
         onFinishInflate();
         keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
@@ -1494,16 +1500,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Deprecated
     private void setKeyguardBottomArea(KeyguardBottomAreaView keyguardBottomArea) {
         mKeyguardBottomArea = keyguardBottomArea;
-
-        KeyguardLongPressViewBinder.bind(
-                mView.requireViewById(R.id.keyguard_long_press),
-                mKeyguardLongPressViewModel,
-                () -> {
-                    onEmptySpaceClick();
-                    return Unit.INSTANCE;
-                },
-                mFalsingManager,
-                mKeyguardBottomArea.requireViewById(R.id.keyguard_settings_button));
     }
 
     @Override
