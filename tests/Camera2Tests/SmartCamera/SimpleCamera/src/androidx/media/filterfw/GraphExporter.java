@@ -113,7 +113,7 @@ public class GraphExporter {
                         getDotName(target.getFilter().getName()) + ":" +
                         getDotName(target.getName()) + "_IN;\n" );
                 } else {
-                    // Found a unconnected output port, add dummy node
+                    // Found a unconnected output port, add placeholder node
                     String color = filter.getSignature().getOutputPortInfo(portName).isRequired()
                         ? "red" : "blue";  // red for unconnected, required ports
                     dotFile.write("  " +
@@ -131,7 +131,7 @@ public class GraphExporter {
                 if(target != null) {
                     // Found a connection -- nothing to do, connections have been written out above
                 } else {
-                    // Found a unconnected input port, add dummy node
+                    // Found a unconnected input port, add placeholder node
                     String color = filter.getSignature().getInputPortInfo(portName).isRequired()
                         ? "red" : "blue";  // red for unconnected, required ports
                     dotFile.write("  " +
