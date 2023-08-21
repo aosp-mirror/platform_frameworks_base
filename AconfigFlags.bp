@@ -1,0 +1,43 @@
+// Copyright (C) 2023 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Aconfig declarations and libraries for the core framework
+java_defaults {
+    name: "framework-minus-apex-aconfig-libraries",
+
+    // Add java_aconfig_libraries to here to add them to the core framework
+    srcs: [
+        ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
+    ],
+}
+
+// Default flags for java_aconfig_libraries that go into framework-minus-apex
+// These libraries will not work standalone
+java_defaults {
+    name: "framework-minus-apex-aconfig-java-defaults",
+    sdk_version: "core_platform",
+    libs: ["fake_device_config"],
+}
+
+aconfig_declarations {
+    name: "com.android.hardware.camera2-aconfig",
+    package: "com.android.hardware.camera2",
+    srcs: ["core/java/android/hardware/camera2/camera_platform.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.hardware.camera2-aconfig-java",
+    aconfig_declarations: "com.android.hardware.camera2-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
