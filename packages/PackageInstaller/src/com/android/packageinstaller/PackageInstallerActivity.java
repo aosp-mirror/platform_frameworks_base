@@ -371,7 +371,7 @@ public class PackageInstallerActivity extends AlertActivity {
         if (mLocalLOGV) Log.i(TAG, "onResume(): mAppSnippet=" + mAppSnippet);
 
         if (mAppSnippet != null) {
-            // load dummy layout with OK button disabled until we override this layout in
+            // load placeholder layout with OK button disabled until we override this layout in
             // startInstallConfirm
             bindUi();
             checkIfAllowedAndInitiateInstall();
