@@ -163,6 +163,11 @@
     <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
     <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
+    <!-- Title text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
+    <string name="bubble_bar_education_manage_title">Control bubbles anytime</string>
+    <!-- Descriptive text for the bubble bar "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->
+    <string name="bubble_bar_education_manage_text">Tap here to manage which apps and conversations can bubble</string>
+
     <!-- [CHAR LIMIT=100] Notification Importance title -->
     <string name="notification_bubble_title">Bubble</string>
 
