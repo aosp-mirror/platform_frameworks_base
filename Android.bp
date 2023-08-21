@@ -263,6 +263,7 @@ java_defaults {
     defaults: [
         "framework-aidl-export-defaults",
         "latest_android_hardware_soundtrigger3_java_static",
+        "framework-minus-apex-aconfig-libraries",
     ],
     srcs: [
         ":framework-non-updatable-sources",
@@ -611,6 +612,7 @@ stubs_defaults {
 }
 
 build = [
+    "AconfigFlags.bp",
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
 ]
