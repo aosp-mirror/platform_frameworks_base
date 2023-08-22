@@ -845,6 +845,7 @@ final class SettingsState {
 
     private void doWriteState() {
         boolean wroteState = false;
+        String settingFailedToBePersisted = null;
         final int version;
         final ArrayMap<String, Setting> settings;
         final ArrayMap<String, String> namespaceBannedHashes;
@@ -895,8 +896,14 @@ final class SettingsState {
                             }
                         }
                     } catch (IOException ex) {
-                        Slog.e(LOG_TAG, "[SKIPPED PERSISTING]" + setting.getName()
+                        Slog.e(LOG_TAG, "[ABORT PERSISTING]" + setting.getName()
                                 + " due to error writing to disk", ex);
+                        // A setting failed to be written. Abort the serialization to avoid leaving
+                        // a partially serialized setting on disk, which can cause parsing errors.
+                        // Note down the problematic setting, so that we can delete it before trying
+                        // again to persist the rest of the settings.
+                        settingFailedToBePersisted = setting.getName();
+                        throw ex;
                     }
                 }
                 serializer.endTag(null, TAG_SETTINGS);
@@ -922,14 +929,14 @@ final class SettingsState {
                     Slog.i(LOG_TAG, "[PERSIST END]");
                 }
             } catch (Throwable t) {
-                Slog.wtf(LOG_TAG, "Failed to write settings, restoring backup", t);
+                Slog.wtf(LOG_TAG, "Failed to write settings, restoring old file", t);
                 if (t instanceof IOException) {
-                    if (DEBUG) {
-                        // we failed to create a directory, so log the permissions and existence
-                        // state for the settings file and directory
-                        logSettingsDirectoryInformation(destination.getBaseFile());
-                    }
                     if (t.getMessage().contains("Couldn't create directory")) {
+                        if (DEBUG) {
+                            // we failed to create a directory, so log the permissions and existence
+                            // state for the settings file and directory
+                            logSettingsDirectoryInformation(destination.getBaseFile());
+                        }
                         // attempt to create the directory with Files.createDirectories, which
                         // throws more informative errors than File.mkdirs.
                         Path parentPath = destination.getBaseFile().getParentFile().toPath();
@@ -950,7 +957,15 @@ final class SettingsState {
             }
         }
 
-        if (wroteState) {
+        if (!wroteState) {
+            if (settingFailedToBePersisted != null) {
+                synchronized (mLock) {
+                    // Delete the problematic setting. This will schedule a write as well.
+                    deleteSettingLocked(settingFailedToBePersisted);
+                }
+            }
+        } else {
+            // success
             synchronized (mLock) {
                 addHistoricalOperationLocked(HISTORICAL_OPERATION_PERSIST, null);
             }
