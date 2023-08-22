@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics;
 
+import static com.android.server.biometrics.AuthenticationStatsCollector.MAXIMUM_ENROLLMENT_NOTIFICATIONS;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -44,15 +46,20 @@ import com.android.internal.R;
 import com.android.server.biometrics.sensors.BiometricNotification;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.io.File;
 
 @Presubmit
 @SmallTest
 public class AuthenticationStatsCollectorTest {
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     private AuthenticationStatsCollector mAuthenticationStatsCollector;
     private static final float FRR_THRESHOLD = 0.2f;
@@ -75,7 +82,6 @@ public class AuthenticationStatsCollectorTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
 
         when(mContext.getResources()).thenReturn(mResources);
         when(mResources.getFraction(eq(R.fraction.config_biometricNotificationFrrThreshold),
@@ -130,6 +136,33 @@ public class AuthenticationStatsCollectorTest {
         assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
     }
 
+    /**
+     * Our current use case does not need the counters to update after the notification
+     * limit is reached. If we need these counters to continue counting in the future,
+     * a separate privacy review must be done.
+     */
+    @Test
+    public void authenticate_notificationExceeded_mapMustNotBeUpdated() {
+
+        mAuthenticationStatsCollector.setAuthenticationStatsForUser(USER_ID_1,
+                new AuthenticationStats(USER_ID_1, 400 /* totalAttempts */,
+                        40 /* rejectedAttempts */,
+                        MAXIMUM_ENROLLMENT_NOTIFICATIONS /* enrollmentNotifications */,
+                        0 /* modality */));
+
+        mAuthenticationStatsCollector.authenticate(USER_ID_1, false /* authenticated */);
+
+        AuthenticationStats authenticationStats =
+                mAuthenticationStatsCollector.getAuthenticationStatsForUser(USER_ID_1);
+
+        assertThat(authenticationStats.getUserId()).isEqualTo(USER_ID_1);
+        // Assert that counters haven't been updated.
+        assertThat(authenticationStats.getTotalAttempts()).isEqualTo(400);
+        assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(40);
+        assertThat(authenticationStats.getEnrollmentNotifications())
+                .isEqualTo(MAXIMUM_ENROLLMENT_NOTIFICATIONS);
+    }
+
     @Test
     public void authenticate_frrNotExceeded_notificationNotExceeded_shouldNotSendNotification() {
 
@@ -156,7 +189,8 @@ public class AuthenticationStatsCollectorTest {
 
         mAuthenticationStatsCollector.setAuthenticationStatsForUser(USER_ID_1,
                 new AuthenticationStats(USER_ID_1, 500 /* totalAttempts */,
-                        400 /* rejectedAttempts */, 2 /* enrollmentNotifications */,
+                        400 /* rejectedAttempts */,
+                        MAXIMUM_ENROLLMENT_NOTIFICATIONS /* enrollmentNotifications */,
                         0 /* modality */));
 
         mAuthenticationStatsCollector.authenticate(USER_ID_1, false /* authenticated */);
@@ -164,12 +198,12 @@ public class AuthenticationStatsCollectorTest {
         // Assert that no notification should be sent.
         verify(mBiometricNotification, never()).sendFaceEnrollNotification(any());
         verify(mBiometricNotification, never()).sendFpEnrollNotification(any());
-        // Assert that data has been reset.
+        // Assert that data hasn't been reset.
         AuthenticationStats authenticationStats = mAuthenticationStatsCollector
                 .getAuthenticationStatsForUser(USER_ID_1);
-        assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
-        assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
-        assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
+        assertThat(authenticationStats.getTotalAttempts()).isEqualTo(500);
+        assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(400);
+        assertThat(authenticationStats.getFrr()).isWithin(0f).of(0.8f);
     }
 
     @Test
