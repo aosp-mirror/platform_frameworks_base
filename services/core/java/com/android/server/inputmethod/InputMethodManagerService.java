@@ -3377,15 +3377,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             } else {
                 // If subtype is null, try to find the most applicable one from
                 // getCurrentInputMethodSubtype.
+                subtypeId = NOT_A_SUBTYPE_ID;
                 newSubtype = getCurrentInputMethodSubtypeLocked();
+                if (newSubtype != null) {
+                    for (int i = 0; i < subtypeCount; ++i) {
+                        if (Objects.equals(newSubtype, info.getSubtypeAt(i))) {
+                            subtypeId = i;
+                            break;
+                        }
+                    }
+                }
             }
-            if (newSubtype == null || oldSubtype == null) {
-                Slog.w(TAG, "Illegal subtype state: old subtype = " + oldSubtype
-                        + ", new subtype = " + newSubtype);
-                notifyInputMethodSubtypeChangedLocked(userId, info, null);
-                return;
-            }
-            if (!newSubtype.equals(oldSubtype)) {
+            if (!Objects.equals(newSubtype, oldSubtype)) {
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                 IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
