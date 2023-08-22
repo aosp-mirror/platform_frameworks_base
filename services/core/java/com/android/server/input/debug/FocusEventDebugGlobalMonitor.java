@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
+package com.android.server.input.debug;
 
 import android.view.Display;
 import android.view.InputEvent;
@@ -22,6 +22,7 @@ import android.view.InputEventReceiver;
 import android.view.MotionEvent;
 
 import com.android.server.UiThread;
+import com.android.server.input.InputManagerService;
 
 /**
  * Receives input events before they are dispatched and reports them to FocusEventDebugView.

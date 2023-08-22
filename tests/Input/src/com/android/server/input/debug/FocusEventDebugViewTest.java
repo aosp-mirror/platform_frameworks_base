@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
+package com.android.server.input.debug;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -31,10 +32,11 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
-import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.input.InputManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,76 +50,50 @@ import org.junit.runner.RunWith;
 public class FocusEventDebugViewTest {
 
     private FocusEventDebugView mFocusEventDebugView;
-    private FocusEventDebugView.RotaryInputValueView mRotaryInputValueView;
-    private FocusEventDebugView.RotaryInputGraphView mRotaryInputGraphView;
-    private float mScaledVerticalScrollFactor;
+    private RotaryInputValueView mRotaryInputValueView;
+    private RotaryInputGraphView mRotaryInputGraphView;
 
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getContext();
-        mScaledVerticalScrollFactor =
-                ViewConfiguration.get(context).getScaledVerticalScrollFactor();
         InputManagerService mockService = mock(InputManagerService.class);
         when(mockService.monitorInput(anyString(), anyInt()))
                 .thenReturn(InputChannel.openInputChannelPair("FocusEventDebugViewTest")[1]);
 
-        mRotaryInputValueView = new FocusEventDebugView.RotaryInputValueView(context);
-        mRotaryInputGraphView = new FocusEventDebugView.RotaryInputGraphView(context);
+        mRotaryInputValueView = spy(new RotaryInputValueView(context));
+        mRotaryInputGraphView = spy(new RotaryInputGraphView(context));
         mFocusEventDebugView = new FocusEventDebugView(context, mockService,
                 () -> mRotaryInputValueView, () -> mRotaryInputGraphView);
     }
 
     @Test
-    public void startsRotaryInputValueViewWithDefaultValue() {
-        assertEquals("+0.0", mRotaryInputValueView.getText());
-    }
-
-    @Test
-    public void startsRotaryInputGraphViewWithDefaultFrameCenter() {
-        assertEquals(0, mRotaryInputGraphView.getFrameCenterPosition(), 0.01);
-    }
-
-    @Test
-    public void handleRotaryInput_updatesRotaryInputValueViewWithScrollValue() {
+    public void handleRotaryInput_sendsMotionEventWhenEnabled() {
         mFocusEventDebugView.handleUpdateShowRotaryInput(true);
 
-        mFocusEventDebugView.handleRotaryInput(createRotaryMotionEvent(0.5f));
+        mFocusEventDebugView.handleRotaryInput(createRotaryMotionEvent(0.5f,  10L));
 
-        assertEquals(String.format("+%.1f", 0.5f * mScaledVerticalScrollFactor),
-                mRotaryInputValueView.getText());
+        verify(mRotaryInputGraphView).addValue(0.5f, 10L);
+        verify(mRotaryInputValueView).updateValue(0.5f);
     }
 
     @Test
-    public void handleRotaryInput_translatesRotaryInputGraphViewWithHighScrollValue() {
-        mFocusEventDebugView.handleUpdateShowRotaryInput(true);
+    public void handleRotaryInput_doesNotSendMotionEventWhenDisabled() {
+        mFocusEventDebugView.handleUpdateShowRotaryInput(false);
 
-        mFocusEventDebugView.handleRotaryInput(createRotaryMotionEvent(1000f));
+        mFocusEventDebugView.handleRotaryInput(createRotaryMotionEvent(0.5f, 10L));
 
-        assertTrue(mRotaryInputGraphView.getFrameCenterPosition() > 0);
+        verify(mRotaryInputGraphView, never()).addValue(anyFloat(), anyLong());
+        verify(mRotaryInputValueView, never()).updateValue(anyFloat());
     }
 
-    @Test
-    public void updateActivityStatus_setsAndRemovesColorFilter() {
-        // It should not be active initially.
-        assertNull(mRotaryInputValueView.getBackground().getColorFilter());
-
-        mRotaryInputValueView.updateActivityStatus(true);
-        // It should be active after rotary input.
-        assertNotNull(mRotaryInputValueView.getBackground().getColorFilter());
-
-        mRotaryInputValueView.updateActivityStatus(false);
-        // It should not be active after waiting for mUpdateActivityStatusCallback.
-        assertNull(mRotaryInputValueView.getBackground().getColorFilter());
-    }
-
-    private MotionEvent createRotaryMotionEvent(float scrollAxisValue) {
+    private MotionEvent createRotaryMotionEvent(float scrollAxisValue, long eventTime) {
         PointerCoords pointerCoords = new PointerCoords();
         pointerCoords.setAxisValue(MotionEvent.AXIS_SCROLL, scrollAxisValue);
         PointerProperties pointerProperties = new PointerProperties();
 
         return MotionEvent.obtain(
                 /* downTime */ 0,
-                /* eventTime */ 0,
+                /* eventTime */ eventTime,
                 /* action */ MotionEvent.ACTION_SCROLL,
                 /* pointerCount */ 1,
                 /* pointerProperties */ new PointerProperties[] {pointerProperties},
