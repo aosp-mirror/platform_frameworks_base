@@ -2892,13 +2892,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     private void notifyPackageUseInternal(String packageName, int reason) {
         long time = System.currentTimeMillis();
-        synchronized (mLock) {
-            final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
-            if (pkgSetting == null) {
-                return;
-            }
-            pkgSetting.getPkgState().setLastPackageUsageTimeInMills(reason, time);
-        }
+        this.commitPackageStateMutation(null, mutator -> {
+            final PackageStateWrite state = mutator.forPackage(packageName);
+            state.setLastPackageUsageTime(reason, time);
+        });
     }
 
     /*package*/ DexManager getDexManager() {
@@ -6681,9 +6678,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void notifyPackageUse(String packageName, int reason) {
-            synchronized (mLock) {
-                PackageManagerService.this.notifyPackageUseInternal(packageName, reason);
-            }
+            PackageManagerService.this.notifyPackageUseInternal(packageName, reason);
         }
 
         @Nullable
