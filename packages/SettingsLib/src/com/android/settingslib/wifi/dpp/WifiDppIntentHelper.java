@@ -28,6 +28,11 @@ import java.util.List;
  * Wifi dpp intent helper functions to share between the Settings App and SystemUI.
  */
 public class WifiDppIntentHelper {
+    /**
+     * Action added to the intent when app wants to launch the QR code generator with lock screen.
+     */
+    public static final String ACTION_CONFIGURATOR_AUTH_QR_CODE_GENERATOR =
+            "android.settings.WIFI_DPP_CONFIGURATOR_AUTH_QR_CODE_GENERATOR";
     static final String EXTRA_WIFI_SECURITY = "security";
 
     /** The data corresponding to {@code WifiConfiguration} SSID */
