@@ -82,7 +82,7 @@ public class TestHandler extends Handler {
             uptimeMillis = uptimeMillis - SystemClock.uptimeMillis() + mClock.getAsLong();
         }
 
-        // post a dummy queue entry to keep track of message removal
+        // post a sentinel queue entry to keep track of message removal
         return super.sendMessageAtTime(msg, Long.MAX_VALUE)
                 && mMessages.add(new MsgInfo(Message.obtain(msg), uptimeMillis, mMessageCount));
     }
