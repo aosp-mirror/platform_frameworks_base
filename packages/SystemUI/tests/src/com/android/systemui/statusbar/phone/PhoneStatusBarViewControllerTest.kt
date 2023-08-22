@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
+import android.app.StatusBarManager.WINDOW_STATE_HIDING
+import android.app.StatusBarManager.WINDOW_STATE_SHOWING
+import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
@@ -31,12 +35,15 @@ import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
@@ -75,6 +82,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var centralSurfacesImpl: CentralSurfacesImpl
     @Mock
+    private lateinit var commandQueue: CommandQueue
+    @Mock
     private lateinit var shadeControllerImpl: ShadeControllerImpl
     @Mock
     private lateinit var windowRootView: Provider<WindowRootView>
@@ -82,6 +91,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var shadeLogger: ShadeLogger
     @Mock
     private lateinit var viewUtil: ViewUtil
+    private lateinit var statusBarWindowStateController: StatusBarWindowStateController
 
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
@@ -91,6 +101,9 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        statusBarWindowStateController = StatusBarWindowStateController(DISPLAY_ID, commandQueue)
+
         `when`(sysuiUnfoldComponent.getStatusBarMoveFromCenterAnimationController())
             .thenReturn(moveFromCenterAnimation)
         // create the view and controller on main thread as it requires main looper
@@ -186,6 +199,42 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         verify(shadeViewController, never()).handleExternalTouch(any())
     }
 
+    @Test
+    fun onTouch_windowHidden_centralSurfacesNotNotified() {
+        val callback = getCommandQueueCallback()
+        callback.setWindowState(DISPLAY_ID, WINDOW_STATUS_BAR, WINDOW_STATE_HIDDEN)
+
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+
+        verify(centralSurfacesImpl, never()).setInteracting(any(), any())
+    }
+
+    @Test
+    fun onTouch_windowHiding_centralSurfacesNotNotified() {
+        val callback = getCommandQueueCallback()
+        callback.setWindowState(DISPLAY_ID, WINDOW_STATUS_BAR, WINDOW_STATE_HIDING)
+
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+
+        verify(centralSurfacesImpl, never()).setInteracting(any(), any())
+    }
+
+    @Test
+    fun onTouch_windowShowing_centralSurfacesNotified() {
+        val callback = getCommandQueueCallback()
+        callback.setWindowState(DISPLAY_ID, WINDOW_STATUS_BAR, WINDOW_STATE_SHOWING)
+
+        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+
+        verify(centralSurfacesImpl).setInteracting(any(), any())
+    }
+
+    private fun getCommandQueueCallback(): CommandQueue.Callbacks {
+        val captor = argumentCaptor<CommandQueue.Callbacks>()
+        verify(commandQueue).addCallback(captor.capture())
+        return captor.value!!
+    }
+
     private fun createViewMock(): PhoneStatusBarView {
         val view = spy(view)
         val viewTreeObserver = mock(ViewTreeObserver::class.java)
@@ -201,6 +250,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             featureFlags,
             userChipViewModel,
             centralSurfacesImpl,
+            statusBarWindowStateController,
             shadeControllerImpl,
             shadeViewController,
             windowRootView,
@@ -217,5 +267,9 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         override var isEnabled: Boolean = false
         override var isHingeAngleEnabled: Boolean = false
         override val halfFoldedTimeoutMillis: Int = 0
+    }
+
+    private companion object {
+        const val DISPLAY_ID = 1
     }
 }
