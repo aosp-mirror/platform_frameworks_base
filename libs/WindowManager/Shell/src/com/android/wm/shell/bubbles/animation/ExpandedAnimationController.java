@@ -131,6 +131,16 @@ public class ExpandedAnimationController
 
     private BubbleStackView mBubbleStackView;
 
+    /**
+     * Whether the individual bubble has been dragged out of the row of bubbles far enough to cause
+     * the rest of the bubbles to animate to fill the gap.
+     */
+    private boolean mBubbleDraggedOutEnough = false;
+
+    /** End action to run when the lead bubble's expansion animation completes. */
+    @Nullable
+    private Runnable mLeadBubbleEndAction;
+
     public ExpandedAnimationController(BubblePositioner positioner,
             Runnable onBubbleAnimatedOutAction, BubbleStackView stackView) {
         mPositioner = positioner;
@@ -141,14 +151,12 @@ public class ExpandedAnimationController
     }
 
     /**
-     * Whether the individual bubble has been dragged out of the row of bubbles far enough to cause
-     * the rest of the bubbles to animate to fill the gap.
+     * Overrides the collapse location without actually collapsing the stack.
+     * @param point the new collapse location.
      */
-    private boolean mBubbleDraggedOutEnough = false;
-
-    /** End action to run when the lead bubble's expansion animation completes. */
-    @Nullable
-    private Runnable mLeadBubbleEndAction;
+    public void setCollapsePoint(PointF point) {
+        mCollapsePoint = point;
+    }
 
     /**
      * Animates expanding the bubbles into a row along the top of the screen, optionally running an
