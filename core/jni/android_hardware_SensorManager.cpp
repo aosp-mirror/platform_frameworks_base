@@ -150,7 +150,7 @@ static jstring getJavaInternedString(JNIEnv *env, const String8 &string) {
         return gStringOffsets.emptyString;
     }
 
-    ScopedLocalRef<jstring> javaString(env, env->NewStringUTF(string.string()));
+    ScopedLocalRef<jstring> javaString(env, env->NewStringUTF(string.c_str()));
     jstring internedString = (jstring)
             env->CallObjectMethod(javaString.get(), gStringOffsets.intern);
     return internedString;
