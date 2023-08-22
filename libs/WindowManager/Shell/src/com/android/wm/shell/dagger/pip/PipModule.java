@@ -18,9 +18,9 @@ package com.android.wm.shell.dagger.pip;
 
 import android.annotation.Nullable;
 
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.PipUtils;
 
 import dagger.Module;
 import dagger.Provides;
