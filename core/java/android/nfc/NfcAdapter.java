@@ -600,6 +600,17 @@ public final class NfcAdapter {
         return offHostSE;
     }
 
+    private static void retrieveServiceRegisterer() {
+        if (sServiceRegisterer == null) {
+            NfcServiceManager manager = NfcFrameworkInitializer.getNfcServiceManager();
+            if (manager == null) {
+                Log.e(TAG, "NfcServiceManager is null");
+                throw new UnsupportedOperationException();
+            }
+            sServiceRegisterer = manager.getNfcManagerServiceRegisterer();
+        }
+    }
+
     /**
      * Returns the NfcAdapter for application context,
      * or throws if NFC is not available.
@@ -627,12 +638,7 @@ public final class NfcAdapter {
                 Log.v(TAG, "this device does not have NFC support");
                 throw new UnsupportedOperationException();
             }
-            NfcServiceManager manager = NfcFrameworkInitializer.getNfcServiceManager();
-            if (manager == null) {
-                Log.e(TAG, "NfcServiceManager is null");
-                throw new UnsupportedOperationException();
-            }
-            sServiceRegisterer = manager.getNfcManagerServiceRegisterer();
+            retrieveServiceRegisterer();
             sService = getServiceInterface();
             if (sService == null) {
                 Log.e(TAG, "could not retrieve NFC service");
@@ -706,11 +712,13 @@ public final class NfcAdapter {
             throw new IllegalArgumentException(
                     "context not associated with any application (using a mock context?)");
         }
-
-        if (sIsInitialized && sServiceRegisterer.tryGet() == null) {
-            synchronized (NfcAdapter.class) {
-                /* Stale sService pointer */
-                if (sIsInitialized) sIsInitialized = false;
+        retrieveServiceRegisterer();
+        if (sServiceRegisterer.tryGet() == null) {
+            if (sIsInitialized) {
+                synchronized (NfcAdapter.class) {
+                    /* Stale sService pointer */
+                    if (sIsInitialized) sIsInitialized = false;
+                }
             }
             return null;
         }
