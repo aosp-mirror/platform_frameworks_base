@@ -125,6 +125,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
@@ -448,6 +449,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mCommandQueue,
                 mMainExecutor,
                 mock(LogBuffer.class),
+                mock(WindowRootViewVisibilityInteractor.class),
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mStatusBarKeyguardViewManager,

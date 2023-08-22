@@ -1171,7 +1171,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 new FoldStateListener(mContext, this::onFoldedStateChanged));
     }
 
-    @VisibleForTesting
+    /**
+     * @deprecated use {@link
+     * WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible} instead.
+     */    @VisibleForTesting
     void initShadeVisibilityListener() {
         mShadeController.setVisibilityListener(new ShadeController.ShadeVisibilityListener() {
             @Override
@@ -3337,6 +3340,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         updateVisibleToUser();
     }
 
+    /**
+     * @deprecated use {@link
+     * WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisibleAndInteractive} instead.
+     */
     protected void updateVisibleToUser() {
         boolean oldVisibleToUser = mVisibleToUser;
         mVisibleToUser = mVisible && mDeviceInteractive;
