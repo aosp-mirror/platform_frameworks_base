@@ -1,0 +1,8 @@
+package: "com.android.graphics.hwui.flags"
+
+flag {
+  name: "limited_hdr"
+  namespace: "core_graphics"
+  description: "API to enable apps to restrict the amount of HDR headroom that is used"
+  bug: "234181960"
+}
