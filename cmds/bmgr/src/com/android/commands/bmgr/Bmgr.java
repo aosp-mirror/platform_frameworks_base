@@ -192,7 +192,7 @@ public class Bmgr {
         }
 
         if ("whitelist".equals(op)) {
-            doPrintWhitelist();
+            doPrintAllowlist();
             return;
         }
 
@@ -911,7 +911,7 @@ public class Bmgr {
         }
     }
 
-    private void doPrintWhitelist() {
+    private void doPrintAllowlist() {
         try {
             final String[] whitelist = mBmgr.getTransportWhitelist();
             if (whitelist != null) {
