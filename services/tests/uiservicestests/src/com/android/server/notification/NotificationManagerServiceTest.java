@@ -5903,6 +5903,49 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisitUris_styleExtrasWithoutStyle() {
+        Notification notification = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle(
+                personWithIcon("content://user"))
+                .addHistoricMessage(new Notification.MessagingStyle.Message("Heyhey!",
+                                System.currentTimeMillis(),
+                                personWithIcon("content://historicalMessenger")))
+                .addMessage(new Notification.MessagingStyle.Message("Are you there",
+                                System.currentTimeMillis(),
+                                personWithIcon("content://messenger")))
+                        .setShortcutIcon(
+                                Icon.createWithContentUri("content://conversationShortcut"));
+        messagingStyle.addExtras(notification.extras); // Instead of Builder.setStyle(style).
+
+        Notification.CallStyle callStyle = Notification.CallStyle.forOngoingCall(
+                        personWithIcon("content://caller"),
+                        PendingIntent.getActivity(mContext, 0, new Intent(),
+                                PendingIntent.FLAG_IMMUTABLE))
+                .setVerificationIcon(Icon.createWithContentUri("content://callVerification"));
+        callStyle.addExtras(notification.extras); // Same.
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        notification.visitUris(visitor);
+
+        verify(visitor).accept(eq(Uri.parse("content://user")));
+        verify(visitor).accept(eq(Uri.parse("content://historicalMessenger")));
+        verify(visitor).accept(eq(Uri.parse("content://messenger")));
+        verify(visitor).accept(eq(Uri.parse("content://conversationShortcut")));
+        verify(visitor).accept(eq(Uri.parse("content://caller")));
+        verify(visitor).accept(eq(Uri.parse("content://callVerification")));
+    }
+
+    private static Person personWithIcon(String iconUri) {
+        return new Person.Builder()
+                .setName("Mr " + iconUri)
+                .setIcon(Icon.createWithContentUri(iconUri))
+                .build();
+    }
+
+    @Test
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
@@ -10104,7 +10147,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         try {
             mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
-                    r.getSbn().getTag(), r,false);
+                    r.getSbn().getTag(), r, false, false);
             fail("Allowed a contextual direct reply with an immutable intent to be posted");
         } catch (IllegalArgumentException e) {
             // good
@@ -10135,7 +10178,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r.applyAdjustments();
 
         mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
-                r.getSbn().getTag(), r,false);
+                r.getSbn().getTag(), r, false, false);
     }
 
     @Test
@@ -10169,7 +10212,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r.applyAdjustments();
 
         mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(), r.getSbn().getId(),
-                    r.getSbn().getTag(), r,false);
+                    r.getSbn().getTag(), r, false, false);
     }
 
     @Test
@@ -10382,7 +10425,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // normal blocked notifications - blocked
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isFalse();
 
         // just using the style - blocked
         nb.setStyle(new Notification.MediaStyle());
@@ -10391,7 +10434,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isFalse();
 
         // using the style, but incorrect type in session - blocked
         nb.setStyle(new Notification.MediaStyle());
@@ -10403,7 +10446,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isFalse();
 
         // style + media session - bypasses block
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
@@ -10412,7 +10455,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
     }
 
     @Test
@@ -10495,7 +10538,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // normal blocked notifications - blocked
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isFalse();
 
         // just using the style - blocked
         Person person = new Person.Builder()
@@ -10509,36 +10552,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isFalse();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isFalse();
 
         // style + managed call - bypasses block
         when(mTelecomManager.isInManagedCall()).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
 
         // style + self managed call - bypasses block
         when(mTelecomManager.isInSelfManagedCall(
                 r.getSbn().getPackageName(), r.getUser())).thenReturn(true);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
 
         // set telecom manager to null - blocked
         mService.setTelecomManager(null);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                           r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                           r.getSbn().getId(), r.getSbn().getTag(), r, false, false))
                 .isFalse();
 
         // set telecom feature to false - blocked
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(false);
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                           r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                           r.getSbn().getId(), r.getSbn().getTag(), r, false, false))
                 .isFalse();
 
         // telecom manager is not ready - blocked
         mService.setTelecomManager(mTelecomManager);
         when(mTelecomManager.isInCall()).thenThrow(new IllegalStateException("not ready"));
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false))
                 .isFalse();
     }
 
@@ -11058,7 +11101,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         try {
             mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                    r.getSbn().getId(), r.getSbn().getTag(), r, false);
+                    r.getSbn().getId(), r.getSbn().getTag(), r, false, false);
             assertFalse("CallStyle should not be allowed without a valid use case", true);
         } catch (IllegalArgumentException error) {
             assertThat(error.getMessage()).contains("CallStyle");
@@ -11078,7 +11121,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
+    }
+
+    @Test
+    public void checkCallStyleNotification_allowedForByForegroundService() throws Exception {
+        Person person = new Person.Builder().setName("caller").build();
+        Notification n = new Notification.Builder(mContext, "test")
+                // Without FLAG_FOREGROUND_SERVICE.
+                //.setFlag(FLAG_FOREGROUND_SERVICE, true)
+                .setStyle(Notification.CallStyle.forOngoingCall(
+                        person, mock(PendingIntent.class)))
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false,
+                true /* byForegroundService */)).isTrue();
     }
 
     @Test
@@ -11094,7 +11155,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
     }
 
     @Test
@@ -11110,7 +11171,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
     }
 
     @Test
@@ -11126,7 +11187,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
-                r.getSbn().getId(), r.getSbn().getTag(), r, false)).isTrue();
+                r.getSbn().getId(), r.getSbn().getTag(), r, false, false)).isTrue();
     }
 
     @Test
