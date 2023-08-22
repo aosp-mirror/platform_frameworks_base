@@ -293,7 +293,8 @@ public class ContentProviderHelper {
                     return holder;
                 }
 
-                // Don't expose providers between normal apps and instant apps
+                // Don't expose providers between normal apps and instant apps; enforce limited
+                // package visibility (introduced in Android 11); etc.
                 try {
                     if (AppGlobals.getPackageManager()
                             .resolveContentProvider(name, /*flags=*/ 0, userId) == null) {
