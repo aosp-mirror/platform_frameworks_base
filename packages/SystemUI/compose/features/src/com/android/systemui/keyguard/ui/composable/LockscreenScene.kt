@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.composable
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.qualifiers.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -42,6 +36,7 @@ import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -54,6 +49,7 @@ class LockscreenScene
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: LockscreenSceneViewModel,
+    @KeyguardRootView private val viewProvider: () -> @JvmSuppressWildcards View,
 ) : ComposableScene {
     override val key = SceneKey.Lockscreen
 
@@ -72,6 +68,7 @@ constructor(
     ) {
         LockscreenScene(
             viewModel = viewModel,
+            viewProvider = viewProvider,
             modifier = modifier,
         )
     }
@@ -89,25 +86,22 @@ constructor(
 @Composable
 private fun LockscreenScene(
     viewModel: LockscreenSceneViewModel,
+    viewProvider: () -> View,
     modifier: Modifier = Modifier,
 ) {
-    // TODO(b/280879610): implement the real UI.
-
-    val lockButtonIcon: Icon by viewModel.lockButtonIcon.collectAsState()
-
-    Box(modifier = modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text("Lockscreen", style = MaterialTheme.typography.headlineMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(onClick = { viewModel.onLockButtonClicked() }) { Icon(lockButtonIcon) }
-
-                Button(onClick = { viewModel.onContentClicked() }) { Text("Open some content") }
+    AndroidView(
+        factory = { _ ->
+            val keyguardRootView = viewProvider()
+            // Remove the KeyguardRootView from any parent it might already have in legacy code just
+            // in case (a view can't have two parents).
+            (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
+            keyguardRootView
+        },
+        update = { keyguardRootView ->
+            keyguardRootView.requireViewById<View>(R.id.lock_icon_view).setOnClickListener {
+                viewModel.onLockButtonClicked()
             }
-        }
-    }
+        },
+        modifier = modifier,
+    )
 }
