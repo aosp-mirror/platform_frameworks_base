@@ -104,7 +104,7 @@ public final class SearchSession implements AutoCloseable {
         mInterface = android.app.search.ISearchUiManager.Stub.asInterface(b);
         mSessionId = new SearchSessionId(
                 context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
-        // b/175527717 whitelist possible clients of this API
+        // b/175527717 allowlist possible clients of this API
         searchContext.setPackageName(context.getPackageName());
         try {
             mInterface.createSearchSession(searchContext, mSessionId, mToken);
