@@ -31,7 +31,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
-import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.NavigationBarController
@@ -84,7 +83,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private val fakeSystemClock = FakeSystemClock()
     private val sysUiState = SysUiState(displayTracker)
     private val featureFlags = FakeFeatureFlags()
-    private val screenLifecycle = ScreenLifecycle(dumpManager)
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)
 
@@ -142,7 +140,6 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 sysUiState,
                 mock(),
                 userTracker,
-                screenLifecycle,
                 wakefulnessLifecycle,
                 uiEventLogger,
                 displayTracker,

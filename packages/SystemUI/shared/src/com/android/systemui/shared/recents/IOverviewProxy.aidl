@@ -76,24 +76,9 @@ oneway interface IOverviewProxy {
     void onSystemBarAttributesChanged(int displayId, int behavior) = 20;
 
     /**
-     * Sent when screen turned on and ready to use (blocker scrim is hidden)
-     */
-    void onScreenTurnedOn() = 21;
-
-    /**
      * Sent when the desired dark intensity of the nav buttons has changed
      */
     void onNavButtonsDarkIntensityChanged(float darkIntensity) = 22;
-
-     /**
-      * Sent when screen started turning on.
-      */
-     void onScreenTurningOn() = 23;
-
-     /**
-      * Sent when screen started turning off.
-      */
-     void onScreenTurningOff() = 24;
 
      /**
       * Sent when split keyboard shortcut is triggered to enter stage split.
