@@ -92,7 +92,7 @@ abstract class PipTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
 
     @Presubmit
     @Test
-    fun hasAtMostOnePipDismissOverlayWindow() {
+    open fun hasAtMostOnePipDismissOverlayWindow() {
         val matcher = ComponentNameMatcher("", "pip-dismiss-overlay")
         flicker.assertWm {
             val overlaysPerState =
