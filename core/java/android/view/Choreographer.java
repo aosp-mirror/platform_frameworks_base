@@ -1208,9 +1208,15 @@ public final class Choreographer {
         }
 
         private void allocateFrameTimelines(int length) {
-            mFrameTimelines = new FrameTimeline[length];
-            for (int i = 0; i < mFrameTimelines.length; i++) {
-                mFrameTimelines[i] = new FrameTimeline();
+            // Maintain one default frame timeline for API (such as getFrameTimelines and
+            // getPreferredFrameTimeline) consistency. It should have default data when accessed.
+            length = Math.max(1, length);
+
+            if (mFrameTimelines == null || mFrameTimelines.length != length) {
+                mFrameTimelines = new FrameTimeline[length];
+                for (int i = 0; i < mFrameTimelines.length; i++) {
+                    mFrameTimelines[i] = new FrameTimeline();
+                }
             }
         }
 
@@ -1220,12 +1226,7 @@ public final class Choreographer {
          */
         FrameTimeline update(
                 long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            // Even if the frame timelines length is 0, continue with allocation for API
-            // FrameData.getFrameTimelines consistency. The 0 length frame timelines code path
-            // should only occur when USE_VSYNC property is false.
-            if (mFrameTimelines.length != vsyncEventData.frameTimelinesLength) {
-                allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
-            }
+            allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
             mFrameTimeNanos = frameTimeNanos;
             mPreferredFrameTimelineIndex = vsyncEventData.preferredFrameTimelineIndex;
             for (int i = 0; i < mFrameTimelines.length; i++) {
