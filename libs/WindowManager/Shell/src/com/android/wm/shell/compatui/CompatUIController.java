@@ -34,6 +34,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -59,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -79,6 +81,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     }
 
     private static final String TAG = "CompatUIController";
+
+    // The time to wait before education and button hiding
+    private static final int DISAPPEAR_DELAY_MS = 5000;
 
     /** Whether the IME is shown on display id. */
     private final Set<Integer> mDisplaysWithIme = new ArraySet<>(1);
@@ -158,6 +163,9 @@ public class CompatUIController implements OnDisplaysChangedListener,
     @NonNull
     private final CompatUIShellCommandHandler mCompatUIShellCommandHandler;
 
+    @NonNull
+    private final Function<Integer, Integer> mDisappearTimeSupplier;
+
     @Nullable
     private CompatUICallback mCompatUICallback;
 
@@ -176,7 +184,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @NonNull Lazy<Transitions> transitionsLazy,
             @NonNull DockStateReader dockStateReader,
             @NonNull CompatUIConfiguration compatUIConfiguration,
-            @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler) {
+            @NonNull CompatUIShellCommandHandler compatUIShellCommandHandler,
+            @NonNull AccessibilityManager accessibilityManager) {
         mContext = context;
         mShellController = shellController;
         mDisplayController = displayController;
@@ -189,6 +198,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
         mDockStateReader = dockStateReader;
         mCompatUIConfiguration = compatUIConfiguration;
         mCompatUIShellCommandHandler = compatUIShellCommandHandler;
+        mDisappearTimeSupplier = flags -> accessibilityManager.getRecommendedTimeoutMillis(
+                DISAPPEAR_DELAY_MS, flags);
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -508,7 +519,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         return new ReachabilityEduWindowManager(context, taskInfo, mSyncQueue,
                 taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                mCompatUIConfiguration, mMainExecutor, this::onInitialReachabilityEduDismissed);
+                mCompatUIConfiguration, mMainExecutor, this::onInitialReachabilityEduDismissed,
+                mDisappearTimeSupplier);
     }
 
     private void onInitialReachabilityEduDismissed(@NonNull TaskInfo taskInfo,
@@ -554,7 +566,8 @@ public class CompatUIController implements OnDisplaysChangedListener,
             @Nullable ShellTaskOrganizer.TaskListener taskListener) {
         return new UserAspectRatioSettingsWindowManager(context, taskInfo, mSyncQueue,
                 taskListener, mDisplayController.getDisplayLayout(taskInfo.displayId),
-                mCompatUIHintsState, this::launchUserAspectRatioSettings, mMainExecutor);
+                mCompatUIHintsState, this::launchUserAspectRatioSettings, mMainExecutor,
+                mDisappearTimeSupplier);
     }
 
     private void launchUserAspectRatioSettings(
