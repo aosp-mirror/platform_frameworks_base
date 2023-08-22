@@ -88,7 +88,8 @@ class PackageFreezerTest {
 
     @Test
     fun freezePackage() {
-        val freezer = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms, TEST_EXIT_REASON)
+        val freezer = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
+                TEST_EXIT_REASON, null /* request */)
         verify(pms, times(1))
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
                     eq(TEST_EXIT_REASON))
@@ -104,9 +105,9 @@ class PackageFreezerTest {
     @Test
     fun freezePackage_twice() {
         val freezer1 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
-                TEST_EXIT_REASON)
+                TEST_EXIT_REASON, null  /* request */)
         val freezer2 = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
-                TEST_EXIT_REASON)
+                TEST_EXIT_REASON, null  /* request */)
         verify(pms, times(2))
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
                     eq(TEST_EXIT_REASON))
@@ -127,7 +128,7 @@ class PackageFreezerTest {
     @Test
     fun freezePackage_withoutClosing() {
         var freezer: PackageFreezer? = PackageFreezer(TEST_PACKAGE, TEST_USER_ID, TEST_REASON, pms,
-                TEST_EXIT_REASON)
+                TEST_EXIT_REASON, null  /* request */)
         verify(pms, times(1))
             .killApplication(eq(TEST_PACKAGE), any(), eq(TEST_USER_ID), eq(TEST_REASON),
                     eq(TEST_EXIT_REASON))
