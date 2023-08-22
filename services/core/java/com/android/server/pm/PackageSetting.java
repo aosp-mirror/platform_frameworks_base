@@ -809,9 +809,16 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return changed;
     }
 
-    boolean isAnyInstalled(int[] users) {
-        for (int user: users) {
-            if (readUserState(user).isInstalled()) {
+    boolean isInstalledOrHasDataOnAnyOtherUser(int[] allUsers, int currentUser) {
+        for (int user: allUsers) {
+            if (user == currentUser) {
+                continue;
+            }
+            final PackageUserStateInternal userState = readUserState(user);
+            if (userState.isInstalled()) {
+                return true;
+            }
+            if (userState.getCeDataInode() > 0) {
                 return true;
             }
         }
