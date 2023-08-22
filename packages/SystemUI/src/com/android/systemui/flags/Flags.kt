@@ -70,8 +70,7 @@ object Flags {
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        unreleasedFlag("notification_inline_reply_animation")
+    val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
 
     /** Makes sure notification panel is updated before the user switch is complete. */
     // TODO(b/278873737): Tracking Bug
