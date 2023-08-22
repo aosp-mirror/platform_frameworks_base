@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
+import static com.android.settingslib.wifi.WifiUtils.getHotspotIconResource;
 import static com.android.wifitrackerlib.WifiEntry.CONNECTED_STATE_CONNECTED;
 
 import android.animation.Animator;
@@ -89,6 +90,7 @@ import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.wifitrackerlib.HotspotNetworkEntry;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -454,16 +456,31 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     @Nullable
     Drawable getInternetWifiDrawable(@NonNull WifiEntry wifiEntry) {
-        if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
-            return null;
-        }
-        final Drawable drawable =
-                mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(), wifiEntry.getLevel());
+        Drawable drawable = getWifiDrawable(wifiEntry);
         if (drawable == null) {
             return null;
         }
         drawable.setTint(mContext.getColor(R.color.connected_network_primary_color));
         return drawable;
+    }
+
+    /**
+     * Returns a Wi-Fi icon {@link Drawable}.
+     *
+     * @param wifiEntry {@link WifiEntry}
+     */
+    @Nullable
+    Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
+        if (wifiEntry instanceof HotspotNetworkEntry) {
+            int deviceType = ((HotspotNetworkEntry) wifiEntry).getDeviceType();
+            return mContext.getDrawable(getHotspotIconResource(deviceType));
+        }
+        // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
+        // will be returned.
+        if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
+            return null;
+        }
+        return mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(), wifiEntry.getLevel());
     }
 
     Drawable getSignalStrengthDrawable(int subId) {
@@ -1312,10 +1329,6 @@ public class InternetDialogController implements AccessPointController.AccessPoi
             mCallback.onSubscriptionsChanged(defaultDataSubId);
         }
         mDefaultDataSubId = defaultDataSubId;
-    }
-
-    public WifiUtils.InternetIconInjector getWifiIconInjector() {
-        return mWifiIconInjector;
     }
 
     interface InternetDialogCallback {

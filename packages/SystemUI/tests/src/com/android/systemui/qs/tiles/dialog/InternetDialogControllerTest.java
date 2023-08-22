@@ -1,11 +1,13 @@
 package com.android.systemui.qs.tiles.dialog;
 
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
 import static android.telephony.SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_GREAT;
 import static android.telephony.SignalStrength.SIGNAL_STRENGTH_POOR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.settingslib.wifi.WifiUtils.getHotspotIconResource;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
 import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX;
@@ -75,6 +77,7 @@ import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wifitrackerlib.HotspotNetworkEntry;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -511,12 +514,40 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getInternetWifiDrawable_withWifiLevelUnreachable_returnNull() {
+    public void getWifiDrawable_withWifiLevelUnreachable_returnNull() {
         when(mConnectedEntry.getLevel()).thenReturn(WIFI_LEVEL_UNREACHABLE);
 
-        Drawable drawable = mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
+        assertThat(mInternetDialogController.getWifiDrawable(mConnectedEntry)).isNull();
+    }
 
-        assertThat(drawable).isNull();
+    @Test
+    public void getWifiDrawable_withHotspotNetworkEntry_returnHotspotDrawable() {
+        HotspotNetworkEntry entry = mock(HotspotNetworkEntry.class);
+        when(entry.getDeviceType()).thenReturn(DEVICE_TYPE_PHONE);
+        Drawable hotspotDrawable = mock(Drawable.class);
+        mTestableResources.addOverride(getHotspotIconResource(DEVICE_TYPE_PHONE), hotspotDrawable);
+
+        assertThat(mInternetDialogController.getWifiDrawable(entry)).isEqualTo(hotspotDrawable);
+    }
+
+    @Test
+    public void getWifiDrawable_withWifiEntryNotShowXLevelIcon_getIconWithInternet() {
+        when(mWifiEntry1.getLevel()).thenReturn(WIFI_LEVEL_MAX);
+        when(mWifiEntry1.shouldShowXLevelIcon()).thenReturn(false);
+
+        mInternetDialogController.getWifiDrawable(mWifiEntry1);
+
+        verify(mWifiIconInjector).getIcon(eq(false) /* noInternet */, anyInt());
+    }
+
+    @Test
+    public void getWifiDrawable_withWifiEntryShowXLevelIcon_getIconWithNoInternet() {
+        when(mWifiEntry1.getLevel()).thenReturn(WIFI_LEVEL_MAX);
+        when(mWifiEntry1.shouldShowXLevelIcon()).thenReturn(true);
+
+        mInternetDialogController.getWifiDrawable(mWifiEntry1);
+
+        verify(mWifiIconInjector).getIcon(eq(true) /* noInternet */, anyInt());
     }
 
     @Test
