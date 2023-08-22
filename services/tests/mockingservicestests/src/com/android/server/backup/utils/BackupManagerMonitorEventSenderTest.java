@@ -30,11 +30,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.IBackupAgent;
-import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupRestoreEventLogger;
@@ -62,39 +62,65 @@ import java.util.List;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class BackupManagerMonitorUtilsTest {
+public class BackupManagerMonitorEventSenderTest {
     @Mock private IBackupManagerMonitor mMonitorMock;
+    @Mock private BackupManagerMonitorDumpsysUtils mBackupManagerMonitorDumpsysUtilsMock;
+
+    private BackupManagerMonitorEventSender mBackupManagerMonitorEventSender;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(mMonitorMock,
+                mBackupManagerMonitorDumpsysUtilsMock);
     }
 
     @Test
-    public void monitorEvent_monitorIsNull_returnsNull() throws Exception {
-        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(null, 0, null, 0,
-                null);
+    public void monitorEvent_monitorIsNull_sendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.RESTORE);
+        mBackupManagerMonitorEventSender.setMonitor(null);
+        mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, extras);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
-        assertThat(result).isNull();
+        verify(mBackupManagerMonitorDumpsysUtilsMock).parseBackupManagerMonitorRestoreEventForDumpsys(any(
+                Bundle.class));
     }
 
     @Test
-    public void monitorEvent_monitorOnEventThrows_returnsNull() throws Exception {
+    public void monitorEvent_monitorIsNull_doNotCallOnEvent() throws Exception {
+        mBackupManagerMonitorEventSender = new BackupManagerMonitorEventSender(null);
+        mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, null);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
+
+        verify(mMonitorMock, never()).onEvent(any(Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_monitorOnEventThrows_setsMonitorToNull() throws Exception {
         doThrow(new RemoteException()).when(mMonitorMock).onEvent(any(Bundle.class));
 
-        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(mMonitorMock, 0, null,
-                0, null);
+        mBackupManagerMonitorEventSender.monitorEvent(0, null, 0, null);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
         verify(mMonitorMock).onEvent(any(Bundle.class));
-        assertThat(result).isNull();
+        assertThat(monitor).isNull();
+    }
+
+    @Test
+    public void monitorEvent_extrasAreNull_doNotSendBundleToDumpsys() throws Exception {
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, null);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
     }
 
     @Test
     public void monitorEvent_packageAndExtrasAreNull_fillsBundleCorrectly() throws Exception {
-        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(mMonitorMock, 1, null,
-                2, null);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, null);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
-        assertThat(result).isEqualTo(mMonitorMock);
+        assertThat(monitor).isEqualTo(mMonitorMock);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();
@@ -112,10 +138,10 @@ public class BackupManagerMonitorUtilsTest {
         extras.putInt("key1", 4);
         extras.putString("key2", "value2");
 
-        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(mMonitorMock, 1,
-                packageInfo, 2, extras);
+        mBackupManagerMonitorEventSender.monitorEvent(1, packageInfo, 2, extras);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
-        assertThat(result).isEqualTo(mMonitorMock);
+        assertThat(monitor).isEqualTo(mMonitorMock);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();
@@ -130,7 +156,8 @@ public class BackupManagerMonitorUtilsTest {
     }
 
     @Test
-    public void monitorEvent_packageAndExtrasAreNotNull_fillsBundleCorrectlyLong() throws Exception {
+    public void monitorEvent_packageAndExtrasAreNotNull_fillsBundleCorrectlyLong()
+            throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test.package";
         packageInfo.versionCode = 3;
@@ -139,10 +166,10 @@ public class BackupManagerMonitorUtilsTest {
         extras.putInt("key1", 4);
         extras.putString("key2", "value2");
 
-        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(mMonitorMock, 1,
-                packageInfo, 2, extras);
+        mBackupManagerMonitorEventSender.monitorEvent(1, packageInfo, 2, extras);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
-        assertThat(result).isEqualTo(mMonitorMock);
+        assertThat(monitor).isEqualTo(mMonitorMock);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();
@@ -158,15 +185,45 @@ public class BackupManagerMonitorUtilsTest {
     }
 
     @Test
+    public void monitorEvent_eventOpTypeIsRestore_sendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.RESTORE);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock).parseBackupManagerMonitorRestoreEventForDumpsys(any(
+                Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_eventOpTypeIsBackup_doNotSendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.BACKUP);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
+    }
+
+    @Test
+    public void monitorEvent_eventOpTypeIsUnknown_doNotSendBundleToDumpsys() throws Exception {
+        Bundle extras = new Bundle();
+        extras.putInt(EXTRA_LOG_OPERATION_TYPE, OperationType.UNKNOWN);
+        mBackupManagerMonitorEventSender.monitorEvent(1, null, 2, extras);
+
+        verify(mBackupManagerMonitorDumpsysUtilsMock, never())
+                .parseBackupManagerMonitorRestoreEventForDumpsys(any(Bundle.class));
+    }
+
+    @Test
     public void monitorAgentLoggingResults_onBackup_fillsBundleCorrectly() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test.package";
         // Mock an agent that returns a logging result.
         IBackupAgent agent = setUpLoggingAgentForOperation(OperationType.BACKUP);
 
-        IBackupManagerMonitor monitor =
-                BackupManagerMonitorUtils.monitorAgentLoggingResults(
-                        mMonitorMock, packageInfo, agent);
+
+        mBackupManagerMonitorEventSender.monitorAgentLoggingResults(packageInfo, agent);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
         assertCorrectBundleSentToMonitor(monitor, OperationType.BACKUP);
     }
@@ -178,9 +235,8 @@ public class BackupManagerMonitorUtilsTest {
         // Mock an agent that returns a logging result.
         IBackupAgent agent = setUpLoggingAgentForOperation(OperationType.RESTORE);
 
-        IBackupManagerMonitor monitor =
-                BackupManagerMonitorUtils.monitorAgentLoggingResults(
-                        mMonitorMock, packageInfo, agent);
+        mBackupManagerMonitorEventSender.monitorAgentLoggingResults(packageInfo, agent);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
         assertCorrectBundleSentToMonitor(monitor, OperationType.RESTORE);
     }
@@ -217,9 +273,9 @@ public class BackupManagerMonitorUtilsTest {
         List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
         loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
 
-        IBackupManagerMonitor monitor = BackupManagerMonitorUtils.sendAgentLoggingResults(
-                mMonitorMock, packageInfo, loggingResults, OperationType.BACKUP);
-
+        mBackupManagerMonitorEventSender.sendAgentLoggingResults(
+                packageInfo, loggingResults, OperationType.BACKUP);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
         assertCorrectBundleSentToMonitor(monitor, OperationType.BACKUP);
     }
 
@@ -230,8 +286,9 @@ public class BackupManagerMonitorUtilsTest {
         List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
         loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
 
-        IBackupManagerMonitor monitor = BackupManagerMonitorUtils.sendAgentLoggingResults(
-                mMonitorMock, packageInfo, loggingResults, OperationType.RESTORE);
+        mBackupManagerMonitorEventSender.sendAgentLoggingResults(
+                packageInfo, loggingResults, OperationType.RESTORE);
+        IBackupManagerMonitor monitor = mBackupManagerMonitorEventSender.getMonitor();
 
         assertCorrectBundleSentToMonitor(monitor, OperationType.RESTORE);
     }
@@ -262,7 +319,7 @@ public class BackupManagerMonitorUtilsTest {
     public void putMonitoringExtraString_bundleExists_fillsBundleCorrectly() throws Exception {
         Bundle bundle = new Bundle();
 
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(bundle, "key", "value");
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", "value");
 
         assertThat(result).isEqualTo(bundle);
         assertThat(result.size()).isEqualTo(1);
@@ -272,7 +329,7 @@ public class BackupManagerMonitorUtilsTest {
     @Test
     public void putMonitoringExtraString_bundleDoesNotExist_fillsBundleCorrectly()
             throws Exception {
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(null, "key", "value");
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", "value");
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
@@ -284,7 +341,7 @@ public class BackupManagerMonitorUtilsTest {
     public void putMonitoringExtraLong_bundleExists_fillsBundleCorrectly() throws Exception {
         Bundle bundle = new Bundle();
 
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(bundle, "key", 123);
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", 123);
 
         assertThat(result).isEqualTo(bundle);
         assertThat(result.size()).isEqualTo(1);
@@ -293,7 +350,7 @@ public class BackupManagerMonitorUtilsTest {
 
     @Test
     public void putMonitoringExtraLong_bundleDoesNotExist_fillsBundleCorrectly() throws Exception {
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(null, "key", 123);
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", 123);
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
@@ -304,7 +361,7 @@ public class BackupManagerMonitorUtilsTest {
     public void putMonitoringExtraBoolean_bundleExists_fillsBundleCorrectly() throws Exception {
         Bundle bundle = new Bundle();
 
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(bundle, "key", true);
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(bundle, "key", true);
 
         assertThat(result).isEqualTo(bundle);
         assertThat(result.size()).isEqualTo(1);
@@ -314,7 +371,7 @@ public class BackupManagerMonitorUtilsTest {
     @Test
     public void putMonitoringExtraBoolean_bundleDoesNotExist_fillsBundleCorrectly()
             throws Exception {
-        Bundle result = BackupManagerMonitorUtils.putMonitoringExtra(null, "key", true);
+        Bundle result = mBackupManagerMonitorEventSender.putMonitoringExtra(null, "key", true);
 
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);

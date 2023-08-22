@@ -1284,6 +1284,12 @@ public class BubbleStackView extends FrameLayout
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show manage edu: " + shouldShow);
         }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show manage edu, but it is forced hidden");
+            }
+            return false;
+        }
         return shouldShow;
     }
 
@@ -1315,6 +1321,12 @@ public class BubbleStackView extends FrameLayout
         final boolean shouldShow = !seen || BubbleDebugConfig.forceShowUserEducation(mContext);
         if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
             Log.d(TAG, "Show stack edu: " + shouldShow);
+        }
+        if (shouldShow && BubbleDebugConfig.neverShowUserEducation(mContext)) {
+            if (BubbleDebugConfig.DEBUG_USER_EDUCATION) {
+                Log.d(TAG, "Want to show stack edu, but it is forced hidden");
+            }
+            return false;
         }
         return shouldShow;
     }
@@ -1763,13 +1775,26 @@ public class BubbleStackView extends FrameLayout
             return;
         }
 
+        if (firstBubble && bubble.isAppBubble() && !mPositioner.hasUserModifiedDefaultPosition()) {
+            // TODO (b/294284894): update language around "app bubble" here
+            // If it's an app bubble and we don't have a previous resting position, update the
+            // controllers to use the default position for the app bubble (it'd be different from
+            // the position initialized with the controllers originally).
+            PointF startPosition =  mPositioner.getDefaultStartPosition(true /* isAppBubble */);
+            mStackOnLeftOrWillBe = mPositioner.isStackOnLeft(startPosition);
+            mStackAnimationController.setStackPosition(startPosition);
+            mExpandedAnimationController.setCollapsePoint(startPosition);
+            // Set the translation x so that this bubble will animate in from the same side they
+            // expand / collapse on.
+            bubble.getIconView().setTranslationX(startPosition.x);
+        } else if (firstBubble) {
+            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
+        }
+
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(mPositioner.getBubbleSize(),
                         mPositioner.getBubbleSize()));
 
-        if (firstBubble) {
-            mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        }
         // Set the dot position to the opposite of the side the stack is resting on, since the stack
         // resting slightly off-screen would result in the dot also being off-screen.
         bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);

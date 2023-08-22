@@ -51,15 +51,18 @@ import kotlinx.coroutines.withContext
 private val KEY_TIMESTAMP = "appliedTimestamp"
 private val KNOWN_PLUGINS =
     mapOf<String, List<ClockMetadata>>(
-        "com.android.systemui.falcon.one" to listOf(ClockMetadata("ANALOG_CLOCK_BIGNUM")),
-        "com.android.systemui.falcon.two" to listOf(ClockMetadata("DIGITAL_CLOCK_CALLIGRAPHY")),
-        "com.android.systemui.falcon.three" to listOf(ClockMetadata("DIGITAL_CLOCK_FLEX")),
-        "com.android.systemui.falcon.four" to listOf(ClockMetadata("DIGITAL_CLOCK_GROWTH")),
-        "com.android.systemui.falcon.five" to listOf(ClockMetadata("DIGITAL_CLOCK_HANDWRITTEN")),
-        "com.android.systemui.falcon.six" to listOf(ClockMetadata("DIGITAL_CLOCK_INFLATE")),
-        "com.android.systemui.falcon.seven" to listOf(ClockMetadata("DIGITAL_CLOCK_METRO")),
-        "com.android.systemui.falcon.eight" to listOf(ClockMetadata("DIGITAL_CLOCK_NUMBEROVERLAP")),
-        "com.android.systemui.falcon.nine" to listOf(ClockMetadata("DIGITAL_CLOCK_WEATHER")),
+        "com.android.systemui.clocks.bignum" to listOf(ClockMetadata("ANALOG_CLOCK_BIGNUM")),
+        "com.android.systemui.clocks.calligraphy" to
+            listOf(ClockMetadata("DIGITAL_CLOCK_CALLIGRAPHY")),
+        "com.android.systemui.clocks.flex" to listOf(ClockMetadata("DIGITAL_CLOCK_FLEX")),
+        "com.android.systemui.clocks.growth" to listOf(ClockMetadata("DIGITAL_CLOCK_GROWTH")),
+        "com.android.systemui.clocks.handwritten" to
+            listOf(ClockMetadata("DIGITAL_CLOCK_HANDWRITTEN")),
+        "com.android.systemui.clocks.inflate" to listOf(ClockMetadata("DIGITAL_CLOCK_INFLATE")),
+        "com.android.systemui.clocks.metro" to listOf(ClockMetadata("DIGITAL_CLOCK_METRO")),
+        "com.android.systemui.clocks.numoverlap" to
+            listOf(ClockMetadata("DIGITAL_CLOCK_NUMBEROVERLAP")),
+        "com.android.systemui.clocks.weather" to listOf(ClockMetadata("DIGITAL_CLOCK_WEATHER")),
     )
 
 private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(

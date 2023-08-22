@@ -653,14 +653,38 @@ public class BubblePositioner {
     }
 
     /**
-     * @return the stack position to use if we don't have a saved location or if user education
-     * is being shown.
+     * Returns whether the {@link #getRestingPosition()} is equal to the default start position
+     * initialized for bubbles, if {@code true} this means the user hasn't moved the bubble
+     * from the initial start position (or they haven't received a bubble yet).
+     */
+    public boolean hasUserModifiedDefaultPosition() {
+        PointF defaultStart = getDefaultStartPosition();
+        return mRestingStackPosition != null
+                && !mRestingStackPosition.equals(defaultStart);
+    }
+
+    /**
+     * Returns the stack position to use if we don't have a saved location or if user education
+     * is being shown, for a normal bubble.
      */
     public PointF getDefaultStartPosition() {
-        // Start on the left if we're in LTR, right otherwise.
-        final boolean startOnLeft =
-                mContext.getResources().getConfiguration().getLayoutDirection()
-                        != LAYOUT_DIRECTION_RTL;
+        return getDefaultStartPosition(false /* isAppBubble */);
+    }
+
+    /**
+     * The stack position to use if we don't have a saved location or if user education
+     * is being shown.
+     *
+     * @param isAppBubble whether this start position is for an app bubble or not.
+     */
+    public PointF getDefaultStartPosition(boolean isAppBubble) {
+        final int layoutDirection = mContext.getResources().getConfiguration().getLayoutDirection();
+        // Normal bubbles start on the left if we're in LTR, right otherwise.
+        // TODO (b/294284894): update language around "app bubble" here
+        // App bubbles start on the right in RTL, left otherwise.
+        final boolean startOnLeft = isAppBubble
+                ? layoutDirection == LAYOUT_DIRECTION_RTL
+                : layoutDirection != LAYOUT_DIRECTION_RTL;
         final RectF allowableStackPositionRegion = getAllowableStackPositionRegion(
                 1 /* default starts with 1 bubble */);
         if (isLargeScreen()) {

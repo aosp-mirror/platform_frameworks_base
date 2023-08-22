@@ -54,6 +54,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.screenrecord.MediaProjectionPermissionDialog;
 import com.android.systemui.screenrecord.ScreenShareOption;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -71,6 +72,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
     private final FeatureFlags mFeatureFlags;
     private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
+    private final ActivityStarter mActivityStarter;
 
     private String mPackageName;
     private int mUid;
@@ -86,8 +88,10 @@ public class MediaProjectionPermissionActivity extends Activity
 
     @Inject
     public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
-            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver) {
+            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
+            ActivityStarter activityStarter) {
         mFeatureFlags = featureFlags;
+        mActivityStarter = activityStarter;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
     }
 
@@ -306,8 +310,16 @@ public class MediaProjectionPermissionActivity extends Activity
                 // Start activity from the current foreground user to avoid creating a separate
                 // SystemUI process without access to recent tasks because it won't have
                 // WM Shell running inside.
+                // It is also important to make sure the shade is dismissed, otherwise users won't
+                // see the app selector.
                 mUserSelectingTask = true;
-                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                mActivityStarter.startActivity(
+                        intent,
+                        /* dismissShade= */ true,
+                        /* animationController= */ null,
+                        /* showOverLockscreenWhenLocked= */ false,
+                        UserHandle.of(ActivityManager.getCurrentUser())
+                );
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);

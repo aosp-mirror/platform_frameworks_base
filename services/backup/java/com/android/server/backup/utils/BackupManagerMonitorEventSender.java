@@ -25,7 +25,6 @@ import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.backup.BackupAnnotations.OperationType;
@@ -37,6 +36,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 
 import java.util.List;
@@ -44,9 +44,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Utility methods to communicate with BackupManagerMonitor.
+ * Utility methods to log BackupManagerMonitor events.
  */
-public class BackupManagerMonitorUtils {
+public class BackupManagerMonitorEventSender {
     /**
      * Timeout for how long we wait before we give up on getting logs from a {@link IBackupAgent}.
      * We expect this to be very fast since the agent immediately returns whatever logs have been
@@ -54,51 +54,77 @@ public class BackupManagerMonitorUtils {
      * for non-essential logs.
      */
     private static final int AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS = 500;
+    @Nullable private IBackupManagerMonitor mMonitor;
+    private final BackupManagerMonitorDumpsysUtils mBackupManagerMonitorDumpsysUtils;
+    public BackupManagerMonitorEventSender(@Nullable IBackupManagerMonitor monitor) {
+        mMonitor = monitor;
+        mBackupManagerMonitorDumpsysUtils = new BackupManagerMonitorDumpsysUtils();
+    }
+
+    @VisibleForTesting
+    BackupManagerMonitorEventSender(@Nullable IBackupManagerMonitor monitor,
+            BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils) {
+        mMonitor = monitor;
+        mBackupManagerMonitorDumpsysUtils = backupManagerMonitorDumpsysUtils;
+    }
+
+    public void setMonitor(IBackupManagerMonitor monitor) {
+        mMonitor = monitor;
+    }
+
+    public IBackupManagerMonitor getMonitor() {
+        return mMonitor;
+    }
 
     /**
      * Notifies monitor about the event.
      *
      * Calls {@link IBackupManagerMonitor#onEvent(Bundle)} with a bundle representing current event.
      *
-     * @param monitor - implementation of {@link IBackupManagerMonitor} to notify.
      * @param id - event id.
      * @param pkg - package event is related to.
      * @param category - event category.
      * @param extras - additional event data.
-     * @return <code>monitor</code> if call succeeded and <code>null</code> otherwise.
      */
-    @Nullable
-    public static IBackupManagerMonitor monitorEvent(
-            @Nullable IBackupManagerMonitor monitor,
+    public void monitorEvent(
             int id,
             PackageInfo pkg,
             int category,
             Bundle extras) {
-        if (monitor != null) {
-            try {
-                Bundle bundle = new Bundle();
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
-                if (pkg != null) {
-                    bundle.putString(EXTRA_LOG_EVENT_PACKAGE_NAME,
-                            pkg.packageName);
-                    bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
-                            pkg.versionCode);
-                    bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
-                            pkg.getLongVersionCode());
-                }
-                if (extras != null) {
-                    bundle.putAll(extras);
-                }
-                monitor.onEvent(bundle);
-                return monitor;
-            } catch (RemoteException e) {
-                if (DEBUG) {
-                    Slog.w(TAG, "backup manager monitor went away");
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
+            bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
+            if (pkg != null) {
+                bundle.putString(EXTRA_LOG_EVENT_PACKAGE_NAME,
+                        pkg.packageName);
+                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
+                        pkg.versionCode);
+                bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
+                        pkg.getLongVersionCode());
+            }
+            if (extras != null) {
+                bundle.putAll(extras);
+                if (extras.containsKey(EXTRA_LOG_OPERATION_TYPE) &&
+                        extras.getInt(EXTRA_LOG_OPERATION_TYPE) == OperationType.RESTORE){
+                    mBackupManagerMonitorDumpsysUtils
+                            .parseBackupManagerMonitorRestoreEventForDumpsys(bundle);
                 }
             }
+
+            if (mMonitor != null) {
+                mMonitor.onEvent(bundle);
+            } else {
+                if (DEBUG) {
+                    Slog.w(TAG, "backup manager monitor is null unable to send event");
+                }
+            }
+        } catch (RemoteException e) {
+            mMonitor = null;
+            if (DEBUG) {
+                Slog.w(TAG, "backup manager monitor went away");
+            }
         }
-        return null;
     }
 
     /**
@@ -108,17 +134,12 @@ public class BackupManagerMonitorUtils {
      * <p>Note that this method does two separate binder calls (one to the agent and one to the
      * monitor).
      *
-     * @param monitor - implementation of {@link IBackupManagerMonitor} to notify.
      * @param pkg - package the {@code agent} belongs to.
      * @param agent - the {@link IBackupAgent} to retrieve logs from.
-     * @return {@code null} if the monitor is null. {@code monitor} if we fail to retrieve the logs
-     *     from the {@code agent}. Otherwise, the result of {@link
-     *     #monitorEvent(IBackupManagerMonitor, int, PackageInfo, int, Bundle)}.
      */
-    public static IBackupManagerMonitor monitorAgentLoggingResults(
-            @Nullable IBackupManagerMonitor monitor, PackageInfo pkg, IBackupAgent agent) {
-        if (monitor == null) {
-            return null;
+    public void monitorAgentLoggingResults(PackageInfo pkg, IBackupAgent agent) {
+        if (mMonitor == null) {
+            Slog.i(TAG, "backup manager monitor is null unable to send event"+pkg);
         }
 
         try {
@@ -127,7 +148,7 @@ public class BackupManagerMonitorUtils {
             AndroidFuture<Integer> operationTypeFuture = new AndroidFuture<>();
             agent.getLoggerResults(resultsFuture);
             agent.getOperationType(operationTypeFuture);
-            return sendAgentLoggingResults(monitor, pkg,
+            sendAgentLoggingResults(pkg,
                     resultsFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS),
                     operationTypeFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS,
                             TimeUnit.MILLISECONDS));
@@ -136,18 +157,15 @@ public class BackupManagerMonitorUtils {
         } catch (Exception e) {
             Slog.w(TAG, "Failed to retrieve logging results from agent", e);
         }
-        return monitor;
     }
 
-    public static IBackupManagerMonitor sendAgentLoggingResults(
-            @NonNull IBackupManagerMonitor monitor, PackageInfo pkg, List<DataTypeResult> results,
+    public void sendAgentLoggingResults(PackageInfo pkg, List<DataTypeResult> results,
             @OperationType int operationType) {
         Bundle loggerResultsBundle = new Bundle();
         loggerResultsBundle.putParcelableList(
                 EXTRA_LOG_AGENT_LOGGING_RESULTS, results);
         loggerResultsBundle.putInt(EXTRA_LOG_OPERATION_TYPE, operationType);
-        return monitorEvent(
-                monitor,
+        monitorEvent(
                 LOG_EVENT_ID_AGENT_LOGGING_RESULTS,
                 pkg,
                 LOG_EVENT_CATEGORY_AGENT,
