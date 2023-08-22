@@ -351,13 +351,13 @@ public class HandwritingInitiator {
     }
 
     private static boolean shouldTriggerStylusHandwritingForView(@NonNull View view) {
-        if (!view.isAutoHandwritingEnabled()) {
+        if (!view.shouldInitiateHandwriting()) {
             return false;
         }
-        // The view may be a handwriting initiation delegate, in which case it is not the editor
+        // The view may be a handwriting initiation delegator, in which case it is not the editor
         // view for which handwriting would be started. However, in almost all cases, the return
-        // values of View#isStylusHandwritingAvailable will be the same for the delegate view and
-        // the delegator editor view. So the delegate view can be used to decide whether handwriting
+        // values of View#isStylusHandwritingAvailable will be the same for the delegator view and
+        // the delegate editor view. So the delegator view can be used to decide whether handwriting
         // should be triggered.
         return view.isStylusHandwritingAvailable();
     }
@@ -682,7 +682,7 @@ public class HandwritingInitiator {
     /** The helper method to check if the given view is still active for handwriting. */
     private static boolean isViewActive(@Nullable View view) {
         return view != null && view.isAttachedToWindow() && view.isAggregatedVisible()
-                && view.isAutoHandwritingEnabled();
+                && view.shouldInitiateHandwriting();
     }
 
     /**

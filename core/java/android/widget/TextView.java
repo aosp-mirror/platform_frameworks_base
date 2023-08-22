@@ -1856,6 +1856,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean clickable = canInputOrMove || isClickable();
         boolean longClickable = canInputOrMove || isLongClickable();
         int focusable = getFocusable();
+        boolean isAutoHandwritingEnabled = true;
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
@@ -1878,6 +1879,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.View_longClickable:
                     longClickable = a.getBoolean(attr, longClickable);
                     break;
+
+                case com.android.internal.R.styleable.View_autoHandwritingEnabled:
+                    isAutoHandwritingEnabled = a.getBoolean(attr, true);
+                    break;
             }
         }
         a.recycle();
@@ -1891,6 +1896,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setClickable(clickable);
         setLongClickable(longClickable);
+        setAutoHandwritingEnabled(isAutoHandwritingEnabled);
 
         if (mEditor != null) mEditor.prepareCursorControllers();
 
