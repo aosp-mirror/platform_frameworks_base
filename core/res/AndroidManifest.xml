@@ -4806,6 +4806,13 @@
     <permission android:name="android.permission.CHANGE_ACCESSIBILITY_VOLUME"
                 android:protectionLevel="signature" />
 
+    <!-- @FlaggedApi("com.android.server.accessibility.motion_event_observing")
+    @hide
+    @TestApi
+    Allows an accessibility service to observe motion events without consuming them. -->
+    <permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to collect frame statistics -->
     <permission android:name="android.permission.FRAME_STATS"
          android:protectionLevel="signature" />
