@@ -338,8 +338,8 @@ public class NetworkPolicyLogger {
         return "App idle state of uid " + uid + ": " + idle;
     }
 
-    private static String getAppIdleWlChangedLog(int uid, boolean isWhitelisted) {
-        return "App idle whitelist state of uid " + uid + ": " + isWhitelisted;
+    private static String getAppIdleWlChangedLog(int uid, boolean isAllowlisted) {
+        return "App idle whitelist state of uid " + uid + ": " + isAllowlisted;
     }
 
     private static String getParoleStateChanged(boolean paroleOn) {
@@ -519,14 +519,14 @@ public class NetworkPolicyLogger {
             data.timeStamp = System.currentTimeMillis();
         }
 
-        public void appIdleWlChanged(int uid, boolean isWhitelisted) {
+        public void appIdleWlChanged(int uid, boolean isAllowlisted) {
             final Data data = getNextSlot();
             if (data == null) return;
 
             data.reset();
             data.type = EVENT_APP_IDLE_WL_CHANGED;
             data.ifield1 = uid;
-            data.bfield1 = isWhitelisted;
+            data.bfield1 = isAllowlisted;
             data.timeStamp = System.currentTimeMillis();
         }
 
