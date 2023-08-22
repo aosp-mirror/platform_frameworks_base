@@ -112,10 +112,10 @@ class CompanionDeviceManagerSnippet : Snippet {
             throw CompanionException("Association result can't be null.")
         }
 
-        val association = result.getParcelableExtra(
+        val association = checkNotNull(result.getParcelableExtra(
             CompanionDeviceManager.EXTRA_ASSOCIATION,
             AssociationInfo::class.java
-        )
+        ))
         val remoteDevice = association.associatedDevice?.getBluetoothDevice()!!
 
         // Register associated device
@@ -138,8 +138,8 @@ class CompanionDeviceManagerSnippet : Snippet {
      */
     @Rpc(description = "Start permissions sync.")
     fun startPermissionsSync(associationId: Int) {
-        val pendingIntent = companionDeviceManager
-            .buildPermissionTransferUserConsentIntent(associationId)
+        val pendingIntent = checkNotNull(companionDeviceManager
+            .buildPermissionTransferUserConsentIntent(associationId))
         CompanionActivity.launchAndWait(context)
         CompanionActivity.startIntentSender(pendingIntent)
         confirmationUi.waitUntilSystemDataTransferConfirmationVisible()
