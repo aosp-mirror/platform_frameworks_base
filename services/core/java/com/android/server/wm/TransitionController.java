@@ -1146,6 +1146,7 @@ class TransitionController {
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
+            mAtm.mWindowManager.requestTraversal();
             mSnapshotController.setPause(false);
             mAnimatingState = false;
             Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);
