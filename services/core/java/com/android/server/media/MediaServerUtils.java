@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 /** Util class for media server. */
@@ -63,7 +64,8 @@ import java.util.List;
      * @throws IllegalArgumentException If the given {@code packageName} does not correspond to the
      *     given {@code uid}, and {@code uid} is not the root uid, or the shell uid.
      */
-    public static void enforcePackageName(String packageName, int uid) {
+    public static void enforcePackageName(
+            @NonNull Context context, @NonNull String packageName, int uid) {
         if (uid == Process.ROOT_UID || uid == Process.SHELL_UID) {
             return;
         }
@@ -76,12 +78,16 @@ import java.util.List;
                 packageManagerInternal.getPackageUid(
                         packageName, 0 /* flags */, UserHandle.getUserId(uid));
         if (!UserHandle.isSameApp(uid, actualUid)) {
+            String[] uidPackages = context.getPackageManager().getPackagesForUid(uid);
             throw new IllegalArgumentException(
                     "packageName does not belong to the calling uid; "
                             + "pkg="
                             + packageName
                             + ", uid="
-                            + uid);
+                            + uid
+                            + " ("
+                            + Arrays.toString(uidPackages)
+                            + ")");
         }
     }
 
