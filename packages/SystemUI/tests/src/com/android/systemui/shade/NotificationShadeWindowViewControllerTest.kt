@@ -89,6 +89,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var shadeController: ShadeController
+    @Mock private lateinit var shadeLogger: ShadeLogger
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
     @Mock private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
@@ -109,6 +110,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
 
+    private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
 
@@ -147,6 +149,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                     ),
                 inputProxy = inputProxy,
             )
+        fakeClock = FakeSystemClock()
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -167,6 +170,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,
+                shadeLogger,
                 pulsingGestureListener,
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
@@ -174,7 +178,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
                 { multiShadeInteractor },
-                FakeSystemClock(),
+                fakeClock,
                 {
                     MultiShadeMotionEventInteractor(
                         applicationContext = context,
@@ -329,6 +333,33 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun handleDispatchTouchEvent_launchAnimationRunningTimesOut() =
+        testScope.runTest {
+            // GIVEN touch dispatcher in a state that returns true
+            underTest.setStatusBarViewController(phoneStatusBarViewController)
+            whenever(keyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()).thenReturn(
+                true
+            )
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isTrue()
+
+            // WHEN launch animation is running for 2 seconds
+            fakeClock.setUptimeMillis(10000)
+            underTest.setExpandAnimationRunning(true)
+            fakeClock.advanceTime(2000)
+
+            // THEN touch is ignored
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isFalse()
+
+            // WHEN Launch animation is running for 6 seconds
+            fakeClock.advanceTime(4000)
+
+            // THEN move is ignored, down is handled, and window is notified
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(MOVE_EVENT)).isFalse()
+            assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isTrue()
+            verify(notificationShadeWindowController).setLaunchingActivity(false)
+        }
+
+    @Test
     fun shouldInterceptTouchEvent_statusBarKeyguardViewManagerShouldIntercept() {
         // down event should be intercepted by keyguardViewManager
         whenever(statusBarKeyguardViewManager.shouldInterceptTouchEvent(DOWN_EVENT))
@@ -348,6 +379,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
     companion object {
         private val DOWN_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private const val VIEW_BOTTOM = 100
     }
 }

@@ -25,6 +25,8 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -72,6 +74,7 @@ public final class ShadeControllerImpl implements ShadeController {
     @Inject
     public ShadeControllerImpl(
             CommandQueue commandQueue,
+            @ShadeTouchLog LogBuffer touchLog,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -82,6 +85,7 @@ public final class ShadeControllerImpl implements ShadeController {
             Lazy<NotificationGutsManager> gutsManager
     ) {
         mCommandQueue = commandQueue;
+        TouchLogger.logTouchesTo(touchLog);
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
         mGutsManager = gutsManager;

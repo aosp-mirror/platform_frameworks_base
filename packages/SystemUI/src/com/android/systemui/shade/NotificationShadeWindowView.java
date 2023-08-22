@@ -192,6 +192,8 @@ public class NotificationShadeWindowView extends FrameLayout {
 
         result = result != null ? result : super.dispatchTouchEvent(ev);
 
+        TouchLogger.logDispatchTouch(TAG, ev, result);
+
         mInteractionEventHandler.dispatchTouchEventComplete();
 
         return result;

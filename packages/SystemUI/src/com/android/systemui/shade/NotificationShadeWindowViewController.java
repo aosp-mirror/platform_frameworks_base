@@ -92,6 +92,7 @@ public class NotificationShadeWindowViewController {
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final LockIconViewController mLockIconViewController;
+    private final ShadeLogger mShadeLogger;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
@@ -104,7 +105,14 @@ public class NotificationShadeWindowViewController {
     private boolean mTouchActive;
     private boolean mTouchCancelled;
     private MotionEvent mDownEvent;
+    // TODO rename to mLaunchAnimationRunning
     private boolean mExpandAnimationRunning;
+    /**
+     *  When mExpandAnimationRunning is true and the touch dispatcher receives a down even after
+     *  uptime exceeds this, the dispatcher will stop blocking touches for the launch animation,
+     *  which has presumabely not completed due to an error.
+     */
+    private long mLaunchAnimationTimeout;
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
@@ -146,6 +154,7 @@ public class NotificationShadeWindowViewController {
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
+            ShadeLogger shadeLogger,
             PulsingGestureListener pulsingGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
@@ -168,6 +177,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
         mLockIconViewController.init();
+        mShadeLogger = shadeLogger;
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -214,6 +224,13 @@ public class NotificationShadeWindowViewController {
         return mView.findViewById(R.id.keyguard_message_area);
     }
 
+    private Boolean logDownDispatch(MotionEvent ev, String msg, Boolean result) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mShadeLogger.logShadeWindowDispatch(ev, msg, result);
+        }
+        return result;
+    }
+
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
     public void setupExpandedStatusBar() {
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
@@ -225,8 +242,8 @@ public class NotificationShadeWindowViewController {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
                 if (mStatusBarViewController == null) { // Fix for b/192490822
-                    Log.w(TAG, "Ignoring touch while statusBarView not yet set.");
-                    return false;
+                    return logDownDispatch(ev,
+                            "Ignoring touch while statusBarView not yet set", false);
                 }
                 boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
                 boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
@@ -238,10 +255,9 @@ public class NotificationShadeWindowViewController {
                 }
 
                 // Reset manual touch dispatch state here but make sure the UP/CANCEL event still
-                // gets
-                // delivered.
+                // gets delivered.
                 if (!isCancel && mService.shouldIgnoreTouch()) {
-                    return false;
+                    return logDownDispatch(ev, "touch ignored by CS", false);
                 }
 
                 if (isDown) {
@@ -253,8 +269,16 @@ public class NotificationShadeWindowViewController {
                     mTouchActive = false;
                     mDownEvent = null;
                 }
-                if (mTouchCancelled || mExpandAnimationRunning) {
-                    return false;
+                if (mTouchCancelled) {
+                    return logDownDispatch(ev, "touch cancelled", false);
+                }
+                if (mExpandAnimationRunning) {
+                    if (isDown && mClock.uptimeMillis() > mLaunchAnimationTimeout) {
+                        mShadeLogger.d("NSWVC: launch animation timed out");
+                        setExpandAnimationRunning(false);
+                    } else {
+                        return logDownDispatch(ev, "expand animation running", false);
+                    }
                 }
 
                 if (mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
@@ -268,13 +292,13 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mIsOcclusionTransitionRunning) {
-                    return false;
+                    return logDownDispatch(ev, "occlusion transition running", false);
                 }
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
                 if (mStatusBarKeyguardViewManager.dispatchTouchEvent(ev)) {
-                    return true;
+                    return logDownDispatch(ev, "dispatched to Keyguard", true);
                 }
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
@@ -282,7 +306,7 @@ public class NotificationShadeWindowViewController {
                     // you can't touch anything other than the brightness slider while the mirror is
                     // showing and the rest of the panel is transparent.
                     if (ev.getActionMasked() == MotionEvent.ACTION_POINTER_DOWN) {
-                        return false;
+                        return logDownDispatch(ev, "disallowed new pointer", false);
                     }
                 }
                 if (isDown) {
@@ -314,7 +338,9 @@ public class NotificationShadeWindowViewController {
                     expandingBelowNotch = true;
                 }
                 if (expandingBelowNotch) {
-                    return mStatusBarViewController.sendTouchToView(ev);
+                    return logDownDispatch(ev,
+                            "expand below notch. sending touch to status bar",
+                            mStatusBarViewController.sendTouchToView(ev));
                 }
 
                 if (!mIsTrackingBarGesture && isDown
@@ -324,9 +350,10 @@ public class NotificationShadeWindowViewController {
                     if (mStatusBarViewController.touchIsWithinView(x, y)) {
                         if (mStatusBarWindowStateController.windowIsShowing()) {
                             mIsTrackingBarGesture = true;
-                            return mStatusBarViewController.sendTouchToView(ev);
-                        } else { // it's hidden or hiding, don't send to notification shade.
-                            return true;
+                            return logDownDispatch(ev, "sending touch to status bar",
+                                    mStatusBarViewController.sendTouchToView(ev));
+                        } else {
+                            return logDownDispatch(ev, "hidden or hiding", true);
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
@@ -334,10 +361,10 @@ public class NotificationShadeWindowViewController {
                     if (isUp || isCancel) {
                         mIsTrackingBarGesture = false;
                     }
-                    return sendToStatusBar;
+                    return logDownDispatch(ev, "sending bar gesture to status bar",
+                            sendToStatusBar);
                 }
-
-                return null;
+                return logDownDispatch(ev, "no custom touch dispatch of down event", null);
             }
 
             @Override
@@ -349,18 +376,26 @@ public class NotificationShadeWindowViewController {
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
                 if (mStatusBarStateController.isDozing() && !mService.isPulsing()
                         && !mDockManager.isDocked()) {
-                    // Capture all touch events in always-on.
+                    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                        mShadeLogger.d("NSWVC: capture all touch events in always-on");
+                    }
                     return true;
                 }
 
                 if (mStatusBarKeyguardViewManager.shouldInterceptTouchEvent(ev)) {
                     // Don't allow touches to proceed to underlying views if alternate
                     // bouncer is showing
+                    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                        mShadeLogger.d("NSWVC: alt bouncer showing");
+                    }
                     return true;
                 }
 
                 if (mLockIconViewController.onInterceptTouchEvent(ev)) {
                     // immediately return true; don't send the touch to the drag down helper
+                    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                        mShadeLogger.d("NSWVC: don't send touch to drag down helper");
+                    }
                     return true;
                 }
 
@@ -371,7 +406,13 @@ public class NotificationShadeWindowViewController {
                         && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
                         && !mStatusBarStateController.isDozing()) {
-                    return mDragDownHelper.onInterceptTouchEvent(ev);
+                    boolean result = mDragDownHelper.onInterceptTouchEvent(ev);
+                    if (result) {
+                        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                            mShadeLogger.d("NSWVC: drag down helper intercepted");
+                        }
+                    }
+                    return result;
                 } else {
                     return false;
                 }
@@ -486,6 +527,7 @@ public class NotificationShadeWindowViewController {
     }
 
     public void cancelCurrentTouch() {
+        mShadeLogger.d("NSWVC: cancelling current touch");
         if (mTouchActive) {
             final long now = mClock.uptimeMillis();
             final MotionEvent event;
@@ -518,6 +560,9 @@ public class NotificationShadeWindowViewController {
 
     public void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
+            if (running) {
+                mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
+            }
             mExpandAnimationRunning = running;
             mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);
         }
