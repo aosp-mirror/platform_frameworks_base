@@ -191,7 +191,17 @@ public class LowPowerStandbyControllerTest {
 
         mTestPolicyFile = new File(mContextSpy.getCacheDir(), "lps_policy.xml");
         mController = new LowPowerStandbyController(mContextSpy, mTestLooper.getLooper(),
-                () -> mClock.now(), mDeviceConfigWrapperMock, () -> mIActivityManagerMock,
+                new LowPowerStandbyController.Clock() {
+                    @Override
+                    public long elapsedRealtime() {
+                        return mClock.now();
+                    }
+
+                    @Override
+                    public long uptimeMillis() {
+                        return mClock.now();
+                    }
+                }, mDeviceConfigWrapperMock, () -> mIActivityManagerMock,
                 mTestPolicyFile);
     }
 
