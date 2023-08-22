@@ -1,4 +1,4 @@
-# Copyright (C) 2023 The Android Open Source Project
+# Copyright 2023 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,27 @@
 # limitations under the License.
 
 #
-# Input Device Configuration file for a flavor of Google Remote Control.
-#
+# Key Layout file for flavor of Google Remote Control.
 #
 
-# Basic Parameters
-keyboard.doNotWakeByDefault = 1
-audio.mic = 1
+key 116   POWER         WAKE
+key 217   ASSIST        WAKE
+
+key 103   DPAD_UP
+key 108   DPAD_DOWN
+key 105   DPAD_LEFT
+key 106   DPAD_RIGHT
+key 353   DPAD_CENTER
+
+key 158   BACK
+key 172   HOME          WAKE
+
+key 113   VOLUME_MUTE
+key 114   VOLUME_DOWN
+key 115   VOLUME_UP
+
+# custom keys
+key usage 0x000c0186    MACRO_1      WAKE
+
+key usage 0x000c0077    BUTTON_3     WAKE #YouTube
+key usage 0x000c0078    BUTTON_4     WAKE #Netflix
