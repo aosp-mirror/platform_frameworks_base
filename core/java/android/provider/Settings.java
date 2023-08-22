@@ -1322,7 +1322,7 @@ public final class Settings {
 
     /**
      * Activity Action: Ask the user to allow an app to ignore battery optimizations (that is,
-     * put them on the whitelist of apps shown by
+     * put them on the allowlist of apps shown by
      * {@link #ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}).  For an app to use this, it also
      * must hold the {@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
      * permission.
@@ -11543,7 +11543,7 @@ public final class Settings {
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
         /**
-         * The package name for the custom bugreport handler app. This app must be whitelisted.
+         * The package name for the custom bugreport handler app. This app must be allowlisted.
          * This is currently used only by Power Menu short press.
          *
          * @hide
@@ -11924,7 +11924,7 @@ public final class Settings {
                 "location_background_throttle_proximity_alert_interval_ms";
 
         /**
-         * Packages that are whitelisted for background throttling (throttling will not be applied).
+         * Packages that are allowlisted for background throttling (throttling will not be applied).
          * @hide
          */
         @Readable
@@ -11932,7 +11932,7 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
-         * Packages that are whitelisted for ignoring location settings (may retrieve location even
+         * Packages that are allowlisted for ignoring location settings (may retrieve location even
          * when user location settings are off), for emergency purposes.
          * @deprecated No longer used from Android 12+
          * @hide
@@ -12465,7 +12465,7 @@ public final class Settings {
 
         /**
          * List of certificate (hex string representation of the application's certificate - SHA-1
-         * or SHA-256) and carrier app package pairs which are whitelisted to prompt the user for
+         * or SHA-256) and carrier app package pairs which are allowlisted to prompt the user for
          * install when a sim card with matching UICC carrier privilege rules is inserted.  The
          * certificate is used as a key, so the certificate encoding here must be the same as the
          * certificate encoding used on the SIM.
@@ -15841,7 +15841,7 @@ public final class Settings {
                 "enable_adb_incremental_install_default";
 
         /**
-         * The packages whitelisted to be run in autofill compatibility mode. The list
+         * The packages allowlisted to be run in autofill compatibility mode. The list
          * of packages is {@code ":"} colon delimited, and each entry has the name of the
          * package and an optional list of url bar resource ids (the list is delimited by
          * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
@@ -15912,7 +15912,7 @@ public final class Settings {
         public static final String STYLUS_EVER_USED = "stylus_ever_used";
 
         /**
-         * Exemptions to the hidden API blacklist.
+         * Exemptions to the hidden API denylist.
          *
          * @hide
          */
