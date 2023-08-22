@@ -292,6 +292,7 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemEventCoordinator.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemStatusAnimationScheduler.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/events/SystemStatusAnimationSchedulerImpl.kt
+-packages/SystemUI/src/com/android/systemui/statusbar/gesture/GesturePointerEventDetector.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/gesture/GenericGestureDetector.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeUpGestureHandler.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/gesture/SwipeUpGestureLogger.kt
