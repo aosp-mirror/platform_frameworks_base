@@ -133,6 +133,7 @@ import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorDumpsysUtils;
 import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
@@ -142,6 +143,7 @@ import dalvik.annotation.optimization.NeverCompile;
 import com.google.android.collect.Sets;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -150,6 +152,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
@@ -4161,6 +4164,7 @@ public class UserBackupManagerService {
                 }
             }
             dumpInternal(pw);
+            dumpBMMEvents(pw);
         } finally {
             Binder.restoreCallingIdentity(identityToken);
         }
@@ -4176,6 +4180,23 @@ public class UserBackupManagerService {
             pw.print("      ");
             pw.println(pkg.applicationInfo.backupAgentName);
         }
+    }
+
+    private void dumpBMMEvents(PrintWriter pw) {
+        BackupManagerMonitorDumpsysUtils bm =
+                new BackupManagerMonitorDumpsysUtils();
+        File events = bm.getBMMEventsFile();
+        pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
+        try (BufferedReader reader = new BufferedReader(new FileReader(events))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "IO Exception when reading BMM events from file: " + e);
+            pw.println("IO Exception when reading BMM events from file");
+        }
+        pw.println("END OF BACKUP MANAGER MONITOR EVENTS");
     }
 
     @NeverCompile // Avoid size overhead of debugging code.

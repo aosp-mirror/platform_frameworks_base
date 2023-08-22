@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 
 import java.util.List;
@@ -54,9 +55,17 @@ public class BackupManagerMonitorEventSender {
      */
     private static final int AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS = 500;
     @Nullable private IBackupManagerMonitor mMonitor;
-
+    private final BackupManagerMonitorDumpsysUtils mBackupManagerMonitorDumpsysUtils;
     public BackupManagerMonitorEventSender(@Nullable IBackupManagerMonitor monitor) {
         mMonitor = monitor;
+        mBackupManagerMonitorDumpsysUtils = new BackupManagerMonitorDumpsysUtils();
+    }
+
+    @VisibleForTesting
+    BackupManagerMonitorEventSender(@Nullable IBackupManagerMonitor monitor,
+            BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils) {
+        mMonitor = monitor;
+        mBackupManagerMonitorDumpsysUtils = backupManagerMonitorDumpsysUtils;
     }
 
     public void setMonitor(IBackupManagerMonitor monitor) {
@@ -82,28 +91,38 @@ public class BackupManagerMonitorEventSender {
             PackageInfo pkg,
             int category,
             Bundle extras) {
-        if (mMonitor != null) {
-            try {
-                Bundle bundle = new Bundle();
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
-                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
-                if (pkg != null) {
-                    bundle.putString(EXTRA_LOG_EVENT_PACKAGE_NAME,
-                            pkg.packageName);
-                    bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
-                            pkg.versionCode);
-                    bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
-                            pkg.getLongVersionCode());
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID, id);
+            bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY, category);
+            if (pkg != null) {
+                bundle.putString(EXTRA_LOG_EVENT_PACKAGE_NAME,
+                        pkg.packageName);
+                bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
+                        pkg.versionCode);
+                bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
+                        pkg.getLongVersionCode());
+            }
+            if (extras != null) {
+                bundle.putAll(extras);
+                if (extras.containsKey(EXTRA_LOG_OPERATION_TYPE) &&
+                        extras.getInt(EXTRA_LOG_OPERATION_TYPE) == OperationType.RESTORE){
+                    mBackupManagerMonitorDumpsysUtils
+                            .parseBackupManagerMonitorRestoreEventForDumpsys(bundle);
                 }
-                if (extras != null) {
-                    bundle.putAll(extras);
-                }
+            }
+
+            if (mMonitor != null) {
                 mMonitor.onEvent(bundle);
-            } catch (RemoteException e) {
-                mMonitor = null;
+            } else {
                 if (DEBUG) {
-                    Slog.w(TAG, "backup manager monitor went away");
+                    Slog.w(TAG, "backup manager monitor is null unable to send event");
                 }
+            }
+        } catch (RemoteException e) {
+            mMonitor = null;
+            if (DEBUG) {
+                Slog.w(TAG, "backup manager monitor went away");
             }
         }
     }
@@ -120,7 +139,7 @@ public class BackupManagerMonitorEventSender {
      */
     public void monitorAgentLoggingResults(PackageInfo pkg, IBackupAgent agent) {
         if (mMonitor == null) {
-            return;
+            Slog.i(TAG, "backup manager monitor is null unable to send event"+pkg);
         }
 
         try {
