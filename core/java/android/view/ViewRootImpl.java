@@ -4127,7 +4127,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void fireAccessibilityFocusEventIfHasFocusedNode() {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
+        if (!mAccessibilityManager.isEnabled()) {
             return;
         }
         final View focusedView = mView.findFocus();
@@ -5179,8 +5179,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean getAccessibilityFocusedRect(Rect bounds) {
-        final AccessibilityManager manager = AccessibilityManager.getInstance(mView.mContext);
-        if (!manager.isEnabled() || !manager.isTouchExplorationEnabled()) {
+        if (mView == null) {
+            Slog.w(TAG, "calling getAccessibilityFocusedRect() while the mView is null");
+            return false;
+        }
+        if (!mAccessibilityManager.isEnabled()
+                || !mAccessibilityManager.isTouchExplorationEnabled()) {
             return false;
         }
 
@@ -7248,8 +7252,8 @@ public final class ViewRootImpl implements ViewParent,
                 && action != MotionEvent.ACTION_HOVER_EXIT) {
             return;
         }
-        AccessibilityManager manager = AccessibilityManager.getInstance(mContext);
-        if (manager.isEnabled() && manager.isTouchExplorationEnabled()) {
+        if (mAccessibilityManager.isEnabled()
+                && mAccessibilityManager.isTouchExplorationEnabled()) {
             return;
         }
         if (mView == null) {
@@ -11049,7 +11053,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             // The accessibility may be turned off while we were waiting so check again.
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (mAccessibilityManager.isEnabled()) {
                 mLastEventTimeMillis = SystemClock.uptimeMillis();
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
