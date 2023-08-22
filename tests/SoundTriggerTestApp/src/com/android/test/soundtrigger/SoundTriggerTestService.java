@@ -469,7 +469,7 @@ public class SoundTriggerTestService extends Service {
             }
         }
 
-        // Create a few dummy models if we didn't load anything.
+        // Create a few placeholder models if we didn't load anything.
         if (!loadedModel) {
             Properties dummyModelProperties = new Properties();
             for (String name : new String[]{"1", "2", "3"}) {
