@@ -371,6 +371,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
         mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
+        mView.setSmartspace(mSmartspaceView);
     }
 
     /**
