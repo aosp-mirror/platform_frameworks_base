@@ -1413,7 +1413,7 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAugmentedAutofillWhitelistLocked(packages=" + packages + ", activities="
                     + activities + ")");
         }
-        whitelistForAugmentedAutofillPackages(packages, activities);
+        allowlistForAugmentedAutofillPackages(packages, activities);
         final String serviceName;
         if (mRemoteAugmentedAutofillServiceInfo != null) {
             serviceName = mRemoteAugmentedAutofillServiceInfo.getComponentName()
@@ -1477,7 +1477,7 @@ final class AutofillManagerServiceImpl
     /**
      * @throws IllegalArgumentException if packages or components are empty.
      */
-    private void whitelistForAugmentedAutofillPackages(@Nullable List<String> packages,
+    private void allowlistForAugmentedAutofillPackages(@Nullable List<String> packages,
             @Nullable List<ComponentName> components) {
         // TODO(b/123100824): add CTS test for when it's null
         synchronized (mLock) {
