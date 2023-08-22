@@ -17,11 +17,13 @@
 package com.android.systemui.unfold
 
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.updates.FoldProvider
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener
 import java.util.concurrent.Executor
 
-class UnfoldProgressProvider(private val unfoldProgressProvider: UnfoldTransitionProgressProvider) :
+class UnfoldProgressProvider(private val unfoldProgressProvider: UnfoldTransitionProgressProvider,
+        private val foldProvider: FoldProvider) :
     ShellUnfoldProgressProvider {
 
     override fun addListener(executor: Executor, listener: UnfoldListener) {
@@ -39,5 +41,11 @@ class UnfoldProgressProvider(private val unfoldProgressProvider: UnfoldTransitio
                     executor.execute { listener.onStateChangeFinished() }
                 }
             })
+
+        foldProvider.registerCallback(object : FoldProvider.FoldCallback {
+            override fun onFoldUpdated(isFolded: Boolean) {
+                listener.onFoldStateChanged(isFolded)
+            }
+        }, executor)
     }
 }
