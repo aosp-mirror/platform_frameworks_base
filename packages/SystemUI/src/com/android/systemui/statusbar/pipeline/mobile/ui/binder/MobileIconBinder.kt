@@ -26,6 +26,7 @@ import android.widget.ImageView
 import android.widget.Space
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
@@ -64,7 +65,7 @@ object MobileIconBinder {
         val roamingSpace = view.requireViewById<Space>(R.id.mobile_roaming_space)
         val dotView = view.requireViewById<StatusBarIconView>(R.id.status_bar_dot)
 
-        view.isVisible = true
+        view.isVisible = viewModel.isVisible.value
         iconView.isVisible = true
 
         // TODO(b/238425913): We should log this visibility state.
@@ -77,108 +78,122 @@ object MobileIconBinder {
         var isCollecting = false
 
         view.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                logger.logCollectionStarted(view, viewModel)
-                isCollecting = true
-
-                launch {
-                    visibilityState.collect { state ->
-                        when (state) {
-                            STATE_ICON -> {
-                                mobileGroupView.visibility = VISIBLE
-                                dotView.visibility = GONE
-                            }
-                            STATE_DOT -> {
-                                mobileGroupView.visibility = INVISIBLE
-                                dotView.visibility = VISIBLE
-                            }
-                            STATE_HIDDEN -> {
-                                mobileGroupView.visibility = INVISIBLE
-                                dotView.visibility = INVISIBLE
-                            }
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    // isVisible controls the visibility state of the outer group, and thus it needs
+                    // to run in the CREATED lifecycle so it can continue to watch while invisible
+                    // See (b/291031862) for details
+                    launch {
+                        viewModel.isVisible.collect { isVisible ->
+                            viewModel.verboseLogger?.logBinderReceivedVisibility(
+                                view,
+                                viewModel.subscriptionId,
+                                isVisible
+                            )
+                            view.isVisible = isVisible
+                            // [StatusIconContainer] can get out of sync sometimes. Make sure to
+                            // request another layout when this changes.
+                            view.requestLayout()
                         }
                     }
                 }
+            }
 
-                launch {
-                    viewModel.isVisible.collect { isVisible ->
-                        viewModel.verboseLogger?.logBinderReceivedVisibility(
-                            view,
-                            viewModel.subscriptionId,
-                            isVisible
-                        )
-                        view.isVisible = isVisible
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    logger.logCollectionStarted(view, viewModel)
+                    isCollecting = true
+
+                    launch {
+                        visibilityState.collect { state ->
+                            when (state) {
+                                STATE_ICON -> {
+                                    mobileGroupView.visibility = VISIBLE
+                                    dotView.visibility = GONE
+                                }
+                                STATE_DOT -> {
+                                    mobileGroupView.visibility = INVISIBLE
+                                    dotView.visibility = VISIBLE
+                                }
+                                STATE_HIDDEN -> {
+                                    mobileGroupView.visibility = INVISIBLE
+                                    dotView.visibility = INVISIBLE
+                                }
+                            }
+                        }
                     }
-                }
 
-                // Set the icon for the triangle
-                launch {
-                    viewModel.icon.distinctUntilChanged().collect { icon ->
-                        viewModel.verboseLogger?.logBinderReceivedSignalIcon(
-                            view,
-                            viewModel.subscriptionId,
-                            icon,
-                        )
-                        mobileDrawable.level = icon.toSignalDrawableState()
+                    // Set the icon for the triangle
+                    launch {
+                        viewModel.icon.distinctUntilChanged().collect { icon ->
+                            viewModel.verboseLogger?.logBinderReceivedSignalIcon(
+                                view,
+                                viewModel.subscriptionId,
+                                icon,
+                            )
+                            mobileDrawable.level = icon.toSignalDrawableState()
+                        }
                     }
-                }
 
-                launch {
-                    viewModel.contentDescription.distinctUntilChanged().collect {
-                        ContentDescriptionViewBinder.bind(it, view)
+                    launch {
+                        viewModel.contentDescription.distinctUntilChanged().collect {
+                            ContentDescriptionViewBinder.bind(it, view)
+                        }
                     }
-                }
 
-                // Set the network type icon
-                launch {
-                    viewModel.networkTypeIcon.distinctUntilChanged().collect { dataTypeId ->
-                        viewModel.verboseLogger?.logBinderReceivedNetworkTypeIcon(
-                            view,
-                            viewModel.subscriptionId,
-                            dataTypeId,
-                        )
-                        dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
-                        networkTypeView.visibility = if (dataTypeId != null) VISIBLE else GONE
+                    // Set the network type icon
+                    launch {
+                        viewModel.networkTypeIcon.distinctUntilChanged().collect { dataTypeId ->
+                            viewModel.verboseLogger?.logBinderReceivedNetworkTypeIcon(
+                                view,
+                                viewModel.subscriptionId,
+                                dataTypeId,
+                            )
+                            dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
+                            networkTypeView.visibility = if (dataTypeId != null) VISIBLE else GONE
+                        }
                     }
-                }
 
-                // Set the roaming indicator
-                launch {
-                    viewModel.roaming.distinctUntilChanged().collect { isRoaming ->
-                        roamingView.isVisible = isRoaming
-                        roamingSpace.isVisible = isRoaming
+                    // Set the roaming indicator
+                    launch {
+                        viewModel.roaming.distinctUntilChanged().collect { isRoaming ->
+                            roamingView.isVisible = isRoaming
+                            roamingSpace.isVisible = isRoaming
+                        }
                     }
-                }
 
-                // Set the activity indicators
-                launch { viewModel.activityInVisible.collect { activityIn.isVisible = it } }
+                    // Set the activity indicators
+                    launch { viewModel.activityInVisible.collect { activityIn.isVisible = it } }
 
-                launch { viewModel.activityOutVisible.collect { activityOut.isVisible = it } }
+                    launch { viewModel.activityOutVisible.collect { activityOut.isVisible = it } }
 
-                launch {
-                    viewModel.activityContainerVisible.collect { activityContainer.isVisible = it }
-                }
-
-                // Set the tint
-                launch {
-                    iconTint.collect { tint ->
-                        val tintList = ColorStateList.valueOf(tint)
-                        iconView.imageTintList = tintList
-                        networkTypeView.imageTintList = tintList
-                        roamingView.imageTintList = tintList
-                        activityIn.imageTintList = tintList
-                        activityOut.imageTintList = tintList
-                        dotView.setDecorColor(tint)
+                    launch {
+                        viewModel.activityContainerVisible.collect {
+                            activityContainer.isVisible = it
+                        }
                     }
-                }
 
-                launch { decorTint.collect { tint -> dotView.setDecorColor(tint) } }
+                    // Set the tint
+                    launch {
+                        iconTint.collect { tint ->
+                            val tintList = ColorStateList.valueOf(tint)
+                            iconView.imageTintList = tintList
+                            networkTypeView.imageTintList = tintList
+                            roamingView.imageTintList = tintList
+                            activityIn.imageTintList = tintList
+                            activityOut.imageTintList = tintList
+                            dotView.setDecorColor(tint)
+                        }
+                    }
 
-                try {
-                    awaitCancellation()
-                } finally {
-                    isCollecting = false
-                    logger.logCollectionStopped(view, viewModel)
+                    launch { decorTint.collect { tint -> dotView.setDecorColor(tint) } }
+
+                    try {
+                        awaitCancellation()
+                    } finally {
+                        isCollecting = false
+                        logger.logCollectionStopped(view, viewModel)
+                    }
                 }
             }
         }

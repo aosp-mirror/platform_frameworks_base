@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel;
 import com.android.systemui.util.CarrierConfigTracker;
+import com.android.systemui.util.kotlin.FlowProviderKt;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -71,6 +72,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -105,7 +108,8 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     private ShadeCarrier mShadeCarrier3;
     private TestableLooper mTestableLooper;
     @Mock
-    private ShadeCarrierGroupController.OnSingleCarrierChangedListener mOnSingleCarrierChangedListener;
+    private ShadeCarrierGroupController.OnSingleCarrierChangedListener
+            mOnSingleCarrierChangedListener;
     @Mock
     private MobileUiAdapter mMobileUiAdapter;
     @Mock
@@ -118,6 +122,9 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
     private MobileContextProvider mMobileContextProvider;
     @Mock
     private StatusBarPipelineFlags mStatusBarPipelineFlags;
+
+    private final MutableStateFlow<Boolean> mIsVisibleFlow =
+            FlowProviderKt.getMutableStateFlow(true);
 
     private FakeSlotIndexResolver mSlotIndexResolver;
     private ClickListenerTextView mNoCarrierTextView;
@@ -170,7 +177,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
                 mMobileUiAdapter,
                 mMobileContextProvider,
                 mStatusBarPipelineFlags
-            )
+        )
                 .setShadeCarrierGroup(mShadeCarrierGroup)
                 .build();
 
@@ -181,6 +188,7 @@ public class ShadeCarrierGroupControllerTest extends LeakCheckedTest {
         when(mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()).thenReturn(true);
         when(mMobileContextProvider.getMobileContextForSub(anyInt(), any())).thenReturn(mContext);
         when(mMobileIconsViewModel.getLogger()).thenReturn(mMobileViewLogger);
+        when(mShadeCarrierGroupMobileIconViewModel.isVisible()).thenReturn(mIsVisibleFlow);
         when(mMobileIconsViewModel.viewModelForSub(anyInt(), any()))
                 .thenReturn(mShadeCarrierGroupMobileIconViewModel);
     }
