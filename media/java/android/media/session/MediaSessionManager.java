@@ -617,7 +617,7 @@ public final class MediaSessionManager {
             mService.dispatchMediaKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
                     needWakeLock);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to send key event.", e);
+            e.rethrowFromSystemServer();
         }
     }
 
