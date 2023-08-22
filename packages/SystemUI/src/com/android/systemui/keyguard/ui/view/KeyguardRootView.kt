@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +28,6 @@ import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.LockIconView
 import com.android.systemui.R
 import com.android.systemui.animation.view.LaunchableImageView
-import com.android.systemui.common.ui.view.LongPressHandlingView
 
 /** Provides a container for all keyguard ui content. */
 class KeyguardRootView(
@@ -41,11 +39,9 @@ class KeyguardRootView(
         attrs,
     ) {
 
-    var motionEventSpy: ((MotionEvent) -> Unit)? = null
     private var statusView: KeyguardStatusView? = null
 
     init {
-        addLongPressHandlingView()
         addIndicationTextArea()
         addLockIconView()
         addAmbientIndicationArea()
@@ -53,15 +49,6 @@ class KeyguardRootView(
         addRightShortcut()
         addSettingsPopupMenu()
         addStatusView()
-    }
-
-    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        motionEventSpy?.invoke(event)
-        return super.onInterceptTouchEvent(event)
-    }
-
-    private fun addLongPressHandlingView() {
-        addView(LongPressHandlingView(context, attrs).apply { id = R.id.keyguard_long_press })
     }
 
     private fun addIndicationTextArea() {

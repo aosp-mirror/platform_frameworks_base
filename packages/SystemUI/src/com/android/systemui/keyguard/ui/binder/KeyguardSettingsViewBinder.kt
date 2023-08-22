@@ -38,11 +38,13 @@ import kotlinx.coroutines.launch
 
 object KeyguardSettingsViewBinder {
     fun bind(
-        view: LaunchableLinearLayout,
+        parentView: View,
         viewModel: KeyguardSettingsMenuViewModel,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
     ): DisposableHandle {
+        val view = parentView.requireViewById<LaunchableLinearLayout>(R.id.keyguard_settings_button)
+
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -125,4 +127,5 @@ object KeyguardSettingsViewBinder {
             }
             .start()
     }
+
 }

@@ -89,9 +89,8 @@ class LongPressHandlingView(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        super.onTouchEvent(event)
-        return interactionHandler.onTouchEvent(event.toModel())
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return interactionHandler.onTouchEvent(event?.toModel())
     }
 }
 

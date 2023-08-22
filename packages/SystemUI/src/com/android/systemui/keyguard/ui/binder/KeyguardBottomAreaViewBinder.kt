@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.util.Size
 import android.view.View
@@ -75,7 +76,7 @@ object KeyguardBottomAreaViewBinder {
      * Users of the [KeyguardBottomAreaViewBinder] class should use this to control the binder after
      * it is bound.
      */
-    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     @Deprecated("Deprecated as part of b/278057014")
     interface Binding {
         /**
@@ -118,6 +119,17 @@ object KeyguardBottomAreaViewBinder {
 
         view.clipChildren = false
         view.clipToPadding = false
+        view.setOnTouchListener { _, event ->
+            if (settingsMenu.isVisible) {
+                val hitRect = Rect()
+                settingsMenu.getHitRect(hitRect)
+                if (!hitRect.contains(event.x.toInt(), event.y.toInt())) {
+                    viewModel.onTouchedOutsideLockScreenSettingsMenu()
+                }
+            }
+
+            false
+        }
 
         val configurationBasedDimensions = MutableStateFlow(loadFromResources(view))
 
@@ -125,7 +137,7 @@ object KeyguardBottomAreaViewBinder {
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.startButton.collect { buttonModel ->
                             updateButton(
@@ -138,7 +150,7 @@ object KeyguardBottomAreaViewBinder {
                         }
                     }
 
-                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.endButton.collect { buttonModel ->
                             updateButton(
@@ -176,7 +188,7 @@ object KeyguardBottomAreaViewBinder {
                         }
                     }
 
-                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = startButton,
@@ -185,7 +197,7 @@ object KeyguardBottomAreaViewBinder {
                         )
                     }
 
-                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = endButton,
@@ -211,7 +223,7 @@ object KeyguardBottomAreaViewBinder {
                             }
                     }
 
-                    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         configurationBasedDimensions.collect { dimensions ->
                             startButton.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -373,14 +385,13 @@ object KeyguardBottomAreaViewBinder {
         view.isClickable = viewModel.isClickable
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
-                val onTouchListener =
-                    KeyguardQuickAffordanceOnTouchListener(
-                        view,
-                        viewModel,
-                        messageDisplayer,
-                        vibratorHelper,
-                        falsingManager,
-                    )
+                val onTouchListener = KeyguardQuickAffordanceOnTouchListener(
+                    view,
+                    viewModel,
+                    messageDisplayer,
+                    vibratorHelper,
+                    falsingManager,
+                )
                 view.setOnTouchListener(onTouchListener)
                 view.onLongClickListener =
                     OnLongClickListener(falsingManager, viewModel, vibratorHelper, onTouchListener)
@@ -397,7 +408,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     @Deprecated("Deprecated as part of b/278057014")
-    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private suspend fun updateButtonAlpha(
         view: View,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
@@ -428,7 +439,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     @Deprecated("Deprecated as part of b/278057014")
-    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnLongClickListener(
         private val falsingManager: FalsingManager?,
         private val viewModel: KeyguardQuickAffordanceViewModel,
@@ -465,7 +476,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     @Deprecated("Deprecated as part of b/278057014")
-    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnClickListener(
         private val viewModel: KeyguardQuickAffordanceViewModel,
         private val falsingManager: FalsingManager,
@@ -521,7 +532,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     @Deprecated("Deprecated as part of b/278057014")
-    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private data class ConfigurationBasedDimensions(
         val defaultBurnInPreventionYOffsetPx: Int,
         val buttonSizePx: Size,
