@@ -36,6 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.media.projection.IMediaProjection;
+import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
 import android.media.projection.ReviewGrantedConsentResult;
 import android.os.Bundle;
@@ -208,11 +209,13 @@ public class MediaProjectionPermissionActivity extends Activity
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
-            mDialog = new MediaProjectionPermissionDialog(dialogContext, () -> {
-                ScreenShareOption selectedOption =
-                        ((MediaProjectionPermissionDialog) mDialog).getSelectedScreenShareOption();
-                grantMediaProjectionPermission(selectedOption.getMode());
-            }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
+            mDialog = new MediaProjectionPermissionDialog(dialogContext, getMediaProjectionConfig(),
+                    () -> {
+                        MediaProjectionPermissionDialog dialog =
+                                (MediaProjectionPermissionDialog) mDialog;
+                        ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
+                        grantMediaProjectionPermission(selectedOption.getMode());
+                    }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
         } else {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(dialogContext,
                     R.style.Theme_SystemUI_Dialog)
@@ -346,6 +349,16 @@ public class MediaProjectionPermissionActivity extends Activity
         if (!isFinishing()) {
             finish();
         }
+    }
+
+    @Nullable
+    private MediaProjectionConfig getMediaProjectionConfig() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return null;
+        }
+        return intent.getParcelableExtra(
+                MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG);
     }
 
     private boolean isPartialScreenSharingEnabled() {
