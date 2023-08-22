@@ -60,7 +60,7 @@ public final class UserSelectionDialogResult extends BaseDialogResult implements
     @Nullable private ProviderPendingIntentResponse mProviderPendingIntentResponse;
 
     public UserSelectionDialogResult(
-            @NonNull IBinder requestToken, @NonNull String providerId,
+            @Nullable IBinder requestToken, @NonNull String providerId,
             @NonNull String entryKey, @NonNull String entrySubkey) {
         super(requestToken);
         mProviderId = providerId;
@@ -69,7 +69,7 @@ public final class UserSelectionDialogResult extends BaseDialogResult implements
     }
 
     public UserSelectionDialogResult(
-            @NonNull IBinder requestToken, @NonNull String providerId,
+            @Nullable IBinder requestToken, @NonNull String providerId,
             @NonNull String entryKey, @NonNull String entrySubkey,
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         super(requestToken);
