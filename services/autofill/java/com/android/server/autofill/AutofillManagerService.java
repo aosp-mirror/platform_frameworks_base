@@ -223,6 +223,9 @@ public final class AutofillManagerService
     @GuardedBy("mFlagLock")
     private String mPccProviderHints;
 
+    @GuardedBy("mFlagLock")
+    private int mMaxInputLengthForAutofill;
+
     // Default flag values for Autofill PCC
 
     private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
@@ -694,6 +697,10 @@ public final class AutofillManagerService
                     DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
                     DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
+            mMaxInputLengthForAutofill = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_MAX_INPUT_LENGTH_FOR_AUTOFILL,
+                    AutofillFeatureFlags.DEFAULT_MAX_INPUT_LENGTH_FOR_AUTOFILL);
             if (verbose) {
                 Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
                         + "mPccClassificationEnabled=" + mPccClassificationEnabled
@@ -985,6 +992,15 @@ public final class AutofillManagerService
     public String getPccProviderHints() {
         synchronized (mFlagLock) {
             return mPccProviderHints;
+        }
+    }
+
+    /**
+     * Return the max suggestion length
+     */
+    public int getMaxInputLengthForAutofill() {
+        synchronized (mFlagLock) {
+            return mMaxInputLengthForAutofill;
         }
     }
 
