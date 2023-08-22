@@ -764,13 +764,14 @@ public final class PermissionControllerManager {
      * inactive.
      *
      * @param packageName The package which became inactive
-     *
+     * @param deviceId The device ID refers either the primary device i.e. the phone or
+     *                 a virtual device. See {@link Context#DEVICE_ID_DEFAULT}
      * @hide
      */
     @RequiresPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
-    public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName) {
-        mRemoteService.run(
-                service -> service.notifyOneTimePermissionSessionTimeout(packageName));
+    public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName, int deviceId) {
+        mRemoteService.run(service -> service.notifyOneTimePermissionSessionTimeout(
+                packageName, deviceId));
     }
 
     /**
@@ -930,12 +931,14 @@ public final class PermissionControllerManager {
             @NonNull List<String> permissions) {
         mRemoteService.postAsync(service -> {
             AndroidFuture<Void> callback = new AndroidFuture<>();
-            service.revokeSelfPermissionsOnKill(packageName, permissions, callback);
+            service.revokeSelfPermissionsOnKill(packageName, permissions, mContext.getDeviceId(),
+                    callback);
             return callback;
         }).whenComplete((result, err) -> {
             if (err != null) {
                 Log.e(TAG, "Failed to self revoke " + String.join(",", permissions)
-                        + " for package " + packageName, err);
+                        + " for package " + packageName + ", and device " + mContext.getDeviceId(),
+                        err);
             }
         });
     }
