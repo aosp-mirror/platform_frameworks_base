@@ -364,7 +364,7 @@ public class DropBoxManager {
     }
 
     /**
-     * Checks any blacklists (set in system settings) to see whether a certain
+     * Checks any denylists (set in system settings) to see whether a certain
      * tag is allowed.  Entries with disabled tags will be dropped immediately,
      * so you can save the work of actually constructing and sending the data.
      *
