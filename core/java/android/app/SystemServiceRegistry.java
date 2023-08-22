@@ -243,6 +243,7 @@ import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationManager;
 import android.view.translation.UiTranslationManager;
 
+import com.android.internal.R;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
@@ -871,6 +872,10 @@ public final class SystemServiceRegistry {
                         PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
                     return null;
                 }
+                if (!ctx.getResources().getBoolean(R.bool.config_enableVirtualDeviceManager)) {
+                    return null;
+                }
+
                 IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
                 return new VirtualDeviceManager(service, ctx.getOuterContext());
