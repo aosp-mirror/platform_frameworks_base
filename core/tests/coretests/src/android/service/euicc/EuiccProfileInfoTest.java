@@ -239,7 +239,7 @@ public class EuiccProfileInfoTest {
         assertNotEquals(p.hashCode(), t.hashCode());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testBuilderBuild_IllegalIccid() {
         new EuiccProfileInfo.Builder("abc").build();
     }
