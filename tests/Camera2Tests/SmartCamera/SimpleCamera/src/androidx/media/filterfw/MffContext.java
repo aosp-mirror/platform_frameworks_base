@@ -16,15 +16,12 @@
 
 package androidx.media.filterfw;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.renderscript.RenderScript;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -116,9 +113,6 @@ public class MffContext {
     /** Flag whether camera streaming is supported in this context. */
     private boolean mCameraStreamingSupport;
 
-    /** RenderScript base master class. */
-    private RenderScript mRenderScript;
-
     /**
      * Creates a new MffContext with the default configuration.
      *
@@ -200,9 +194,7 @@ public class MffContext {
                     mCameraStreamer.stop();
                     mCameraStreamer.tearDown();
                 }
-                if (Build.VERSION.SDK_INT >= 11) {
-                    maybeDestroyRenderScript();
-                }
+
                 stopRunners(false);
                 waitUntilStopped();
                 tearDown();
@@ -299,14 +291,6 @@ public class MffContext {
      */
     public final boolean isCameraStreamingSupported() {
         return mCameraStreamingSupport;
-    }
-
-    @TargetApi(11)
-    public final RenderScript getRenderScript() {
-        if (mRenderScript == null) {
-            mRenderScript = RenderScript.create(mApplicationContext);
-        }
-        return mRenderScript;
     }
 
     final void assertOpenGLSupported() {
@@ -457,14 +441,6 @@ public class MffContext {
 
     private Activity findActivityForContext(Context context) {
         return (context instanceof Activity) ? (Activity) context : null;
-    }
-
-    @TargetApi(11)
-    private void maybeDestroyRenderScript() {
-        if (mRenderScript != null) {
-            mRenderScript.destroy();
-            mRenderScript = null;
-        }
     }
 
 }
