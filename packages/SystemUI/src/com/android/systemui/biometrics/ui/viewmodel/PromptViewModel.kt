@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
@@ -45,16 +46,23 @@ import kotlinx.coroutines.launch
 class PromptViewModel
 @Inject
 constructor(
-    private val interactor: PromptSelectorInteractor,
+    private val displayStateInteractor: DisplayStateInteractor,
+    private val promptSelectorInteractor: PromptSelectorInteractor,
     private val vibrator: VibratorHelper,
     private val featureFlags: FeatureFlags,
 ) {
+    /** Models UI of [BiometricPromptLayout.iconView] */
+    val fingerprintIconViewModel: PromptFingerprintIconViewModel =
+        PromptFingerprintIconViewModel(displayStateInteractor, promptSelectorInteractor)
+
     /** The set of modalities available for this prompt */
     val modalities: Flow<BiometricModalities> =
-        interactor.prompt.map { it?.modalities ?: BiometricModalities() }.distinctUntilChanged()
+        promptSelectorInteractor.prompt
+            .map { it?.modalities ?: BiometricModalities() }
+            .distinctUntilChanged()
 
     // TODO(b/251476085): remove after icon controllers are migrated - do not keep this state
-    private var _legacyState = MutableStateFlow(AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN)
+    private var _legacyState = MutableStateFlow(AuthBiometricView.STATE_IDLE)
     val legacyState: StateFlow<Int> = _legacyState.asStateFlow()
 
     private val _isAuthenticating: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -75,17 +83,18 @@ constructor(
      * successful authentication.
      */
     val isConfirmationRequired: Flow<Boolean> =
-        combine(_isOverlayTouched, interactor.isConfirmationRequired) {
+        combine(_isOverlayTouched, promptSelectorInteractor.isConfirmationRequired) {
             isOverlayTouched,
             isConfirmationRequired ->
             !isOverlayTouched && isConfirmationRequired
         }
 
     /** The kind of credential the user has. */
-    val credentialKind: Flow<PromptKind> = interactor.credentialKind
+    val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
 
     /** The label to use for the cancel button. */
-    val negativeButtonText: Flow<String> = interactor.prompt.map { it?.negativeButtonText ?: "" }
+    val negativeButtonText: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.negativeButtonText ?: "" }
 
     private val _message: MutableStateFlow<PromptMessage> = MutableStateFlow(PromptMessage.Empty)
 
@@ -113,7 +122,7 @@ constructor(
                 _forceLargeSize,
                 _forceMediumSize,
                 modalities,
-                interactor.isConfirmationRequired,
+                promptSelectorInteractor.isConfirmationRequired,
                 fingerprintStartMode,
             ) { forceLarge, forceMedium, modalities, confirmationRequired, fpStartMode ->
                 when {
@@ -129,14 +138,16 @@ constructor(
             .distinctUntilChanged()
 
     /** Title for the prompt. */
-    val title: Flow<String> = interactor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
+    val title: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
 
     /** Subtitle for the prompt. */
-    val subtitle: Flow<String> = interactor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
+    val subtitle: Flow<String> =
+        promptSelectorInteractor.prompt.map { it?.subtitle ?: "" }.distinctUntilChanged()
 
     /** Description for the prompt. */
     val description: Flow<String> =
-        interactor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
+        promptSelectorInteractor.prompt.map { it?.description ?: "" }.distinctUntilChanged()
 
     /** If the indicator (help, error) message should be shown. */
     val isIndicatorMessageVisible: Flow<Boolean> =
@@ -160,7 +171,9 @@ constructor(
 
     /** If the icon can be used as a confirmation button. */
     val isIconConfirmButton: Flow<Boolean> =
-        combine(size, interactor.isConfirmationRequired) { size, isConfirmationRequired ->
+        combine(size, promptSelectorInteractor.isConfirmationRequired) {
+            size,
+            isConfirmationRequired ->
             size.isNotSmall && isConfirmationRequired
         }
 
@@ -169,7 +182,7 @@ constructor(
         combine(
                 size,
                 isAuthenticated,
-                interactor.isCredentialAllowed,
+                promptSelectorInteractor.isCredentialAllowed,
             ) { size, authState, credentialAllowed ->
                 size.isNotSmall && authState.isNotAuthenticated && !credentialAllowed
             }
@@ -221,7 +234,7 @@ constructor(
         combine(
                 size,
                 isAuthenticated,
-                interactor.isCredentialAllowed,
+                promptSelectorInteractor.isCredentialAllowed,
             ) { size, authState, credentialAllowed ->
                 size.isNotSmall && authState.isNotAuthenticated && credentialAllowed
             }

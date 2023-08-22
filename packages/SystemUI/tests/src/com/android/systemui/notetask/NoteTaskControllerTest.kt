@@ -69,7 +69,6 @@ import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
-import kotlin.test.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -673,7 +672,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             extras().bool(EXTRA_USE_STYLUS_MODE).isTrue()
         }
         iconCaptor.value?.let { icon ->
-            assertNotNull(icon)
+            assertThat(icon).isNotNull()
             assertThat(icon.resId).isEqualTo(R.drawable.ic_note_task_shortcut_widget)
         }
     }

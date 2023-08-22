@@ -24,7 +24,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
 import com.android.systemui.biometrics.domain.model.BiometricModalities
@@ -37,7 +40,9 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -69,8 +74,19 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var vibrator: VibratorHelper
 
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
+    private val fingerprintRepository = FakeFingerprintPropertyRepository()
     private val promptRepository = FakePromptRepository()
+    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+
+    private val displayStateInteractor =
+        DisplayStateInteractorImpl(
+            testScope.backgroundScope,
+            mContext,
+            fakeExecutor,
+            rearDisplayStateRepository
+        )
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
@@ -78,10 +94,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Before
     fun setup() {
-        selector = PromptSelectorInteractorImpl(promptRepository, lockPatternUtils)
+        selector =
+            PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(selector, vibrator, featureFlags)
+        viewModel = PromptViewModel(displayStateInteractor, selector, vibrator, featureFlags)
         featureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
     }
 
@@ -105,7 +122,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             }
             assertThat(message).isEqualTo(PromptMessage.Empty)
             assertThat(size).isEqualTo(expectedSize)
-            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN)
+            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_IDLE)
 
             val startMessage = "here we go"
             viewModel.showAuthenticating(startMessage, isRetry = false)

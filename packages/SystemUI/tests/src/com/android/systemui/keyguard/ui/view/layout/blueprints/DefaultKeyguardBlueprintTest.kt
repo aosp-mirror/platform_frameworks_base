@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLongPressHandlingSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
@@ -48,6 +49,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultShortcutsSection: DefaultShortcutsSection
     @Mock
     private lateinit var defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection
+    @Mock private lateinit var defaultLongPressHandlingSection: DefaultLongPressHandlingSection
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
@@ -62,6 +64,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultLockIconSection,
                 defaultShortcutsSection,
                 defaultAmbientIndicationAreaSection,
+                defaultLongPressHandlingSection,
                 defaultSettingsPopupMenuSection,
                 defaultStatusViewSection,
                 splitShadeGuidelines,

@@ -230,8 +230,10 @@ public class CompatUIController implements OnDisplaysChangedListener,
             // The user aspect ratio button should not be handled when a new TaskInfo is
             // sent because of a double tap or when in multi-window mode.
             if (taskInfo.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-                mUserAspectRatioSettingsLayout.release();
-                mUserAspectRatioSettingsLayout = null;
+                if (mUserAspectRatioSettingsLayout != null) {
+                    mUserAspectRatioSettingsLayout.release();
+                    mUserAspectRatioSettingsLayout = null;
+                }
                 return;
             }
             if (!taskInfo.isFromLetterboxDoubleTap) {
