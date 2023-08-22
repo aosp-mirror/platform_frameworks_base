@@ -28,8 +28,11 @@ import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -47,8 +50,10 @@ interface KeyguardBouncerRepository {
     val primaryBouncerShowingSoon: StateFlow<Boolean>
     val primaryBouncerStartingToHide: StateFlow<Boolean>
     val primaryBouncerStartingDisappearAnimation: StateFlow<Runnable?>
+
     /** Determines if we want to instantaneously show the primary bouncer instead of translating. */
     val primaryBouncerScrimmed: StateFlow<Boolean>
+
     /**
      * Set how much of the notification panel is showing on the screen.
      *
@@ -60,8 +65,23 @@ interface KeyguardBouncerRepository {
     val panelExpansionAmount: StateFlow<Float>
     val keyguardPosition: StateFlow<Float?>
     val isBackButtonEnabled: StateFlow<Boolean?>
-    /** Determines if user is already unlocked */
-    val keyguardAuthenticated: StateFlow<Boolean?>
+
+    /**
+     * Triggers when the user has successfully used biometrics to authenticate. True = biometrics
+     * used to authenticate is Class 3, else false. When null, biometrics haven't authenticated the
+     * device.
+     */
+    val keyguardAuthenticatedBiometrics: StateFlow<Boolean?>
+
+    /**
+     * Triggers when the given userId (Int) has successfully used primary authentication to
+     * authenticate
+     */
+    val keyguardAuthenticatedPrimaryAuth: Flow<Int>
+
+    /** Triggers when the given userId (Int) has requested the bouncer when already authenticated */
+    val userRequestedBouncerWhenAlreadyAuthenticated: Flow<Int>
+
     val showMessage: StateFlow<BouncerShowMessageModel?>
     val resourceUpdateRequests: StateFlow<Boolean>
     val alternateBouncerVisible: StateFlow<Boolean>
@@ -88,7 +108,11 @@ interface KeyguardBouncerRepository {
 
     fun setShowMessage(bouncerShowMessageModel: BouncerShowMessageModel?)
 
-    fun setKeyguardAuthenticated(keyguardAuthenticated: Boolean?)
+    fun setKeyguardAuthenticatedBiometrics(keyguardAuthenticatedBiometrics: Boolean?)
+
+    suspend fun setKeyguardAuthenticatedPrimaryAuth(userId: Int)
+
+    suspend fun setUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int)
 
     fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean)
 
@@ -117,9 +141,11 @@ constructor(
     private val _primaryBouncerDisappearAnimation = MutableStateFlow<Runnable?>(null)
     override val primaryBouncerStartingDisappearAnimation =
         _primaryBouncerDisappearAnimation.asStateFlow()
+
     /** Determines if we want to instantaneously show the primary bouncer instead of translating. */
     private val _primaryBouncerScrimmed = MutableStateFlow(false)
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
+
     /**
      * Set how much of the notification panel is showing on the screen.
      *
@@ -134,13 +160,26 @@ constructor(
     override val keyguardPosition = _keyguardPosition.asStateFlow()
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
-    private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
-    /** Determines if user is already unlocked */
-    override val keyguardAuthenticated = _keyguardAuthenticated.asStateFlow()
+
+    /** Whether the user is already unlocked by biometrics */
+    private val _keyguardAuthenticatedBiometrics = MutableStateFlow<Boolean?>(null)
+    override val keyguardAuthenticatedBiometrics = _keyguardAuthenticatedBiometrics.asStateFlow()
+
+    /** Whether the user is unlocked via a primary authentication method (pin/pattern/password). */
+    private val _keyguardAuthenticatedPrimaryAuth = MutableSharedFlow<Int>()
+    override val keyguardAuthenticatedPrimaryAuth: Flow<Int> =
+        _keyguardAuthenticatedPrimaryAuth.asSharedFlow()
+
+    /** Whether the user requested to show the bouncer when device is already authenticated */
+    private val _userRequestedBouncerWhenAlreadyAuthenticated = MutableSharedFlow<Int>()
+    override val userRequestedBouncerWhenAlreadyAuthenticated: Flow<Int> =
+        _userRequestedBouncerWhenAlreadyAuthenticated.asSharedFlow()
+
     private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
+
     /** Values associated with the AlternateBouncer */
     private val _alternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()
@@ -204,8 +243,16 @@ constructor(
         _showMessage.value = bouncerShowMessageModel
     }
 
-    override fun setKeyguardAuthenticated(keyguardAuthenticated: Boolean?) {
-        _keyguardAuthenticated.value = keyguardAuthenticated
+    override fun setKeyguardAuthenticatedBiometrics(keyguardAuthenticatedBiometrics: Boolean?) {
+        _keyguardAuthenticatedBiometrics.value = keyguardAuthenticatedBiometrics
+    }
+
+    override suspend fun setKeyguardAuthenticatedPrimaryAuth(userId: Int) {
+        _keyguardAuthenticatedPrimaryAuth.emit(userId)
+    }
+
+    override suspend fun setUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int) {
+        _userRequestedBouncerWhenAlreadyAuthenticated.emit(userId)
     }
 
     override fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean) {

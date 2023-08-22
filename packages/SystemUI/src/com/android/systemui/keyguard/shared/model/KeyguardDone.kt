@@ -12,25 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.android.systemui.keyguard.shared.model
 
-import com.android.keyguard.TrustGrantFlags
-
-sealed class TrustMessage
-
-/** Represents the trust state */
-data class TrustModel(
-    /** If true, the system believes the environment to be trusted. */
-    val isTrusted: Boolean,
-    /** The user, for which the trust changed. */
-    val userId: Int,
-    val flags: TrustGrantFlags,
-) : TrustMessage()
-
-/** Represents where trust agents are enabled for a particular user. */
-data class TrustManagedModel(
-    val userId: Int,
-    val isTrustManaged: Boolean,
-) : TrustMessage()
+/**
+ * When to send the keyguard done signal. Should it immediately be sent when the keyguard is
+ * requested to be dismissed? Or should it be sent later?
+ */
+enum class KeyguardDone {
+    IMMEDIATE, // keyguard is immediately done, immediately start transitioning away keyguard
+    LATER, // keyguard is dismissible pending the next keyguardDone call
+}

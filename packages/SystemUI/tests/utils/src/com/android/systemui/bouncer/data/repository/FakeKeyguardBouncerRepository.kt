@@ -2,11 +2,14 @@ package com.android.systemui.bouncer.data.repository
 
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Fake implementation of [KeyguardRepository] */
+/** Fake implementation of [KeyguardBouncerRepository] */
 class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     private val _primaryBouncerShow = MutableStateFlow(false)
     override val primaryBouncerShow = _primaryBouncerShow.asStateFlow()
@@ -26,7 +29,13 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
     private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
-    override val keyguardAuthenticated = _keyguardAuthenticated.asStateFlow()
+    override val keyguardAuthenticatedBiometrics = _keyguardAuthenticated.asStateFlow()
+    private val _keyguardAuthenticatedPrimaryAuth = MutableSharedFlow<Int>()
+    override val keyguardAuthenticatedPrimaryAuth: Flow<Int> =
+        _keyguardAuthenticatedPrimaryAuth.asSharedFlow()
+    private val _userRequestedBouncerWhenAlreadyAuthenticated = MutableSharedFlow<Int>()
+    override val userRequestedBouncerWhenAlreadyAuthenticated: Flow<Int> =
+        _userRequestedBouncerWhenAlreadyAuthenticated.asSharedFlow()
     private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
@@ -83,8 +92,16 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
         _showMessage.value = bouncerShowMessageModel
     }
 
-    override fun setKeyguardAuthenticated(keyguardAuthenticated: Boolean?) {
+    override fun setKeyguardAuthenticatedBiometrics(keyguardAuthenticated: Boolean?) {
         _keyguardAuthenticated.value = keyguardAuthenticated
+    }
+
+    override suspend fun setKeyguardAuthenticatedPrimaryAuth(userId: Int) {
+        _keyguardAuthenticatedPrimaryAuth.emit(userId)
+    }
+
+    override suspend fun setUserRequestedBouncerWhenAlreadyAuthenticated(userId: Int) {
+        _userRequestedBouncerWhenAlreadyAuthenticated.emit(userId)
     }
 
     override fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean) {

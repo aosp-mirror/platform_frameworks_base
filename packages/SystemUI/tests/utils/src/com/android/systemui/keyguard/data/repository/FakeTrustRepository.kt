@@ -17,6 +17,8 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.keyguard.TrustGrantFlags
+import com.android.systemui.keyguard.shared.model.TrustModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,9 @@ class FakeTrustRepository : TrustRepository {
     override val isCurrentUserTrustManaged: StateFlow<Boolean>
         get() = _isCurrentUserTrustManaged
 
+    private val _requestDismissKeyguard = MutableStateFlow(TrustModel(false, 0, TrustGrantFlags(0)))
+    override val trustAgentRequestingToDismissKeyguard: Flow<TrustModel> = _requestDismissKeyguard
+
     fun setCurrentUserTrusted(trust: Boolean) {
         _isCurrentUserTrusted.value = trust
     }
@@ -45,5 +50,9 @@ class FakeTrustRepository : TrustRepository {
 
     fun setCurrentUserActiveUnlockAvailable(available: Boolean) {
         _isCurrentUserActiveUnlockAvailable.value = available
+    }
+
+    fun setRequestDismissKeyguard(trustModel: TrustModel) {
+        _requestDismissKeyguard.value = trustModel
     }
 }

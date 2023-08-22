@@ -21,7 +21,9 @@ import android.graphics.Point
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
+import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.ScreenState
@@ -30,12 +32,18 @@ import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardRepository : KeyguardRepository {
+    private val _deferKeyguardDone: MutableSharedFlow<KeyguardDone> = MutableSharedFlow()
+    override val keyguardDone: Flow<KeyguardDone> = _deferKeyguardDone
+
+    private val _dismissAction = MutableStateFlow<DismissAction>(DismissAction.None)
+    override val dismissAction: StateFlow<DismissAction> = _dismissAction
 
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions: StateFlow<Boolean> =
@@ -173,6 +181,14 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     override fun dozeTimeTick() {
         _dozeTimeTick.value = _dozeTimeTick.value + 1
+    }
+
+    override fun setDismissAction(dismissAction: DismissAction) {
+        _dismissAction.value = dismissAction
+    }
+
+    override suspend fun setKeyguardDone(timing: KeyguardDone) {
+        _deferKeyguardDone.emit(timing)
     }
 
     fun dozeTimeTick(millis: Long) {

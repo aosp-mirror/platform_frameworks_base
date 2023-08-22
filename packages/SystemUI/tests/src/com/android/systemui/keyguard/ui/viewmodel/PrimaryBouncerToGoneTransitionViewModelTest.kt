@@ -22,7 +22,10 @@ import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
@@ -32,6 +35,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
+import dagger.Lazy
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -47,13 +51,21 @@ import org.mockito.MockitoAnnotations
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: PrimaryBouncerToGoneTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var featureFlags: FakeFeatureFlags
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
+    @Mock
+    private lateinit var keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
+                set(Flags.UDFPS_NEW_TOUCH_DETECTION, true)
+            }
         val interactor =
             KeyguardTransitionInteractorFactory.create(
                     scope = TestScope().backgroundScope,
@@ -64,7 +76,9 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
             PrimaryBouncerToGoneTransitionViewModel(
                 interactor,
                 statusBarStateController,
-                primaryBouncerInteractor
+                primaryBouncerInteractor,
+                keyguardDismissActionInteractor,
+                featureFlags,
             )
 
         whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(false)
