@@ -292,7 +292,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             int viewIndex = mStatusArea.indexOfChild(ksv);
             ksv.setVisibility(View.GONE);
 
-            mSmartspaceController.removeViewsFromParent(mStatusArea);
+            removeViewsFromStatusArea();
             addSmartspaceView();
             // TODO(b/261757708): add content observer for the Settings toggle and add/remove
             //  weather according to the Settings.
@@ -324,7 +324,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     void onLocaleListChanged() {
         if (mSmartspaceController.isEnabled()) {
-            mSmartspaceController.removeViewsFromParent(mStatusArea);
+            removeViewsFromStatusArea();
             addSmartspaceView();
             if (mSmartspaceController.isDateWeatherDecoupled()) {
                 mDateWeatherView.removeView(mWeatherView);
@@ -617,5 +617,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         return ((mCurrentClockSize == LARGE) ? clock.getLargeClock() : clock.getSmallClock())
                 .getConfig().getHasCustomWeatherDataDisplay();
+    }
+
+    private void removeViewsFromStatusArea() {
+        for  (int i = mStatusArea.getChildCount() - 1; i >= 0; i--) {
+            final View childView = mStatusArea.getChildAt(i);
+            if (childView.getTag(R.id.tag_smartspace_view) != null) {
+                mStatusArea.removeViewAt(i);
+            }
+        }
     }
 }

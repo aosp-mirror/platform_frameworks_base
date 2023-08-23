@@ -24,15 +24,12 @@ import com.android.keyguard.KeyguardStatusViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
-import com.android.systemui.animation.view.LaunchableLinearLayout
-import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
-import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
@@ -41,7 +38,6 @@ import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandList
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
@@ -80,7 +76,6 @@ constructor(
     private val falsingManager: FalsingManager,
     private val vibratorHelper: VibratorHelper,
     private val keyguardStateController: KeyguardStateController,
-    private val keyguardLongPressViewModel: KeyguardLongPressViewModel,
     private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
     private val activityStarter: ActivityStarter,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
@@ -110,7 +105,7 @@ constructor(
         bindLeftShortcut()
         bindRightShortcut()
         bindAmbientIndicationArea()
-        bindSettingsPopupMenu(notificationPanel)
+        bindSettingsPopupMenu()
 
         KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
         keyguardBlueprintCommandListener.start()
@@ -199,43 +194,18 @@ constructor(
         }
     }
 
-    private fun bindSettingsPopupMenu(legacyParent: ViewGroup) {
+    private fun bindSettingsPopupMenu() {
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-            // Remove the legacy long-press view from the NotificationPanelView where it used to be
-            // before this refactor such that we only have one long-press view at the bottom of
-            // KeyguardRootView.
-            val legacyLongPressView = legacyParent.requireViewById<View>(R.id.keyguard_long_press)
-            legacyParent.removeView(legacyLongPressView)
-
-            val longPressView: LongPressHandlingView =
-                keyguardRootView.requireViewById(R.id.keyguard_long_press)
-            val settingsMenuView: LaunchableLinearLayout =
-                keyguardRootView.requireViewById(R.id.keyguard_settings_button)
-
-            // Bind the long-press view that (1) triggers the showing of the settings popup menu and
-            // (2) captures touch events outside of the shown settings popup menu to hide it.
-            KeyguardLongPressViewBinder.bind(
-                view = longPressView,
-                viewModel = keyguardLongPressViewModel,
-                onSingleTap = {},
-                falsingManager = falsingManager,
-                settingsMenuView = settingsMenuView,
-            )
-
-            // Bind the settings popup menu.
             settingsPopupMenuHandle?.dispose()
             settingsPopupMenuHandle =
                 KeyguardSettingsViewBinder.bind(
-                    settingsMenuView,
+                    keyguardRootView,
                     keyguardSettingsMenuViewModel,
                     vibratorHelper,
                     activityStarter,
                 )
         } else {
             keyguardRootView.findViewById<View?>(R.id.keyguard_settings_button)?.let {
-                keyguardRootView.removeView(it)
-            }
-            keyguardRootView.findViewById<View?>(R.id.keyguard_long_press)?.let {
                 keyguardRootView.removeView(it)
             }
         }

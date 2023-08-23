@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.keyguard.qualifiers
 
-import androidx.constraintlayout.widget.ConstraintSet
+import javax.inject.Qualifier
 
-/**
- * Lower level modules that determine constraints for a particular section in the lockscreen root
- * view.
- */
-interface KeyguardSection {
-    fun apply(constraintSet: ConstraintSet)
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class KeyguardRootView
