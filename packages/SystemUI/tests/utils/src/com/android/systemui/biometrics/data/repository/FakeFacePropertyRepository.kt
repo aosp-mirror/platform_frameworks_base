@@ -17,13 +17,23 @@
 
 package com.android.systemui.biometrics.data.repository
 
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.biometrics.shared.model.LockoutMode
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class FakeFacePropertyRepository : FacePropertyRepository {
     private val faceSensorInfo = MutableStateFlow<FaceSensorInfo?>(null)
-    override val sensorInfo: Flow<FaceSensorInfo?>
+    override val sensorInfo: StateFlow<FaceSensorInfo?>
         get() = faceSensorInfo
+
+    private val lockoutModesForUser = mutableMapOf<Int, LockoutMode>()
+
+    fun setLockoutMode(userId: Int, mode: LockoutMode) {
+        lockoutModesForUser[userId] = mode
+    }
+    override suspend fun getLockoutMode(userId: Int): LockoutMode {
+        return lockoutModesForUser[userId]!!
+    }
 
     fun setSensorInfo(value: FaceSensorInfo?) {
         faceSensorInfo.value = value
