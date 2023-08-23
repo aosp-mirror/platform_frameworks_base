@@ -851,7 +851,10 @@ public class Bubble implements BubbleViewProvider {
         return mAppIntent;
     }
 
-    boolean isAppBubble() {
+    /**
+     * Returns whether this bubble is from an app versus a notification.
+     */
+    public boolean isAppBubble() {
         return mIsAppBubble;
     }
 

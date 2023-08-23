@@ -203,6 +203,60 @@ public class BubblePositionerTest extends ShellTestCase {
         assertThat(restingPosition.y).isEqualTo(getDefaultYPosition());
     }
 
+    /** Test that the default resting position on tablet is middle right. */
+    @Test
+    public void testGetDefaultPosition_appBubble_onTablet() {
+        new WindowManagerConfig().setLargeScreen().setUpConfig();
+        mPositioner.update();
+
+        RectF allowableStackRegion =
+                mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
+        PointF startPosition = mPositioner.getDefaultStartPosition(true /* isAppBubble */);
+
+        assertThat(startPosition.x).isEqualTo(allowableStackRegion.right);
+        assertThat(startPosition.y).isEqualTo(getDefaultYPosition());
+    }
+
+    @Test
+    public void testGetRestingPosition_appBubble_onTablet_RTL() {
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
+
+        RectF allowableStackRegion =
+                mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
+        PointF startPosition = mPositioner.getDefaultStartPosition(true /* isAppBubble */);
+
+        assertThat(startPosition.x).isEqualTo(allowableStackRegion.left);
+        assertThat(startPosition.y).isEqualTo(getDefaultYPosition());
+    }
+
+    @Test
+    public void testHasUserModifiedDefaultPosition_false() {
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
+
+        assertThat(mPositioner.hasUserModifiedDefaultPosition()).isFalse();
+
+        mPositioner.setRestingPosition(mPositioner.getDefaultStartPosition());
+
+        assertThat(mPositioner.hasUserModifiedDefaultPosition()).isFalse();
+    }
+
+    @Test
+    public void testHasUserModifiedDefaultPosition_true() {
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
+
+        assertThat(mPositioner.hasUserModifiedDefaultPosition()).isFalse();
+
+        mPositioner.setRestingPosition(new PointF(0, 100));
+
+        assertThat(mPositioner.hasUserModifiedDefaultPosition()).isTrue();
+    }
+
     /**
      * Calculates the Y position bubbles should be placed based on the config. Based on
      * the calculations in {@link BubblePositioner#getDefaultStartPosition()} and
