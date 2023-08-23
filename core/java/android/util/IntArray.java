@@ -212,6 +212,11 @@ public class IntArray implements Cloneable {
         return -1;
     }
 
+    /** Returns {@code true} if this array contains the specified value. */
+    public boolean contains(int value) {
+        return indexOf(value) != -1;
+    }
+
     /**
      * Removes the value at the specified index from this array.
      */

@@ -55,9 +55,11 @@ public class IntArrayTest {
         a.add(5, 20);
         assertThat(a.get(5)).isEqualTo(20);
         assertThat(a.indexOf(20)).isEqualTo(5);
+        assertThat(a.contains(20)).isTrue();
         verify(a, 1, 2, 0, 0, 0, 20, 10, 0, 0);
 
         assertThat(a.indexOf(99)).isEqualTo(-1);
+        assertThat(a.contains(99)).isFalse();
 
         a.resize(15);
         a.set(14, 30);
@@ -71,6 +73,7 @@ public class IntArrayTest {
         backingArray[2] = 30;
         verify(a, backingArray);
         assertThat(a.indexOf(30)).isEqualTo(2);
+        assertThat(a.contains(30)).isTrue();
 
         a.resize(2);
         assertThat(backingArray[2]).isEqualTo(0);
