@@ -1399,11 +1399,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assertCallerIsOwnerRootOrVerifier();
         synchronized (mLock) {
             assertPreparedAndNotDestroyedLocked("getNames");
+            String[] names;
             if (!isCommitted()) {
-                return getNamesLocked();
+                names = getNamesLocked();
             } else {
-                return getStageDirContentsLocked();
+                names = getStageDirContentsLocked();
             }
+            return ArrayUtils.removeString(names, APP_METADATA_FILE_NAME);
         }
     }
 
