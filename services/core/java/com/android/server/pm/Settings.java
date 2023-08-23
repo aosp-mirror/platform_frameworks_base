@@ -5186,9 +5186,12 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.print(" instant=");
             pw.print(userState.isInstantApp());
             pw.print(" virtual=");
-            pw.println(userState.isVirtualPreload());
+            pw.print(userState.isVirtualPreload());
             pw.print(" quarantined=");
             pw.print(userState.isQuarantined());
+
+            // Dump install state with additional indentation on their own lines.
+            pw.println();
             pw.print("      installReason=");
             pw.println(userState.getInstallReason());
 
