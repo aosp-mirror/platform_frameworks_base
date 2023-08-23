@@ -7258,8 +7258,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void showStartingWindow(boolean taskSwitch) {
-        showStartingWindow(null /* prev */, false /* newTask */, taskSwitch,
-                false /* startActivity */, null);
+        // Pass the activity which contains starting window already.
+        final ActivityRecord prev = task.getActivity(
+                a -> a != this && a.mStartingData != null && a.showToCurrentUser());
+        showStartingWindow(prev, false /* newTask */, taskSwitch, false /* startActivity */, null);
     }
 
     /**
