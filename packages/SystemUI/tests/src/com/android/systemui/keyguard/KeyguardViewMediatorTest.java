@@ -182,6 +182,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
         when(mPowerManager.newWakeLock(anyInt(), any())).thenReturn(mock(WakeLock.class));
+        when(mPowerManager.isInteractive()).thenReturn(true);
         when(mInteractionJankMonitor.begin(any(), anyInt())).thenReturn(true);
         when(mInteractionJankMonitor.end(anyInt())).thenReturn(true);
         final ViewRootImpl testViewRoot = mock(ViewRootImpl.class);
@@ -707,8 +708,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setShowingLocked(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         TestableLooper.get(this).processAllMessages();
-
-        when(mPowerManager.isInteractive()).thenReturn(true);
 
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
