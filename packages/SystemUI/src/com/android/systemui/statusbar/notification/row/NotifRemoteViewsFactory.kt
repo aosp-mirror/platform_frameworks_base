@@ -19,10 +19,18 @@ package com.android.systemui.statusbar.notification.row
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
 
 /** Interface used to create replacement view instances in Notification RemoteViews. */
 interface NotifRemoteViewsFactory {
 
     /** return the replacement view instance for the given view name */
-    fun instantiate(parent: View?, name: String, context: Context, attrs: AttributeSet): View?
+    fun instantiate(
+        row: ExpandableNotificationRow,
+        @InflationFlag layoutType: Int,
+        parent: View?,
+        name: String,
+        context: Context,
+        attrs: AttributeSet
+    ): View?
 }
