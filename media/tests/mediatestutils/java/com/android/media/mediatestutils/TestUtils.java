@@ -51,7 +51,7 @@ public class TestUtils {
         return getFutureForListener(
                 (recv) ->
                         context.registerReceiver(
-                                recv, new IntentFilter(action), Context.RECEIVER_NOT_EXPORTED),
+                                recv, new IntentFilter(action), Context.RECEIVER_EXPORTED),
                 (recv) -> {
                     try {
                         context.unregisterReceiver(recv);
@@ -73,6 +73,13 @@ public class TestUtils {
                             }
                         },
                 "Intent receiver future for action: " + action);
+    }
+
+    /**
+     * Same as previous, but with no predicate.
+     */
+    public static ListenableFuture<Intent> getFutureForIntent(Context context, String action) {
+        return getFutureForIntent(context, action, i -> true);
     }
 
     /**
