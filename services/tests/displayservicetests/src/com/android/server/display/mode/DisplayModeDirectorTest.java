@@ -39,6 +39,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -1084,6 +1085,196 @@ public class DisplayModeDirectorTest {
         setBrightness(100, 255, displayListener);
         // Sensor reads 9000 lux,
         sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
+
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertVoteForPhysicalRefreshRate(vote, 60 /*fps*/);
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNotNull();
+        assertThat(vote.disableRefreshRateSwitching).isTrue();
+    }
+
+    @Test
+    public void testLockFpsForHighZoneWithThermalCondition() throws Exception {
+        // First, configure brightness zones or DMD won't register for sensor data.
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setHighDisplayBrightnessThresholds(new int[] { 200 });
+        config.setHighAmbientBrightnessThresholds(new int[] { 8000 });
+
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 120.f}, 0);
+        setPeakRefreshRate(120 /*fps*/);
+        director.getSettingsObserver().setDefaultRefreshRate(120);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        // Set the thresholds for High Zone
+        DisplayDeviceConfig ddcMock = mock(DisplayDeviceConfig.class);
+        when(ddcMock.getDefaultHighBlockingZoneRefreshRate()).thenReturn(90);
+        when(ddcMock.getHighDisplayBrightnessThresholds()).thenReturn(new float[] { 200 });
+        when(ddcMock.getHighAmbientBrightnessThresholds()).thenReturn(new float[] { 8000 });
+        when(ddcMock.getDefaultLowBlockingZoneRefreshRate()).thenReturn(90);
+        when(ddcMock.getLowDisplayBrightnessThresholds()).thenReturn(new float[] {});
+        when(ddcMock.getLowAmbientBrightnessThresholds()).thenReturn(new float[] {});
+
+        // Set the thermal condition for refresh rate range
+        when(ddcMock.getHighBlockingZoneThermalMap()).thenReturn(
+                new SparseArray<RefreshRateRange>() {{
+                    put(Temperature.THROTTLING_CRITICAL, new RefreshRateRange(60, 60));
+                }}
+        );
+        director.defaultDisplayDeviceUpdated(ddcMock); // set the ddc
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        // Get the display listener so that we can send it new brightness events
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                  ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        // Get the sensor listener so that we can give it new light sensor events
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
+                .registerListener(
+                        listenerCaptor.capture(),
+                        eq(lightSensor),
+                        anyInt(),
+                        any(Handler.class));
+        SensorEventListener sensorListener = listenerCaptor.getValue();
+
+        // Get the thermal listener so that we can give it new thermal conditions
+        ArgumentCaptor<IThermalEventListener> thermalListenerCaptor =
+                ArgumentCaptor.forClass(IThermalEventListener.class);
+        verify(mInjector, atLeastOnce()).registerThermalServiceListener(
+                thermalListenerCaptor.capture());
+        List<IThermalEventListener> thermalListeners = thermalListenerCaptor.getAllValues();
+
+        setBrightness(100, 100, displayListener);
+        // Sensor reads 2000 lux,
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 2000));
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertThat(vote).isNull();
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNull();
+
+        // We expect DisplayModeDirector to act on BrightnessInfo.adjustedBrightness; set only this
+        // parameter to the necessary threshold
+        setBrightness(255, 255, displayListener);
+        // Sensor reads 9000 lux,
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9000));
+
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertVoteForPhysicalRefreshRate(vote, 90 /*fps*/);
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNotNull();
+        assertThat(vote.disableRefreshRateSwitching).isTrue();
+
+        // Set critical and check new refresh rate
+        Temperature temp = getSkinTemp(Temperature.THROTTLING_CRITICAL);
+        for (var listener : thermalListeners) {
+            listener.notifyThrottling(temp);
+        }
+
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertVoteForPhysicalRefreshRate(vote, 60 /*fps*/);
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNotNull();
+        assertThat(vote.disableRefreshRateSwitching).isTrue();
+    }
+
+    @Test
+    public void testLockFpsForLowZoneWithThermalCondition() throws Exception {
+        // First, configure brightness zones or DMD won't register for sensor data.
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setHighDisplayBrightnessThresholds(new int[] { 200 });
+        config.setHighAmbientBrightnessThresholds(new int[] { 8000 });
+
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f, 120.f}, 0);
+        setPeakRefreshRate(120 /*fps*/);
+        director.getSettingsObserver().setDefaultRefreshRate(120);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        // Set the thresholds for Low Zone
+        DisplayDeviceConfig ddcMock = mock(DisplayDeviceConfig.class);
+        when(ddcMock.getDefaultLowBlockingZoneRefreshRate()).thenReturn(90);
+        when(ddcMock.getHighDisplayBrightnessThresholds()).thenReturn(new float[] { 200 });
+        when(ddcMock.getHighAmbientBrightnessThresholds()).thenReturn(new float[] { 8000 });
+        when(ddcMock.getDefaultLowBlockingZoneRefreshRate()).thenReturn(90);
+        when(ddcMock.getLowDisplayBrightnessThresholds()).thenReturn(new float[] { 10 });
+        when(ddcMock.getLowAmbientBrightnessThresholds()).thenReturn(new float[] { 10 });
+
+        // Set the thermal condition for refresh rate range
+        when(ddcMock.getLowBlockingZoneThermalMap()).thenReturn(
+                new SparseArray<RefreshRateRange>() {{
+                    put(Temperature.THROTTLING_CRITICAL, new RefreshRateRange(60, 60));
+                }}
+        );
+        director.defaultDisplayDeviceUpdated(ddcMock); // set the ddc
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        // Get the display listener so that we can send it new brightness events
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                  ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                    | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        // Get the sensor listener so that we can give it new light sensor events
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(sensorManager, Mockito.timeout(TimeUnit.SECONDS.toMillis(1)))
+                .registerListener(
+                        listenerCaptor.capture(),
+                        eq(lightSensor),
+                        anyInt(),
+                        any(Handler.class));
+        SensorEventListener sensorListener = listenerCaptor.getValue();
+
+        // Get the thermal listener so that we can give it new thermal conditions
+        ArgumentCaptor<IThermalEventListener> thermalListenerCaptor =
+                ArgumentCaptor.forClass(IThermalEventListener.class);
+        verify(mInjector, atLeastOnce()).registerThermalServiceListener(
+                thermalListenerCaptor.capture());
+        List<IThermalEventListener> thermalListeners = thermalListenerCaptor.getAllValues();
+
+        setBrightness(100, 100, displayListener);
+        // Sensor reads 2000 lux,
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 2000));
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertThat(vote).isNull();
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNull();
+
+        // We expect DisplayModeDirector to act on BrightnessInfo.adjustedBrightness; set only this
+        // parameter to the necessary threshold
+        setBrightness(5, 5, displayListener);
+        // Sensor reads 9 lux,
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 9));
+
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertVoteForPhysicalRefreshRate(vote, 90 /*fps*/);
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNotNull();
+        assertThat(vote.disableRefreshRateSwitching).isTrue();
+
+        // Set critical and check new refresh rate
+        Temperature temp = getSkinTemp(Temperature.THROTTLING_CRITICAL);
+        for (var listener : thermalListeners) {
+            listener.notifyThrottling(temp);
+        }
 
         vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
         assertVoteForPhysicalRefreshRate(vote, 60 /*fps*/);
@@ -2904,6 +3095,10 @@ public class DisplayModeDirectorTest {
         @Override
         public boolean registerThermalServiceListener(IThermalEventListener listener) {
             return true;
+        }
+
+        @Override
+        public void unregisterThermalServiceListener(IThermalEventListener listener) {
         }
 
         @Override

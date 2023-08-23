@@ -579,6 +579,10 @@
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:element type ="xs:string" name="refreshRateThermalThrottlingId">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="blockingZoneThreshold" type="blockingZoneThreshold"
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
