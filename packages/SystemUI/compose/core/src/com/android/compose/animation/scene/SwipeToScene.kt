@@ -257,35 +257,18 @@ private fun onDrag(
     // twice in a row to accelerate the transition and go from A => B then B => C really fast.
     maybeHandleAcceleratedSwipe(transition, orientation)
 
-    val fromScene = transition._fromScene
-    val upOrLeft = fromScene.upOrLeft(orientation)
-    val downOrRight = fromScene.downOrRight(orientation)
     val offset = transition.dragOffset
+    val fromScene = transition._fromScene
 
     // Compute the target scene depending on the current offset.
-    val targetSceneKey: SceneKey
-    val signedDistance: Float
-    when {
-        offset < 0f && upOrLeft != null -> {
-            targetSceneKey = upOrLeft
-            signedDistance = -transition.absoluteDistance
-        }
-        offset > 0f && downOrRight != null -> {
-            targetSceneKey = downOrRight
-            signedDistance = transition.absoluteDistance
-        }
-        else -> {
-            targetSceneKey = fromScene.key
-            signedDistance = 0f
-        }
+    val target = fromScene.findTargetSceneAndDistance(orientation, offset, layoutImpl)
+
+    if (transition._toScene.key != target.sceneKey) {
+        transition._toScene = layoutImpl.scenes.getValue(target.sceneKey)
     }
 
-    if (transition._toScene.key != targetSceneKey) {
-        transition._toScene = layoutImpl.scenes.getValue(targetSceneKey)
-    }
-
-    if (transition._distance != signedDistance) {
-        transition._distance = signedDistance
+    if (transition._distance != target.distance) {
+        transition._distance = target.distance
     }
 }
 
@@ -319,6 +302,48 @@ private fun maybeHandleAcceleratedSwipe(
 
     // Important note: toScene and distance will be updated right after this function is called,
     // using fromScene and dragOffset.
+}
+
+private data class TargetScene(
+    val sceneKey: SceneKey,
+    val distance: Float,
+)
+
+private fun Scene.findTargetSceneAndDistance(
+    orientation: Orientation,
+    directionOffset: Float,
+    layoutImpl: SceneTransitionLayoutImpl,
+): TargetScene {
+    val maxDistance =
+        when (orientation) {
+            Orientation.Horizontal -> layoutImpl.size.width
+            Orientation.Vertical -> layoutImpl.size.height
+        }.toFloat()
+
+    val upOrLeft = upOrLeft(orientation)
+    val downOrRight = downOrRight(orientation)
+
+    // Compute the target scene depending on the current offset.
+    return when {
+        directionOffset < 0f && upOrLeft != null -> {
+            TargetScene(
+                sceneKey = upOrLeft,
+                distance = -maxDistance,
+            )
+        }
+        directionOffset > 0f && downOrRight != null -> {
+            TargetScene(
+                sceneKey = downOrRight,
+                distance = maxDistance,
+            )
+        }
+        else -> {
+            TargetScene(
+                sceneKey = key,
+                distance = 0f,
+            )
+        }
+    }
 }
 
 private fun CoroutineScope.onDragStopped(
@@ -372,31 +397,13 @@ private fun CoroutineScope.onDragStopped(
         layoutImpl.onChangeScene(targetScene.key)
     }
 
-    // Animate the offset.
-    transition.offsetAnimationJob = launch {
-        transition.offsetAnimatable.snapTo(offset)
-        transition.isAnimatingOffset = true
-
-        transition.offsetAnimatable.animateTo(
-            targetOffset,
-            // TODO(b/290184746): Make this spring spec configurable.
-            spring(
-                stiffness = Spring.StiffnessMediumLow,
-                visibilityThreshold = OffsetVisibilityThreshold
-            ),
-            initialVelocity = velocity,
-        )
-
-        // Now that the animation is done, the state should be idle. Note that if the state was
-        // changed since this animation started, some external code changed it and we shouldn't do
-        // anything here. Note also that this job will be cancelled in the case where the user
-        // intercepts this swipe.
-        if (layoutImpl.state.transitionState == transition) {
-            layoutImpl.state.transitionState = TransitionState.Idle(targetScene.key)
-        }
-
-        transition.offsetAnimationJob = null
-    }
+    animateOffset(
+        transition = transition,
+        layoutImpl = layoutImpl,
+        initialVelocity = velocity,
+        targetOffset = targetOffset,
+        targetScene = targetScene.key
+    )
 }
 
 /**
@@ -434,6 +441,90 @@ private fun shouldCommitSwipe(
             (offset >= positionalThreshold && !wasCommitted) ||
             isCloserToTarget()
     }
+}
+
+private fun CoroutineScope.animateOffset(
+    transition: SwipeTransition,
+    layoutImpl: SceneTransitionLayoutImpl,
+    initialVelocity: Float,
+    targetOffset: Float,
+    targetScene: SceneKey,
+) {
+    transition.offsetAnimationJob = launch {
+        if (!transition.isAnimatingOffset) {
+            transition.offsetAnimatable.snapTo(transition.dragOffset)
+        }
+        transition.isAnimatingOffset = true
+
+        transition.offsetAnimatable.animateTo(
+            targetOffset,
+            // TODO(b/290184746): Make this spring spec configurable.
+            spring(
+                stiffness = Spring.StiffnessMediumLow,
+                visibilityThreshold = OffsetVisibilityThreshold
+            ),
+            initialVelocity = initialVelocity,
+        )
+
+        // Now that the animation is done, the state should be idle. Note that if the state was
+        // changed since this animation started, some external code changed it and we shouldn't do
+        // anything here. Note also that this job will be cancelled in the case where the user
+        // intercepts this swipe.
+        if (layoutImpl.state.transitionState == transition) {
+            layoutImpl.state.transitionState = TransitionState.Idle(targetScene)
+        }
+
+        transition.offsetAnimationJob = null
+    }
+}
+
+private fun CoroutineScope.animateOverscroll(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: SwipeTransition,
+    velocity: Velocity,
+    orientation: Orientation,
+): Velocity {
+    val velocityAmount =
+        when (orientation) {
+            Orientation.Vertical -> velocity.y
+            Orientation.Horizontal -> velocity.x
+        }
+
+    if (velocityAmount == 0f) {
+        // There is no remaining velocity
+        return Velocity.Zero
+    }
+
+    val fromScene = layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
+    val target = fromScene.findTargetSceneAndDistance(orientation, velocityAmount, layoutImpl)
+    val isValidTarget = target.distance != 0f && target.sceneKey != fromScene.key
+
+    if (!isValidTarget || layoutImpl.state.transitionState == transition) {
+        // We have not found a valid target or we are already in a transition
+        return Velocity.Zero
+    }
+
+    transition._currentScene = fromScene
+    transition._fromScene = fromScene
+    transition._toScene = layoutImpl.scene(target.sceneKey)
+    transition._distance = target.distance
+    transition.absoluteDistance = target.distance.absoluteValue
+    transition.dragOffset = 0f
+    transition.isAnimatingOffset = false
+    transition.offsetAnimationJob = null
+
+    layoutImpl.state.transitionState = transition
+
+    animateOffset(
+        transition = transition,
+        layoutImpl = layoutImpl,
+        initialVelocity = velocityAmount,
+        targetOffset = 0f,
+        targetScene = fromScene.key
+    )
+
+    // The animateOffset animation consumes any remaining velocity.
+    return velocity
 }
 
 /**
@@ -543,8 +634,14 @@ private fun rememberSwipeToSceneNestedScrollConnection(
                     velocityAvailable
                 },
                 onPostFling = { velocityAvailable ->
-                    // We will handle the overscroll here
-                    Velocity.Zero
+                    // If there is any velocity left, we can try running an overscroll animation
+                    // between scenes.
+                    coroutineScope.animateOverscroll(
+                        layoutImpl = layoutImpl,
+                        transition = transition,
+                        velocity = velocityAvailable,
+                        orientation = orientation
+                    )
                 },
             )
         }
