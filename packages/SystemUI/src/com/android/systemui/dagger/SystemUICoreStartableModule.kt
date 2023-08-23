@@ -49,6 +49,7 @@ import com.android.systemui.recents.Recents
 import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.ImmersiveModeConfirmation
+import com.android.systemui.statusbar.gesture.GesturePointerEventListener
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
 import com.android.systemui.statusbar.phone.LockscreenWallpaper
@@ -181,6 +182,12 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(ScreenDecorations::class)
     abstract fun bindScreenDecorations(sysui: ScreenDecorations): CoreStartable
+
+    /** Inject into GesturePointerEventHandler. */
+    @Binds
+    @IntoMap
+    @ClassKey(GesturePointerEventListener::class)
+    abstract fun bindGesturePointerEventListener(sysui: GesturePointerEventListener): CoreStartable
 
     /** Inject into SessionTracker.  */
     @Binds
