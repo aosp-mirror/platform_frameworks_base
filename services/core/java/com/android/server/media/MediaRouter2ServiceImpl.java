@@ -313,7 +313,7 @@ class MediaRouter2ServiceImpl {
         if (linkedItemLandingComponent != null) {
             int callingUid = Binder.getCallingUid();
             MediaServerUtils.enforcePackageName(
-                    linkedItemLandingComponent.getPackageName(), callingUid);
+                    mContext, linkedItemLandingComponent.getPackageName(), callingUid);
             if (!MediaServerUtils.isValidActivityComponentName(
                     mContext,
                     linkedItemLandingComponent,

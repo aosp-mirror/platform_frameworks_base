@@ -542,7 +542,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             int callingPid, int callingUid, String callingPackage, String reason) {
         final long token = Binder.clearCallingIdentity();
         try {
-            MediaServerUtils.enforcePackageName(callingPackage, callingUid);
+            MediaServerUtils.enforcePackageName(mContext, callingPackage, callingUid);
             if (targetUid != callingUid) {
                 boolean canAllowWhileInUse = mActivityManagerLocal
                         .canAllowWhileInUsePermissionInFgs(callingPid, callingUid, callingPackage);
@@ -1187,7 +1187,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
@@ -1239,7 +1239,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1270,7 +1270,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 MediaSessionRecordImpl record;
@@ -1596,7 +1596,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int userId = userHandle.getIdentifier();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
                 enforceMediaPermissions(packageName, pid, uid, userId);
 
                 synchronized (mLock) {
@@ -2110,7 +2110,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // If they gave us a component name verify they own the
                 // package
                 packageName = componentName.getPackageName();
-                MediaServerUtils.enforcePackageName(packageName, uid);
+                MediaServerUtils.enforcePackageName(mContext, packageName, uid);
             }
             // Check that they can make calls on behalf of the user and get the final user id
             int resolvedUserId = handleIncomingUser(pid, uid, userId, packageName);
