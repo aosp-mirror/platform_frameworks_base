@@ -2929,7 +2929,13 @@ public class PackageInstaller {
          *
          * By default this is the app that created the {@link PackageInstaller} object.
          *
-         * @param installerPackageName name of the installer package
+         * Note: Only applications with {@link android.Manifest.permission#INSTALL_PACKAGES}
+         * permission are allowed to set an installer that is not the caller's own installer
+         * package name, otherwise it will cause a {@link SecurityException} when creating the
+         * install session.
+         *
+         * @param installerPackageName The name of the installer package, its length must be less
+         *                            than {@code 255}, otherwise it will be invalid.
          */
         public void setInstallerPackageName(@Nullable String installerPackageName) {
             this.installerPackageName = installerPackageName;
