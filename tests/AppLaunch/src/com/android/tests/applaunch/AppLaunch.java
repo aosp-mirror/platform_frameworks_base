@@ -674,7 +674,7 @@ public class AppLaunch extends InstrumentationTestCase {
             return true;
         }
 
-        // iorap compiler filters specified: the compilerFilter must be in the whitelist.
+        // iorap compiler filters specified: the compilerFilter must be in the allowlist.
         if (mIorapCompilerFilters.indexOf(compilerFilter) != -1) {
             return true;
         }
