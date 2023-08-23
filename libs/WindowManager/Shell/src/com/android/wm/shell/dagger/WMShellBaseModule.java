@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
@@ -233,10 +234,12 @@ public abstract class WMShellBaseModule {
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
             DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration,
-            CompatUIShellCommandHandler compatUIShellCommandHandler) {
+            CompatUIShellCommandHandler compatUIShellCommandHandler,
+            AccessibilityManager accessibilityManager) {
         return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
-                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler);
+                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler,
+                accessibilityManager);
     }
 
     @WMSingleton
