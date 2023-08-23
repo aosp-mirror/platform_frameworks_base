@@ -358,12 +358,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public String toString() {
-            return "SessionState{uid " + mClient.mUid + " pid " + mClient.mPid
-                    + " method " + Integer.toHexString(
+            return "SessionState{uid=" + mClient.mUid + " pid=" + mClient.mPid
+                    + " method=" + Integer.toHexString(
                     IInputMethodInvoker.getBinderIdentityHashCode(mMethod))
-                    + " session " + Integer.toHexString(
+                    + " session=" + Integer.toHexString(
                     System.identityHashCode(mSession))
-                    + " channel " + mChannel
+                    + " channel=" + mChannel
                     + "}";
         }
 
@@ -388,9 +388,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public String toString() {
-            return "AccessibilitySessionState{uid " + mClient.mUid + " pid " + mClient.mPid
-                    + " id " + Integer.toHexString(mId)
-                    + " session " + Integer.toHexString(
+            return "AccessibilitySessionState{uid=" + mClient.mUid + " pid=" + mClient.mPid
+                    + " id=" + Integer.toHexString(mId)
+                    + " session=" + Integer.toHexString(
                     System.identityHashCode(mSession))
                     + "}";
         }
@@ -884,47 +884,47 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     continue;
                 }
                 pw.print(prefix);
-                pw.println("SoftInputShowHideHistory #" + entry.mSequenceNumber + ":");
+                pw.println("SoftInputShowHide #" + entry.mSequenceNumber + ":");
 
                 pw.print(prefix);
-                pw.println(" time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
+                pw.println("  time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
                         + " (timestamp=" + entry.mTimestamp + ")");
 
                 pw.print(prefix);
-                pw.print(" reason=" + InputMethodDebug.softInputDisplayReasonToString(
+                pw.print("  reason=" + InputMethodDebug.softInputDisplayReasonToString(
                         entry.mReason));
                 pw.println(" inFullscreenMode=" + entry.mInFullscreenMode);
 
                 pw.print(prefix);
-                pw.println(" requestClient=" + entry.mClientState);
+                pw.println("  requestClient=" + entry.mClientState);
 
                 pw.print(prefix);
-                pw.println(" focusedWindowName=" + entry.mFocusedWindowName);
+                pw.println("  focusedWindowName=" + entry.mFocusedWindowName);
 
                 pw.print(prefix);
-                pw.println(" requestWindowName=" + entry.mRequestWindowName);
+                pw.println("  requestWindowName=" + entry.mRequestWindowName);
 
                 pw.print(prefix);
-                pw.println(" imeControlTargetName=" + entry.mImeControlTargetName);
+                pw.println("  imeControlTargetName=" + entry.mImeControlTargetName);
 
                 pw.print(prefix);
-                pw.println(" imeTargetNameFromWm=" + entry.mImeTargetNameFromWm);
+                pw.println("  imeTargetNameFromWm=" + entry.mImeTargetNameFromWm);
 
                 pw.print(prefix);
-                pw.println(" imeSurfaceParentName=" + entry.mImeSurfaceParentName);
+                pw.println("  imeSurfaceParentName=" + entry.mImeSurfaceParentName);
 
                 pw.print(prefix);
-                pw.print(" editorInfo: ");
+                pw.print("  editorInfo:");
                 if (entry.mEditorInfo != null) {
                     pw.print(" inputType=" + entry.mEditorInfo.inputType);
                     pw.print(" privateImeOptions=" + entry.mEditorInfo.privateImeOptions);
                     pw.println(" fieldId (viewId)=" + entry.mEditorInfo.fieldId);
                 } else {
-                    pw.println("null");
+                    pw.println(" null");
                 }
 
                 pw.print(prefix);
-                pw.println(" focusedWindowSoftInputMode=" + InputMethodDebug.softInputModeToString(
+                pw.println("  focusedWindowSoftInputMode=" + InputMethodDebug.softInputModeToString(
                         entry.mFocusedWindowSoftInputMode));
             }
         }
@@ -1052,30 +1052,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("StartInput #" + entry.mSequenceNumber + ":");
 
                 pw.print(prefix);
-                pw.println(" time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
+                pw.println("  time=" + formatter.format(Instant.ofEpochMilli(entry.mWallTime))
                         + " (timestamp=" + entry.mTimestamp + ")"
                         + " reason="
                         + InputMethodDebug.startInputReasonToString(entry.mStartInputReason)
                         + " restarting=" + entry.mRestarting);
 
                 pw.print(prefix);
-                pw.print(" imeToken=" + entry.mImeTokenString + " [" + entry.mImeId + "]");
+                pw.print("  imeToken=" + entry.mImeTokenString + " [" + entry.mImeId + "]");
                 pw.print(" imeUserId=" + entry.mImeUserId);
                 pw.println(" imeDisplayId=" + entry.mImeDisplayId);
 
                 pw.print(prefix);
-                pw.println(" targetWin=" + entry.mTargetWindowString
+                pw.println("  targetWin=" + entry.mTargetWindowString
                         + " [" + entry.mEditorInfo.packageName + "]"
                         + " targetUserId=" + entry.mTargetUserId
                         + " targetDisplayId=" + entry.mTargetDisplayId
                         + " clientBindSeq=" + entry.mClientBindSequenceNumber);
 
                 pw.print(prefix);
-                pw.println(" softInputMode=" + InputMethodDebug.softInputModeToString(
+                pw.println("  softInputMode=" + InputMethodDebug.softInputModeToString(
                         entry.mTargetWindowSoftInputMode));
 
                 pw.print(prefix);
-                pw.println(" inputType=0x" + Integer.toHexString(entry.mEditorInfo.inputType)
+                pw.println("  inputType=0x" + Integer.toHexString(entry.mEditorInfo.inputType)
                         + " imeOptions=0x" + Integer.toHexString(entry.mEditorInfo.imeOptions)
                         + " fieldId=0x" + Integer.toHexString(entry.mEditorInfo.fieldId)
                         + " fieldName=" + entry.mEditorInfo.fieldName
@@ -5946,11 +5946,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("  InputMethod #" + i + ":");
                 info.dump(p, "    ");
             }
-            p.println("  Clients:");
+            p.println("  ClientStates:");
             final int numClients = mClients.size();
             for (int i = 0; i < numClients; ++i) {
                 final ClientState ci = mClients.valueAt(i);
-                p.println("  Client " + ci + ":");
+                p.println("  " + ci + ":");
                 p.println("    client=" + ci.mClient);
                 p.println("    fallbackInputConnection=" + ci.mFallbackInputConnection);
                 p.println("    sessionRequested=" + ci.mSessionRequested);
@@ -5977,7 +5977,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             method = getCurMethodLocked();
             p.println("  mCurMethod=" + getCurMethodLocked());
             p.println("  mEnabledSession=" + mEnabledSession);
-            mVisibilityStateComputer.dump(pw);
+            mVisibilityStateComputer.dump(pw, "  ");
             p.println("  mInFullscreenMode=" + mInFullscreenMode);
             p.println("  mSystemReady=" + mSystemReady + " mInteractive=" + mIsInteractive);
             p.println("  ENABLE_HIDE_IME_CAPTION_BAR="
@@ -5991,13 +5991,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mSettings.dumpLocked(p, "    ");
 
             p.println("  mStartInputHistory:");
-            mStartInputHistory.dump(pw, "   ");
+            mStartInputHistory.dump(pw, "    ");
 
             p.println("  mSoftInputShowHideHistory:");
-            mSoftInputShowHideHistory.dump(pw, "   ");
+            mSoftInputShowHideHistory.dump(pw, "    ");
 
             p.println("  mImeTrackerService#History:");
-            mImeTrackerService.dump(pw, "   ");
+            mImeTrackerService.dump(pw, "    ");
         }
 
         // Exit here for critical dump, as remaining sections require IPCs to other processes.
