@@ -32,8 +32,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -390,6 +392,35 @@ public class HighBrightnessModeControllerTest {
         assertEquals(Float.POSITIVE_INFINITY, hbmc.getHdrBrightnessValue(), 0.0);
     }
 
+    @Test
+    public void testHdrRespectsChangingDesiredHdrSdrRatio() {
+        final Runnable hbmChangedCallback = mock(Runnable.class);
+        final HighBrightnessModeController hbmc = new TestHbmBuilder()
+                .setClock(new OffsettableClock())
+                .setHdrBrightnessConfig(mHdrBrightnessDeviceConfigMock)
+                .setHbmChangedCallback(hbmChangedCallback)
+                .build();
+
+        // Passthrough return the max desired hdr/sdr ratio
+        when(mHdrBrightnessDeviceConfigMock.getHdrBrightnessFromSdr(anyFloat(), anyFloat()))
+                .thenAnswer(i -> i.getArgument(1));
+
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/, 2.0f /*maxDesiredHdrSdrRatio*/);
+        advanceTime(0);
+        assertEquals(2.0f, hbmc.getHdrBrightnessValue(), EPSILON);
+        verify(hbmChangedCallback, times(1)).run();
+
+        // Verify that a change in only the desired hdrSdrRatio still results in the changed
+        // callback being invoked
+        hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
+                DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/,
+                3.0f /*maxDesiredHdrSdrRatio*/);
+        advanceTime(0);
+        assertEquals(3.0f, hbmc.getHdrBrightnessValue(), 0.0);
+        verify(hbmChangedCallback, times(2)).run();
+    }
+
 
     @Test
     public void testHdrTrumpsSunlight() {
@@ -698,6 +729,7 @@ public class HighBrightnessModeControllerTest {
     private class TestHbmBuilder {
         OffsettableClock mClock;
         HighBrightnessModeController.HdrBrightnessDeviceConfig mHdrBrightnessCfg;
+        Runnable mHdrChangedCallback = () -> {};
 
         TestHbmBuilder setClock(OffsettableClock clock) {
             mClock = clock;
@@ -711,6 +743,11 @@ public class HighBrightnessModeControllerTest {
             return this;
         }
 
+        TestHbmBuilder setHbmChangedCallback(Runnable runnable) {
+            mHdrChangedCallback = runnable;
+            return this;
+        }
+
         HighBrightnessModeController build() {
             initHandler(mClock);
             if (mHighBrightnessModeMetadata == null) {
@@ -718,8 +755,8 @@ public class HighBrightnessModeControllerTest {
             }
             return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
                     DISPLAY_HEIGHT, mDisplayToken, mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX,
-                    DEFAULT_HBM_DATA, mHdrBrightnessCfg, () -> {}, mHighBrightnessModeMetadata,
-                    mContextSpy);
+                    DEFAULT_HBM_DATA, mHdrBrightnessCfg, mHdrChangedCallback,
+                    mHighBrightnessModeMetadata, mContextSpy);
         }
 
     }
