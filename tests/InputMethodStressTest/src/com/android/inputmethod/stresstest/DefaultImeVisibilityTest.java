@@ -23,6 +23,7 @@ import static com.android.compatibility.common.util.SystemUtil.eventually;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.REQUEST_FOCUS_ON_CREATE;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity.createIntent;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.callOnMainSync;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.requestFocusAndVerify;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowAndViewFocus;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsHidden;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
@@ -96,7 +97,7 @@ public final class DefaultImeVisibilityTest {
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         eventually(
                 () ->
-                        assertWithMessage("Display rotation should be updated.")
+                        assertWithMessage("Display rotation should have been updated")
                                 .that(uiDevice.getDisplayRotation())
                                 .isEqualTo(mIsPortrait ? 0 : 1),
                 TIMEOUT);
@@ -104,7 +105,7 @@ public final class DefaultImeVisibilityTest {
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
             // TODO(b/291752364): Remove the explicit focus request once the issue with view focus
             //  change between fullscreen IME and actual editText is fixed.
-            callOnMainSync(editText::requestFocus);
+            requestFocusAndVerify(activity);
             verifyWindowAndViewFocus(editText, true, true);
             callOnMainSync(activity::showImeWithInputMethodManager);
             waitOnMainUntilImeIsShown(editText);
