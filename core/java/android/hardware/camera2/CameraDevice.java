@@ -540,14 +540,6 @@ public abstract class CameraDevice implements AutoCloseable {
      *   or configuring it to use one of the supported
      *   {@link android.media.CamcorderProfile CamcorderProfiles}.</li>
      *
-     * <li>For efficient YUV processing with {@link android.renderscript}:
-     *   Create a RenderScript
-     *   {@link android.renderscript.Allocation Allocation} with a supported YUV
-     *   type, the IO_INPUT flag, and one of the sizes returned by
-     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(Allocation.class)},
-     *   Then obtain the Surface with
-     *   {@link android.renderscript.Allocation#getSurface}.</li>
-     *
      * <li>For access to RAW, uncompressed YUV, or compressed JPEG data in the application: Create an
      *   {@link android.media.ImageReader} object with one of the supported output formats given by
      *   {@link StreamConfigurationMap#getOutputFormats()}, setting its size to one of the
