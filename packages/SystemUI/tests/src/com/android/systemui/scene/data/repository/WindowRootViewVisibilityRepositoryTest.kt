@@ -17,13 +17,20 @@
 package com.android.systemui.scene.data.repository
 
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.mockito.Mockito.verify
 
 @SmallTest
 class WindowRootViewVisibilityRepositoryTest : SysuiTestCase() {
-    private val underTest = WindowRootViewVisibilityRepository()
+    private val iStatusBarService = mock<IStatusBarService>()
+    private val executor = FakeExecutor(FakeSystemClock())
+    private val underTest = WindowRootViewVisibilityRepository(iStatusBarService, executor)
 
     @Test
     fun isLockscreenOrShadeVisible_true() {
@@ -37,5 +44,24 @@ class WindowRootViewVisibilityRepositoryTest : SysuiTestCase() {
         underTest.setIsLockscreenOrShadeVisible(false)
 
         assertThat(underTest.isLockscreenOrShadeVisible.value).isFalse()
+    }
+
+    @Test
+    fun onLockscreenOrShadeInteractive_statusBarServiceNotified() {
+        underTest.onLockscreenOrShadeInteractive(
+            shouldClearNotificationEffects = true,
+            notificationCount = 3,
+        )
+        executor.runAllReady()
+
+        verify(iStatusBarService).onPanelRevealed(true, 3)
+    }
+
+    @Test
+    fun onLockscreenOrShadeNotInteractive_statusBarServiceNotified() {
+        underTest.onLockscreenOrShadeNotInteractive()
+        executor.runAllReady()
+
+        verify(iStatusBarService).onPanelHidden()
     }
 }

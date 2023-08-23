@@ -171,6 +171,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -456,6 +457,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final CentralSurfacesComponent.Factory mCentralSurfacesComponentFactory;
     private final PluginManager mPluginManager;
     private final ShadeController mShadeController;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final InitController mInitController;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
@@ -704,6 +706,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
@@ -814,6 +817,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
@@ -1516,6 +1520,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter);
+        mWindowRootViewVisibilityInteractor.setUp(mPresenter, mNotificationsController);
     }
 
     /**
@@ -2123,48 +2128,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
     }
 
-    protected void handleVisibleToUserChanged(boolean visibleToUser) {
-        if (visibleToUser) {
-            onVisibleToUser();
-        } else {
-            onInvisibleToUser();
-        }
-    }
-
-    void onVisibleToUser() {
-        /* The LEDs are turned off when the notification panel is shown, even just a little bit.
-         * See also CentralSurfaces.setPanelExpanded for another place where we attempt to do
-         * this.
-         */
-        boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
-        boolean clearNotificationEffects =
-                !mPresenter.isPresenterFullyCollapsed() && (mState == StatusBarState.SHADE
-                        || mState == StatusBarState.SHADE_LOCKED);
-        int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-        if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
-            notificationLoad = 1;
-        }
-        final int finalNotificationLoad = notificationLoad;
-        mUiBgExecutor.execute(() -> {
-            try {
-                mBarService.onPanelRevealed(clearNotificationEffects,
-                        finalNotificationLoad);
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
-            }
-        });
-    }
-
-    void onInvisibleToUser() {
-        mUiBgExecutor.execute(() -> {
-            try {
-                mBarService.onPanelHidden();
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
-            }
-        });
-    }
-
     private void logStateToEventlog() {
         boolean isShowing = mKeyguardStateController.isShowing();
         boolean isOccluded = mKeyguardStateController.isOccluded();
@@ -2693,7 +2656,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
-            updateVisibleToUser();
 
             updateNotificationPanelTouchState();
             getNotificationShadeWindowViewController().cancelCurrentTouch();
@@ -2790,7 +2752,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         /* wakingUp= */ true,
                         mShouldDelayWakeUpAnimation);
 
-                updateVisibleToUser();
                 updateIsKeyguard();
                 mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
                         && mFeatureFlags.isEnabled(
@@ -3117,9 +3078,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     protected boolean mVisible;
 
-    // mScreenOnFromKeyguard && mVisible.
-    private boolean mVisibleToUser;
-
     protected DevicePolicyManager mDevicePolicyManager;
     private final PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -3247,20 +3205,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
                         true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
             }
-        }
-        updateVisibleToUser();
-    }
-
-    /**
-     * @deprecated use {@link
-     * WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisibleAndInteractive} instead.
-     */
-    protected void updateVisibleToUser() {
-        boolean oldVisibleToUser = mVisibleToUser;
-        mVisibleToUser = mVisible && mDeviceInteractive;
-
-        if (oldVisibleToUser != mVisibleToUser) {
-            handleVisibleToUserChanged(mVisibleToUser);
         }
     }
 
@@ -3442,7 +3386,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // If we're visible and switched to SHADE_LOCKED (the user dragged
                     // down on the lockscreen), clear notification LED, vibration,
                     // ringing.
-                    // Other transitions are covered in handleVisibleToUserChanged().
+                    // Other transitions are covered in WindowRootViewVisibilityInteractor.
                     if (mVisible && (newState == StatusBarState.SHADE_LOCKED
                             || mStatusBarStateController.goingToFullShade())) {
                         clearNotificationEffects();

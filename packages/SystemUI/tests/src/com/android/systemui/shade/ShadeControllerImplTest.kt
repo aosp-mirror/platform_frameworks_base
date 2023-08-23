@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.TestScopeProvider
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.assist.AssistManager
@@ -33,6 +34,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -53,6 +55,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class ShadeControllerImplTest : SysuiTestCase() {
+    private val executor = FakeExecutor(FakeSystemClock())
+
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -67,12 +71,17 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var nswvc: NotificationShadeWindowViewController
     @Mock private lateinit var display: Display
     @Mock private lateinit var touchLog: LogBuffer
-    private val windowRootViewVisibilityInteractor =
+    @Mock private lateinit var iStatusBarService: IStatusBarService
+    @Mock private lateinit var headsUpManager: HeadsUpManager
+
+    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
         WindowRootViewVisibilityInteractor(
             TestScopeProvider.getTestScope(),
-            WindowRootViewVisibilityRepository(),
+            WindowRootViewVisibilityRepository(iStatusBarService, executor),
             FakeKeyguardRepository(),
+            headsUpManager,
         )
+    }
 
     private lateinit var shadeController: ShadeControllerImpl
 

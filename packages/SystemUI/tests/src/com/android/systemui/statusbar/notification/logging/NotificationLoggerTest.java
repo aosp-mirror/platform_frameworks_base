@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -98,6 +99,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotificationListener mListener;
+    @Mock private HeadsUpManager mHeadsUpManager;
 
     private NotificationEntry mEntry;
     private TestableNotificationLogger mLogger;
@@ -107,11 +109,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
             new NotificationPanelLoggerFake();
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
     private final FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
-    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor =
-            new WindowRootViewVisibilityInteractor(
-                    mTestScope.getBackgroundScope(),
-                    new WindowRootViewVisibilityRepository(),
-                    mKeyguardRepository);
+    private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     @Before
@@ -119,6 +117,11 @@ public class NotificationLoggerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mNotifLiveDataStore.getActiveNotifList()).thenReturn(mActiveNotifEntries);
 
+        mWindowRootViewVisibilityInteractor = new WindowRootViewVisibilityInteractor(
+                mTestScope.getBackgroundScope(),
+                new WindowRootViewVisibilityRepository(mBarService, mUiBgExecutor),
+                mKeyguardRepository,
+                mHeadsUpManager);
         mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true);
 
         mEntry = new NotificationEntryBuilder()

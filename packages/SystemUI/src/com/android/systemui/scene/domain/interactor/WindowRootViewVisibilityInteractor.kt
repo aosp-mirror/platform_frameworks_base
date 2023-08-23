@@ -16,26 +16,39 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
+import com.android.systemui.statusbar.NotificationPresenter
+import com.android.systemui.statusbar.notification.init.NotificationsController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Business logic about the visibility of various parts of the window root view. */
 @SysUISingleton
 class WindowRootViewVisibilityInteractor
 @Inject
 constructor(
-    @Application scope: CoroutineScope,
+    @Application private val scope: CoroutineScope,
     private val windowRootViewVisibilityRepository: WindowRootViewVisibilityRepository,
-    keyguardRepository: KeyguardRepository,
-) {
+    private val keyguardRepository: KeyguardRepository,
+    private val headsUpManager: HeadsUpManager,
+) : CoreStartable {
+
+    private var notificationPresenter: NotificationPresenter? = null
+    private var notificationsController: NotificationsController? = null
+
+    private val isNotifPresenterFullyCollapsed: Boolean
+        get() = notificationPresenter?.isPresenterFullyCollapsed ?: true
 
     /**
      * True if lockscreen (including AOD) or the shade is visible and false otherwise. Notably,
@@ -60,7 +73,49 @@ constructor(
             }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
+    /**
+     * Sets classes that aren't easily injectable on this class.
+     *
+     * TODO(b/277762009): Inject these directly instead.
+     */
+    fun setUp(
+        presenter: NotificationPresenter?,
+        notificationsController: NotificationsController?,
+    ) {
+        this.notificationPresenter = presenter
+        this.notificationsController = notificationsController
+    }
+
+    override fun start() {
+        scope.launch {
+            isLockscreenOrShadeVisibleAndInteractive.collect { interactive ->
+                if (interactive) {
+                    windowRootViewVisibilityRepository.onLockscreenOrShadeInteractive(
+                        getShouldClearNotificationEffects(keyguardRepository.statusBarState.value),
+                        getNotificationLoad(),
+                    )
+                } else {
+                    windowRootViewVisibilityRepository.onLockscreenOrShadeNotInteractive()
+                }
+            }
+        }
+    }
+
     fun setIsLockscreenOrShadeVisible(visible: Boolean) {
         windowRootViewVisibilityRepository.setIsLockscreenOrShadeVisible(visible)
+    }
+
+    private fun getShouldClearNotificationEffects(statusBarState: StatusBarState): Boolean {
+        return !isNotifPresenterFullyCollapsed &&
+            (statusBarState == StatusBarState.SHADE ||
+                statusBarState == StatusBarState.SHADE_LOCKED)
+    }
+
+    private fun getNotificationLoad(): Int {
+        return if (headsUpManager.hasPinnedHeadsUp() && isNotifPresenterFullyCollapsed) {
+            1
+        } else {
+            notificationsController?.getActiveNotificationsCount() ?: 0
+        }
     }
 }

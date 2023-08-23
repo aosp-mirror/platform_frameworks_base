@@ -25,6 +25,7 @@ import android.window.OnBackInvokedDispatcher
 import android.window.WindowOnBackInvokedDispatcher
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -42,10 +43,13 @@ import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -69,6 +73,7 @@ import org.mockito.junit.MockitoJUnit
 class BackActionInteractorTest : SysuiTestCase() {
     private val testScope = TestScope()
     private val featureFlags = FakeFeatureFlags()
+    private val executor = FakeExecutor(FakeSystemClock())
 
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
@@ -81,14 +86,18 @@ class BackActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var windowRootView: WindowRootView
     @Mock private lateinit var viewRootImpl: ViewRootImpl
     @Mock private lateinit var onBackInvokedDispatcher: WindowOnBackInvokedDispatcher
+    @Mock private lateinit var iStatusBarService: IStatusBarService
+    @Mock private lateinit var headsUpManager: HeadsUpManager
 
     private val keyguardRepository = FakeKeyguardRepository()
-    private val windowRootViewVisibilityInteractor =
+    private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
         WindowRootViewVisibilityInteractor(
             testScope.backgroundScope,
-            WindowRootViewVisibilityRepository(),
+            WindowRootViewVisibilityRepository(iStatusBarService, executor),
             keyguardRepository,
+            headsUpManager,
         )
+    }
 
     private val backActionInteractor: BackActionInteractor by lazy {
         BackActionInteractor(

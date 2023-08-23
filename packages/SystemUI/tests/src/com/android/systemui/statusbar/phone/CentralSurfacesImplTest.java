@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.TestCase.fail;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -62,7 +61,6 @@ import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
 import android.support.test.metricshelper.MetricsAsserts;
@@ -317,6 +315,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private FingerprintManager mFingerprintManager;
     @Mock IPowerManager mPowerManagerService;
     @Mock ActivityStarter mActivityStarter;
+    @Mock private WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
 
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -509,6 +508,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mCentralSurfacesCommandQueueCallbacks,
                 mPluginManager,
                 mShadeController,
+                mWindowRootViewVisibilityInteractor,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
                 mInitController,
@@ -756,74 +756,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 .build();
 
         assertTrue(mNotificationInterruptStateProvider.shouldHeadsUp(entry));
-    }
-
-    @Test
-    public void testLogHidden() {
-        try {
-            mCentralSurfaces.handleVisibleToUserChanged(false);
-            mUiBgExecutor.runAllReady();
-            verify(mBarService, times(1)).onPanelHidden();
-            verify(mBarService, never()).onPanelRevealed(anyBoolean(), anyInt());
-        } catch (RemoteException e) {
-            fail();
-        }
-    }
-
-    @Test
-    public void testPanelOpenForHeadsUp() {
-        when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
-        when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
-        when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        try {
-            mCentralSurfaces.handleVisibleToUserChanged(true);
-            mUiBgExecutor.runAllReady();
-            verify(mBarService, never()).onPanelHidden();
-            verify(mBarService, times(1)).onPanelRevealed(false, 1);
-        } catch (RemoteException e) {
-            fail();
-        }
-        mMainExecutor.runAllReady();
-    }
-
-    @Test
-    public void testPanelOpenAndClear() {
-        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
-
-        when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-
-        try {
-            mCentralSurfaces.handleVisibleToUserChanged(true);
-            mUiBgExecutor.runAllReady();
-            verify(mBarService, never()).onPanelHidden();
-            verify(mBarService, times(1)).onPanelRevealed(true, 5);
-        } catch (RemoteException e) {
-            fail();
-        }
-        mMainExecutor.runAllReady();
-    }
-
-    @Test
-    public void testPanelOpenAndNoClear() {
-        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        when(mNotificationsController.getActiveNotificationsCount()).thenReturn(5);
-        when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
-        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
-
-        try {
-            mCentralSurfaces.handleVisibleToUserChanged(true);
-            mUiBgExecutor.runAllReady();
-            verify(mBarService, never()).onPanelHidden();
-            verify(mBarService, times(1)).onPanelRevealed(false, 5);
-        } catch (RemoteException e) {
-            fail();
-        }
-        mMainExecutor.runAllReady();
     }
 
     @Test

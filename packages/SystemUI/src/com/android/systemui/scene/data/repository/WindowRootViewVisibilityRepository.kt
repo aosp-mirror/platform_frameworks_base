@@ -16,7 +16,11 @@
 
 package com.android.systemui.scene.data.repository
 
+import android.os.RemoteException
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.UiBackground
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,11 +28,47 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /** Source of truth for the visibility of various parts of the window root view. */
 @SysUISingleton
-class WindowRootViewVisibilityRepository @Inject constructor() {
+class WindowRootViewVisibilityRepository
+@Inject
+constructor(
+    private val statusBarService: IStatusBarService,
+    @UiBackground private val uiBgExecutor: Executor,
+) {
     private val _isLockscreenOrShadeVisible = MutableStateFlow(false)
     val isLockscreenOrShadeVisible: StateFlow<Boolean> = _isLockscreenOrShadeVisible.asStateFlow()
 
     fun setIsLockscreenOrShadeVisible(visible: Boolean) {
         _isLockscreenOrShadeVisible.value = visible
+    }
+
+    /**
+     * Called when the lockscreen or shade has been shown and can be interacted with so that SysUI
+     * can notify external services.
+     */
+    fun onLockscreenOrShadeInteractive(
+        shouldClearNotificationEffects: Boolean,
+        notificationCount: Int,
+    ) {
+        executeServiceCallOnUiBg {
+            statusBarService.onPanelRevealed(shouldClearNotificationEffects, notificationCount)
+        }
+    }
+
+    /**
+     * Called when the lockscreen or shade no longer can be interactecd with so that SysUI can
+     * notify external services.
+     */
+    fun onLockscreenOrShadeNotInteractive() {
+        executeServiceCallOnUiBg { statusBarService.onPanelHidden() }
+    }
+
+    private fun executeServiceCallOnUiBg(runnable: () -> Unit) {
+        uiBgExecutor.execute {
+            try {
+                runnable.invoke()
+            } catch (ex: RemoteException) {
+                // Won't fail unless the world has ended
+            }
+        }
     }
 }
