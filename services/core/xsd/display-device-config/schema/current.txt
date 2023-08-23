@@ -3,11 +3,15 @@ package com.android.server.display.config {
 
   public class AutoBrightness {
     ctor public AutoBrightness();
+    method public final java.math.BigInteger getBrighteningLightDebounceIdleMillis();
     method public final java.math.BigInteger getBrighteningLightDebounceMillis();
+    method public final java.math.BigInteger getDarkeningLightDebounceIdleMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
     method public final com.android.server.display.config.DisplayBrightnessMapping getDisplayBrightnessMapping();
     method public boolean getEnabled();
+    method public final void setBrighteningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
+    method public final void setDarkeningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
     method public final void setDisplayBrightnessMapping(com.android.server.display.config.DisplayBrightnessMapping);
     method public void setEnabled(boolean);

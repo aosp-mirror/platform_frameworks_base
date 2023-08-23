@@ -253,13 +253,19 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *       <quirk>canSetBrightnessViaHwc</quirk>
  *      </quirks>
  *
- *      <autoBrightness enable="true">
+ *      <autoBrightness enabled="true">
  *          <brighteningLightDebounceMillis>
  *              2000
  *          </brighteningLightDebounceMillis>
  *          <darkeningLightDebounceMillis>
- *              1000
+ *              4000
  *          </darkeningLightDebounceMillis>
+ *          <brighteningLightDebounceIdleMillis>
+ *              2000
+ *          </brighteningLightDebounceIdleMillis>
+ *          <darkeningLightDebounceIdleMillis>
+ *              1000
+ *          </darkeningLightDebounceIdleMillis>
  *          <displayBrightnessMapping>
  *              <displayBrightnessPoint>
  *                  <lux>50</lux>
@@ -648,6 +654,14 @@ public class DisplayDeviceConfig {
 
     // Represents the auto-brightness darkening light debounce.
     private long mAutoBrightnessDarkeningLightDebounce =
+            INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
+
+    // Represents the auto-brightness brightening light debounce for idle screen brightness mode.
+    private long mAutoBrightnessBrighteningLightDebounceIdle =
+            INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
+
+    // Represents the auto-brightness darkening light debounce for idle screen brightness mode.
+    private long mAutoBrightnessDarkeningLightDebounceIdle =
             INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
 
     // This setting allows non-default displays to have autobrightness enabled.
@@ -1447,6 +1461,20 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return Auto brightness darkening light debounce for idle screen brightness mode
+     */
+    public long getAutoBrightnessDarkeningLightDebounceIdle() {
+        return mAutoBrightnessDarkeningLightDebounceIdle;
+    }
+
+    /**
+     * @return Auto brightness brightening light debounce for idle screen brightness mode
+     */
+    public long getAutoBrightnessBrighteningLightDebounceIdle() {
+        return mAutoBrightnessBrighteningLightDebounceIdle;
+    }
+
+    /**
      * @return Auto brightness brightening ambient lux levels
      */
     public float[] getAutoBrightnessBrighteningLevelsLux() {
@@ -1685,6 +1713,10 @@ public class DisplayDeviceConfig {
                 + mAutoBrightnessBrighteningLightDebounce
                 + ", mAutoBrightnessDarkeningLightDebounce= "
                 + mAutoBrightnessDarkeningLightDebounce
+                + ", mAutoBrightnessBrighteningLightDebounceIdle= "
+                + mAutoBrightnessBrighteningLightDebounceIdle
+                + ", mAutoBrightnessDarkeningLightDebounceIdle= "
+                + mAutoBrightnessDarkeningLightDebounceIdle
                 + ", mBrightnessLevelsLux= " + Arrays.toString(mBrightnessLevelsLux)
                 + ", mBrightnessLevelsNits= " + Arrays.toString(mBrightnessLevelsNits)
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
@@ -2308,6 +2340,9 @@ public class DisplayDeviceConfig {
         final AutoBrightness autoBrightness = config.getAutoBrightness();
         loadAutoBrightnessBrighteningLightDebounce(autoBrightness);
         loadAutoBrightnessDarkeningLightDebounce(autoBrightness);
+        // Idle must be called after interactive, since we fall back to it if needed.
+        loadAutoBrightnessBrighteningLightDebounceIdle(autoBrightness);
+        loadAutoBrightnessDarkeningLightDebounceIdle(autoBrightness);
         loadAutoBrightnessDisplayBrightnessMapping(autoBrightness);
         loadEnableAutoBrightness(autoBrightness);
     }
@@ -2339,6 +2374,37 @@ public class DisplayDeviceConfig {
         } else {
             mAutoBrightnessDarkeningLightDebounce =
                     autoBrightnessConfig.getDarkeningLightDebounceMillis().intValue();
+        }
+    }
+
+    /**
+     * Loads the auto-brightness brightening light debounce for idle mode. Internally, this takes
+     * care of loading the value from the display config, and if not present, falls back to
+     * whichever interactive value was chosen.
+     */
+    private void loadAutoBrightnessBrighteningLightDebounceIdle(
+            AutoBrightness autoBrightnessConfig) {
+        if (autoBrightnessConfig == null
+                || autoBrightnessConfig.getBrighteningLightDebounceIdleMillis() == null) {
+            mAutoBrightnessBrighteningLightDebounceIdle = mAutoBrightnessBrighteningLightDebounce;
+        } else {
+            mAutoBrightnessBrighteningLightDebounceIdle =
+                    autoBrightnessConfig.getBrighteningLightDebounceIdleMillis().intValue();
+        }
+    }
+
+    /**
+     * Loads the auto-brightness darkening light debounce for idle mode. Internally, this takes
+     * care of loading the value from the display config, and if not present, falls back to
+     * whichever interactive value was chosen.
+     */
+    private void loadAutoBrightnessDarkeningLightDebounceIdle(AutoBrightness autoBrightnessConfig) {
+        if (autoBrightnessConfig == null
+                || autoBrightnessConfig.getDarkeningLightDebounceIdleMillis() == null) {
+            mAutoBrightnessDarkeningLightDebounceIdle = mAutoBrightnessDarkeningLightDebounce;
+        } else {
+            mAutoBrightnessDarkeningLightDebounceIdle =
+                    autoBrightnessConfig.getDarkeningLightDebounceIdleMillis().intValue();
         }
     }
 
