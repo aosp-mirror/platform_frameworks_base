@@ -92,17 +92,12 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
-import android.window.BackEvent;
-import android.window.OnBackAnimationCallback;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -493,7 +488,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
-    private final boolean mAnimateBack;
     private final FragmentService mFragmentService;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final WallpaperController mWallpaperController;
@@ -505,13 +499,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ActivityStarter mActivityStarter;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
-
-    /**
-     * This keeps track of whether we have (or haven't) registered the predictive back callback.
-     * Since we can have visible -> visible transitions, we need to avoid
-     * double-registering (or double-unregistering) our callback.
-     */
-    private boolean mIsBackCallbackRegistered = false;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
@@ -637,31 +624,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             (extractor, which) -> updateTheme();
 
     private final InteractionJankMonitor mJankMonitor;
-
-    /** Existing callback that handles back gesture invoked for the Shade. */
-    private final OnBackInvokedCallback mOnBackInvokedCallback;
-
-    /**
-     *  New callback that handles back gesture invoked, cancel, progress
-     *  and provides feedback via Shade animation.
-     *  (enabled via the WM_SHADE_ANIMATE_BACK_GESTURE flag)
-     */
-    private final OnBackAnimationCallback mOnBackAnimationCallback = new OnBackAnimationCallback() {
-        @Override
-        public void onBackInvoked() {
-            mBackActionInteractor.onBackRequested();
-        }
-
-        @Override
-        public void onBackProgressed(BackEvent event) {
-            if (mBackActionInteractor.shouldBackBeHandled()) {
-                if (mShadeSurface.canBeCollapsed()) {
-                    float fraction = event.getProgress();
-                    mShadeSurface.onBackProgressed(fraction);
-                }
-            }
-        }
-    };
 
     /**
      * Public constructor for CentralSurfaces.
@@ -922,14 +884,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI)) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
-        // Based on teamfood flag, enable predictive back animation for the Shade.
-        mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
-        mOnBackInvokedCallback = () -> {
-            if (DEBUG) {
-                Log.d(TAG, "mOnBackInvokedCallback() called");
-            }
-            mBackActionInteractor.onBackRequested();
-        };
     }
 
     private void initBubbles(Bubbles bubbles) {
@@ -2172,39 +2126,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
             onVisibleToUser();
-            if (!mIsBackCallbackRegistered) {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl != null) {
-                    viewRootImpl.getOnBackInvokedDispatcher()
-                            .registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                                    mAnimateBack ? mOnBackAnimationCallback
-                                            : mOnBackInvokedCallback);
-                    mIsBackCallbackRegistered = true;
-                    if (DEBUG) Log.d(TAG, "is now VISIBLE to user AND callback registered");
-                }
-            } else {
-                if (DEBUG) Log.d(TAG, "is now VISIBLE to user, BUT callback ALREADY unregistered");
-            }
         } else {
             onInvisibleToUser();
-
-            if (mIsBackCallbackRegistered) {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl != null) {
-                    viewRootImpl.getOnBackInvokedDispatcher()
-                            .unregisterOnBackInvokedCallback(
-                                    mAnimateBack ? mOnBackAnimationCallback
-                                            : mOnBackInvokedCallback);
-                    mIsBackCallbackRegistered = false;
-                    if (DEBUG) Log.d(TAG, "is NOT VISIBLE to user, AND callback unregistered");
-                }
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG,
-                            "is NOT VISIBLE to user, BUT NO callback (or callback ALREADY "
-                                    + "unregistered)");
-                }
-            }
         }
     }
 
@@ -2724,11 +2647,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNavigationBarController.showPinningEscapeToast(mDisplayId);
     }
 
-    protected ViewRootImpl getViewRootImpl()  {
-        View root = mNotificationShadeWindowController.getWindowRootView();
-        if (root != null) return root.getViewRootImpl();
-        return null;
-    }
     /**
      * Propagation of the bouncer state, indicating that it's fully visible.
      */

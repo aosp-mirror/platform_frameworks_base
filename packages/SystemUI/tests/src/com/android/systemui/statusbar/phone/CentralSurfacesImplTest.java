@@ -73,13 +73,7 @@ import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
-import android.window.BackEvent;
-import android.window.OnBackAnimationCallback;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
-import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.test.filters.SmallTest;
 
@@ -196,7 +190,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -320,16 +313,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private CameraLauncher mCameraLauncher;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
-    /**
-     * The process of registering/unregistering a predictive back callback requires a
-     * ViewRootImpl, which is present IRL, but may be missing during a Mockito unit test.
-     * To prevent an NPE during test execution, we explicitly craft and provide a fake ViewRootImpl.
-     */
-    @Mock private ViewRootImpl mViewRootImpl;
-    @Mock private WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     @Mock private UserTracker mUserTracker;
     @Mock private FingerprintManager mFingerprintManager;
-    @Captor private ArgumentCaptor<OnBackInvokedCallback> mOnBackInvokedCallback;
     @Mock IPowerManager mPowerManagerService;
     @Mock ActivityStarter mActivityStarter;
 
@@ -561,16 +546,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserTracker,
                 () -> mFingerprintManager,
                 mActivityStarter
-        ) {
-            @Override
-            protected ViewRootImpl getViewRootImpl() {
-                return mViewRootImpl;
-            }
-        };
+        );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
-        when(mViewRootImpl.getOnBackInvokedDispatcher())
-                .thenReturn(mOnBackInvokedDispatcher);
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),
@@ -790,83 +768,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         } catch (RemoteException e) {
             fail();
         }
-    }
-
-    /**
-     * Do the following:
-     * 1. verify that a predictive back callback is registered when CSurf becomes visible
-     * 2. verify that the same callback is unregistered when CSurf becomes invisible
-     */
-    @Test
-    public void testPredictiveBackCallback_registration() {
-        mCentralSurfaces.handleVisibleToUserChanged(true);
-        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
-                mOnBackInvokedCallback.capture());
-
-        mCentralSurfaces.handleVisibleToUserChanged(false);
-        verify(mOnBackInvokedDispatcher).unregisterOnBackInvokedCallback(
-                eq(mOnBackInvokedCallback.getValue()));
-    }
-
-    /**
-     * Do the following:
-     * 1. capture the predictive back callback during registration
-     * 2. call the callback directly
-     * 3. verify that the ShadeController's panel collapse animation is invoked
-     */
-    @Test
-    public void testPredictiveBackCallback_invocationCollapsesPanel() {
-        mCentralSurfaces.handleVisibleToUserChanged(true);
-        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
-                mOnBackInvokedCallback.capture());
-
-        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
-        mOnBackInvokedCallback.getValue().onBackInvoked();
-        verify(mBackActionInteractor).onBackRequested();
-    }
-
-    /**
-     * When back progress is at 100%, the onBackProgressed animation driver inside
-     * NotificationPanelViewController should be invoked appropriately (with 1.0f passed in).
-     */
-    @Test
-    public void testPredictiveBackAnimation_progressMaxScalesPanel() {
-        mCentralSurfaces.handleVisibleToUserChanged(true);
-        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
-                mOnBackInvokedCallback.capture());
-
-        OnBackAnimationCallback onBackAnimationCallback =
-                (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
-        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
-        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
-
-        BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 100.0f, 1.0f, BackEvent.EDGE_LEFT);
-        onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
-        verify(mNotificationPanelViewController).onBackProgressed(eq(1.0f));
-    }
-
-    /**
-     * When back progress is at 0%, the onBackProgressed animation driver inside
-     * NotificationPanelViewController should be invoked appropriately (with 0.0f passed in).
-     */
-    @Test
-    public void testPredictiveBackAnimation_progressMinScalesPanel() {
-        mCentralSurfaces.handleVisibleToUserChanged(true);
-        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
-                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
-                mOnBackInvokedCallback.capture());
-
-        OnBackAnimationCallback onBackAnimationCallback =
-                (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
-        when(mBackActionInteractor.shouldBackBeHandled()).thenReturn(true);
-        when(mNotificationPanelViewController.canBeCollapsed()).thenReturn(true);
-
-        BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 10.0f, 0.0f, BackEvent.EDGE_LEFT);
-        onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
-        verify(mNotificationPanelViewController).onBackProgressed(eq(0.0f));
     }
 
     @Test
