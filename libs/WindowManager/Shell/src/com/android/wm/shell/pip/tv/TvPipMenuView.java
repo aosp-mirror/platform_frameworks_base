@@ -55,7 +55,7 @@ import com.android.internal.widget.LinearLayoutManager;
 import com.android.internal.widget.RecyclerView;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.TvWindowMenuActionButton;
-import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.List;

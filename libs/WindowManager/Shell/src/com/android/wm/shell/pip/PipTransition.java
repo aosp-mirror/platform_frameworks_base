@@ -64,6 +64,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
