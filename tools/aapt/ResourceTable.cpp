@@ -11,6 +11,7 @@
 #include "ResourceFilter.h"
 #include "ResourceIdCache.h"
 #include "SdkConstants.h"
+#include "Utils.h"
 
 #include <algorithm>
 #include <androidfw/ResourceTypes.h>
@@ -4803,7 +4804,7 @@ bool ResourceTable::versionForCompat(const Bundle* bundle, const String16& resou
     String8 resPath = String8::format("res/%s/%s.xml",
             newFile->getGroupEntry().toDirName(target->getResourceType()).c_str(),
             String8(resourceName).c_str());
-    resPath.convertToResPath();
+    convertToResPath(resPath);
 
     // Add a resource table entry.
     addEntry(SourcePos(),
@@ -4927,7 +4928,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         String8 resPath = String8::format("res/%s/%s.xml",
                 newFile->getGroupEntry().toDirName(target->getResourceType()).c_str(),
                 String8(resourceName).c_str());
-        resPath.convertToResPath();
+        convertToResPath(resPath);
 
         // Add a resource table entry.
         if (bundle->getVerbose()) {
