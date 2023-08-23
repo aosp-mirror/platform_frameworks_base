@@ -1,10 +1,9 @@
 # Bug component: 36824
 
-cbrubaker@google.com
-vishwath@google.com
+brambonne@google.com
+brufino@google.com
+jeffv@google.com
 
-per-file NetworkSecurityPolicy.java = cbrubaker@google.com
-per-file NetworkSecurityPolicy.java = klyubin@google.com
-per-file FrameworkNetworkSecurityPolicy.java = cbrubaker@google.com
-per-file FrameworkNetworkSecurityPolicy.java = klyubin@google.com
+per-file *NetworkSecurityPolicy.java = file:net/OWNERS
 per-file Confirmation*.java = file:/keystore/OWNERS
+per-file FileIntegrityManager.java = victorhsieh@google.com
