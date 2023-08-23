@@ -8,6 +8,7 @@
 
 #include "Images.h"
 
+#include <androidfw/PathUtils.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 
@@ -1357,7 +1358,7 @@ static bool write_png_protected(png_structp write_ptr, String8& printableName, p
 status_t preProcessImage(const Bundle* bundle, const sp<AaptAssets>& /* assets */,
                          const sp<AaptFile>& file, String8* /* outNewLeafName */)
 {
-    String8 ext(file->getPath().getPathExtension());
+    String8 ext(getPathExtension(file->getPath()));
 
     // We currently only process PNG images.
     if (strcmp(ext.c_str(), ".png") != 0) {
@@ -1518,7 +1519,7 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
 
     // Check to see if we're dealing with a 9-patch
     // If we are, process appropriately
-    if (source.getBasePath().getPathExtension() == ".9")  {
+    if (getPathExtension(getBasePath(source)) == ".9")  {
         if (do_9patch(source.c_str(), &imageInfo) != NO_ERROR) {
             return error;
         }
@@ -1584,12 +1585,12 @@ status_t preProcessImageToCache(const Bundle* bundle, const String8& source, con
 status_t postProcessImage(const Bundle* bundle, const sp<AaptAssets>& assets,
                           ResourceTable* table, const sp<AaptFile>& file)
 {
-    String8 ext(file->getPath().getPathExtension());
+    String8 ext(getPathExtension(file->getPath()));
 
     // At this point, now that we have all the resource data, all we need to
     // do is compile XML files.
     if (strcmp(ext.c_str(), ".xml") == 0) {
-        String16 resourceName(parseResourceName(file->getSourceFile().getPathLeaf()));
+        String16 resourceName(parseResourceName(getPathLeaf(file->getSourceFile())));
         return compileXmlFile(bundle, assets, resourceName, file, table);
     }
 

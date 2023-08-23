@@ -26,3 +26,13 @@
 // If the default OS separator is backslash, this converts all
 // backslashes to slashes, in-place. Otherwise it does nothing.
 void convertToResPath(android::String8&);
+
+/**
+ * Retrieve the front (root dir) component.  Optionally also return the
+ * remaining components.
+ *
+ * "/tmp/foo/bar.c" --> "tmp" (remain = "foo/bar.c")
+ * "/tmp" --> "tmp" (remain = "")
+ * "bar.c" --> "bar.c" (remain = "")
+ */
+android::String8 walkPath(const android::String8& path, android::String8* outRemains = nullptr);

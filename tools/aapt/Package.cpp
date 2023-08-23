@@ -10,6 +10,7 @@
 #include "ResourceFilter.h"
 #include "Utils.h"
 
+#include <androidfw/PathUtils.h>
 #include <androidfw/misc.h>
 
 #include <utils/Log.h>
@@ -170,7 +171,7 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
     /* anything here? */
     if (zip->getNumEntries() == 0) {
         if (bundle->getVerbose()) {
-            printf("Archive is empty -- removing %s\n", outputFile.getPathLeaf().c_str());
+            printf("Archive is empty -- removing %s\n", getPathLeaf(outputFile).c_str());
         }
         delete zip;        // close the file so we can remove it in Win32
         zip = NULL;
@@ -274,9 +275,9 @@ bool processFile(Bundle* bundle, ZipFile* zip,
         return true;
     }
 
-    if (strcasecmp(storageName.getPathExtension().c_str(), ".gz") == 0) {
+    if (strcasecmp(getPathExtension(storageName).c_str(), ".gz") == 0) {
         fromGzip = true;
-        storageName = storageName.getBasePath();
+        storageName = getBasePath(storageName);
     }
 
     if (bundle->getUpdate()) {
@@ -366,7 +367,7 @@ bool processFile(Bundle* bundle, ZipFile* zip,
  */
 bool okayToCompress(Bundle* bundle, const String8& pathName)
 {
-    String8 ext = pathName.getPathExtension();
+    String8 ext = getPathExtension(pathName);
     int i;
 
     if (ext.length() == 0)

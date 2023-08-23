@@ -30,6 +30,7 @@
 #include <utime.h>
 #include <zlib.h>
 
+#include <androidfw/PathUtils.h>
 #include <log/log.h>
 #include <utils/ByteOrder.h>
 #include <utils/KeyedVector.h>
@@ -606,14 +607,14 @@ int write_tarfile(const String8& packageName, const String8& domain,
             prefix += packageName;
         }
         if (domain.length() > 0) {
-            prefix.appendPath(domain);
+            appendPath(prefix, domain);
         }
 
         // pax extended means we don't put in a prefix field, and put a different
         // string in the basic name field.  We can also construct the full path name
         // out of the substrings we've now built.
         fullname = prefix;
-        fullname.appendPath(relpath);
+        appendPath(fullname, relpath);
 
         // ustar:
         //    [   0 : 100 ]; file name/path
@@ -654,7 +655,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
         // Now build the pax *header* templated on the ustar header
         memcpy(paxHeader, buf, 512);
 
-        String8 leaf = fullname.getPathLeaf();
+        String8 leaf = getPathLeaf(fullname);
         memset(paxHeader, 0, 100);                  // rewrite the name area
         snprintf(paxHeader, 100, "PaxHeader/%s", leaf.c_str());
         memset(paxHeader + 345, 0, 155);            // rewrite the prefix area

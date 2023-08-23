@@ -7,7 +7,9 @@
 #include "AaptUtil.h"
 #include "Main.h"
 #include "ResourceFilter.h"
+#include "Utils.h"
 
+#include <androidfw/PathUtils.h>
 #include <utils/misc.h>
 #include <utils/SortedVector.h>
 
@@ -96,7 +98,7 @@ static bool isHidden(const char *root, const char *path)
     char *matchedPattern = NULL;
 
     String8 fullPath(root);
-    fullPath.appendPath(path);
+    appendPath(fullPath, String8(path));
     FileType type = getFileType(fullPath);
 
     int plen = strlen(path);
@@ -508,7 +510,7 @@ String8 AaptFile::getPrintableSource() const
 {
     if (hasData()) {
         String8 name(mGroupEntry.toDirName(String8()));
-        name.appendPath(mPath);
+        appendPath(name, mPath);
         name.append(" #generated");
         return name;
     }
@@ -615,7 +617,7 @@ sp<AaptDir> AaptDir::makeDir(const String8& path)
     String8 remain = path;
 
     sp<AaptDir> subdir = this;
-    while (name = remain.walkPath(&remain), remain != "") {
+    while (name = walkPath(remain, &remain), remain != "") {
         subdir = subdir->makeDir(name);
     }
 
@@ -623,7 +625,7 @@ sp<AaptDir> AaptDir::makeDir(const String8& path)
     if (i >= 0) {
         return subdir->mDirs.valueAt(i);
     }
-    sp<AaptDir> dir = new AaptDir(name, subdir->mPath.appendPathCopy(name));
+    sp<AaptDir> dir = new AaptDir(name, appendPathCopy(subdir->mPath, name));
     subdir->mDirs.add(name, dir);
     return dir;
 }
@@ -645,7 +647,7 @@ status_t AaptDir::addLeafFile(const String8& leafName, const sp<AaptFile>& file,
     if (mFiles.indexOfKey(leafName) >= 0) {
         group = mFiles.valueFor(leafName);
     } else {
-        group = new AaptGroup(leafName, mPath.appendPathCopy(leafName));
+        group = new AaptGroup(leafName, appendPathCopy(mPath, leafName));
         mFiles.add(leafName, group);
     }
 
@@ -684,7 +686,7 @@ ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
             // Add fully qualified path for dependency purposes
             // if we're collecting them
             if (fullResPaths != NULL) {
-                fullResPaths->add(srcDir.appendPathCopy(name));
+                fullResPaths->add(appendPathCopy(srcDir, name));
             }
         }
         closedir(dir);
@@ -701,7 +703,7 @@ ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
         String8 pathName(srcDir);
         FileType type;
 
-        pathName.appendPath(fileNames[i].c_str());
+        appendPath(pathName, fileNames[i]);
         type = getFileType(pathName.c_str());
         if (type == kFileTypeDirectory) {
             sp<AaptDir> subdir;
@@ -709,7 +711,7 @@ ssize_t AaptDir::slurpFullTree(Bundle* bundle, const String8& srcDir,
             if (mDirs.indexOfKey(fileNames[i]) >= 0) {
                 subdir = mDirs.valueFor(fileNames[i]);
             } else {
-                subdir = new AaptDir(fileNames[i], mPath.appendPathCopy(fileNames[i]));
+                subdir = new AaptDir(fileNames[i], appendPathCopy(mPath, fileNames[i]));
                 notAdded = true;
             }
             ssize_t res = subdir->slurpFullTree(bundle, pathName, kind,
@@ -821,11 +823,11 @@ String8 AaptDir::getPrintableSource() const
 {
     if (mFiles.size() > 0) {
         // Arbitrarily pull the first file out of the list as the source dir.
-        return mFiles.valueAt(0)->getPrintableSource().getPathDir();
+        return getPathDir(mFiles.valueAt(0)->getPrintableSource());
     }
     if (mDirs.size() > 0) {
         // Or arbitrarily pull the first dir out of the list as the source dir.
-        return mDirs.valueAt(0)->getPrintableSource().getPathDir();
+        return getPathDir(mDirs.valueAt(0)->getPrintableSource());
     }
 
     // Should never hit this case, but to be safe...
@@ -908,8 +910,8 @@ sp<AaptFile> AaptAssets::addFile(
     sp<AaptFile> file;
     String8 root, remain(filePath), partialPath;
     while (remain.length() > 0) {
-        root = remain.walkPath(&remain);
-        partialPath.appendPath(root);
+        root = walkPath(remain, &remain);
+        appendPath(partialPath, root);
 
         const String8 rootStr(root);
 
@@ -924,7 +926,7 @@ sp<AaptFile> AaptAssets::addFile(
                     return NULL;
                 }
             }
-            file = new AaptFile(srcDir.appendPathCopy(filePath), entry, resType);
+            file = new AaptFile(appendPathCopy(srcDir, filePath), entry, resType);
             status_t res = group->addFile(file);
             if (res != NO_ERROR) {
                 return NULL;
@@ -981,7 +983,7 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
     if (bundle->getAndroidManifestFile() != NULL) {
         // place at root of zip.
         String8 srcFile(bundle->getAndroidManifestFile());
-        addFile(srcFile.getPathLeaf(), AaptGroupEntry(), srcFile.getPathDir(),
+        addFile(getPathLeaf(srcFile), AaptGroupEntry(), getPathDir(srcFile),
                 NULL, String8());
         totalCount++;
     }
@@ -1154,7 +1156,7 @@ ssize_t AaptAssets::slurpResourceTree(Bundle* bundle, const String8& srcDir)
         }
 
         String8 subdirName(srcDir);
-        subdirName.appendPath(entry->d_name);
+        appendPath(subdirName, entry->d_name);
 
         AaptGroupEntry group;
         String8 resType;
@@ -1239,16 +1241,16 @@ AaptAssets::slurpResourceZip(Bundle* /* bundle */, const char* filename)
 
         String8 entryName(entry->getFileName());
 
-        String8 dirName = entryName.getPathDir();
+        String8 dirName = getPathDir(entryName);
         sp<AaptDir> dir = dirName == "" ? this : makeDir(dirName);
 
         String8 resType;
         AaptGroupEntry kind;
 
         String8 remain;
-        if (entryName.walkPath(&remain) == kResourceDir) {
+        if (walkPath(entryName, &remain) == kResourceDir) {
             // these are the resources, pull their type out of the directory name
-            kind.initFromDirName(remain.walkPath().c_str(), &resType);
+            kind.initFromDirName(walkPath(remain).c_str(), &resType);
         } else {
             // these are untyped and don't have an AaptGroupEntry
         }
@@ -1258,10 +1260,10 @@ AaptAssets::slurpResourceZip(Bundle* /* bundle */, const char* filename)
         }
 
         // use the one from the zip file if they both exist.
-        dir->removeFile(entryName.getPathLeaf());
+        dir->removeFile(getPathLeaf(entryName));
 
         sp<AaptFile> file = new AaptFile(entryName, kind, resType);
-        status_t err = dir->addLeafFile(entryName.getPathLeaf(), file);
+        status_t err = dir->addLeafFile(getPathLeaf(entryName), file);
         if (err != NO_ERROR) {
             fprintf(stderr, "err=%s entryName=%s\n", strerror(err), entryName.c_str());
             count = err;
@@ -1374,7 +1376,7 @@ status_t AaptAssets::filter(Bundle* bundle)
                     // containing no entries.
                     continue;
                 }
-                if (file->getPath().getPathExtension() == ".xml") {
+                if (getPathExtension(file->getPath()) == ".xml") {
                     // We can't remove .xml files at this point, because when
                     // we parse them they may add identifier resources, so
                     // removing them can cause our resource identifiers to
@@ -1411,7 +1413,7 @@ status_t AaptAssets::filter(Bundle* bundle)
                     // containing no entries.
                     continue;
                 }
-                if (file->getPath().getPathExtension() == ".xml") {
+                if (getPathExtension(file->getPath()) == ".xml") {
                     // We can't remove .xml files at this point, because when
                     // we parse them they may add identifier resources, so
                     // removing them can cause our resource identifiers to

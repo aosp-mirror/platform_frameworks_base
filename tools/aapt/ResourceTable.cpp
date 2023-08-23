@@ -14,6 +14,7 @@
 #include "Utils.h"
 
 #include <algorithm>
+#include <androidfw/PathUtils.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 #include <utils/TypeHelpers.h>
@@ -83,7 +84,7 @@ status_t compileXmlFile(const Bundle* bundle,
         sp<AaptDir> resDir = assets->getDirs().valueFor(String8("res"));
         sp<AaptDir> dir = resDir->getDirs().valueFor(target->getGroupEntry().toDirName(
                 target->getResourceType()));
-        dir->removeFile(target->getPath().getPathLeaf());
+        dir->removeFile(getPathLeaf(target->getPath()));
         return NO_ERROR;
     }
 

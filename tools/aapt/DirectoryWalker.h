@@ -7,6 +7,7 @@
 #ifndef DIRECTORYWALKER_H
 #define DIRECTORYWALKER_H
 
+#include <androidfw/PathUtils.h>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/param.h>
@@ -77,7 +78,7 @@ public:
 
         mEntry = *entryPtr;
         // Get stats
-        String8 fullPath = mBasePath.appendPathCopy(mEntry.d_name);
+        String8 fullPath = appendPathCopy(mBasePath, mEntry.d_name);
         stat(fullPath.c_str(),&mStats);
         return &mEntry;
     };
