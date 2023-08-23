@@ -18,6 +18,7 @@
 #define LOG_TAG "BootAnimation"
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
+#include <filesystem>
 #include <vector>
 
 #include <stdint.h>
@@ -1306,10 +1307,10 @@ bool BootAnimation::preloadZip(Animation& animation) {
             continue;
         }
 
-        const String8 entryName(name);
-        const String8 path(entryName.getPathDir());
-        const String8 leaf(entryName.getPathLeaf());
-        if (leaf.size() > 0) {
+        const std::filesystem::path entryName(name);
+        const std::filesystem::path path(entryName.parent_path());
+        const std::filesystem::path leaf(entryName.filename());
+        if (!leaf.empty()) {
             if (entryName == CLOCK_FONT_ZIP_NAME) {
                 FileMap* map = zip->createEntryFileMap(entry);
                 if (map) {
@@ -1327,7 +1328,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
             }
 
             for (size_t j = 0; j < pcount; j++) {
-                if (path == animation.parts[j].path) {
+                if (path.string() == animation.parts[j].path.c_str()) {
                     uint16_t method;
                     // supports only stored png files
                     if (zip->getEntryInfo(entry, &method, nullptr, nullptr, nullptr, nullptr, nullptr)) {
@@ -1344,7 +1345,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
                                                         map->getDataLength());
                                 } else {
                                     Animation::Frame frame;
-                                    frame.name = leaf;
+                                    frame.name = leaf.c_str();
                                     frame.map = map;
                                     frame.trimWidth = animation.width;
                                     frame.trimHeight = animation.height;
