@@ -725,7 +725,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     }
 
     private String getCallingRulePusherPackageName(int callingUid) {
-        // Obtain the system apps that are whitelisted in config_integrityRuleProviderPackages.
+        // Obtain the system apps that are allowlisted in config_integrityRuleProviderPackages.
         List<String> allowedRuleProviders = getAllowedRuleProviderSystemApps();
         if (DEBUG_INTEGRITY_COMPONENT) {
             Slog.i(
