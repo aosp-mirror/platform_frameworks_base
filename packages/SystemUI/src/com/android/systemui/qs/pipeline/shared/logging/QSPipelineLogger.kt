@@ -20,7 +20,9 @@ import android.annotation.UserIdInt
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.qs.pipeline.dagger.QSAutoAddLog
+import com.android.systemui.qs.pipeline.dagger.QSRestoreLog
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
+import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
@@ -34,11 +36,13 @@ class QSPipelineLogger
 constructor(
     @QSTileListLog private val tileListLogBuffer: LogBuffer,
     @QSAutoAddLog private val tileAutoAddLogBuffer: LogBuffer,
+    @QSRestoreLog private val restoreLogBuffer: LogBuffer,
 ) {
 
     companion object {
         const val TILE_LIST_TAG = "QSTileListLog"
         const val AUTO_ADD_TAG = "QSAutoAddableLog"
+        const val RESTORE_TAG = "QSRestoreLog"
     }
 
     /**
@@ -161,6 +165,23 @@ constructor(
                 str1 = spec.toString()
             },
             { "Tile $str1 auto removed for user $int1" }
+        )
+    }
+
+    fun logSettingsRestored(restoreData: RestoreData) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = restoreData.userId
+                str1 = restoreData.restoredTiles.toString()
+                str2 = restoreData.restoredAutoAddedTiles.toString()
+            },
+            {
+                "Restored settings data for user $int1\n" +
+                    "\tRestored tiles: $str1\n" +
+                    "\tRestored auto added tiles: $str2"
+            }
         )
     }
 

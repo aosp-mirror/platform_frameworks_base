@@ -22,6 +22,8 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepositoryImpl
+import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredBroadcastRepository
+import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecSettingsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
@@ -56,6 +58,11 @@ abstract class QSPipelineModule {
     @ClassKey(QSPipelineCoreStartable::class)
     abstract fun provideCoreStartable(startable: QSPipelineCoreStartable): CoreStartable
 
+    @Binds
+    abstract fun provideQSSettingsRestoredRepository(
+            impl: QSSettingsRestoredBroadcastRepository
+    ): QSSettingsRestoredRepository
+
     companion object {
         /**
          * Provides a logging buffer for all logs related to the new Quick Settings pipeline to log
@@ -66,6 +73,13 @@ abstract class QSPipelineModule {
         @QSTileListLog
         fun provideQSTileListLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create(QSPipelineLogger.TILE_LIST_TAG, maxSize = 700, systrace = false)
+        }
+
+        @Provides
+        @SysUISingleton
+        @QSRestoreLog
+        fun providesQSRestoreLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create(QSPipelineLogger.RESTORE_TAG, maxSize = 50, systrace = false)
         }
     }
 }

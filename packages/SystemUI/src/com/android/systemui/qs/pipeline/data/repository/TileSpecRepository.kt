@@ -220,9 +220,7 @@ constructor(
 
     private fun parseTileSpecs(tilesFromSettings: String, user: Int): List<TileSpec> {
         val fromSettings =
-            tilesFromSettings.split(DELIMITER).map(TileSpec::create).filter {
-                it != TileSpec.Invalid
-            }
+            tilesFromSettings.toTilesList()
         return if (fromSettings.isNotEmpty()) {
             fromSettings.also { logger.logParsedTiles(it, false, user) }
         } else {
@@ -235,6 +233,8 @@ constructor(
 
     companion object {
         private const val SETTING = Settings.Secure.QS_TILES
-        private const val DELIMITER = ","
+        private const val DELIMITER = TilesSettingConverter.DELIMITER
+
+        private fun String.toTilesList() = TilesSettingConverter.toTilesList(this)
     }
 }

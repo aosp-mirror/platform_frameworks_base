@@ -120,16 +120,14 @@ constructor(
 
     private suspend fun load(userId: Int): Set<TileSpec> {
         return withContext(bgDispatcher) {
-            (secureSettings.getStringForUser(SETTING, userId) ?: "")
-                .split(",")
-                .map(TileSpec::create)
-                .filter { it !is TileSpec.Invalid }
-                .toSet()
+            (secureSettings.getStringForUser(SETTING, userId) ?: "").toTilesSet()
         }
     }
 
     companion object {
         private const val SETTING = Settings.Secure.QS_AUTO_ADDED_TILES
         private const val DELIMITER = ","
+
+        private fun String.toTilesSet() = TilesSettingConverter.toTilesSet(this)
     }
 }
