@@ -275,11 +275,17 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                         + " - DisplayContent not found.");
                 return null;
             }
+            final SurfaceControl inputOverlay = dc.getInputOverlayLayer();
+            if (inputOverlay == null) {
+                Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                        + " - Input overlay layer is not initialized.");
+                return null;
+            }
             return mService.makeSurfaceBuilder(dc.getSession())
                     .setContainerLayer()
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")
-                    .setParent(dc.getSurfaceControl())
+                    .setParent(inputOverlay)
                     .build();
         }
     }
