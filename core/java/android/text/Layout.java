@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -3407,7 +3408,7 @@ public abstract class Layout {
          *
          * The specified amount of pixels will be added to each line.
          *
-         * The default value is {@code 0}.
+         * The default value is {@code 0}. The negative value is allowed for squeezing lines.
          *
          * @param amount an amount of pixels to be added to line height.
          * @return this builder instance.
@@ -3435,7 +3436,7 @@ public abstract class Layout {
          * @see StaticLayout.Builder#setLineSpacing(float, float)
          */
         @NonNull
-        public Builder setLineSpacingMultiplier(float multiplier) {
+        public Builder setLineSpacingMultiplier(@FloatRange(from = 0) float multiplier) {
             mSpacingMult = multiplier;
             return this;
         }
@@ -3450,11 +3451,11 @@ public abstract class Layout {
          *
          * @param includeFontPadding true for including extra space into first and last line.
          * @return this builder instance.
-         * @see Layout#isIncludeFontPadding()
+         * @see Layout#isFontPaddingIncluded()
          * @see StaticLayout.Builder#setIncludePad(boolean)
          */
         @NonNull
-        public Builder setIncludeFontPadding(boolean includeFontPadding) {
+        public Builder setFontPaddingIncluded(boolean includeFontPadding) {
             mIncludePad = includeFontPadding;
             return this;
         }
@@ -3853,10 +3854,10 @@ public abstract class Layout {
      * Returns true if this layout is created with increased line height.
      *
      * @return true if the layout is created with increased line height.
-     * @see Layout.Builder#setIncludeFontPadding(boolean)
+     * @see Layout.Builder#setFontPaddingIncluded(boolean)
      * @see StaticLayout.Builder#setIncludePad(boolean)
      */
-    public final boolean isIncludeFontPadding() {
+    public final boolean isFontPaddingIncluded() {
         return mIncludePad;
     }
 
@@ -3979,7 +3980,7 @@ public abstract class Layout {
     @Nullable
     public final int[] getRightIndents() {
         if (mRightIndents == null) {
-            return mLeftIndents;
+            return null;
         }
         int[] newArray = new int[mRightIndents.length];
         System.arraycopy(mRightIndents, 0, newArray, 0, newArray.length);
