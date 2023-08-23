@@ -88,6 +88,7 @@ internal object StatementUtils {
         } catch (e: Exception) {
             return Result.Failure(e)
         }
+        checkNotNull(signingInfo)
         return if (signingInfo.hasMultipleSigners()) {
             signingInfo.apkContentsSigners
         } else {

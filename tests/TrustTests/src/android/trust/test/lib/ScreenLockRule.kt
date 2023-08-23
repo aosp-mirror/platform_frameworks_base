@@ -36,7 +36,7 @@ import org.junit.runners.model.Statement
 class ScreenLockRule : TestRule {
     private val context: Context = getApplicationContext()
     private val uiDevice = UiDevice.getInstance(getInstrumentation())
-    private val windowManager = WindowManagerGlobal.getWindowManagerService()
+    private val windowManager = checkNotNull(WindowManagerGlobal.getWindowManagerService())
     private val lockPatternUtils = LockPatternUtils(context)
     private var instantLockSavedValue = false
 
