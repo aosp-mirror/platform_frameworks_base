@@ -19,6 +19,7 @@ java_defaults {
     // Add java_aconfig_libraries to here to add them to the core framework
     srcs: [
         ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
+        ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
     ],
 }
 
@@ -30,6 +31,7 @@ java_defaults {
     libs: ["fake_device_config"],
 }
 
+// Camera
 aconfig_declarations {
     name: "com.android.hardware.camera2-aconfig",
     package: "com.android.hardware.camera2",
@@ -39,5 +41,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.hardware.camera2-aconfig-java",
     aconfig_declarations: "com.android.hardware.camera2-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Window
+aconfig_declarations {
+    name: "com.android.window.flags.window-aconfig",
+    package: "com.android.window.flags",
+    srcs: ["core/java/android/window/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.window.flags.window-aconfig-java",
+    aconfig_declarations: "com.android.window.flags.window-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
