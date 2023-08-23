@@ -388,7 +388,10 @@ constructor(
         })
         ssView.setFalsingManager(falsingManager)
         ssView.setKeyguardBypassEnabled(bypassController.bypassEnabled)
-        return (ssView as View).apply { addOnAttachStateChangeListener(stateChangeListener) }
+        return (ssView as View).apply {
+            setTag(R.id.tag_smartspace_view, Any())
+            addOnAttachStateChangeListener(stateChangeListener)
+        }
     }
 
     private fun connectSession() {
@@ -448,12 +451,6 @@ constructor(
      */
     fun requestSmartspaceUpdate() {
         session?.requestSmartspaceUpdate()
-    }
-
-    fun removeViewsFromParent(viewGroup: ViewGroup) {
-        smartspaceViews.toList().forEach {
-            viewGroup.removeView(it as View)
-        }
     }
 
     /**
@@ -596,3 +593,4 @@ constructor(
         }
     }
 }
+
