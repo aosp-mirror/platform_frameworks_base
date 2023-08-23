@@ -85,7 +85,7 @@ class BubblePopupDrawable(private val config: Config) : Drawable() {
         canvas.drawPath(path, paint)
     }
 
-    override fun onBoundsChange(bounds: Rect?) {
+    override fun onBoundsChange(bounds: Rect) {
         requestPathUpdate()
     }
 
