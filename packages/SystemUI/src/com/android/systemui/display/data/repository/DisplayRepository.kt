@@ -22,6 +22,7 @@ import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_ADDED
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
 import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
 import android.os.Handler
+import android.util.Log
 import android.view.Display
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -41,6 +42,13 @@ import kotlinx.coroutines.flow.stateIn
 interface DisplayRepository {
     /** Provides a nullable set of displays. */
     val displays: Flow<Set<Display>>
+
+    /**
+     * Pending display id that can be enabled/disabled.
+     *
+     * When `null`, it means there is no pending display waiting to be enabled.
+     */
+    val pendingDisplay: Flow<Int?>
 }
 
 @SysUISingleton
@@ -85,8 +93,59 @@ constructor(
                 initialValue = getDisplays()
             )
 
-    fun getDisplays(): Set<Display> =
+    private fun getDisplays(): Set<Display> =
         traceSection("DisplayRepository#getDisplays()") {
             displayManager.displays?.toSet() ?: emptySet()
         }
+
+    override val pendingDisplay: Flow<Int?> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DisplayConnectionListener {
+                        private val pendingIds = mutableSetOf<Int>()
+                        override fun onDisplayConnected(id: Int) {
+                            pendingIds += id
+                            trySend(id)
+                        }
+
+                        override fun onDisplayDisconnected(id: Int) {
+                            if (id in pendingIds) {
+                                pendingIds -= id
+                                trySend(null)
+                            } else {
+                                Log.e(
+                                    TAG,
+                                    "onDisplayDisconnected received for unknown display. " +
+                                        "id=$id, knownIds=$pendingIds"
+                                )
+                            }
+                        }
+                    }
+                displayManager.registerDisplayListener(
+                    callback,
+                    backgroundHandler,
+                    DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                )
+                awaitClose { displayManager.unregisterDisplayListener(callback) }
+            }
+            .flowOn(backgroundCoroutineDispatcher)
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = null
+            )
+
+    private companion object {
+        const val TAG = "DisplayRepository"
+    }
+}
+
+/** Used to provide default implementations for all methods. */
+private interface DisplayConnectionListener : DisplayListener {
+
+    override fun onDisplayConnected(id: Int) {}
+    override fun onDisplayDisconnected(id: Int) {}
+    override fun onDisplayAdded(id: Int) {}
+    override fun onDisplayRemoved(id: Int) {}
+    override fun onDisplayChanged(id: Int) {}
 }

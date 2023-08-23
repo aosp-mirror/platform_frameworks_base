@@ -20,6 +20,7 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State.CONNECTED
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.privacy.PrivacyItemController
@@ -105,5 +106,7 @@ class SystemEventCoordinatorTest : SysuiTestCase() {
         suspend fun emit(value: ConnectedDisplayInteractor.State) = flow.emit(value)
         override val connectedDisplayState: Flow<ConnectedDisplayInteractor.State>
             get() = flow
+        override val pendingDisplay: Flow<PendingDisplay?>
+            get() = MutableSharedFlow<PendingDisplay>()
     }
 }

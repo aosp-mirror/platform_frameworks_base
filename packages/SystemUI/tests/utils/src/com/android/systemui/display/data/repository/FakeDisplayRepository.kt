@@ -33,10 +33,17 @@ fun display(type: Int, flags: Int = 0, id: Int = 0): Display {
 /** Fake [DisplayRepository] implementation for testing. */
 class FakeDisplayRepository : DisplayRepository {
     private val flow = MutableSharedFlow<Set<Display>>()
+    private val pendingDisplayFlow = MutableSharedFlow<Int?>()
 
     /** Emits [value] as [displays] flow value. */
     suspend fun emit(value: Set<Display>) = flow.emit(value)
 
+    /** Emits [value] as [pendingDisplay] flow value. */
+    suspend fun emit(value: Int?) = pendingDisplayFlow.emit(value)
+
     override val displays: Flow<Set<Display>>
         get() = flow
+
+    override val pendingDisplay: Flow<Int?>
+        get() = pendingDisplayFlow
 }

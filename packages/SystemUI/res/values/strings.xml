@@ -3184,6 +3184,12 @@
     <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
 
+    <!--- Title of the dialog appearing when an external display is connected, asking whether to start mirroring [CHAR LIMIT=NONE]-->
+    <string name="connected_display_dialog_start_mirroring">Mirror to external display?</string>
+
+    <!--- Label of the "enable display" button of the dialog appearing when an external display is connected [CHAR LIMIT=NONE]-->
+    <string name="enable_display">Enable display</string>
+
     <!-- Title of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=30] -->
     <string name="privacy_dialog_title">Microphone &amp; Camera</string>
     <!-- Subtitle of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=NONE] -->
