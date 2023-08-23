@@ -5257,9 +5257,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public int getUserMinAspectRatio(@NonNull String packageName, int userId) {
             final Computer snapshot = snapshotComputer();
             final int callingUid = Binder.getCallingUid();
-            snapshot.enforceCrossUserPermission(
-                    callingUid, userId, false /* requireFullPermission */,
-                    false /* checkShell */, "getUserMinAspectRatio");
             final PackageStateInternal packageState = snapshot
                     .getPackageStateForInstalledAndFiltered(packageName, callingUid, userId);
             return packageState == null ? USER_MIN_ASPECT_RATIO_UNSET
