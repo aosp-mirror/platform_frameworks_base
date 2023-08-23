@@ -311,7 +311,7 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         wct.setWindowingMode(task.token, WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW)
-        wct.setBounds(task.token, null)
+        wct.setBounds(task.token, Rect())
         wct.setDensityDpi(task.token, getDefaultDensityDpi())
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
