@@ -221,7 +221,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -489,7 +488,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private View mReportRejectedTouch;
 
     private final NotificationGutsManager mGutsManager;
-    private final NotificationLogger mNotificationLogger;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
@@ -694,7 +692,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
             NotificationGutsManager notificationGutsManager,
-            NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             ShadeExpansionStateManager shadeExpansionStateManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -803,7 +800,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mGutsManager = notificationGutsManager;
-        mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mKeyguardViewMediator = keyguardViewMediator;
@@ -2176,8 +2172,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
             onVisibleToUser();
-            mNotificationLogger.startNotificationLogging();
-
             if (!mIsBackCallbackRegistered) {
                 ViewRootImpl viewRootImpl = getViewRootImpl();
                 if (viewRootImpl != null) {
@@ -2192,7 +2186,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 if (DEBUG) Log.d(TAG, "is now VISIBLE to user, BUT callback ALREADY unregistered");
             }
         } else {
-            mNotificationLogger.stopNotificationLogging();
             onInvisibleToUser();
 
             if (mIsBackCallbackRegistered) {

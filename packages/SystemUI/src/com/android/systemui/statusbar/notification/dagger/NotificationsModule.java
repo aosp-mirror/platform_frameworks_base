@@ -19,12 +19,13 @@ package com.android.systemui.statusbar.notification.dagger;
 import android.content.Context;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.shade.ShadeEventsModule;
-import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -76,10 +77,13 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 import java.util.concurrent.Executor;
 
@@ -125,7 +129,8 @@ public interface NotificationsModule {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
-            ShadeExpansionStateManager shadeExpansionStateManager,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
+            JavaAdapter javaAdapter,
             NotificationLogger.ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         return new NotificationLogger(
@@ -135,10 +140,17 @@ public interface NotificationsModule {
                 visibilityProvider,
                 notifPipeline,
                 statusBarStateController,
-                shadeExpansionStateManager,
+                windowRootViewVisibilityInteractor,
+                javaAdapter,
                 expansionStateLogger,
                 notificationPanelLogger);
     }
+
+    /** Binds {@link NotificationLogger} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationLogger.class)
+    CoreStartable bindsNotificationLogger(NotificationLogger notificationLogger);
 
     /** Provides an instance of {@link NotificationPanelLogger} */
     @SysUISingleton

@@ -159,7 +159,6 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -168,10 +167,7 @@ import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
@@ -228,7 +224,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private NotificationStackScrollLayoutController mStackScrollerController;
-    @Mock private NotificationListContainer mNotificationListContainer;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private ShadeLogger mShadeLogger;
@@ -255,7 +250,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private StatusBarSignalPolicy mStatusBarSignalPolicy;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
@@ -389,18 +383,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
 
         mMetricsLogger = new FakeMetricsLogger();
-        NotificationLogger notificationLogger = new NotificationLogger(
-                mNotificationListener,
-                mUiBgExecutor,
-                mNotifLiveDataStore,
-                mVisibilityProvider,
-                mock(NotifPipeline.class),
-                mStatusBarStateController,
-                mShadeExpansionStateManager,
-                mExpansionStateLogger,
-                new NotificationPanelLoggerFake()
-        );
-        notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
 
@@ -492,7 +474,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,
                 mNotificationGutsManager,
-                notificationLogger,
                 mNotificationInterruptStateProvider,
                 new ShadeExpansionStateManager(),
                 mKeyguardViewMediator,
@@ -611,7 +592,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "sysui:GestureWakeLock");
         mCentralSurfaces.startKeyguard();
         mInitController.executePostInitTasks();
-        notificationLogger.setUpWithContainer(mNotificationListContainer);
         mCentralSurfaces.registerCallbacks();
     }
 
