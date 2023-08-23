@@ -94,7 +94,7 @@ constructor(
     val startingDisappearAnimation: Flow<Runnable> =
         repository.primaryBouncerStartingDisappearAnimation.filterNotNull()
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
-    val keyguardPosition: Flow<Float> = repository.keyguardPosition
+    val keyguardPosition: Flow<Float> = repository.keyguardPosition.filterNotNull()
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
