@@ -911,6 +911,70 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetPersistentLetterboxPositionForHorizontalReachability(PrintWriter pw)
+            throws RemoteException {
+        @LetterboxHorizontalReachabilityPosition final int position;
+        try {
+            String arg = getNextArgRequired();
+            switch (arg) {
+                case "left":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
+                    break;
+                case "center":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
+                    break;
+                case "right":
+                    position = LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: 'left', 'center' or 'right' are expected as an argument");
+                    return -1;
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: 'left', 'center' or 'right' are expected as an argument" + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setPersistentLetterboxPositionForHorizontalReachability(
+                    false /* IsInBookMode */, position);
+        }
+        return 0;
+    }
+
+    private int runSetPersistentLetterboxPositionForVerticalReachability(PrintWriter pw)
+            throws RemoteException {
+        @LetterboxVerticalReachabilityPosition final int position;
+        try {
+            String arg = getNextArgRequired();
+            switch (arg) {
+                case "top":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
+                    break;
+                case "center":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+                    break;
+                case "bottom":
+                    position = LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
+                    break;
+                default:
+                    getErrPrintWriter().println(
+                            "Error: 'top', 'center' or 'bottom' are expected as an argument");
+                    return -1;
+            }
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: 'top', 'center' or 'bottom' are expected as an argument" + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setPersistentLetterboxPositionForVerticalReachability(
+                    false /* forTabletopMode */, position);
+        }
+        return 0;
+    }
+
     private int runSetBooleanFlag(PrintWriter pw, Consumer<Boolean> setter)
             throws RemoteException {
         String arg = getNextArg();
@@ -993,6 +1057,12 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 case "--defaultPositionForVerticalReachability":
                     runSetLetterboxDefaultPositionForVerticalReachability(pw);
+                    break;
+                case "--persistentPositionForHorizontalReachability":
+                    runSetPersistentLetterboxPositionForHorizontalReachability(pw);
+                    break;
+                case "--persistentPositionForVerticalReachability":
+                    runSetPersistentLetterboxPositionForVerticalReachability(pw);
                     break;
                 case "--isEducationEnabled":
                     runSetBooleanFlag(pw, mLetterboxConfiguration::setIsEducationEnabled);
@@ -1079,6 +1149,14 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "defaultPositionForVerticalReachability":
                         mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
+                        break;
+                    case "persistentPositionForHorizontalReachability":
+                        mLetterboxConfiguration
+                                .resetPersistentLetterboxPositionForHorizontalReachability();
+                        break;
+                    case "persistentPositionForVerticalReachability":
+                        mLetterboxConfiguration
+                                .resetPersistentLetterboxPositionForVerticalReachability();
                         break;
                     case "isEducationEnabled":
                         mLetterboxConfiguration.resetIsEducationEnabled();
@@ -1206,6 +1284,8 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetEnabledAutomaticReachabilityInBookMode();
             mLetterboxConfiguration.resetDefaultPositionForHorizontalReachability();
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
+            mLetterboxConfiguration.resetPersistentLetterboxPositionForHorizontalReachability();
+            mLetterboxConfiguration.resetPersistentLetterboxPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
             mLetterboxConfiguration.resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
@@ -1233,6 +1313,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Vertical position multiplier (tabletop mode): "
                     + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier(
                             true /* isInTabletopMode */));
+            pw.println("Horizontal position multiplier for reachability: "
+                    + mLetterboxConfiguration.getHorizontalMultiplierForReachability(
+                            false /* isInBookMode */));
+            pw.println("Vertical position multiplier for reachability: "
+                    + mLetterboxConfiguration.getVerticalMultiplierForReachability(
+                            false /* isInTabletopMode */));
             pw.println("Aspect ratio: "
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
             pw.println("Default min aspect ratio for unresizable apps: "
@@ -1472,6 +1558,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      --defaultPositionForVerticalReachability [top|center|bottom]");
         pw.println("        Default position of app window when vertical reachability is.");
         pw.println("        enabled.");
+        pw.println("      --persistentPositionForHorizontalReachability [left|center|right]");
+        pw.println("        Persistent position of app window when horizontal reachability is.");
+        pw.println("        enabled.");
+        pw.println("      --persistentPositionForVerticalReachability [top|center|bottom]");
+        pw.println("        Persistent position of app window when vertical reachability is.");
+        pw.println("        enabled.");
         pw.println("      --isEducationEnabled [true|1|false|0]");
         pw.println("        Whether education is allowed for letterboxed fullscreen apps.");
         pw.println("      --isSplitScreenAspectRatioForUnresizableAppsEnabled [true|1|false|0]");
@@ -1493,8 +1585,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
         pw.println("      |isHorizontalReachabilityEnabled|isVerticalReachabilityEnabled");
-        pw.println("      |isEducationEnabled||defaultPositionMultiplierForHorizontalReachability");
+        pw.println("      |isEducationEnabled|defaultPositionMultiplierForHorizontalReachability");
         pw.println("      |isTranslucentLetterboxingEnabled|isUserAppAspectRatioSettingsEnabled");
+        pw.println("      |persistentPositionMultiplierForHorizontalReachability");
+        pw.println("      |persistentPositionMultiplierForVerticalReachability");
         pw.println("      |defaultPositionMultiplierForVerticalReachability]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
