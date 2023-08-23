@@ -88,12 +88,19 @@ class PinBouncerViewModel(
         interactor.resetMessage()
     }
 
+    /** Notifies that the user has placed down a pointer. */
+    fun onDown() {
+        interactor.onDown()
+    }
+
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
         val pinInput = mutablePinInput.value
         if (pinInput.isEmpty()) {
             interactor.clearMessage()
         }
+
+        interactor.onIntentionalUserInput()
 
         mutablePinInput.value = pinInput.append(input)
         tryAuthenticate(useAutoConfirm = true)
@@ -148,8 +155,10 @@ class PinBouncerViewModel(
 enum class ActionButtonAppearance {
     /** Button must not be shown. */
     Hidden,
+
     /** Button is shown, but with no background to make it less prominent. */
     Subtle,
+
     /** Button is shown. */
     Shown,
 }

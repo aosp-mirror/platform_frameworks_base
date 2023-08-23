@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ObservableTransitionState as SceneTransitionObservableTransitionState
 import com.android.compose.animation.scene.SceneKey as SceneTransitionSceneKey
@@ -82,7 +87,18 @@ fun SceneContainer(
         onChangeScene = viewModel::onSceneChanged,
         transitions = SceneContainerTransitions,
         state = state,
-        modifier = modifier.fillMaxSize().motionEventSpy { viewModel.onUserInput() },
+        modifier =
+            modifier
+                .fillMaxSize()
+                .motionEventSpy { event -> viewModel.onMotionEvent(event) }
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            awaitPointerEvent(PointerEventPass.Final)
+                            viewModel.onMotionEventComplete()
+                        }
+                    }
+                }
     ) {
         sceneByKey.forEach { (sceneKey, composableScene) ->
             scene(

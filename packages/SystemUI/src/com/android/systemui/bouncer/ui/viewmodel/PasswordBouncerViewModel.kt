@@ -34,6 +34,7 @@ class PasswordBouncerViewModel(
     ) {
 
     private val _password = MutableStateFlow("")
+
     /** The password entered so far. */
     val password: StateFlow<String> = _password.asStateFlow()
 
@@ -46,6 +47,10 @@ class PasswordBouncerViewModel(
     fun onPasswordInputChanged(password: String) {
         if (this.password.value.isEmpty() && password.isNotEmpty()) {
             interactor.clearMessage()
+        }
+
+        if (password.isNotEmpty()) {
+            interactor.onIntentionalUserInput()
         }
 
         _password.value = password

@@ -27,6 +27,9 @@ import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -97,6 +100,9 @@ class SceneTestUtils(
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
     private val context = test.context
+
+    private val falsingCollectorFake: FalsingCollector by lazy { FalsingCollectorFake() }
+    private var falsingInteractor: FalsingInteractor? = null
 
     fun fakeSceneContainerRepository(
         containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
@@ -175,6 +181,7 @@ class SceneTestUtils(
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             featureFlags = featureFlags,
+            falsingInteractor = falsingInteractor(),
         )
     }
 
@@ -189,6 +196,14 @@ class SceneTestUtils(
             authenticationInteractor = authenticationInteractor,
             featureFlags = featureFlags,
         )
+    }
+
+    fun falsingInteractor(collector: FalsingCollector = falsingCollector()): FalsingInteractor {
+        return falsingInteractor ?: FalsingInteractor(collector).also { falsingInteractor = it }
+    }
+
+    fun falsingCollector(): FalsingCollector {
+        return falsingCollectorFake
     }
 
     private fun applicationScope(): CoroutineScope {

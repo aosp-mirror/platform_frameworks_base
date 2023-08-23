@@ -21,6 +21,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -199,33 +201,39 @@ internal fun PatternBouncer(
             .onSizeChanged { containerSize = it }
             .thenIf(isInputEnabled) {
                 Modifier.pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { start ->
-                            inputPosition = start
-                            viewModel.onDragStart()
-                        },
-                        onDragEnd = {
-                            inputPosition = null
-                            if (isAnimationEnabled) {
-                                lineFadeOutAnimatables.values.forEach { animatable ->
-                                    // Launch using the longer-lived scope because we want these
-                                    // animations to proceed to completion even if the surrounding
-                                    // scope is canceled.
-                                    scope.launch { animatable.animateTo(1f) }
-                                }
-                            }
-                            viewModel.onDragEnd()
-                        },
-                    ) { change, _ ->
-                        inputPosition = change.position
-                        viewModel.onDrag(
-                            xPx = change.position.x,
-                            yPx = change.position.y,
-                            containerSizePx = containerSize.width,
-                            verticalOffsetPx = verticalOffset,
-                        )
+                        awaitEachGesture {
+                            awaitFirstDown()
+                            viewModel.onDown()
+                        }
                     }
-                }
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { start ->
+                                inputPosition = start
+                                viewModel.onDragStart()
+                            },
+                            onDragEnd = {
+                                inputPosition = null
+                                if (isAnimationEnabled) {
+                                    lineFadeOutAnimatables.values.forEach { animatable ->
+                                        // Launch using the longer-lived scope because we want these
+                                        // animations to proceed to completion even if the
+                                        // surrounding scope is canceled.
+                                        scope.launch { animatable.animateTo(1f) }
+                                    }
+                                }
+                                viewModel.onDragEnd()
+                            },
+                        ) { change, _ ->
+                            inputPosition = change.position
+                            viewModel.onDrag(
+                                xPx = change.position.x,
+                                yPx = change.position.y,
+                                containerSizePx = containerSize.width,
+                                verticalOffsetPx = verticalOffset,
+                            )
+                        }
+                    }
             }
     ) {
         if (isAnimationEnabled) {

@@ -99,7 +99,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         )
     private val sceneContainerViewModel =
         SceneContainerViewModel(
-                interactor = sceneInteractor,
+                sceneInteractor = sceneInteractor,
+                falsingInteractor = utils.falsingInteractor(),
             )
             .apply { setTransitionState(transitionState) }
 
@@ -151,6 +152,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sysUiState = sysUiState,
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
+                falsingCollector = utils.falsingCollector(),
             )
         startable.start()
 

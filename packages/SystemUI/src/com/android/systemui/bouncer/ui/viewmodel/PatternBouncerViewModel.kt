@@ -46,10 +46,12 @@ class PatternBouncerViewModel(
 
     /** The number of columns in the dot grid. */
     val columnCount = 3
+
     /** The number of rows in the dot grid. */
     val rowCount = 3
 
     private val _selectedDots = MutableStateFlow<LinkedHashSet<PatternDotViewModel>>(linkedSetOf())
+
     /** The dots that were selected by the user, in the order of selection. */
     val selectedDots: StateFlow<List<PatternDotViewModel>> =
         _selectedDots
@@ -61,10 +63,12 @@ class PatternBouncerViewModel(
             )
 
     private val _currentDot = MutableStateFlow<PatternDotViewModel?>(null)
+
     /** The most-recently selected dot that the user selected. */
     val currentDot: StateFlow<PatternDotViewModel?> = _currentDot.asStateFlow()
 
     private val _dots = MutableStateFlow(defaultDots())
+
     /** All dots on the grid. */
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
 
@@ -74,6 +78,11 @@ class PatternBouncerViewModel(
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
         interactor.resetMessage()
+    }
+
+    /** Notifies that the user has placed down a pointer, not necessarily dragging just yet. */
+    fun onDown() {
+        interactor.onDown()
     }
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
@@ -124,11 +133,13 @@ class PatternBouncerViewModel(
                             dot =
                                 PatternDotViewModel(
                                     x =
-                                        if (hitDot.x > dot.x) dot.x + 1
-                                        else if (hitDot.x < dot.x) dot.x - 1 else dot.x,
+                                        if (hitDot.x > dot.x) {
+                                            dot.x + 1
+                                        } else if (hitDot.x < dot.x) dot.x - 1 else dot.x,
                                     y =
-                                        if (hitDot.y > dot.y) dot.y + 1
-                                        else if (hitDot.y < dot.y) dot.y - 1 else dot.y,
+                                        if (hitDot.y > dot.y) {
+                                            dot.y + 1
+                                        } else if (hitDot.y < dot.y) dot.y - 1 else dot.y,
                                 )
                         }
                     }
@@ -148,6 +159,12 @@ class PatternBouncerViewModel(
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
         val pattern = _selectedDots.value.map { it.toCoordinate() }
+
+        if (pattern.size == 1) {
+            // Single dot patterns are treated as erroneous/false taps:
+            interactor.onFalseUserInput()
+        }
+
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
