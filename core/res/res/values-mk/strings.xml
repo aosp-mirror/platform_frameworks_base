@@ -296,7 +296,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Безбеден режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Систем Android"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Префрли на личен профил"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Префрлете се на личен профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Префрли се на работен профил"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Префрлете се на личната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="managed_profile_app_label" msgid="367401088383965725">"Префрлете се на работната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -643,6 +643,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Отпечатокот не е препознаен"</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Не се препознава ликот. Користете отпечаток."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отпечатокот е проверен"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Лицето е проверено"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Лицето е проверено, притиснете го копчето „Потврди“"</string>
