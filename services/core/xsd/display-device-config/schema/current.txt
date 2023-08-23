@@ -17,8 +17,10 @@ package com.android.server.display.config {
     ctor public BlockingZoneConfig();
     method public final com.android.server.display.config.BlockingZoneThreshold getBlockingZoneThreshold();
     method public final java.math.BigInteger getDefaultRefreshRate();
+    method @Nullable public final String getRefreshRateThermalThrottlingId();
     method public final void setBlockingZoneThreshold(com.android.server.display.config.BlockingZoneThreshold);
     method public final void setDefaultRefreshRate(java.math.BigInteger);
+    method public final void setRefreshRateThermalThrottlingId(@Nullable String);
   }
 
   public class BlockingZoneThreshold {
