@@ -1,6 +1,9 @@
 java_aconfig_library {
     name: "virtualdevice_flags_lib",
     aconfig_declarations: "virtualdevice_flags",
+    static_libs: [
+        "android.companion.virtual.flags-aconfig-java",
+    ],
 }
 
 aconfig_declarations {

@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.ComponentName;
 import android.content.Context;
@@ -173,6 +174,9 @@ public final class VirtualDeviceManager {
             int associationId,
             @NonNull VirtualDeviceParams params) {
         Objects.requireNonNull(params, "params must not be null");
+        if (Flags.moreLogs()) {
+            Log.i(TAG, "Creating VirtualDevice");
+        }
         try {
             return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {
