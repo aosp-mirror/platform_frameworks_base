@@ -132,7 +132,7 @@ import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.BackupEligibilityRules;
-import com.android.server.backup.utils.BackupManagerMonitorUtils;
+import com.android.server.backup.utils.BackupManagerMonitorEventSender;
 import com.android.server.backup.utils.BackupObserverUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
 
@@ -1830,12 +1830,14 @@ public class UserBackupManagerService {
      */
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) {
+        BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+                getBMMEventSender(monitor);
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
 
         if (packages == null || packages.length < 1) {
             Slog.e(TAG, addUserIdToLogMessage(mUserId, "No packages named for backup request"));
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_NO_PACKAGES,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             throw new IllegalArgumentException("No packages are provided for backup");
@@ -1853,7 +1855,7 @@ public class UserBackupManagerService {
             final int logTag = mSetupComplete
                     ? BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED
                     : BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor, logTag, null,
+            mBackupManagerMonitorEventSender.monitorEvent(logTag, null,
                     BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
@@ -1871,7 +1873,7 @@ public class UserBackupManagerService {
         } catch (TransportNotRegisteredException | TransportNotAvailableException
                 | RemoteException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
+            mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
                     null, BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
             return BackupManager.ERROR_TRANSPORT_ABORTED;
@@ -3066,7 +3068,9 @@ public class UserBackupManagerService {
                     /* caller */ "BMS.reportDelayedRestoreResult");
 
             IBackupManagerMonitor monitor = transportClient.getBackupManagerMonitor();
-            BackupManagerMonitorUtils.sendAgentLoggingResults(monitor, packageInfo, results,
+            BackupManagerMonitorEventSender  mBackupManagerMonitorEventSender =
+                    getBMMEventSender(monitor);
+            mBackupManagerMonitorEventSender.sendAgentLoggingResults(packageInfo, results,
                     BackupAnnotations.OperationType.RESTORE);
         } catch (NameNotFoundException | TransportNotAvailableException
                 | TransportNotRegisteredException | RemoteException e) {
@@ -3188,6 +3192,11 @@ public class UserBackupManagerService {
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    @VisibleForTesting
+    BackupManagerMonitorEventSender getBMMEventSender(IBackupManagerMonitor monitor) {
+        return new BackupManagerMonitorEventSender(monitor);
     }
 
     /** User-configurable enabling/disabling of backups. */
