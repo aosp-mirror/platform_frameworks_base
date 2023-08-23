@@ -55,6 +55,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -77,7 +78,6 @@ class ActivityStartInterceptor {
 
     private final ActivityTaskManagerService mService;
     private final ActivityTaskSupervisor mSupervisor;
-    private final RootWindowContainer mRootWindowContainer;
     private final Context mServiceContext;
 
     // UserManager cannot be final as it's not ready when this class is instantiated during boot
@@ -110,17 +110,23 @@ class ActivityStartInterceptor {
     TaskFragment mInTaskFragment;
     ActivityOptions mActivityOptions;
 
+    /*
+     * Note that this is just a hint of what the launch display area will be as it is
+     * based only on the information at the early pre-interception stage of starting the
+     * intent. The real launch display area calculated later may be different from this one.
+     */
+    TaskDisplayArea mPresumableLaunchDisplayArea;
+
     ActivityStartInterceptor(
             ActivityTaskManagerService service, ActivityTaskSupervisor supervisor) {
-        this(service, supervisor, service.mRootWindowContainer, service.mContext);
+        this(service, supervisor, service.mContext);
     }
 
     @VisibleForTesting
     ActivityStartInterceptor(ActivityTaskManagerService service, ActivityTaskSupervisor supervisor,
-            RootWindowContainer root, Context context) {
+            Context context) {
         mService = service;
         mSupervisor = supervisor;
-        mRootWindowContainer = root;
         mServiceContext = context;
     }
 
@@ -162,7 +168,7 @@ class ActivityStartInterceptor {
     /**
      * A helper function to obtain the targeted {@link TaskFragment} during
      * {@link #intercept(Intent, ResolveInfo, ActivityInfo, String, Task, TaskFragment, int, int,
-     * ActivityOptions)} if any.
+     * ActivityOptions, TaskDisplayArea)} if any.
      */
     @Nullable
     private TaskFragment getLaunchTaskFragment() {
@@ -187,7 +193,7 @@ class ActivityStartInterceptor {
      */
     boolean intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
             Task inTask, TaskFragment inTaskFragment, int callingPid, int callingUid,
-            ActivityOptions activityOptions) {
+            ActivityOptions activityOptions, TaskDisplayArea presumableLaunchDisplayArea) {
         mUserManager = UserManager.get(mServiceContext);
 
         mIntent = intent;
@@ -199,6 +205,7 @@ class ActivityStartInterceptor {
         mInTask = inTask;
         mInTaskFragment = inTaskFragment;
         mActivityOptions = activityOptions;
+        mPresumableLaunchDisplayArea = presumableLaunchDisplayArea;
 
         if (interceptQuietProfileIfNeeded()) {
             // If work profile is turned off, skip the work challenge since the profile can only
@@ -219,6 +226,11 @@ class ActivityStartInterceptor {
             return true;
         }
         if (interceptLockedManagedProfileIfNeeded()) {
+            return true;
+        }
+        if (interceptHomeIfNeeded()) {
+            // Replace primary home intents directed at displays that do not support primary home
+            // but support secondary home with the relevant secondary home activity.
             return true;
         }
 
@@ -467,6 +479,47 @@ class ActivityStartInterceptor {
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, 0,
                 mRealCallingUid, mRealCallingPid);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
+    }
+
+    private boolean interceptHomeIfNeeded() {
+        if (mPresumableLaunchDisplayArea == null || mService.mRootWindowContainer == null) {
+            return false;
+        }
+        if (!ActivityRecord.isHomeIntent(mIntent)) {
+            return false;
+        }
+        if (!mIntent.hasCategory(Intent.CATEGORY_HOME)) {
+            // Already a secondary home intent, leave it alone.
+            return false;
+        }
+        if (mService.mRootWindowContainer.shouldPlacePrimaryHomeOnDisplay(
+                mPresumableLaunchDisplayArea.getDisplayId())) {
+            // Primary home can be launched to the display area.
+            return false;
+        }
+        if (!mService.mRootWindowContainer.shouldPlaceSecondaryHomeOnDisplayArea(
+                mPresumableLaunchDisplayArea)) {
+            // Secondary home cannot be launched on the display area.
+            return false;
+        }
+
+        // At this point we have a primary home intent for a display that does not support primary
+        // home activity but it supports secondary home one. So replace it with secondary home.
+        Pair<ActivityInfo, Intent> info = mService.mRootWindowContainer
+                .resolveSecondaryHomeActivity(mUserId, mPresumableLaunchDisplayArea);
+        mIntent = info.second;
+        // The new task flag is needed because the home activity should already be in the root task
+        // and should not be moved to the caller's task. Also, activities cannot change their type,
+        // e.g. a standard activity cannot become a home activity.
+        mIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+        mCallingPid = mRealCallingPid;
+        mCallingUid = mRealCallingUid;
+        mResolvedType = null;
+
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId, /* flags= */ 0,
+                mRealCallingUid, mRealCallingPid);
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, /*profilerInfo=*/ null);
         return true;
     }
 
