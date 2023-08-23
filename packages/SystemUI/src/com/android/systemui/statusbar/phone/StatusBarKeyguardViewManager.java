@@ -92,6 +92,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -101,7 +103,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -450,14 +451,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
-    private KeyguardStateController.Callback mKeyguardStateControllerCallback =
-            new KeyguardStateController.Callback() {
-                @Override
-                public void onUnlockedChanged() {
-                    updateAlternateBouncerShowing(mAlternateBouncerInteractor.maybeHide());
-                }
-            };
-
     private void registerListeners() {
         mKeyguardUpdateManager.registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
@@ -471,7 +464,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
         }
-        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
 
         if (mFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
             mShadeViewController.postToView(() ->
