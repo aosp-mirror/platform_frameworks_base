@@ -2061,6 +2061,15 @@ public class UsageStatsService extends SystemService implements
             return mode == AppOpsManager.MODE_ALLOWED;
         }
 
+        private boolean canReportUsageStats() {
+            if (isCallingUidSystem()) {
+                return true; // System UID can always report UsageStats
+            }
+
+            return getContext().checkCallingPermission(Manifest.permission.REPORT_USAGE_STATS)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+
         private boolean hasObserverPermission() {
             final int callingUid = Binder.getCallingUid();
             DevicePolicyManagerInternal dpmInternal = getDpmInternal();
@@ -2541,14 +2550,19 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportChooserSelection(@NonNull String packageName, int userId,
                 @NonNull String contentType, String[] annotations, @NonNull String action) {
-            if (packageName == null) {
-                throw new IllegalArgumentException("Package selection must not be null.");
-            }
-            // A valid contentType and action must be provided for chooser selection events.
-            if (contentType == null || contentType.isBlank()
-                    || action == null || action.isBlank()) {
+            // A valid package name, content type, and action must be provided for these events
+            Objects.requireNonNull(packageName);
+            Objects.requireNonNull(contentType);
+            Objects.requireNonNull(action);
+            if (contentType.isBlank() || action.isBlank()) {
                 return;
             }
+
+            if (!canReportUsageStats()) {
+                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
+                        + " permission are allowed to call reportChooserSelection");
+            }
+
             // Verify if this package exists before reporting an event for it.
             if (mPackageManagerInternal.getPackageUid(packageName, 0, userId) < 0) {
                 Slog.w(TAG, "Event report user selecting an invalid package");
@@ -2566,9 +2580,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportUserInteraction(String packageName, int userId) {
             Objects.requireNonNull(packageName);
-            if (!isCallingUidSystem()) {
-                throw new SecurityException("Only system is allowed to call reportUserInteraction");
+            if (!canReportUsageStats()) {
+                throw new SecurityException("Only the system or holders of the REPORT_USAGE_STATS"
+                        + " permission are allowed to call reportUserInteraction");
             }
+
             final Event event = new Event(USER_INTERACTION, SystemClock.elapsedRealtime());
             event.mPackage = packageName;
             reportEventOrAddToQueue(userId, event);
