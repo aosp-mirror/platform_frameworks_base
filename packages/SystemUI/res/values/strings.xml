@@ -1102,6 +1102,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
     <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
+    <!-- 1P/3P apps disabled the single app projection option. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled"><xliff:g id="app_name" example="Meet">%1$s</xliff:g> has disabled this option</string>
 
     <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
     <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
