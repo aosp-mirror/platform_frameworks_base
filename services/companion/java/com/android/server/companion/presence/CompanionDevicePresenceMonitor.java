@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.UserManager;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.companion.AssociationStore;
@@ -226,53 +227,40 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
     private void onDevicePresent(@NonNull Set<Integer> presentDevicesForSource,
             int newDeviceAssociationId, @NonNull String sourceLoggingTag) {
-        if (DEBUG) {
-            Log.i(TAG, "onDevice_Present() id=" + newDeviceAssociationId
-                    + ", source=" + sourceLoggingTag);
-            Log.d(TAG, "  > association="
-                    + mAssociationStore.getAssociationById(newDeviceAssociationId));
-        }
+        Slog.i(TAG, "onDevice_Present() id=" + newDeviceAssociationId
+                + ", source=" + sourceLoggingTag);
 
         final boolean alreadyPresent = isDevicePresent(newDeviceAssociationId);
         if (alreadyPresent) {
-            Log.i(TAG, "Device" + "id (" + newDeviceAssociationId + ") already present.");
+            Slog.i(TAG, "Device" + "id (" + newDeviceAssociationId + ") already present.");
         }
 
         final boolean added = presentDevicesForSource.add(newDeviceAssociationId);
         if (!added) {
-            Log.w(TAG, "Association with id "
+            Slog.i(TAG, "Association with id "
                     + newDeviceAssociationId + " is ALREADY reported as "
                     + "present by this source (" + sourceLoggingTag + ")");
         }
-
-        if (alreadyPresent) return;
 
         mCallback.onDeviceAppeared(newDeviceAssociationId);
     }
 
     private void onDeviceGone(@NonNull Set<Integer> presentDevicesForSource,
             int goneDeviceAssociationId, @NonNull String sourceLoggingTag) {
-        if (DEBUG) {
-            Log.i(TAG, "onDevice_Gone() id=" + goneDeviceAssociationId
-                    + ", source=" + sourceLoggingTag);
-            Log.d(TAG, "  > association="
-                    + mAssociationStore.getAssociationById(goneDeviceAssociationId));
-        }
+        Slog.i(TAG, "onDevice_Gone() id=" + goneDeviceAssociationId
+                + ", source=" + sourceLoggingTag);
 
         final boolean removed = presentDevicesForSource.remove(goneDeviceAssociationId);
         if (!removed) {
-            Log.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
+            Slog.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
                     + "as present by this source (" + sourceLoggingTag + ")");
-
             return;
         }
 
         final boolean stillPresent = isDevicePresent(goneDeviceAssociationId);
+
         if (stillPresent) {
-            if (DEBUG) {
-                Log.i(TAG, "  Device id (" + goneDeviceAssociationId + ") is still present.");
-            }
-            return;
+            Slog.w(TAG, "  Device id (" + goneDeviceAssociationId + ") is still present.");
         }
 
         mCallback.onDeviceDisappeared(goneDeviceAssociationId);
