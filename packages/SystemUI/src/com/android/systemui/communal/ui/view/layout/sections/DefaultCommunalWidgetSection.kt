@@ -22,7 +22,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.communal.ui.adapter.CommunalWidgetViewAdapter
 import com.android.systemui.communal.ui.binder.CommunalWidgetViewBinder
 import com.android.systemui.communal.ui.viewmodel.CommunalWidgetViewModel

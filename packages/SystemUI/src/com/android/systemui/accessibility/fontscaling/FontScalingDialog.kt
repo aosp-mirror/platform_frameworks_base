@@ -29,7 +29,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener.ControlUnitType

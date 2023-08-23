@@ -68,14 +68,14 @@ public class ButtonPreferenceTest {
 
     @Test
     public void onBindViewHolder_whenIconSet_shouldSetIcon() {
-        mPreference.setIcon(R.drawable.settingslib_ic_cross);
+        mPreference.setIcon(com.android.settingslib.widget.preference.banner.R.drawable.settingslib_ic_cross);
 
         mPreference.onBindViewHolder(mHolder);
 
         final Button button = mPreference.getButton();
         final Drawable icon = button.getCompoundDrawablesRelative()[0];
         final ShadowDrawable shadowDrawable = shadowOf(icon);
-        assertThat(shadowDrawable.getCreatedFromResId()).isEqualTo(R.drawable.settingslib_ic_cross);
+        assertThat(shadowDrawable.getCreatedFromResId()).isEqualTo(com.android.settingslib.widget.preference.banner.R.drawable.settingslib_ic_cross);
     }
 
     @Test

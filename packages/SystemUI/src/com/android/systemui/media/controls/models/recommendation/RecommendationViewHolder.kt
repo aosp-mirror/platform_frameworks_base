@@ -23,7 +23,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import com.android.internal.widget.CachingIconView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.ui.IlluminationDrawable
 import com.android.systemui.util.animation.TransitionLayout

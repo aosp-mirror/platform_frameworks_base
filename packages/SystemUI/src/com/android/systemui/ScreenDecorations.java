@@ -84,6 +84,7 @@ import com.android.systemui.decor.RoundedCornerResDelegateImpl;
 import com.android.systemui.decor.ScreenDecorCommand;
 import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
@@ -334,7 +335,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         mThreadFactory = threadFactory;
         mDotFactory = dotFactory;
         mFaceScanningFactory = faceScanningFactory;
-        mFaceScanningViewId = com.android.systemui.R.id.face_scanning_anim;
+        mFaceScanningViewId = com.android.systemui.res.R.id.face_scanning_anim;
         mLogger = logger;
         mAuthController = authController;
     }
@@ -1195,7 +1196,7 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (faceScanningOverlay != null) {
             faceScanningOverlay.setFaceScanningAnimColor(
                     Utils.getColorAttrDefaultColor(faceScanningOverlay.getContext(),
-                            com.android.systemui.R.attr.wallpaperTextColorAccent));
+                            com.android.systemui.res.R.attr.wallpaperTextColorAccent));
         }
     }
 

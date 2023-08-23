@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 
 /**

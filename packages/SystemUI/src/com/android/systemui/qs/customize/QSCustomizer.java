@@ -33,7 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.qs.QSDetailClipper;

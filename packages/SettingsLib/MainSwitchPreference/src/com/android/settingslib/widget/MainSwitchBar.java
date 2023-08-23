@@ -35,6 +35,8 @@ import com.android.settingslib.utils.BuildCompatUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.settingslib.widget.mainswitch.R;
+
 /**
  * MainSwitchBar is a View with a customized Switch.
  * This component is used as the main switch of the page

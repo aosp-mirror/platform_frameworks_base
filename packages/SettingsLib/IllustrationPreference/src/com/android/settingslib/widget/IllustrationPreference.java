@@ -42,6 +42,7 @@ import com.airbnb.lottie.LottieDrawable;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import com.android.settingslib.widget.preference.illustration.R;
 
 /**
  * IllustrationPreference is a preference that can play lottie format animation
@@ -427,10 +428,10 @@ public class IllustrationPreference extends Preference {
         mIsAutoScale = false;
         if (attrs != null) {
             TypedArray a = context.obtainStyledAttributes(attrs,
-                    R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
-            mImageResId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
+                    com.airbnb.lottie.R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
+            mImageResId = a.getResourceId(com.airbnb.lottie.R.styleable.LottieAnimationView_lottie_rawRes, 0);
             mCacheComposition = a.getBoolean(
-                    R.styleable.LottieAnimationView_lottie_cacheComposition, true);
+                    com.airbnb.lottie.R.styleable.LottieAnimationView_lottie_cacheComposition, true);
 
             a = context.obtainStyledAttributes(attrs,
                     R.styleable.IllustrationPreference, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);

@@ -32,7 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;

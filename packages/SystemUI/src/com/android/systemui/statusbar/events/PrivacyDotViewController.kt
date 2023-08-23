@@ -25,7 +25,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import com.android.internal.annotations.GuardedBy
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main

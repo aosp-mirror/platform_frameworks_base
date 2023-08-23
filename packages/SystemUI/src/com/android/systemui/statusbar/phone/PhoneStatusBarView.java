@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;

@@ -63,7 +63,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -983,7 +983,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         spyController.mCarrierNetworkChangeMode = true;
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
-        assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+        assertThat(dds).contains(mContext.getString(com.android.settingslib.R.string.carrier_network_change_mode));
     }
 
     @Test

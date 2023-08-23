@@ -24,6 +24,7 @@ import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.res.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.broadcast.BroadcastDispatcher;

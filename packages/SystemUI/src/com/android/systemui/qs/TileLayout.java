@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;

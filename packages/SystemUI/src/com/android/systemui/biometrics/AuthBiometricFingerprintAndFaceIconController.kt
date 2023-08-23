@@ -19,7 +19,7 @@ package com.android.systemui.biometrics
 import android.annotation.RawRes
 import android.content.Context
 import com.airbnb.lottie.LottieAnimationView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_AUTHENTICATED
 import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState.STATE_ERROR

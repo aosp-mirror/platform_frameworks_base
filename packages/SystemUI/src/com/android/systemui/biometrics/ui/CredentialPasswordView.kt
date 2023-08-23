@@ -10,7 +10,7 @@ import android.view.WindowInsets.Type.ime
 import android.view.accessibility.AccessibilityManager
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.AuthPanelController
 import com.android.systemui.biometrics.ui.binder.CredentialViewBinder
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel

@@ -18,7 +18,7 @@ package com.android.systemui.communal.ui.binder
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.communal.ui.adapter.CommunalWidgetViewAdapter
 import com.android.systemui.communal.ui.view.CommunalWidgetWrapper
 import com.android.systemui.communal.ui.viewmodel.CommunalWidgetViewModel

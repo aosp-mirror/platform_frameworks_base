@@ -23,7 +23,7 @@ import android.testing.TestableResources;
 import android.testing.UiThreadTest;
 import android.util.KeyValueListParser;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 

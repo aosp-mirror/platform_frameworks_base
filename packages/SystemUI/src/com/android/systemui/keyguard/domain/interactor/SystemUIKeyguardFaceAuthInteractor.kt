@@ -22,7 +22,7 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.CoreStartable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor

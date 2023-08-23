@@ -97,7 +97,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shade.TouchLogger;

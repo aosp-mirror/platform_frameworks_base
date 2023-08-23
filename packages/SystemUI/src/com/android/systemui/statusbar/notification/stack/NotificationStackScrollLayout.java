@@ -86,7 +86,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ExpandHelper;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.ViewRefactorFlag;

@@ -24,7 +24,7 @@ import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import com.android.settingslib.widget.preference.barchart.R;
 /**
  * BarChartInfo is responsible for storing information about {@link BarChartPreference}.
  */

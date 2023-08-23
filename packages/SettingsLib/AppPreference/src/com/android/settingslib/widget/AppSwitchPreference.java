@@ -22,7 +22,7 @@ import android.view.View;
 
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.SwitchPreference;
-
+import com.android.settingslib.widget.preference.app.R;
 /**
  * The SwitchPreference for the pages need to show apps icon.
  */

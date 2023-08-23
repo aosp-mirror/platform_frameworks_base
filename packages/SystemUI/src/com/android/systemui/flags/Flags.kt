@@ -17,7 +17,7 @@ package com.android.systemui.flags
 
 import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
 import com.android.systemui.flags.FlagsFactory.sysPropBooleanFlag

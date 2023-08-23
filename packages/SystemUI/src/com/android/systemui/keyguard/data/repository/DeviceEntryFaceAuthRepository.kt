@@ -24,7 +24,7 @@ import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging

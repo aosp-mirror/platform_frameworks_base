@@ -30,7 +30,7 @@ import android.os.Bundle;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Alerts the user that wireless debugging cannot be enabled by a secondary user.

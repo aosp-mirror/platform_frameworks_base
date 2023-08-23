@@ -25,7 +25,7 @@ import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.settingslib.drawable.UserIconDrawable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.ContentDescription

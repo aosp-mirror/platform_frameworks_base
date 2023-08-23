@@ -41,7 +41,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.media.MediaProjectionCaptureTarget;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.SystemUIDialog;

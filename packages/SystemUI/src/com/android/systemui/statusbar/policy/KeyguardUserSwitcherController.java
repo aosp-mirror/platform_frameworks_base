@@ -38,7 +38,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;

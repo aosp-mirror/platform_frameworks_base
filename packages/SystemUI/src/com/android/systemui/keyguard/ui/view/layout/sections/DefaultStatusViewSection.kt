@@ -31,7 +31,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardViewConfigurator

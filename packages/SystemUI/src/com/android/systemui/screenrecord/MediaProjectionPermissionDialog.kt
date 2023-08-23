@@ -18,7 +18,7 @@ package com.android.systemui.screenrecord
 import android.content.Context
 import android.media.projection.MediaProjectionConfig
 import android.os.Bundle
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** Dialog to select screen recording options */
 class MediaProjectionPermissionDialog(

@@ -38,7 +38,7 @@ import androidx.core.view.doOnLayout
 import com.android.app.animation.Interpolators
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController

@@ -22,7 +22,7 @@ import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings.Global.USER_SWITCHER_ENABLED
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton

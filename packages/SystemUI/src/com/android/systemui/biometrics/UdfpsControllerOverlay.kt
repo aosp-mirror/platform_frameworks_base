@@ -46,7 +46,7 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.biometrics.ui.controller.UdfpsKeyguardViewController

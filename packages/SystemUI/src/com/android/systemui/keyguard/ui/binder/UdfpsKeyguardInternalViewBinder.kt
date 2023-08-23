@@ -18,7 +18,7 @@
 package com.android.systemui.biometrics.ui.binder
 
 import android.view.View
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.keyguard.ui.binder.UdfpsAodFingerprintViewBinder
 import com.android.systemui.keyguard.ui.binder.UdfpsBackgroundViewBinder
 import com.android.systemui.keyguard.ui.binder.UdfpsFingerprintViewBinder

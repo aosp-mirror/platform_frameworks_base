@@ -47,7 +47,7 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedFloatAsState
 import com.android.settingslib.Utils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel

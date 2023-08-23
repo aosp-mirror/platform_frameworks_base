@@ -26,7 +26,7 @@ import android.telecom.TelecomManager
 import android.util.Log
 import android.view.WindowManager
 import com.android.internal.app.AlertActivity
-import com.android.systemui.R
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Dialog shown to the user to switch to managed profile for making a call using work SIM. */

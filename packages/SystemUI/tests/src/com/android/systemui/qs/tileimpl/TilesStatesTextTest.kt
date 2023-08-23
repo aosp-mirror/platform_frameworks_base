@@ -18,7 +18,7 @@ package com.android.systemui.qs.tileimpl
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.MediumTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals

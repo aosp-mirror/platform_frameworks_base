@@ -38,7 +38,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.MediaOutputConstants;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.media.controls.util.MediaDataUtils;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;

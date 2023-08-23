@@ -22,7 +22,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.Diffable

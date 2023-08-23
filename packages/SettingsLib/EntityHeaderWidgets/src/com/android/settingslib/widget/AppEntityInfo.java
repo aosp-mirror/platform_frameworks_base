@@ -22,6 +22,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.settingslib.widget.entityheader.R;
+
 /**
  * AppEntityInfo is responsible for storing app information shown in {@link R.xml.app_view.xml}.
  */

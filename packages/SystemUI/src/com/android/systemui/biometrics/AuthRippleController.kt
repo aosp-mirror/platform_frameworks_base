@@ -31,7 +31,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags

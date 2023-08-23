@@ -48,7 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel

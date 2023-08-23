@@ -21,7 +21,7 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription

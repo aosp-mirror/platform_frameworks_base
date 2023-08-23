@@ -35,6 +35,8 @@ import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.android.systemui.res.R;
+
 public class SlicePermissionActivity extends Activity implements OnClickListener,
         OnDismissListener {
 

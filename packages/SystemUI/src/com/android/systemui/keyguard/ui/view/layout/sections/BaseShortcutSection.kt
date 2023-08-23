@@ -4,7 +4,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder

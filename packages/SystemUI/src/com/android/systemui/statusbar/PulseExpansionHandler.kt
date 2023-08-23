@@ -31,7 +31,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton

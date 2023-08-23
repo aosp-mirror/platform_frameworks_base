@@ -22,7 +22,7 @@ import android.view.ContextThemeWrapper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.ui.MediaHost

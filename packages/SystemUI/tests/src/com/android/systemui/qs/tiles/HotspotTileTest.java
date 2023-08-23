@@ -31,7 +31,7 @@ import androidx.test.filters.SmallTest;
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -116,7 +116,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         assertThat(mState.state).isNotEqualTo(Tile.STATE_UNAVAILABLE);
         assertThat(String.valueOf(mState.secondaryLabel))
-                .isNotEqualTo(mContext.getString(R.string.wifitrackerlib_admin_restricted_network));
+                .isNotEqualTo(mContext.getString(com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network));
         mockitoSession.finishMocking();
     }
 
@@ -131,7 +131,7 @@ public class HotspotTileTest extends SysuiTestCase {
 
         assertThat(mState.state).isEqualTo(Tile.STATE_UNAVAILABLE);
         assertThat(String.valueOf(mState.secondaryLabel))
-                .isEqualTo(mContext.getString(R.string.wifitrackerlib_admin_restricted_network));
+                .isEqualTo(mContext.getString(com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network));
         mockitoSession.finishMocking();
     }
 

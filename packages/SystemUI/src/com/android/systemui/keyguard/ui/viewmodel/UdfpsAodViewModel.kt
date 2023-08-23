@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.keyguard.domain.interactor.BurnInOffsets
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import javax.inject.Inject

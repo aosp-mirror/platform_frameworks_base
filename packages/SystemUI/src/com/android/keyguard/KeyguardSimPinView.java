@@ -20,7 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Displays a PIN pad for unlocking.

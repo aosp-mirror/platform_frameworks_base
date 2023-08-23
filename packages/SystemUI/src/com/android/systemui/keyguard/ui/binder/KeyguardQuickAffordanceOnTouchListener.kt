@@ -24,7 +24,7 @@ import android.view.ViewConfiguration
 import android.view.ViewPropertyAnimator
 import androidx.core.animation.CycleInterpolator
 import androidx.core.animation.ObjectAnimator
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel

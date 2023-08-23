@@ -32,6 +32,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.settingslib.R;
 import com.android.settingslib.graph.BatteryMeterDrawableBase;
 
 import org.junit.Before;

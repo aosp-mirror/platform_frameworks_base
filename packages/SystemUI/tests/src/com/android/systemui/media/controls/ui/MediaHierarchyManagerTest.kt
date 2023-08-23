@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController

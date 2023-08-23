@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.mainswitch.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

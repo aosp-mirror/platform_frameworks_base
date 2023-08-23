@@ -116,6 +116,7 @@ filegroup {
 //Create a library to expose SystemUI's resources to other modules.
 android_library {
     name: "SystemUI-res",
+    use_resource_processor: true,
     resource_dirs: [
         "res-product",
         "res-keyguard",
@@ -149,13 +150,9 @@ android_library {
             exclude_srcs: [":ReleaseJavaFiles"],
         },
     },
-    resource_dirs: [
-        "res-product",
-        "res-keyguard",
-        "res",
-    ],
     use_resource_processor: true,
     static_libs: [
+        "SystemUI-res",
         "WifiTrackerLib",
         "WindowManager-Shell",
         "SystemUIAnimationLib",
@@ -380,14 +377,13 @@ java_library {
 
 android_library {
     name: "SystemUI-tests-base",
+    use_resource_processor: true,
     manifest: "tests/AndroidManifest-base.xml",
     resource_dirs: [
         "tests/res",
-        "res-product",
-        "res-keyguard",
-        "res",
     ],
     static_libs: [
+        "SystemUI-res",
         "WifiTrackerLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
@@ -442,6 +438,7 @@ android_library {
 
 android_library {
     name: "SystemUI-tests",
+    use_resource_processor: true,
     defaults: [
         "SystemUI_compose_defaults",
     ],
@@ -485,6 +482,7 @@ android_library {
 
 android_app {
     name: "SystemUIRobo-stub",
+    use_resource_processor: true,
     defaults: [
         "platform_app_defaults",
         "SystemUI_optimized_defaults",

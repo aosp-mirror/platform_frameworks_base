@@ -153,7 +153,7 @@ public class InputMethodPreference extends PrimarySwitchPreference
         }
         final ImageView icon = holder.itemView.findViewById(android.R.id.icon);
         final int iconSize = getContext().getResources().getDimensionPixelSize(
-                com.android.settingslib.widget.R.dimen.secondary_app_icon_size);
+                com.android.settingslib.widget.theme.R.dimen.secondary_app_icon_size);
         if (icon != null && iconSize > 0) {
             ViewGroup.LayoutParams params = icon.getLayoutParams();
             params.height = iconSize;

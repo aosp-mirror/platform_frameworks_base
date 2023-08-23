@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;

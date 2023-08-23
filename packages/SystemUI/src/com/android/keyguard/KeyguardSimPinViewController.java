@@ -39,7 +39,7 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 
@@ -144,7 +144,7 @@ public class KeyguardSimPinViewController
             mView.resetPasswordText(true /* animate */, true /* announce */);
             getKeyguardSecurityCallback().userActivity();
             mMessageAreaController.setMessage(
-                    com.android.systemui.R.string.kg_invalid_sim_pin_hint);
+                    com.android.systemui.res.R.string.kg_invalid_sim_pin_hint);
             return;
         }
 

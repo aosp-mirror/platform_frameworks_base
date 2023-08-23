@@ -35,7 +35,7 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;

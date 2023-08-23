@@ -22,7 +22,7 @@ import android.content.IntentFilter
 import android.icu.text.DateFormat
 import android.icu.text.DisplayContext
 import android.os.UserHandle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application

@@ -28,7 +28,7 @@ import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN

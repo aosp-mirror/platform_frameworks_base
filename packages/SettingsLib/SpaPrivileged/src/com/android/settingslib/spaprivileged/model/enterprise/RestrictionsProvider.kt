@@ -26,10 +26,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.settingslib.RestrictedLockUtilsInternal
-import com.android.settingslib.widget.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import com.android.settingslib.widget.restricted.R
 
 data class Restrictions(
     val userId: Int,

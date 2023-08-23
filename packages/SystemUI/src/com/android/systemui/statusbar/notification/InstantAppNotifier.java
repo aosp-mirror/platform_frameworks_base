@@ -49,7 +49,7 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;

@@ -24,7 +24,7 @@ import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.StringRes
 import com.android.keyguard.LockIconViewController
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardBottomAreaViewBinder.bind
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel

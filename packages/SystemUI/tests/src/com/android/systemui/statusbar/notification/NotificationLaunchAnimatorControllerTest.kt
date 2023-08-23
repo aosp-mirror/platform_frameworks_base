@@ -16,7 +16,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.policy.HeadsUpUtil
-import com.android.systemui.tests.R
+import com.android.systemui.res.R
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.test.TestScope

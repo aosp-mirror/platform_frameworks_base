@@ -28,7 +28,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;

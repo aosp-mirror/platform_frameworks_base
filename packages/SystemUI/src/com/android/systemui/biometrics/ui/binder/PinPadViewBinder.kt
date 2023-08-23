@@ -20,7 +20,7 @@ package com.android.systemui.biometrics.ui.binder
 import android.view.KeyEvent
 import android.widget.ImeAwareEditText
 import com.android.internal.widget.LockscreenCredential
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.IPinPad
 import com.android.systemui.biometrics.ui.PinPadClickListener

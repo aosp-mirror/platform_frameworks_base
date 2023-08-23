@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 
+import com.android.systemui.res.R;
 import com.android.settingslib.Utils;
 
 public class HardwareBgDrawable extends LayerDrawable {

@@ -31,7 +31,7 @@ import androidx.core.animation.AnimatorListenerAdapter
 import androidx.core.animation.AnimatorSet
 import androidx.core.animation.ValueAnimator
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsChangedListener

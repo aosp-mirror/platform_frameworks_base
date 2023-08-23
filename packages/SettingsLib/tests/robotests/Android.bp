@@ -27,6 +27,7 @@ package {
 
 android_app {
     name: "SettingsLibShell",
+    use_resource_processor: true,
     defaults: ["SettingsLibDefaults"],
     platform_apis: true,
 

@@ -7,7 +7,7 @@ import android.os.UserManager
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.internal.widget.VerifyCredentialResponse
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.util.time.SystemClock

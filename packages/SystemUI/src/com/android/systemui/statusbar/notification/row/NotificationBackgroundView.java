@@ -33,7 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.io.PrintWriter;
 import java.util.Arrays;

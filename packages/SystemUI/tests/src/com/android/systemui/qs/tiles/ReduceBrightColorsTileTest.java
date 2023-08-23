@@ -32,7 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R.drawable;
+import com.android.systemui.res.R.drawable;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;

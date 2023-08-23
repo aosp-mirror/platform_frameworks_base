@@ -42,7 +42,7 @@ import android.view.WindowManager.LayoutParams;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FeatureFlags;

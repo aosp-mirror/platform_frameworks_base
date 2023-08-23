@@ -1,7 +1,7 @@
 package com.android.systemui.util
 
 import android.content.res.Resources
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 object LargeScreenUtils {
     /**

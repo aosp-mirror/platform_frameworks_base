@@ -18,6 +18,7 @@ package com.android.settingslib.widget;
 
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import com.android.settingslib.widget.profileselector.R;
 
 /**
  * ViewPager Adapter to handle between TabLayout and ViewPager2

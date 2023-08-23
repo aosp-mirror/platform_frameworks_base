@@ -38,7 +38,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher

@@ -50,6 +50,7 @@ android_app {
 
     // Dummy to generate .toc files.
     name: "PluginDummyLib",
+    use_resource_processor: true,
     platform_apis: true,
     srcs: ["src/**/*.java"],
 

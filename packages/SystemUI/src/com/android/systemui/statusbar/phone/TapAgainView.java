@@ -28,7 +28,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wm.shell.animation.Interpolators;
 
 /**
@@ -83,7 +83,7 @@ public class TapAgainView extends TextView {
     public void animateOut() {
         long fadeOutDuration = 167L;  // From KeyguardIndicationTextView#getFadeOutDuration
         int yTranslation = mContext.getResources().getDimensionPixelSize(
-                com.android.systemui.R.dimen.keyguard_indication_y_translation);
+                com.android.systemui.res.R.dimen.keyguard_indication_y_translation);
 
         AnimatorSet animatorSet = new AnimatorSet();
         ObjectAnimator fadeOut = ObjectAnimator.ofFloat(this, View.ALPHA, 0f);

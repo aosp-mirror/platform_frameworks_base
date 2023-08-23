@@ -26,7 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorResultHandler
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.data.RecentTask

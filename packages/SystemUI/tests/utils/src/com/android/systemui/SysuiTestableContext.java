@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.res.R;
 
 import java.util.Set;
 

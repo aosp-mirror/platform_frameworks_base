@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 public class PowerNotificationControlsFragment extends Fragment {
 

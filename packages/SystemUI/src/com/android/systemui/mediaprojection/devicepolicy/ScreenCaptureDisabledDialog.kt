@@ -16,7 +16,7 @@
 package com.android.systemui.mediaprojection.devicepolicy
 
 import android.content.Context
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 /** Dialog that shows that screen capture is disabled on this device. */

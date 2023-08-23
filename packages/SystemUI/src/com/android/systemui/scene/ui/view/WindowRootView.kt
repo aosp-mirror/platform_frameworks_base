@@ -25,7 +25,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.core.view.updateMargins
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.compose.ComposeFacade
 
 /** A view that can serve as the root of the main SysUI window. */

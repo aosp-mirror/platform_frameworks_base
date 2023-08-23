@@ -42,7 +42,7 @@ import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 public class KeyguardPatternView extends KeyguardInputView

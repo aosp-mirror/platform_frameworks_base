@@ -16,7 +16,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector

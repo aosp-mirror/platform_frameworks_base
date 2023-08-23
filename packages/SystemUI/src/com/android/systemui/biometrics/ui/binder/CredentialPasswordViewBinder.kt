@@ -12,7 +12,7 @@ import android.window.OnBackInvokedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.IPinPad

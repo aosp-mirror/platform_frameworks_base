@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.core
 
 import android.app.Fragment
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions

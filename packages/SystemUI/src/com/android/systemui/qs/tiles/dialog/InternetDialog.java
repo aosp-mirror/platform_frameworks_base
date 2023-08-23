@@ -59,7 +59,7 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.accessibility.floatingmenu.AnnotationLinkSpan;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;

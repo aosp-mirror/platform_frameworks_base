@@ -24,7 +24,7 @@ import android.text.format.DateUtils;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;

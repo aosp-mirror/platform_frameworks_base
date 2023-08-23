@@ -20,7 +20,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.Gravity
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout
 import com.android.systemui.statusbar.StatusBarIconView

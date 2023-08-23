@@ -36,7 +36,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor

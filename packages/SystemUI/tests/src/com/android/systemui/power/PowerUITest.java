@@ -45,7 +45,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
 import com.android.settingslib.fuelgauge.Estimate;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;

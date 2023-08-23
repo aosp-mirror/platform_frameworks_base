@@ -29,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

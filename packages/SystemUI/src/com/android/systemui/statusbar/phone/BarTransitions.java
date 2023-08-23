@@ -35,7 +35,7 @@ import android.view.View;
 
 import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

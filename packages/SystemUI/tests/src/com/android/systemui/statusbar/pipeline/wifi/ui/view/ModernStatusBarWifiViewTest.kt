@@ -25,7 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT

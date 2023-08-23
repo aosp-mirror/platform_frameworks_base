@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.content.Context
 import androidx.annotation.ColorInt
 import com.android.settingslib.Utils.getColorAttrDefaultColor
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.keyguard.domain.interactor.BurnInOffsets
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor

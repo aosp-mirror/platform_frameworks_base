@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;

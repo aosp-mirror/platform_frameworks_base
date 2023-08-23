@@ -36,7 +36,7 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;

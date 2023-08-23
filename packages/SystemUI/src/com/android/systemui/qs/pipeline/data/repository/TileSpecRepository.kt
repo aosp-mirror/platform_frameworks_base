@@ -21,7 +21,7 @@ import android.content.res.Resources
 import android.database.ContentObserver
 import android.provider.Settings
 import android.util.SparseArray
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background

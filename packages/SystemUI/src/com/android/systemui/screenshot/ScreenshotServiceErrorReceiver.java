@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.WindowManager;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Performs a number of miscellaneous, non-system-critical actions

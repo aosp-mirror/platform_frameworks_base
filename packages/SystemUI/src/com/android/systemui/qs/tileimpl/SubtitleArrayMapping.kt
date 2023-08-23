@@ -15,7 +15,7 @@
  */
 package com.android.systemui.qs.tileimpl
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /** Return the subtitle resource Id of the given tile. */
 object SubtitleArrayMapping {

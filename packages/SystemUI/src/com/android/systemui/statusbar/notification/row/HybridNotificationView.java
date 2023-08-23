@@ -30,7 +30,7 @@ import androidx.annotation.ColorInt;
 
 import com.android.internal.util.ContrastColorUtil;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;

@@ -42,7 +42,7 @@ import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMET
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository

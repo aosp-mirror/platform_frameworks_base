@@ -25,7 +25,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.util.Preconditions;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.dreams.DreamOverlayStatusBarView;

@@ -22,7 +22,7 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.tileimpl.QSTileImpl

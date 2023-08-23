@@ -23,7 +23,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 

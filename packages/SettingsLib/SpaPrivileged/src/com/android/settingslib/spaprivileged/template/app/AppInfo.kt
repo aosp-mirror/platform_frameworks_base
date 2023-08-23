@@ -72,7 +72,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     private fun InstallType(app: ApplicationInfo) {
         if (!app.isInstantApp) return
         Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(stringResource(com.android.settingslib.widget.R.string.install_type_instant))
+        SettingsBody(stringResource(com.android.settingslib.widget.preference.app.R.string.install_type_instant))
     }
 
     @Composable

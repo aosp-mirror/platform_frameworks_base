@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationShelf

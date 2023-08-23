@@ -59,7 +59,7 @@ import androidx.lifecycle.Observer;
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.bubbles.DismissView;

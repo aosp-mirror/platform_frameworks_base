@@ -34,7 +34,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.qs.QSTile;

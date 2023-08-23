@@ -341,7 +341,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
 
         mContext.getOrCreateTestableResources().addOverride(
-                com.android.systemui.R.integer.config_face_auth_supported_posture,
+                com.android.systemui.res.R.integer.config_face_auth_supported_posture,
                 DEVICE_POSTURE_UNKNOWN);
         mFaceWakeUpTriggersConfig = new FaceWakeUpTriggersConfig(
                 mContext.getResources(),
@@ -349,7 +349,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 mDumpManager
         );
 
-        mContext.getOrCreateTestableResources().addOverride(com.android.systemui
+        mContext.getOrCreateTestableResources().addOverride(com.android.systemui.res
                         .R.array.config_fingerprint_listen_on_occluding_activity_packages,
                 new String[]{ PKG_ALLOWING_FP_LISTEN_ON_OCCLUDING_ACTIVITY });
 

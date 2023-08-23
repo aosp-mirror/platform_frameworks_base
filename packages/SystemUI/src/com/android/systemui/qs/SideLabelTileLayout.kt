@@ -18,7 +18,7 @@ package com.android.systemui.qs
 
 import android.content.Context
 import android.util.AttributeSet
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 open class SideLabelTileLayout(
     context: Context,

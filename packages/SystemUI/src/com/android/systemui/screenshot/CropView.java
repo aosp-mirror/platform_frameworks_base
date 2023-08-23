@@ -45,7 +45,7 @@ import androidx.customview.widget.ExploreByTouchHelper;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import com.android.internal.graphics.ColorUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.List;
 

@@ -36,7 +36,7 @@ import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;

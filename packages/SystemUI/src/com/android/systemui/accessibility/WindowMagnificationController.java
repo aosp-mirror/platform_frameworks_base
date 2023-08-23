@@ -80,7 +80,7 @@ import androidx.core.math.MathUtils;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.util.settings.SecureSettings;
 

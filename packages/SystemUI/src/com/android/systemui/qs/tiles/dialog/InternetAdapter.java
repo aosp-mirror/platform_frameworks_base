@@ -36,7 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.WifiUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;

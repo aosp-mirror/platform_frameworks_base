@@ -23,7 +23,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 
 import java.util.Comparator;
-
+import com.android.settingslib.widget.preference.barchart.R;
 /**
  * A class responsible for saving bar view information.
  */

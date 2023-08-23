@@ -22,7 +22,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.widget.Spinner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

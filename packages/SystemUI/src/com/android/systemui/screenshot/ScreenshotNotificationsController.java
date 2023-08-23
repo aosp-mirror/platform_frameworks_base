@@ -30,7 +30,7 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import com.android.internal.messages.nano.SystemMessageProto;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.util.NotificationChannels;
 

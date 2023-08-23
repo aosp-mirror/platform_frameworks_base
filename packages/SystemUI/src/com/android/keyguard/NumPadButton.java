@@ -30,7 +30,7 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Similar to the {@link NumPadKey}, but displays an image.

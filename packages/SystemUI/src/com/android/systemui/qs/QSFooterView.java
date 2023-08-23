@@ -35,7 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.development.DevelopmentSettingsEnabler;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Footer of expanded Quick Settings, tiles page indicator, (optionally) build number and

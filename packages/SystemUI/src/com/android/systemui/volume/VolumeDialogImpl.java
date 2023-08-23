@@ -120,7 +120,7 @@ import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;

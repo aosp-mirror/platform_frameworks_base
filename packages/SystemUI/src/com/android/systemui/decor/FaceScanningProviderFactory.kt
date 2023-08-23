@@ -115,7 +115,7 @@ class FaceScanningOverlayProviderImpl(
     private val logger: ScreenDecorationsLogger,
     private val featureFlags: FeatureFlags,
 ) : BoundDecorProvider() {
-    override val viewId: Int = com.android.systemui.R.id.face_scanning_anim
+    override val viewId: Int = com.android.systemui.res.R.id.face_scanning_anim
 
     override fun onReloadResAndMeasure(
         view: View,
