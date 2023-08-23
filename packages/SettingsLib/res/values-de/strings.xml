@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Dateiübertragung"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Eingabegerät"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internetzugriff"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Zugriff auf Kontakte und Anrufliste geben"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Die Daten werden z. B. für Anrufbenachrichtigungen verwendet"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Freigabe der Internetverbindung"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Zugriff auf SIM"</string>

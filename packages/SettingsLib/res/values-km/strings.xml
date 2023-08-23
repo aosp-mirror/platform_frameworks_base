@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ផ្ទេរ​ឯកសារ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ឧបករណ៍​បញ្ចូល"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ការចូលប្រើ​អ៊ីនធឺណិត"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"អនុញ្ញាតឱ្យចូលប្រើទំនាក់ទំនង និងប្រវត្តិហៅទូរសព្ទ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"ព័ត៌មាននឹងត្រូវបានប្រើសម្រាប់ការប្រកាសអំពីការហៅទូរសព្ទ និងច្រើនទៀត"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ចែករំលែក​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"សារ​ជាអក្សរ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ការចូលដំណើរការស៊ីម"</string>

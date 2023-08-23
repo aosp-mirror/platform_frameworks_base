@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ до Інтернету"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Надати доступ до контактів і історії викликів"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Дані використовуватимуться для сповіщень про виклики тощо"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстові повідомлення"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Доступ до SIM-карти"</string>

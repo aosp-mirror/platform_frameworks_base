@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ਇਨਪੁੱਟ ਡੀਵਾਈਸ"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"ਸੰਪਰਕਾਂ ਅਤੇ ਕਾਲ ਇਤਿਹਾਸ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"ਜਾਣਕਾਰੀ ਦੀ ਵਰਤੋਂ ਕਾਲ ਘੋਸ਼ਣਾਵਾਂ ਅਤੇ ਹੋਰ ਚੀਜ਼ਾਂ ਲਈ ਕੀਤੀ ਜਾਵੇਗੀ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਸਾਂਝਾਕਰਨ"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"ਲਿਖਤ ਸੁਨੇਹੇ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"ਸਿਮ ਪਹੁੰਚ"</string>

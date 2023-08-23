@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferimi i skedarëve"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Pajisja e hyrjes"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Qasje në internet"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Lejo qasje te kontaktet dhe historiku i telefonatave"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Informacioni do të përdoret për njoftime për telefonata etj."</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Ndarja e lidhjes së internetit"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Mesazhet me tekst"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Qasje në kartën SIM"</string>
