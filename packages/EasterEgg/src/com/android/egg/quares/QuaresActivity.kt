@@ -293,7 +293,7 @@ class ClueView(context: Context) : View(context) {
         return correct
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (!showText) return
         canvas?.let {
