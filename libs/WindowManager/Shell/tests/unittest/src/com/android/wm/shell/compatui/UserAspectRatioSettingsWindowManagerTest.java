@@ -106,7 +106,7 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
                 false, /* topActivityBoundsLetterboxed */ true);
         mWindowManager = new UserAspectRatioSettingsWindowManager(mContext, mTaskInfo,
                 mSyncTransactionQueue, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
-                mOnUserAspectRatioSettingsButtonClicked, mExecutor);
+                mOnUserAspectRatioSettingsButtonClicked, mExecutor, flags -> 0);
         spyOn(mWindowManager);
         doReturn(mLayout).when(mWindowManager).inflateLayout();
         doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
