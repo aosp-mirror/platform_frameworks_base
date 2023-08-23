@@ -670,7 +670,7 @@
     <string name="accessibility_no_calling" msgid="3540827068323895748">"لا يتم الاتصال."</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"اختيار صورة الملف الشخصي"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"رمز المستخدم التلقائي"</string>
-    <string name="physical_keyboard_title" msgid="4811935435315835220">"لوحة مفاتيح خارجية"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"لوحة المفاتيح الخارجية"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"اختيار تنسيق لوحة مفاتيح"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"التنسيق التلقائي"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"تشغيل الشاشة"</string>
