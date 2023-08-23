@@ -17,16 +17,30 @@
 package com.android.systemui.biometrics.udfps
 
 import android.graphics.Rect
+import android.os.Build
+import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 
 /** Returns whether the touch coordinates are within the sensor's bounding box. */
 @SysUISingleton
-class BoundingBoxOverlapDetector : OverlapDetector {
+class BoundingBoxOverlapDetector(private val targetSize: Float) : OverlapDetector {
+
+    private val TAG = "BoundingBoxOverlapDetector"
+
     override fun isGoodOverlap(
         touchData: NormalizedTouchData,
         nativeSensorBounds: Rect,
         nativeOverlayBounds: Rect,
-    ): Boolean =
-        touchData.isWithinBounds(nativeOverlayBounds) &&
-            touchData.isWithinBounds(nativeSensorBounds)
+    ): Boolean {
+        val scaledRadius = (nativeSensorBounds.width() / 2) * targetSize
+        val scaledSensorBounds =
+            Rect(
+                (nativeSensorBounds.centerX() - scaledRadius).toInt(),
+                (nativeSensorBounds.centerY() - scaledRadius).toInt(),
+                (nativeSensorBounds.centerX() + scaledRadius).toInt(),
+                (nativeSensorBounds.centerY() + scaledRadius).toInt(),
+            )
+
+        return touchData.isWithinBounds(scaledSensorBounds)
+    }
 }
