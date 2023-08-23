@@ -67,7 +67,6 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -147,7 +146,6 @@ public class QuickSettingsController implements Dumpable {
     private final MediaHierarchyManager mMediaHierarchyManager;
     private final AmbientState mAmbientState;
     private final RecordingController mRecordingController;
-    private final FalsingCollector mFalsingCollector;
     private final LockscreenGestureLogger mLockscreenGestureLogger;
     private final ShadeLogger mShadeLog;
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
@@ -335,7 +333,6 @@ public class QuickSettingsController implements Dumpable {
             AmbientState ambientState,
             RecordingController recordingController,
             FalsingManager falsingManager,
-            FalsingCollector falsingCollector,
             AccessibilityManager accessibilityManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             MetricsLogger metricsLogger,
@@ -381,7 +378,6 @@ public class QuickSettingsController implements Dumpable {
         mAmbientState = ambientState;
         mRecordingController = recordingController;
         mFalsingManager = falsingManager;
-        mFalsingCollector = falsingCollector;
         mAccessibilityManager = accessibilityManager;
 
         mLockscreenGestureLogger = lockscreenGestureLogger;
@@ -1660,7 +1656,6 @@ public class QuickSettingsController implements Dumpable {
                 }
             }
             if (shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
-                mFalsingCollector.onQsDown();
                 mShadeLog.logMotionEvent(event,
                         "handleQsDown: down action, QS tracking enabled");
                 mTracking = true;

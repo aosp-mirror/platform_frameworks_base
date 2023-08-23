@@ -39,7 +39,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.R
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
@@ -59,6 +58,11 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.shared.system.SysUiStatsLog
+import com.android.systemui.shared.system.SysUiStatsLog.SMARTSPACE_CARD_REPORTED
+import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__UNKNOWN_CARD
+import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY as SSPACE_CARD_REPORTED__DREAM_OVERLAY
+import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN as SSPACE_CARD_REPORTED__LOCKSCREEN
+import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -100,7 +104,6 @@ constructor(
     @Main executor: DelayableExecutor,
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
-    falsingCollector: FalsingCollector,
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
     private val logger: MediaUiEventLogger,
@@ -122,6 +125,7 @@ constructor(
 
     /** Is the player currently visible (at the end of the transformation */
     private var playersVisible: Boolean = false
+
     /**
      * The desired location where we'll be at the end of the transformation. Usually this matches
      * the end location, except when we're still waiting on a state update call.
@@ -152,6 +156,7 @@ constructor(
     @VisibleForTesting var mediaCarousel: MediaScrollView
     val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
+
     @VisibleForTesting
     lateinit var settingsButton: View
         private set
@@ -280,7 +285,6 @@ constructor(
                 this::updatePageIndicatorLocation,
                 this::updateSeekbarListening,
                 this::closeGuts,
-                falsingCollector,
                 falsingManager,
                 this::logSmartspaceImpression,
                 logger
@@ -327,23 +331,18 @@ constructor(
                     if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                         // Log card received if a new resumable media card is added
                         MediaPlayerData.getMediaPlayer(key)?.let {
-                            /* ktlint-disable max-line-length */
                             logSmartspaceCardReported(
                                 759, // SMARTSPACE_CARD_RECEIVED
                                 it.mSmartspaceId,
                                 it.mUid,
                                 surfaces =
                                     intArrayOf(
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY
+                                        SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
+                                        SSPACE_CARD_REPORTED__LOCKSCREEN,
+                                        SSPACE_CARD_REPORTED__DREAM_OVERLAY,
                                     ),
                                 rank = MediaPlayerData.getMediaPlayerIndex(key)
                             )
-                            /* ktlint-disable max-line-length */
                         }
                         if (
                             mediaCarouselScrollHandler.visibleToUser &&
@@ -362,24 +361,20 @@ constructor(
                                         it.mUid + systemClock.currentTimeMillis().toInt()
                                     )
                                 it.mIsImpressed = false
-                                /* ktlint-disable max-line-length */
+
                                 logSmartspaceCardReported(
                                     759, // SMARTSPACE_CARD_RECEIVED
                                     it.mSmartspaceId,
                                     it.mUid,
                                     surfaces =
                                         intArrayOf(
-                                            SysUiStatsLog
-                                                .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                            SysUiStatsLog
-                                                .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
-                                            SysUiStatsLog
-                                                .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY
+                                            SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
+                                            SSPACE_CARD_REPORTED__LOCKSCREEN,
+                                            SSPACE_CARD_REPORTED__DREAM_OVERLAY,
                                         ),
                                     rank = index,
                                     receivedLatencyMillis = receivedSmartspaceCardLatency
                                 )
-                                /* ktlint-disable max-line-length */
                             }
                         }
                         // If media container area already visible to the user, log impression for
@@ -431,19 +426,16 @@ constructor(
                                             it.mUid + systemClock.currentTimeMillis().toInt()
                                         )
                                     it.mIsImpressed = false
-                                    /* ktlint-disable max-line-length */
+
                                     logSmartspaceCardReported(
                                         759, // SMARTSPACE_CARD_RECEIVED
                                         it.mSmartspaceId,
                                         it.mUid,
                                         surfaces =
                                             intArrayOf(
-                                                SysUiStatsLog
-                                                    .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                                SysUiStatsLog
-                                                    .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
-                                                SysUiStatsLog
-                                                    .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY
+                                                SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
+                                                SSPACE_CARD_REPORTED__LOCKSCREEN,
+                                                SSPACE_CARD_REPORTED__DREAM_OVERLAY,
                                             ),
                                         rank = index,
                                         receivedLatencyMillis =
@@ -451,25 +443,20 @@ constructor(
                                                     data.headphoneConnectionTimeMillis)
                                                 .toInt()
                                     )
-                                    /* ktlint-disable max-line-length */
                                 }
                             }
                         }
                         addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
                         MediaPlayerData.getMediaPlayer(key)?.let {
-                            /* ktlint-disable max-line-length */
                             logSmartspaceCardReported(
                                 759, // SMARTSPACE_CARD_RECEIVED
                                 it.mSmartspaceId,
                                 it.mUid,
                                 surfaces =
                                     intArrayOf(
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__LOCKSCREEN,
-                                        SysUiStatsLog
-                                            .SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__DREAM_OVERLAY
+                                        SMART_SPACE_CARD_REPORTED__DISPLAY_SURFACE__SHADE,
+                                        SSPACE_CARD_REPORTED__LOCKSCREEN,
+                                        SSPACE_CARD_REPORTED__DREAM_OVERLAY,
                                     ),
                                 rank = MediaPlayerData.getMediaPlayerIndex(key),
                                 receivedLatencyMillis =
@@ -477,7 +464,6 @@ constructor(
                                             data.headphoneConnectionTimeMillis)
                                         .toInt()
                             )
-                            /* ktlint-disable max-line-length */
                         }
                         if (
                             mediaCarouselScrollHandler.visibleToUser &&
@@ -560,7 +546,10 @@ constructor(
         mediaCarouselScrollHandler.onSettingsButtonUpdated(settings)
         settingsButton.setOnClickListener {
             logger.logCarouselSettings()
-            activityStarter.startActivity(settingsIntent, true /* dismissShade */)
+            activityStarter.startActivity(
+                settingsIntent,
+                /* dismissShade= */ true,
+            )
         }
     }
 
@@ -1108,7 +1097,6 @@ constructor(
         }
     }
 
-    @JvmOverloads
     /**
      * Log Smartspace events
      *
@@ -1127,6 +1115,7 @@ constructor(
      *   between headphone connection to sysUI displays media recommendation card
      * @param isSwipeToDismiss whether is to log swipe-to-dismiss event
      */
+    @JvmOverloads
     fun logSmartspaceCardReported(
         eventId: Int,
         instanceId: Int,
@@ -1154,21 +1143,24 @@ constructor(
 
         val cardinality = mediaContent.getChildCount()
         surfaces.forEach { surface ->
-            /* ktlint-disable max-line-length */
             SysUiStatsLog.write(
-                SysUiStatsLog.SMARTSPACE_CARD_REPORTED,
+                SMARTSPACE_CARD_REPORTED,
                 eventId,
                 instanceId,
                 // Deprecated, replaced with AiAi feature type so we don't need to create logging
                 // card type for each new feature.
-                SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__UNKNOWN_CARD,
+                SMART_SPACE_CARD_REPORTED__CARD_TYPE__UNKNOWN_CARD,
                 surface,
                 // Use -1 as rank value to indicate user swipe to dismiss the card
                 if (isSwipeToDismiss) -1 else rank,
                 cardinality,
-                if (mediaControlKey.isSsMediaRec) 15 // MEDIA_RECOMMENDATION
-                else if (mediaControlKey.isSsReactivated) 43 // MEDIA_RESUME_SS_ACTIVATED
-                else 31, // MEDIA_RESUME
+                if (mediaControlKey.isSsMediaRec) {
+                    15 // MEDIA_RECOMMENDATION
+                } else if (mediaControlKey.isSsReactivated) {
+                    43 // MEDIA_RESUME_SS_ACTIVATED
+                } else {
+                    31
+                }, // MEDIA_RESUME
                 uid,
                 interactedSubcardRank,
                 interactedSubcardCardinality,
@@ -1176,7 +1168,7 @@ constructor(
                 null, // Media cards cannot have subcards.
                 null // Media cards don't have dimensions today.
             )
-            /* ktlint-disable max-line-length */
+
             if (DEBUG) {
                 Log.d(
                     TAG,
@@ -1259,6 +1251,7 @@ internal object MediaPlayerData {
             instanceId = InstanceId.fakeInstanceId(-1),
             appUid = -1
         )
+
     // Whether should prioritize Smartspace card.
     internal var shouldPrioritizeSs: Boolean = false
         private set
@@ -1291,6 +1284,7 @@ internal object MediaPlayerData {
 
     private val mediaPlayers = TreeMap<MediaSortKey, MediaControlPanel>(comparator)
     private val mediaData: MutableMap<String, MediaSortKey> = mutableMapOf()
+
     // A map that tracks order of visible media players before they get reordered.
     private val visibleMediaPlayers = LinkedHashMap<String, MediaSortKey>()
 

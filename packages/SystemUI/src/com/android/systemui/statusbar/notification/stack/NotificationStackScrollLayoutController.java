@@ -455,7 +455,6 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onDragCancelled(View v) {
-                    mFalsingCollector.onNotificationStopDismissing();
                 }
 
                 /**
@@ -501,7 +500,6 @@ public class NotificationStackScrollLayoutController {
                     }
 
                     mView.addSwipedOutView(view);
-                    mFalsingCollector.onNotificationDismissed();
                     if (mFalsingCollector.shouldEnforceBouncer()) {
                         mActivityStarter.executeRunnableDismissingKeyguard(
                                 null,
@@ -549,7 +547,6 @@ public class NotificationStackScrollLayoutController {
 
                 @Override
                 public void onBeginDrag(View v) {
-                    mFalsingCollector.onNotificationStartDismissing();
                     mView.onSwipeBegin(v);
                 }
 

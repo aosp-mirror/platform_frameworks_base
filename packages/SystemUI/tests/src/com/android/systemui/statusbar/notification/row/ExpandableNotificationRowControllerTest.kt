@@ -27,7 +27,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.FalsingManager
@@ -57,6 +56,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.wmshell.BubblesManager
+import java.util.Optional
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -68,7 +68,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
-import java.util.Optional
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -100,7 +99,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val gutsManager: NotificationGutsManager = mock()
     private val onUserInteractionCallback: OnUserInteractionCallback = mock()
     private val falsingManager: FalsingManager = mock()
-    private val falsingCollector: FalsingCollector = mock()
     private val featureFlags: FeatureFlags = mock()
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier = mock()
     private val bubblesManager: BubblesManager = mock()
@@ -140,7 +138,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 /*allowLongPress=*/ false,
                 onUserInteractionCallback,
                 falsingManager,
-                falsingCollector,
                 featureFlags,
                 peopleNotificationIdentifier,
                 Optional.of(bubblesManager),
@@ -226,20 +223,20 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     fun registerSettingsListener_forBubbles() {
         controller.init(mock(NotificationEntry::class.java))
         val viewStateObserver = withArgCaptor {
-            verify(view).addOnAttachStateChangeListener(capture());
+            verify(view).addOnAttachStateChangeListener(capture())
         }
-        viewStateObserver.onViewAttachedToWindow(view);
-        verify(settingsController).addCallback(any(), any());
+        viewStateObserver.onViewAttachedToWindow(view)
+        verify(settingsController).addCallback(any(), any())
     }
 
     @Test
     fun unregisterSettingsListener_forBubbles() {
         controller.init(mock(NotificationEntry::class.java))
         val viewStateObserver = withArgCaptor {
-            verify(view).addOnAttachStateChangeListener(capture());
+            verify(view).addOnAttachStateChangeListener(capture())
         }
-        viewStateObserver.onViewDetachedFromWindow(view);
-        verify(settingsController).removeCallback(any(), any());
+        viewStateObserver.onViewDetachedFromWindow(view)
+        verify(settingsController).removeCallback(any(), any())
     }
 
     @Test
@@ -263,11 +260,17 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         whenever(view.privateLayout).thenReturn(childView)
 
         controller.mSettingsListener.onSettingChanged(
-                BUBBLES_SETTING_URI, view.entry.sbn.userId, "1")
+            BUBBLES_SETTING_URI,
+            view.entry.sbn.userId,
+            "1"
+        )
         verify(childView).setBubblesEnabledForUser(true)
 
         controller.mSettingsListener.onSettingChanged(
-                BUBBLES_SETTING_URI, view.entry.sbn.userId, "9")
+            BUBBLES_SETTING_URI,
+            view.entry.sbn.userId,
+            "9"
+        )
         verify(childView).setBubblesEnabledForUser(false)
     }
 
@@ -277,13 +280,12 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         whenever(view.privateLayout).thenReturn(childView)
 
         val notification = Notification.Builder(mContext).build()
-        val sbn = SbnBuilder().setNotification(notification)
-                .setUser(UserHandle.of(USER_ALL))
-                .build()
-        whenever(view.entry).thenReturn(NotificationEntryBuilder()
-                .setSbn(sbn)
-                .setUser(UserHandle.of(USER_ALL))
-                .build())
+        val sbn =
+            SbnBuilder().setNotification(notification).setUser(UserHandle.of(USER_ALL)).build()
+        whenever(view.entry)
+            .thenReturn(
+                NotificationEntryBuilder().setSbn(sbn).setUser(UserHandle.of(USER_ALL)).build()
+            )
 
         controller.mSettingsListener.onSettingChanged(BUBBLES_SETTING_URI, 9, "1")
         verify(childView).setBubblesEnabledForUser(true)

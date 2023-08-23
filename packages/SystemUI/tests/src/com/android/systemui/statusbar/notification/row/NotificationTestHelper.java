@@ -54,7 +54,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
-import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
@@ -600,7 +599,6 @@ public class NotificationTestHelper {
                 mock(OnExpandClickListener.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 new FalsingManagerFake(),
-                new FalsingCollectorFake(),
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
