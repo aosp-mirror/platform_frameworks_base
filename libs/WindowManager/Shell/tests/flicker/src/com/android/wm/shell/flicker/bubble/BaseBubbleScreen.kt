@@ -31,6 +31,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.LaunchBubbleHelper
+import com.android.server.wm.flicker.helpers.MultiWindowUtils
 import com.android.wm.shell.flicker.BaseTest
 import org.junit.runners.Parameterized
 
@@ -56,6 +57,9 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
     ): FlickerBuilder.() -> Unit {
         return {
             setup {
+                MultiWindowUtils.executeShellCommand(
+                        instrumentation,
+                        "settings put secure force_hide_bubbles_user_education 1")
                 notifyManager.setBubblesAllowed(
                     testApp.packageName,
                     uid,
@@ -67,6 +71,9 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
             }
 
             teardown {
+                MultiWindowUtils.executeShellCommand(
+                        instrumentation,
+                        "settings put secure force_hide_bubbles_user_education 0")
                 notifyManager.setBubblesAllowed(
                     testApp.packageName,
                     uid,
