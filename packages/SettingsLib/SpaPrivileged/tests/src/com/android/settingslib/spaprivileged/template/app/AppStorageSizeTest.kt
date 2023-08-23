@@ -38,7 +38,7 @@ import org.mockito.Mock
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppStorageSizeTest {
@@ -63,7 +63,9 @@ class AppStorageSizeTest {
         whenever(context.storageStatsManager).thenReturn(storageStatsManager)
         whenever(
             storageStatsManager.queryStatsForPackage(
-                app.storageUuid, app.packageName, app.userHandle
+                app.storageUuid,
+                app.packageName,
+                app.userHandle,
             )
         ).thenReturn(STATS)
     }
@@ -86,7 +88,9 @@ class AppStorageSizeTest {
         var storageSize = stateOf("Computing")
         whenever(
             storageStatsManager.queryStatsForPackage(
-                app.storageUuid, app.packageName, app.userHandle
+                app.storageUuid,
+                app.packageName,
+                app.userHandle,
             )
         ).thenThrow(NameNotFoundException())
 

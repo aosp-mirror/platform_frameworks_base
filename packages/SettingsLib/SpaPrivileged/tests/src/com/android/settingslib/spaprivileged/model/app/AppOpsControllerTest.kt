@@ -32,15 +32,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppOpsControllerTest {
@@ -56,8 +54,8 @@ class AppOpsControllerTest {
     fun setUp() {
         whenever(context.appOpsManager).thenReturn(appOpsManager)
         whenever(context.packageManager).thenReturn(packageManager)
-        doNothing().`when`(packageManager)
-                .updatePermissionFlags(anyString(), anyString(), anyInt(), anyInt(), any())
+        doNothing().whenever(packageManager)
+                .updatePermissionFlags(any(), any(), any(), any(), any())
     }
 
     @Test

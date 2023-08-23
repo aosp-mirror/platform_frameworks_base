@@ -31,10 +31,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.any
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class DisposableBroadcastReceiverAsUserTest {
@@ -51,18 +53,26 @@ class DisposableBroadcastReceiverAsUserTest {
 
     @Before
     fun setUp() {
-        whenever(context.registerReceiverAsUser(any(), any(), any(), any(), any()))
-            .thenAnswer {
-                registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
-                null
-            }
+        whenever(
+            context.registerReceiverAsUser(
+                any(),
+                eq(USER_HANDLE),
+                eq(INTENT_FILTER),
+                isNull(),
+                isNull(),
+                eq(Context.RECEIVER_NOT_EXPORTED),
+            )
+        ).then {
+            registeredBroadcastReceiver = it.arguments[0] as BroadcastReceiver
+            null
+        }
     }
 
     @Test
     fun broadcastReceiver_registered() {
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides context) {
-                DisposableBroadcastReceiverAsUser(IntentFilter(), USER_HANDLE) {}
+                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
             }
         }
 
@@ -74,7 +84,7 @@ class DisposableBroadcastReceiverAsUserTest {
         var onReceiveIsCalled = false
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides context) {
-                DisposableBroadcastReceiverAsUser(IntentFilter(), USER_HANDLE) {
+                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {
                     onReceiveIsCalled = true
                 }
             }
@@ -87,5 +97,7 @@ class DisposableBroadcastReceiverAsUserTest {
 
     private companion object {
         val USER_HANDLE: UserHandle = UserHandle.of(0)
+
+        val INTENT_FILTER = IntentFilter()
     }
 }

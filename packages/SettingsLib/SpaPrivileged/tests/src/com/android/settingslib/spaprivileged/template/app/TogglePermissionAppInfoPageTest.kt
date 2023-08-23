@@ -45,7 +45,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class TogglePermissionAppInfoPageTest {
