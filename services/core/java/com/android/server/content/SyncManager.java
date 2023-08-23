@@ -714,7 +714,7 @@ public class SyncManager {
         // This can be noisy, therefore we will allowlist sync adapters installed
         // before we started checking for account access because they already know
         // the account (they run before) which is the genie is out of the bottle.
-        whiteListExistingSyncAdaptersIfNeeded();
+        allowListExistingSyncAdaptersIfNeeded();
 
         mLogger.log("Sync manager initialized: " + Build.FINGERPRINT);
     }
@@ -755,7 +755,7 @@ public class SyncManager {
         }
     }
 
-    private void whiteListExistingSyncAdaptersIfNeeded() {
+    private void allowListExistingSyncAdaptersIfNeeded() {
         if (!mSyncStorageEngine.shouldGrantSyncAdaptersAccountAccess()) {
             return;
         }
