@@ -4579,6 +4579,16 @@ public final class Settings {
         public static final String WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE =
                 "wear_accessibility_gesture_enabled_during_oobe";
 
+
+        /**
+         * If the text-to-speech pre-warm is enabled.
+         * Set to 1 for true and 0 for false.
+         *
+         * This setting is used only internally.
+         * @hide
+         */
+        public static final String WEAR_TTS_PREWARM_ENABLED = "wear_tts_prewarm_enabled";
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AIRPLANE_MODE_ON} instead
          */
@@ -6017,6 +6027,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ADVANCED_SETTINGS);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE);
+            PRIVATE_SETTINGS.add(WEAR_TTS_PREWARM_ENABLED);
             PRIVATE_SETTINGS.add(SCREEN_AUTO_BRIGHTNESS_ADJ);
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
