@@ -1350,8 +1350,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private boolean shouldSkipHeightUpdate() {
         return mAmbientState.isOnKeyguard()
-                && (mAmbientState.isUnlockHintRunning()
-                || mAmbientState.isSwipingUp()
+                && (mAmbientState.isSwipingUp()
                 || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
     }
 
@@ -5069,14 +5068,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     public void setIsFullWidth(boolean isFullWidth) {
         mAmbientState.setSmallScreen(isFullWidth);
-    }
-
-    public void setUnlockHintRunning(boolean running) {
-        mAmbientState.setUnlockHintRunning(running);
-        if (!running) {
-            // re-calculate the stack height which was frozen while running this animation
-            updateStackPosition();
-        }
     }
 
     public void setPanelFlinging(boolean flinging) {

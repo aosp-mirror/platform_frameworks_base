@@ -322,26 +322,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    public void setUnlockHintRunning_updatesStackEndHeightOnlyOnFinish() {
-        final float expansionFraction = 0.5f;
-        mAmbientState.setStatusBarState(StatusBarState.KEYGUARD);
-        mStackScroller.setUnlockHintRunning(true);
-
-        // Validate that when the animation is running, we update only the stackHeight
-        clearInvocations(mAmbientState);
-        mStackScroller.updateStackEndHeightAndStackHeight(expansionFraction);
-        verify(mAmbientState, never()).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
-
-        // Validate that when the animation ends the stackEndHeight is recalculated immediately
-        clearInvocations(mAmbientState);
-        mStackScroller.setUnlockHintRunning(false);
-        verify(mAmbientState).setUnlockHintRunning(eq(false));
-        verify(mAmbientState).setStackEndHeight(anyFloat());
-        verify(mAmbientState).setStackHeight(anyFloat());
-    }
-
-    @Test
     public void testNotDimmedOnKeyguard() {
         when(mBarState.getState()).thenReturn(StatusBarState.SHADE);
         mStackScroller.setDimmed(true /* dimmed */, false /* animate */);

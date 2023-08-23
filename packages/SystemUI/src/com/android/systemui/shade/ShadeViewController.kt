@@ -199,12 +199,6 @@ interface ShadeViewController {
     /** Animate to expanded shade after a delay in ms. Used for lockscreen to shade transition. */
     fun transitionToExpandedShade(delay: Long)
 
-    /**
-     * Returns whether the unlock hint animation is running. The unlock hint animation is when the
-     * user taps the lock screen, causing the contents of the lock screen visually bounce.
-     */
-    val isUnlockHintRunning: Boolean
-
     /** @see ViewGroupFadeHelper.reset */
     fun resetViewGroupFade()
 
