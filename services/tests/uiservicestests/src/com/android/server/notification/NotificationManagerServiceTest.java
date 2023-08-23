@@ -6045,31 +6045,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testVisitUris_styleExtrasWithoutStyle() {
-        Notification notification = new Notification.Builder(mContext, "a")
-                .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .build();
+        Notification.Builder notification = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
-        Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle(
-                personWithIcon("content://user"))
-                .addHistoricMessage(new Notification.MessagingStyle.Message("Heyhey!",
-                                System.currentTimeMillis(),
-                                personWithIcon("content://historicalMessenger")))
-                .addMessage(new Notification.MessagingStyle.Message("Are you there",
-                                System.currentTimeMillis(),
-                                personWithIcon("content://messenger")))
-                        .setShortcutIcon(
-                                Icon.createWithContentUri("content://conversationShortcut"));
-        messagingStyle.addExtras(notification.extras); // Instead of Builder.setStyle(style).
+        Bundle messagingExtras = new Bundle();
+        messagingExtras.putParcelable(Notification.EXTRA_MESSAGING_PERSON,
+                personWithIcon("content://user"));
+        messagingExtras.putParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Heyhey!",
+                        System.currentTimeMillis() - 100,
+                        personWithIcon("content://historicalMessenger")).toBundle()});
+        messagingExtras.putParcelableArray(Notification.EXTRA_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Are you there?",
+                        System.currentTimeMillis(),
+                        personWithIcon("content://messenger")).toBundle()});
+        messagingExtras.putParcelable(Notification.EXTRA_CONVERSATION_ICON,
+                Icon.createWithContentUri("content://conversationShortcut"));
+        notification.addExtras(messagingExtras);
 
-        Notification.CallStyle callStyle = Notification.CallStyle.forOngoingCall(
-                        personWithIcon("content://caller"),
-                        PendingIntent.getActivity(mContext, 0, new Intent(),
-                                PendingIntent.FLAG_IMMUTABLE))
-                .setVerificationIcon(Icon.createWithContentUri("content://callVerification"));
-        callStyle.addExtras(notification.extras); // Same.
+        Bundle callExtras = new Bundle();
+        callExtras.putParcelable(Notification.EXTRA_CALL_PERSON,
+                personWithIcon("content://caller"));
+        callExtras.putParcelable(Notification.EXTRA_VERIFICATION_ICON,
+                Icon.createWithContentUri("content://callVerification"));
+        notification.addExtras(callExtras);
 
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
-        notification.visitUris(visitor);
+        notification.build().visitUris(visitor);
 
         verify(visitor).accept(eq(Uri.parse("content://user")));
         verify(visitor).accept(eq(Uri.parse("content://historicalMessenger")));
