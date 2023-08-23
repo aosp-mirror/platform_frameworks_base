@@ -466,6 +466,7 @@
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
   <java-symbol type="integer" name="config_longPressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_shortPressOnStemPrimaryBehavior" />
+  <java-symbol type="string" name="config_primaryShortPressTargetActivity" />
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="string" name="config_doublePressOnPowerTargetActivity" />

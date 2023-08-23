@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.IInputConstants.INVALID_INPUT_DEVICE_ID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -338,6 +339,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS
     static final int SHORT_PRESS_PRIMARY_NOTHING = 0;
     static final int SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS = 1;
+    static final int SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY = 2;
 
     // Must match: config_longPressOnStemPrimaryBehavior in config.xml
     // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS
@@ -608,6 +610,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
+
+    // Must match config_primaryShortPressTargetActivity in config.xml
+    ComponentName mPrimaryShortPressTargetActivity;
 
     // Whether to lock the device after the next dreaming transition has finished.
     private boolean mLockAfterDreamingTransitionFinished;
@@ -1374,7 +1379,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerKeyHandled = true;
                 performHapticFeedback(HapticFeedbackConstants.ASSISTANT_BUTTON, false,
                         "Power - Long Press - Go To Assistant");
-                final int powerKeyDeviceId = Integer.MIN_VALUE;
+                final int powerKeyDeviceId = INVALID_INPUT_DEVICE_ID;
                 launchAssistAction(null, powerKeyDeviceId, eventTime,
                         AssistUtils.INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS);
                 break;
@@ -1461,23 +1466,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void stemPrimarySinglePressAction(int behavior) {
+        if (DEBUG_INPUT) {
+            Slog.d(TAG, "stemPrimarySinglePressAction: behavior=" + behavior);
+        }
+        if (behavior == SHORT_PRESS_PRIMARY_NOTHING) return;
+
+        final boolean keyguardActive = mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
+        if (keyguardActive) {
+            // If keyguarded then notify the keyguard.
+            mKeyguardDelegate.onSystemKeyPressed(KeyEvent.KEYCODE_STEM_PRIMARY);
+            return;
+        }
         switch (behavior) {
-            case SHORT_PRESS_PRIMARY_NOTHING:
-                break;
             case SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS:
                 if (DEBUG_INPUT) {
                     Slog.d(TAG, "Executing stem primary short press action behavior.");
                 }
-                final boolean keyguardActive =
-                        mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
-                if (!keyguardActive) {
-                    Intent intent = new Intent(Intent.ACTION_ALL_APPS);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                Intent allAppsIntent = new Intent(Intent.ACTION_ALL_APPS);
+                allAppsIntent.addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                startActivityAsUser(allAppsIntent, UserHandle.CURRENT_OR_SELF);
+                break;
+            case SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY:
+                if (DEBUG_INPUT) {
+                    Slog.d(
+                            TAG,
+                            "Executing stem primary short press action behavior for launching "
+                                    + "target activity.");
+                }
+                if (mPrimaryShortPressTargetActivity != null) {
+                    Intent targetActivityIntent = new Intent();
+                    targetActivityIntent.setComponent(mPrimaryShortPressTargetActivity);
+                    ResolveInfo resolveInfo =
+                            mContext.getPackageManager()
+                                    .resolveActivity(targetActivityIntent, /* flags= */ 0);
+                    if (resolveInfo != null) {
+                        targetActivityIntent.addFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK
+                                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                                        | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                        startActivityAsUser(targetActivityIntent, UserHandle.CURRENT_OR_SELF);
+                    } else {
+                        Slog.wtf(
+                                TAG,
+                                "Could not resolve activity with : "
+                                        + mPrimaryShortPressTargetActivity.flattenToString()
+                                        + " name.");
+                    }
                 } else {
-                    // If keyguarded then notify the keyguard.
-                    mKeyguardDelegate.onSystemKeyPressed(KeyEvent.KEYCODE_STEM_PRIMARY);
+                    Slog.wtf(
+                            TAG,
+                            "mPrimaryShortPressTargetActivity must not be null and correctly"
+                                + " specified");
                 }
                 break;
         }
@@ -1527,7 +1568,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void stemPrimaryLongPress() {
+    private void stemPrimaryLongPress(long eventTime) {
         if (DEBUG_INPUT) {
             Slog.d(TAG, "Executing stem primary long press action behavior.");
         }
@@ -1536,7 +1577,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case LONG_PRESS_PRIMARY_NOTHING:
                 break;
             case LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT:
-                launchVoiceAssist(/* allowDuringSetup= */false);
+                final int stemPrimaryKeyDeviceId = INVALID_INPUT_DEVICE_ID;
+                launchAssistAction(
+                        null,
+                        stemPrimaryKeyDeviceId,
+                        eventTime,
+                        AssistUtils.INVOCATION_TYPE_UNKNOWN);
                 break;
         }
     }
@@ -2159,6 +2205,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mSensorPrivacyManager = mContext.getSystemService(SensorPrivacyManager.class);
+        mSearchManager = mContext.getSystemService(SearchManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -2295,6 +2342,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerDoublePressTargetActivity = ComponentName.unflattenFromString(
             mContext.getResources().getString(
                 com.android.internal.R.string.config_doublePressOnPowerTargetActivity));
+        mPrimaryShortPressTargetActivity = ComponentName.unflattenFromString(
+            mContext.getResources().getString(
+                com.android.internal.R.string.config_primaryShortPressTargetActivity));
         mShortPressOnSleepBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
         mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
@@ -2658,7 +2708,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onLongPress(long eventTime) {
-            stemPrimaryLongPress();
+            stemPrimaryLongPress(eventTime);
         }
 
         @Override
@@ -3905,7 +3955,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Add Intent Extra data.
         Bundle args = null;
         args = new Bundle();
-        if (deviceId > Integer.MIN_VALUE) {
+        if (deviceId != INVALID_INPUT_DEVICE_ID) {
             args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
         }
         if (hint != null) {
@@ -3914,8 +3964,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         args.putLong(Intent.EXTRA_TIME, eventTime);
         args.putInt(AssistUtils.INVOCATION_TYPE_KEY, invocationType);
 
-        ((SearchManager) mContext.createContextAsUser(UserHandle.of(mCurrentUserId), 0)
-                .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);
+        if (mSearchManager != null) {
+            mSearchManager.launchAssist(args);
+        } else {
+            // Fallback to status bar if search manager doesn't exist (e.g. on wear).
+            StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+            if (statusBar != null) {
+                statusBar.startAssist(args);
+            }
+        }
     }
 
     /**
@@ -3926,37 +3983,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean keyguardActive =
                 mKeyguardDelegate != null && mKeyguardDelegate.isShowing();
         if (!keyguardActive) {
-            if (mHasFeatureWatch && isInRetailMode()) {
-                launchRetailVoiceAssist(allowDuringSetup);
-            } else {
-                startVoiceAssistIntent(allowDuringSetup);
-            }
+            startActivityAsUser(
+                    new Intent(Intent.ACTION_VOICE_ASSIST),
+                    /* bundle= */ null,
+                    UserHandle.CURRENT_OR_SELF,
+                    allowDuringSetup);
         } else {
             mKeyguardDelegate.dismissKeyguardToLaunch(new Intent(Intent.ACTION_VOICE_ASSIST));
         }
-    }
-
-    private void launchRetailVoiceAssist(boolean allowDuringSetup) {
-        Intent retailIntent = new Intent(ACTION_VOICE_ASSIST_RETAIL);
-        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivity(
-                retailIntent, /* flags= */0);
-        if (resolveInfo != null) {
-            retailIntent.setComponent(
-                    new ComponentName(resolveInfo.activityInfo.packageName,
-                            resolveInfo.activityInfo.name));
-            startActivityAsUser(retailIntent, null, UserHandle.CURRENT_OR_SELF,
-                    allowDuringSetup);
-        } else {
-            Slog.w(TAG, "Couldn't find an app to process " + ACTION_VOICE_ASSIST_RETAIL
-                    + ". Fall back to start " + Intent.ACTION_VOICE_ASSIST);
-            startVoiceAssistIntent(allowDuringSetup);
-        }
-    }
-
-    private void startVoiceAssistIntent(boolean allowDuringSetup) {
-        Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
-        startActivityAsUser(intent, null, UserHandle.CURRENT_OR_SELF,
-                allowDuringSetup);
     }
 
     private boolean isInRetailMode() {
@@ -3979,13 +4013,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             Slog.i(TAG, "Not starting activity because user setup is in progress: " + intent);
         }
-    }
-
-    private SearchManager getSearchManager() {
-        if (mSearchManager == null) {
-            mSearchManager = (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
-        }
-        return mSearchManager;
     }
 
     private void preloadRecentApps() {
@@ -6471,6 +6498,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "SHORT_PRESS_PRIMARY_NOTHING";
             case SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS:
                 return "SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS";
+            case SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY:
+                return "SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY";
             default:
                 return Integer.toString(behavior);
         }
