@@ -144,8 +144,6 @@ APerformanceHintSession* APerformanceHintManager::createSession(
     binder::Status ret =
             mHintManager->createHintSession(mToken, tids, initialTargetWorkDurationNanos, &session);
     if (!ret.isOk() || !session) {
-        ALOGE("%s: PerformanceHint cannot create hint session. %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
         return nullptr;
     }
     return new APerformanceHintSession(mHintManager, std::move(session), mPreferredRateNanos,

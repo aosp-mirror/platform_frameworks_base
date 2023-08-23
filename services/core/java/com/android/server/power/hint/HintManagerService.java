@@ -56,7 +56,6 @@ import java.util.Objects;
 public final class HintManagerService extends SystemService {
     private static final String TAG = "HintManagerService";
     private static final boolean DEBUG = false;
-    private static final int MAX_HINT_SESSION_COUNT_PER_UID = 20;
     @VisibleForTesting final long mHintSessionPreferredRate;
 
     // Multi-level map storing all active AppHintSessions.
@@ -368,23 +367,6 @@ public final class HintManagerService extends SystemService {
                     + " not be empty.");
 
             final int callingUid = Binder.getCallingUid();
-            if (callingUid != Process.SYSTEM_UID) {
-                int sessionCount = 0;
-                synchronized (mLock) {
-                    ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
-                            mActiveSessions.get(callingUid);
-                    if (tokenMap != null) {
-                        for (ArraySet<AppHintSession> arr : tokenMap.values()) {
-                            sessionCount += arr.size();
-                        }
-                    }
-                }
-                if (sessionCount >= MAX_HINT_SESSION_COUNT_PER_UID) {
-                    throw new IllegalStateException(
-                            "Max session count limit reached: " + sessionCount);
-                }
-            }
-
             final int callingTgid = Process.getThreadGroupLeader(Binder.getCallingPid());
             final long identity = Binder.clearCallingIdentity();
             try {
