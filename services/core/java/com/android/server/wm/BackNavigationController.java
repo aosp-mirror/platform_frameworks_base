@@ -409,7 +409,7 @@ class BackNavigationController {
     boolean isKeyguardOccluded(WindowState focusWindow) {
         final KeyguardController kc = mWindowManagerService.mAtmService.mKeyguardController;
         final int displayId = focusWindow.getDisplayId();
-        return kc.isKeyguardLocked(displayId) && kc.isDisplayOccluded(displayId);
+        return kc.isKeyguardOccluded(displayId);
     }
 
     /**

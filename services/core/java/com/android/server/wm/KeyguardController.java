@@ -112,7 +112,7 @@ class KeyguardController {
         final KeyguardDisplayState state = getDisplayState(displayId);
         return (state.mKeyguardShowing || state.mAodShowing)
                 && !state.mKeyguardGoingAway
-                && !isDisplayOccluded(displayId);
+                && !state.mOccluded;
     }
 
     /**
@@ -134,8 +134,7 @@ class KeyguardController {
      */
     boolean isKeyguardShowing(int displayId) {
         final KeyguardDisplayState state = getDisplayState(displayId);
-        return state.mKeyguardShowing && !state.mKeyguardGoingAway
-                && !isDisplayOccluded(displayId);
+        return state.mKeyguardShowing && !state.mKeyguardGoingAway && !state.mOccluded;
     }
 
     /**
@@ -144,6 +143,12 @@ class KeyguardController {
     boolean isKeyguardLocked(int displayId) {
         final KeyguardDisplayState state = getDisplayState(displayId);
         return state.mKeyguardShowing && !state.mKeyguardGoingAway;
+    }
+
+    /** Returns {code @true} if Keyguard is occluded while it is showing and not going away. */
+    boolean isKeyguardOccluded(int displayId) {
+        final KeyguardDisplayState state = getDisplayState(displayId);
+        return state.mKeyguardShowing && !state.mKeyguardGoingAway && state.mOccluded;
     }
 
     /**
@@ -496,7 +501,9 @@ class KeyguardController {
     }
 
     /**
-     * @return true if Keyguard is occluded or the device is dreaming.
+     * Returns {@code true} if the top activity on the display can occlude keyguard or the device
+     * is dreaming. Note that this method may return {@code true} even if the keyguard is disabled
+     * or not showing.
      */
     boolean isDisplayOccluded(int displayId) {
         return getDisplayState(displayId).mOccluded;

@@ -6527,7 +6527,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     boolean isKeyguardOccluded() {
         return mRootWindowContainer.mTaskSupervisor
-                .getKeyguardController().isDisplayOccluded(mDisplayId);
+                .getKeyguardController().isKeyguardOccluded(mDisplayId);
     }
 
     /**
