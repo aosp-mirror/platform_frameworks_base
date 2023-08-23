@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.pip;
 
-import static com.android.wm.shell.pip.PipUtils.dpToPx;
+import static com.android.wm.shell.common.pip.PipUtils.dpToPx;
 
 import android.content.Context;
 import android.content.res.Resources;
