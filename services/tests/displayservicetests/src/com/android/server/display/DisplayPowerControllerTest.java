@@ -63,8 +63,8 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
-import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
@@ -74,7 +74,6 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.testutils.OffsettableClock;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -140,6 +139,9 @@ public final class DisplayPowerControllerTest {
                     .spyStatic(BatteryStatsService.class)
                     .build();
 
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
+
     @Before
     public void setUp() throws Exception {
         mClock = new OffsettableClock.Stopped();
@@ -153,9 +155,10 @@ public final class DisplayPowerControllerTest {
         Settings.System.putFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0, UserHandle.USER_CURRENT);
 
-        addLocalServiceMock(WindowManagerPolicy.class, mWindowManagerPolicyMock);
-        addLocalServiceMock(ColorDisplayService.ColorDisplayServiceInternal.class,
-                mCdsiMock);
+        mLocalServiceKeeperRule.overrideLocalService(
+                WindowManagerPolicy.class, mWindowManagerPolicyMock);
+        mLocalServiceKeeperRule.overrideLocalService(
+                ColorDisplayService.ColorDisplayServiceInternal.class, mCdsiMock);
 
         mContext.addMockSystemService(PowerManager.class, mPowerManagerMock);
 
@@ -165,12 +168,6 @@ public final class DisplayPowerControllerTest {
 
         setUpSensors();
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
-    }
-
-    @After
-    public void tearDown() {
-        LocalServices.removeServiceForTest(WindowManagerPolicy.class);
-        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
     }
 
     @Test
@@ -1124,14 +1121,6 @@ public final class DisplayPowerControllerTest {
         // dispatch handler looper
         advanceTime(1);
         verify(mDisplayWhiteBalanceControllerMock, times(1)).setStrongModeEnabled(true);
-    }
-
-    /**
-     * Creates a mock and registers it to {@link LocalServices}.
-     */
-    private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
-        LocalServices.removeServiceForTest(clazz);
-        LocalServices.addService(clazz, mock);
     }
 
     private void advanceTime(long timeMs) {
