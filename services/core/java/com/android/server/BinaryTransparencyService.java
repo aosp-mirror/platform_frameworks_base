@@ -80,9 +80,9 @@ import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.modules.expresslog.Histogram;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageSplit;
@@ -1391,7 +1391,7 @@ public class BinaryTransparencyService extends SystemService {
         // Check the flag to determine whether biometric property verification is enabled. It's
         // disabled by default.
         if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_BIOMETRICS,
-                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, false)) {
+                KEY_ENABLE_BIOMETRIC_PROPERTY_VERIFICATION, true)) {
             if (DEBUG) {
                 Slog.d(TAG, "Do not collect/verify biometric properties. Feature disabled by "
                         + "DeviceConfig");
