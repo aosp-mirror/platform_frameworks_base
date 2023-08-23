@@ -114,6 +114,13 @@ public interface NotificationsModule {
     @Binds
     NotifGutsViewManager bindNotifGutsViewManager(NotificationGutsManager notificationGutsManager);
 
+    /** Binds {@link NotificationGutsManager} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationGutsManager.class)
+    CoreStartable bindsNotificationGutsManager(NotificationGutsManager notificationGutsManager);
+
+
     /** Provides an instance of {@link VisibilityLocationProvider} */
     @Binds
     VisibilityLocationProvider bindVisibilityLocationProvider(
