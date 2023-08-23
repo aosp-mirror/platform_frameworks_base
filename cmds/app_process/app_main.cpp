@@ -271,9 +271,9 @@ int main(int argc, char* const argv[])
         } else if (strcmp(arg, "--application") == 0) {
             application = true;
         } else if (strncmp(arg, "--nice-name=", 12) == 0) {
-            niceName.setTo(arg + 12);
+            niceName = (arg + 12);
         } else if (strncmp(arg, "--", 2) != 0) {
-            className.setTo(arg);
+            className = arg;
             break;
         } else {
             --i;
