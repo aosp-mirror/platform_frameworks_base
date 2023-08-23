@@ -1,0 +1,20 @@
+{
+  "presubmit": [
+    {
+      "name": "MediaRingtoneTests",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "MediaRingtoneTests",
+      "options": [
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ]
+}
