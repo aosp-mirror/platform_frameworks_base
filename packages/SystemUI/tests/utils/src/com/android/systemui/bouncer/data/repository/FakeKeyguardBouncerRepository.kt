@@ -21,7 +21,7 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
     private val _panelExpansionAmount = MutableStateFlow(KeyguardBouncerConstants.EXPANSION_HIDDEN)
     override val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
-    private val _keyguardPosition = MutableStateFlow(0f)
+    private val _keyguardPosition = MutableStateFlow<Float?>(null)
     override val keyguardPosition = _keyguardPosition.asStateFlow()
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
