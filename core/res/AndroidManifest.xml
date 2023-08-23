@@ -6099,6 +6099,10 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- @SystemApi @hide Allows trusted system components to report events to UsageStatsManager -->
+    <permission android:name="android.permission.REPORT_USAGE_STATS"
+                android:protectionLevel="signature|module" />
+
     <!-- Allows an application to query broadcast response stats (see
          {@link android.app.usage.BroadcastResponseStats}).
          @SystemApi
