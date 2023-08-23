@@ -215,7 +215,7 @@ public abstract class SoftRestrictedPermissionPolicy {
                             return true;
                         }
 
-                        // The package is now a part of the forced scoped storage whitelist
+                        // The package is now a part of the forced scoped storage allowlist
                         if (isForcedScopedStorage) {
                             return true;
                         }

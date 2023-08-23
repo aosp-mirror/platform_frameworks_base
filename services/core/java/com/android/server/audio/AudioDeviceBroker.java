@@ -2175,7 +2175,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
         if (btSCoOn) {
             // Use the SCO device known to BtHelper so that it matches exactly
             // what has been communicated to audio policy manager. The device
-            // returned by requestedCommunicationDevice() can be a dummy SCO device if legacy
+            // returned by requestedCommunicationDevice() can be a placeholder SCO device if legacy
             // APIs are used to start SCO audio.
             AudioDeviceAttributes device = mBtHelper.getHeadsetAudioDevice();
             if (device != null) {
