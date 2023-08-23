@@ -58,6 +58,7 @@ import android.compat.testing.PlatformCompatChangeRule;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -106,6 +107,7 @@ import com.android.server.display.DisplayManagerService.DeviceStateListener;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.lights.LightsManager;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -254,10 +256,11 @@ public class DisplayManagerServiceTest {
     @Mock LocalDisplayAdapter.SurfaceControlProxy mSurfaceControlProxy;
     @Mock IBinder mMockDisplayToken;
     @Mock SensorManagerInternal mMockSensorManagerInternal;
-
     @Mock SensorManager mSensorManager;
-
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
+    @Mock PackageManagerInternal mMockPackageManagerInternal;
+    @Mock UserManagerInternal mMockUserManagerInternal;
+
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
 
@@ -276,6 +279,10 @@ public class DisplayManagerServiceTest {
         LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
         LocalServices.addService(
                 VirtualDeviceManagerInternal.class, mMockVirtualDeviceManagerInternal);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
         // TODO: b/287945043
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
 
