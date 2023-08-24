@@ -17,8 +17,8 @@ filegroup {
     visibility: ["//frameworks/base/services"],
 }
 
-java_library_static {
-    name: "services.permission",
+java_library {
+    name: "services.permission-pre-jarjar",
     defaults: ["platform_service_defaults"],
     srcs: [":services.permission-sources"],
     libs: [
@@ -32,11 +32,16 @@ java_library_static {
         // Adds reflection-less suppressed exceptions and AutoCloseable.use().
         "kotlin-stdlib-jdk7",
     ],
-    jarjar_rules: "jarjar-rules.txt",
     kotlincflags: [
         "-Xjvm-default=all",
         "-Xno-call-assertions",
         "-Xno-param-assertions",
         "-Xno-receiver-assertions",
     ],
+}
+
+java_library {
+    name: "services.permission",
+    static_libs: ["services.permission-pre-jarjar"],
+    jarjar_rules: "jarjar-rules.txt",
 }
