@@ -1201,7 +1201,7 @@ public class TransitionTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
         assertTrue(app.getTask().inTransition());
 
         player.start();
@@ -1226,6 +1226,7 @@ public class TransitionTests extends WindowTestsBase {
         assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
         navBar.finishDrawing(null /* postDrawTransaction */, Integer.MAX_VALUE);
         assertTrue(asyncRotationController.isTargetToken(navBar.mToken));
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(navBar));
 
         player.startTransition();
         // Non-app windows should not be collected.
