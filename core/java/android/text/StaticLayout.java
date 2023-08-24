@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.LineBreaker;
 import android.os.Build;
@@ -421,6 +422,40 @@ public class StaticLayout extends Layout {
         }
 
         /**
+         * Set true for using width of bounding box as a source of automatic line breaking and
+         * drawing.
+         *
+         * If this value is false, the Layout determines the drawing offset and automatic line
+         * breaking based on total advances. By setting true, use all joined glyph's bounding boxes
+         * as a source of text width.
+         *
+         * If the font has glyphs that have negative bearing X or its xMax is greater than advance,
+         * the glyph clipping can happen because the drawing area may be bigger. By setting this to
+         * true, the Layout will reserve more spaces for drawing.
+         *
+         * @param useBoundsForWidth True for using bounding box, false for advances.
+         * @return this builder instance
+         * @see Layout#getUseBoundsForWidth()
+         * @see Layout.Builder#setUseBoundsForWidth(boolean)
+         */
+        @NonNull
+        public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            return this;
+        }
+
+        /**
+         * Internal API that tells underlying line breaker that calculating bounding boxes even if
+         * the line break is performed with advances. This is useful for DynamicLayout internal
+         * implementation because it uses bounding box as well as advances.
+         * @hide
+         */
+        public Builder setCalculateBounds(boolean value) {
+            mCalculateBounds = value;
+            return this;
+        }
+
+        /**
          * Build the {@link StaticLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this
@@ -479,6 +514,8 @@ public class StaticLayout extends Layout {
         private int mJustificationMode;
         private boolean mAddLastLineLineSpacing;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
+        private boolean mUseBoundsForWidth;
+        private boolean mCalculateBounds;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -508,7 +545,8 @@ public class StaticLayout extends Layout {
                 null,  // leftIndents
                 null,  // rightIndents
                 JUSTIFICATION_MODE_NONE,
-                null  // lineBreakConfig
+                null,  // lineBreakConfig,
+                false  // useBoundsForWidth
         );
 
         mColumns = COLUMNS_ELLIPSIZE;
@@ -585,7 +623,7 @@ public class StaticLayout extends Layout {
                 b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd,
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 b.mMaxLines, b.mBreakStrategy, b.mHyphenationFrequency, b.mLeftIndents,
-                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig);
+                b.mRightIndents, b.mJustificationMode, b.mLineBreakConfig, b.mUseBoundsForWidth);
 
         mColumns = columnSize;
         if (b.mEllipsize != null) {
@@ -644,6 +682,7 @@ public class StaticLayout extends Layout {
         mLineCount = 0;
         mEllipsized = false;
         mMaxLineHeight = mMaximumVisibleLineCount < 1 ? 0 : DEFAULT_MAX_LINE_HEIGHT;
+        mDrawingBounds = null;
         boolean isFallbackLineSpacing = b.mFallbackLineSpacing;
 
         int v = 0;
@@ -674,6 +713,7 @@ public class StaticLayout extends Layout {
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
                 .setJustificationMode(b.mJustificationMode)
                 .setIndents(indents)
+                .setUseBoundsForWidth(b.mUseBoundsForWidth)
                 .build();
 
         LineBreaker.ParagraphConstraints constraints =
@@ -711,7 +751,7 @@ public class StaticLayout extends Layout {
             final PrecomputedText.Params param = new PrecomputedText.Params(paint,
                     b.mLineBreakConfig, textDir, b.mBreakStrategy, b.mHyphenationFrequency);
             paragraphInfo = PrecomputedText.createMeasuredParagraphs(source, param, bufStart,
-                    bufEnd, false /* computeLayout */);
+                    bufEnd, false /* computeLayout */, b.mCalculateBounds);
         }
 
         for (int paraIndex = 0; paraIndex < paragraphInfo.length; paraIndex++) {
@@ -1406,6 +1446,16 @@ public class StaticLayout extends Layout {
         return mLines[mColumns * line + ELLIPSIS_START];
     }
 
+    @Override
+    @NonNull
+    public RectF computeDrawingBoundingBox() {
+        // Cache the drawing bounds result because it does not change after created.
+        if (mDrawingBounds == null) {
+            mDrawingBounds = super.computeDrawingBoundingBox();
+        }
+        return mDrawingBounds;
+    }
+
     /**
      * Return the total height of this layout.
      *
@@ -1431,6 +1481,7 @@ public class StaticLayout extends Layout {
     private int mTopPadding, mBottomPadding;
     @UnsupportedAppUsage
     private int mColumns;
+    private RectF mDrawingBounds = null;  // lazy calculation.
 
     /**
      * Keeps track if ellipsize is applied to the text.

@@ -584,6 +584,11 @@ public class LayoutTest {
         public int getTopPadding() {
             return 0;
         }
+
+        @Override
+        public RectF computeDrawingBoundingBox() {
+            return new RectF();
+        }
     }
 
     @Test

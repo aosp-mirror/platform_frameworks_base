@@ -23,6 +23,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.text.PositionedGlyphs;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
@@ -70,6 +72,9 @@ public class TextLine {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Spanned mSpanned;
     private PrecomputedText mComputed;
+    private RectF mTmpRectForMeasure;
+    private RectF mTmpRectForPaintAPI;
+    private Rect mTmpRectForPrecompute;
 
     private boolean mUseFallbackExtent = false;
 
@@ -265,7 +270,7 @@ public class TextLine {
             // width.
             return;
         }
-        final float width = Math.abs(measure(end, false, null));
+        final float width = Math.abs(measure(end, false, null, null));
         mAddedWidthForJustify = (justifyWidth - width) / spaces;
         mIsJustifying = true;
     }
@@ -307,11 +312,33 @@ public class TextLine {
      * Returns metrics information for the entire line.
      *
      * @param fmi receives font metrics information, can be null
+     * @param drawBounds output parameter for drawing bounding box. optional.
+     * @param returnDrawWidth true for returning width of the bounding box, false for returning
+     *                       total advances.
      * @return the signed width of the line
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    public float metrics(FontMetricsInt fmi) {
-        return measure(mLen, false, fmi);
+    public float metrics(FontMetricsInt fmi, @Nullable RectF drawBounds, boolean returnDrawWidth) {
+        if (returnDrawWidth) {
+            if (drawBounds == null) {
+                if (mTmpRectForMeasure == null) {
+                    mTmpRectForMeasure = new RectF();
+                }
+                drawBounds = mTmpRectForMeasure;
+            }
+            drawBounds.setEmpty();
+            float w = measure(mLen, false, fmi, drawBounds);
+            float boundsWidth = drawBounds.width();
+            if (Math.abs(w) > boundsWidth) {
+                return w;
+            } else {
+                // bounds width is always positive but output of measure is signed width.
+                // To be able to use bounds width as signed width, use the sign of the width.
+                return Math.signum(w) * boundsWidth;
+            }
+        } else {
+            return measure(mLen, false, fmi, drawBounds);
+        }
     }
 
     /**
@@ -379,12 +406,13 @@ public class TextLine {
      *                 as the edge of the trailing run's edge. If false, the offset is regarded as
      *                 the edge of the preceding run's edge. See example above.
      * @param fmi receives metrics information about the requested character, can be null
+     * @param drawBounds output parameter for drawing bounding box. optional.
      * @return the signed graphical offset from the leading margin to the requested character edge.
      *         The positive value means the offset is right from the leading edge. The negative
      *         value means the offset is left from the leading edge.
      */
     public float measure(@IntRange(from = 0) int offset, boolean trailing,
-            @NonNull FontMetricsInt fmi) {
+            @NonNull FontMetricsInt fmi, @Nullable RectF drawBounds) {
         if (offset > mLen) {
             throw new IndexOutOfBoundsException(
                     "offset(" + offset + ") should be less than line limit(" + mLen + ")");
@@ -408,14 +436,17 @@ public class TextLine {
                     final boolean sameDirection = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
 
                     if (targetIsInThisSegment && sameDirection) {
-                        return h + measureRun(segStart, offset, j, runIsRtl, fmi, null, 0);
+                        return h + measureRun(segStart, offset, j, runIsRtl, fmi, drawBounds, null,
+                                0, h);
                     }
 
-                    final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi, null, 0);
+                    final float segmentWidth = measureRun(segStart, j, j, runIsRtl, fmi, drawBounds,
+                            null, 0, h);
                     h += sameDirection ? segmentWidth : -segmentWidth;
 
                     if (targetIsInThisSegment) {
-                        return h + measureRun(segStart, offset, j, runIsRtl, null, null, 0);
+                        return h + measureRun(segStart, offset, j, runIsRtl, null, null,  null, 0,
+                                h);
                     }
 
                     if (j != runLimit) {  // charAt(j) == TAB_CHAR
@@ -506,7 +537,7 @@ public class TextLine {
                     final boolean sameDirection = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
 
                     final float segmentWidth =
-                            measureRun(segStart, j, j, runIsRtl, null, advances, segStart);
+                            measureRun(segStart, j, j, runIsRtl, null, null, advances, segStart, 0);
 
                     final float oldh = h;
                     h += sameDirection ? segmentWidth : -segmentWidth;
@@ -547,7 +578,7 @@ public class TextLine {
     }
 
     /**
-     * @see #measure(int, boolean, FontMetricsInt)
+     * @see #measure(int, boolean, FontMetricsInt, RectF)
      * @return The measure results for all possible offsets
      */
     @VisibleForTesting
@@ -578,7 +609,8 @@ public class TextLine {
                     // measureRun overwrites the result.
                     final float previousSegEndHorizontal = measurement[segStart];
                     final float width =
-                            measureRun(segStart, j, j, runIsRtl, fmi, measurement, segStart);
+                            measureRun(segStart, j, j, runIsRtl, fmi, null, measurement, segStart,
+                                    0);
                     horizontal += sameDirection ? width : -width;
 
                     float currHorizontal = sameDirection ? oldHorizontal : horizontal;
@@ -643,14 +675,14 @@ public class TextLine {
             boolean needWidth) {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(start, limit, limit, runIsRtl, null, null, 0);
+            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0);
             handleRun(start, limit, limit, runIsRtl, c, null, x + w, top,
-                    y, bottom, null, false, null, 0);
+                    y, bottom, null, null, false, null, 0);
             return w;
         }
 
         return handleRun(start, limit, limit, runIsRtl, c, null, x, top,
-                y, bottom, null, needWidth, null, 0);
+                y, bottom, null, null, needWidth, null, 0);
     }
 
     /**
@@ -665,13 +697,20 @@ public class TextLine {
      * run, can be null.
      * @param advances receives the advance information about the requested run, can be null.
      * @param advancesIndex the start index to fill in the advance information.
+     * @param x horizontal offset of the run.
      * @return the signed width from the start of the run to the leading edge
      * of the character at offset, based on the run (not paragraph) direction
      */
     private float measureRun(int start, int offset, int limit, boolean runIsRtl,
-            @Nullable FontMetricsInt fmi, @Nullable float[] advances, int advancesIndex) {
-        return handleRun(start, offset, limit, runIsRtl, null, null, 0, 0, 0, 0, fmi, true,
-                advances, advancesIndex);
+            @Nullable FontMetricsInt fmi, @Nullable RectF drawBounds, @Nullable float[] advances,
+            int advancesIndex, float x) {
+        if (drawBounds != null && (mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
+            float w = -measureRun(start, offset, limit, runIsRtl, null, null, null, 0, 0);
+            return handleRun(start, offset, limit, runIsRtl, null, null, x + w, 0, 0, 0, fmi,
+                    drawBounds, true, advances, advancesIndex);
+        }
+        return handleRun(start, offset, limit, runIsRtl, null, null, x, 0, 0, 0, fmi, drawBounds,
+                true, advances, advancesIndex);
     }
 
     /**
@@ -690,13 +729,13 @@ public class TextLine {
             int limit, boolean runIsRtl, float x, boolean needWidth) {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(start, limit, limit, runIsRtl, null, null, 0);
-            handleRun(start, limit, limit, runIsRtl, null, consumer, x + w, 0, 0, 0, null,
+            float w = -measureRun(start, limit, limit, runIsRtl, null, null, null, 0, 0);
+            handleRun(start, limit, limit, runIsRtl, null, consumer, x + w, 0, 0, 0, null, null,
                     false, null, 0);
             return w;
         }
 
-        return handleRun(start, limit, limit, runIsRtl, null, consumer, x, 0, 0, 0, null,
+        return handleRun(start, limit, limit, runIsRtl, null, consumer, x, 0, 0, 0, null, null,
                 needWidth, null, 0);
     }
 
@@ -1037,17 +1076,25 @@ public class TextLine {
     }
 
     private float getRunAdvance(TextPaint wp, int start, int end, int contextStart, int contextEnd,
-            boolean runIsRtl, int offset, @Nullable float[] advances, int advancesIndex) {
+            boolean runIsRtl, int offset, @Nullable float[] advances, int advancesIndex,
+            RectF drawingBounds) {
         if (mCharsValid) {
             return wp.getRunCharacterAdvance(mChars, start, end, contextStart, contextEnd,
-                    runIsRtl, offset, advances, advancesIndex);
+                    runIsRtl, offset, advances, advancesIndex, drawingBounds);
         } else {
             final int delta = mStart;
             if (mComputed == null || advances != null) {
                 return wp.getRunCharacterAdvance(mText, delta + start, delta + end,
                         delta + contextStart, delta + contextEnd, runIsRtl,
-                        delta + offset, advances, advancesIndex);
+                        delta + offset, advances, advancesIndex, drawingBounds);
             } else {
+                if (drawingBounds != null) {
+                    if (mTmpRectForPrecompute == null) {
+                        mTmpRectForPrecompute = new Rect();
+                    }
+                    mComputed.getBounds(start + delta, end + delta, mTmpRectForPrecompute);
+                    drawingBounds.set(mTmpRectForPrecompute);
+                }
                 return mComputed.getWidth(start + delta, end + delta);
             }
         }
@@ -1079,7 +1126,7 @@ public class TextLine {
     private float handleText(TextPaint wp, int start, int end,
             int contextStart, int contextEnd, boolean runIsRtl,
             Canvas c, TextShaper.GlyphsConsumer consumer, float x, int top, int y, int bottom,
-            FontMetricsInt fmi, boolean needWidth, int offset,
+            FontMetricsInt fmi, RectF drawBounds, boolean needWidth, int offset,
             @Nullable ArrayList<DecorationInfo> decorations,
             @Nullable float[] advances, int advancesIndex) {
 
@@ -1087,6 +1134,9 @@ public class TextLine {
             wp.setWordSpacing(mAddedWidthForJustify);
         }
         // Get metrics first (even for empty strings or "0" width runs)
+        if (drawBounds != null && fmi == null) {
+            fmi = new FontMetricsInt();
+        }
         if (fmi != null) {
             expandMetricsFromPaint(fmi, wp);
         }
@@ -1101,8 +1151,19 @@ public class TextLine {
         final int numDecorations = decorations == null ? 0 : decorations.size();
         if (needWidth || ((c != null || consumer != null) && (wp.bgColor != 0
                 || numDecorations != 0 || runIsRtl))) {
+            if (drawBounds != null && mTmpRectForPaintAPI == null) {
+                mTmpRectForPaintAPI = new RectF();
+            }
             totalWidth = getRunAdvance(wp, start, end, contextStart, contextEnd, runIsRtl, offset,
-                    advances, advancesIndex);
+                    advances, advancesIndex, drawBounds == null ? null : mTmpRectForPaintAPI);
+            if (drawBounds != null) {
+                if (runIsRtl) {
+                    mTmpRectForPaintAPI.offset(x - totalWidth, 0);
+                } else {
+                    mTmpRectForPaintAPI.offset(x, 0);
+                }
+                drawBounds.union(mTmpRectForPaintAPI);
+            }
         }
 
         final float leftX, rightX;
@@ -1145,9 +1206,9 @@ public class TextLine {
                     final int decorationStart = Math.max(info.start, start);
                     final int decorationEnd = Math.min(info.end, offset);
                     float decorationStartAdvance = getRunAdvance(wp, start, end, contextStart,
-                            contextEnd, runIsRtl, decorationStart, null, 0);
+                            contextEnd, runIsRtl, decorationStart, null, 0, null);
                     float decorationEndAdvance = getRunAdvance(wp, start, end, contextStart,
-                            contextEnd, runIsRtl, decorationEnd, null, 0);
+                            contextEnd, runIsRtl, decorationEnd, null, 0, null);
                     final float decorationXLeft, decorationXRight;
                     if (runIsRtl) {
                         decorationXLeft = rightX - decorationEndAdvance;
@@ -1322,7 +1383,7 @@ public class TextLine {
     private float handleRun(int start, int measureLimit,
             int limit, boolean runIsRtl, Canvas c,
             TextShaper.GlyphsConsumer consumer, float x, int top, int y,
-            int bottom, FontMetricsInt fmi, boolean needWidth,
+            int bottom, FontMetricsInt fmi, RectF drawBounds, boolean needWidth,
             @Nullable float[] advances, int advancesIndex) {
 
         if (measureLimit < start || measureLimit > limit) {
@@ -1341,6 +1402,14 @@ public class TextLine {
             wp.set(mPaint);
             if (fmi != null) {
                 expandMetricsFromPaint(fmi, wp);
+            }
+            if (drawBounds != null) {
+                if (fmi == null) {
+                    FontMetricsInt tmpFmi = new FontMetricsInt();
+                    expandMetricsFromPaint(tmpFmi, wp);
+                    fmi = tmpFmi;
+                }
+                drawBounds.union(0f, fmi.top, 0f, fmi.bottom);
             }
             return 0f;
         }
@@ -1361,7 +1430,8 @@ public class TextLine {
             wp.setStartHyphenEdit(adjustStartHyphenEdit(start, wp.getStartHyphenEdit()));
             wp.setEndHyphenEdit(adjustEndHyphenEdit(limit, wp.getEndHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, consumer, x, top,
-                    y, bottom, fmi, needWidth, measureLimit, null, advances, advancesIndex);
+                    y, bottom, fmi, drawBounds, needWidth, measureLimit, null, advances,
+                    advancesIndex);
         }
 
         // Shaping needs to take into account context up to metric boundaries,
@@ -1450,7 +1520,8 @@ public class TextLine {
                     activePaint.setEndHyphenEdit(
                             adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
                     x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c,
-                            consumer, x, top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
+                            consumer, x, top, y, bottom, fmi, drawBounds,
+                            needWidth || activeEnd < measureLimit,
                             Math.min(activeEnd, mlimit), mDecorations,
                             advances, advancesIndex + activeStart - start);
 
@@ -1478,7 +1549,7 @@ public class TextLine {
             activePaint.setEndHyphenEdit(
                     adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
             x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, consumer, x,
-                    top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
+                    top, y, bottom, fmi, drawBounds, needWidth || activeEnd < measureLimit,
                     Math.min(activeEnd, mlimit), mDecorations,
                     advances, advancesIndex + activeStart - start);
         }

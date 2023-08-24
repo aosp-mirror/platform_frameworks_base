@@ -53,6 +53,17 @@
 
 namespace android {
 
+namespace {
+
+void copyMinikinRectToSkRect(const minikin::MinikinRect& minikinRect, SkRect* skRect) {
+    skRect->fLeft = minikinRect.mLeft;
+    skRect->fTop = minikinRect.mTop;
+    skRect->fRight = minikinRect.mRight;
+    skRect->fBottom = minikinRect.mBottom;
+}
+
+}  // namespace
+
 static void getPosTextPath(const SkFont& font, const uint16_t glyphs[], int count,
                            const SkPoint pos[], SkPath* dst) {
     dst->reset();
@@ -101,8 +112,8 @@ namespace PaintGlue {
         float measured = 0;
 
         std::unique_ptr<float[]> advancesArray(new float[count]);
-        MinikinUtils::measureText(&paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text,
-                0, count, count, advancesArray.get());
+        MinikinUtils::measureText(&paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0,
+                                  count, count, advancesArray.get(), nullptr);
 
         for (int i = 0; i < count; i++) {
             // traverse in the given direction
@@ -192,9 +203,10 @@ namespace PaintGlue {
         if (advances) {
             advancesArray.reset(new jfloat[count]);
         }
-        const float advance = MinikinUtils::measureText(paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, text, start, count, contextCount,
-                advancesArray.get());
+        minikin::MinikinRect bounds;
+        const float advance = MinikinUtils::measureText(
+                paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, start, count,
+                contextCount, advancesArray.get(), &bounds);
         if (advances) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }
@@ -232,7 +244,7 @@ namespace PaintGlue {
         minikin::Bidi bidiFlags = dir == 1 ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, text, start, count, start + count,
-                advancesArray.get());
+                                  advancesArray.get(), nullptr);
         size_t result = minikin::GraphemeBreak::getTextRunCursor(advancesArray.get(), text,
                 start, count, offset, moveOpt);
         return static_cast<jint>(result);
@@ -496,7 +508,7 @@ namespace PaintGlue {
     static jfloat doRunAdvance(JNIEnv* env, const Paint* paint, const Typeface* typeface,
                                const jchar buf[], jint start, jint count, jint bufSize,
                                jboolean isRtl, jint offset, jfloatArray advances,
-                               jint advancesIndex) {
+                               jint advancesIndex, SkRect* drawBounds) {
         if (advances) {
             size_t advancesLength = env->GetArrayLength(advances);
             if ((size_t)(count + advancesIndex) > advancesLength) {
@@ -505,14 +517,23 @@ namespace PaintGlue {
             }
         }
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
+        minikin::MinikinRect bounds;
         if (offset == start + count && advances == nullptr) {
-            return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
-                    bufSize, nullptr);
+            float result =
+                    MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
+                                              bufSize, nullptr, drawBounds ? &bounds : nullptr);
+            if (drawBounds) {
+                copyMinikinRectToSkRect(bounds, drawBounds);
+            }
+            return result;
         }
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
-                advancesArray.get());
+                                  advancesArray.get(), drawBounds ? &bounds : nullptr);
 
+        if (drawBounds) {
+            copyMinikinRectToSkRect(bounds, drawBounds);
+        }
         float result = minikin::getRunAdvance(advancesArray.get(), buf, start, count, offset);
         if (advances) {
             minikin::distributeAdvances(advancesArray.get(), buf, start, count);
@@ -528,7 +549,7 @@ namespace PaintGlue {
         ScopedCharArrayRO textArray(env, text);
         jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
                                      start - contextStart, end - start, contextEnd - contextStart,
-                                     isRtl, offset - contextStart, nullptr, 0);
+                                     isRtl, offset - contextStart, nullptr, 0, nullptr);
         return result;
     }
 
@@ -536,13 +557,19 @@ namespace PaintGlue {
                                                         jcharArray text, jint start, jint end,
                                                         jint contextStart, jint contextEnd,
                                                         jboolean isRtl, jint offset,
-                                                        jfloatArray advances, jint advancesIndex) {
+                                                        jfloatArray advances, jint advancesIndex,
+                                                        jobject drawBounds) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = paint->getAndroidTypeface();
         ScopedCharArrayRO textArray(env, text);
+        SkRect skDrawBounds;
         jfloat result = doRunAdvance(env, paint, typeface, textArray.get() + contextStart,
                                      start - contextStart, end - start, contextEnd - contextStart,
-                                     isRtl, offset - contextStart, advances, advancesIndex);
+                                     isRtl, offset - contextStart, advances, advancesIndex,
+                                     drawBounds ? &skDrawBounds : nullptr);
+        if (drawBounds != nullptr) {
+            GraphicsJNI::rect_to_jrectf(skDrawBounds, env, drawBounds);
+        }
         return result;
     }
 
@@ -551,7 +578,7 @@ namespace PaintGlue {
         minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
         std::unique_ptr<float[]> advancesArray(new float[count]);
         MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
-                advancesArray.get());
+                                  advancesArray.get(), nullptr);
         return minikin::getOffsetForAdvance(advancesArray.get(), buf, start, count, advance);
     }
 
@@ -1081,7 +1108,7 @@ static const JNINativeMethod methods[] = {
          (void*)PaintGlue::getCharArrayBounds},
         {"nHasGlyph", "(JILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph},
         {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
-        {"nGetRunCharacterAdvance", "(J[CIIIIZI[FI)F",
+        {"nGetRunCharacterAdvance", "(J[CIIIIZI[FILandroid/graphics/RectF;)F",
          (void*)PaintGlue::getRunCharacterAdvance___CIIIIZI_FI_F},
         {"nGetOffsetForAdvance", "(J[CIIIIZF)I", (void*)PaintGlue::getOffsetForAdvance___CIIIIZF_I},
         {"nGetFontMetricsIntForText", "(J[CIIIIZLandroid/graphics/Paint$FontMetricsInt;)V",

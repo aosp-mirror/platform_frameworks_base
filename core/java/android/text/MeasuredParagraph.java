@@ -460,10 +460,11 @@ public class MeasuredParagraph {
             @NonNull TextDirectionHeuristic textDir,
             int hyphenationMode,
             boolean computeLayout,
+            boolean computeBounds,
             @Nullable MeasuredParagraph hint,
             @Nullable MeasuredParagraph recycle) {
         return buildForStaticLayoutInternal(paint, lineBreakConfig, text, start, end, textDir,
-                hyphenationMode, computeLayout, hint, recycle, null);
+                hyphenationMode, computeLayout, computeBounds, hint, recycle, null);
     }
 
     /**
@@ -498,7 +499,7 @@ public class MeasuredParagraph {
             boolean computeLayout,
             @Nullable StyleRunCallback testCallback) {
         return buildForStaticLayoutInternal(paint, lineBreakConfig, text, start, end, textDir,
-                hyphenationMode, computeLayout, null, null, testCallback);
+                hyphenationMode, computeLayout, false, null, null, testCallback);
     }
 
     private static @NonNull MeasuredParagraph buildForStaticLayoutInternal(
@@ -510,6 +511,7 @@ public class MeasuredParagraph {
             @NonNull TextDirectionHeuristic textDir,
             int hyphenationMode,
             boolean computeLayout,
+            boolean computeBounds,
             @Nullable MeasuredParagraph hint,
             @Nullable MeasuredParagraph recycle,
             @Nullable StyleRunCallback testCallback) {
@@ -519,7 +521,8 @@ public class MeasuredParagraph {
         if (hint == null) {
             builder = new MeasuredText.Builder(mt.mCopiedBuffer)
                     .setComputeHyphenation(hyphenationMode)
-                    .setComputeLayout(computeLayout);
+                    .setComputeLayout(computeLayout)
+                    .setComputeBounds(computeBounds);
         } else {
             builder = new MeasuredText.Builder(hint.mMeasuredText);
         }

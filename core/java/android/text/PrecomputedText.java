@@ -434,7 +434,8 @@ public class PrecomputedText implements Spannable {
         }
         if (paraInfo == null) {
             paraInfo = createMeasuredParagraphs(
-                    text, params, 0, text.length(), true /* computeLayout */);
+                    text, params, 0, text.length(), true /* computeLayout */,
+                    true /* computeBounds */);
         }
         return new PrecomputedText(text, 0, text.length(), params, paraInfo);
     }
@@ -462,7 +463,7 @@ public class PrecomputedText implements Spannable {
             final int paraEnd = pct.getParagraphEnd(i);
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
                     params.getTextPaint(), params.getLineBreakConfig(), pct, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout,
+                    params.getTextDirection(), hyphenationMode, computeLayout, true,
                     pct.getMeasuredParagraph(i), null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);
@@ -471,7 +472,8 @@ public class PrecomputedText implements Spannable {
     /** @hide */
     public static ParagraphInfo[] createMeasuredParagraphs(
             @NonNull CharSequence text, @NonNull Params params,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout) {
+            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout,
+            boolean computeBounds) {
         ArrayList<ParagraphInfo> result = new ArrayList<>();
 
         Preconditions.checkNotNull(text);
@@ -500,7 +502,8 @@ public class PrecomputedText implements Spannable {
 
             result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
                     params.getTextPaint(), params.getLineBreakConfig(), text, paraStart, paraEnd,
-                    params.getTextDirection(), hyphenationMode, computeLayout, null /* no hint */,
+                    params.getTextDirection(), hyphenationMode, computeLayout, computeBounds,
+                    null /* no hint */,
                     null /* no recycle */)));
         }
         return result.toArray(new ParagraphInfo[result.size()]);

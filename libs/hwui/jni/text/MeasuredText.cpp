@@ -81,13 +81,14 @@ static void nAddReplacementRun(JNIEnv* /* unused */, jclass /* unused */, jlong 
 // Regular JNI
 static jlong nBuildMeasuredText(JNIEnv* env, jclass /* unused */, jlong builderPtr, jlong hintPtr,
                                 jcharArray javaText, jboolean computeHyphenation,
-                                jboolean computeLayout, jboolean fastHyphenationMode) {
+                                jboolean computeLayout, jboolean computeBounds,
+                                jboolean fastHyphenationMode) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
 
     // Pass the ownership to Java.
     return toJLong(toBuilder(builderPtr)
-                           ->build(textBuffer, computeHyphenation, computeLayout,
+                           ->build(textBuffer, computeHyphenation, computeLayout, computeBounds,
                                    fastHyphenationMode, toMeasuredParagraph(hintPtr))
                            .release());
 }
@@ -160,7 +161,7 @@ static const JNINativeMethod gMTBuilderMethods[] = {
         {"nInitBuilder", "()J", (void*)nInitBuilder},
         {"nAddStyleRun", "(JJIIIIZ)V", (void*)nAddStyleRun},
         {"nAddReplacementRun", "(JJIIF)V", (void*)nAddReplacementRun},
-        {"nBuildMeasuredText", "(JJ[CZZZ)J", (void*)nBuildMeasuredText},
+        {"nBuildMeasuredText", "(JJ[CZZZZ)J", (void*)nBuildMeasuredText},
         {"nFreeBuilder", "(J)V", (void*)nFreeBuilder},
 };
 
