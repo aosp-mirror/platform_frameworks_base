@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Մատնահետքի պատկերակ"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Սարքի ապակողպում"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Ընտրեք ապակողպման այլ եղանակ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Օգտագործեք դեմքով ապակողպումը, երբ ձեր մատնահետքը չի հաջողվում ճանաչել, օրինակ՝ երբ ձեր ձեռքերը թաց են"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Օգտագործեք մատնահետքով ապակողպումը, երբ ձեր դեմքը չի հաջողվում ճանաչել, օրինակ՝ երբ լուսավորությունը թույլ է"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Դեմքով ապակողպում"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Դեմքով ապակողպման հետ կապված խնդիր"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Հպեք՝ ձեր դեմքի նմուշը ջնջելու համար, այնուհետև նորից ավելացրեք այն:"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Կարգավորեք դեմքով ապակողպումը"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Ապակողպելու համար պարզապես նայեք հեռախոսին"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Դեմքով ապակողպումն օգտագործելու համար անցեք Կարգավորումներ &gt; Գաղտնիություն և տրամադրեք "<b>"տեսախցիկն օգտագործելու թույլտվություն"</b>"։"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Կարգավորեք ապակողպելու այլ եղանակներ"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Հպեք՝ մատնահետք ավելացնելու համար"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Մատնահետքով ապակողպում"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Մատնահետքերի սկաները հնարավոր չէ օգտագործել"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Այցելեք սպասարկման կենտրոն։"</string>

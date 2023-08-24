@@ -671,14 +671,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"رمز بصمة الإصبع"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"فتح قفل الجهاز"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"تجربة طريقة أخرى لفتح القفل"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"استخدِم ميزة \"فتح الجهاز بالتعرف على الوجه\" عندما لا يتم التعرف على بصمة إصبعك، مثلاً عندما تكون أصابعك مبتلة."</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"استخدِم ميزة \"فتح الجهاز ببصمة الإصبع\" عندما لا يتم التعرف على وجهك، مثلاً عند عدم وجود ضوء كافٍ."</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فتح الجهاز بالتعرف على الوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"مشكلة متعلّقة بميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"انقر لحذف نموذج الوجه ثم أضِف نموذجًا لوجهك مرة أخرى."</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\""</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"يمكنك فتح قفل هاتفك بمجرّد النظر إلى الشاشة."</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏لاستخدام ميزة \"فتح الجهاز بالتعرف على الوجه\"، عليك منح إذن "<b>"الوصول إلى الكاميرا"</b>" في الإعدادات &gt; الخصوصية."</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"إعداد المزيد من الطرق لفتح قفل الجهاز"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"انقر لإضافة بصمة إصبع."</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فتح الجهاز ببصمة الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
@@ -1598,7 +1598,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"انقر لإزالة القيد."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"استخدام مرتفع لبيانات الجوّال"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"استخدمت تطبيقاتك بيانات أكثر من المعتاد"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق <xliff:g id="APP">%s</xliff:g> بيانات أكثر من المعتاد"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق \"<xliff:g id="APP">%s</xliff:g>\" بيانات أكثر من المعتاد"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="5975877665505297662">"إصدار لـ:"</string>

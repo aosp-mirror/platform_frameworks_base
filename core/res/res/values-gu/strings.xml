@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ફિંગરપ્રિન્ટ આયકન"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ડિવાઇસ અનલૉક કરવું"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"અનલૉક કરવા માટેની અન્ય રીત અજમાવી જુઓ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"જ્યારે તમારી ફિંગરપ્રિન્ટ ઓળખાતી ન હોય, જેમ કે જ્યારે તમારી આંગળીઓ ભીની હોય ત્યારે ફેસ અનલૉકનો ઉપયોગ કરો"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"જ્યારે તમારો ચહેરો ઓળખાતો ન હોય, જેમ કે જ્યારે પૂરતો પ્રકાશ ન હોય ત્યારે ફિંગરપ્રિન્ટ અનલૉકનો ઉપયોગ કરો"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ફેસ અનલૉક"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ફેસ અનલૉકની સુવિધામાં સમસ્યા"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"તમારા ચહેરાનું મૉડલ ડિલીટ કરવા માટે ટૅપ કરો, પછી તમારો ચહેરો ફરીથી ઉમેરો"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ફેસ અનલૉક સુવિધાનું સેટઅપ કરો"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"તમારા ફોનની તરફ જોઈને તેને અનલૉક કરો"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ફેસ અનલૉક સુવિધાનો ઉપયોગ કરવા માટે, સેટિંગ &gt; પ્રાઇવસીમાં જઈને "<b>"કૅમેરા ઍક્સેસ"</b>" ચાલુ કરો"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"અનલૉક કરવાની બીજી રીતોનું સેટઅપ કરો"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ફિંગરપ્રિન્ટ ઉમેરવા માટે ટૅપ કરો"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ફિંગરપ્રિન્ટ અનલૉક"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ફિંગરપ્રિન્ટ સેન્સરનો ઉપયોગ કરી શકાતો નથી"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"રિપેર કરવાની સેવા આપતા પ્રદાતાની મુલાકાત લો."</string>

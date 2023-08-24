@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Hiba történt. Próbálja újra."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ujjlenyomat ikon"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Eszköz feloldása"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Próbálkozzon a feloldás más módjával"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Használja az Arcalapú feloldás funkciót, ha a rendszer nem ismeri fel az ujjlenyomatot, például amikor ujjai nedvesek"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Használja a Feloldás ujjlenyomattal funkciót, ha a rendszer nem ismeri fel az arcát, például amikor nincs elég fény"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Arcalapú feloldás"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arcalapú feloldással kapcsolatos problémák"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Koppintson arcmodellje törléséhez, majd készítsen újat"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Az Arcalapú feloldás beállítása"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Feloldhatja a zárolást úgy, hogy ránéz a telefonra"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Az Arcalapú feloldás funkció használatához kapcsolja be a "<b>"Hozzáférés a kamerához"</b>" beállítást a Beállítások &gt; Adatvédelem szakaszban."</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"További feloldási módszerek beállítása"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Koppintson ide ujjlenyomat hozzáadásához"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Feloldás ujjlenyomattal"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nem lehet használni az ujjlenyomat-érzékelőt"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Keresse fel a szervizt."</string>

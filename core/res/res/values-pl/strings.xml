@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Coś poszło nie tak. Spróbuj ponownie."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikona odcisku palca"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Odblokowywanie urządzenia"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Wypróbuj inną metodę odblokowywania"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Jeśli odcisk palca nie jest rozpoznawany, ponieważ przykładowo masz mokre palce, użyj funkcji rozpoznawania twarzy"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Jeśli twarz nie jest rozpoznawana, na przykład z powodu słabego oświetlenia, użyj funkcji odblokowywania odciskiem palca"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problem z rozpoznawaniem twarzy"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Kliknij, aby usunąć model twarzy, a następnie ponownie dodaj skan twarzy"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Skonfiguruj rozpoznawanie twarzy"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Popatrz na ekran telefonu, aby go odblokować"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aby używać rozpoznawania twarzy, włącz "<b>"dostęp do aparatu"</b>" w Ustawieniach i prywatności"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Skonfiguruj więcej sposobów odblokowywania"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Kliknij, aby dodać odcisk palca"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Odblokowywanie odciskiem palca"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Nie można użyć czytnika linii papilarnych"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Odwiedź serwis."</string>

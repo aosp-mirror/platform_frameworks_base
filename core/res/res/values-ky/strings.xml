@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Бир жерден ката кетти. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Манжа изинин сүрөтчөсү"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Түзмөктүн кулпусун ачуу"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Кулпуну башка жол менен ачуу"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Манжаңыздын изи таанылбай калганда, мисалы, манжаңыз ным болсо, Жүзүнөн таанып ачуу функциясын колдонуңуз"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Жүзүңүз таанылбай калганда, мисалы, күңүрт жерде турсаңыз, Манжа изи менен ачуу функциясын колдонуңуз"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Жүзүнөн таанып ачуу"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Жүзүнөн таанып ачуу функциясында маселе келип чыкты"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Жүзүңүздүн үлгүсүн өчүрүү үчүн басып, жаңы үлгүнү кошуңуз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Жүзүнөн таанып ачууну коюу"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Телефонуңузду карап туруп эле кулпусун ачып алыңыз"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Параметрлер &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Кулпусун ачуунун көбүрөөк жолдорун жөндөңүз"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Манжа изин кошуу үчүн басыңыз"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Кулпуланган түзмөктү манжа изи менен ачуу"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Манжа изинин сенсорун колдонууга болбойт"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
