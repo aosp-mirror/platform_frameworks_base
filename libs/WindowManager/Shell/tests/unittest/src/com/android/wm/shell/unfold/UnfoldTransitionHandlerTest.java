@@ -92,7 +92,7 @@ public class UnfoldTransitionHandlerTest {
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
                 Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
         TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
-                triggerTaskInfo, /* remoteTransition= */ null, displayChange);
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
 
         WindowContainerTransaction result = mUnfoldTransitionHandler.handleRequest(mTransition,
                 requestInfo);
@@ -106,7 +106,7 @@ public class UnfoldTransitionHandlerTest {
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
                 Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(false);
         TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
-                triggerTaskInfo, /* remoteTransition= */ null, displayChange);
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
 
         WindowContainerTransaction result = mUnfoldTransitionHandler.handleRequest(mTransition,
                 requestInfo);
@@ -212,7 +212,7 @@ public class UnfoldTransitionHandlerTest {
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
                 Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
         return new TransitionRequestInfo(TRANSIT_CHANGE,
-                triggerTaskInfo, /* remoteTransition= */ null, displayChange);
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
     }
 
     private static class TestShellUnfoldProgressProvider implements ShellUnfoldProgressProvider,
