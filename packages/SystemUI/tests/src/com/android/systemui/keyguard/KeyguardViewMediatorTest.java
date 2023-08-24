@@ -97,6 +97,8 @@ import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.scene.FakeWindowRootViewComponent;
+import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.ShadeController;
@@ -229,11 +231,22 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 .thenReturn(mock(Flow.class));
         when(mDreamingToLockscreenTransitionViewModel.getTransitionEnded())
                 .thenReturn(mock(Flow.class));
-        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
-                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
+                mContext,
+                new FakeWindowRootViewComponent.Factory(mock(WindowRootView.class)),
+                mWindowManager,
+                mActivityManager,
+                mDozeParameters,
+                mStatusBarStateController,
+                mConfigurationController,
+                mViewMediator,
+                mKeyguardBypassController,
+                mColorExtractor,
+                mDumpManager,
+                mKeyguardStateController,
+                mScreenOffAnimationController,
+                mAuthController,
+                mShadeExpansionStateManager,
                 mShadeWindowLogger);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);

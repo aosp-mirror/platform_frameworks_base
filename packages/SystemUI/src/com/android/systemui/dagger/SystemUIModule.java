@@ -77,6 +77,7 @@ import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.retail.dagger.RetailModeModule;
 import com.android.systemui.scene.SceneContainerFrameworkModule;
+import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
@@ -225,7 +226,8 @@ import javax.inject.Named;
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
             KeyguardBouncerComponent.class,
-            NotificationShelfComponent.class
+            NotificationShelfComponent.class,
+            WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
 
