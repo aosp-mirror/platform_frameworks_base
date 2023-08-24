@@ -2740,31 +2740,109 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runGrantRevokePermission(boolean grant) throws RemoteException {
         int userId = UserHandle.USER_SYSTEM;
 
-        String opt = null;
+        String opt;
+        boolean allPermissions = false;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             }
+            if (opt.equals("--all-permissions")) {
+                allPermissions = true;
+            }
         }
 
         String pkg = getNextArg();
-        if (pkg == null) {
+        if (!allPermissions && pkg == null) {
             getErrPrintWriter().println("Error: no package specified");
             return 1;
         }
         String perm = getNextArg();
-        if (perm == null) {
+        if (!allPermissions && perm == null) {
             getErrPrintWriter().println("Error: no permission specified");
+            return 1;
+        }
+        if (allPermissions && perm != null) {
+            getErrPrintWriter().println("Error: permission specified but not expected");
             return 1;
         }
         final UserHandle translatedUser = UserHandle.of(translateUserId(userId,
                 UserHandle.USER_NULL, "runGrantRevokePermission"));
-        if (grant) {
-            mPermissionManager.grantRuntimePermission(pkg, perm, translatedUser);
+
+        List<PackageInfo> packageInfos;
+        if (pkg == null) {
+            packageInfos = mContext.getPackageManager().getInstalledPackages(
+                    PackageManager.GET_PERMISSIONS);
         } else {
-            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUser, null);
+            try {
+                packageInfos = Collections.singletonList(
+                        mContext.getPackageManager().getPackageInfo(pkg,
+                                PackageManager.GET_PERMISSIONS));
+            } catch (NameNotFoundException e) {
+                getErrPrintWriter().println("Error: package not found");
+                return 1;
+            }
+        }
+
+        for (PackageInfo packageInfo : packageInfos) {
+            List<String> permissions = Collections.singletonList(perm);
+            if (allPermissions) {
+                permissions = getRequestedRuntimePermissions(packageInfo);
+            }
+            for (String permission : permissions) {
+                if (grant) {
+                    try {
+                        mPermissionManager.grantRuntimePermission(packageInfo.packageName,
+                                permission,
+                                translatedUser);
+                    } catch (Exception e) {
+                        if (!allPermissions) {
+                            throw e;
+                        } else {
+                            Slog.w(TAG, "Could not grant permission " + permission, e);
+                        }
+                    }
+                } else {
+                    try {
+                        mPermissionManager.revokeRuntimePermission(packageInfo.packageName,
+                                permission,
+                                translatedUser, null);
+                    } catch (Exception e) {
+                        if (!allPermissions) {
+                            throw e;
+                        } else {
+                            Slog.w(TAG, "Could not grant permission " + permission, e);
+                        }
+                    }
+                }
+            }
         }
         return 0;
+    }
+
+    private List<String> getRequestedRuntimePermissions(PackageInfo info) {
+        // No requested permissions
+        if (info.requestedPermissions == null) {
+            return new ArrayList<>();
+        }
+        List<String> result = new ArrayList<>();
+        PackageManager pm = mContext.getPackageManager();
+        // Iterate through requested permissions for denied ones
+        for (String permission : info.requestedPermissions) {
+            PermissionInfo pi = null;
+            try {
+                pi = pm.getPermissionInfo(permission, 0);
+            } catch (NameNotFoundException nnfe) {
+                // ignore
+            }
+            if (pi == null) {
+                continue;
+            }
+            if (pi.getProtection() != PermissionInfo.PROTECTION_DANGEROUS) {
+                continue;
+            }
+            result.add(permission);
+        }
+        return result;
     }
 
     private int runResetPermissions() throws RemoteException {
@@ -4532,11 +4610,15 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  get-distracting-restriction [--user USER_ID] PACKAGE [PACKAGE...]");
         pw.println("    Gets the specified restriction flags of given package(s) (of the user).");
         pw.println("");
-        pw.println("  grant [--user USER_ID] PACKAGE PERMISSION");
-        pw.println("  revoke [--user USER_ID] PACKAGE PERMISSION");
+        pw.println("  grant [--user USER_ID] [--all-permissions] PACKAGE PERMISSION");
+        pw.println("  revoke [--user USER_ID] [--all-permissions] PACKAGE PERMISSION");
         pw.println("    These commands either grant or revoke permissions to apps.  The permissions");
         pw.println("    must be declared as used in the app's manifest, be runtime permissions");
         pw.println("    (protection level dangerous), and the app targeting SDK greater than Lollipop MR1.");
+        pw.println("    Flags are:");
+        pw.println("    --user: Specifies the user for which the operation needs to be performed");
+        pw.println("    --all-permissions: If specified all the missing runtime permissions will");
+        pw.println("       be granted to the PACKAGE or to all the packages if none is specified.");
         pw.println("");
         pw.println("  set-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
         pw.println("  clear-permission-flags [--user USER_ID] PACKAGE PERMISSION [FLAGS..]");
