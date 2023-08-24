@@ -2704,8 +2704,14 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
+  public class ParsedVibration {
+    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffectListForTesting();
+    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  }
+
   public final class VibrationXmlParser {
-    method @Nullable public static android.os.VibrationEffect parse(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
   }
 
   public final class VibrationXmlSerializer {

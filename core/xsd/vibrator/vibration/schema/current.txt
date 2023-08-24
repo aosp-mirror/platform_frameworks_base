@@ -47,6 +47,11 @@ package com.android.internal.vibrator.persistence {
     method public void setWaveformEffect_optional(com.android.internal.vibrator.persistence.WaveformEffect);
   }
 
+  public class VibrationSelect {
+    ctor public VibrationSelect();
+    method public java.util.List<com.android.internal.vibrator.persistence.Vibration> getVibration();
+  }
+
   public enum WaveformAmplitudeDefault {
     method public String getRawName();
     enum_constant public static final com.android.internal.vibrator.persistence.WaveformAmplitudeDefault _default;
@@ -74,8 +79,9 @@ package com.android.internal.vibrator.persistence {
 
   public class XmlParser {
     ctor public XmlParser();
-    method public static com.android.internal.vibrator.persistence.Vibration read(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static com.android.internal.vibrator.persistence.Vibration readVibration(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static com.android.internal.vibrator.persistence.VibrationSelect readVibrationSelect(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
   }
 

@@ -58,7 +58,7 @@ public final class HapticFeedbackVibrationProvider {
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
-        this(res, vibrator, loadHapticCustomizations(res));
+        this(res, vibrator, loadHapticCustomizations(res, vibrator));
     }
 
     /** @hide */
@@ -288,9 +288,10 @@ public final class HapticFeedbackVibrationProvider {
     }
 
     @Nullable
-    private static SparseArray<VibrationEffect> loadHapticCustomizations(Resources res) {
+    private static SparseArray<VibrationEffect> loadHapticCustomizations(
+            Resources res, Vibrator vibrator) {
         try {
-            return HapticFeedbackCustomization.loadVibrations(res);
+            return HapticFeedbackCustomization.loadVibrations(res, vibrator);
         } catch (IOException | HapticFeedbackCustomization.CustomizationParserException e) {
             Slog.e(TAG, "Unable to load haptic customizations.", e);
             return null;

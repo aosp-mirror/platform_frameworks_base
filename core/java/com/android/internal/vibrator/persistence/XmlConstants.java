@@ -36,6 +36,7 @@ public final class XmlConstants {
     public static final String NAMESPACE = null;
 
     public static final String TAG_VIBRATION = "vibration";
+    public static final String TAG_VIBRATION_SELECT = "vibration-select";
 
     public static final String TAG_PREDEFINED_EFFECT = "predefined-effect";
     public static final String TAG_PRIMITIVE_EFFECT = "primitive-effect";

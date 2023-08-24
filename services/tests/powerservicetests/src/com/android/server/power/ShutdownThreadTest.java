@@ -30,6 +30,7 @@ import android.content.Context;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
@@ -84,6 +85,7 @@ public class ShutdownThreadTest {
 
     @Mock private Context mContextMock;
     @Mock private Vibrator mVibratorMock;
+    @Mock private VibratorInfo mVibratorInfoMock;
 
     private String mDefaultShutdownVibrationFilePath;
     private long mLastSleepDurationMs;
@@ -94,8 +96,9 @@ public class ShutdownThreadTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mVibratorMock.hasVibrator()).thenReturn(true);
+        when(mVibratorMock.getInfo()).thenReturn(mVibratorInfoMock);
 
-        when(mVibratorMock.areVibrationFeaturesSupported(any())).thenReturn(true);
+        when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(true);
 
         mShutdownThread = new ShutdownThread(new TestInjector());
     }
@@ -130,7 +133,7 @@ public class ShutdownThreadTest {
     @Test
     public void testVibratorUnsupportedShutdownVibrationEffect() throws Exception {
         setShutdownVibrationFileContent(WAVEFORM_VIB_10MS_SERIALIZATION);
-        when(mVibratorMock.areVibrationFeaturesSupported(any())).thenReturn(false);
+        when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(false);
 
         mShutdownThread.playShutdownVibration(mContextMock);
 

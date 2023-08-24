@@ -42,13 +42,20 @@ public final class XmlValidator {
      */
     public static void checkStartTag(TypedXmlPullParser parser, String expectedTag)
             throws XmlParserException {
-        String tagName = parser.getName();
+        checkStartTag(parser);
+        checkParserCondition(
+                    expectedTag.equals(parser.getName()),
+                    "Unexpected start tag found %s, expected %s", parser.getName(), expectedTag);
+    }
+
+    /**  Check parser is currently at {@link XmlPullParser#START_TAG}. */
+    public static void checkStartTag(TypedXmlPullParser parser) throws XmlParserException {
         try {
             checkParserCondition(
-                    parser.getEventType() == parser.START_TAG && expectedTag.equals(tagName),
-                    "Unexpected tag found %s, expected %s", tagName, expectedTag);
+                    parser.getEventType() == parser.START_TAG,
+                    "Expected start tag, got " + parser.getEventType());
         } catch (XmlPullParserException e) {
-            throw XmlParserException.createFromPullParserException(tagName, e);
+            throw XmlParserException.createFromPullParserException(parser.getName(), e);
         }
     }
 

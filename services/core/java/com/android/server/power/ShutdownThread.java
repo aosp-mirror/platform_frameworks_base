@@ -851,9 +851,10 @@ public final class ShutdownThread extends Thread {
      */
     private VibrationEffect getValidShutdownVibration(Context context, Vibrator vibrator) {
         VibrationEffect parsedEffect = parseVibrationEffectFromFile(
-                mInjector.getDefaultShutdownVibrationEffectFilePath(context));
+                mInjector.getDefaultShutdownVibrationEffectFilePath(context),
+                vibrator);
 
-        if (parsedEffect == null || !vibrator.areVibrationFeaturesSupported(parsedEffect)) {
+        if (parsedEffect == null) {
             return createDefaultVibrationEffect();
         }
 
@@ -869,11 +870,12 @@ public final class ShutdownThread extends Thread {
         return parsedEffect;
     }
 
-    private static VibrationEffect parseVibrationEffectFromFile(String filePath) {
+    private static VibrationEffect parseVibrationEffectFromFile(
+            String filePath, Vibrator vibrator) {
         if (!TextUtils.isEmpty(filePath)) {
             try {
-                return VibrationXmlParser.parse(new FileReader(filePath));
-            } catch (IOException e) {
+                return VibrationXmlParser.parseDocument(new FileReader(filePath)).resolve(vibrator);
+            } catch (Exception e) {
                 Log.e(TAG, "Error parsing default shutdown vibration effect.", e);
             }
         }

@@ -153,7 +153,7 @@ public abstract class Vibrator {
      *
      * @hide
      */
-    protected VibratorInfo getInfo() {
+    public VibratorInfo getInfo() {
         return VibratorInfo.EMPTY_VIBRATOR_INFO;
     }
 

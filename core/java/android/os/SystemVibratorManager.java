@@ -194,7 +194,7 @@ public class SystemVibratorManager extends VibratorManager {
         }
 
         @Override
-        protected VibratorInfo getInfo() {
+        public VibratorInfo getInfo() {
             return mVibratorInfo;
         }
 

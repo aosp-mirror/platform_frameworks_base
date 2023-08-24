@@ -82,7 +82,7 @@ final class InputDeviceVibrator extends Vibrator {
     }
 
     @Override
-    protected VibratorInfo getInfo() {
+    public VibratorInfo getInfo() {
         return mVibratorInfo;
     }
 

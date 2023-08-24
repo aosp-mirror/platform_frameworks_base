@@ -42,6 +42,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Unit tests for {@link VibrationXmlParser} and {@link VibrationXmlSerializer}.
@@ -67,7 +68,8 @@ public class VibrationEffectXmlSerializationTest {
     }
 
     @Test
-    public void testParseTag_succeedAndParserPointsToEndVibrationTag() throws Exception {
+    public void testParseElement_fromVibrationTag_succeedAndParserPointsToEndVibrationTag()
+            throws Exception {
         VibrationEffect effect = VibrationEffect.startComposition()
                 .addPrimitive(PRIMITIVE_CLICK)
                 .addPrimitive(PRIMITIVE_TICK, 0.2497f)
@@ -86,7 +88,7 @@ public class VibrationEffectXmlSerializationTest {
                 + "</vibration>";
 
         TypedXmlPullParser parser = createXmlPullParser(xml);
-        assertParseTagSucceeds(parser, effect);
+        assertParseElementSucceeds(parser, effect);
         parser.next();
         assertEndOfDocument(parser);
 
@@ -95,30 +97,134 @@ public class VibrationEffectXmlSerializationTest {
         parser = createXmlPullParser("<next-tag>" + xml + "</next-tag>");
         // Move the parser once to point to the "<vibration> tag.
         parser.next();
-        assertParseTagSucceeds(parser, effect);
+        assertParseElementSucceeds(parser, effect);
         parser.next();
         assertEndTag(parser, "next-tag");
 
         parser = createXmlPullParser(xml + "<next-tag>");
-        assertParseTagSucceeds(parser, effect);
+        assertParseElementSucceeds(parser, effect);
         parser.next();
         assertStartTag(parser, "next-tag");
 
         parser = createXmlPullParser(xml + xml2);
-        assertParseTagSucceeds(parser, effect);
+        assertParseElementSucceeds(parser, effect);
         parser.next();
-        assertParseTagSucceeds(parser, effect2);
+        assertParseElementSucceeds(parser, effect2);
         parser.next();
         assertEndOfDocument(parser);
+
+        // Check when there is comment before the end tag.
+        xml = "<vibration><primitive-effect name=\"tick\"/><!-- comment --></vibration>";
+        parser = createXmlPullParser(xml);
+        assertParseElementSucceeds(
+                parser, VibrationEffect.startComposition().addPrimitive(PRIMITIVE_TICK).compose());
     }
 
     @Test
-    public void testParseTag_badXml_throwsException() throws Exception {
-        assertParseTagFails(
+    public void
+            testParseElement_fromVibrationSelectTag_succeedAndParserPointsToEndVibrationSelectTag()
+                    throws Exception {
+        VibrationEffect effect1 = VibrationEffect.startComposition()
+                .addPrimitive(PRIMITIVE_CLICK)
+                .addPrimitive(PRIMITIVE_TICK, 0.2497f)
+                .compose();
+        String vibrationXml1 = "<vibration>"
+                + "<primitive-effect name=\"click\"/>"
+                + "<primitive-effect name=\"tick\" scale=\"0.2497\"/>"
+                + "</vibration>";
+        VibrationEffect effect2 = VibrationEffect.startComposition()
+                .addPrimitive(PRIMITIVE_LOW_TICK, 1f, 356)
+                .addPrimitive(PRIMITIVE_SPIN, 0.6364f, 7)
+                .compose();
+        String vibrationXml2 = "<vibration>"
+                + "<primitive-effect name=\"low_tick\" delayMs=\"356\"/>"
+                + "<primitive-effect name=\"spin\" scale=\"0.6364\" delayMs=\"7\"/>"
+                + "</vibration>";
+
+        String xml = "<vibration-select>" + vibrationXml1 + vibrationXml2 + "</vibration-select>";
+        TypedXmlPullParser parser = createXmlPullParser(xml);
+        assertParseElementSucceeds(parser, effect1, effect2);
+        parser.next();
+        assertEndOfDocument(parser);
+
+        // Test no-issues when an end-tag follows the vibration XML.
+        // To test this, starting with the corresponding "start-tag" is necessary.
+        parser = createXmlPullParser("<next-tag>" + xml + "</next-tag>");
+        // Move the parser once to point to the "<vibration> tag.
+        parser.next();
+        assertParseElementSucceeds(parser, effect1, effect2);
+        parser.next();
+        assertEndTag(parser, "next-tag");
+
+        parser = createXmlPullParser(xml + "<next-tag>");
+        assertParseElementSucceeds(parser, effect1, effect2);
+        parser.next();
+        assertStartTag(parser, "next-tag");
+
+        xml = "<vibration-select>" + vibrationXml1 + vibrationXml2 + "</vibration-select>"
+                + "<vibration-select>" + vibrationXml2 + vibrationXml1 + "</vibration-select>"
+                + vibrationXml1;
+        parser = createXmlPullParser(xml);
+        assertParseElementSucceeds(parser, effect1, effect2);
+        parser.next();
+        assertParseElementSucceeds(parser, effect2, effect1);
+        parser.next();
+        assertParseElementSucceeds(parser, effect1);
+        parser.next();
+        assertEndOfDocument(parser);
+
+        // Check when there is comment before the end tag.
+        xml = "<vibration-select>" + vibrationXml1 + "<!-- comment --></vibration-select>";
+        parser = createXmlPullParser(xml);
+        parser.next();
+        assertParseElementSucceeds(parser, effect1);
+    }
+
+    @Test
+    public void testParseElement_withHiddenApis_onlySucceedsWithFlag() throws Exception {
+        // Check when the root tag is "vibration".
+        String xml = "<vibration><predefined-effect name=\"texture_tick\"/></vibration>";
+        assertParseElementSucceeds(createXmlPullParser(xml),
+                VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS,
+                VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK));
+        assertParseElementFails(xml);
+
+        // Check when the root tag is "vibration-select".
+        xml = "<vibration-select>" + xml + "</vibration-select>";
+        assertParseElementSucceeds(createXmlPullParser(xml),
+                VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS,
+                VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK));
+        assertParseElementFails(xml);
+    }
+
+    @Test
+    public void testParseElement_badXml_throwsException() throws Exception {
+        // No "vibration-select" tag.
+        assertParseElementFails(
                 "<vibration>random text<primitive-effect name=\"click\"/></vibration>");
-        assertParseTagFails("<bad-tag><primitive-effect name=\"click\"/></vibration>");
-        assertParseTagFails("<primitive-effect name=\"click\"/></vibration>");
-        assertParseTagFails("<vibration><primitive-effect name=\"click\"/>");
+        assertParseElementFails("<bad-tag><primitive-effect name=\"click\"/></vibration>");
+        assertParseElementFails("<primitive-effect name=\"click\"/></vibration>");
+        assertParseElementFails("<vibration><primitive-effect name=\"click\"/>");
+
+        // Incomplete XML.
+        assertParseElementFails("<vibration-select><primitive-effect name=\"click\"/>");
+        assertParseElementFails("<vibration-select>"
+                + "<vibration>"
+                + "<primitive-effect name=\"low_tick\" delayMs=\"356\"/>"
+                + "</vibration>");
+
+        // Bad vibration XML.
+        assertParseElementFails("<vibration-select>"
+                + "<primitive-effect name=\"low_tick\" delayMs=\"356\"/>"
+                + "</vibration>"
+                + "</vibration-select>");
+
+        // "vibration-select" tag should have no attributes.
+        assertParseElementFails("<vibration-select bad_attr=\"123\">"
+                + "<vibration>"
+                + "<predefined-effect name=\"tick\"/>"
+                + "</vibration>"
+                + "</vibration-select>");
     }
 
     @Test
@@ -140,9 +246,27 @@ public class VibrationEffectXmlSerializationTest {
         assertPublicApisSerializerSucceeds(effect, "click", "tick", "low_tick", "spin");
         assertPublicApisRoundTrip(effect);
 
-        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisParseVibrationEffectSucceeds(xml, effect);
         assertHiddenApisSerializerSucceeds(effect, "click", "tick", "low_tick", "spin");
         assertHiddenApisRoundTrip(effect);
+    }
+
+    @Test
+    public void testParseDocument_withVibrationSelectTag_withHiddenApis_onlySucceedsWithFlag()
+            throws Exception {
+        // Check when the root tag is "vibration".
+        String xml = "<vibration><predefined-effect name=\"texture_tick\"/></vibration>";
+        assertParseDocumentSucceeds(xml,
+                VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS,
+                VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK));
+        assertThat(parseDocument(xml, /* flags= */ 0)).isNull();
+
+        // Check when the root tag is "vibration-select".
+        xml = "<vibration-select>" + xml + "</vibration-select>";
+        assertParseDocumentSucceeds(xml,
+                VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS,
+                VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK));
+        assertThat(parseDocument(xml, /* flags= */ 0)).isNull();
     }
 
     @Test
@@ -162,7 +286,7 @@ public class VibrationEffectXmlSerializationTest {
         assertPublicApisSerializerSucceeds(effect, "123", "456", "789", "254", "1", "255", "0");
         assertPublicApisRoundTrip(effect);
 
-        assertHiddenApisParserSucceeds(xml, effect);
+        assertHiddenApisParseVibrationEffectSucceeds(xml, effect);
         assertHiddenApisSerializerSucceeds(effect, "123", "456", "789", "254", "1", "255", "0");
         assertHiddenApisRoundTrip(effect);
     }
@@ -179,7 +303,7 @@ public class VibrationEffectXmlSerializationTest {
             assertPublicApisSerializerSucceeds(effect, entry.getKey());
             assertPublicApisRoundTrip(effect);
 
-            assertHiddenApisParserSucceeds(xml, effect);
+            assertHiddenApisParseVibrationEffectSucceeds(xml, effect);
             assertHiddenApisSerializerSucceeds(effect, entry.getKey());
             assertHiddenApisRoundTrip(effect);
         }
@@ -195,7 +319,7 @@ public class VibrationEffectXmlSerializationTest {
             assertPublicApisParserFails(xml);
             assertPublicApisSerializerFails(effect);
 
-            assertHiddenApisParserSucceeds(xml, effect);
+            assertHiddenApisParseVibrationEffectSucceeds(xml, effect);
             assertHiddenApisSerializerSucceeds(effect, entry.getKey());
             assertHiddenApisRoundTrip(effect);
         }
@@ -214,19 +338,19 @@ public class VibrationEffectXmlSerializationTest {
             assertPublicApisParserFails(xml);
             assertPublicApisSerializerFails(effect);
 
-            assertHiddenApisParserSucceeds(xml, effect);
+            assertHiddenApisParseVibrationEffectSucceeds(xml, effect);
             assertHiddenApisSerializerSucceeds(effect, entry.getKey());
             assertHiddenApisRoundTrip(effect);
         }
     }
 
     private void assertPublicApisParserFails(String xml) throws IOException {
-        assertThat(parse(xml, /* flags= */ 0)).isNull();
+        assertThat(parseVibrationEffect(xml, /* flags= */ 0)).isNull();
     }
 
     private void assertPublicApisParserSucceeds(String xml, VibrationEffect effect)
             throws IOException {
-        assertThat(parse(xml, /* flags= */ 0)).isEqualTo(effect);
+        assertThat(parseVibrationEffect(xml, /* flags= */ 0)).isEqualTo(effect);
     }
 
     private TypedXmlPullParser createXmlPullParser(String xml) throws Exception {
@@ -237,16 +361,30 @@ public class VibrationEffectXmlSerializationTest {
         return parser;
     }
 
+    private void assertParseDocumentSucceeds(String xml, int flags, VibrationEffect... effects)
+            throws Exception {
+        assertThat(parseDocument(xml, flags).getVibrationEffectListForTesting())
+                .containsExactly(effects);
+    }
+
     /**
      * Asserts parsing vibration from an open TypedXmlPullParser succeeds, and that the parser
-     * points to the end "vibration" tag.
+     * points to the end "vibration" or "vibration-select" tag.
      */
-    private void assertParseTagSucceeds(
-            TypedXmlPullParser parser, VibrationEffect effect) throws Exception {
-        assertThat(parseTag(parser)).isEqualTo(effect);
+    private void assertParseElementSucceeds(
+            TypedXmlPullParser parser, VibrationEffect... effects) throws Exception {
+        assertParseElementSucceeds(parser, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS, effects);
+    }
 
+    private void assertParseElementSucceeds(
+            TypedXmlPullParser parser, int flags, VibrationEffect... effects) throws Exception {
+        String tagName = parser.getName();
+        assertThat(Set.of("vibration", "vibration-select")).contains(tagName);
+
+        assertThat(parseElement(parser, flags).getVibrationEffectListForTesting())
+                .containsExactly(effects);
         assertThat(parser.getEventType()).isEqualTo(XmlPullParser.END_TAG);
-        assertThat(parser.getName()).isEqualTo("vibration");
+        assertThat(parser.getName()).isEqualTo(tagName);
     }
 
     private void assertEndTag(TypedXmlPullParser parser, String expectedTagName) throws Exception {
@@ -264,9 +402,10 @@ public class VibrationEffectXmlSerializationTest {
         assertThat(parser.getEventType()).isEqualTo(parser.END_DOCUMENT);
     }
 
-    private void assertHiddenApisParserSucceeds(String xml, VibrationEffect effect)
+    private void assertHiddenApisParseVibrationEffectSucceeds(String xml, VibrationEffect effect)
             throws IOException {
-        assertThat(parse(xml, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS)).isEqualTo(effect);
+        assertThat(parseVibrationEffect(xml, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS))
+                .isEqualTo(effect);
     }
 
     private void assertPublicApisSerializerFails(VibrationEffect effect) {
@@ -275,10 +414,10 @@ public class VibrationEffectXmlSerializationTest {
                 () -> serialize(effect, /* flags= */ 0));
     }
 
-    private void assertParseTagFails(String xml) {
+    private void assertParseElementFails(String xml) {
         assertThrows("Expected parsing to fail for " + xml,
                 VibrationXmlParser.VibrationXmlParserException.class,
-                () -> parseTag(createXmlPullParser(xml)));
+                () -> parseElement(createXmlPullParser(xml), /* flags= */ 0));
     }
 
     private void assertPublicApisSerializerSucceeds(VibrationEffect effect,
@@ -299,22 +438,29 @@ public class VibrationEffectXmlSerializationTest {
     }
 
     private void assertPublicApisRoundTrip(VibrationEffect effect) throws IOException {
-        assertThat(parse(serialize(effect, /* flags= */ 0), /* flags= */ 0)).isEqualTo(effect);
+        assertThat(parseVibrationEffect(serialize(effect, /* flags= */ 0), /* flags= */ 0))
+                .isEqualTo(effect);
     }
 
     private void assertHiddenApisRoundTrip(VibrationEffect effect) throws IOException {
         String xml = serialize(effect, VibrationXmlSerializer.FLAG_ALLOW_HIDDEN_APIS);
-        assertThat(parse(xml, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS)).isEqualTo(effect);
+        assertThat(parseVibrationEffect(xml, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS))
+                .isEqualTo(effect);
     }
 
-    private static VibrationEffect parse(String xml, @VibrationXmlParser.Flags int flags)
+    private static VibrationEffect parseVibrationEffect(
+            String xml, @VibrationXmlParser.Flags int flags) throws IOException {
+        return VibrationXmlParser.parseVibrationEffect(new StringReader(xml), flags);
+    }
+
+    private static ParsedVibration parseDocument(String xml, int flags)
             throws IOException {
-        return VibrationXmlParser.parse(new StringReader(xml), flags);
+        return VibrationXmlParser.parseDocument(new StringReader(xml), flags);
     }
 
-    private static VibrationEffect parseTag(TypedXmlPullParser parser)
+    private static ParsedVibration parseElement(TypedXmlPullParser parser, int flags)
             throws IOException, VibrationXmlParser.VibrationXmlParserException {
-        return VibrationXmlParser.parseTag(parser, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS);
+        return VibrationXmlParser.parseElement(parser, flags);
     }
 
     private static String serialize(VibrationEffect effect, @VibrationXmlSerializer.Flags int flags)

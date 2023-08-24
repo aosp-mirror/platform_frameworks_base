@@ -41,17 +41,26 @@ public final class XmlReader {
      */
     public static void readDocumentStartTag(TypedXmlPullParser parser, String expectedRootTag)
             throws XmlParserException, IOException {
+        readDocumentStart(parser);
+
+        String tagName = parser.getName();
+        XmlValidator.checkParserCondition(expectedRootTag.equals(tagName),
+                "Unexpected root tag found %s, expected %s", tagName, expectedRootTag);
+    }
+
+    /**
+     * Check parser is currently at {@link XmlPullParser#START_DOCUMENT}.
+     *
+     * <p>The parser will be pointing to the first tag in the document.
+     */
+    public static void readDocumentStart(TypedXmlPullParser parser)
+            throws XmlParserException, IOException {
         try {
             int type = parser.getEventType();
-            checkArgument(type == XmlPullParser.START_DOCUMENT, "Document already started");
-
-            type = parser.nextTag(); // skips comments, instruction tokens and whitespace only
-            XmlValidator.checkParserCondition(type == XmlPullParser.START_TAG,
-                    "Unexpected element at document start, expected root tag %s", expectedRootTag);
-
-            String tagName = parser.getName();
-            XmlValidator.checkParserCondition(expectedRootTag.equals(tagName),
-                    "Unexpected root tag found %s, expected %s", tagName, expectedRootTag);
+            checkArgument(
+                    type == XmlPullParser.START_DOCUMENT,
+                    "Unexpected type, expected %d", type);
+            parser.nextTag(); // skips comments, instruction tokens and whitespace only
         } catch (XmlPullParserException e) {
             throw XmlParserException.createFromPullParserException("document start tag", e);
         }

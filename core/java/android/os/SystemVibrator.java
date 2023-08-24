@@ -62,7 +62,7 @@ public class SystemVibrator extends Vibrator {
     }
 
     @Override
-    protected VibratorInfo getInfo() {
+    public VibratorInfo getInfo() {
         synchronized (mLock) {
             if (mVibratorInfo != null) {
                 return mVibratorInfo;

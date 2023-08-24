@@ -25,10 +25,13 @@ import static com.android.server.vibrator.HapticFeedbackCustomization.Customizat
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.AtomicFile;
 import android.util.SparseArray;
 
@@ -36,6 +39,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -60,7 +64,23 @@ public class HapticFeedbackCustomizationTest {
     private static final VibrationEffect PREDEFINED_VIBRATION =
             VibrationEffect.createPredefined(EFFECT_CLICK);
 
+    private static final String WAVEFORM_VIBRATION_XML = "<vibration>"
+            + "<waveform-effect>"
+            + "<waveform-entry durationMs=\"123\" amplitude=\"254\"/>"
+            + "</waveform-effect>"
+            + "</vibration>";
+    private static final VibrationEffect WAVEFORM_VIBARTION =
+            VibrationEffect.createWaveform(new long[] {123}, new int[] {254}, -1);
+
     @Mock private Resources mResourcesMock;
+    @Mock private Vibrator mVibratorMock;
+    @Mock private VibratorInfo mVibratorInfoMock;
+
+    @Before
+    public void setUp() {
+        when(mVibratorMock.getInfo()).thenReturn(mVibratorInfoMock);
+        when(mVibratorInfoMock.areVibrationFeaturesSupported(any())).thenReturn(true);
+    }
 
     @Test
     public void testParseCustomizations_noCustomization_success() throws Exception {
@@ -70,10 +90,25 @@ public class HapticFeedbackCustomizationTest {
     }
 
     @Test
-    public void testParseCustomizations_oneCustomization_success() throws Exception {
+    public void testParseCustomizations_oneVibrationCustomization_success() throws Exception {
         String xml = "<haptic-feedback-constants>"
                 + "<constant id=\"10\">"
                 + COMPOSITION_VIBRATION_XML
+                + "</constant>"
+                + "</haptic-feedback-constants>";
+        SparseArray<VibrationEffect> expectedMapping = new SparseArray<>();
+        expectedMapping.put(10, COMPOSITION_VIBRATION);
+
+        assertParseCustomizationsSucceeds(xml, expectedMapping);
+    }
+
+    @Test
+    public void testParseCustomizations_oneVibrationSelectCustomization_success() throws Exception {
+        String xml = "<haptic-feedback-constants>"
+                + "<constant id=\"10\">"
+                + "<vibration-select>"
+                + COMPOSITION_VIBRATION_XML
+                + "</vibration-select>"
                 + "</constant>"
                 + "</haptic-feedback-constants>";
         SparseArray<VibrationEffect> expectedMapping = new SparseArray<>();
@@ -89,16 +124,94 @@ public class HapticFeedbackCustomizationTest {
                 + COMPOSITION_VIBRATION_XML
                 + "</constant>"
                 + "<constant id=\"12\">"
+                + "<vibration-select>"
                 + PREDEFINED_VIBRATION_XML
+                + WAVEFORM_VIBRATION_XML
+                + "</vibration-select>"
                 + "</constant>"
                 + "<constant id=\"150\">"
                 + PREDEFINED_VIBRATION_XML
+                + "</constant>"
+                + "<constant id=\"10\">"
+                + "<vibration-select>"
+                + WAVEFORM_VIBRATION_XML
+                + COMPOSITION_VIBRATION_XML
+                + "</vibration-select>"
                 + "</constant>"
                 + "</haptic-feedback-constants>";
         SparseArray<VibrationEffect> expectedMapping = new SparseArray<>();
         expectedMapping.put(1, COMPOSITION_VIBRATION);
         expectedMapping.put(12, PREDEFINED_VIBRATION);
         expectedMapping.put(150, PREDEFINED_VIBRATION);
+        expectedMapping.put(10, WAVEFORM_VIBARTION);
+
+        assertParseCustomizationsSucceeds(xml, expectedMapping);
+    }
+
+    @Test
+    public void testParseCustomizations_multipleCustomizations_noSupportedVibration_success()
+                throws Exception {
+        makeUnsupported(COMPOSITION_VIBRATION, PREDEFINED_VIBRATION, WAVEFORM_VIBARTION);
+        String xml = "<haptic-feedback-constants>"
+                + "<constant id=\"1\">"
+                + COMPOSITION_VIBRATION_XML
+                + "</constant>"
+                + "<constant id=\"12\">"
+                + "<vibration-select>"
+                + PREDEFINED_VIBRATION_XML
+                + WAVEFORM_VIBRATION_XML
+                + "</vibration-select>"
+                + "</constant>"
+                + "<constant id=\"150\">"
+                + PREDEFINED_VIBRATION_XML
+                + "</constant>"
+                + "<constant id=\"10\">"
+                + "<vibration-select>"
+                + WAVEFORM_VIBRATION_XML
+                + COMPOSITION_VIBRATION_XML
+                + "</vibration-select>"
+                + "</constant>"
+                + "</haptic-feedback-constants>";
+
+        assertParseCustomizationsSucceeds(xml, new SparseArray<>());
+    }
+
+    @Test
+    public void testParseCustomizations_multipleCustomizations_someUnsupportedVibration_success()
+                throws Exception {
+        makeSupported(PREDEFINED_VIBRATION, WAVEFORM_VIBARTION);
+        makeUnsupported(COMPOSITION_VIBRATION);
+        String xml = "<haptic-feedback-constants>"
+                + "<constant id=\"1\">" // No supported customization.
+                + COMPOSITION_VIBRATION_XML
+                + "</constant>"
+                + "<constant id=\"12\">" // PREDEFINED_VIBRATION is the first/only supported.
+                + "<vibration-select>"
+                + PREDEFINED_VIBRATION_XML
+                + COMPOSITION_VIBRATION_XML
+                + "</vibration-select>"
+                + "</constant>"
+                + "<constant id=\"14\">" // WAVEFORM_VIBARTION is the first/only supported.
+                + "<vibration-select>"
+                + COMPOSITION_VIBRATION_XML
+                + WAVEFORM_VIBRATION_XML
+                + "</vibration-select>"
+                + "</constant>"
+                + "<constant id=\"150\">" // PREDEFINED_VIBRATION is the first/only supported.
+                + PREDEFINED_VIBRATION_XML
+                + "</constant>"
+                + "<constant id=\"10\">" // PREDEFINED_VIBRATION is the first supported.
+                + "<vibration-select>"
+                + PREDEFINED_VIBRATION_XML
+                + WAVEFORM_VIBRATION_XML
+                + "</vibration-select>"
+                + "</constant>"
+                + "</haptic-feedback-constants>";
+        SparseArray<VibrationEffect> expectedMapping = new SparseArray<>();
+        expectedMapping.put(12, PREDEFINED_VIBRATION);
+        expectedMapping.put(14, WAVEFORM_VIBARTION);
+        expectedMapping.put(150, PREDEFINED_VIBRATION);
+        expectedMapping.put(10, PREDEFINED_VIBRATION);
 
         assertParseCustomizationsSucceeds(xml, expectedMapping);
     }
@@ -107,15 +220,18 @@ public class HapticFeedbackCustomizationTest {
     public void testParseCustomizations_noCustomizationFile_returnsNull() throws Exception {
         setCustomizationFilePath("");
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock)).isNull();
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+                .isNull();
 
         setCustomizationFilePath(null);
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock)).isNull();
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+                .isNull();
 
         setCustomizationFilePath("non_existent_file.xml");
 
-        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock)).isNull();
+        assertThat(HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock))
+                .isNull();
     }
 
     @Test
@@ -216,6 +332,22 @@ public class HapticFeedbackCustomizationTest {
                 + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
                 + "</constant>"
                 + "</haptic-feedback-constants>");
+
+        assertParseCustomizationsFails(
+                "<haptic-feedback-constants>"
+                + "<constant id=\"10\">"
+                + "<vibration-select>"
+                + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
+                + "</constant>"
+                + "</haptic-feedback-constants>");
+
+        assertParseCustomizationsFails(
+                "<haptic-feedback-constants>"
+                + "<constant id=\"10\">"
+                + "<vibration><predefined-effect name=\"bad-effect-name\"/></vibration>"
+                + "</vibration-select>"
+                + "</constant>"
+                + "</haptic-feedback-constants>");
     }
 
     @Test
@@ -255,20 +387,21 @@ public class HapticFeedbackCustomizationTest {
             String xml, SparseArray<VibrationEffect> expectedCustomizations) throws Exception {
         setupCustomizationFile(xml);
         assertThat(expectedCustomizations.contentEquals(
-                HapticFeedbackCustomization.loadVibrations(mResourcesMock))).isTrue();
+                HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock)))
+                        .isTrue();
     }
 
     private void assertParseCustomizationsFails(String xml) throws Exception {
         setupCustomizationFile(xml);
         assertThrows("Expected haptic feedback customization to fail for " + xml,
                 CustomizationParserException.class,
-                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock));
+                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock));
     }
 
     private void assertParseCustomizationsFails() throws Exception {
         assertThrows("Expected haptic feedback customization to fail",
                 CustomizationParserException.class,
-                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock));
+                () ->  HapticFeedbackCustomization.loadVibrations(mResourcesMock, mVibratorMock));
     }
 
     private void setupCustomizationFile(String xml) throws Exception {
@@ -279,6 +412,18 @@ public class HapticFeedbackCustomizationTest {
     private void setCustomizationFilePath(String path) {
         when(mResourcesMock.getString(R.string.config_hapticFeedbackCustomizationFile))
                 .thenReturn(path);
+    }
+
+    private void makeSupported(VibrationEffect... effects) {
+        for (VibrationEffect effect : effects) {
+            when(mVibratorInfoMock.areVibrationFeaturesSupported(effect)).thenReturn(true);
+        }
+    }
+
+    private void makeUnsupported(VibrationEffect... effects) {
+        for (VibrationEffect effect : effects) {
+            when(mVibratorInfoMock.areVibrationFeaturesSupported(effect)).thenReturn(false);
+        }
     }
 
     private static File createFile(String contents) throws Exception {
