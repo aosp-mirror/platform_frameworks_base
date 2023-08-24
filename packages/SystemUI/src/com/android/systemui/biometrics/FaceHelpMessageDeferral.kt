@@ -25,7 +25,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import java.io.PrintWriter
-import java.util.*
+import java.util.Objects
 import javax.inject.Inject
 
 /**
@@ -42,6 +42,7 @@ constructor(
 ) :
     BiometricMessageDeferral(
         resources.getIntArray(R.array.config_face_help_msgs_defer_until_timeout).toHashSet(),
+        resources.getIntArray(R.array.config_face_help_msgs_ignore).toHashSet(),
         resources.getFloat(R.dimen.config_face_help_msgs_defer_until_timeout_threshold),
         logBuffer,
         dumpManager
@@ -50,10 +51,11 @@ constructor(
 /**
  * @property messagesToDefer messages that shouldn't show immediately when received, but may be
  *   shown later if the message is the most frequent acquiredInfo processed and meets [threshold]
- *   percentage of all passed acquired frames.
+ *   percentage of all acquired frames, excluding [acquiredInfoToIgnore].
  */
 open class BiometricMessageDeferral(
     private val messagesToDefer: Set<Int>,
+    private val acquiredInfoToIgnore: Set<Int>,
     private val threshold: Float,
     private val logBuffer: BiometricMessageDeferralLogger,
     dumpManager: DumpManager
@@ -98,9 +100,17 @@ open class BiometricMessageDeferral(
         return messagesToDefer.contains(acquiredMsgId)
     }
 
-    /** Adds the acquiredInfo frame to the counts. We account for all frames. */
+    /**
+     * Adds the acquiredInfo frame to the counts. We account for frames not included in
+     * acquiredInfoToIgnore.
+     */
     fun processFrame(acquiredInfo: Int) {
         if (messagesToDefer.isEmpty()) {
+            return
+        }
+
+        if (acquiredInfoToIgnore.contains(acquiredInfo)) {
+            logBuffer.logFrameIgnored(acquiredInfo)
             return
         }
 
