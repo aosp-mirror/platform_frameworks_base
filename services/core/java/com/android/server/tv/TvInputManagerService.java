@@ -41,6 +41,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -94,6 +95,7 @@ import android.util.SparseArray;
 import android.view.InputChannel;
 import android.view.Surface;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
@@ -177,6 +179,11 @@ public final class TvInputManagerService extends SystemService {
 
     private final ActivityManager mActivityManager;
 
+    private boolean mExternalInputLoggingDisplayNameFilterEnabled = false;
+    private final HashSet<String> mExternalInputLoggingDeviceOnScreenDisplayNames =
+            new HashSet<String>();
+    private final List<String> mExternalInputLoggingDeviceBrandNames = new ArrayList<String>();
+
     public TvInputManagerService(Context context) {
         super(context);
 
@@ -192,6 +199,8 @@ public final class TvInputManagerService extends SystemService {
         synchronized (mLock) {
             getOrCreateUserStateLocked(mCurrentUserId);
         }
+
+        initExternalInputLoggingConfigs();
     }
 
     @Override
@@ -222,6 +231,21 @@ public final class TvInputManagerService extends SystemService {
             buildTvInputListLocked(mCurrentUserId, null);
             buildTvContentRatingSystemListLocked(mCurrentUserId);
         }
+    }
+
+    private void initExternalInputLoggingConfigs() {
+        mExternalInputLoggingDisplayNameFilterEnabled = mContext.getResources().getBoolean(
+                R.bool.config_tvExternalInputLoggingDisplayNameFilterEnabled);
+        if (!mExternalInputLoggingDisplayNameFilterEnabled) {
+            return;
+        }
+        final String[] deviceOnScreenDisplayNames = mContext.getResources().getStringArray(
+                R.array.config_tvExternalInputLoggingDeviceOnScreenDisplayNames);
+        final String[] deviceBrandNames = mContext.getResources().getStringArray(
+                R.array.config_tvExternalInputLoggingDeviceBrandNames);
+        mExternalInputLoggingDeviceOnScreenDisplayNames.addAll(
+                Arrays.asList(deviceOnScreenDisplayNames));
+        mExternalInputLoggingDeviceBrandNames.addAll(Arrays.asList(deviceBrandNames));
     }
 
     private void registerBroadcastReceivers() {
@@ -3073,6 +3097,9 @@ public final class TvInputManagerService extends SystemService {
                 hdmiPort = hdmiDeviceInfo.getPortId();
                 if (hdmiDeviceInfo.isCecDevice()) {
                     displayName = hdmiDeviceInfo.getDisplayName();
+                    if (mExternalInputLoggingDisplayNameFilterEnabled) {
+                        displayName = filterExternalInputLoggingDisplayName(displayName);
+                    }
                     vendorId = hdmiDeviceInfo.getVendorId();
                 }
             }
@@ -3080,6 +3107,22 @@ public final class TvInputManagerService extends SystemService {
 
         FrameworkStatsLog.write(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT, eventType, inputState,
                 inputType, vendorId, hdmiPort, tifSessionId, displayName);
+    }
+
+    private String filterExternalInputLoggingDisplayName(String displayName) {
+        String nullDisplayName = "NULL_DISPLAY_NAME", filteredDisplayName = "FILTERED_DISPLAY_NAME";
+        if (displayName == null) {
+            return nullDisplayName;
+        }
+        if (mExternalInputLoggingDeviceOnScreenDisplayNames.contains(displayName)) {
+            return displayName;
+        }
+        for (String brandName : mExternalInputLoggingDeviceBrandNames) {
+            if (displayName.toUpperCase().contains(brandName.toUpperCase())) {
+                return brandName;
+            }
+        }
+        return filteredDisplayName;
     }
 
     private static final class UserState {

@@ -5221,4 +5221,9 @@
 
   <!-- Whether we order unlocking and waking -->
   <java-symbol type="bool" name="config_orderUnlockAndWake" />
+
+  <!-- External TV Input Logging Configs -->
+  <java-symbol type="bool" name="config_tvExternalInputLoggingDisplayNameFilterEnabled" />
+  <java-symbol type="array" name="config_tvExternalInputLoggingDeviceOnScreenDisplayNames" />
+  <java-symbol type="array" name="config_tvExternalInputLoggingDeviceBrandNames" />
 </resources>
