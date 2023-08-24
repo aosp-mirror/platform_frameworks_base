@@ -526,7 +526,7 @@ static void CameraMetadata_dump(JNIEnv *env, jclass thiz, jlong ptr) {
                     "Failed to read from fd (errno = %#x, message = '%s')",
                     errno, strerror(errno));
             //return;
-        } else if (!logLine.isEmpty()) {
+        } else if (!logLine.empty()) {
             ALOGD("%s", logLine.string());
         }
 
