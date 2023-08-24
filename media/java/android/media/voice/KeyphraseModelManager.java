@@ -37,7 +37,7 @@ import java.util.Objects;
  * This class provides management of voice based sound recognition models. Usage of this class is
  * restricted to system or signature applications only. This allows OEMs to write apps that can
  * manage voice based sound trigger models.
- * Callers of this class are expected to have whitelist manifest permission MANAGE_VOICE_KEYPHRASES.
+ * Callers of this class are expected to have allowlist manifest permission MANAGE_VOICE_KEYPHRASES.
  * Callers of this class are expected to be the designated voice interaction service via
  * {@link Settings.Secure.VOICE_INTERACTION_SERVICE} or a bundled voice model enrollment application
  * detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}.
