@@ -17,11 +17,7 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
@@ -54,17 +50,6 @@ class GoneScene @Inject constructor() : ComposableScene {
     override fun SceneScope.Content(
         modifier: Modifier,
     ) {
-        /*
-         * TODO(b/279501596): once we start testing with the real Content Dynamics Framework,
-         *  replace this with an error to make sure it doesn't get rendered.
-         */
-        Box(modifier = modifier) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Text("Gone", style = MaterialTheme.typography.headlineMedium)
-            }
-        }
+        Box(modifier = modifier)
     }
 }
