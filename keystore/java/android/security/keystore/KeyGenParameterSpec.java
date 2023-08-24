@@ -1508,7 +1508,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * key has purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}. If the key
          * does not have purpose {@link android.security.keystore.KeyProperties#PURPOSE_SIGN}, it is
          * not possible to use the key to sign a certificate, so the public key certificate will
-         * contain a dummy signature.
+         * contain a placeholder signature.
          *
          * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
          * {@link #getAttestationChallenge()} returns non-null and the spec is used to generate a
