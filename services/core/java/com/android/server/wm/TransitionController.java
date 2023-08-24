@@ -711,7 +711,7 @@ class TransitionController {
                 startTask.fillTaskInfo(info);
             }
             final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange, transition.getFlags());
+                    transition.mType, info, remoteTransition, displayChange);
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
