@@ -592,7 +592,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPublicLayout.updateExpandButtons(true);
         updateLimits();
         updateShelfIconColor();
-        updateRippleAllowed();
         if (mUpdateSelfBackgroundOnUpdate) {
             // Because this is triggered by UiMode change which we already propagated to children,
             // we know that child rows will receive the same event, and will update their own
@@ -2556,31 +2555,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
             }
         }
-        updateRippleAllowed();
     }
 
-    private void updateRippleAllowed() {
-        boolean allowed = isOnKeyguard()
-                || mEntry.getSbn().getNotification().contentIntent == null;
-        setRippleAllowed(allowed);
-    }
-
-    @Override
-    public void onTap() {
-        // This notification will expand and animates into the content activity, so we disable the
-        // ripple. We will restore its value once the tap/click is actually performed.
-        if (mEntry.getSbn().getNotification().contentIntent != null) {
-            setRippleAllowed(false);
-        }
-    }
-
-    @Override
-    public boolean performClick() {
-        // We force-disabled the ripple in onTap. When this method is called, the code drawing the
-        // ripple will already have been called so we can restore its value now.
-        updateRippleAllowed();
-        return super.performClick();
-    }
 
     @Override
     public int getHeightWithoutLockscreenConstraints() {

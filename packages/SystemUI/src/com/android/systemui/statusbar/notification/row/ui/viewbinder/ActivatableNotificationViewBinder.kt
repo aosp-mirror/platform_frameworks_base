@@ -82,11 +82,7 @@ private class TouchHandler(
         }
         if (ev.action == MotionEvent.ACTION_UP) {
             // If this is a false tap, capture the even so it doesn't result in a click.
-            val falseTap: Boolean = falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
-            if (!falseTap && v is ActivatableNotificationView) {
-                v.onTap()
-            }
-            return falseTap
+            return falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)
         }
         return result
     }
