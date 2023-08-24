@@ -97,6 +97,9 @@ public final class CredentialManagerService
     private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER =
             "enable_credential_manager";
 
+    private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
+            "enable_credential_description_api";
+
     private final Context mContext;
 
     /** Cache of system service list per user id. */
@@ -309,7 +312,14 @@ public final class CredentialManagerService
     }
 
     public static boolean isCredentialDescriptionApiEnabled() {
-        return true;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API,
+                    false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
@@ -942,7 +952,7 @@ public final class CredentialManagerService
             Slog.i(TAG, "registerCredentialDescription with callingPackage: " + callingPackage);
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
@@ -962,7 +972,7 @@ public final class CredentialManagerService
 
 
             if (!isCredentialDescriptionApiEnabled()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Feature not supported");
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
