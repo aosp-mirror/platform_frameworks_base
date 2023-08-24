@@ -96,8 +96,11 @@ class PowerStatsAggregator {
                 BatteryStats.HistoryItem item = iterator.next();
 
                 if (baseTime < 0) {
-                    mStats.setStartTime(item.time);
+                    mStats.addClockUpdate(item.time, item.currentTime);
                     baseTime = item.time;
+                } else if (item.cmd == BatteryStats.HistoryItem.CMD_CURRENT_TIME
+                           || item.cmd == BatteryStats.HistoryItem.CMD_RESET) {
+                    mStats.addClockUpdate(item.time, item.currentTime);
                 }
 
                 lastTime = item.time;
@@ -128,7 +131,7 @@ class PowerStatsAggregator {
                         mStats.setDuration(lastTime - baseTime);
                         consumer.accept(mStats);
                         mStats.reset();
-                        mStats.setStartTime(item.time);
+                        mStats.addClockUpdate(item.time, item.currentTime);
                         baseTime = lastTime = item.time;
                     }
                     mStats.addPowerStats(item.powerStats, item.time);

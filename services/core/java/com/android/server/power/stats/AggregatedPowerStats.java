@@ -16,16 +16,21 @@
 
 package com.android.server.power.stats;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
+import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.os.PowerStats;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,10 +38,16 @@ import java.util.Set;
  * etc) covering a specific period of power usage history.
  */
 class AggregatedPowerStats {
+    private static final String TAG = "AggregatedPowerStats";
+    private static final int MAX_CLOCK_UPDATES = 100;
     private final PowerComponentAggregatedPowerStats[] mPowerComponentStats;
 
-    // See MonotonicClock
-    private long mStartTime;
+    static class ClockUpdate {
+        public long monotonicTime;
+        @CurrentTimeMillisLong public long currentTime;
+    }
+
+    private final List<ClockUpdate> mClockUpdates = new ArrayList<>();
 
     @DurationMillisLong
     private long mDurationMs;
@@ -46,17 +57,39 @@ class AggregatedPowerStats {
     }
 
     /**
-     * @param startTime monotonic time
+     * Records a mapping of monotonic time to wall-clock time. Since wall-clock time can change,
+     * there may be multiple clock updates in one set of aggregated stats.
+     *
+     * @param monotonicTime monotonic time in milliseconds, see
+     * {@link com.android.internal.os.MonotonicClock}
+     * @param currentTime   current time in milliseconds, see {@link System#currentTimeMillis()}
      */
-    void setStartTime(long startTime) {
-        mStartTime = startTime;
+    void addClockUpdate(long monotonicTime, @CurrentTimeMillisLong long currentTime) {
+        ClockUpdate clockUpdate = new ClockUpdate();
+        clockUpdate.monotonicTime = monotonicTime;
+        clockUpdate.currentTime = currentTime;
+        if (mClockUpdates.size() < MAX_CLOCK_UPDATES) {
+            mClockUpdates.add(clockUpdate);
+        } else {
+            Slog.i(TAG, "Too many clock updates. Replacing the previous update with "
+                        + DateFormat.format("yyyy-MM-dd-HH-mm-ss", currentTime));
+            mClockUpdates.set(mClockUpdates.size() - 1, clockUpdate);
+        }
     }
 
     /**
      * Start time according to {@link com.android.internal.os.MonotonicClock}
      */
-    public long getStartTime() {
-        return mStartTime;
+    long getStartTime() {
+        if (mClockUpdates.isEmpty()) {
+            return 0;
+        } else {
+            return mClockUpdates.get(0).monotonicTime;
+        }
+    }
+
+    List<ClockUpdate> getClockUpdates() {
+        return mClockUpdates;
     }
 
     void setDuration(long durationMs) {
@@ -110,7 +143,7 @@ class AggregatedPowerStats {
     }
 
     void reset() {
-        mStartTime = 0;
+        mClockUpdates.clear();
         mDurationMs = 0;
         for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             stats.reset();
@@ -119,11 +152,33 @@ class AggregatedPowerStats {
 
     void dump(PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
-        ipw.print("Start time: ");
-        ipw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", mStartTime));
-        ipw.print(" duration: ");
-        ipw.print(mDurationMs);
-        ipw.println();
+        StringBuilder sb = new StringBuilder();
+        long baseTime = 0;
+        for (int i = 0; i < mClockUpdates.size(); i++) {
+            ClockUpdate clockUpdate = mClockUpdates.get(i);
+            sb.setLength(0);
+            if (i == 0) {
+                baseTime = clockUpdate.monotonicTime;
+                sb.append("Start time: ")
+                        .append(DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime))
+                        .append(" (")
+                        .append(baseTime)
+                        .append(") duration: ")
+                        .append(mDurationMs);
+                ipw.println(sb);
+            } else {
+                sb.setLength(0);
+                sb.append("Clock update:  ");
+                TimeUtils.formatDuration(
+                        clockUpdate.monotonicTime - baseTime, sb,
+                        TimeUtils.HUNDRED_DAY_FIELD_LEN + 3);
+                sb.append(" ").append(
+                        DateFormat.format("yyyy-MM-dd-HH-mm-ss", clockUpdate.currentTime));
+                ipw.increaseIndent();
+                ipw.println(sb);
+                ipw.decreaseIndent();
+            }
+        }
 
         ipw.println("Device");
         ipw.increaseIndent();
