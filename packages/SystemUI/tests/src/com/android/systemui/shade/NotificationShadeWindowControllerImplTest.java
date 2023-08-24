@@ -53,6 +53,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -114,11 +115,22 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
-                mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+        mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
+                mContext,
+                new FakeWindowRootViewComponent.Factory(mNotificationShadeWindowView),
+                mWindowManager,
+                mActivityManager,
+                mDozeParameters,
+                mStatusBarStateController,
+                mConfigurationController,
+                mKeyguardViewMediator,
+                mKeyguardBypassController,
+                mColorExtractor,
+                mDumpManager,
+                mKeyguardStateController,
+                mScreenOffAnimationController,
+                mAuthController,
+                mShadeExpansionStateManager,
                 mShadeWindowLogger) {
                     @Override
                     protected boolean isDebuggable() {
@@ -126,7 +138,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                     }
             };
         mNotificationShadeWindowController.setScrimsVisibilityListener((visibility) -> {});
-        mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
+        mNotificationShadeWindowController.fetchWindowRootView();
 
         mNotificationShadeWindowController.attach();
         verify(mWindowManager).addView(eq(mNotificationShadeWindowView), any());

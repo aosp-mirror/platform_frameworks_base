@@ -59,8 +59,8 @@ public interface NotificationShadeWindowController extends RemoteInputController
      */
     default void attach() {}
 
-    /** Sets the notification shade view. */
-    default void setWindowRootView(ViewGroup view) {}
+    /** Requests this class to fetch the notification shade view. */
+    default void fetchWindowRootView() {}
 
     /** Gets the notification shade view. */
     @Nullable

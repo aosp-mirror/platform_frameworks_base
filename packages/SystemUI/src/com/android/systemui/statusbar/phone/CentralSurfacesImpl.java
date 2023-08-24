@@ -92,7 +92,6 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
@@ -1601,10 +1600,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 CollapsedStatusBarFragment.class,
                 mCentralSurfacesComponent::createCollapsedStatusBarFragment);
 
-        ViewGroup windowRootView = mCentralSurfacesComponent.getWindowRootView();
-        // TODO(b/277762009): Inject [NotificationShadeWindowView] directly into the controller.
-        //  (Right now, there's a circular dependency.)
-        mNotificationShadeWindowController.setWindowRootView(windowRootView);
+        // Ideally, NotificationShadeWindowController could automatically fetch the window root view
+        // in #attach or a CoreStartable.start method or something similar. But for now, to avoid
+        // regressions, we'll continue standing up the root view in CentralSurfaces.
+        mNotificationShadeWindowController.fetchWindowRootView();
         getNotificationShadeWindowViewController().setupExpandedStatusBar();
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
