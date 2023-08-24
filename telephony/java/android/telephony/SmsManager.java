@@ -842,7 +842,7 @@ public final class SmsManager {
                         ISms iSms = getISmsServiceOrThrow();
                         if (iSms != null) {
                             iSms.sendTextForSubscriberWithOptions(subId,
-                                    null, null, destinationAddress,
+                                    null, getAttributionTag(), destinationAddress,
                                     scAddress,
                                     text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                                     expectMore, finalValidity);
@@ -864,7 +864,7 @@ public final class SmsManager {
                 ISms iSms = getISmsServiceOrThrow();
                 if (iSms != null) {
                     iSms.sendTextForSubscriberWithOptions(getSubscriptionId(),
-                            null, null, destinationAddress,
+                            null, getAttributionTag(), destinationAddress,
                             scAddress,
                             text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                             expectMore, finalValidity);
@@ -1513,8 +1513,8 @@ public final class SmsManager {
             public void onSuccess(int subId) {
                 try {
                     ISms iSms = getISmsServiceOrThrow();
-                    iSms.sendDataForSubscriber(subId, null, null, destinationAddress, scAddress,
-                            destinationPort & 0xFFFF, data, sentIntent, deliveryIntent);
+                    iSms.sendDataForSubscriber(subId, null, getAttributionTag(), destinationAddress,
+                            scAddress, destinationPort & 0xFFFF, data, sentIntent, deliveryIntent);
                 } catch (RemoteException e) {
                     Log.e(TAG, "sendDataMessage: Couldn't send SMS - Exception: " + e.getMessage());
                     notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
