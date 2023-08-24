@@ -782,6 +782,7 @@ public interface ImeTracker {
         private boolean shouldMonitorLatency(@SoftInputShowHideReason int reason) {
             return reason == SoftInputShowHideReason.SHOW_SOFT_INPUT
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT
+                    || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API
                     || reason == SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME

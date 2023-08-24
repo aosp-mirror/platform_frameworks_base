@@ -20,6 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.os.IBinder;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.inputmethod.EditorInfo;
@@ -70,6 +71,7 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS,
         SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE,
         SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW,
 })
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
@@ -284,4 +286,9 @@ public @interface SoftInputShowHideReason {
      * Hide soft input when {@link InputMethodManager#closeCurrentInput()} gets called.
      */
     int HIDE_CLOSE_CURRENT_SESSION = ImeProtoEnums.REASON_HIDE_CLOSE_CURRENT_SESSION;
+
+    /**
+     * Hide soft input when {@link InputMethodManager#hideSoftInputFromView(View, int)} gets called.
+     */
+    int HIDE_SOFT_INPUT_FROM_VIEW = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_FROM_VIEW;
 }

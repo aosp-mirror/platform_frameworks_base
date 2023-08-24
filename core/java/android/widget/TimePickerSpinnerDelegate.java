@@ -471,15 +471,15 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         // value and having the IME up makes no sense.
         InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
         if (inputMethodManager != null) {
-            if (inputMethodManager.isActive(mHourSpinnerInput)) {
+            if (mHourSpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mHourSpinnerInput, 0);
                 mHourSpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-            } else if (inputMethodManager.isActive(mMinuteSpinnerInput)) {
+            } else if (mMinuteSpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mMinuteSpinnerInput, 0);
                 mMinuteSpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
-            } else if (inputMethodManager.isActive(mAmPmSpinnerInput)) {
+            } else if (mAmPmSpinnerInput.hasFocus()) {
+                inputMethodManager.hideSoftInputFromView(mAmPmSpinnerInput, 0);
                 mAmPmSpinnerInput.clearFocus();
-                inputMethodManager.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
             }
         }
     }
