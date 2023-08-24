@@ -70,4 +70,7 @@
     <string name="config_usbConfirmActivity" translatable="false">
         com.android.systemui/com.android.systemui.tv.usb.TvUsbConfirmActivity
     </string>
+
+    <!-- Android TV does not have a Recents UI by default. -->
+    <bool name="config_hasRecents">false</bool>
 </resources>
