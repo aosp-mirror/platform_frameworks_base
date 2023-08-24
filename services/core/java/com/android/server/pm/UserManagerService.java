@@ -2938,8 +2938,10 @@ public class UserManagerService extends IUserManager.Stub {
                     UserHandle.USER_NULL, UserManager.RESTRICTION_SOURCE_SYSTEM));
         }
 
-        result.addAll(getDevicePolicyManagerInternal()
-                .getUserRestrictionSources(restrictionKey, userId));
+        final DevicePolicyManagerInternal dpmi = getDevicePolicyManagerInternal();
+        if (dpmi != null) {
+            result.addAll(dpmi.getUserRestrictionSources(restrictionKey, userId));
+        }
         return result;
     }
 
