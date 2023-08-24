@@ -411,6 +411,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Inicia"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Vols iniciar una emissió?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Quan emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Quan emets una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
@@ -865,8 +867,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Amplia una part de la pantalla"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Obre la configuració de l\'ampliació"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Tanca la configuració de l\'ampliació"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Surt del mode d\'edició"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Arrossega el cantó per canviar la mida"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permet el desplaçament en diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Canvia la mida"</string>
