@@ -37,6 +37,7 @@ public:
     void sendLoadResetHint();
     void sendLoadIncreaseHint();
     bool init();
+    void destroy();
 
 private:
     APerformanceHintSession* mHintSession = nullptr;
