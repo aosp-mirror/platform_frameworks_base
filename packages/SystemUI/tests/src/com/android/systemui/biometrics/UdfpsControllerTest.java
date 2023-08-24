@@ -1616,4 +1616,43 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // THEN vibrate is used
         verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
     }
+
+    @Test
+    public void aodInterrupt_withNewTouchDetection() throws RemoteException {
+        mUdfpsController.cancelAodSendFingerUpAction();
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        1 /* pointerId */, touchData);
+
+        // Enable new touch detection.
+        when(mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true);
+
+        // Configure UdfpsController to use FingerprintManager as opposed to AlternateTouchProvider.
+        initUdfpsController(mOpticalProps, false /* hasAlternateTouchProvider */);
+
+        // GIVEN that the overlay is showing and screen is on and fp is running
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, 0,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mScreenObserver.onScreenTurnedOn();
+        mFgExecutor.runAllReady();
+
+        // WHEN fingerprint is requested because of AOD interrupt
+        mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
+
+        // Check case where touch driver sends touch to UdfpsView as well
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+
+        mBiometricExecutor.runAllReady();
+
+        // THEN only one onPointerDown is sent
+        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(), anyFloat(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(), anyBoolean());
+    }
 }
