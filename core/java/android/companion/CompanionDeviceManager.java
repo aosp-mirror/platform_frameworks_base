@@ -20,7 +20,9 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMIN
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +30,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -214,6 +217,34 @@ public final class CompanionDeviceManager {
      */
     public static final String COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME =
             "com.android.companiondevicemanager";
+
+    /**
+     * Test message type without a designated callback.
+     *
+     * @hide
+     */
+    @TestApi public static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
+    /**
+     * Message header assigned to the remote authentication handshakes.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 0x63827765; // ?RMA
+    /**
+     * Message header assigned to the telecom context sync metadata.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
+    /**
+     * Message header assigned to the permission restore request.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
     /**
      * Callback for applications to receive updates about and the outcome of
@@ -804,28 +835,36 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Listener for any changes to {@link com.android.server.companion.transport.Transport}.
+     * Listener for any changes to the list of attached transports.
+     *
+     * @see com.android.server.companion.transport.Transport
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public interface OnTransportsChangedListener {
         /**
-         * Invoked when a change occurs to any of the transports
+         * Invoked when a transport is attached or detached.
          *
-         * @param associations all the associations which have connected transports
+         * @param associations all the associations which have connected transports.
          */
         void onTransportsChanged(@NonNull List<AssociationInfo> associations);
     }
 
     /**
-     * Register a listener for any changes to
-     * {@link com.android.server.companion.transport.Transport}. Your app will receive a callback to
-     * {@link OnTransportsChangedListener} immediately with all the existing transports.
+     * Adds a listener for any changes to the list of attached transports.
+     * {@link OnTransportsChangedListener#onTransportsChanged(List)} will be triggered with a list
+     * of existing transports when a transport is detached or a new transport is attached.
+     *
+     * @see com.android.server.companion.transport.Transport
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void addOnTransportsChangedListener(
-            @NonNull Executor executor, @NonNull OnTransportsChangedListener listener) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnTransportsChangedListener listener) {
         final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
                 executor, listener);
         try {
@@ -836,11 +875,14 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Unregister a listener to stop receiving any changes to
-     * {@link com.android.server.companion.transport.Transport}.
+     * Removes the registered listener for any changes to the list of attached transports.
+     *
+     * @see com.android.server.companion.transport.Transport
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnTransportsChangedListener(
             @NonNull OnTransportsChangedListener listener) {
         final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
@@ -853,11 +895,16 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Send a message to remote devices
+     * Sends a message to associated remote devices. The target associations must already have a
+     * connected transport.
+     *
+     * @see #attachSystemDataTransport(int, InputStream, OutputStream)
      *
      * @hide
      */
-    public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
+    public void sendMessage(int messageType, @NonNull byte[] data, @NonNull int[] associationIds) {
         try {
             mService.sendMessage(messageType, data, associationIds);
         } catch (RemoteException e) {
@@ -866,28 +913,30 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Listener when a message is received for the registered message type
+     * Listener that triggers a callback when a message is received through a connected transport.
      *
      * @see #addOnMessageReceivedListener(Executor, int, OnMessageReceivedListener)
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     public interface OnMessageReceivedListener {
         /**
-         * Called when a message is received
+         * Called when a message is received.
          */
-        void onMessageReceived(int associationId, byte[] data);
+        void onMessageReceived(int associationId, @NonNull byte[] data);
     }
 
     /**
-     * Register a listener to receive callbacks when a message is received by the given type
-     *
-     * @see com.android.server.companion.transport.Transport for supported message types
+     * Adds a listener to trigger callbacks when messages of given type are received.
      *
      * @hide
      */
-    public void addOnMessageReceivedListener(@NonNull Executor executor, int messageType,
-            OnMessageReceivedListener listener) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
+    public void addOnMessageReceivedListener(
+            @NonNull @CallbackExecutor Executor executor, int messageType,
+            @NonNull OnMessageReceivedListener listener) {
         final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
                 executor, listener);
         try {
@@ -898,15 +947,14 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Unregister a listener to stop receiving callbacks when a message is received by the given
-     * type
-     *
-     * @see com.android.server.companion.transport.Transport for supported message types
+     * Removes the registered listener for received messages of given type.
      *
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS)
     public void removeOnMessageReceivedListener(int messageType,
-            OnMessageReceivedListener listener) {
+            @NonNull OnMessageReceivedListener listener) {
         final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
                 null, listener);
         try {
