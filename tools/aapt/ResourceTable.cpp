@@ -1813,7 +1813,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
     mTypeIdOffset = findLargestTypeIdForPackage(assets->getIncludedResources(), mAssetsPackage);
 
     const String8& featureAfter = bundle->getFeatureAfterPackage();
-    if (!featureAfter.isEmpty()) {
+    if (!featureAfter.empty()) {
         AssetManager featureAssetManager;
         if (!featureAssetManager.addAssetPath(featureAfter, NULL)) {
             fprintf(stderr, "ERROR: Feature package '%s' not found.\n",
@@ -1823,7 +1823,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
 
         const ResTable& featureTable = featureAssetManager.getResources(false);
         mTypeIdOffset = std::max(mTypeIdOffset,
-                findLargestTypeIdForPackage(featureTable, mAssetsPackage)); 
+                findLargestTypeIdForPackage(featureTable, mAssetsPackage));
     }
 
     return NO_ERROR;
@@ -3252,7 +3252,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
             // If we're building splits, then each invocation of the flattening
             // step will have 'missing' entries. Don't warn/error for this case.
-            if (bundle->getSplitConfigurations().isEmpty()) {
+            if (bundle->getSplitConfigurations().empty()) {
                 bool missing_entry = false;
                 const char* log_prefix = bundle->getErrorOnMissingConfigEntry() ?
                         "error" : "warning";
@@ -4858,7 +4858,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
-    while (!nodesToVisit.isEmpty()) {
+    while (!nodesToVisit.empty()) {
         sp<XMLNode> node = nodesToVisit.top();
         nodesToVisit.pop();
 
