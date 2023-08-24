@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
+// Next ID: 29
 oneway interface IOverviewProxy {
 
     void onActiveNavBarRegionChanges(in Region activeRegion) = 11;
@@ -54,6 +55,13 @@ oneway interface IOverviewProxy {
      * Sent when the assistant changes how visible it is to the user.
      */
     void onAssistantVisibilityChanged(float visibility) = 14;
+
+    /**
+     * Sent when the assistant has been invoked with the given type (defined in AssistManager) and
+     * should be shown. This method should be used if SystemUiProxy#setAssistantOverridesRequested
+     * was previously called including this invocation type.
+     */
+    void onAssistantOverrideInvoked(int invocationType) = 28;
 
     /**
      * Sent when some system ui state changes.
