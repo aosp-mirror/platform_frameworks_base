@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"နားလည်ပြီ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့နိုင်သည်။"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဤအက်ပ်ပြန်စရန် တို့ပါ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"ဆက်တင်များတွင် ဤအက်ပ်၏အချိုးအစားကို ပြောင်းရန်"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"အချိုးစား ပြောင်းရန်"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ကင်မရာပြဿနာလား။\nပြင်ဆင်ရန် တို့ပါ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ကောင်းမသွားဘူးလား။\nပြန်ပြောင်းရန် တို့ပါ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ကင်မရာပြဿနာ မရှိဘူးလား။ ပယ်ရန် တို့ပါ။"</string>

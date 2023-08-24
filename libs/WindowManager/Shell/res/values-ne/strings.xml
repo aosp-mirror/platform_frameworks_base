@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"बुझेँ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हालैका बबलहरू छैनन्"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हालैका बबल र खारेज गरिएका बबलहरू यहाँ देखिने छन्"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापन गर्नुहोस्"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल हटाइयो।"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"यो एप अझ राम्रो हेर्न मिल्ने बनाउनका लागि यसलाई रिस्टार्ट गर्न ट्याप गर्नुहोस्।"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"अझ राम्रो भ्यू प्राप्त गर्नका लागि यो एप रिस्टार्ट गर्न ट्याप गर्नुहोस्"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"सेटिङमा गई यो एपको एस्पेक्ट रेसियो परिवर्तन गर्नुहोस्"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"एस्पेक्ट रेसियो परिवर्तन गर्नुहोस्"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्यामेरासम्बन्धी समस्या देखियो?\nसमस्या हल गर्न ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"समस्या हल भएन?\nपहिलेको जस्तै बनाउन ट्याप गर्नुहोस्"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्यामेरासम्बन्धी कुनै पनि समस्या छैन? खारेज गर्न ट्याप गर्नुहोस्।"</string>
