@@ -285,11 +285,7 @@ object Flags {
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
-    val WALLPAPER_PICKER_PREVIEW_ANIMATION =
-            unreleasedFlag(
-                    "wallpaper_picker_preview_animation",
-                teamfood = true
-            )
+    val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
 
     /** Stop running face auth when the display state changes to OFF. */
     // TODO(b/294221702): Tracking bug.
