@@ -328,6 +328,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private SurfaceControl mOverlayLayer;
 
+    /**
+     * A SurfaceControl that contains input overlays used for cases where we need to receive input
+     * over the entire display.
+     */
+    private SurfaceControl mInputOverlayLayer;
+
     /** A surfaceControl specifically for accessibility overlays. */
     private SurfaceControl mA11yOverlayLayer;
 
@@ -1329,6 +1335,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             transaction.reparent(mOverlayLayer, mSurfaceControl);
         }
 
+        if (mInputOverlayLayer == null) {
+            mInputOverlayLayer = b.setName("Input Overlays").setParent(mSurfaceControl).build();
+        } else {
+            transaction.reparent(mInputOverlayLayer, mSurfaceControl);
+        }
+
         if (mA11yOverlayLayer == null) {
             mA11yOverlayLayer =
                     b.setName("Accessibility Overlays").setParent(mSurfaceControl).build();
@@ -1342,7 +1354,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .show(mSurfaceControl)
                 .setLayer(mOverlayLayer, Integer.MAX_VALUE)
                 .show(mOverlayLayer)
-                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 1)
+                .setLayer(mInputOverlayLayer, Integer.MAX_VALUE - 1)
+                .show(mInputOverlayLayer)
+                .setLayer(mA11yOverlayLayer, Integer.MAX_VALUE - 2)
                 .show(mA11yOverlayLayer);
     }
 
@@ -3353,6 +3367,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // -> this DisplayContent.
             setRemoteInsetsController(null);
             mOverlayLayer.release();
+            mInputOverlayLayer.release();
             mA11yOverlayLayer.release();
             mWindowingLayer.release();
             mInputMonitor.onDisplayRemoved();
@@ -5701,6 +5716,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     SurfaceControl getOverlayLayer() {
         return mOverlayLayer;
+    }
+
+    SurfaceControl getInputOverlayLayer() {
+        return mInputOverlayLayer;
     }
 
     SurfaceControl getA11yOverlayLayer() {

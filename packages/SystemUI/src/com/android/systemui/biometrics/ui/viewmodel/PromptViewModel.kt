@@ -289,7 +289,7 @@ constructor(
             if (authenticateAfterError) {
                 showAuthenticating(messageAfterError)
             } else {
-                showHelp(messageAfterError)
+                showInfo(messageAfterError)
             }
         }
     }
@@ -309,12 +309,15 @@ constructor(
     private fun supportsRetry(failedModality: BiometricModality) =
         failedModality == BiometricModality.Face
 
+    suspend fun showHelp(message: String) = showHelp(message, clearIconError = false)
+    suspend fun showInfo(message: String) = showHelp(message, clearIconError = true)
+
     /**
      * Show a persistent help message.
      *
      * Will be show even if the user has already authenticated.
      */
-    suspend fun showHelp(message: String) {
+    private suspend fun showHelp(message: String, clearIconError: Boolean) {
         val alreadyAuthenticated = _isAuthenticated.value.isAuthenticated
         if (!alreadyAuthenticated) {
             _isAuthenticating.value = false
@@ -329,6 +332,8 @@ constructor(
                 AuthBiometricView.STATE_PENDING_CONFIRMATION
             } else if (alreadyAuthenticated && !isConfirmationRequired.first()) {
                 AuthBiometricView.STATE_AUTHENTICATED
+            } else if (clearIconError) {
+                AuthBiometricView.STATE_IDLE
             } else {
                 AuthBiometricView.STATE_HELP
             }
