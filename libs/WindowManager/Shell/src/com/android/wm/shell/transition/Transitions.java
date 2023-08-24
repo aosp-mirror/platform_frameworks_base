@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_SLEEP;
@@ -1104,7 +1105,9 @@ public class Transitions implements RemoteCallable<Transitions>,
                 }
             }
         }
-        if (request.getType() == TRANSIT_KEYGUARD_OCCLUDE && request.getTriggerTask() != null
+        final boolean isOccludingKeyguard = request.getType() == TRANSIT_KEYGUARD_OCCLUDE
+                || ((request.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) != 0);
+        if (isOccludingKeyguard && request.getTriggerTask() != null
                 && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             // This freeform task is on top of keyguard, so its windowing mode should be changed to
             // fullscreen.
