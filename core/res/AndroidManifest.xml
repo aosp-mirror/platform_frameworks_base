@@ -1700,6 +1700,15 @@
         android:description="@string/permdesc_cameraOpenCloseListener"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows camera access by Headless System User 0 when device is running in
+            HSUM Mode.
+    @hide -->
+    <permission android:name="android.permission.CAMERA_HEADLESS_SYSTEM_USER"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_cameraHeadlessSystemUser"
+        android:description="@string/permdesc_cameraHeadlessSystemUser"
+        android:protectionLevel="signature" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
     <!-- ====================================================================== -->
