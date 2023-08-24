@@ -285,11 +285,7 @@ object Flags {
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
-    val WALLPAPER_PICKER_PREVIEW_ANIMATION =
-            unreleasedFlag(
-                    "wallpaper_picker_preview_animation",
-                teamfood = true
-            )
+    val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
 
     /**
      * TODO(b/278086361): Tracking bug
