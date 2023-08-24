@@ -644,8 +644,6 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private InlineSuggestionSessionController mInlineSuggestionSessionController;
 
-    private boolean mHideNavBarForKeyboard;
-    private boolean mIsAutomotive;
     private @NonNull OptionalInt mHandwritingRequestId = OptionalInt.empty();
     private InputEventReceiver mHandwritingEventReceiver;
     private Handler mHandler;
@@ -1616,7 +1614,7 @@ public class InputMethodService extends AbstractInputMethodService {
         // shown the first time (cold start).
         mSettingsObserver.shouldShowImeWithHardKeyboard();
 
-        mHideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
+        final boolean hideNavBarForKeyboard = getApplicationContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_hideNavBarForKeyboard);
 
         initConfigurationTracker();
@@ -1662,7 +1660,7 @@ public class InputMethodService extends AbstractInputMethodService {
             // screen real estate. When this happens, the IME window should animate from the
             // bottom of the screen to reduce the jank that happens from the lack of synchronization
             // between the bottom system window and the IME window.
-            if (mHideNavBarForKeyboard) {
+            if (hideNavBarForKeyboard) {
                 window.setDecorFitsSystemWindows(false);
             }
         }
@@ -2360,9 +2358,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     public void setExtractView(View view) {
         mExtractFrame.removeAllViews();
-        mExtractFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        mExtractFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         mExtractView = view;
         if (view != null) {
             mExtractEditText = view.findViewById(
@@ -2381,7 +2377,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mExtractAction = null;
         }
     }
-    
+
     /**
      * Replaces the current candidates view with a new one.  You only need to
      * call this when dynamically changing the view; normally, you should
@@ -2390,11 +2386,9 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void setCandidatesView(View view) {
         mCandidatesFrame.removeAllViews();
-        mCandidatesFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        mCandidatesFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
     }
-    
+
     /**
      * Replaces the current input view with a new one.  You only need to
      * call this when dynamically changing the view; normally, you should
@@ -2403,12 +2397,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public void setInputView(View view) {
         mInputFrame.removeAllViews();
-        mInputFrame.addView(view, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+        mInputFrame.addView(view, new FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         mInputView = view;
     }
-    
+
     /**
      * Called by the framework to create the layout for showing extracted text.
      * Only called when in fullscreen mode.  The returned view hierarchy must
@@ -3442,9 +3434,12 @@ public class InputMethodService extends AbstractInputMethodService {
         return false;
     }
 
+    /**
+     * Not implemented in this class.
+     */
     public void onAppPrivateCommand(String action, Bundle data) {
     }
-    
+
     /**
      * Handle a request by the system to toggle the soft input area.
      */
@@ -4084,11 +4079,6 @@ public class InputMethodService extends AbstractInputMethodService {
     private int mapToImeWindowStatus() {
         return IME_ACTIVE
                 | (isInputViewShown() ? IME_VISIBLE : 0);
-    }
-
-    private boolean isAutomotive() {
-        return getApplicationContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     /**
