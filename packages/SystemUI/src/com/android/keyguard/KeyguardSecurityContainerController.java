@@ -290,13 +290,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          * Authentication has happened and it's time to dismiss keyguard. This function
          * should clean up and inform KeyguardViewMediator.
          *
-         * @param fromPrimaryAuth whether the user has authenticated with primary auth like
-         *                   pattern, password or PIN but not by trust agents or fingerprint
          * @param targetUserId a user that needs to be the foreground user at the dismissal
          *                    completion.
          */
         @Override
-        public void finish(boolean fromPrimaryAuth, int targetUserId) {
+        public void finish(int targetUserId) {
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
             boolean deferKeyguardDone = false;
@@ -309,9 +307,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
             if (mViewMediatorCallback != null) {
                 if (deferKeyguardDone) {
-                    mViewMediatorCallback.keyguardDonePending(fromPrimaryAuth, targetUserId);
+                    mViewMediatorCallback.keyguardDonePending(targetUserId);
                 } else {
-                    mViewMediatorCallback.keyguardDone(fromPrimaryAuth, targetUserId);
+                    mViewMediatorCallback.keyguardDone(targetUserId);
                 }
             }
 
@@ -690,8 +688,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /**
      * Dismiss keyguard due to a user unlock event.
      */
-    public void finish(boolean primaryAuth, int currentUser) {
-        mKeyguardSecurityCallback.finish(primaryAuth, currentUser);
+    public void finish(int currentUser) {
+        mKeyguardSecurityCallback.finish(currentUser);
     }
 
     /**
@@ -902,7 +900,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUiEventLogger.log(uiEvent, getSessionId());
         }
         if (finish) {
-            mKeyguardSecurityCallback.finish(primaryAuth, targetUserId);
+            mKeyguardSecurityCallback.finish(targetUserId);
         }
         return finish;
     }

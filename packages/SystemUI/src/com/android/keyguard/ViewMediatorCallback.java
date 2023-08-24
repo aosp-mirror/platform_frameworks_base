@@ -29,11 +29,9 @@ public interface ViewMediatorCallback {
     /**
      * Report that the keyguard is done.
      *
-     * @param primaryAuth whether the user has authenticated with primary authentication like
-     *                   pattern, password or PIN but not by trust agents or fingerprint
      * @param targetUserId a user that needs to be the foreground user at the completion.
      */
-    void keyguardDone(boolean primaryAuth, int targetUserId);
+    void keyguardDone(int targetUserId);
 
     /**
      * Report that the keyguard is done drawing.
@@ -47,13 +45,11 @@ public interface ViewMediatorCallback {
     void setNeedsInput(boolean needsInput);
 
     /**
-     * Report that the keyguard is dismissable, pending the next keyguardDone call.
+     * Report that the keyguard is dismissible, pending the next keyguardDone call.
      *
-     * @param primaryAuth whether the user has authenticated with primary authentication like
-     *                   pattern, password or PIN but not by trust agents or fingerprint
      * @param targetUserId a user that needs to be the foreground user at the completion.
      */
-    void keyguardDonePending(boolean primaryAuth, int targetUserId);
+    void keyguardDonePending(int targetUserId);
 
     /**
      * Report when keyguard is actually gone

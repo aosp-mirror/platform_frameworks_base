@@ -181,6 +181,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import dagger.Lazy;
+
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -775,7 +776,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDone(boolean primaryAuth, int targetUserId) {
+        public void keyguardDone(int targetUserId) {
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
                 return;
             }
@@ -796,7 +797,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDonePending(boolean primaryAuth, int targetUserId) {
+        public void keyguardDonePending(int targetUserId) {
             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardDonePending");
             if (DEBUG) Log.d(TAG, "keyguardDonePending");
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {

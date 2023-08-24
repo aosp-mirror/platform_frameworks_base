@@ -96,7 +96,7 @@ public interface KeyguardSecurityCallback {
     /**
      * Dismisses keyguard and go to unlocked state.
      */
-    default void finish(boolean strongAuth, int targetUserId) {
+    default void finish(int targetUserId) {
     }
 
     /**
