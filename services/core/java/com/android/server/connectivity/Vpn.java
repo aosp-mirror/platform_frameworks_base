@@ -2542,17 +2542,6 @@ public class Vpn {
     private native boolean jniAddAddress(String interfaze, String address, int prefixLen);
     private native boolean jniDelAddress(String interfaze, String address, int prefixLen);
 
-    private static RouteInfo findIPv4DefaultRoute(LinkProperties prop) {
-        for (RouteInfo route : prop.getAllRoutes()) {
-            // Currently legacy VPN only works on IPv4.
-            if (route.isDefaultRoute() && route.getGateway() instanceof Inet4Address) {
-                return route;
-            }
-        }
-
-        throw new IllegalStateException("Unable to find IPv4 default gateway");
-    }
-
     private void enforceNotRestrictedUser() {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -2650,10 +2639,6 @@ public class Vpn {
                     new UserHandle(mUserId))) {
             throw new SecurityException("Restricted users cannot establish VPNs");
         }
-
-        final RouteInfo ipv4DefaultRoute = findIPv4DefaultRoute(egress);
-        final String gateway = ipv4DefaultRoute.getGateway().getHostAddress();
-        final String iface = ipv4DefaultRoute.getInterface();
 
         // Load certificates.
         String privateKey = "";
