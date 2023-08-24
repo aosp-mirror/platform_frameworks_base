@@ -673,8 +673,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                     synchronized (mInterfaceLock) {
                         try {
                             if (mSessionProcessor != null) {
-                                mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
                                 mInitialized = true;
+                                mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
                             } else {
                                 Log.v(TAG, "Failed to start capture session, session " +
                                                 " released before extension start!");
