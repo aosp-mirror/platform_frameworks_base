@@ -443,7 +443,7 @@ public class PackageInfoUtils {
 
         updateApplicationInfo(info, flags, state);
 
-        initForUser(info, pkg, userId);
+        initForUser(info, pkg, userId, state);
 
         // TODO(b/135203078): Remove PackageParser1/toAppInfoWithoutState and clean all this up
         PackageStateUnserialized pkgState = pkgSetting.getTransientState();
@@ -689,7 +689,7 @@ public class PackageInfoUtils {
         info.splitDependencies = pkg.getSplitDependencies().size() == 0
                 ? null : pkg.getSplitDependencies();
 
-        initForUser(info, pkg, userId);
+        initForUser(info, pkg, userId, state);
 
         info.primaryCpuAbi = pkgSetting.getPrimaryCpuAbi();
         info.secondaryCpuAbi = pkgSetting.getSecondaryCpuAbi();
@@ -1001,13 +1001,19 @@ public class PackageInfoUtils {
     }
 
     private static void initForUser(ApplicationInfo output, AndroidPackage input,
-            @UserIdInt int userId) {
+            @UserIdInt int userId, PackageUserStateInternal state) {
         PackageImpl pkg = ((PackageImpl) input);
         String packageName = input.getPackageName();
         output.uid = UserHandle.getUid(userId, UserHandle.getAppId(input.getUid()));
 
         if ("android".equals(packageName)) {
             output.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        if (!pkg.isSystem() && state.getCeDataInode() <= 0) {
+            // The data dir has been deleted
+            output.dataDir = null;
             return;
         }
 
@@ -1045,11 +1051,17 @@ public class PackageInfoUtils {
     // This duplicates the ApplicationInfo variant because it uses field assignment and the classes
     // don't inherit from each other, unfortunately. Consolidating logic would introduce overhead.
     private static void initForUser(InstrumentationInfo output, AndroidPackage input,
-            @UserIdInt int userId) {
+            @UserIdInt int userId, PackageUserStateInternal state) {
         PackageImpl pkg = ((PackageImpl) input);
         String packageName = input.getPackageName();
         if ("android".equals(packageName)) {
             output.dataDir = SYSTEM_DATA_PATH;
+            return;
+        }
+
+        if (!pkg.isSystem() && state.getCeDataInode() <= 0) {
+            // The data dir has been deleted
+            output.dataDir = null;
             return;
         }
 
@@ -1084,10 +1096,19 @@ public class PackageInfoUtils {
         }
     }
 
-    @NonNull
+    /**
+     * Returns the data dir of the app for the target user. Return null if the app isn't installed
+     * on the target user and doesn't have a data dir on the target user.
+     */
+    @Nullable
     public static File getDataDir(PackageStateInternal ps, int userId) {
         if ("android".equals(ps.getPackageName())) {
             return Environment.getDataSystemDirectory();
+        }
+
+        if (!ps.isSystem() && ps.getUserStateOrDefault(userId).getCeDataInode() <= 0) {
+            // The data dir has been deleted
+            return null;
         }
 
         if (ps.isDefaultToDeviceProtectedStorage()
