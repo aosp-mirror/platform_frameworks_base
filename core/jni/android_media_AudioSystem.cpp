@@ -494,7 +494,7 @@ android_media_AudioSystem_getParameters(JNIEnv *env, jobject thiz, jstring keys)
                           env->GetStringLength(keys));
         env->ReleaseStringCritical(keys, c_keys);
     }
-    return env->NewStringUTF(AudioSystem::getParameters(c_keys8).string());
+    return env->NewStringUTF(AudioSystem::getParameters(c_keys8).c_str());
 }
 
 static void
@@ -523,7 +523,7 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
     }
 
     jclass clazz = env->FindClass(kClassPathName);
-    const char* zechars = regId.string();
+    const char *zechars = regId.c_str();
     jstring zestring = env->NewStringUTF(zechars);
 
     env->CallStaticVoidMethod(clazz, gAudioPolicyEventHandlerMethods.postDynPolicyEventFromNative,
