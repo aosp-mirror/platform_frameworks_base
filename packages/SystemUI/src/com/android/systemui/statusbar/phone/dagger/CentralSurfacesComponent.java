@@ -21,9 +21,7 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.shade.ShadeHeaderController;
-import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarterModule;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import dagger.Subcomponent;
@@ -45,7 +43,6 @@ import javax.inject.Scope;
  */
 @Subcomponent(modules = {
         StatusBarViewModule.class,
-        StatusBarNotificationActivityStarterModule.class,
 })
 @CentralSurfacesComponent.CentralSurfacesScope
 public interface CentralSurfacesComponent {
@@ -76,6 +73,4 @@ public interface CentralSurfacesComponent {
      */
     @Named(STATUS_BAR_FRAGMENT)
     CollapsedStatusBarFragment createCollapsedStatusBarFragment();
-
-    NotificationActivityStarter getNotificationActivityStarter();
 }
