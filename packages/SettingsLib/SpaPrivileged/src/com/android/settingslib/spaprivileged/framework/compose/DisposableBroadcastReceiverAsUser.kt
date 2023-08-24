@@ -46,7 +46,12 @@ fun DisposableBroadcastReceiverAsUser(
     LifecycleEffect(
         onStart = {
             context.registerReceiverAsUser(
-                broadcastReceiver, userHandle, intentFilter, null, null
+                broadcastReceiver,
+                userHandle,
+                intentFilter,
+                null,
+                null,
+                Context.RECEIVER_NOT_EXPORTED,
             )
         },
         onStop = {
