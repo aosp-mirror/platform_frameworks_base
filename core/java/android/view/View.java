@@ -5318,11 +5318,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Retention(RetentionPolicy.SOURCE)
     public @interface LayerType {}
 
-    @ViewDebug.ExportedProperty(category = "drawing", mapping = {
-            @ViewDebug.IntToString(from = LAYER_TYPE_NONE, to = "NONE"),
-            @ViewDebug.IntToString(from = LAYER_TYPE_SOFTWARE, to = "SOFTWARE"),
-            @ViewDebug.IntToString(from = LAYER_TYPE_HARDWARE, to = "HARDWARE")
-    })
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
 
@@ -22515,6 +22510,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @EnumEntry(value = LAYER_TYPE_NONE, name = "none"),
             @EnumEntry(value = LAYER_TYPE_SOFTWARE, name = "software"),
             @EnumEntry(value = LAYER_TYPE_HARDWARE, name = "hardware")
+    })
+    @ViewDebug.ExportedProperty(category = "drawing", mapping = {
+            @ViewDebug.IntToString(from = LAYER_TYPE_NONE, to = "NONE"),
+            @ViewDebug.IntToString(from = LAYER_TYPE_SOFTWARE, to = "SOFTWARE"),
+            @ViewDebug.IntToString(from = LAYER_TYPE_HARDWARE, to = "HARDWARE")
     })
     @LayerType
     public int getLayerType() {
