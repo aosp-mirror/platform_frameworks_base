@@ -118,7 +118,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val lockscreenSceneViewModel =
         LockscreenSceneViewModel(
             authenticationInteractor = authenticationInteractor,
-            bouncerInteractor = bouncerInteractor,
         )
 
     private val shadeSceneViewModel =
@@ -167,9 +166,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun clickLockButtonAndEnterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            lockscreenSceneViewModel.onLockButtonClicked()
-            assertCurrentScene(SceneKey.Bouncer)
-            emulateUiSceneTransition()
+            emulateUserDrivenTransition(SceneKey.Bouncer)
 
             enterPin()
             assertCurrentScene(SceneKey.Gone)
@@ -462,10 +459,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(authenticationInteractor.isUnlocked.value)
             .isFalse()
 
-        lockscreenSceneViewModel.onLockButtonClicked()
-        runCurrent()
-        emulateUiSceneTransition()
-
+        emulateUserDrivenTransition(SceneKey.Bouncer)
         enterPin()
         emulateUiSceneTransition(
             expectedVisible = false,

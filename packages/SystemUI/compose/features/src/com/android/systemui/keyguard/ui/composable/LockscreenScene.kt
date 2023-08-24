@@ -67,7 +67,6 @@ constructor(
         modifier: Modifier,
     ) {
         LockscreenScene(
-            viewModel = viewModel,
             viewProvider = viewProvider,
             modifier = modifier,
         )
@@ -85,7 +84,6 @@ constructor(
 
 @Composable
 private fun LockscreenScene(
-    viewModel: LockscreenSceneViewModel,
     viewProvider: () -> View,
     modifier: Modifier = Modifier,
 ) {
@@ -98,9 +96,7 @@ private fun LockscreenScene(
             keyguardRootView
         },
         update = { keyguardRootView ->
-            keyguardRootView.requireViewById<View>(R.id.lock_icon_view).setOnClickListener {
-                viewModel.onLockButtonClicked()
-            }
+            keyguardRootView.requireViewById<View>(R.id.lock_icon_view)
         },
         modifier = modifier,
     )

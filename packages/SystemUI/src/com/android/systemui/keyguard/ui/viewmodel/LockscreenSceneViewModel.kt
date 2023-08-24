@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
@@ -30,7 +29,6 @@ class LockscreenSceneViewModel
 @Inject
 constructor(
     authenticationInteractor: AuthenticationInteractor,
-    private val bouncerInteractor: BouncerInteractor,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: Flow<SceneKey> =
@@ -41,9 +39,4 @@ constructor(
                 SceneKey.Bouncer
             }
         }
-
-    /** Notifies that the lock button on the lock screen was clicked. */
-    fun onLockButtonClicked() {
-        bouncerInteractor.showOrUnlockDevice()
-    }
 }
