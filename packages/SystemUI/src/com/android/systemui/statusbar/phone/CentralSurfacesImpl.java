@@ -308,6 +308,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final DeviceStateManager mDeviceStateManager;
+    private final Lazy<CentralSurfacesCommandQueueCallbacks> mCommandQueueCallbacksLazy;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
@@ -739,6 +740,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             CentralSurfacesComponent.Factory centralSurfacesComponentFactory,
+            Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -847,6 +849,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mCentralSurfacesComponentFactory = centralSurfacesComponentFactory;
+        mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -1613,12 +1616,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Listen for demo mode changes
         mDemoModeController.addCallback(mDemoModeCallback);
 
-        if (mCommandQueueCallbacks != null) {
-            mCommandQueue.removeCallback(mCommandQueueCallbacks);
-        }
-        mCommandQueueCallbacks =
-                mCentralSurfacesComponent.getCentralSurfacesCommandQueueCallbacks();
-        // Connect in to the status bar manager service
+        mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
     }
 

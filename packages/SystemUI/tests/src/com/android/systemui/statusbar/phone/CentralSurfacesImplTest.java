@@ -289,6 +289,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private CentralSurfacesComponent.Factory mStatusBarComponentFactory;
     @Mock private CentralSurfacesComponent mCentralSurfacesComponent;
+    @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -531,6 +532,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mVolumeComponent,
                 mCommandQueue,
                 mStatusBarComponentFactory,
+                () -> mCentralSurfacesCommandQueueCallbacks,
                 mPluginManager,
                 mShadeController,
                 mStatusBarKeyguardViewManager,

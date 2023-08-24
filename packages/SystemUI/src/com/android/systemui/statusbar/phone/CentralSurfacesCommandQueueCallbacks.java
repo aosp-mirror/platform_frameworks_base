@@ -51,6 +51,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -67,7 +68,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -80,7 +80,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 /** */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final CentralSurfaces mCentralSurfaces;
     private final Context mContext;
