@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.Surface;
+import android.view.TextureView;
 
 import java.lang.ref.WeakReference;
 
@@ -43,6 +44,10 @@ import java.lang.ref.WeakReference;
  * destination of the older {@link android.hardware.Camera} API. Doing so will cause all the
  * frames from the image stream to be sent to the SurfaceTexture object rather than to the device's
  * display.
+ *
+ * <p>A typical pattern is to use SurfaceTexture to render frames to a {@link TextureView}; however,
+ * a TextureView is not <i>required</i> for using the texture object. The texture object may be used
+ * as part of an OpenGL ES shader.
  *
  * <p>When sampling from the texture one should first transform the texture coordinates using the
  * matrix queried via {@link #getTransformMatrix(float[])}.  The transform matrix may change each
