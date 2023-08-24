@@ -19,7 +19,6 @@ package android.telephony.satellite.stub;
 import android.telephony.satellite.stub.NTRadioTechnology;
 import android.telephony.satellite.stub.PointingInfo;
 import android.telephony.satellite.stub.SatelliteDatagram;
-import android.telephony.satellite.stub.SatelliteError;
 import android.telephony.satellite.stub.SatelliteModemState;
 
 /**
