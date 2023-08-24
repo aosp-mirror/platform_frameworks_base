@@ -1842,6 +1842,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
