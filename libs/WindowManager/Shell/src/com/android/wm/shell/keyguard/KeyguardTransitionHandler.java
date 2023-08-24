@@ -16,7 +16,10 @@
 
 package com.android.wm.shell.keyguard;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
@@ -27,6 +30,7 @@ import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -165,10 +169,16 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
                             if (sct != null) {
                                 finishTransaction.merge(sct);
                             }
+                            final WindowContainerTransaction mergedWct =
+                                    new WindowContainerTransaction();
+                            if (wct != null) {
+                                mergedWct.merge(wct, true);
+                            }
+                            maybeDismissFreeformOccludingKeyguard(mergedWct, info);
                             // Post our finish callback to let startAnimation finish first.
                             mMainExecutor.executeDelayed(() -> {
                                 mStartedTransitions.remove(transition);
-                                finishCallback.onTransitionFinished(wct);
+                                finishCallback.onTransitionFinished(mergedWct);
                             }, 0);
                         }
                     });
@@ -257,6 +267,26 @@ public class KeyguardTransitionHandler implements Transitions.TransitionHandler 
             // There is no good reason for this to happen because the player is a local object
             // implementing an AIDL interface.
             Log.wtf(TAG, "RemoteException thrown from KeyguardService transition", e);
+        }
+    }
+
+    private void maybeDismissFreeformOccludingKeyguard(
+            WindowContainerTransaction wct, TransitionInfo info) {
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_OCCLUDING) == 0) {
+            return;
+        }
+        // There's a window occluding the Keyguard, find it and if it's in freeform mode, change it
+        // to fullscreen.
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo != null && taskInfo.taskId != INVALID_TASK_ID
+                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && taskInfo.isFocused && change.getContainer() != null) {
+                wct.setWindowingMode(change.getContainer(), WINDOWING_MODE_FULLSCREEN);
+                wct.setBounds(change.getContainer(), null);
+                return;
+            }
         }
     }
 
