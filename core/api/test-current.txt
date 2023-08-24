@@ -836,6 +836,22 @@ package android.appwidget {
 
 package android.companion {
 
+  public static final class AssociationInfo.Builder {
+    ctor public AssociationInfo.Builder(int, int, @NonNull String);
+    ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
+    method @NonNull public android.companion.AssociationInfo build();
+    method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
+    method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
+    method @NonNull public android.companion.AssociationInfo.Builder setLastTimeConnected(long);
+    method @NonNull public android.companion.AssociationInfo.Builder setNotifyOnDeviceNearby(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setRevoked(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
+    method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
+  }
+
   public abstract class CompanionDeviceService extends android.app.Service {
     method public void onBindCompanionDeviceService(@NonNull android.content.Intent);
   }
