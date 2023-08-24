@@ -123,6 +123,8 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
     public void setUp() {
         assumeFalse("Skip test: does not apply to watches",
             mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH));
+        assumeFalse("Skip test: does not apply to TVs",
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
 
         MockitoAnnotations.initMocks(this);
         mBgExecutor = MoreExecutors.directExecutor();
