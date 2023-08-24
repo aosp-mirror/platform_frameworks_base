@@ -14,6 +14,8 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.row.FooterView
+import com.android.systemui.statusbar.notification.row.FooterView.FooterViewState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Expect
@@ -47,6 +49,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
+    private val footerView = FooterView(context, /*attrs=*/null)
     private val ambientState = AmbientState(
             context,
             dumpManager,
@@ -322,6 +325,57 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
         assertThat(notificationRow.viewState.alpha).isEqualTo(expected)
+    }
+
+    @Test
+    fun resetViewStates_noSpaceForFooter_footerHidden() {
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 0f // no space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_hasNonClearableRow_footerVisible() {
+        whenever(notificationRow.canViewBeCleared()).thenReturn(false)
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat(footerView.viewState.hidden).isFalse()
+        assertThat((footerView.viewState as FooterViewState).hideContent).isFalse()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_allRowsClearable_footerHidden() {
+        whenever(notificationRow.canViewBeCleared()).thenReturn(true)
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
+    }
+
+    @Test
+    fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
+        ambientState.isClearAllInProgress = true
+        ambientState.isShadeExpanded = true
+        ambientState.stackEndHeight = 1000f // plenty space for the footer in the stack
+        hostView.removeAllViews() // remove all rows
+        hostView.addView(footerView)
+
+        stackScrollAlgorithm.resetViewStates(ambientState, 0)
+
+        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
     }
 
     @Test
