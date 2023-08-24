@@ -225,7 +225,6 @@ class KeyguardController {
                 final DisplayContent dc = mRootWindowContainer.getDefaultDisplay();
                 dc.requestTransitionAndLegacyPrepare(
                         TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
-                dc.mWallpaperController.showWallpaperInTransition(false /* showHome */);
                 mWindowManager.executeAppTransition();
             }
         }
@@ -282,8 +281,6 @@ class KeyguardController {
                     TRANSIT_TO_BACK, transitFlags, null /* trigger */, dc);
             updateKeyguardSleepToken();
 
-            // Make the home wallpaper visible
-            dc.mWallpaperController.showWallpaperInTransition(true /* showHome */);
             // Some stack visibility might change (e.g. docked stack)
             mRootWindowContainer.resumeFocusedTasksTopActivities();
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);

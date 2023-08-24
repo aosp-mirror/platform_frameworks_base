@@ -657,6 +657,14 @@
     <integer-array name="config_face_help_msgs_defer_until_timeout">
     </integer-array>
 
+    <!-- Which face help messages to ignore when determining the % of frames that meet
+         config_face_help_msgs_defer_until_timeout_threshold -->
+    <integer-array name="config_face_help_msgs_ignore">
+        <item>20</item> <!-- FACE_ACQUIRED_START -->
+        <item>23</item> <!-- FACE_ACQUIRED_UNKNOWN -->
+        <item>24</item> <!-- FACE_ACQUIRED_FIRST_FRAME_RECEIVED -->
+    </integer-array>
+
     <!-- Percentage of face auth frames received required to show a deferred message at
          FACE_ERROR_TIMEOUT. See config_face_help_msgs_defer_until_timeout for messages
          that are deferred.-->

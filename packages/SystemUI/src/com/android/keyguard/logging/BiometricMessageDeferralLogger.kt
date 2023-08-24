@@ -49,6 +49,12 @@ open class BiometricMessageDeferralLogger(
         )
     }
 
+    fun logFrameIgnored(
+        acquiredInfo: Int,
+    ) {
+        logBuffer.log(tag, DEBUG, { int1 = acquiredInfo }, { "frameIgnored acquiredInfo=$int1" })
+    }
+
     fun logFrameProcessed(
         acquiredInfo: Int,
         totalFrames: Int,

@@ -394,6 +394,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
 
         @Override
+        public void setAssistantOverridesRequested(int[] invocationTypes) {
+            mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+        }
+
+        @Override
         public void onHomeRotationEnabled(boolean enabled) {
             mView.getRotationButtonController().setHomeRotationEnabled(enabled);
         }

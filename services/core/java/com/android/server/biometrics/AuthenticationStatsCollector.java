@@ -49,7 +49,8 @@ public class AuthenticationStatsCollector {
     // Upload the data every 50 attempts (average number of daily authentications).
     private static final int AUTHENTICATION_UPLOAD_INTERVAL = 50;
     // The maximum number of eligible biometric enrollment notification can be sent.
-    private static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
+    @VisibleForTesting
+    static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
 
     @NonNull private final Context mContext;
 
@@ -113,6 +114,10 @@ public class AuthenticationStatsCollector {
         }
 
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
+
+        if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS) {
+            return;
+        }
 
         authenticationStats.authenticate(authenticated);
 
