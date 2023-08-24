@@ -63,6 +63,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -428,6 +429,23 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                     + keyboardLayoutDescriptor + "'.");
         }
         return result[0];
+    }
+
+    @AnyThread
+    public KeyCharacterMap getKeyCharacterMap(@NonNull String layoutDescriptor) {
+        final String[] overlay = new String[1];
+        visitKeyboardLayout(layoutDescriptor,
+                (resources, keyboardLayoutResId, layout) -> {
+                    try (InputStreamReader stream = new InputStreamReader(
+                            resources.openRawResource(keyboardLayoutResId))) {
+                        overlay[0] = Streams.readFully(stream);
+                    } catch (IOException | Resources.NotFoundException ignored) {
+                    }
+                });
+        if (TextUtils.isEmpty(overlay[0])) {
+            return KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+        }
+        return KeyCharacterMap.load(layoutDescriptor, overlay[0]);
     }
 
     private void visitAllKeyboardLayouts(KeyboardLayoutVisitor visitor) {

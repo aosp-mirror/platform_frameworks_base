@@ -51,6 +51,7 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputMonitor;
+import android.view.KeyCharacterMap;
 import android.view.PointerIcon;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1200,6 +1201,21 @@ public final class InputManagerGlobal {
     public int getKeyCodeForKeyLocation(int deviceId, int locationKeyCode) {
         try {
             return mIm.getKeyCodeForKeyLocation(deviceId, locationKeyCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns KeyCharacterMap for the provided Keyboard layout. If provided layout is null it will
+     * return KeyCharacter map for the default layout {@code Generic.kl}.
+     */
+    public KeyCharacterMap getKeyCharacterMap(@Nullable KeyboardLayout keyboardLayout) {
+        if (keyboardLayout == null) {
+            return KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+        }
+        try {
+            return mIm.getKeyCharacterMap(keyboardLayout.getDescriptor());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
