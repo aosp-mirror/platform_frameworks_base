@@ -1133,7 +1133,7 @@ int doDump(Bundle* bundle)
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
                     if (depth < 2) {
-                        if (withinSupportsInput && !supportedInput.isEmpty()) {
+                        if (withinSupportsInput && !supportedInput.empty()) {
                             printf("supports-input: '");
                             const size_t N = supportedInput.size();
                             for (size_t i=0; i<N; i++) {
@@ -1300,7 +1300,7 @@ int doDump(Bundle* bundle)
                             ResTable::normalizeForOutput(versionName.c_str()).c_str());
 
                     String8 splitName = AaptXml::getAttribute(tree, NULL, "split");
-                    if (!splitName.isEmpty()) {
+                    if (!splitName.empty()) {
                         printf(" split='%s'", ResTable::normalizeForOutput(
                                     splitName.c_str()).c_str());
                     }
