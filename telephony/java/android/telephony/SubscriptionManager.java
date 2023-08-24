@@ -64,6 +64,7 @@ import android.telephony.ims.ImsMmTelManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.util.LruCache;
 import android.util.Pair;
 
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
@@ -85,7 +86,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1332,20 +1332,15 @@ public class SubscriptionManager {
      * In order to prevent the overflow of the heap size due to an indiscriminate increase in the
      * cache, the heap size of the resource cache is set sufficiently large.
      */
-    private static final int MAX_RESOURCE_CACHE_ENTRY_COUNT = 10_000;
+    private static final int MAX_RESOURCE_CACHE_ENTRY_COUNT = 1_000;
 
     /**
      * Cache of Resources that has been created in getResourcesForSubId. Key contains package name,
      * and Configuration of Resources. If more than the maximum number of resources are stored in
      * this cache, the least recently used Resources will be removed to maintain the maximum size.
      */
-    private static final Map<Pair<String, Configuration>, Resources> sResourcesCache =
-            Collections.synchronizedMap(new LinkedHashMap<>(16, 0.75f, true) {
-                @Override
-                protected boolean removeEldestEntry(Entry eldest) {
-                    return size() > MAX_RESOURCE_CACHE_ENTRY_COUNT;
-                }
-            });
+    private static final LruCache<Pair<String, Configuration>, Resources> sResourcesCache =
+            new LruCache<>(MAX_RESOURCE_CACHE_ENTRY_COUNT);
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -2841,10 +2836,12 @@ public class SubscriptionManager {
                 configurationKey.setLocale(Locale.ROOT);
             }
             cacheKey = Pair.create(context.getPackageName(), configurationKey);
-            Resources cached = sResourcesCache.get(cacheKey);
-            if (cached != null) {
-                // Cache hit. Use cached Resources.
-                return cached;
+            synchronized (sResourcesCache) {
+                Resources cached = sResourcesCache.get(cacheKey);
+                if (cached != null) {
+                    // Cache hit. Use cached Resources.
+                    return cached;
+                }
             }
         }
 
@@ -2876,8 +2873,10 @@ public class SubscriptionManager {
         Resources res = newContext.getResources();
 
         if (cacheKey != null) {
-            // Save the newly created Resources in the resource cache.
-            sResourcesCache.put(cacheKey, res);
+            synchronized (sResourcesCache) {
+                // Save the newly created Resources in the resource cache.
+                sResourcesCache.put(cacheKey, res);
+            }
         }
         return res;
     }
