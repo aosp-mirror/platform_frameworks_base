@@ -24,6 +24,7 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
 import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
@@ -661,10 +662,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         set.setDuration(FLING_SWITCH_DURATION);
         set.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
+                        mContext, getDividerLeash(), null /*tag*/);
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
                 mDividePosition = dividerPos;
                 updateBounds(mDividePosition);
                 finishCallback.accept(insets);
+                InteractionJankMonitorUtils.endTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
         });
         set.start();
