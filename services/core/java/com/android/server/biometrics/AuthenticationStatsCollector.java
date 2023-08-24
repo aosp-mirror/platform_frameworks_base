@@ -45,12 +45,12 @@ public class AuthenticationStatsCollector {
     private static final String TAG = "AuthenticationStatsCollector";
 
     // The minimum number of attempts that will calculate the FRR and trigger the notification.
-    private static final int MINIMUM_ATTEMPTS = 500;
+    private static final int MINIMUM_ATTEMPTS = 150;
     // Upload the data every 50 attempts (average number of daily authentications).
     private static final int AUTHENTICATION_UPLOAD_INTERVAL = 50;
     // The maximum number of eligible biometric enrollment notification can be sent.
     @VisibleForTesting
-    static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
+    static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 1;
 
     @NonNull private final Context mContext;
 
