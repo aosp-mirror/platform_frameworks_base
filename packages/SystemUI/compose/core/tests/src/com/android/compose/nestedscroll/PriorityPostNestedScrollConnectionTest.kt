@@ -42,7 +42,7 @@ class PriorityPostNestedScrollConnectionTest {
 
     private val scrollConnection =
         PriorityPostNestedScrollConnection(
-            canStart = { canStart },
+            canStart = { _, _ -> canStart },
             canContinueScroll = { canContinueScroll },
             onStart = { isStarted = true },
             onScroll = {

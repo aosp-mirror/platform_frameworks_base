@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.Velocity
  * @sample com.android.compose.animation.scene.rememberSwipeToSceneNestedScrollConnection
  */
 class PriorityPostNestedScrollConnection(
-    private val canStart: (offsetAvailable: Offset) -> Boolean,
+    private val canStart: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
     private val canContinueScroll: () -> Boolean,
     private val onStart: () -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
@@ -43,12 +43,22 @@ class PriorityPostNestedScrollConnection(
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
     private var isPriorityMode = false
 
+    private var offsetScrolledBeforePriorityMode = Offset.Zero
+
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
     ): Offset {
-        if (isPriorityMode || source == NestedScrollSource.Fling || !canStart(available)) {
+        // The offset before the start takes into account the up and down movements, starting from
+        // the beginning or from the last fling gesture.
+        val offsetBeforeStart = offsetScrolledBeforePriorityMode - available
+
+        if (
+            isPriorityMode ||
+                source == NestedScrollSource.Fling ||
+                !canStart(available, offsetBeforeStart)
+        ) {
             // The priority mode cannot start so we won't consume the available offset.
             return Offset.Zero
         }
@@ -66,6 +76,11 @@ class PriorityPostNestedScrollConnection(
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (!isPriorityMode) {
+            if (source != NestedScrollSource.Fling) {
+                // We want to track the amount of offset consumed before entering priority mode
+                offsetScrolledBeforePriorityMode += available
+            }
+
             return Offset.Zero
         }
 
@@ -96,6 +111,10 @@ class PriorityPostNestedScrollConnection(
     }
 
     private fun onPriorityStop(velocity: Velocity): Velocity {
+
+        // We can restart tracking the consumed offsets from scratch.
+        offsetScrolledBeforePriorityMode = Offset.Zero
+
         if (!isPriorityMode) {
             return Velocity.Zero
         }

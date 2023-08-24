@@ -327,6 +327,7 @@ private fun CoroutineScope.onDragStopped(
     velocity: Float,
     velocityThreshold: Float,
     positionalThreshold: Float,
+    canChangeScene: Boolean = true,
 ) {
     // The state was changed since the drag started; don't do anything.
     if (layoutImpl.state.transitionState != transition) {
@@ -345,14 +346,15 @@ private fun CoroutineScope.onDragStopped(
     val offset = transition.dragOffset
     val distance = transition.distance
     if (
-        shouldCommitSwipe(
-            offset,
-            distance,
-            velocity,
-            velocityThreshold,
-            positionalThreshold,
-            wasCommitted = transition._currentScene == transition._toScene,
-        )
+        canChangeScene &&
+            shouldCommitSwipe(
+                offset,
+                distance,
+                velocity,
+                velocityThreshold,
+                positionalThreshold,
+                wasCommitted = transition._currentScene == transition._toScene,
+            )
     ) {
         targetOffset = distance
         targetScene = transition._toScene
@@ -450,6 +452,7 @@ private fun rememberSwipeToSceneNestedScrollConnection(
     velocityThreshold: Float,
     positionalThreshold: Float,
 ): PriorityPostNestedScrollConnection {
+    val density = LocalDensity.current
     val scrollConnection =
         remember(
             orientation,
@@ -459,6 +462,7 @@ private fun rememberSwipeToSceneNestedScrollConnection(
             layoutImpl,
             velocityThreshold,
             positionalThreshold,
+            density,
         ) {
             fun Offset.toAmount() =
                 when (orientation) {
@@ -484,10 +488,16 @@ private fun rememberSwipeToSceneNestedScrollConnection(
             // This is the scene on which we will have priority during the scroll gesture.
             var priorityScene: SceneKey? = null
 
+            // If we performed a long gesture before entering priority mode, we would have to avoid
+            // moving on to the next scene.
+            var gestureStartedOnNestedChild = false
+
             PriorityPostNestedScrollConnection(
-                canStart = { offsetAvailable ->
+                canStart = { offsetAvailable, offsetBeforeStart ->
                     val amount = offsetAvailable.toAmount()
                     if (amount == 0f) return@PriorityPostNestedScrollConnection false
+
+                    gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
 
                     val fromScene = layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
                     nextScene =
@@ -502,11 +512,13 @@ private fun rememberSwipeToSceneNestedScrollConnection(
                 canContinueScroll = { priorityScene == transition._toScene.key },
                 onStart = {
                     priorityScene = nextScene
-
                     onDragStarted(layoutImpl, transition, orientation)
                 },
                 onScroll = { offsetAvailable ->
                     val amount = offsetAvailable.toAmount()
+
+                    // TODO(b/297842071) We should handle the overscroll or slow drag if the gesture
+                    // is initiated in a nested child.
 
                     // Appends a new coroutine to attempt to drag by [amount] px. In this case we
                     // are assuming that the [coroutineScope] is tied to the main thread and that
@@ -524,6 +536,7 @@ private fun rememberSwipeToSceneNestedScrollConnection(
                         velocity = velocityAvailable.toAmount(),
                         velocityThreshold = velocityThreshold,
                         positionalThreshold = positionalThreshold,
+                        canChangeScene = !gestureStartedOnNestedChild
                     )
 
                     // The onDragStopped animation consumes any remaining velocity.
