@@ -269,6 +269,10 @@ public class NotificationTestHelper {
         return generateRow(notification, PKG, UID, USER_HANDLE, mDefaultInflationFlags);
     }
 
+    public ExpandableNotificationRow createRow(NotificationEntry entry) throws Exception {
+        return generateRow(entry, mDefaultInflationFlags);
+    }
+
     /**
      * Create a row with the specified content views inflated in addition to the default.
      *
@@ -538,18 +542,6 @@ public class NotificationTestHelper {
             @InflationFlag int extraInflationFlags,
             int importance)
             throws Exception {
-        // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
-        //  set, but we do not want to override an existing value that is needed by a specific test.
-        mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
-
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                mContext.LAYOUT_INFLATER_SERVICE);
-        mRow = (ExpandableNotificationRow) inflater.inflate(
-                R.layout.status_bar_notification_row,
-                null /* root */,
-                false /* attachToRoot */);
-        ExpandableNotificationRow row = mRow;
-
         final NotificationChannel channel =
                 new NotificationChannel(
                         notification.getChannelId(),
@@ -568,6 +560,25 @@ public class NotificationTestHelper {
                 .setPostTime(System.currentTimeMillis())
                 .setChannel(channel)
                 .build();
+
+        return generateRow(entry, extraInflationFlags);
+    }
+
+    private ExpandableNotificationRow generateRow(
+            NotificationEntry entry,
+            @InflationFlag int extraInflationFlags)
+            throws Exception {
+        // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
+        //  set, but we do not want to override an existing value that is needed by a specific test.
+        mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
+
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                mContext.LAYOUT_INFLATER_SERVICE);
+        mRow = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row,
+                null /* root */,
+                false /* attachToRoot */);
+        ExpandableNotificationRow row = mRow;
 
         entry.setRow(row);
         mIconManager.createIcons(entry);
