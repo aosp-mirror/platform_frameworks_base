@@ -314,31 +314,6 @@ class WallpaperController {
                         || !mWallpaperTarget.mActivityRecord.isWaitingForTransitionStart());
     }
 
-    /**
-     * Make one wallpaper visible, according to {@attr showHome}.
-     * This is called during the keyguard unlocking transition
-     * (see {@link KeyguardController#keyguardGoingAway(int, int)}),
-     * or when a keyguard unlock is cancelled (see {@link KeyguardController})
-     */
-    public void showWallpaperInTransition(boolean showHome) {
-        updateWallpaperWindowsTarget(mFindResults);
-
-        if (!mFindResults.hasTopShowWhenLockedWallpaper()) {
-            Slog.w(TAG, "There is no wallpaper for the lock screen");
-            return;
-        }
-        WindowState hideWhenLocked = mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper;
-        WindowState showWhenLocked = mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper;
-        if (!mFindResults.hasTopHideWhenLockedWallpaper()) {
-            // Shared wallpaper, ensure its visibility
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindows(true);
-        } else {
-            // Separate lock and home wallpapers: show the correct wallpaper in transition
-            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(showHome);
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(!showHome);
-        }
-    }
-
     void hideDeferredWallpapersIfNeededLegacy() {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
@@ -840,10 +815,7 @@ class WallpaperController {
             }
         }
 
-        if (!mDisplayContent.isKeyguardGoingAway() || !mIsLockscreenLiveWallpaperEnabled) {
-            // When keyguard goes away, KeyguardController handles the visibility
-            updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
-        }
+        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
 
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
