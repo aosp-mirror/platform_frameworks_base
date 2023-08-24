@@ -17,8 +17,7 @@
 package com.android.server.companion.transport;
 
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
-
-import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
+import static android.companion.CompanionDeviceManager.MESSAGE_REQUEST_PERMISSION_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;

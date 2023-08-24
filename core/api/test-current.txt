@@ -852,6 +852,10 @@ package android.companion {
     method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
   }
 
+  public final class CompanionDeviceManager {
+    field public static final int MESSAGE_REQUEST_PING = 1669362552; // 0x63807378
+  }
+
   public abstract class CompanionDeviceService extends android.app.Service {
     method public void onBindCompanionDeviceService(@NonNull android.content.Intent);
   }
