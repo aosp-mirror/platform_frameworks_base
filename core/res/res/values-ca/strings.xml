@@ -670,14 +670,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"S\'ha produït un error. Torna-ho a provar."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona d\'empremta digital"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Desbloqueig del dispositiu"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Prova una altra manera de desbloquejar"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Utilitza Desbloqueig facial quan no es reconegui la teva empremta digital, com ara quan tens els dits mullats"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Utilitza Desbloqueig amb empremta digital quan no es reconegui la teva cara, com ara quan no hi ha prou llum"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema amb Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toca per suprimir el teu model facial i, a continuació, torna a afegir la teva cara"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura Desbloqueig facial"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Mira el telèfon per desbloquejar-lo"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Per utilitzar Desbloqueig facial, activa "<b>"Accés a la càmera"</b>" a Configuració &gt; Privadesa"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura més maneres de desbloquejar el dispositiu"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toca per afegir una empremta digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueig amb empremta digital"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"No es pot utilitzar el sensor d\'empremtes digitals"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visita un proveïdor de reparacions."</string>
@@ -2032,7 +2032,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Vols actualitzar-ho a "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Vols actualitzar <xliff:g id="TYPE">%1$s</xliff:g> a "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Vols actualitzar <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> a "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Vols actualitzar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> a "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"Desa"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"No, gràcies"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ara no"</string>

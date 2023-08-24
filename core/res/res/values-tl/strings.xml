@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Nagkaproblema. Subukan ulit."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icon ng fingerprint"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Pag-unlock ng device"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Sumubok ng ibang paraan ng pag-unlock."</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Gamitin ang Pag-unlock Gamit ang Mukha kapag hindi nakikilala ang iyong fingerprint, tulad kapag basa ang iyong mga daliri"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Gamitin ang Pag-unlock Gamit ang Fingerprint kapag hindi nakikilala ang iyong mukha, tulad kapag madilim"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Isyu sa Pag-unlock Gamit ang Mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"I-tap para i-delete ang iyong face model, pagkatapos ay idagdag ulit ang mukha mo"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"I-unlock ang iyong telepono sa pamamagitan ng pagtingin dito"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para magamit ang Pag-unlock Gamit ang Mukha, i-on ang "<b>"Access sa camera"</b>" sa Mga Setting &gt; Privacy"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Mag-set up ng higit pang paraan para mag-unlock"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"I-tap para magdagdag ng fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Pag-unlock Gamit ang Fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Hindi magamit ang sensor para sa fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Bumisita sa provider ng pag-aayos."</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"I-update sa "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"I-update ang <xliff:g id="TYPE">%1$s</xliff:g> sa "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"I-update ang <xliff:g id="TYPE_0">%1$s</xliff:g> at <xliff:g id="TYPE_1">%2$s</xliff:g> sa "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"I-update ang mga item na ito sa "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, at <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"I-save"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Hindi, salamat na lang"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Hindi ngayon"</string>

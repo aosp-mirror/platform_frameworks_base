@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"エラーが発生しました。もう一度お試しください。"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋アイコン"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"デバイスのロック解除"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"別のロック解除方法を試す"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"指が濡れている場合など、指紋が認識されないときに顔認証を使用できます"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"暗い場所など、顔が認識されないときに指紋認証を使用できます"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"顔認証"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"顔認証に関する問題"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"タップして顔モデルを削除してから、改めて顔を追加してください"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"顔認証の設定"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"スマートフォンに顔を向けるとロックが解除されます"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"顔認証を使用するには、[設定] &gt; [プライバシー] で"<b>"カメラへのアクセス"</b>"を有効にしてください"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"その他のロック解除方法の設定"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"タップすると指紋が追加されます"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋認証"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"指紋認証センサーを使用できません"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"修理業者に調整を依頼してください。"</string>
@@ -1594,7 +1594,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"設定した上限を <xliff:g id="SIZE">%s</xliff:g> 超えました"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"バックグラウンドデータに上限あり"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"タップして制限を解除します。"</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"モバイルデータ使用量の増加"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"高いモバイルデータ使用量"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"アプリが通常より多くのデータを使用しています"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"「<xliff:g id="APP">%s</xliff:g>」が通常より多くのデータを使用しています"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"セキュリティ証明書"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" で更新しますか？"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>を "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" で更新しますか？"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" で更新しますか？"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" で更新しますか？"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"はい"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"いいえ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"後で"</string>

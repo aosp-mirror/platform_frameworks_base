@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"發生錯誤，請再試一次。"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"指紋圖示"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"裝置解鎖"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"改用其他解鎖方式"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"當指紋無法識別 (如手指弄濕) 時使用面孔解鎖"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"當面孔無法識別 (如光線不足) 時使用指紋解鎖"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"面孔解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"「面孔解鎖」功能發生問題"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"請輕按這裡刪除面部模型，然後再重新新增"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"設定「面孔解鎖」"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"直望手機即可解鎖"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"如要使用「面孔解鎖」，請在 [設定] &gt; [私隱] 開啟"<b>"相機存取權"</b></string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"設定更多解鎖方法"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"輕按即可新增指紋"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"指紋解鎖"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"無法使用指紋感應器"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請諮詢維修服務供應商。"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"要在 "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" 中更新嗎？"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"要在 "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE">%1$s</xliff:g>嗎？"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"要在 "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>嗎？"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"要在 "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>嗎？"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"儲存"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"不用了，謝謝"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"暫時不要"</string>

@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"فنگر پرنٹ آئیکن"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"آلے کو غیر مقفل کرنا"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"غیر مقفل کرنے کا کوئی دوسرا طریقہ آزمائیں"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"آپ کے فنگر پرنٹ کی شناخت نہ ہو پانے کی صورت میں، جیسے کی جب آپ کی انگلیاں گیلی ہوں، تو فیس اَنلاک کا استعمال کریں"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"آپ کے چہرے کی شناخت نہ ہو پانے کی صورت میں، جیسے کی جب خاطر خواہ روشنی موجود نہ ہو، تو فنگر پرنٹ اَن لاک کا استعمال کریں"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"فیس اَنلاک"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"فیس اَنلاک میں مسئلہ"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"اپنے چہرے کا ماڈل حذف کرنے کے لیے تھپتھپائیں پھر اپنا چہرہ دوبارہ شامل کریں"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"فیس اَنلاک سیٹ اپ کریں"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"اپنے فون کی طرف دیکھ کر اسے غیر مقفل کریں"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"فیس اَنلاک کا استعمال کرنے کے لیے، ترتیبات اور رازداری میں "<b>"کیمرے تک رسائی"</b>" کو آن کریں"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"غیر مقفل کرنے کے مزید طریقے سیٹ اپ کریں"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"فنگر پرنٹ شامل کرنے کیلئے تھپتھپائیں"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"فنگر پرنٹ اَن لاک"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"فنگر پرنٹ سینسر کا استعمال نہیں کر سکتے"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ایک مرمت فراہم کنندہ کو ملاحظہ کریں۔"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" میں اپ ڈیٹ کریں؟"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" میں <xliff:g id="TYPE">%1$s</xliff:g> اپ ڈیٹ کریں؟"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> اور <xliff:g id="TYPE_1">%2$s</xliff:g> کو "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" میں اپ ڈیٹ کریں؟"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ان آئٹمز کو "<b>"<xliff:g id="LABEL">%4$s</xliff:g> "</b>" میں اپ ڈیٹ کریں: <xliff:g id="TYPE_0">%1$s</xliff:g>، <xliff:g id="TYPE_1">%2$s</xliff:g> اور <xliff:g id="TYPE_2">%3$s</xliff:g> ؟"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"محفوظ کریں"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"نہیں، شکریہ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ابھی نہیں"</string>
