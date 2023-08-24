@@ -417,7 +417,8 @@ public final class CredentialProviderInfoFactory {
                                 si,
                                 /* isSystemProvider= */ true,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(si.getComponentName()), false);
+                                enabledServices.contains(si.getComponentName()),
+                                false);
                 if (cpi.isSystemProvider()) {
                     providerInfos.add(cpi);
                 } else {
@@ -456,7 +457,7 @@ public final class CredentialProviderInfoFactory {
             int userId,
             int providerFilter,
             Set<ComponentName> enabledServices,
-            Set<String> primaryServices) {
+            Set<ComponentName> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -490,7 +491,7 @@ public final class CredentialProviderInfoFactory {
             int userId,
             int providerFilter,
             Set<ComponentName> enabledServices,
-            Set<String> primaryServices) {
+            Set<ComponentName> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -601,7 +602,7 @@ public final class CredentialProviderInfoFactory {
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
             Set<ComponentName> enabledServices,
-            Set<String> primaryServices) {
+            Set<ComponentName> primaryServices) {
         final List<CredentialProviderInfo> services = new ArrayList<>();
         final List<ResolveInfo> resolveInfos =
                 context.getPackageManager()
@@ -624,8 +625,7 @@ public final class CredentialProviderInfoFactory {
                                 /* isSystemProvider= */ false,
                                 disableSystemAppVerificationForTests,
                                 enabledServices.contains(serviceInfo.getComponentName()),
-                                primaryServices.contains(
-                                        serviceInfo.getComponentName().flattenToString()));
+                                primaryServices.contains(serviceInfo.getComponentName()));
                 if (!cpi.isSystemProvider()) {
                     services.add(cpi);
                 }
