@@ -310,14 +310,14 @@ class AssociationRequestsProcessor {
 
     public void enableSystemDataSync(int associationId, int flags) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        AssociationInfo updated = AssociationInfo.builder(association)
+        AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() | flags).build();
         mAssociationStore.updateAssociation(updated);
     }
 
     public void disableSystemDataSync(int associationId, int flags) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        AssociationInfo updated = AssociationInfo.builder(association)
+        AssociationInfo updated = (new AssociationInfo.Builder(association))
                 .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
         mAssociationStore.updateAssociation(updated);
     }
