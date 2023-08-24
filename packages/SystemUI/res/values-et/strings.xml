@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Teine seade taotles süsteemi keele muutmist"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Muuda keelt"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Kasuta praegust keelt"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Kas lubada selles võrgus juhtmevaba silumine?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Võrgu nimi (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWiFi-võrgu aadress (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Luba selles võrgus alati"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Vale muster"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Vale parool"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Liiga palju valesid katseid.\nProovige <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast uuesti."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Proovige uuesti. Katse <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Teie andmed kustutatakse"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Kui sisestate järgmisel katsel vale mustri, kustutatakse selle seadme andmed."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kui jagate, salvestate või kannate üle, on rakendusel <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kui jagate, salvestate või kannate rakendust üle, on rakendusel <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> juurdepääs kõigele, mida selles rakenduses kuvatakse või esitatakse. Seega olge paroolide, makseteabe, sõnumite, fotode, heli ja videoga ettevaatlik."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Alusta"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Kas alustada ülekandmist?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kui kannate üle, on Androidil juurdepääs kõigele, mis on teie ekraanikuval nähtaval või mida teie seadmes esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Rakenduse ülekandmise ajal on Androidil juurdepääs kõigele, mis on selles rakenduses nähtaval või mida selles esitatakse. Seega olge paroolide, makseteabe, sõnumite, fotode, heli ja videoga ettevaatlik."</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ekraanikuva osa suurendamine"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ava suurendamisseaded"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Sule suurendamisseaded"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Välju muutmisrežiimist"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Suuruse muutmiseks lohistage nurka"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Luba diagonaalne kerimine"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Muuda suurust"</string>

@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Zmenu jazyka systému vyžiadalo iné zariadenie"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Zmeniť jazyk"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Ponechať aktuálny jazyk"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Chcete povoliť bezdrôtové ladenie v tejto sieti?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Názov siete (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Vždy povoliť v tejto sieti"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Nesprávny vzor"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Nesprávne heslo"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Príliš veľa nesprávnych pokusov. \nSkúste to znova o <xliff:g id="NUMBER">%d</xliff:g> s."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Skúste to znova. <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>. z <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> pokusov."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Vaše dáta budú odstránené"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Ak pri ďalšom pokuse zadáte nesprávny vzor, dáta tohto zariadenia budú odstránené."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Počas zdieľania, nahrávania alebo prenosu bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Začať"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Chcete spustiť prenos?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Počas prenosu bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Počas prenosu v aplikácii bude mať Android prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Zväčšiť časť obrazovky"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otvoriť nastavenia zväčšenia"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Zavrieť nastavenia zväčšenia"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Ukončiť režim úprav"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Veľkosť zmeníte presunutím rohu"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Povoliť diagonálne posúvanie"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Zmeniť veľkosť"</string>
@@ -1168,7 +1173,7 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Pozornosť Asistenta je zapnutá"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavte predvolenú aplikáciu na poznámky v Nastaveniach"</string>
     <string name="install_app" msgid="5066668100199613936">"Inštalovať aplikáciu"</string>
-    <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofón a kamera"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofón a fotoaparát"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Nedávne využitie aplikácie"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Zobraziť nedávny prístup"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Hotovo"</string>

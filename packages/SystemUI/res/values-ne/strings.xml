@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"अर्को डिभाइसले सिस्टमको भाषा परिवर्तन गर्न अनुरोध गरेको छ"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"भाषा परिवर्तन गर्नुहोस्"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"अहिलेको भाषा राख्नुहोस्"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"यस नेटवर्कमा वायरलेस डिबगिङ सेवा प्रयोग गर्न दिने हो?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"नेटवर्कको नाम (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi ठेगाना (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"यस नेटवर्कमा सधैँ अनुमति दिइयोस्"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"प्याटर्न मिलेन"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"पासवर्ड मिलेन"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"अत्यन्तै धेरै पटक गलत प्रयास गरिए। \n <xliff:g id="NUMBER">%d</xliff:g>सेकेन्ड पछि पुनः प्रयास गर्नुहोस्।"</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"फेरि प्रयास गर्नुहोस्। <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> मध्ये <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> प्रयास।"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"तपाईंको डेटा मेटाइने छ"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"तपाईंले अर्को पटक पनि गलत ढाँचा प्रविष्टि गर्नुभयो भने यो डिभाइसको डेटा मेटाइने छ।"</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"तपाईंले सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"तपाईंले कुनै एप सेयर गर्दा, रेकर्ड गर्दा वा कास्ट गर्दा <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले उक्त एपमा देखाइने वा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"सुरु गर्नुहोस्"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"कास्ट गर्न थाल्ने हो?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"तपाईंले कास्ट गर्दा Android ले तपाईंको स्क्रिनमा देखिने वा डिभाइसमा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"तपाईंले कुनै एप कास्ट गर्दा Android ले उक्त एपमा देखाइने वा प्ले गरिने सबै कुरा हेर्न तथा प्रयोग गर्न सक्छ। त्यसैले पासवर्ड, भुक्तानीसम्बन्धी विवरण, म्यासेज, फोटो र अडियो तथा भिडियो जस्ता कुरा हेर्दा वा प्ले गर्दा सावधानी अपनाउनुहोला।"</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"स्क्रिनको केही भाग म्याग्निफाइ गर्नुहोस्"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"जुम इनसम्बन्धी सेटिङ खोल्नुहोस्"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"जुम इन गर्ने सुविधाको सेटिङ बन्द गर्नुहोस्"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"सम्पादन गर्ने मोडबाट बाहिरिनुहोस्"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"आकार बदल्न कुनाबाट ड्र्याग गर्नुहोस्"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"डायगोनल तरिकाले स्क्रोल गर्ने अनुमति दिनुहोस्"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"आकार बदल्नुहोस्"</string>
