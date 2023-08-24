@@ -714,8 +714,16 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
+        /**
+         * The connection is using transactional call APIs.
+         * <p>
+         * The underlying connection was added as a transactional call via the
+         * {@link TelecomManager#addCall} API.
+         */
+        public static final int PROPERTY_IS_TRANSACTIONAL = 0x00008000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00004000
+        // Next PROPERTY value: 0x00010000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -912,6 +920,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
+            }
+            if (hasProperty(properties, PROPERTY_IS_TRANSACTIONAL)) {
+                builder.append(" PROPERTY_IS_TRANSACTIONAL");
             }
             builder.append("]");
             return builder.toString();
