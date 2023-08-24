@@ -541,7 +541,6 @@ public class SpatializerHelper {
         }
         loglogi("addCompatibleAudioDevice: dev=" + ada);
         final AdiDeviceState deviceState = findSACompatibleDeviceStateForAudioDeviceAttributes(ada);
-        initSAState(deviceState);
         AdiDeviceState updatedDevice = null; // non-null on update.
         if (deviceState != null) {
             if (forceEnable && !deviceState.isSAEnabled()) {
