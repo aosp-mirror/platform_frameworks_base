@@ -44,6 +44,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import dagger.Lazy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -136,6 +137,7 @@ public class AssistManager {
     protected final Context mContext;
     private final AssistDisclosure mAssistDisclosure;
     private final PhoneStateMonitor mPhoneStateMonitor;
+    private final OverviewProxyService mOverviewProxyService;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
     protected final AssistLogger mAssistLogger;
@@ -164,6 +166,9 @@ public class AssistManager {
     private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
 
+    // Invocation types that should be sent over OverviewProxy instead of handled here.
+    private int[] mAssistOverrideInvocationTypes;
+
     @Inject
     public AssistManager(
             DeviceProvisionedController controller,
@@ -184,6 +189,7 @@ public class AssistManager {
         mCommandQueue = commandQueue;
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, uiHandler);
+        mOverviewProxyService = overviewProxyService;
         mPhoneStateMonitor = phoneStateMonitor;
         mAssistLogger = assistLogger;
         mUserTracker = userTracker;
@@ -197,7 +203,7 @@ public class AssistManager {
 
         mSysUiState = sysUiState;
 
-        overviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
+        mOverviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
             @Override
             public void onAssistantProgress(float progress) {
                 // Progress goes from 0 to 1 to indicate how close the assist gesture is to
@@ -260,6 +266,20 @@ public class AssistManager {
     }
 
     public void startAssist(Bundle args) {
+        if (shouldOverrideAssist(args)) {
+            try {
+                if (mOverviewProxyService.getProxy() == null) {
+                    Log.w(TAG, "No OverviewProxyService to invoke assistant override");
+                    return;
+                }
+                mOverviewProxyService.getProxy().onAssistantOverrideInvoked(
+                        args.getInt(INVOCATION_TYPE_KEY));
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to invoke assistant via OverviewProxyService override", e);
+            }
+            return;
+        }
+
         final ComponentName assistComponent = getAssistInfo();
         if (assistComponent == null) {
             return;
@@ -281,6 +301,24 @@ public class AssistManager {
                 legacyDeviceState);
         logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
         startAssistInternal(args, assistComponent, isService);
+    }
+
+    private boolean shouldOverrideAssist(Bundle args) {
+        if (args == null || !args.containsKey(INVOCATION_TYPE_KEY)) {
+            return false;
+        }
+
+        int invocationType = args.getInt(INVOCATION_TYPE_KEY);
+        return mAssistOverrideInvocationTypes != null && Arrays.stream(
+                mAssistOverrideInvocationTypes).anyMatch(override -> override == invocationType);
+    }
+
+    /**
+     * @param invocationTypes The invocation types that will henceforth be handled via
+     *         OverviewProxy (Launcher); other invocation types should be handled by this class.
+     */
+    public void setAssistantOverridesRequested(int[] invocationTypes) {
+        mAssistOverrideInvocationTypes = invocationTypes;
     }
 
     /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */

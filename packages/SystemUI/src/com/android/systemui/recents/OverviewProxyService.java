@@ -326,6 +326,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
+        public void setAssistantOverridesRequested(int[] invocationTypes) {
+            verifyCallerAndClearCallingIdentityPostMain("setAssistantOverridesRequested", () ->
+                    notifyAssistantOverrideRequested(invocationTypes));
+        }
+
+        @Override
         public void notifyAccessibilityButtonClicked(int displayId) {
             verifyCallerAndClearCallingIdentity("notifyAccessibilityButtonClicked", () ->
                     AccessibilityManager.getInstance(mContext)
@@ -908,6 +914,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAssistantOverrideRequested(int[] invocationTypes) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).setAssistantOverridesRequested(invocationTypes);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -1051,6 +1063,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+        default void setAssistantOverridesRequested(int[] invocationTypes) {}
     }
 
     /**
