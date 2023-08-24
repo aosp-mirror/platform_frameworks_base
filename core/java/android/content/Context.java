@@ -593,7 +593,7 @@ public abstract class Context {
     public static final int BIND_IMPORTANT_BACKGROUND = 0x00800000;
 
     /**
-     * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
+     * @hide Flag for {@link #bindService}: allows application hosting service to manage allowlists
      * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
      */
     public static final int BIND_ALLOW_WHITELIST_MANAGEMENT = 0x01000000;
