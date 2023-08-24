@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Եղավ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ամպիկներ չկան"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Այստեղ կցուցադրվեն վերջերս օգտագործված և փակված ամպիկները, որոնք կկարողանաք հեշտությամբ վերաբացել"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"Պղպջակ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Կառավարել"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ամպիկը փակվեց։"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Հպեք՝ հավելվածը վերագործարկելու և ավելի հարմար տեսք ընտրելու համար։"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Հպեք՝ հավելվածը վերագործարկելու և ավելի հարմար տեսք ընտրելու համար"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Փոխել հավելվածի կողմերի հարաբերակցությունը Կարգավորումներում"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Փոխել չափերի հարաբերակցությունը"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Տեսախցիկի հետ կապված խնդիրնե՞ր կան։\nՀպեք՝ վերակարգավորելու համար։"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Չհաջողվե՞ց շտկել։\nՀպեք՝ փոփոխությունները չեղարկելու համար։"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Տեսախցիկի հետ կապված խնդիրներ չկա՞ն։ Փակելու համար հպեք։"</string>
