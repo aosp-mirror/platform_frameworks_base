@@ -161,7 +161,7 @@ constructor(
      * Once a transition between one scene and another passes a threshold, the UI invokes this
      * method to report it, updating the value in [desiredScene] to match what the UI shows.
      */
-    internal fun onSceneChanged(scene: SceneModel, loggingReason: String) {
+    fun onSceneChanged(scene: SceneModel, loggingReason: String) {
         updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
     }
 

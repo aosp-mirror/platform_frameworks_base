@@ -16,16 +16,17 @@
 
 package com.android.keyguard
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -52,7 +53,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class KeyguardPinViewControllerTest : SysuiTestCase() {
 
@@ -175,7 +177,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     private fun getPinTopGuideline(): Float {
         val cs = ConstraintSet()
-        val container = objectKeyguardPINView.requireViewById(R.id.pin_container) as ConstraintLayout
+        val container =
+            objectKeyguardPINView.requireViewById(R.id.pin_container) as ConstraintLayout
         cs.clone(container)
         return cs.getConstraint(R.id.pin_pad_top_guideline).layout.guidePercent
     }

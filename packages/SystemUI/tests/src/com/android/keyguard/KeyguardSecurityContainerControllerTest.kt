@@ -21,7 +21,6 @@ import android.content.res.Configuration
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.media.AudioManager
 import android.telephony.TelephonyManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
 import android.view.Gravity
@@ -30,6 +29,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsetsController
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
@@ -37,6 +37,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
@@ -96,7 +97,8 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
