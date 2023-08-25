@@ -342,7 +342,10 @@ public class ToastPresenter {
             // to cancel the toast there is an inherent race and we may attempt to add a window
             // after the token has been invalidated. Let us hedge against that.
             Log.w(TAG, "Error while attempting to show toast from " + mPackageName, e);
-            return;
+        } catch (WindowManager.InvalidDisplayException e) {
+            // Display the toast was scheduled on might have been meanwhile removed.
+            Log.w(TAG, "Cannot show toast from " + mPackageName
+                    + " on display it was scheduled on.", e);
         }
     }
 }
