@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Іншая прылада запытала змяненне мовы сістэмы"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Змяніць мову"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Захаваць бягучую мову"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Дазволіць адладку па Wi-Fi у гэтай сетцы?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Назва сеткі (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nАдрас Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Заўсёды дазваляць у гэтай сетцы"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Няправільны ўзор разблакіроўкі"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Няправільны пароль"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Занадта шмат няўдалых спроб.\nПаспрабуйце зноў праз <xliff:g id="NUMBER">%d</xliff:g> с."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Паўтарыце спробу. Спроба <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> з <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Вашы даныя будуць выдалены"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Калі вы ўведзяце няправільны ўзор разблакіроўкі яшчэ раз, даныя з гэтай прылады будуць выдалены."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Калі пачынаецца абагульванне, запіс ці трансляцыя, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> атрымлівае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Калі пачынаецца абагульванне, запіс ці трансляцыя змесціва праграмы, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> атрымлівае доступ да ўсяго змесціва, якое паказваецца ці прайграецца ў праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Пачаць"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Пачаць трансляцыю?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Калі адбываецца трансляцыя, Android мае доступ да ўсяго змесціва, якое паказваецца на экране ці прайграецца на прыладзе. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Калі адбываецца трансляцыя змесціва праграмы, Android мае доступ да ўсяго змесціва, якое паказваецца ці прайграецца ў праграме. Таму прадухіліце паказ пароляў, плацежных рэквізітаў, паведамленняў, фота, відэа і аўдыя."</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Павялічыць частку экрана"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Адкрыць налады павелічэння"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Закрыць налады павелічэння"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Выйсці з рэжыму рэдагавання"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Каб змяніць памер, перацягніце вугал"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дазволіць прагортванне па дыяганалі"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Змяніць памер"</string>
@@ -1181,7 +1186,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Зараз выкарыстоўваецца для тэлефоннага выкліку"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Нядаўна выкарыстоўваўся для тэлефоннага выкліку"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Зараз выкарыстоўваецца праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Нядаўна выкарыстоўваўся праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Нядаўна выкарыстоўвалася праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Зараз выкарыстоўваецца праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Нядаўна выкарыстоўваўся праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Зараз выкарыстоўваецца праграмай \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

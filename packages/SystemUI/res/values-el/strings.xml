@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Ζητήθηκε αλλαγή της γλώσσας συστήματος από άλλη συσκευή"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Αλλαγή γλώσσας"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Διατήρ. τρέχουσας γλώσσας"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Να επιτρέπεται ασύρματος εντοπ. σφαλ. στο δίκτυο;"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Όνομα δικτύου (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nΔιεύθυνση Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Να επιτρέπεται πάντα σε αυτό το δίκτυο"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Εσφαλμένο μοτίβο"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Εσφαλμένος κωδικός πρόσβασης"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Πάρα πολλές αποτυχημένες προσπάθειες.\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Προσπαθήστε ξανά. Προσπάθεια <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> από <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Τα δεδομένα σας θα διαγραφούν"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Εάν εισαγάγετε εσφαλμένο μοτίβο στην επόμενη προσπάθεια, τα δεδομένα αυτής της συσκευής θα διαγραφούν."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Όταν κάνετε κοινή χρήση, εγγραφή ή μετάδοση, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη σας ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Όταν κάνετε κοινή χρήση, εγγραφή ή μετάδοση μιας εφαρμογής, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Έναρξη"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Έναρξη μετάδοσης;"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Όταν κάνετε μετάδοση, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη σας ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Όταν κάνετε μετάδοση μιας εφαρμογής, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Μεγέθυνση μέρους της οθόνης"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Άνοιγμα ρυθμίσεων μεγιστοποίησης"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Κλείσιμο ρυθμίσεων μεγιστοποίησης"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Έξοδος από τη λειτουργία επεξεργασίας"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Σύρετε τη γωνία για αλλαγή μεγέθους"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Να επιτρέπεται η διαγώνια κύλιση"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Αλλαγή μεγέθους"</string>
