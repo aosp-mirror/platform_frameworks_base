@@ -27,6 +27,7 @@ import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.TransportInfo
 import android.net.VpnTransportInfo
 import android.net.vcn.VcnTransportInfo
+import android.net.wifi.ScanResult
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
@@ -45,6 +46,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -1205,6 +1207,58 @@ class WifiRepositoryImplTest : SysuiTestCase() {
                 .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
         }
 
+    @Test
+    fun wifiScanResults_containsSsidList() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiScanResults)
+
+            val scanResults =
+                listOf(
+                    ScanResult().also { it.SSID = "ssid 1" },
+                    ScanResult().also { it.SSID = "ssid 2" },
+                    ScanResult().also { it.SSID = "ssid 3" },
+                    ScanResult().also { it.SSID = "ssid 4" },
+                    ScanResult().also { it.SSID = "ssid 5" },
+                )
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            val expected =
+                listOf(
+                    WifiScanEntry(ssid = "ssid 1"),
+                    WifiScanEntry(ssid = "ssid 2"),
+                    WifiScanEntry(ssid = "ssid 3"),
+                    WifiScanEntry(ssid = "ssid 4"),
+                    WifiScanEntry(ssid = "ssid 5"),
+                )
+
+            assertThat(latest).isEqualTo(expected)
+        }
+
+    @Test
+    fun wifiScanResults_updates() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiScanResults)
+
+            var scanResults =
+                listOf(
+                    ScanResult().also { it.SSID = "ssid 1" },
+                    ScanResult().also { it.SSID = "ssid 2" },
+                    ScanResult().also { it.SSID = "ssid 3" },
+                    ScanResult().also { it.SSID = "ssid 4" },
+                    ScanResult().also { it.SSID = "ssid 5" },
+                )
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            // New scan representing no results
+            scanResults = emptyList()
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            assertThat(latest).isEmpty()
+        }
+
     private fun createRepo(): WifiRepositoryImpl {
         return WifiRepositoryImpl(
             fakeBroadcastDispatcher,
@@ -1237,6 +1291,13 @@ class WifiRepositoryImplTest : SysuiTestCase() {
         testScope.runCurrent()
         val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
         verify(connectivityManager).registerDefaultNetworkCallback(callbackCaptor.capture())
+        return callbackCaptor.value!!
+    }
+
+    private fun getScanResultsCallback(): WifiManager.ScanResultsCallback {
+        testScope.runCurrent()
+        val callbackCaptor = argumentCaptor<WifiManager.ScanResultsCallback>()
+        verify(wifiManager).registerScanResultsCallback(any(), callbackCaptor.capture())
         return callbackCaptor.value!!
     }
 

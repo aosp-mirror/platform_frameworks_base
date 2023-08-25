@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -42,6 +43,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRep
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_STATE_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Inactive.toHotspotDeviceType
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
@@ -51,6 +53,7 @@ import com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE
 import com.android.wifitrackerlib.WifiPickerTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
@@ -73,6 +76,7 @@ constructor(
     featureFlags: FeatureFlags,
     @Application private val scope: CoroutineScope,
     @Main private val mainExecutor: Executor,
+    @Background private val bgDispatcher: CoroutineDispatcher,
     private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
     private val wifiManager: WifiManager,
     @WifiTrackerLibInputLog private val inputLogger: LogBuffer,
@@ -300,6 +304,14 @@ constructor(
             this::logActivity,
         )
 
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> =
+        WifiRepositoryHelper.createNetworkScanFlow(
+            wifiManager,
+            scope,
+            bgDispatcher,
+            this::logScanResults,
+        )
+
     private fun logOnWifiEntriesChanged(connectedEntry: WifiEntry?) {
         inputLogger.log(
             TAG,
@@ -321,6 +333,9 @@ constructor(
     private fun logActivity(activity: String) {
         inputLogger.log(TAG, LogLevel.DEBUG, { str1 = activity }, { "onActivityChanged: $str1" })
     }
+
+    private fun logScanResults() =
+        inputLogger.log(TAG, LogLevel.DEBUG, {}, { "onScanResultsAvailable" })
 
     /**
      * Data class storing all the information fetched from [WifiPickerTracker].
@@ -345,6 +360,7 @@ constructor(
         private val featureFlags: FeatureFlags,
         @Application private val scope: CoroutineScope,
         @Main private val mainExecutor: Executor,
+        @Background private val bgDispatcher: CoroutineDispatcher,
         private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
         @WifiTrackerLibInputLog private val inputLogger: LogBuffer,
         @WifiTrackerLibTableLog private val wifiTrackerLibTableLogBuffer: TableLogBuffer,
@@ -354,6 +370,7 @@ constructor(
                 featureFlags,
                 scope,
                 mainExecutor,
+                bgDispatcher,
                 wifiPickerTrackerFactory,
                 wifiManager,
                 inputLogger,
