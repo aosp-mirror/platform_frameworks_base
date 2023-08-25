@@ -2447,8 +2447,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!enabled) {
             // Hide the soft input if the currently active TextView is disabled
             InputMethodManager imm = getInputMethodManager();
-            if (imm != null && imm.isActive(this)) {
-                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+            if (imm != null) {
+                imm.hideSoftInputFromView(this, 0);
             }
         }
 
@@ -8058,8 +8058,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             } else if (actionCode == EditorInfo.IME_ACTION_DONE) {
                 InputMethodManager imm = getInputMethodManager();
-                if (imm != null && imm.isActive(this)) {
-                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                if (imm != null) {
+                    imm.hideSoftInputFromView(this, 0);
                 }
                 return;
             }
@@ -9722,8 +9722,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 // No target for next focus, but make sure the IME
                                 // if this came from it.
                                 InputMethodManager imm = getInputMethodManager();
-                                if (imm != null && imm.isActive(this)) {
-                                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                                if (imm != null) {
+                                    imm.hideSoftInputFromView(this, 0);
                                 }
                             }
                         }

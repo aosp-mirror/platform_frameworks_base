@@ -263,6 +263,8 @@ public final class InputMethodDebug {
                 return "HIDE_WHEN_INPUT_TARGET_INVISIBLE";
             case SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION:
                 return "HIDE_SOFT_INPUT_CLOSE_CURRENT_SESSION";
+            case SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW:
+                return "HIDE_SOFT_INPUT_FROM_VIEW";
             default:
                 return "Unknown=" + reason;
         }

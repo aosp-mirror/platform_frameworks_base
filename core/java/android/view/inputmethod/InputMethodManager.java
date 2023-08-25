@@ -2280,6 +2280,40 @@ public final class InputMethodManager {
     }
 
     /**
+     * Synonym for {@link #hideSoftInputFromWindow(IBinder, int)} but takes a {@link View} as a
+     * parameter to be a counterpart of {@link #showSoftInput(View, int)}.
+     *
+     * @param view {@link View} to be used to conditionally issue hide request when and only when
+     *             this {@link View} is serving as an IME target.
+     * @hide
+     */
+    public boolean hideSoftInputFromView(@NonNull View view, @HideFlags int flags) {
+        final var reason = SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_VIEW;
+        final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
+                null /* component */, Process.myUid(),
+                ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT, reason);
+        ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
+                reason, ActivityThread::currentApplication);
+        ImeTracing.getInstance().triggerClientDump("InputMethodManager#hideSoftInputFromView",
+                this, null /* icProto */);
+        synchronized (mH) {
+            if (!hasServedByInputMethodLocked(view)) {
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+                ImeTracker.forLatency().onShowFailed(
+                        statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED,
+                        ActivityThread::currentApplication);
+                Log.w(TAG, "Ignoring hideSoftInputFromView() as view=" + view + " is not served.");
+                return false;
+            }
+
+            ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
+
+            return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, view.getWindowToken(),
+                    statsToken, flags, null, reason);
+        }
+    }
+
+    /**
      * Start stylus handwriting session.
      *
      * If supported by the current input method, a stylus handwriting session is started on the
