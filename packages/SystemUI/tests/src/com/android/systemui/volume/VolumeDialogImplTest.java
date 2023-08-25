@@ -57,6 +57,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
@@ -71,6 +72,7 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -128,6 +130,9 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     private FakeFeatureFlags mFeatureFlags;
     private int mLongestHideShowAnimationDuration = 250;
+
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Before
     public void setup() throws Exception {
@@ -233,7 +238,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 AccessibilityManager.FLAG_CONTENT_CONTROLS
                 | AccessibilityManager.FLAG_CONTENT_TEXT);
     }
-
 
     @Test
     public void testComputeTimeout_withHovering() {
@@ -647,11 +651,12 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @After
     public void teardown() {
-        cleanUp(mDialog);
         setOrientation(mOriginalOrientation);
+        mAnimatorTestRule.advanceTimeBy(mLongestHideShowAnimationDuration);
         mTestableLooper.moveTimeForward(mLongestHideShowAnimationDuration);
         mTestableLooper.processAllMessages();
         reset(mPostureController);
+        cleanUp(mDialog);
     }
 
     private void cleanUp(VolumeDialogImpl dialog) {
