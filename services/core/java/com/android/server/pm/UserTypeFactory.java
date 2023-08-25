@@ -275,18 +275,18 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
-                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
-                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
-                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
-                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setIconBadge(com.android.internal.R.drawable.ic_private_profile_icon_badge)
+                .setBadgePlain(com.android.internal.R.drawable.ic_private_profile_badge)
+                // Private Profile doesn't use BadgeNoBackground, so just set to BadgePlain
+                // as a placeholder.
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_private_profile_badge)
+                .setStatusBarIcon(com.android.internal.R.drawable.stat_sys_private_profile_status)
                 .setBadgeLabels(
-                        com.android.internal.R.string.managed_profile_label_badge,
-                        com.android.internal.R.string.managed_profile_label_badge_2,
-                        com.android.internal.R.string.managed_profile_label_badge_3)
+                        com.android.internal.R.string.private_profile_label_badge)
                 .setBadgeColors(
-                        com.android.internal.R.color.profile_badge_2)
+                        com.android.internal.R.color.system_accent1_900)
                 .setDarkThemeBadgeColors(
-                        com.android.internal.R.color.profile_badge_2_dark)
+                        com.android.internal.R.color.system_accent1_900)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
