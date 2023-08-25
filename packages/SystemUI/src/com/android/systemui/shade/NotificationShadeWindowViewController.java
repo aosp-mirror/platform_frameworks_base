@@ -545,6 +545,8 @@ public class NotificationShadeWindowViewController {
     @VisibleForTesting
     void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
+            // TODO(b/288507023): Remove this log.
+            Log.d(TAG, "Setting mExpandAnimationRunning=" + running);
             if (running) {
                 mLaunchAnimationTimeout = mClock.uptimeMillis() + 5000;
             }
