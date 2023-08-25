@@ -16,9 +16,14 @@
 
 package android.app.servertransaction;
 
-import static org.mockito.Mockito.verify;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 
+import static org.junit.Assert.assertEquals;
+
+import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -32,24 +37,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link WindowContextWindowRemovalItem}.
+ * Tests for {@link ConfigurationChangeItem}.
  *
  * Build/Install/Run:
- *  atest FrameworksCoreTests:WindowContextWindowRemovalItemTest
+ *  atest FrameworksCoreTests:ConfigurationChangeItemTest
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
-public class WindowContextWindowRemovalItemTest {
+public class ConfigurationChangeItemTest {
 
     @Mock
     private ClientTransactionHandler mHandler;
     @Mock
     private IBinder mToken;
-    @Mock
-    private PendingTransactionActions mPendingActions;
-    @Mock
-    private IBinder mClientToken;
+    // Can't mock final class.
+    private final Configuration mConfiguration = new Configuration();
 
     @Before
     public void setup() {
@@ -57,11 +60,11 @@ public class WindowContextWindowRemovalItemTest {
     }
 
     @Test
-    public void testExecute() {
-        final WindowContextWindowRemovalItem item = WindowContextWindowRemovalItem.obtain(
-                mClientToken);
-        item.execute(mHandler, mToken, mPendingActions);
+    public void testGetContextToUpdate() {
+        final ConfigurationChangeItem item = ConfigurationChangeItem
+                .obtain(mConfiguration, DEVICE_ID_DEFAULT);
+        final Context context = item.getContextToUpdate(mHandler, mToken);
 
-        verify(mHandler).handleWindowContextWindowRemoval(mClientToken);
+        assertEquals(ActivityThread.currentApplication(), context);
     }
 }

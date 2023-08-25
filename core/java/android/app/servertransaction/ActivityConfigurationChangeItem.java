@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -40,7 +41,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     private Configuration mConfiguration;
 
     @Override
-    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client, @Nullable IBinder token) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
@@ -48,14 +49,21 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @Nullable ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(r, mConfiguration, INVALID_DISPLAY);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
+            @Nullable IBinder token) {
+        // TODO(b/260873529): Update ClientTransaction to bundle multiple activity config updates.
+        return client.getActivity(token);
+    }
 
     // ObjectPoolItem implementation
 
