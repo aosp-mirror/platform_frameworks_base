@@ -1167,10 +1167,9 @@ public final class Choreographer {
          */
         FrameTimeline update(
                 long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            if (vsyncEventData.frameTimelinesLength == 0) {
-                throw new IllegalArgumentException(
-                        "Vsync event timelines length must be greater than 0");
-            }
+            // Even if the frame timelines length is 0, continue with allocation for API
+            // FrameData.getFrameTimelines consistency. The 0 length frame timelines code path
+            // should only occur when USE_VSYNC property is false.
             if (mFrameTimelines.length != vsyncEventData.frameTimelinesLength) {
                 allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
             }
@@ -1207,7 +1206,11 @@ public final class Choreographer {
             if (newPreferredDeadline < minimumDeadline) {
                 DisplayEventReceiver.VsyncEventData latestVsyncEventData =
                         displayEventReceiver.getLatestVsyncEventData();
-                update(frameTimeNanos, latestVsyncEventData);
+                if (latestVsyncEventData == null) {
+                    Log.w(TAG, "Could not get latest VsyncEventData. Did SurfaceFlinger crash?");
+                } else {
+                    update(frameTimeNanos, latestVsyncEventData);
+                }
             } else {
                 update(frameTimeNanos, newPreferredIndex);
             }
