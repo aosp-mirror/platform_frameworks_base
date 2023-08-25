@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"확인"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"최근 대화창 없음"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"최근 대화창과 내가 닫은 대화창이 여기에 표시됩니다."</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"버블"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"더 편하게 보기를 원하면 탭하여 앱을 다시 시작하세요."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"탭하면 앱을 다시 시작하여 보기를 개선합니다."</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"설정에서 앱의 가로세로 비율을 변경합니다."</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"가로세로 비율 변경"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"카메라 문제가 있나요?\n해결하려면 탭하세요."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
