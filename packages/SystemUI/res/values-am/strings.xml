@@ -68,14 +68,14 @@
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ዩኤስቢ አንቃ"</string>
     <string name="learn_more" msgid="4690632085667273811">"የበለጠ ለመረዳት"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገፅ እይታ"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገፅ ዕይታ"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock ተሰናክሏል"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ምስል ተልኳል"</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገፅ እይታ በማስቀመጥ ላይ..."</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"ቅጽበታዊ ገፅ ዕይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ቅጽበታዊ ገፅ እይታን ወደ የስራ መገለጫ በማስቀመጥ ላይ…"</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"ቅጽበታዊ ገፅ እይታ ተቀምጧል"</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"ቅጽበታዊ ገፅ ዕይታ ተቀምጧል"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"ቅጽበታዊ ገፅ ዕይታን ማስቀመጥ አልተቻለም"</string>
-    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ቅጽበታዊ ገፅ እይታ ከመቀመጡ በፊት መሣሪያ መከፈት አለበት"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ቅጽበታዊ ገፅ ዕይታ ከመቀመጡ በፊት መሣሪያ መከፈት አለበት"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ቅጽበታዊ ገፅ ዕይታን እንደገና ማንሳት ይሞክሩ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ቅጽበታዊ ገፅ እይታን ማስቀመጥ አልተቻለም"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ቅጽበታዊ ገፅ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም"</string>
@@ -93,8 +93,8 @@
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"የቀኝ ወሰን <xliff:g id="PERCENT">%1$d</xliff:g> በመቶ"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"<xliff:g id="APP">%1$s</xliff:g> ውስጥ የስራ መገለጫው ውስጥ ተቀምጧል"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ፋይሎች"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ይህን ቅጽበታዊ ገፅ እይታ ለይቷል።"</string>
-    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> እና ሌሎች ክፍት መተግበሪያዎች ይህን ቅጽበታዊ ገፅ እይታ ለይተዋል።"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ይህን ቅጽበታዊ ገፅ ዕይታ ለይቷል።"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> እና ሌሎች ክፍት መተግበሪያዎች ይህን ቅጽበታዊ ገፅ ዕይታ ለይተዋል።"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ወደ ማስታወሻ አክል"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"የማያ መቅረጫ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"የማያ ገፅ ቀረጻን በማሰናዳት ላይ"</string>
@@ -411,6 +411,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"እርስዎ ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በማያ ገጽዎ ላይ ለሚታይ ወይም በመሣሪያዎ ላይ ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ።"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"አንድን መተግበሪያ ሲያጋሩ፣ ሲቀርጹ ወይም cast ሲያደርጉ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ።"</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ጀምር"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"cast ማድረግ ይጀምር?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"እርስዎ cast በሚያደርጉበት ጊዜ Android በማያ ገጽዎ ላይ ለሚታይ ወይም በመሣሪያዎ ላይ ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ።"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"አንድን መተግበሪያ cast ሲያደርጉ Android በዚያ መተግበሪያ ላይ ለሚታይ ወይም ለሚጫወት ማንኛውም ነገር መዳረሻ አለው። ስለዚህ እንደ ይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ"</string>
@@ -660,11 +662,11 @@
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"መተግበሪያዎችን ይክፈቱ"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"የአሁኑ መተግበሪያ"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"የማሳወቂያ ጥላ መዳረሻ"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"ሙሉ ቅጽበታዊ ገፅ እይታ ያነሳል"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"ሙሉ ቅጽበታዊ ገፅ ዕይታ ያነሳል"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"የሥርዓት / የመተግበሪያ አቋራጮች ዝርዝር መዳረሻ"</string>
     <string name="group_system_go_back" msgid="8838454003680364227">"ተመለስ፦ ወደ ቀዳሚው ሁኔታ ይመለሳል (ተመለስ አዝራር)"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"የመነሻ ማያ ገፅ መዳረሻ"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"የክፍት መተግበሪያዎች አጠቃላይ እይታ"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"የክፍት መተግበሪያዎች አጠቃላይ ዕይታ"</string>
     <string name="group_system_cycle_forward" msgid="9202444850838205990">"የቅርብ ጊዜ መተግበሪያዎች ላይ ዑደት ያደርጋል (ወደ ፊት)"</string>
     <string name="group_system_cycle_back" msgid="5163464503638229131">"የቅርብ ጊዜ መተግበሪያዎች ላይ ዑደት ያደርጋል (ወደ ኋላ)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"የሁሉም መተግበሪያዎች ዝርዝር እና ፍለጋ መዳረሻ (ማለትም ፍለጋ/ማስጀመሪያ)"</string>
@@ -865,8 +867,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"የማያ ገጹን ክፍል አጉላ"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"የማጉያ ቅንብሮችን ክፈት"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"የማጉላት ቅንብሮችን ዝጋ"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"ከአርትዖት ሁነታ ውጣ"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"መጠን ለመቀየር ጠርዙን ይዘው ይጎትቱ"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"ሰያፍ ሽብለላን ፍቀድ"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"መጠን ቀይር"</string>
@@ -1103,7 +1104,7 @@
     <string name="clipboard_content_copied" msgid="144452398567828145">"ይዘት ተቀድቷል"</string>
     <string name="clipboard_editor" msgid="2971197550401892843">"የቅንጥብ ሰሌዳ አርታዒ"</string>
     <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"የቅንጥብ ሰሌዳ"</string>
-    <string name="clipboard_image_preview" msgid="2156475174343538128">"የምስል ቅድመ-እይታ"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"የምስል ቅድመ-ዕይታ"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"አርትዕ"</string>
     <string name="add" msgid="81036585205287996">"አክል"</string>
     <string name="manage_users" msgid="1823875311934643849">"ተጠቃሚዎችን ያስተዳድሩ"</string>
