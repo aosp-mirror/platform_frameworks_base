@@ -1,0 +1,8 @@
+package: "android.service.autofill"
+
+flag {
+  name: "test"
+  namespace: "autofill"
+  description: "Test flag "
+  bug: "297380045"
+}
