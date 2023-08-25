@@ -874,7 +874,7 @@ static jstring android_hardware_Camera_getParameters(JNIEnv *env, jobject thiz)
     if (camera == 0) return 0;
 
     String8 params8 = camera->getParameters();
-    if (params8.isEmpty()) {
+    if (params8.empty()) {
         jniThrowRuntimeException(env, "getParameters failed (empty parameters)");
         return 0;
     }
