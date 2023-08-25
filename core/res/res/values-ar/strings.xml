@@ -1596,7 +1596,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"انقر لإزالة القيد."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"استخدام مرتفع لبيانات الجوّال"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"استخدمت تطبيقاتك بيانات أكثر من المعتاد"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق <xliff:g id="APP">%s</xliff:g> بيانات أكثر من المعتاد"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"استخدمَ تطبيق \"<xliff:g id="APP">%s</xliff:g>\" بيانات أكثر من المعتاد"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="5975877665505297662">"إصدار لـ:"</string>

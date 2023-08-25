@@ -778,7 +778,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"detectar observações nas condições da rede"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Permite que o app detecte observações nas condições da rede. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"alterar calibragem do dispositivo de entrada"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Permite que o app modifique os parâmetros de calibragem da tela sensível ao toque. Não deve ser necessário para apps normais."</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Permite que o app modifique os parâmetros de calibragem da tela touch. Não deve ser necessário para apps normais."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"acessar certificados de DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Permite que o app provisione e use certificados de DRM. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"receber status de transferência do Android Beam"</string>
@@ -1591,7 +1591,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Você ultrapassou <xliff:g id="SIZE">%s</xliff:g> do limite definido"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Dados de segundo plano restritos"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Toque para remover a restrição."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Alto uso de dados móveis"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Uso elevado de dados móveis"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Seus apps usaram mais dados do que o normal"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"O app <xliff:g id="APP">%s</xliff:g> usou mais dados do que o normal"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Certificado de segurança"</string>
