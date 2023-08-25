@@ -54,14 +54,13 @@ float getTargetHdrSdrRatio(const SkColorSpace* destColorspace) {
         return maxPQLux / GenericSdrWhiteNits;
     } else if (skcms_TransferFunction_isHLGish(&destTF)) {
         return maxHLGLux / GenericSdrWhiteNits;
-    } else {
 #ifdef __ANDROID__
+    } else if (RenderThread::isCurrent()) {
         CanvasContext* context = CanvasContext::getActiveContext();
         return context ? context->targetSdrHdrRatio() : 1.f;
-#else
-        return 1.f;
 #endif
     }
+    return 1.f;
 }
 
 void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkRect& src,
