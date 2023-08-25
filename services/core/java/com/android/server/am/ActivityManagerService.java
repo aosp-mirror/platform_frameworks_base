@@ -5407,6 +5407,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent = new Intent(Intent.ACTION_MAIN);
             }
             try {
+                if (allowlistToken != null) {
+                    final int callingUid = Binder.getCallingUid();
+                    final String packageName;
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        packageName = AppGlobals.getPackageManager().getNameForUid(callingUid);
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                    Slog.wtf(TAG, "Send a non-null allowlistToken to a non-PI target."
+                            + " Calling package: " + packageName + "; intent: " + intent
+                            + "; options: " + options);
+                }
                 target.send(code, intent, resolvedType, allowlistToken, null,
                         requiredPermission, options);
             } catch (RemoteException e) {
