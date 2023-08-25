@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -76,6 +76,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(TelephonyIcons.THREE_G)
             isDataConnected.value = true
+            signalLevelIcon.value = defaultSignal()
         }
         commonImpl =
             MobileIconViewModel(
@@ -109,7 +110,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             assertThat(latestQs).isEqualTo(expected)
             assertThat(latestKeyguard).isEqualTo(expected)
 
-            interactor.setLevel(2)
+            interactor.signalLevelIcon.value = defaultSignal(level = 2)
             expected = defaultSignal(level = 2)
 
             assertThat(latestHome).isEqualTo(expected)

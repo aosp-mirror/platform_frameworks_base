@@ -22,6 +22,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -82,6 +83,16 @@ class FakeMobileIconInteractor(
     override val isForceHidden = MutableStateFlow(false)
 
     override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
+
+    override val signalLevelIcon: MutableStateFlow<SignalIconModel> =
+        MutableStateFlow(
+            SignalIconModel(
+                level = level.value,
+                numberOfLevels = numberOfLevels.value,
+                showExclamationMark = false,
+                carrierNetworkChange = false,
+            )
+        )
 
     fun setIsEmergencyOnly(emergency: Boolean) {
         _isEmergencyOnly.value = emergency

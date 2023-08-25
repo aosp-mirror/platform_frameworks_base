@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.ui.model
+package com.android.systemui.statusbar.pipeline.mobile.domain.model
 
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.log.table.Diffable
