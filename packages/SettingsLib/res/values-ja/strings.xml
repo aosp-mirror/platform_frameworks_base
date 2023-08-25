@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ファイル転送"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"入力デバイス"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"インターネットアクセス"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"連絡先と通話履歴へのアクセスを許可する"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"情報は着信の通知などに使用されます"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"インターネット接続の共有"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"テキスト メッセージ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIMアクセス"</string>

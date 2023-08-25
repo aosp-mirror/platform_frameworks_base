@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ගොනු හුවමාරුව"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ආදාන උපාංගය"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"අන්තර්ජාල ප්‍රවේශය"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"සම්බන්ධතා සහ ඇමතුම් ඉතිහාසය වෙත ප්‍රවේශ වීමට ඉඩ දෙන්න"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"ඇමතුම් නිවේදන සහ තවත් දේ සඳහා තතු භාවිත කෙරේ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"අන්තර්ජාල සම්බන්ධතා බෙදාගැනීම"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"පෙළ පණිවිඩ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM ප්‍රවේශය"</string>

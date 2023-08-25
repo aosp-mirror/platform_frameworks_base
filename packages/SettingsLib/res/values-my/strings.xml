@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ဖိုင်လွဲပြောင်းခြင်း"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"ထည့်သွင်းသော စက်"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"အင်တာနက်ချိတ်ဆက်ခြင်း"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"အဆက်အသွယ်၊ ခေါ်ဆိုမှုမှတ်တမ်း သုံးခွင့်ပေးရန်"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"အချက်အလက်ကို ဖုန်းခေါ်ဆိုမှု ကြေညာချက်စသည်တို့တွင် သုံးမည်"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"အင်တာနက်ဆက်သွယ်မှု မျှဝေခြင်း"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"မိုဘိုင်းမက်ဆေ့ဂျ်များ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"SIM အသုံးပြုခြင်း"</string>
