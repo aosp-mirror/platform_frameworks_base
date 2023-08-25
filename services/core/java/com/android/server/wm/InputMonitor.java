@@ -675,6 +675,11 @@ final class InputMonitor {
                     w.getKeyInterceptionInfo());
 
             if (w.mWinAnimator.hasSurface()) {
+                // Update trusted overlay changes here because they are tied to input info. Input
+                // changes can be updated even if surfaces aren't.
+                inputWindowHandle.setTrustedOverlay(mInputTransaction,
+                        w.mWinAnimator.mSurfaceController.mSurfaceControl,
+                        w.isWindowTrustedOverlay());
                 populateInputWindowHandle(inputWindowHandle, w);
                 setInputWindowInfoIfNeeded(mInputTransaction,
                         w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);
@@ -732,7 +737,7 @@ final class InputMonitor {
                 new InputWindowHandle(null /* inputApplicationHandle */, displayId));
         inputWindowHandle.setName(name);
         inputWindowHandle.setLayoutParamsType(TYPE_SECURE_SYSTEM_OVERLAY);
-        inputWindowHandle.setTrustedOverlay(true);
+        inputWindowHandle.setTrustedOverlay(t, sc, true);
         populateOverlayInputInfo(inputWindowHandle);
         setInputWindowInfoIfNeeded(t, sc, inputWindowHandle);
     }
