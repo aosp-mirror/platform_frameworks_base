@@ -200,8 +200,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void onKeyguardViewManagerStatesUpdated();
 
-    boolean isPulsing();
-
     boolean isOccluded();
 
     boolean isDeviceInVrMode();

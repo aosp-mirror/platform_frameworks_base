@@ -41,7 +41,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
     override fun isLaunchingActivityOverLockscreen() = false
     override fun onKeyguardViewManagerStatesUpdated() {}
-    override fun isPulsing() = false
     override fun isOccluded() = false
     override fun isDeviceInVrMode() = false
     override fun getPresenter(): NotificationPresenter? = null

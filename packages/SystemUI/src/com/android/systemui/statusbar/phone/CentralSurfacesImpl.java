@@ -1708,11 +1708,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         logStateToEventlog();
     }
 
-    @Override
-    public boolean isPulsing() {
-        return mDozeServiceHost.isPulsing();
-    }
-
     /**
      * When the keyguard is showing and covered by a "showWhenLocked" activity it
      * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}
@@ -2852,7 +2847,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // cancelling a sleep), from the power button, on a device with a power button
                     // FPS, and 'press to unlock' is required.
                     mShouldDelayWakeUpAnimation =
-                            !isPulsing()
+                            !mDozeServiceHost.isPulsing()
                                     && mStatusBarStateController.getDozeAmount() == 1f
                                     && mWakefulnessLifecycle.getLastWakeReason()
                                     == PowerManager.WAKE_REASON_POWER_BUTTON
