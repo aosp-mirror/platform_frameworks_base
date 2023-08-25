@@ -960,6 +960,13 @@ static void nativeSetDefaultFrameRateCompatibility(JNIEnv* env, jclass clazz, jl
     transaction->setDefaultFrameRateCompatibility(ctrl, static_cast<int8_t>(compatibility));
 }
 
+static void nativeSetFrameRateCategory(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                       jlong nativeObject, jint category) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    const auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setFrameRateCategory(ctrl, static_cast<int8_t>(category));
+}
+
 static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transactionObj,
                                         jlong nativeObject, jint transformHint) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2164,6 +2171,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRate },
     {"nativeSetDefaultFrameRateCompatibility", "(JJI)V",
             (void*)nativeSetDefaultFrameRateCompatibility},
+    {"nativeSetFrameRateCategory", "(JJI)V",
+            (void*)nativeSetFrameRateCategory},
     {"nativeSetDisplaySurface", "(JLandroid/os/IBinder;J)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(JLandroid/os/IBinder;I)V",
