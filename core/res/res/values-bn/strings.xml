@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"কোনও সমস্যা হয়েছে। আবার করে দেখুন।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"আঙ্গুলের ছাপ আইকন"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ডিভাইস আনলক করুন"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"অন্য কোনওভাবে আনলক করার চেষ্টা করুন"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"আপনার \'ফিঙ্গারপ্রিন্ট\' শনাক্ত করা না গেলে \'ফেস আনলক\' ব্যবহার করুন, যেমন যখন আপনার আঙুল ভিজে থাকে"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"আপনার মুখ শনাক্ত করা না গেলে \'ফিঙ্গারপ্রিন্ট আনলক\' ব্যবহার করুন, যেমন যখন পর্যাপ্ত আলো নেই"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেস আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"\'ফেস আনলক\' ফিচার ব্যবহার করার ক্ষেত্রে হওয়া সমস্যা"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপনার ফেস মডেল মুছে দেওয়ার জন্য ট্যাপ করুন এবং তারপরে আবার ফেস যোগ করুন"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট-আপ করুন"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"\'ফেস আনলক\' ফিচার ব্যবহার করতে \'সেটিংস ও গোপনীয়তা\' বিকল্পে গিয়ে "<b>"ক্যামেরায় অ্যাক্সেস দিন"</b></string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"একটি আঙ্গুলের ছাপ যোগ করতে ট্যাপ করুন"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ফিঙ্গারপ্রিন্ট আনলক"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"আঙ্গুলের ছাপের সেন্সর ব্যবহার করা যাচ্ছে না"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"একজন মেরামতি মিস্ত্রির কাছে যান।"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"-এ আপডেট করতে চান?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"-এ <xliff:g id="TYPE">%1$s</xliff:g> আপডেট করতে চান?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"-এ <xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g> আপডেট করতে চান?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"-এ এই আইটেমগুলি আপডেট করতে চান: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> এবং <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"সেভ করুন"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"না থাক"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"এখনই নয়"</string>

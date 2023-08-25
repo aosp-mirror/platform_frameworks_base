@@ -298,7 +298,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Mfumo wa Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Tumia wasifu wa binafsi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Tumia wasifu wa kazini"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"Badili uweke wasifu wa binafsi <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Badili utumie wasifu wa binafsi wa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="managed_profile_app_label" msgid="367401088383965725">"Badili uweke wasifu wa kazini <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Anwani"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ifikie anwani zako"</string>
@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Hitilafu fulani imetokea. Jaribu tena."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Aikoni ya alama ya kidole"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Kufungua kifaa"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Jaribu njia nyingine ya kufungua"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Tumia kipengele cha Kufungua kwa Uso wakati alama ya kidole chako haitambuliwi, kama vile wakati vidole vyako vina unyevu"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Tumia kipengele cha Kufungua kwa Alama ya Kidole wakati uso wako hautambuliwi, kama vile wakati hakuna mwangaza wa kutosha"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Kufungua kwa Uso"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Hitilafu imetokea kwenye kipengele cha Kufungua kwa Uso"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Gusa ili ufute muundo wa uso wako, kisha uweke uso wako tena"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Weka mipangilio ya Kufungua kwa Uso"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Fungua simu yako kwa kuiangalia"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ili utumie kipengele cha kufungua kwa uso, washa kipengele cha "<b>"ufikiaji wa Kamera"</b>" katika Mipangilio na Faragha"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Weka mipangilio ya mbinu zaidi za kufungua"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Gusa ili uweke alama ya kidole"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Kufungua kwa Alama ya Kidole"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Imeshindwa kutumia kitambua alama ya kidole"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Tembelea mtoa huduma za urekebishaji."</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Ungependa kusasisha katika "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Ungependa kusasisha <xliff:g id="TYPE">%1$s</xliff:g> katika "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> katika "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Ungependa kusasisha vipengee hivi katika "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Hapana"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Si sasa"</string>

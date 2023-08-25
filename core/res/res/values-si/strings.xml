@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"යම් දෙයක් වැරදිණි. නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ඇඟිලි සලකුණු නිරූපකය"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"උපාංගය අගුළු හැරීම"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"අගුළු ඇරීමට වෙනත් ක්‍රමයක් උත්සාහ කරන්න"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"ඔබේ ඇඟිලි තෙත් වූ විට වැනි ඔබේ ඇඟිලි සලකුණ හඳුනා නොගත් විට මුහුණෙන් අගුළු හැරීම භාවිත කරන්න"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"ප්‍රමාණවත් ආලෝකයක් නොමැති විට වැනි ඔබේ මුහුණ හඳුනා නොගත් විට ඇඟිලි සලකුණු අගුළු හැරීම භාවිත කරන්න"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"මුහුණෙන් අගුළු හැරීම"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"මුහුණෙන් අගුලු හැරීම සම්බන්ධව ගැටලුවකි"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ඔබගේ මුහුණත ආකෘතිය මැකීමට තට්ටු කරන්න, අනතුරුව ඔබගේ මුහුණ නැවත එක් කරන්න"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"මුහුණෙන් අගුළු හැරීම පිහිටුවන්න"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"ඔබගේ දුරකථනය දෙස බැලීමෙන් එහි අගුලු හරින්න"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"මුහුණෙන් අගුලු හැරීම භාවිත කිරීමට, සැකසීම් &gt; පෞද්ගලිකත්වය තුළ "<b>"කැමරා ප්‍රවේශය"</b>" ක්‍රියාත්මක කරන්න"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"අගුලු හැරීමට තවත් ක්‍රම සකසන්න"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ඇඟිලි සලකුණක් එක් කිරීමට තට්ටු කරන්න"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ඇඟිලි සලකුණු අගුළු හැරීම"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ඇඟිලි සලකුණු සංවේදකය භාවිත කළ නොහැකිය"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"අළුත්වැඩියා සැපයුම්කරුවෙකු බලන්න."</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" තුළ යාවත්කාලීන කරන්නද?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" තුළ <xliff:g id="TYPE">%1$s</xliff:g> යාවත්කාලීන කරන්නද?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" තුළ <xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> යාවත්කාලීන කරන්නද?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" තුළ යාවත්කාලීන කරන්නද?: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, සහ <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"සුරකින්න"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"එපා ස්තූතියි"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"දැන් නොවේ"</string>

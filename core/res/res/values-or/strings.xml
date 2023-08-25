@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"କିଛି ତ୍ରୁଟି ହୋଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ଡିଭାଇସ ଅନଲକ"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"ଅନଲକ କରିବା ପାଇଁ ଅନ୍ୟ ଏକ ଉପାୟ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"ଆପଣଙ୍କର ଟିପଚିହ୍ନ ଚିହ୍ନଟ ନହେଲେ, ଯେପରିକି ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ଓଦା ଥିବା ସମୟରେ ଫେସ ଅନଲକ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"ଆପଣଙ୍କର ମୁହଁ ଚିହ୍ନଟ ନହେଲେ, ଯେପରିକି ପର୍ଯ୍ୟାପ୍ତ ଆଲୋକ ନଥିବା ସମୟରେ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ ଅନଲକ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ଫେସ୍ ଅନଲକ୍ ସହ ସମସ୍ୟା"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ ଅନଲକ ସେଟ ଅପ କରନ୍ତୁ"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"ଫୋନକୁ ଦେଖି ଏହାକୁ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ଫେସ ଅନଲକ ବ୍ୟବହାର କରିବା ପାଇଁ, ସେଟିଂସ ଏବଂ ଗୋପନୀୟତାରେ "<b>"କ୍ୟାମେରା ଆକ୍ସେସ"</b>"କୁ ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ଅନଲକ୍ କରିବା ପାଇଁ ଆହୁରି ଅଧିକ ଉପାୟ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ଏକ ଟିପଚିହ୍ନ ଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଅନଲକ୍"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ଟିପଚିହ୍ନ ସେନ୍ସରକୁ ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ଏକ ମରାମତି କେନ୍ଦ୍ରକୁ ଭିଜିଟ୍ କରନ୍ତୁ।"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"ରେ ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"ରେ <xliff:g id="TYPE">%1$s</xliff:g>କୁ ଅପ୍‌ଡେଟ୍ କରିବେ।"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"ରେ <xliff:g id="TYPE_0">%1$s</xliff:g> ଏବଂ <xliff:g id="TYPE_1">%2$s</xliff:g> ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"ରେ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ଏବଂ <xliff:g id="TYPE_2">%3$s</xliff:g> ଆଇଟମ୍‌ଗୁଡ଼ିକ ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"ସେଭ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"ନାଁ, ପଚାରିଥିବାରୁ ଧନ୍ୟବାଦ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ଏବେ ନୁହେଁ"</string>
