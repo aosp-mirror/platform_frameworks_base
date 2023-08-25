@@ -6133,7 +6133,7 @@ public class AudioManager {
      */
     public static boolean isOutputDevice(int device)
     {
-        return (device & AudioSystem.DEVICE_BIT_IN) == 0;
+        return !AudioSystem.isInputDevice(device);
     }
 
     /**
@@ -6142,7 +6142,7 @@ public class AudioManager {
      */
     public static boolean isInputDevice(int device)
     {
-        return (device & AudioSystem.DEVICE_BIT_IN) == AudioSystem.DEVICE_BIT_IN;
+        return AudioSystem.isInputDevice(device);
     }
 
 
