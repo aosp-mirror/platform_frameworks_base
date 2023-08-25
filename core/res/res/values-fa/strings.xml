@@ -1592,7 +1592,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"برای برداشتن محدودیت ضربه بزنید."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"مصرف بالای داده تلفن همراه"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"برنامه‌های شما بیش از معمول داده مصرف کرده‌اند"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"‫<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"گواهی امنیتی"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"این گواهی معتبر است."</string>
     <string name="issued_to" msgid="5975877665505297662">"صادرشده برای:"</string>
