@@ -240,8 +240,15 @@ class ActivityLaunchAnimator(
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.launchContainer.context.mainExecutor.execute { this.onIntentStarted(willAnimate) }
+            this.launchContainer.context.mainExecutor.execute {
+                callOnIntentStartedOnMainThread(willAnimate)
+            }
         } else {
+            // TODO(b/288507023): Remove this log.
+            Log.d(
+                TAG,
+                "Calling controller.onIntentStarted(willAnimate=$willAnimate) [controller=$this]"
+            )
             this.onIntentStarted(willAnimate)
         }
     }
@@ -541,6 +548,9 @@ class ActivityLaunchAnimator(
                 Log.i(TAG, "Aborting the animation as no window is opening")
                 removeTimeout()
                 iCallback?.invoke()
+
+                // TODO(b/288507023): Remove this log.
+                Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [no window opening]")
                 controller.onLaunchAnimationCancelled()
                 return
             }
@@ -758,6 +768,9 @@ class ActivityLaunchAnimator(
 
             Log.i(TAG, "Remote animation timed out")
             timedOut = true
+
+            // TODO(b/288507023): Remove this log.
+            Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [animation timed out]")
             controller.onLaunchAnimationCancelled()
         }
 
@@ -772,6 +785,12 @@ class ActivityLaunchAnimator(
             removeTimeout()
 
             animation?.cancel()
+
+            // TODO(b/288507023): Remove this log.
+            Log.d(
+                TAG,
+                "Calling controller.onLaunchAnimationCancelled() [remote animation cancelled]",
+            )
             controller.onLaunchAnimationCancelled()
         }
 
