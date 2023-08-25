@@ -70,7 +70,7 @@ public:
     void initialize();
 
     // Quick check to see if the VulkanManager has been initialized.
-    bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
+    bool hasVkContext() { return mInitialized; }
 
     // Create and destroy functions for wrapping an ANativeWindow in a VulkanSurface
     VulkanSurface* createSurface(ANativeWindow* window,
@@ -204,7 +204,8 @@ private:
     VkSemaphore mSwapSemaphore = VK_NULL_HANDLE;
     void* mDestroySemaphoreContext = nullptr;
 
-    std::mutex mInitializeLock;
+    std::once_flag mInitFlag;
+    std::atomic_bool mInitialized = false;
 };
 
 } /* namespace renderthread */
