@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Kunento engahambanga kahle. Zama futhi."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Isithonjana sezigxivizo zeminwe"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Ukuvula idivayisi"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Zama enye indlela yokuvula"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Sebenzisa i-Face Unlock uma isigxivizo somunwe wakho singaqashelwa, njengalapho iminwe yakho imanzi"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Sebenzisa i-Fingerprint Unlock uma ubuso bakho bungaqashelwa, njengalapho kungenakukhanya okwanele"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Ukuvula ngobuso"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Inkinga Ngokuvula ngobuso"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Thepha ukuze usule imodeli yakho yobuso, bese wengeza futhi ubuso"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Setha Ukuvula ngobuso"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Vula ifoni yakho ngokuyibheka"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Ukuze usebenzise Ukuvula ngobuso, vula "<b>"Ukufinyelela kwekhamera"</b>" kokuthi Amasethingi &gt; Ubumfihlo"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Setha izindlela eziningi zokuvula"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Thepha ukuze ungeze izigxivizo zomunwe"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Ukuvula ngesigxivizo somunwe"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Ayikwazi ukusebenzisa inzwa yesigxivizo somunwe"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vakashela umhlinzeki wokulungisa."</string>
