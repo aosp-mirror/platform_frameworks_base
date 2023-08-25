@@ -5092,6 +5092,13 @@
     -->
     <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
 
+    <!--
+        Used to wrap a label for content description for a Private profile, e.g. "Private Messenger"
+        instead of Messenger when the Messenger app is installed in Private Profile.
+        [CHAR LIMIT=20]
+    -->
+    <string name="private_profile_label_badge">Private <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
+
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
