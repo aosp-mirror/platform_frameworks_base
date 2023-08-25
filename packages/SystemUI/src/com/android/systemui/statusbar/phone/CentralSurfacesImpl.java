@@ -2061,11 +2061,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         return mDisplay.getRotation();
     }
 
-    @Override
-    public void readyForKeyguardDone() {
-        mStatusBarKeyguardViewManager.readyForKeyguardDone();
-    }
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

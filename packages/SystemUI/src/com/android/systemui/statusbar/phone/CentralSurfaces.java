@@ -243,8 +243,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Deprecated
     float getDisplayHeight();
 
-    void readyForKeyguardDone();
-
     void showKeyguard();
 
     boolean hideKeyguard();

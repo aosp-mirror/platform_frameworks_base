@@ -53,7 +53,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun dump(pwOriginal: PrintWriter, args: Array<String>) {}
     override fun getDisplayWidth() = 0f
     override fun getDisplayHeight() = 0f
-    override fun readyForKeyguardDone() {}
     override fun showKeyguard() {}
     override fun hideKeyguard() = false
     override fun showKeyguardImpl() {}
