@@ -554,8 +554,6 @@ android.app.IWallpaperManager
 android.app.IWallpaperManagerCallback$Stub$Proxy
 android.app.IWallpaperManagerCallback$Stub
 android.app.IWallpaperManagerCallback
-android.app.IWindowToken$Stub
-android.app.IWindowToken
 android.app.InstantAppResolverService$1
 android.app.InstantAppResolverService$InstantAppResolutionCallback
 android.app.InstantAppResolverService$ServiceHandler
@@ -702,7 +700,6 @@ android.app.ServiceStartNotAllowedException
 android.app.SharedElementCallback$1
 android.app.SharedElementCallback
 android.app.SharedPreferencesImpl$1
-android.app.SharedPreferencesImpl$2
 android.app.SharedPreferencesImpl$EditorImpl$$ExternalSyntheticLambda0
 android.app.SharedPreferencesImpl$EditorImpl$1
 android.app.SharedPreferencesImpl$EditorImpl$2
@@ -758,12 +755,10 @@ android.app.SystemServiceRegistry$137
 android.app.SystemServiceRegistry$138
 android.app.SystemServiceRegistry$139
 android.app.SystemServiceRegistry$13
-android.app.SystemServiceRegistry$140
 android.app.SystemServiceRegistry$14
 android.app.SystemServiceRegistry$15
 android.app.SystemServiceRegistry$16
 android.app.SystemServiceRegistry$17
-android.app.SystemServiceRegistry$18$$ExternalSyntheticLambda0
 android.app.SystemServiceRegistry$18
 android.app.SystemServiceRegistry$19
 android.app.SystemServiceRegistry$1
@@ -9320,7 +9315,6 @@ android.view.inputmethod.TextAttribute$1
 android.view.inputmethod.TextAttribute
 android.view.inputmethod.TextSnapshot
 android.view.inputmethod.ViewFocusParameterInfo
-android.view.selectiontoolbar.SelectionToolbarManager
 android.view.textclassifier.ConversationAction$1
 android.view.textclassifier.ConversationAction$Builder
 android.view.textclassifier.ConversationAction
@@ -10054,7 +10048,6 @@ android.window.WindowOrganizer$1
 android.window.WindowOrganizer
 android.window.WindowProvider
 android.window.WindowProviderService
-android.window.WindowTokenClient$$ExternalSyntheticLambda1
 android.window.WindowTokenClient
 com.android.apex.ApexInfo
 com.android.apex.ApexInfoList
@@ -10722,7 +10715,6 @@ com.android.internal.app.IntentForwarderActivity
 com.android.internal.app.MessageSamplingConfig$1
 com.android.internal.app.MessageSamplingConfig
 com.android.internal.app.MicroAlertController
-com.android.internal.app.NetInitiatedActivity
 com.android.internal.app.ProcessMap
 com.android.internal.app.ResolverActivity$ActionTitle
 com.android.internal.app.ResolverActivity
@@ -10945,8 +10937,6 @@ com.android.internal.listeners.ListenerExecutor$ListenerOperation
 com.android.internal.listeners.ListenerExecutor
 com.android.internal.listeners.ListenerTransport
 com.android.internal.listeners.ListenerTransportManager
-com.android.internal.location.GpsNetInitiatedHandler$1
-com.android.internal.location.GpsNetInitiatedHandler$GpsNiNotification
 com.android.internal.location.GpsNetInitiatedHandler
 com.android.internal.location.altitude.nano.MapParamsProto
 com.android.internal.location.altitude.nano.S2TileProto
@@ -11140,9 +11130,6 @@ com.android.internal.policy.DecorView$ActionModeCallback2Wrapper
 com.android.internal.policy.DecorView$ColorViewAttributes
 com.android.internal.policy.DecorView$ColorViewState
 com.android.internal.policy.DecorView
-com.android.internal.policy.DividerSnapAlgorithm$SnapTarget
-com.android.internal.policy.DividerSnapAlgorithm
-com.android.internal.policy.DockedDividerUtils
 com.android.internal.policy.GestureNavigationSettingsObserver$$ExternalSyntheticLambda0
 com.android.internal.policy.GestureNavigationSettingsObserver$1
 com.android.internal.policy.GestureNavigationSettingsObserver
