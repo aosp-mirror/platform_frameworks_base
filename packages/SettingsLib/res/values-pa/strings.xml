@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"ਡਿਸਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ਅਯੋਗ ਬਣਾਇਆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ਕੌਂਫਿਗਰੇਸ਼ਨ ਅਸਫਲਤਾ"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ਘੱਟ ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਕਾਰਨ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi ਕਨੈਕਸ਼ਨ ਅਸਫਲਤਾ"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ਪ੍ਰਮਾਣੀਕਰਨ ਸਮੱਸਿਆ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ਕੋਈ ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਨਹੀਂ"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> ਵੱਲੋਂ ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"ਮੀਟਰਬੱਧ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੈ"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s ਰਾਹੀਂ ਆਪਣੇ-ਆਪ ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ਨੈੱਟਵਰਕ ਰੇਟਿੰਗ ਪ੍ਰਦਾਨਕ ਰਾਹੀਂ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਕਨੈਕਟ ਹੋਇਆ"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"ਸਾਈਨ-ਅੱਪ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"ਨਿੱਜੀ ਡੋਮੇਨ ਨਾਮ ਪ੍ਰਣਾਲੀ (DNS) ਸਰਵਰ \'ਤੇ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"ਸਾਈਨ-ਇਨ ਲੋੜੀਂਦਾ ਹੈ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਸੰਪੂਰਨ ਰੁਝੇਂਵੇਂ ਵਿੱਚ ਹੈ"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ਖੋਲ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"ਸਾਈਨ-ਅੱਪ ਮੁਕੰਮਲ ਹੋਇਆ ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"ਬਹੁਤ ਹੌਲੀ"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"ਹੌਲੀ"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"ਠੀਕ ਹੈ"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"ਔਸਤ"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"ਤੇਜ਼"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"ਬਹੁਤ ਤੇਜ਼"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"ਮਿਆਦ ਮੁੱਕ ਗਈ"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"ਜੋੜਾਬੱਧ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਮੀਡੀਆ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਸੁਨੇਹੇ \'ਤੇ ਪਹੁੰਚ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਜਾਂ ਮੀਡੀਆ ਨਹੀਂ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ, ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ), ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ਬੋਲਣ ਦੀ ਪਿੱਚ ਨੂੰ ਦੁਬਾਰਾ ਮੁੜ-ਸੈੱਟ ਕਰੋ"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ਉਸ ਪਿੱਚ \'ਤੇ ਮੁੜ-ਸੈੱਟ ਕਰੋ ਜਿਸ \'ਤੇ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ \'ਤੇ ਲਿਖਤ ਨੂੰ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ।"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"ਬਹੁਤ ਹੌਲੀ"</item>
-    <item msgid="1815382991399815061">"ਹੌਲੀ"</item>
-    <item msgid="3075292553049300105">"ਸਧਾਰਨ"</item>
-    <item msgid="1158955023692670059">"ਤੇਜ਼"</item>
-    <item msgid="5664310435707146591">"ਵੱਧ ਤੇਜ਼"</item>
-    <item msgid="5491266922147715962">"ਬਹੁਤ ਤੇਜ਼"</item>
-    <item msgid="7659240015901486196">"ਤੇਜ਼"</item>
-    <item msgid="7147051179282410945">"ਬਹੁਤ ਤੇਜ਼"</item>
-    <item msgid="581904787661470707">"ਸਭ ਤੋਂ ਵੱਧ ਤੇਜ਼"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ਪ੍ਰੋਫਾਈਲ ਚੁਣੋ"</string>
     <string name="category_personal" msgid="6236798763159385225">"ਨਿੱਜੀ"</string>
@@ -355,7 +345,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ਡੀਬੱਗ ਕੀਤੀ ਐਪਲੀਕੇਸ਼ਨ ਚਲਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ਇਨਪੁੱਟ"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ਡਰਾਇੰਗ"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
     <string name="media_category" msgid="8122076702526144053">"ਮੀਡੀਆ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ਕਲਿੱਪ ਸੀਮਾਵਾਂ, ਹਾਸ਼ੀਏ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਖਾਕਾ ਲਾਗੂ ਕਰੋ"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"ਪਾਰਦਰਸ਼ੀ ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ਨੈਵੀਗੇਸ਼ਨ ਵਾਲੀ ਪੱਟੀ ਦੇ ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ ਨੂੰ ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਤੌਰ \'ਤੇ ਪਾਰਦਰਸ਼ੀ ਬਣਾਓ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ਵਿੰਡੋ-ਪੱਧਰ \'ਤੇ ਧੁੰਦਲਾ ਕਰਨ ਦਿਓ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ਜ਼ਬਰਦਸਤੀ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ਐਪਾਂ ਵਿੱਚ 4x MSAA ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
@@ -404,7 +396,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲਣ ਦਿਓ"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ਹੋਰ ਸਮਾਂ।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ਘੱਟ ਸਮਾਂ।"</string>
     <string name="cancel" msgid="5665114069455378395">"ਰੱਦ ਕਰੋ"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ਠੀਕ ਹੈ"</string>
     <string name="done" msgid="381184316122520313">"ਹੋ ਗਿਆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ਅਲਾਰਮ ਅਤੇ ਰਿਮਾਈਂਡਰ"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ਇਹ ਫ਼ੋਨ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ਇਹ ਟੈਬਲੈੱਟ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ਇਹ ਫ਼ੋਨ"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ਸਵਿੱਚ ਕਰਨ ਲਈ ਖਾਤੇ ਨੂੰ ਅੱਪਗ੍ਰੇਡ ਕਰੋ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ਡਾਊਨਲੋਡਾਂ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ਵਿਗਿਆਪਨ ਤੋਂ ਬਾਅਦ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ਇੱਥੇ ਮੀਡੀਆ ਚਲਾਉਣ ਲਈ ਡੀਵਾਈਸ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ਡੀਵਾਈਸ ਨੂੰ ਮੀਡੀਆ ਚਲਾਉਣ ਦੀ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ਇਸ ਮੀਡੀਆ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ਕਨੈਕਟ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਡੀਵਾਈਸ ਨੂੰ ਬੰਦ ਕਰਕੇ ਵਾਪਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ਤਾਰ ਵਾਲਾ ਆਡੀਓ ਡੀਵਾਈਸ"</string>
     <string name="help_label" msgid="3528360748637781274">"ਮਦਦ ਅਤੇ ਵਿਚਾਰ"</string>
@@ -574,6 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ਤੁਸੀਂ ਵਾਧੂ ਵਰਤੋਂਕਾਰ ਬਣਾ ਕੇ ਹੋਰਾਂ ਲੋਕਾਂ ਨਾਲ ਇਹ ਡੀਵਾਈਸ ਸਾਂਝਾ ਕਰ ਸਕਦੇ ਹੋ। ਹਰੇਕ ਵਰਤੋਂਕਾਰ ਦੀ ਆਪਣੀ ਖੁਦ ਦੀ ਜਗ੍ਹਾ ਹੁੰਦੀ ਹੈ, ਜਿਸਨੂੰ ਉਹ ਐਪਾਂ ਅਤੇ ਵਾਲਪੇਪਰ ਆਦਿ ਨਾਲ ਵਿਉਂਤਬੱਧ ਕਰ ਸਕਦੇ ਹਨ। ਵਰਤੋਂਕਾਰ ਵਾਈ-ਫਾਈ ਵਰਗੀਆਂ ਡੀਵਾਈਸ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੀ ਵਿਵਸਥਿਤ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਸ ਨਾਲ ਹਰੇਕ ਵਰਤੋਂਕਾਰ \'ਤੇ ਅਸਰ ਪੈਂਦਾ ਹੈ।\n\nਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਪੈਂਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਬਾਕੀ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ। ਸ਼ਾਇਦ ਪਹੁੰਚਯੋਗਤਾ ਸੈਟਿੰਗਾਂ ਅਤੇ ਸੇਵਾਵਾਂ ਨੂੰ ਕਿਸੇ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਟ੍ਰਾਂਸਫਰ ਨਾ ਕੀਤਾ ਜਾ ਸਕੇ।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸੈੱਟਅੱਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ਕੀ ਹੁਣ ਵਰਤੋਂਕਾਰ ਸੈੱਟ ਅੱਪ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ਇਹ ਪੱਕਾ ਕਰੋ ਕਿ ਵਿਅਕਤੀ ਡੀਵਾਈਸ ਵਰਤਣ ਅਤੇ ਆਪਣੀ ਜਗ੍ਹਾ ਦੇ ਸੈੱਟ ਅੱਪ ਲਈ ਉਪਲਬਧ ਹੈ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ਕੀ ਹੁਣ ਪ੍ਰੋਫਾਈਲ ਸੈੱਟ ਅੱਪ ਕਰਨੀ ਹੈ?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ਇਸ ਨਾਲ ਨਵਾਂ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗਾ ਅਤੇ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ਕੀ ਮਹਿਮਾਨ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਣਾ ਹੈ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ਇਸ ਨਾਲ ਮੌਜੂਦਾ ਮਹਿਮਾਨ ਸੈਸ਼ਨ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟ ਜਾਵੇਗਾ"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ਬਾਹਰ ਜਾਓ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ਕੀ ਮਹਿਮਾਨ ਸਰਗਰਮੀ ਰੱਖਿਅਤ ਕਰਨੀ ਹੈ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ਤੁਸੀਂ ਮੌਜੂਦਾ ਸੈਸ਼ਨ ਦੀ ਸਰਗਰਮੀ ਨੂੰ ਰੱਖਿਅਤ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਮਿਟਾ ਸਕਦੇ ਹੋ"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ਪਿਛਲੇ ਐਨੀਮੇਸ਼ਨਾਂ ਦਾ ਪੂਰਵ-ਅਨੁਮਾਨ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ਪੂਰਵ-ਅਨੁਮਾਨ ਵਾਪਸੀ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ਇਹ ਸੈਟਿੰਗ ਪੂਰਵ-ਅਨੁਮਾਨ ਇਸ਼ਾਰਾ ਐਨੀਮੇਸ਼ਨ ਲਈ ਸਿਸਟਮ ਐਨੀਮੇਸ਼ਨਾਂ ਨੂੰ ਚਾਲੂ ਕਰਦੀ ਹੈ। ਮੈਨੀਫ਼ੈਸਟ ਫ਼ਾਈਲ ਵਿੱਚ enableOnBackInvokedCallback ਸੈਟਿੰਗ ਨੂੰ ਪ੍ਰਤੀ-ਐਪ \'ਸਹੀ\' \'ਤੇ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ਖੱਬੇ ਲਿਜਾਓ"</item>
+    <item msgid="5425394847942513942">"ਹੇਠਾਂ ਲਿਜਾਓ"</item>
+    <item msgid="7728484337962740316">"ਸੱਜੇ ਲਿਜਾਓ"</item>
+    <item msgid="324200556467459329">"ਉੱਪਰ ਲਿਜਾਓ"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

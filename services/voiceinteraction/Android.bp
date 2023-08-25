@@ -9,9 +9,58 @@ package {
 
 filegroup {
     name: "services.voiceinteraction-sources",
-    srcs: ["java/**/*.java"],
+    srcs: ["java/com/android/server/voiceinteraction/*.java"],
     path: "java",
     visibility: ["//frameworks/base/services"],
+}
+
+filegroup {
+    name: "services.soundtrigger_middleware-sources",
+    srcs: ["java/com/android/server/soundtrigger_middleware/*.java"],
+    path: "java",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "services.soundtrigger_service-sources",
+    srcs: ["java/com/android/server/soundtrigger/*.java"],
+    path: "java",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "services.soundtrigger-sources",
+    srcs: [
+        ":services.soundtrigger_service-sources",
+        ":services.soundtrigger_middleware-sources",
+    ],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.soundtrigger_middleware",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.soundtrigger_middleware-sources"],
+    libs: [
+        "services.core",
+    ],
+    static_libs: [
+        "android.hardware.soundtrigger-V2.3-java",
+    ],
+    visibility: ["//visibility/base/services/tests/voiceinteraction"],
+}
+
+java_library_static {
+    name: "services.soundtrigger",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.soundtrigger_service-sources"],
+    libs: [
+        "services.core",
+    ],
+    static_libs: [
+        "services.soundtrigger_middleware",
+    ],
 }
 
 java_library_static {
@@ -20,6 +69,7 @@ java_library_static {
     srcs: [":services.voiceinteraction-sources"],
     libs: [
         "services.core",
+        "app-compat-annotations",
         "android.hardware.power-V1-java",
         "android.hardware.power-V1.0-java",
     ],

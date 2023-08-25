@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -35,6 +36,7 @@ public class SingleScanSettings implements Parcelable {
     public boolean enable6GhzRnr;
     public ArrayList<ChannelSettings> channelSettings;
     public ArrayList<HiddenNetwork> hiddenNetworks;
+    public byte[] vendorIes;
 
     /** public constructor */
     public SingleScanSettings() { }
@@ -53,13 +55,15 @@ public class SingleScanSettings implements Parcelable {
         return scanType == settings.scanType
                 && enable6GhzRnr == settings.enable6GhzRnr
                 && channelSettings.equals(settings.channelSettings)
-                && hiddenNetworks.equals(settings.hiddenNetworks);
+                && hiddenNetworks.equals(settings.hiddenNetworks)
+                && Arrays.equals(vendorIes, settings.vendorIes);
     }
 
     /** override hash code */
     @Override
     public int hashCode() {
-        return Objects.hash(scanType, channelSettings, hiddenNetworks, enable6GhzRnr);
+        return Objects.hash(scanType, channelSettings, hiddenNetworks, enable6GhzRnr,
+                Arrays.hashCode(vendorIes));
     }
 
 
@@ -88,6 +92,11 @@ public class SingleScanSettings implements Parcelable {
         out.writeBoolean(enable6GhzRnr);
         out.writeTypedList(channelSettings);
         out.writeTypedList(hiddenNetworks);
+        if (vendorIes == null) {
+            out.writeByteArray(new byte[0]);
+        } else {
+            out.writeByteArray(vendorIes);
+        }
     }
 
     /** implement Parcelable interface */
@@ -108,6 +117,10 @@ public class SingleScanSettings implements Parcelable {
             in.readTypedList(result.channelSettings, ChannelSettings.CREATOR);
             result.hiddenNetworks = new ArrayList<HiddenNetwork>();
             in.readTypedList(result.hiddenNetworks, HiddenNetwork.CREATOR);
+            result.vendorIes = in.createByteArray();
+            if (result.vendorIes == null) {
+                result.vendorIes = new byte[0];
+            }
             if (in.dataAvail() != 0) {
                 Log.e(TAG, "Found trailing data after parcel parsing.");
             }

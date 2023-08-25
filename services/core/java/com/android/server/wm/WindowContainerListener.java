@@ -27,4 +27,13 @@ interface WindowContainerListener extends ConfigurationContainerListener {
 
     /** Called when {@link WindowContainer#removeImmediately()} is invoked. */
     default void onRemoved() {}
+
+    /**
+     * Only invoked if the child successfully requested a visibility change.
+     *
+     * @param isVisibleRequested The current {@link WindowContainer#isVisibleRequested()} of this
+     *                           {@link WindowContainer} (not of the child).
+     * @see WindowContainer#onChildVisibleRequestedChanged(WindowContainer)
+     */
+    default void onVisibleRequestedChanged(boolean isVisibleRequested) { }
 }

@@ -16,7 +16,6 @@
 
 package com.android.server.policy;
 
-import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,8 +25,6 @@ import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -52,25 +49,13 @@ public final class SingleKeyGestureDetector {
 
     // Key code of current key down event, reset when key up.
     private int mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-    private volatile boolean mHandledByLongPress = false;
+    private boolean mHandledByLongPress = false;
     private final Handler mHandler;
     private long mLastDownTime = 0;
-
-    /** Supported gesture flags */
-    public static final int KEY_LONGPRESS = 1 << 1;
-    public static final int KEY_VERYLONGPRESS = 1 << 2;
 
     static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
     static long sDefaultLongPressTimeout;
     static long sDefaultVeryLongPressTimeout;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "KEY_" }, value = {
-            KEY_LONGPRESS,
-            KEY_VERYLONGPRESS,
-    })
-    public @interface KeyGestureFlag {}
 
     /**
      *  Rule definition for single keys gesture.
@@ -88,11 +73,9 @@ public final class SingleKeyGestureDetector {
      */
     abstract static class SingleKeyRule {
         private final int mKeyCode;
-        private final int mSupportedGestures;
 
-        SingleKeyRule(int keyCode, @KeyGestureFlag int supportedGestures) {
+        SingleKeyRule(int keyCode) {
             mKeyCode = keyCode;
-            mSupportedGestures = supportedGestures;
         }
 
         /**
@@ -105,15 +88,15 @@ public final class SingleKeyGestureDetector {
         /**
          *  True if the rule support long press.
          */
-        private boolean supportLongPress() {
-            return (mSupportedGestures & KEY_LONGPRESS) != 0;
+        boolean supportLongPress() {
+            return false;
         }
 
         /**
          *  True if the rule support very long press.
          */
-        private boolean supportVeryLongPress() {
-            return (mSupportedGestures & KEY_VERYLONGPRESS) != 0;
+        boolean supportVeryLongPress() {
+            return false;
         }
 
         /**
@@ -168,6 +151,23 @@ public final class SingleKeyGestureDetector {
                     + ", VeryLongPress=" + supportVeryLongPress()
                     + ", MaxMultiPressCount=" + getMaxMultiPressCount();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof SingleKeyRule) {
+                SingleKeyRule that = (SingleKeyRule) o;
+                return mKeyCode == that.mKeyCode;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return mKeyCode;
+        }
     }
 
     static SingleKeyGestureDetector get(Context context) {
@@ -184,7 +184,14 @@ public final class SingleKeyGestureDetector {
     }
 
     void addRule(SingleKeyRule rule) {
+        if (mRules.contains(rule)) {
+            throw new IllegalArgumentException("Rule : " + rule + " already exists.");
+        }
         mRules.add(rule);
+    }
+
+    void removeRule(SingleKeyRule rule) {
+        mRules.remove(rule);
     }
 
     void interceptKey(KeyEvent event, boolean interactive) {
@@ -211,8 +218,8 @@ public final class SingleKeyGestureDetector {
                 mHandledByLongPress = true;
                 mHandler.removeMessages(MSG_KEY_LONG_PRESS);
                 mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
-                final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, mActiveRule.mKeyCode,
-                        0, mActiveRule);
+                final Message msg = mHandler.obtainMessage(MSG_KEY_LONG_PRESS, keyCode, 0,
+                        mActiveRule);
                 msg.setAsynchronous(true);
                 mHandler.sendMessage(msg);
             }
@@ -291,11 +298,24 @@ public final class SingleKeyGestureDetector {
     }
 
     private boolean interceptKeyUp(KeyEvent event) {
-        mHandler.removeMessages(MSG_KEY_LONG_PRESS);
-        mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
         mDownKeyCode = KeyEvent.KEYCODE_UNKNOWN;
         if (mActiveRule == null) {
             return false;
+        }
+
+        if (!mHandledByLongPress) {
+            final long eventTime = event.getEventTime();
+            if (eventTime < mLastDownTime + mActiveRule.getLongPressTimeoutMs()) {
+                mHandler.removeMessages(MSG_KEY_LONG_PRESS);
+            } else {
+                mHandledByLongPress = mActiveRule.supportLongPress();
+            }
+
+            if (eventTime < mLastDownTime + mActiveRule.getVeryLongPressTimeoutMs()) {
+                mHandler.removeMessages(MSG_KEY_VERY_LONG_PRESS);
+            } else {
+                mHandledByLongPress = mActiveRule.supportVeryLongPress();
+            }
         }
 
         if (mHandledByLongPress) {
@@ -375,7 +395,7 @@ public final class SingleKeyGestureDetector {
 
     private class KeyHandler extends Handler {
         KeyHandler() {
-            super(Looper.getMainLooper());
+            super(Looper.myLooper());
         }
 
         @Override
@@ -393,7 +413,6 @@ public final class SingleKeyGestureDetector {
                     if (DEBUG) {
                         Log.i(TAG, "Detect long press " + KeyEvent.keyCodeToString(keyCode));
                     }
-                    mHandledByLongPress = true;
                     rule.onLongPress(mLastDownTime);
                     break;
                 case MSG_KEY_VERY_LONG_PRESS:
@@ -401,7 +420,6 @@ public final class SingleKeyGestureDetector {
                         Log.i(TAG, "Detect very long press "
                                 + KeyEvent.keyCodeToString(keyCode));
                     }
-                    mHandledByLongPress = true;
                     rule.onVeryLongPress(mLastDownTime);
                     break;
                 case MSG_KEY_DELAYED_PRESS:

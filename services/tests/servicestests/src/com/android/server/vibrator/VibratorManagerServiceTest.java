@@ -47,6 +47,7 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.media.AudioAttributes;
@@ -72,6 +73,7 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.Presubmit;
@@ -100,8 +102,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -127,8 +131,10 @@ public class VibratorManagerServiceTest {
     private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
     private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
             .setBatterySaverEnabled(true).build();
-    private static final AudioAttributes AUDIO_ATTRS =
+    private static final AudioAttributes AUDIO_ALARM_ATTRS =
             new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build();
+    private static final AudioAttributes AUDIO_NOTIFICATION_ATTRS =
+            new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build();
     private static final VibrationAttributes ALARM_ATTRS =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
     private static final VibrationAttributes HAPTIC_FEEDBACK_ATTRS =
@@ -139,6 +145,8 @@ public class VibratorManagerServiceTest {
     private static final VibrationAttributes RINGTONE_ATTRS =
             new VibrationAttributes.Builder().setUsage(
                     VibrationAttributes.USAGE_RINGTONE).build();
+    private static final VibrationAttributes UNKNOWN_ATTRS =
+            new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_UNKNOWN).build();
 
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -177,11 +185,13 @@ public class VibratorManagerServiceTest {
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
             mRegisteredAppsOnVirtualDeviceListener;
 
+    private InputManager mInputManager;
+
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
         mVibrationConfig = new VibrationConfig(mContextSpy.getResources());
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
@@ -189,7 +199,10 @@ public class VibratorManagerServiceTest {
 
         mVibrator = new FakeVibrator(mContextSpy);
         when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibrator);
-        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
+
+        mInputManager = new InputManager(mContextSpy);
+        when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE)))
+                .thenReturn(mInputManager);
         when(mContextSpy.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManagerMock);
         when(mIInputManagerMock.getInputDeviceIds()).thenReturn(new int[0]);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
@@ -252,6 +265,7 @@ public class VibratorManagerServiceTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         // Ignore potential exceptions about the looper having never dispatched any messages.
         mTestLooper.stopAutoDispatchAndIgnoreExceptions();
+        InputManagerGlobal.clearInstance();
     }
 
     private VibratorManagerService createSystemReadyService() {
@@ -434,22 +448,22 @@ public class VibratorManagerServiceTest {
         IVibratorStateListener listenerMock = mockVibratorStateListener();
         service.registerVibratorStateListener(1, listenerMock);
 
-        vibrate(service, VibrationEffect.createOneShot(40, 100), ALARM_ATTRS);
-        // Wait until service knows vibrator is on.
-        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
-        // Wait until effect ends.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        long oneShotDuration = 20;
+        vibrateAndWaitUntilFinished(service,
+                VibrationEffect.createOneShot(oneShotDuration, VibrationEffect.DEFAULT_AMPLITUDE),
+                ALARM_ATTRS);
 
         InOrder inOrderVerifier = inOrder(listenerMock);
         // First notification done when listener is registered.
         inOrderVerifier.verify(listenerMock).onVibrating(eq(false));
         inOrderVerifier.verify(listenerMock).onVibrating(eq(true));
-        inOrderVerifier.verify(listenerMock).onVibrating(eq(false));
+        // The last notification is after the vibration has completed.
+        inOrderVerifier.verify(listenerMock, timeout(TEST_TIMEOUT_MILLIS)).onVibrating(eq(false));
         inOrderVerifier.verifyNoMoreInteractions();
 
         InOrder batteryVerifier = inOrder(mBatteryStatsMock);
         batteryVerifier.verify(mBatteryStatsMock)
-                .noteVibratorOn(UID, 40 + mVibrationConfig.getRampDownDurationMs());
+                .noteVibratorOn(UID, oneShotDuration + mVibrationConfig.getRampDownDurationMs());
         batteryVerifier.verify(mBatteryStatsMock).noteVibratorOff(UID);
     }
 
@@ -621,22 +635,18 @@ public class VibratorManagerServiceTest {
 
         setRingerMode(AudioManager.RINGER_MODE_SILENT);
         VibratorManagerService service = createSystemReadyService();
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
-        // Wait before checking it never played.
-        assertFalse(waitUntil(s -> !fakeVibrator.getAllEffectSegments().isEmpty(),
-                service, /* timeout= */ 50));
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                RINGTONE_ATTRS);
 
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         service = createSystemReadyService();
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK), RINGTONE_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(
+                service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK), RINGTONE_ATTRS);
 
         setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
         service = createSystemReadyService();
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK), RINGTONE_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 2,
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(
+                service, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK), RINGTONE_ATTRS);
 
         assertEquals(
                 Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_HEAVY_CLICK),
@@ -651,27 +661,18 @@ public class VibratorManagerServiceTest {
         fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_TICK, VibrationEffect.EFFECT_CLICK,
                 VibrationEffect.EFFECT_HEAVY_CLICK, VibrationEffect.EFFECT_DOUBLE_CLICK);
         VibratorManagerService service = createSystemReadyService();
-        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
 
-        // The haptic feedback should be ignored in low power, but not the ringtone. The end
-        // of the test asserts which actual effects ended up playing.
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK), HAPTIC_FEEDBACK_ATTRS);
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), RINGTONE_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
-                service, TEST_TIMEOUT_MILLIS));
-        // Allow the ringtone to complete, as the other vibrations won't cancel it.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK),
+                HAPTIC_FEEDBACK_ATTRS);
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                RINGTONE_ATTRS);
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK),
-                /* attrs= */ null);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 2,
-                service, TEST_TIMEOUT_MILLIS));
-
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK),
-                NOTIFICATION_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 3,
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service,
+                VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK), /* attrs= */ null);
+        vibrateAndWaitUntilFinished(service,
+                VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK), NOTIFICATION_ATTRS);
 
         assertEquals(
                 Arrays.asList(expectedPrebaked(VibrationEffect.EFFECT_CLICK),
@@ -737,22 +738,17 @@ public class VibratorManagerServiceTest {
                 Vibrator.VIBRATION_INTENSITY_HIGH);
         VibratorManagerService service = createSystemReadyService();
 
-        VibrationAttributes enforceFreshAttrs = new VibrationAttributes.Builder()
+        VibrationAttributes notificationWithFreshAttrs = new VibrationAttributes.Builder()
                 .setUsage(VibrationAttributes.USAGE_NOTIFICATION)
                 .setFlags(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)
                 .build();
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_LOW);
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), NOTIFICATION_ATTRS);
-        // VibrationThread will start this vibration async, so wait before vibrating a second time.
-        assertTrue(waitUntil(s -> mVibratorProviders.get(0).getAllEffectSegments().size() > 0,
-                service, TEST_TIMEOUT_MILLIS));
-
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK), enforceFreshAttrs);
-        // VibrationThread will start this vibration async, so wait before checking.
-        assertTrue(waitUntil(s -> mVibratorProviders.get(0).getAllEffectSegments().size() > 1,
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                NOTIFICATION_ATTRS);
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_TICK),
+                notificationWithFreshAttrs);
 
         assertEquals(
                 Arrays.asList(
@@ -828,15 +824,12 @@ public class VibratorManagerServiceTest {
         vibrate(service, repeatingEffect, new VibrationAttributes.Builder().setUsage(
                 VibrationAttributes.USAGE_UNKNOWN).build());
 
-        // VibrationThread will start this vibration async, so wait before checking it started.
+        // VibrationThread will start this vibration async, wait until it has started.
         assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
                 service, TEST_TIMEOUT_MILLIS));
 
-        vibrate(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK), HAPTIC_FEEDBACK_ATTRS);
-
-        // Wait before checking it never played a second effect.
-        assertFalse(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() > 1,
-                service, /* timeout= */ 50));
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                HAPTIC_FEEDBACK_ATTRS);
 
         // The time estimate is recorded when the vibration starts, repeating vibrations
         // are capped at BATTERY_STATS_REPEATING_VIBRATION_DURATION (=5000).
@@ -846,8 +839,7 @@ public class VibratorManagerServiceTest {
         // No segment played is the prebaked CLICK from the second vibration.
         assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
                 .anyMatch(PrebakedSegment.class::isInstance));
-        // Clean up repeating effect.
-        cancelVibrate(service);
+        cancelVibrate(service);  // Clean up repeating effect.
     }
 
     @Test
@@ -869,7 +861,7 @@ public class VibratorManagerServiceTest {
 
         // Cancel vibration right before requesting a new one.
         // This should trigger slow IVibrator.off before setting the vibration status to cancelled.
-        service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
+        cancelVibrate(service);
         vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
                 ALARM_ATTRS);
 
@@ -879,31 +871,110 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void vibrate_withNewRepeatingVibration_cancelsOngoingEffect() throws Exception {
+    public void vibrate_withNewSameImportanceVibrationAndBothRepeating_cancelsOngoingEffect()
+            throws Exception {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         VibratorManagerService service = createSystemReadyService();
 
-        VibrationEffect alarmEffect = VibrationEffect.createWaveform(
-                new long[]{10_000, 10_000}, new int[]{128, 255}, -1);
-        vibrate(service, alarmEffect, ALARM_ATTRS);
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, 1);
+        vibrate(service, repeatingEffect, ALARM_ATTRS);
 
-        // VibrationThread will start this vibration async, so wait before checking it started.
+        // VibrationThread will start this vibration async, wait until it has started.
         assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
                 service, TEST_TIMEOUT_MILLIS));
 
-        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
-                new long[]{10, 10}, new int[]{128, 255}, 1);
-        vibrate(service, repeatingEffect, NOTIFICATION_ATTRS);
+        VibrationEffect repeatingEffect2 = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, 1);
+        vibrate(service, repeatingEffect2, ALARM_ATTRS);
 
         // VibrationThread will start this vibration async, so wait before checking it started.
-        assertTrue(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() > 2,
+        assertTrue(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() == 2,
                 service, TEST_TIMEOUT_MILLIS));
 
         // The second vibration should have recorded that the vibrators were turned on.
         verify(mBatteryStatsMock, times(2)).noteVibratorOn(anyInt(), anyLong());
 
         cancelVibrate(service);  // Clean up repeating effect.
+    }
+
+    @Test
+    public void vibrate_withNewSameImportanceVibrationButOngoingIsRepeating_ignoreNewVibration()
+            throws Exception {
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10, 10_000}, new int[]{255, 0}, 1);
+        vibrate(service, repeatingEffect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, wait until the off waveform step.
+        assertTrue(waitUntil(s -> fakeVibrator.getOffCount() > 0, service, TEST_TIMEOUT_MILLIS));
+
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                ALARM_ATTRS);
+
+        // The second vibration shouldn't have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
+        // The second vibration shouldn't have played any prebaked segment.
+        assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
+                .anyMatch(PrebakedSegment.class::isInstance));
+        cancelVibrate(service);  // Clean up long effect.
+    }
+
+    @Test
+    public void vibrate_withNewUnknownUsageVibrationAndRepeating_cancelsOngoingEffect()
+            throws Exception {
+        mockVibrators(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, 1);
+        vibrate(service, repeatingEffect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, wait until it has started.
+        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
+                service, TEST_TIMEOUT_MILLIS));
+
+        VibrationEffect repeatingEffect2 = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, 1);
+        vibrate(service, repeatingEffect2, UNKNOWN_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait before checking it started.
+        assertTrue(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() == 2,
+                service, TEST_TIMEOUT_MILLIS));
+
+        // The second vibration should have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(2)).noteVibratorOn(anyInt(), anyLong());
+
+        cancelVibrate(service);  // Clean up repeating effect.
+    }
+
+    @Test
+    public void vibrate_withNewUnknownUsageVibrationAndNotRepeating_ignoreNewVibration()
+            throws Exception {
+        mockVibrators(1);
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect alarmEffect = VibrationEffect.createWaveform(
+                new long[]{10, 10_000}, new int[]{255, 0}, -1);
+        vibrate(service, alarmEffect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, wait until the off waveform step.
+        assertTrue(waitUntil(s -> fakeVibrator.getOffCount() > 0, service, TEST_TIMEOUT_MILLIS));
+
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                UNKNOWN_ATTRS);
+
+        // The second vibration shouldn't have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
+        // The second vibration shouldn't have played any prebaked segment.
+        assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
+                .anyMatch(PrebakedSegment.class::isInstance));
+        cancelVibrate(service);  // Clean up long effect.
     }
 
     @Test
@@ -920,19 +991,15 @@ public class VibratorManagerServiceTest {
         assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
                 service, TEST_TIMEOUT_MILLIS));
 
-        vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
-
-        // Wait before checking it never played a second effect.
-        assertFalse(waitUntil(s -> mVibratorProviders.get(1).getAllEffectSegments().size() > 1,
-                service, /* timeout= */ 50));
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                HAPTIC_FEEDBACK_ATTRS);
 
         // The second vibration shouldn't have recorded that the vibrators were turned on.
         verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
         // The second vibration shouldn't have played any prebaked segment.
         assertFalse(mVibratorProviders.get(1).getAllEffectSegments().stream()
                 .anyMatch(PrebakedSegment.class::isInstance));
-        // Clean up long effect.
-        cancelVibrate(service);
+        cancelVibrate(service);  // Clean up long effect.
     }
 
     @Test
@@ -964,6 +1031,73 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void vibrate_withOngoingLowerImportanceExternalVibration_cancelsOngoingVibration()
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+        VibratorManagerService service = createSystemReadyService();
+
+        IBinder firstToken = mock(IBinder.class);
+        IExternalVibrationController controller = mock(IExternalVibrationController.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
+                controller, firstToken);
+        int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                RINGTONE_ATTRS);
+
+        assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
+        // The external vibration should have been cancelled
+        verify(controller).mute();
+        assertEquals(Arrays.asList(false, true, false),
+                mVibratorProviders.get(1).getExternalControlStates());
+        // The new vibration should have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(1)).noteVibratorOn(anyInt(), anyLong());
+        // One segment played is the prebaked CLICK from the new vibration.
+        assertEquals(1,
+                mVibratorProviders.get(1).getAllEffectSegments().stream()
+                        .filter(PrebakedSegment.class::isInstance)
+                        .count());
+    }
+
+    @Test
+    public void vibrate_withOngoingSameImportancePipelinedVibration_continuesOngoingEffect()
+            throws Exception {
+        VibrationAttributes pipelineAttrs = new VibrationAttributes.Builder(HAPTIC_FEEDBACK_ATTRS)
+                .setFlags(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                .build();
+
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                new long[]{100, 100}, new int[]{128, 255}, -1);
+        vibrate(service, effect, pipelineAttrs);
+        // This vibration will be enqueued, but evicted by the EFFECT_CLICK.
+        vibrate(service, VibrationEffect.startComposition()
+                .addOffDuration(Duration.ofSeconds(10))
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE)
+                .compose(), pipelineAttrs);  // This will queue and be evicted for the click.
+
+        vibrateAndWaitUntilFinished(service, VibrationEffect.get(VibrationEffect.EFFECT_CLICK),
+                pipelineAttrs);
+
+        // The second vibration should have recorded that the vibrators were turned on.
+        verify(mBatteryStatsMock, times(2)).noteVibratorOn(anyInt(), anyLong());
+        // One step segment (with several amplitudes) and one click should have played. Notably
+        // there is no primitive segment.
+        List<VibrationEffectSegment> played = mVibratorProviders.get(1).getAllEffectSegments();
+        assertEquals(2, played.size());
+        assertEquals(1, played.stream().filter(StepSegment.class::isInstance).count());
+        assertEquals(1, played.stream().filter(PrebakedSegment.class::isInstance).count());
+    }
+
+    @Test
     public void vibrate_withInputDevices_vibratesInputDevices() throws Exception {
         mockVibrators(1);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
@@ -979,12 +1113,10 @@ public class VibratorManagerServiceTest {
 
         CombinedVibration effect = CombinedVibration.createParallel(
                 VibrationEffect.createOneShot(10, 10));
-        vibrate(service, effect, ALARM_ATTRS);
-        verify(mIInputManagerMock).vibrateCombined(eq(1), eq(effect), any());
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
 
-        // VibrationThread will start this vibration async, so wait before checking it never played.
-        assertFalse(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
-                service, /* timeout= */ 50));
+        verify(mIInputManagerMock).vibrateCombined(eq(1), eq(effect), any());
+        assertTrue(mVibratorProviders.get(1).getAllEffectSegments().isEmpty());
     }
 
     @Test
@@ -1079,9 +1211,7 @@ public class VibratorManagerServiceTest {
                         .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                         .compose())
                 .combine();
-        vibrate(service, effect, ALARM_ATTRS);
-        assertTrue(waitUntil(s -> !fakeVibrator1.getAllEffectSegments().isEmpty(), service,
-                TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
 
         verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
         verify(mNativeWrapperMock).triggerSynced(anyLong());
@@ -1103,9 +1233,7 @@ public class VibratorManagerServiceTest {
                 .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .addVibrator(2, VibrationEffect.createOneShot(10, 100))
                 .combine();
-        vibrate(service, effect, ALARM_ATTRS);
-        assertTrue(waitUntil(s -> !fakeVibrator1.getAllEffectSegments().isEmpty(), service,
-                TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
 
         verify(mNativeWrapperMock, never()).prepareSynced(any());
         verify(mNativeWrapperMock, never()).triggerSynced(anyLong());
@@ -1123,9 +1251,7 @@ public class VibratorManagerServiceTest {
                 .addVibrator(1, VibrationEffect.createOneShot(10, 50))
                 .addVibrator(2, VibrationEffect.createOneShot(10, 100))
                 .combine();
-        vibrate(service, effect, ALARM_ATTRS);
-        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
 
         verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
         verify(mNativeWrapperMock, never()).triggerSynced(anyLong());
@@ -1144,9 +1270,7 @@ public class VibratorManagerServiceTest {
                 .addVibrator(1, VibrationEffect.createOneShot(10, 50))
                 .addVibrator(2, VibrationEffect.createOneShot(10, 100))
                 .combine();
-        vibrate(service, effect, ALARM_ATTRS);
-        assertTrue(waitUntil(s -> !mVibratorProviders.get(1).getAllEffectSegments().isEmpty(),
-                service, TEST_TIMEOUT_MILLIS));
+        vibrateAndWaitUntilFinished(service, effect, ALARM_ATTRS);
 
         verify(mNativeWrapperMock).prepareSynced(eq(new int[]{1, 2}));
         verify(mNativeWrapperMock).triggerSynced(anyLong());
@@ -1183,28 +1307,21 @@ public class VibratorManagerServiceTest {
                 VibrationEffect.Composition.PRIMITIVE_TICK);
         VibratorManagerService service = createSystemReadyService();
 
-        vibrate(service, VibrationEffect.startComposition()
+        vibrateAndWaitUntilFinished(service, VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
                 .compose(), HAPTIC_FEEDBACK_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 1,
-                service, TEST_TIMEOUT_MILLIS));
 
-        vibrate(service, CombinedVibration.startSequential()
+        vibrateAndWaitUntilFinished(service, CombinedVibration.startSequential()
                 .addNext(1, VibrationEffect.createOneShot(100, 125))
                 .combine(), NOTIFICATION_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 2,
-                service, TEST_TIMEOUT_MILLIS));
 
-        vibrate(service, VibrationEffect.startComposition()
+        vibrateAndWaitUntilFinished(service, VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
                 .compose(), ALARM_ATTRS);
-        assertTrue(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() == 3,
-                service, TEST_TIMEOUT_MILLIS));
 
         // Ring vibrations have intensity OFF and are not played.
-        vibrate(service, VibrationEffect.createOneShot(100, 125), RINGTONE_ATTRS);
-        assertFalse(waitUntil(s -> fakeVibrator.getAllEffectSegments().size() > 3,
-                service, /* timeout= */ 50));
+        vibrateAndWaitUntilFinished(service, VibrationEffect.createOneShot(100, 125),
+                RINGTONE_ATTRS);
 
         // Only 3 effects played successfully.
         assertEquals(3, fakeVibrator.getAllEffectSegments().size());
@@ -1232,6 +1349,7 @@ public class VibratorManagerServiceTest {
                         .combine(),
                 HAPTIC_FEEDBACK_ATTRS);
 
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
@@ -1246,9 +1364,12 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         vibrate(service, VibrationEffect.createOneShot(1000, 100), HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         service.updateServiceState();
+
         // Vibration is not stopped nearly after updating service.
         assertFalse(waitUntil(s -> !s.isVibrating(1), service, 50));
         cancelVibrate(service);
@@ -1314,6 +1435,39 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void vibrate_prebakedAndComposedVibrationsWithFallbacks_playsFallbackOnlyForPredefined()
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(1).setSupportedPrimitives(
+                VibrationEffect.Composition.PRIMITIVE_CLICK);
+
+        VibratorManagerService service = createSystemReadyService();
+        vibrateAndWaitUntilFinished(service,
+                VibrationEffect.startComposition()
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                        .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose(),
+                ALARM_ATTRS);
+
+        List<VibrationEffectSegment> segments = mVibratorProviders.get(1).getAllEffectSegments();
+        // At least one step segment played as fallback for unusupported vibration effect
+        assertTrue(segments.size() > 2);
+        // 0: Supported effect played
+        assertTrue(segments.get(0) instanceof PrebakedSegment);
+        // 1: No segment for unsupported primitive
+        // 2: One or more intermediate step segments as fallback for unsupported effect
+        for (int i = 1; i < segments.size() - 1; i++) {
+            assertTrue(segments.get(i) instanceof StepSegment);
+        }
+        // 3: Supported primitive played
+        assertTrue(segments.get(segments.size() - 1) instanceof PrimitiveSegment);
+    }
+
+    @Test
     public void cancelVibrate_withoutUsageFilter_stopsVibrating() throws Exception {
         mockVibrators(1);
         VibratorManagerService service = createSystemReadyService();
@@ -1322,9 +1476,13 @@ public class VibratorManagerServiceTest {
         assertFalse(service.isVibrating(1));
 
         vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
+
+        // Alarm cancelled on filter match all.
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
     }
 
@@ -1334,6 +1492,8 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         // Vibration is not cancelled with a different usage.
@@ -1363,6 +1523,8 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), attrs);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         // Do not cancel UNKNOWN vibration when filter is being applied for other usages.
@@ -1379,6 +1541,8 @@ public class VibratorManagerServiceTest {
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         vibrate(service, VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100), attrs);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
         // Cancel UNKNOWN vibration when all vibrations are being cancelled.
@@ -1393,7 +1557,8 @@ public class VibratorManagerServiceTest {
         createSystemReadyService();
 
         IBinder binderToken = mock(IBinder.class);
-        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
                 mock(IExternalVibrationController.class), binderToken);
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
@@ -1411,7 +1576,8 @@ public class VibratorManagerServiceTest {
         createSystemReadyService();
 
         IBinder binderToken = mock(IBinder.class);
-        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
                 mock(IExternalVibrationController.class), binderToken);
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         mExternalVibratorService.onExternalVibrationStop(externalVibration);
@@ -1436,7 +1602,8 @@ public class VibratorManagerServiceTest {
         IBinder secondToken = mock(IBinder.class);
         IExternalVibrationController firstController = mock(IExternalVibrationController.class);
         IExternalVibrationController secondController = mock(IExternalVibrationController.class);
-        ExternalVibration firstVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
+        ExternalVibration firstVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
                 firstController, firstToken);
         int firstScale = mExternalVibratorService.onExternalVibrationStart(firstVibration);
 
@@ -1477,9 +1644,12 @@ public class VibratorManagerServiceTest {
 
         VibrationEffect effect = VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100);
         vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
 
-        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME, AUDIO_ATTRS,
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
                 mock(IExternalVibrationController.class));
         int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
         assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
@@ -1488,6 +1658,87 @@ public class VibratorManagerServiceTest {
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
+    }
+
+    @Test
+    public void onExternalVibration_withOngoingHigherImportanceVibration_ignoreNewVibration()
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
+                IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect effect = VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100);
+        vibrate(service, effect, RINGTONE_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
+                mock(IExternalVibrationController.class));
+        int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        // External vibration is ignored.
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
+
+        // Vibration is not cancelled.
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, CLEANUP_TIMEOUT_MILLIS));
+        assertEquals(Arrays.asList(false), mVibratorProviders.get(1).getExternalControlStates());
+        cancelVibrate(service);  // Clean up long effect.
+    }
+
+    @Test
+    public void onExternalVibration_withNewSameImportanceButRepeating_cancelsOngoingVibration()
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
+                IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10, 10_000}, new int[]{255, 0}, 1);
+        vibrate(service, repeatingEffect, ALARM_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS, mock(IExternalVibrationController.class));
+        int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        assertNotEquals(IExternalVibratorService.SCALE_MUTE, scale);
+
+        // Vibration is cancelled.
+        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        assertEquals(Arrays.asList(false, true),
+                mVibratorProviders.get(1).getExternalControlStates());
+    }
+
+    @Test
+    public void onExternalVibration_withNewSameImportanceButOngoingIsRepeating_ignoreNewVibration()
+            throws Exception {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL,
+                IVibrator.CAP_AMPLITUDE_CONTROL);
+        VibratorManagerService service = createSystemReadyService();
+
+        VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
+                new long[]{10_000, 10_000}, new int[]{128, 255}, 1);
+        vibrate(service, repeatingEffect, NOTIFICATION_ATTRS);
+
+        // VibrationThread will start this vibration async, so wait until vibration is triggered.
+        assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_NOTIFICATION_ATTRS,
+                mock(IExternalVibrationController.class));
+        int scale = mExternalVibratorService.onExternalVibrationStart(externalVibration);
+        // New vibration is ignored.
+        assertEquals(IExternalVibratorService.SCALE_MUTE, scale);
+
+        // Vibration is not cancelled.
+        assertFalse(waitUntil(s -> !s.isVibrating(1), service, CLEANUP_TIMEOUT_MILLIS));
+        assertEquals(Arrays.asList(false), mVibratorProviders.get(1).getExternalControlStates());
+        cancelVibrate(service);  // Clean up long effect.
     }
 
     @Test
@@ -1961,8 +2212,11 @@ public class VibratorManagerServiceTest {
     }
 
     private InputDevice createInputDeviceWithVibrator(int id) {
-        return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, /* hasVibrator= */ true, false, false, false, false);
+        return new InputDevice.Builder()
+                .setId(id)
+                .setName("Test Device " + id)
+                .setHasVibrator(true)
+                .build();
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
@@ -1988,7 +2242,7 @@ public class VibratorManagerServiceTest {
 
     private void vibrateAndWaitUntilFinished(VibratorManagerService service,
             CombinedVibration effect, VibrationAttributes attrs) throws InterruptedException {
-        Vibration vib =
+        HalVibration vib =
                 service.vibrateInternal(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME, effect, attrs,
                         "some reason", service);
         if (vib != null) {

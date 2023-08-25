@@ -30,6 +30,9 @@
     <!-- Title of menu shown over picture-in-picture. Used for accessibility. -->
     <string name="pip_menu_title">Menu</string>
 
+    <!-- accessibility Title of menu shown over picture-in-picture [CHAR LIMIT=NONE] -->
+    <string name="pip_menu_accessibility_title">Picture-in-Picture Menu</string>
+
     <!-- PiP BTW notification title. [CHAR LIMIT=50] -->
     <string name="pip_notification_title"><xliff:g id="name" example="Google Maps">%s</xliff:g> is in picture-in-picture</string>
 
@@ -64,10 +67,10 @@
     <string name="pip_phone_dismiss_hint">Drag down to dismiss</string>
 
     <!-- Multi-Window strings -->
-    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed in split-screen and that things might crash/not work properly [CHAR LIMIT=NONE] -->
-    <string name="dock_forced_resizable">App may not work with split-screen.</string>
+    <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed in split screen and that things might crash/not work properly [CHAR LIMIT=NONE] -->
+    <string name="dock_forced_resizable">App may not work with split screen</string>
     <!-- Warning message when we try to dock a non-resizeable task and launch it in fullscreen instead  [CHAR LIMIT=NONE] -->
-    <string name="dock_non_resizeble_failed_to_dock_text">App does not support split-screen.</string>
+    <string name="dock_non_resizeble_failed_to_dock_text">App does not support split screen</string>
     <!-- Warning message when we try to dock an app not supporting multiple instances split into multiple sides [CHAR LIMIT=NONE] -->
     <string name="dock_multi_instances_not_supported_text">This app can only be opened in 1 window.</string>
     <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed on a secondary display and that things might crash/not work properly [CHAR LIMIT=NONE] -->
@@ -75,8 +78,10 @@
     <!-- Warning message when we try to launch a non-resizeable activity on a secondary display and launch it on the primary instead. -->
     <string name="activity_launch_on_secondary_display_failed_text">App does not support launch on secondary displays.</string>
 
-    <!-- Accessibility label for the divider that separates the windows in split-screen mode [CHAR LIMIT=NONE] -->
-    <string name="accessibility_divider">Split-screen divider</string>
+    <!-- Accessibility label and window tile for the divider that separates the windows in split screen mode [CHAR LIMIT=NONE] -->
+    <string name="accessibility_divider">Split screen divider</string>
+    <!-- Accessibility window title for the split screen divider window [CHAR LIMIT=NONE] -->
+    <string name="divider_title">Split screen divider</string>
 
     <!-- Accessibility action for moving docked stack divider to make the left screen full screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_left_full">Left full screen</string>
@@ -186,7 +191,7 @@
     <string name="letterbox_education_dialog_title">See and do more</string>
 
     <!-- Description of the split screen action. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_split_screen_text">Drag in another app for split-screen</string>
+    <string name="letterbox_education_split_screen_text">Drag in another app for split screen</string>
 
     <!-- Description of the reposition app action. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_reposition_text">Double-tap outside an app to reposition it</string>
@@ -257,4 +262,6 @@
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
     <string name="collapse_menu_text">Close Menu</string>
+    <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
+    <string name="expand_menu_text">Open Menu</string>
 </resources>

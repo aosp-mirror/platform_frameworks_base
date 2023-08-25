@@ -21,6 +21,7 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CLEAR_DATA;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -42,26 +43,45 @@ import java.util.Objects;
  * in production.  Use NotificationRecordLoggerFake for testing.
  * @hide
  */
-public interface NotificationRecordLogger {
+interface NotificationRecordLogger {
 
     // The high-level interface used by clients.
 
     /**
-     * May log a NotificationReported atom reflecting the posting or update of a notification.
-     * @param r The new NotificationRecord. If null, no action is taken.
-     * @param old The previous NotificationRecord.  Null if there was no previous record.
+     * Prepare to log an atom reflecting the posting or update of a notification.
+     *
+     * The returned {@link NotificationReported} object, if any, should be supplied to
+     * {@link #logNotificationPosted}. Because only some updates are considered "interesting
+     * enough" to log, this method may return {@code null}. In that case, the follow-up call
+     * should not be performed.
+     *
+     * @param r The new {@link NotificationRecord}.
+     * @param old The previous {@link NotificationRecord}. Null if there was no previous record.
      * @param position The position at which this notification is ranked.
      * @param buzzBeepBlink Logging code reflecting whether this notification alerted the user.
-     * @param groupId The instance Id of the group summary notification, or null.
+     * @param groupId The {@link InstanceId} of the group summary notification, or null.
      */
-    void maybeLogNotificationPosted(@Nullable NotificationRecord r,
+    @Nullable
+    default NotificationReported prepareToLogNotificationPosted(@Nullable NotificationRecord r,
             @Nullable NotificationRecord old,
             int position, int buzzBeepBlink,
-            InstanceId groupId);
+            InstanceId groupId) {
+        NotificationRecordPair p = new NotificationRecordPair(r, old);
+        if (!p.shouldLogReported(buzzBeepBlink)) {
+            return null;
+        }
+        return new NotificationReported(p, NotificationReportedEvent.fromRecordPair(p), position,
+                buzzBeepBlink, groupId);
+    }
+
+    /**
+     * Log a NotificationReported atom reflecting the posting or update of a notification.
+     */
+    void logNotificationPosted(NotificationReported nr);
 
     /**
      * Logs a NotificationReported atom reflecting an adjustment to a notification.
-     * Unlike maybeLogNotificationPosted, this method is guaranteed to log a notification update,
+     * Unlike for posted notifications, this method is guaranteed to log a notification update,
      * so the caller must take responsibility for checking that that logging update is necessary,
      * and that the notification is meaningfully changed.
      * @param r The NotificationRecord. If null, no action is taken.
@@ -125,7 +145,7 @@ public interface NotificationRecordLogger {
 
         public static NotificationReportedEvent fromRecordPair(NotificationRecordPair p) {
             return (p.old != null) ? NotificationReportedEvent.NOTIFICATION_UPDATED :
-                            NotificationReportedEvent.NOTIFICATION_POSTED;
+                    NotificationReportedEvent.NOTIFICATION_POSTED;
         }
     }
 
@@ -410,7 +430,7 @@ public interface NotificationRecordLogger {
         private int getNumPeople(@Nullable Bundle extras) {
             if (extras != null) {
                 ArrayList<Person> people = extras.getParcelableArrayList(
-                        Notification.EXTRA_PEOPLE_LIST);
+                        Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
                 if (people != null && !people.isEmpty()) {
                     return people.size();
                 }
@@ -450,6 +470,69 @@ public interface NotificationRecordLogger {
 
     }
 
+    /** Data object corresponding to a NotificationReported atom.
+     *
+     * Fields must be kept in sync with frameworks/proto_logging/stats/atoms.proto.
+     */
+    class NotificationReported {
+        final int event_id;
+        final int uid;
+        final String package_name;
+        final int instance_id;
+        final int notification_id_hash;
+        final int channel_id_hash;
+        final int group_id_hash;
+        final int group_instance_id;
+        final boolean is_group_summary;
+        final String category;
+        final int style;
+        final int num_people;
+        final int position;
+        final int importance;
+        final int alerting;
+        final int importance_source;
+        final int importance_initial;
+        final int importance_initial_source;
+        final int importance_asst;
+        final int assistant_hash;
+        final float assistant_ranking_score;
+        final boolean is_ongoing;
+        final boolean is_foreground_service;
+        final long timeout_millis;
+        final boolean is_non_dismissible;
+        @DurationMillisLong long post_duration_millis; // Not final; calculated at the end.
+
+        NotificationReported(NotificationRecordPair p,
+                NotificationReportedEvent eventType, int position, int buzzBeepBlink,
+                InstanceId groupId) {
+            this.event_id = eventType.getId();
+            this.uid = p.r.getUid();
+            this.package_name = p.r.getSbn().getPackageName();
+            this.instance_id = p.getInstanceId();
+            this.notification_id_hash = p.getNotificationIdHash();
+            this.channel_id_hash = p.getChannelIdHash();
+            this.group_id_hash = p.getGroupIdHash();
+            this.group_instance_id = (groupId == null) ? 0 : groupId.getId();
+            this.is_group_summary = p.r.getSbn().getNotification().isGroupSummary();
+            this.category = p.r.getSbn().getNotification().category;
+            this.style = p.getStyle();
+            this.num_people = p.getNumPeople();
+            this.position = position;
+            this.importance = NotificationRecordLogger.getLoggingImportance(p.r);
+            this.alerting = buzzBeepBlink;
+            this.importance_source = p.r.getImportanceExplanationCode();
+            this.importance_initial = p.r.getInitialImportance();
+            this.importance_initial_source = p.r.getInitialImportanceExplanationCode();
+            this.importance_asst = p.r.getAssistantImportance();
+            this.assistant_hash = p.getAssistantHash();
+            this.assistant_ranking_score = p.r.getRankingScore();
+            this.is_ongoing = p.r.getSbn().isOngoing();
+            this.is_foreground_service = NotificationRecordLogger.isForegroundService(p.r);
+            this.timeout_millis = p.r.getSbn().getNotification().getTimeoutAfter();
+            this.is_non_dismissible = NotificationRecordLogger.isNonDismissible(p.r);
+        }
+    }
+
     /**
      * @param r NotificationRecord
      * @return Logging importance of record, taking important conversation channels into account.
@@ -472,5 +555,16 @@ public interface NotificationRecordLogger {
             return false;
         }
         return (r.getSbn().getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+    }
+
+    /**
+     * @param r NotificationRecord
+     * @return Whether the notification is a non-dismissible notification.
+     */
+    static boolean isNonDismissible(@NonNull NotificationRecord r) {
+        if (r.getSbn() == null || r.getSbn().getNotification() == null) {
+            return false;
+        }
+        return (r.getNotification().flags & Notification.FLAG_NO_DISMISS) != 0;
     }
 }

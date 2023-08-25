@@ -720,11 +720,14 @@ public class RingtoneManager {
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             AudioAttributes audioAttributes) {
         // Don't set the stream type
-        Ringtone ringtone =
-                getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig, false);
+        Ringtone ringtone = getRingtone(context, ringtoneUri, -1 /* streamType */,
+                volumeShaperConfig, false);
         if (ringtone != null) {
             ringtone.setAudioAttributesField(audioAttributes);
-            ringtone.createLocalMediaPlayer();
+            if (!ringtone.createLocalMediaPlayer()) {
+                Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
+                return null;
+            }
         }
         return ringtone;
     }
@@ -750,19 +753,6 @@ public class RingtoneManager {
                 createLocalMediaPlayer);
     }
 
-    //FIXME bypass the notion of stream types within the class
-    /**
-     * Returns a {@link Ringtone} with {@link VolumeShaper} if required for a given sound URI on
-     * the given stream type. Normally, if you change the stream type on the returned
-     * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
-     * an optimized route to avoid that.
-     *
-     * @param streamType The stream type for the ringtone, or -1 if it should
-     *            not be set (and the default used instead).
-     * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
-     * @see #getRingtone(Context, Uri)
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType,
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             boolean createLocalMediaPlayer) {
@@ -776,7 +766,10 @@ public class RingtoneManager {
             r.setVolumeShaperConfig(volumeShaperConfig);
             r.setUri(ringtoneUri, volumeShaperConfig);
             if (createLocalMediaPlayer) {
-                r.createLocalMediaPlayer();
+                if (!r.createLocalMediaPlayer()) {
+                    Log.e(TAG, "Failed to open ringtone " + ringtoneUri);
+                    return null;
+                }
             }
             return r;
         } catch (Exception ex) {
@@ -833,6 +826,21 @@ public class RingtoneManager {
         if(!isInternalRingtoneUri(ringtoneUri)) {
             ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         }
+
+        if (ringtoneUri != null) {
+            final String mimeType = resolver.getType(ringtoneUri);
+            if (mimeType == null) {
+                Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                        + " ignored: failure to find mimeType (no access from this context?)");
+                return;
+            }
+            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
+                Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                        + " ignored: associated mimeType:" + mimeType + " is not an audio type");
+                return;
+            }
+        }
+
         Settings.System.putStringForUser(resolver, setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
 
@@ -1158,22 +1166,36 @@ public class RingtoneManager {
             }
 
             // Try finding the scanned ringtone
-            final String filename = getDefaultRingtoneFilename(type);
-            final String whichAudio = getQueryStringForType(type);
-            final String where = MediaColumns.DISPLAY_NAME + "=? AND " + whichAudio + "=?";
-            final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
-            try (Cursor cursor = context.getContentResolver().query(baseUri,
-                    new String[] { MediaColumns._ID },
-                    where,
-                    new String[] { filename, "1" }, null)) {
-                if (cursor.moveToFirst()) {
-                    final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
-                            ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
-                    RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
-                    Settings.System.putInt(context.getContentResolver(), setting, 1);
-                }
+            Uri ringtoneUri = computeDefaultRingtoneUri(context, type);
+            if (ringtoneUri != null) {
+                RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
+                Settings.System.putInt(context.getContentResolver(), setting, 1);
             }
         }
+    }
+
+    /**
+     * @param type the type of ringtone (e.g {@link #TYPE_RINGTONE})
+     * @return the system default URI if found, null otherwise.
+     */
+    private static Uri computeDefaultRingtoneUri(@NonNull Context context, int type) {
+        // Try finding the scanned ringtone
+        final String filename = getDefaultRingtoneFilename(type);
+        final String whichAudio = getQueryStringForType(type);
+        final String where = MediaColumns.DISPLAY_NAME + "=? AND " + whichAudio + "=?";
+        final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+        try (Cursor cursor = context.getContentResolver().query(baseUri,
+                new String[] { MediaColumns._ID },
+                where,
+                new String[] { filename, "1" }, null)) {
+            if (cursor.moveToFirst()) {
+                final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
+                        ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
+                return ringtoneUri;
+            }
+        }
+
+        return null;
     }
 
     private static String getDefaultRingtoneSetting(int type) {

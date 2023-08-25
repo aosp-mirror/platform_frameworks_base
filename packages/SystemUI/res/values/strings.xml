@@ -142,7 +142,7 @@
     <string name="usb_debugging_secondary_user_title">USB debugging not allowed</string>
 
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
-    <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
+    <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to an admin user.</string>
 
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=80] -->
     <string name="hdmi_cec_set_menu_language_title">Do you want to change the system language to <xliff:g id="language" example="German">%1$s</xliff:g>?</string>
@@ -172,7 +172,7 @@
     <string name="wifi_debugging_secondary_user_title">Wireless debugging not allowed</string>
 
     <!-- Message of notification shown when trying to enable wireless debugging but a secondary user is the current foreground user. [CHAR LIMIT=NONE] -->
-    <string name="wifi_debugging_secondary_user_message">The user currently signed in to this device can\u2019t turn on wireless debugging. To use this feature, switch to the primary user.</string>
+    <string name="wifi_debugging_secondary_user_message">The user currently signed in to this device can\u2019t turn on wireless debugging. To use this feature, switch to an admin user.</string>
 
     <!-- Title of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_title">USB port disabled</string>
@@ -191,8 +191,8 @@
 
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
-    <!-- Message shown in power menu when smart lock has been disabled [CHAR_LIMIT=NONE] -->
-    <string name="global_action_smart_lock_disabled">Smart Lock disabled</string>
+    <!-- Message shown in power menu when Extend Unlock has been disabled [CHAR_LIMIT=NONE] -->
+    <string name="global_action_smart_lock_disabled">Extend Unlock disabled</string>
 
     <!-- text to show in place of RemoteInput images when they cannot be shown.
          [CHAR LIMIT=50] -->
@@ -247,27 +247,26 @@
     <string name="screenshot_detected_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> detected this screenshot.</string>
     <!-- A notice shown to the user to indicate that multiple apps have detected the screenshot that the user has just taken. [CHAR LIMIT=75] -->
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
+    <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
+    <string name="app_clips_save_add_to_note">Add to note</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_name">Screen Recorder</string>
+    <string name="screenrecord_title">Screen Recorder</string>
     <!-- Processing screen recoding video in the background [CHAR LIMIT=30]-->
     <string name="screenrecord_background_processing_label">Processing screen recording</string>
     <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
     <string name="screenrecord_channel_description">Ongoing notification for a screen record session</string>
+
+    <!-- For updated Screen Recording permission dialog (i.e. with PSS)-->
     <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_start_label">Start Recording?</string>
-    <!-- Message reminding the user that sensitive information may be captured during a screen recording [CHAR_LIMIT=NONE]-->
-    <string name="screenrecord_description">While recording, Android System can capture any sensitive information that\u2019s visible on your screen or played on your device. This includes passwords, payment info, photos, messages, and audio.</string>
-    <!-- Dropdown option to record the entire screen [CHAR_LIMIT=30]-->
-    <string name="screenrecord_option_entire_screen">Record entire screen</string>
-    <!-- Dropdown option to record a single app [CHAR_LIMIT=30]-->
-    <string name="screenrecord_option_single_app">Record a single app</string>
+    <string name="screenrecord_permission_dialog_title">Start Recording?</string>
     <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_warning_entire_screen">While you\'re recording, Android has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen">While you’re recording, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_warning_single_app">While you\'re recording an app, Android has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <string name="screenrecord_permission_dialog_warning_single_app">While you’re recording an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Button to start a screen recording in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
-    <string name="screenrecord_start_recording">Start recording</string>
+    <string name="screenrecord_permission_dialog_continue">Start recording</string>
+
     <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
     <string name="screenrecord_audio_label">Record audio</string>
     <!-- Label for the option to record audio from the device [CHAR LIMIT=NONE]-->
@@ -279,7 +278,7 @@
     <!-- Label for an option to record audio from both device and microphone [CHAR LIMIT=NONE]-->
     <string name="screenrecord_device_audio_and_mic_label">Device audio and microphone</string>
     <!-- Button to start a screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_start">Start</string>
+    <string name="screenrecord_continue">Start</string>
     <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
     <string name="screenrecord_ongoing_screen_only">Recording screen</string>
     <!-- Notification text displayed when we are recording both the screen and audio [CHAR LIMIT=100]-->
@@ -296,9 +295,8 @@
     <string name="screenrecord_save_title">Screen recording saved</string>
     <!-- Subtext for a notification shown after saving a screen recording to prompt the user to view it [CHAR_LIMIT=100] -->
     <string name="screenrecord_save_text">Tap to view</string>
-    <!-- A toast message shown when there is an error deleting a screen recording [CHAR LIMIT=NONE] -->
-    <string name="screenrecord_delete_error">Error deleting screen recording</string>
-    <!-- A toast message shown when the screen recording cannot be started due to insufficient permissions [CHAR LIMIT=NONE] -->
+    <!-- A toast message shown when there is an error saving a screen recording [CHAR LIMIT=NONE] -->
+    <string name="screenrecord_save_error">Error saving screen recording</string>
     <!-- A toast message shown when the screen recording cannot be started due to a generic error [CHAR LIMIT=NONE] -->
     <string name="screenrecord_start_error">Error starting screen recording</string>
 
@@ -355,7 +353,7 @@
     <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
     <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
-    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face. Press the unlock icon to continue.</string>
+    <string name="biometric_dialog_tap_confirm_with_face">Unlocked by face</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
     <string name="biometric_dialog_tap_confirm_with_face_alt_1">Unlocked by face. Press to continue.</string>
     <!-- Message shown when a biometric has authenticated with a user's face and is waiting for the user to confirm authentication [CHAR LIMIT=60]-->
@@ -402,7 +400,34 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
     <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
-
+    <!-- Confirmation button label for a dialog shown when the system requires the user to re-enroll their biometrics. [CHAR LIMIT=20] -->
+    <string name="biometric_re_enroll_dialog_confirm">Set up</string>
+    <!-- Cancel button label for a dialog shown when the system requires the user to re-enroll their biometric. [CHAR LIMIT=20] -->
+    <string name="biometric_re_enroll_dialog_cancel">Not now</string>
+    <!-- Notification content shown when the system requires the user to re-enroll their biometrics. [CHAR LIMIT=NONE] -->
+    <string name="biometric_re_enroll_notification_content">This is required to improve security and performance</string>
+    <!-- Notification title shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_notification_title">Set up Fingerprint Unlock again</string>
+    <!-- Name shown for system notifications related to the fingerprint unlock feature. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_notification_name">Fingerprint Unlock</string>
+    <!-- Title for a dialog shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_title">Set up Fingerprint Unlock</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_content">To set up Fingerprint Unlock again, your current fingerprint images and models will be deleted.\n\nAfter they\’re deleted, you\’ll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify it\’s you.</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their fingerprint (singular). [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_re_enroll_dialog_content_singular">To set up Fingerprint Unlock again, your current fingerprint images and model will be deleted.\n\nAfter they\’re deleted, you\’ll need to set up Fingerprint Unlock again to use your fingerprint to unlock your phone or verify it\’s you.</string>
+    <!-- Content for a dialog shown when an error occurs while the user is trying to re-enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_reenroll_failure_dialog_content">Couldn\u2019t set up fingerprint unlock. Go to Settings to try again.</string>
+    <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_notification_title">Set up Face Unlock again</string>
+    <!-- Name shown for system notifications related to the face unlock feature. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_notification_name">Face Unlock</string>
+    <!-- Title for a dialog shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_dialog_title">Set up Face Unlock</string>
+    <!-- Content for a dialog shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_re_enroll_dialog_content">To set up Face Unlock again, your current face model will be deleted.\n\nYou\’ll need to set up this feature again to use your face to unlock your phone.</string>
+    <!-- Content for a dialog shown when an error occurs while the user is trying to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_reenroll_failure_dialog_content">Couldn\u2019t set up face unlock. Go to Settings to try again.</string>
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
@@ -755,6 +780,15 @@
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
 
+    <!-- QuickSettings: Contrast tile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_label">Contrast</string>
+    <!-- QuickSettings: Contrast tile description: standard [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_standard">Standard</string>
+    <!-- QuickSettings: Contrast tile description: medium [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_medium">Medium</string>
+    <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_contrast_high">High</string>
+
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
     <!--- Title of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=150] -->
@@ -805,6 +839,62 @@
         Microphone and camera available
     </string>
 
+    <!--- Title of dialog triggered if the microphone sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_turned_on_dialog_title">
+        Microphone turned on
+    </string>
+
+    <!--- Title of dialog triggered if the microphone sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_turned_off_dialog_title">
+        Microphone turned off
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_unblocked_dialog_content">
+        Microphone is enabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are no active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content">
+        Microphone access is disabled for all apps and services.
+        You can enable microphone access in Settings &gt; Privacy &gt; Microphone.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content">
+        Microphone access is disabled for all apps and services.
+        You can change this in Settings &gt; Privacy &gt; Microphone.
+    </string>
+
+    <!--- Title of dialog triggered if the camera sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_turned_on_dialog_title">
+        Camera turned on
+    </string>
+
+    <!--- Title of dialog triggered if the camera sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_turned_off_dialog_title">
+        Camera turned off
+    </string>
+
+    <!--- Content of dialog triggered if the camera sensor privacy changed its state to unblocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_unblocked_dialog_content">
+        Camera is enabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the camera sensor privacy changed its state to blocked. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_camera_blocked_dialog_content">
+        Camera access is disabled for all apps and services.
+    </string>
+
+    <!--- Content of dialog triggered if the microphone sensor privacy changed its state to blocked.
+        and there are active exceptions for explicit user interaction [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_htt_blocked_dialog_content">To use the microphone button, enable microphone access in Settings.</string>
+
+    <!-- Sensor privacy dialog: Button to open system settings [CHAR LIMIT=50] -->
+    <string name="sensor_privacy_dialog_open_settings">Open Settings</string>
+
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_other_device">Other device</string>
 
@@ -853,14 +943,6 @@
     <string name="keyguard_face_successful_unlock">Unlocked by face</string>
     <!-- Message shown when non-bypass face authentication succeeds. [CHAR LIMIT=60] -->
     <string name="keyguard_face_successful_unlock_alt1">Face recognized</string>
-
-    <!-- Messages shown when users press outside of udfps region during -->
-    <string-array name="udfps_accessibility_touch_hints">
-        <item>Move left</item>
-        <item>Move down</item>
-        <item>Move right</item>
-        <item>Move up</item>
-    </string-array>
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
@@ -978,47 +1060,52 @@
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="user_remove_user_remove">Remove</string>
 
-    <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
-
-    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_text">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
-
-    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_title">Start recording or casting?</string>
-
+    <!-- Media projection without Partial Screenshare -->
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
+    <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_warning"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
+    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_sys_service_dialog_title">Start recording or casting?</string>
+    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_sys_service_dialog_warning">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
-    <!-- Media projection permission dialog title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_permission_dialog_title">Allow <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> to share or record?</string>
-
-    <!-- Media projection permission dropdown option for capturing the whole screen. [CHAR LIMIT=30] -->
-    <string name="media_projection_permission_dialog_option_entire_screen">Entire screen</string>
-
-    <!-- Media projection permission dropdown option for capturing single app. [CHAR LIMIT=30] -->
-    <string name="media_projection_permission_dialog_option_single_app">A single app</string>
-
-    <!-- Media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_warning_entire_screen">When you\'re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
-
-    <!-- Media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_warning_single_app">When you\'re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
-
-    <!-- Media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
-    <string name="media_projection_permission_dialog_continue">Continue</string>
-
+    <!-- Permission dropdown option for sharing or recording the whole screen. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_entire_screen">Entire screen</string>
+    <!-- Permission dropdown option for sharing or recording single app. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_single_app">A single app</string>
     <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
-    <string name="media_projection_permission_app_selector_title">Share or record an app</string>
+    <string name="screen_share_permission_app_selector_title">Share or record an app</string>
 
-    <!-- Media projection permission dialog title when there is no app name (e.g. it could be a system service when casting). [CHAR LIMIT=100] -->
-    <string name="media_projection_permission_dialog_system_service_title">Allow this app to share or record?</string>
+    <!-- Media projection that launched from 1P/3P apps -->
+    <!-- 1P/3P app media projection permission dialog title. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_entry_app_permission_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
+    <!-- 1P/3P app media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- 1P/3P app media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
 
-    <!-- Media projection permission warning for capturing the whole screen when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen">When you\'re sharing, recording, or casting, this app has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
+    <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
+    <string name="media_projection_entry_cast_permission_dialog_title">Start casting?</string>
+    <!-- System casting media projection permission warning for capturing the whole screen when SysUI casting requests it. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System casting media projection permission warning for capturing a single app when SysUI casting requests it. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_cast_permission_dialog_continue">Start casting</string>
 
-    <!-- Media projection permission warning for capturing a single app when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_system_service_warning_single_app">When you\'re sharing, recording, or casting an app, this app has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Other sharing (not recording nor casting) that launched by SysUI (currently not in use) -->
+    <!-- System sharing media projection permission dialog title. [CHAR LIMIT=100] -->
+    <string name="media_projection_entry_generic_permission_dialog_title">Start sharing?</string>
+    <!-- System sharing media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System sharing media projection permission warning for capturing a single app. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System sharing media projection permission button to continue. [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_generic_permission_dialog_continue">Start</string>
 
     <!-- Title for the dialog that is shown when screen capturing is disabled by enterprise policy. [CHAR LIMIT=100] -->
     <string name="screen_capturing_disabled_by_policy_dialog_title">Blocked by your IT admin</string>
@@ -1169,7 +1256,10 @@
     <string name="monitoring_description_managed_profile_network_logging">Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile.</string>
 
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
+    <string name="monitoring_description_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to the VPN provider.</string>
+
+    <!-- Monitoring dialog: Description of an active VPN on a managed device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_device_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
 
     <!-- Monitoring dialog: Description of two active VPNs. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_two_named_vpns">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> and <xliff:g id="vpn_app" example="Bar VPN App">%2$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
@@ -1219,6 +1309,19 @@
     <string name="sound_settings">Sound &amp; vibration</string>
     <!-- Label for button to go to sound settings screen [CHAR_LIMIT=30] -->
     <string name="volume_panel_dialog_settings_button">Settings</string>
+
+    <!-- Title for notification after audio lowers -->
+    <string name="csd_lowered_title" product="default">Volume lowered to safer level</string>
+    <!-- Message shown in notification after system lowers audio -->
+    <string name="csd_system_lowered_text" product="default">Headphone volume has been high for longer than recommended</string>
+    <!-- Message shown in notification after system lowers audio after 500% of
+         sound dosage is reached.
+    -->
+    <string name="csd_500_system_lowered_text" product="default">Headphone volume has exceeded the safe limit for this week</string>
+    <!-- Message for sound dose warning dialog button to keep listening -->
+    <string name="csd_button_keep_listening" product="default">Keep listening</string>
+    <!-- Message for sound dose warning dialog button to lower volume -->
+    <string name="csd_button_lower_volume" product="default">Lower volume</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
@@ -1650,34 +1753,105 @@
     <string name="keyboard_shortcut_group_system">System</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->
     <string name="keyboard_shortcut_group_system_home">Home</string>
-    <!-- User visible title for the the keyboard shortcut that takes the user to the recents screen. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the recents screen. -->
     <string name="keyboard_shortcut_group_system_recents">Recents</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the back action. -->
+    <!-- User visible title for the keyboard shortcut that triggers the back action. -->
     <string name="keyboard_shortcut_group_system_back">Back</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the notification shade. -->
+    <!-- User visible title for the keyboard shortcut that triggers the notification shade. -->
     <string name="keyboard_shortcut_group_system_notifications">Notifications</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the keyboard shortcuts helper. -->
+    <!-- User visible title for the keyboard shortcut that triggers the keyboard shortcuts helper. -->
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
-    <!-- User visible title for the the keyboard shortcut that switches to the next hardware keyboard layout. [CHAR LIMIT=30] -->
+    <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
     <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
 
-    <!-- User visible title for the system-wide applications keyboard shortcuts list. -->
+    <!-- Content description for the clear text button in shortcut search list. [CHAR LIMIT=NONE] -->
+    <string name="keyboard_shortcut_clear_text">Clear text</string>
+    <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
+    <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
+    <!-- The description for no shortcuts results [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_no_result">No shortcuts found</string>
+    <!-- The title of system category in shortcut search list. [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_category_system">System</string>
+    <!-- The title of input category in shortcut search list. [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_category_input">Input</string>
+    <!-- The title of open apps category in shortcut search list. [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_category_open_apps">Open apps</string>
+    <!-- The title of current app category in shortcut search list. [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_category_current_app">Current app</string>
+
+    <!-- User visible title for the keyboard shortcut that triggers the notification shade. [CHAR LIMIT=70] -->
+    <string name="group_system_access_notification_shade">Access notification shade</string>
+    <!-- User visible title for the keyboard shortcut that takes a full screenshot. [CHAR LIMIT=70] -->
+    <string name="group_system_full_screenshot">Take a full screenshot</string>
+    <!-- User visible title for the keyboard shortcut that access list of system / apps shortcuts. [CHAR LIMIT=70] -->
+    <string name="group_system_access_system_app_shortcuts">Access list of system / apps shortcuts</string>
+    <!-- User visible title for the keyboard shortcut that goes back to previous state. [CHAR LIMIT=70] -->
+    <string name="group_system_go_back">Back: go back to previous state (back button)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the home screen. [CHAR LIMIT=70] -->
+    <string name="group_system_access_home_screen">Access home screen</string>
+    <!-- User visible title for the keyboard shortcut that triggers overview of open apps. [CHAR LIMIT=70] -->
+    <string name="group_system_overview_open_apps">Overview of open apps</string>
+    <!-- User visible title for the keyboard shortcut that cycles through recent apps (forward). [CHAR LIMIT=70] -->
+    <string name="group_system_cycle_forward">Cycle through recent apps (forward)</string>
+    <!-- User visible title for the keyboard shortcut that cycles through recent apps (back). [CHAR LIMIT=70] -->
+    <string name="group_system_cycle_back">Cycle through recent apps (back)</string>
+    <!-- User visible title for the keyboard shortcut that accesses list of all apps and search. [CHAR LIMIT=70] -->
+    <string name="group_system_access_all_apps_search">Access list of all apps and search (i.e. Search/Launcher)</string>
+    <!-- User visible title for the keyboard shortcut that hides and (re)showes taskbar. [CHAR LIMIT=70] -->
+    <string name="group_system_hide_reshow_taskbar">Hide and (re)show taskbar</string>
+    <!-- User visible title for the keyboard shortcut that accesses system settings. [CHAR LIMIT=70] -->
+    <string name="group_system_access_system_settings">Access system settings</string>
+    <!-- User visible title for the keyboard shortcut that accesses Google Assistant. [CHAR LIMIT=70] -->
+    <string name="group_system_access_google_assistant">Access Google Assistant</string>
+    <!-- User visible title for the keyboard shortcut that locks screen. [CHAR LIMIT=70] -->
+    <string name="group_system_lock_screen">Lock screen</string>
+    <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
+    <string name="group_system_quick_memo">Pull up Notes app for quick memo</string>
+
+    <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
+    <string name="system_multitasking_rhs">Enter Split screen with current app to RHS</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
+    <string name="system_multitasking_lhs">Enter Split screen with current app to LHS</string>
+    <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_full_screen">Switch from Split screen to full screen</string>
+    <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_replace">During Split screen: replace an app from one to another</string>
+
+    <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_input">Input</string>
+    <!-- User visible title for the keyboard shortcut that switches input language (next language). [CHAR LIMIT=70] -->
+    <string name="input_switch_input_language_next">Switch input language (next language)</string>
+    <!-- User visible title for the keyboard shortcut that switches input language (previous language). [CHAR LIMIT=70] -->
+    <string name="input_switch_input_language_previous">Switch input language (previous language)</string>
+    <!-- User visible title for the keyboard shortcut that accesses emoji. [CHAR LIMIT=70] -->
+    <string name="input_access_emoji">Access emoji</string>
+    <!-- User visible title for the keyboard shortcut that accesses voice typing. [CHAR LIMIT=70] -->
+    <string name="input_access_voice_typing">Access voice typing</string>
+
+    <!-- User visible title for the system-wide applications keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications">Applications</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the assist app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the assist app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_assist">Assist</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the browser app. -->
-    <string name="keyboard_shortcut_group_applications_browser">Browser</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the browser app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_browser">Browser (Chrome as default)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_contacts">Contacts</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the email app. -->
-    <string name="keyboard_shortcut_group_applications_email">Email</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the email app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_email">Email (Gmail as default)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_sms">SMS</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the music app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the music app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_music">Music</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the YouTube app. -->
-    <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_calendar">Calendar</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the calculator app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_calculator">Calculator</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the maps app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_maps">Maps</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
@@ -2214,14 +2388,64 @@
     <string name="magnification_mode_switch_state_full_screen">Magnify full screen</string>
     <!-- A11y state description for magnification mode switch that device is in window mode. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
-    <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
-    <string name="magnification_mode_switch_click_label">Switch</string>
+    <!-- Click action label for magnification settings panel. [CHAR LIMIT=NONE] -->
+    <string name="magnification_open_settings_click_label">Open magnification settings</string>
+    <!-- Label of the corner of a rectangle that you can tap and drag to resize the magnification area. [CHAR LIMIT=NONE] -->
+    <string name="magnification_drag_corner_to_resize">Drag corner to resize</string>
+
+    <!-- Title of the magnification option button allow diagonal scrolling [CHAR LIMIT=NONE]-->
+    <string name="accessibility_allow_diagonal_scrolling">Allow diagonal scrolling</string>
+    <!-- Title of the magnification option button Resize [CHAR LIMIT=NONE]-->
+    <string name="accessibility_resize">Resize</string>
+    <!-- Title of the magnification option button Change type [CHAR LIMIT=NONE]-->
+    <string name="accessibility_change_magnification_type">Change magnification type</string>
+    <!-- Title of the magnification option button End resizing [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_end_resizing">End resizing</string>
+
+    <!-- Description of the window magnification Top handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_top_handle">Top handle</string>
+    <!-- Description of the window magnification Left handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_left_handle">Left handle</string>
+    <!-- Description of the window magnification Right handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_right_handle">Right handle</string>
+    <!-- Description of the window magnification Bottom handle [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_bottom_handle">Bottom handle</string>
+
+    <!-- Description of the window magnification panel [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_settings_panel_description">Magnification settings</string>
+    <!-- Title of the window magnification panel option Magnifier size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnifier_size">Magnifier size</string>
+    <!-- Title of the window magnification panel option Zoom [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_zoom">Zoom</string>
+    <!-- Click action label for magnification panel medium size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_medium">Medium</string>
+    <!-- Click action label for magnification panel small size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_small">Small</string>
+    <!-- Click action label for magnification panel large size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_large">Large</string>
+    <!-- Click action label for magnification panel full screen size [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_fullscreen">Full screen</string>
+    <!-- Click action label for magnification panel Done [CHAR LIMIT=20]-->
+    <string name="accessibility_magnification_done">Done</string>
+    <!-- Click action label for edit magnification size [CHAR LIMIT=20]-->
+    <string name="accessibility_magnifier_edit">Edit</string>
+    <!-- Click action label for magnification panel settings [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_magnifier_window_settings">Magnifier window settings</string>
 
     <!-- Accessibility floating menu strings -->
     <!-- Message for the accessibility floating button migration tooltip. It shows when the user use gestural navigation then upgrade their system. It will tell the user they could customize or replace the floating button in Settings. [CHAR LIMIT=100] -->
     <string name="accessibility_floating_button_migration_tooltip">Tap to open accessibility features. Customize or replace this button in Settings.\n\n<annotation id="link">View settings</annotation></string>
     <!-- Message for the accessibility floating button docking tooltip. It shows when the user first time drag the button. It will tell the user about docking behavior. [CHAR LIMIT=70] -->
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
+    <!-- Text for the undo action button of the message view of the accessibility floating menu to perform undo operation. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo">Undo</string>
+    <!-- Text for the message view with undo action of the accessibility floating menu to show which feature shortcut was removed. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo_message_label_text"><xliff:g id="feature name" example="Magnification">%s</xliff:g> shortcut removed</string>
+    <!-- Text for the message view with undo action of the accessibility floating menu to show how many features shortcuts were removed. [CHAR LIMIT=30]-->
+    <string name="accessibility_floating_button_undo_message_number_text">{count, plural,
+        =1 {# shortcut removed}
+        other {# shortcuts removed}
+    }</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top left of the screen. [CHAR LIMIT=30] -->
     <string name="accessibility_floating_button_action_move_top_left">Move top left</string>
     <!-- Action in accessibility menu to move the accessibility floating button to the top right of the screen. [CHAR LIMIT=30] -->
@@ -2234,6 +2458,8 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half">Move to edge and hide</string>
     <!-- Action in accessibility menu to move the accessibility floating button out the edge and show. [CHAR LIMIT=36]-->
     <string name="accessibility_floating_button_action_move_out_edge_and_show">Move out edge and show</string>
+    <!-- Action in accessibility menu to remove the accessibility floating menu view on the screen. [CHAR LIMIT=36]-->
+    <string name="accessibility_floating_button_action_remove_menu">Remove</string>
     <!-- Action in accessibility menu to toggle on/off the accessibility feature. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_action_double_tap_to_toggle">toggle</string>
 
@@ -2280,7 +2506,7 @@
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_favorite_subtitle">Choose controls to access from Quick Settings</string>
+    <string name="controls_favorite_subtitle">Choose device controls to access quickly</string>
     <!-- Controls management editing screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_rearrange">Hold &amp; drag to rearrange controls</string>
 
@@ -2292,6 +2518,15 @@
 
     <!-- Controls management favorites screen. See other apps button [CHAR LIMIT=30] -->
     <string name="controls_favorite_see_other_apps">See other apps</string>
+
+    <!-- Controls management favorites screen. Rearrange controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_rearrange_button">Rearrange</string>
+
+    <!-- Controls management edit screen. Add controls button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_add_controls">Add controls</string>
+
+    <!-- Controls management edit screen. Return to editing button [CHAR LIMIT=30]-->
+    <string name="controls_favorite_back_to_editing">Back to editing</string>
 
     <!-- Controls management controls screen error on load message [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_load_error">Controls could not be loaded. Check the <xliff:g id="app" example="System UI">%s</xliff:g> app to make sure that the app settings haven\u2019t changed.</string>
@@ -2347,7 +2582,7 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
@@ -2360,6 +2595,8 @@
     <string name="controls_media_playing_item_description"><xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> is playing from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
     <!-- Content description for media cotnrols progress bar [CHAR_LIMIT=NONE] -->
     <string name="controls_media_seekbar_description"><xliff:g id="elapsed_time" example="1:30">%1$s</xliff:g> of <xliff:g id="total_time" example="3:00">%2$s</xliff:g></string>
+    <!-- Placeholder title to inform user that an app has posted media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_empty_title"><xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g> is running</string>
 
     <!-- Description for button in media controls. Pressing button starts playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_button_play">Play</string>
@@ -2456,8 +2693,11 @@
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
     <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_suggested_device">Suggested Devices</string>
-    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_require_premium">Requires premium account</string>
+    <!-- Summary for end session dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_end_session_dialog_summary">Stop your shared session to move media to another device</string>
+    <!-- Button text for stopping session [CHAR LIMIT=60] -->
+    <string name="media_output_end_session_dialog_stop">Stop</string>
+
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
@@ -2484,8 +2724,8 @@
     <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
     <!-- The hint message when Broadcast code is less than 4 characters [CHAR LIMIT=60] -->
     <string name="media_output_broadcast_code_hint_no_less_than_min">Use at least 4 characters</string>
-    <!-- The hint message when Broadcast code is more than 16 characters [CHAR LIMIT=60] -->
-    <string name="media_output_broadcast_code_hint_no_more_than_max">Use fewer than 16 characters</string>
+    <!-- The hint message when Broadcast edit is more than 16/254 characters [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_edit_hint_no_more_than_max">Use fewer than <xliff:g id="length" example="16">%1$d</xliff:g> characters</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
@@ -2705,7 +2945,7 @@
     <string name="manage_users">Manage users</string>
 
     <!-- Toast shown when a notification does not support dragging to split [CHAR LIMIT=NONE] -->
-    <string name="drag_split_not_supported">This notification does not support dragging to Splitscreen.</string>
+    <string name="drag_split_not_supported">This notification does not support dragging to split screen</string>
 
     <!-- Content description for the Wi-Fi off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_wifi_off">Wi\u2011Fi unavailable</string>
@@ -2719,6 +2959,8 @@
     <string name="dream_overlay_status_bar_mic_off">Mic is off</string>
     <!-- Content description for the camera and mic off icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_camera_mic_off">Camera and mic are off</string>
+    <!-- Content description for the assistant attention indicator [CHAR LIMIT=NONE] -->
+    <string name="dream_overlay_status_bar_assistant_attention_indicator">Assistant is listening</string>
     <!-- Content description for the notifications indicator icon in the dream overlay status bar [CHAR LIMIT=NONE] -->
     <string name="dream_overlay_status_bar_notification_indicator">{count, plural,
     =1 {# notification}
@@ -2752,45 +2994,77 @@
     <!-- Time format for the Dream Time Complication for 24-hour time format [CHAR LIMIT=NONE] -->
     <string name="dream_time_complication_24_hr_time_format">kk:mm</string>
 
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
+    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
+    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="log_access_confirmation_allow">Allow one-time access</string>
+    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
+
+    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
+    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
+        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
+    </string>
+
+    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
+    <string name="log_access_confirmation_learn_more_url" translatable="false">https://support.google.com/android/answer/12986432</string>
+    <string name="log_access_confirmation_learn_more">Learn more</string>
+    <string name="log_access_confirmation_learn_more_at">Learn more at <xliff:g id="url" example="g.co/android/devicelogs">%s</xliff:g></string>
+
     <!--
     Template for an action that opens a specific app. [CHAR LIMIT=16]
     -->
     <string name="keyguard_affordance_enablement_dialog_action_template">Open <xliff:g id="appName" example="Wallet">%1$s</xliff:g></string>
 
-    <!--
-    Requirement for the wallet app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    <!---
+    Explains that the wallet app is not available because it is not installed. This is shown as part
+    of a dialog that explains to the user why they cannot select this shortcut for their lock screen
+    right now.
+    [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1">&#8226; The app is set up</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app">To add the Wallet app as a shortcut, make sure the app is installed</string>
 
-    <!--
-    Requirement for the wallet app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    <!---
+    Explains that the wallet app is not available because it is not installed. This is shown as part
+    of a dialog that explains to the user why they cannot select this shortcut for their lock screen
+    right now.
+    [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2">&#8226; At least one card has been added to Wallet</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app">To add the Wallet app as a shortcut, make sure at least one card has been added</string>
 
     <!--
     Requirement for the QR code scanner functionality to be available for the user to use. This is
     shown as part of a bulleted list of requirements. When all requirements are met, the piece of
     functionality can be accessed through a shortcut button on the lock screen. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction">&#8226; Install a camera app</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation">To add the QR code scanner as a shortcut, make sure a camera app is installed</string>
 
     <!--
-    Requirement for the home app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    Explains that the lock screen shortcut for the "home" app is not available because the app isn't
+    installed. This is shown as part of a dialog that explains to the user why they cannot select
+    this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1">&#8226; The app is set up</string>
+    <string name="home_quick_affordance_unavailable_install_the_app">To add the Home app as a shortcut, make sure the app is installed</string>
 
     <!--
-    Requirement for the home app to be available for the user to use. This is shown as part of a
-    bulleted list of requirements. When all requirements are met, the app can be accessed through a
-    shortcut button on the lock screen. [CHAR LIMIT=NONE].
+    Explains that the lock screen shortcut for the "home" app is not available because the app isn't
+    configured. This is shown as part of a dialog that explains to the user why they cannot select
+    this shortcut for their lock screen right now. [CHAR LIMIT=NONE].
     -->
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app">&#8226; At least one device is available</string>
+
+    <!---
+    Explains that the notes app is not available. This is shown as part of a dialog that explains to
+    the user why they cannot select this shortcut for their lock screen right now.
+    [CHAR LIMIT=NONE].
+    -->
+    <string name="notes_app_quick_affordance_unavailable_explanation">Select a default notes app to use the notetaking shortcut</string>
+
+    <!---
+    The action to make the lock screen shortcut for the notes app to be available for the user to
+    use. This is shown as the action button in the dialog explaining why the shortcut isn't
+    available. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action">Select app</string>
 
     <!--
     Error message shown when a shortcut must be pressed and held to activate it, usually shown when
@@ -2830,26 +3104,36 @@
     <!-- Switch to work profile dialer app for placing a call dialog. -->
     <!-- Text for Switch to work profile dialog's Title. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_title">Can\'t call from this profile</string>
+    <string name="call_from_work_profile_title">Can\'t call from a personal app</string>
     <!-- Text for switch to work profile for call dialog to guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy. [CHAR LIMIT=NONE]
     -->
-    <string name="call_from_work_profile_text">Your work policy allows you to make phone calls only from the work profile</string>
+    <string name="call_from_work_profile_text">Your organization only allows you to make calls from work apps</string>
     <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
     <string name="call_from_work_profile_action">Switch to work profile</string>
+    <!-- Label for the button to switch to work profile for placing call. Switch to work profile dialog guide users to make call from work
+    profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
+    <string name="install_dialer_on_work_profile_action">Install a work phone app</string>
     <!-- Label for the close button on switch to work profile dialog. Switch to work profile dialog guide users to make call from work
     profile dialer app as it's not possible to make call from current profile due to an admin policy.[CHAR LIMIT=60] -->
-    <string name="call_from_work_profile_close">Close</string>
+    <string name="call_from_work_profile_close">Cancel</string>
 
     <!--
-    Label for a menu item in a menu that is shown when the user wishes to configure the lock screen.
+    Label for a menu item in a menu that is shown when the user wishes to customize the lock screen.
     Clicking on this menu item takes the user to a screen where they can modify the settings of the
     lock screen.
 
+    It is critical that this text is as short as possible. If needed, translators should feel free
+    to drop "lock screen" from their translation and keep just "Customize" or "Customization", in
+    cases when that verb is not available in their target language.
+
     [CHAR LIMIT=32]
     -->
-    <string name="lock_screen_settings">Lock screen settings</string>
+    <string name="lock_screen_settings">Customize lock screen</string>
+
+    <!-- Title of security view when we want to authenticate before customizing the lockscreen. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_unlock_to_customize_ls">Unlock to customize lock screen</string>
 
     <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
     <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
@@ -2865,4 +3149,17 @@
 
     <!-- Content description for priority mode icon on dream [CHAR LIMIT=NONE] -->
     <string name="priority_mode_dream_overlay_content_description">Priority mode on</string>
+
+    <!-- Content description for when assistant attention is active [CHAR LIMIT=NONE] -->
+    <string name="assistant_attention_content_description">Assistant attention on</string>
+
+    <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
+    <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
+
+    <!--
+    Label for a button that, when clicked, sends the user to the app store to install an app.
+
+    [CHAR LIMIT=64].
+    -->
+    <string name="install_app">Install app</string>
 </resources>

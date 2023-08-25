@@ -20,6 +20,7 @@
 #include <system/window.h>
 #include <vulkan/vulkan.h>
 
+#include <SkColorSpace.h>
 #include <SkRefCnt.h>
 #include <SkSize.h>
 
@@ -45,6 +46,7 @@ public:
     }
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     const SkM44& getPixelSnapMatrix() const { return mWindowInfo.pixelSnapMatrix; }
 
 private:
@@ -95,6 +97,7 @@ private:
         uint32_t bufferFormat;
         android_dataspace dataspace;
         sk_sp<SkColorSpace> colorspace;
+        ColorMode colorMode;
         int transform;
         size_t bufferCount;
         uint64_t windowUsageFlags;
@@ -113,6 +116,7 @@ private:
                                            WindowInfo* outWindowInfo);
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
     void releaseBuffers();
+    void invalidateBuffers();
 
     // TODO: This number comes from ui/BufferQueueDefs. We're not pulling the
     // header in so that we don't need to depend on libui, but we should share

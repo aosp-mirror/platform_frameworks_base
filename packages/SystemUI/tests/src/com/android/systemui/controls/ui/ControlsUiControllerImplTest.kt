@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.testing.AndroidTestingRunner
@@ -59,8 +60,8 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.wm.shell.TaskView
-import com.android.wm.shell.TaskViewFactory
+import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer
@@ -69,6 +70,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.isNull
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -101,6 +105,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
     private lateinit var parent: FrameLayout
     private lateinit var underTest: ControlsUiControllerImpl
+
+    private var isKeyguardDismissed: Boolean = true
+    private var isRemoveAppDialogCreated: Boolean = false
 
     @Before
     fun setup() {
@@ -138,11 +145,23 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 authorizedPanelsRepository,
                 preferredPanelRepository,
                 featureFlags,
-                ControlsDialogsFactory { fakeDialogController.dialog },
+                ControlsDialogsFactory {
+                    isRemoveAppDialogCreated = true
+                    fakeDialogController.dialog
+                },
                 dumpManager,
             )
         `when`(userTracker.userId).thenReturn(0)
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(0))
+        doAnswer {
+                if (isKeyguardDismissed) {
+                    it.getArgument<ActivityStarter.OnDismissAction>(0).onDismiss()
+                } else {
+                    it.getArgument<Runnable?>(1)?.run()
+                }
+            }
+            .whenever(activityStarter)
+            .dismissKeyguardThenExecute(any(), isNull(), any())
     }
 
     @Test
@@ -234,7 +253,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         val serviceInfo2 = setUpPanel(panel2)
 
         `when`(authorizedPanelsRepository.getAuthorizedPanels())
-                .thenReturn(setOf(packageName1, packageName2))
+            .thenReturn(setOf(packageName1, packageName2))
 
         underTest.show(parent, {}, context)
 
@@ -245,7 +264,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         captor.value.onServicesUpdated(listOf(serviceInfo1, serviceInfo2))
         FakeExecutor.exhaustExecutors(uiExecutor, bgExecutor)
 
-        val header: View = parent.requireViewById(R.id.controls_header)
+        val header: View = parent.requireViewById(R.id.app_or_structure_spinner)
         assertThat(header.isClickable).isTrue()
         assertThat(header.hasOnClickListeners()).isTrue()
     }
@@ -397,7 +416,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
         val panel = SelectedItem.PanelItem("App name", componentName)
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         underTest.show(parent, {}, context)
         underTest.startRemovingApp(componentName, "Test App")
@@ -409,6 +428,46 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             .isEqualTo(SelectedItem.EMPTY_SELECTION)
         assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isFalse()
         assertThat(preferredPanelRepository.getSelectedComponent()).isNull()
+    }
+
+    @Test
+    fun testKeyguardRemovingAppsNotShowingDialog() {
+        isKeyguardDismissed = false
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        preferredPanelRepository.setSelectedComponent(
+            SelectedComponentRepository.SelectedComponent(panel)
+        )
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        assertThat(isRemoveAppDialogCreated).isFalse()
+        verify(controlsController, never()).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList())).isEqualTo(panel)
+        assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isTrue()
+        assertThat(preferredPanelRepository.getSelectedComponent())
+            .isEqualTo(SelectedComponentRepository.SelectedComponent(panel))
+    }
+
+    @Test
+    fun testCancelRemovingAppsDoesntRemoveFavorite() {
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        preferredPanelRepository.setSelectedComponent(
+            SelectedComponentRepository.SelectedComponent(panel)
+        )
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        fakeDialogController.clickNeutral()
+
+        verify(controlsController, never()).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList())).isEqualTo(panel)
+        assertThat(preferredPanelRepository.shouldAddDefaultComponent()).isTrue()
+        assertThat(preferredPanelRepository.getSelectedComponent())
+            .isEqualTo(SelectedComponentRepository.SelectedComponent(panel))
     }
 
     @Test
@@ -457,7 +516,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {
         val activity = ComponentName(context, "activity")
         preferredPanelRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(panel)
+            SelectedComponentRepository.SelectedComponent(panel)
         )
         return ControlsServiceInfo(panel.componentName, panel.appName, activity)
     }
@@ -496,9 +555,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 name = componentName.className
             }
         return spy(ControlsServiceInfo(mContext, serviceInfo)).apply {
-            `when`(loadLabel()).thenReturn(label)
-            `when`(loadIcon()).thenReturn(mock())
-            `when`(panelActivity).thenReturn(panelComponentName)
+            doReturn(label).whenever(this).loadLabel()
+            doReturn(mock<Drawable>()).whenever(this).loadIcon()
+            doReturn(panelComponentName).whenever(this).panelActivity
         }
     }
 

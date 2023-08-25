@@ -52,6 +52,21 @@
     <integer name="config_delay_for_ims_dereg_millis">0</integer>
     <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
 
+    <!-- Define the bar of considering the availability of a subscription is stable in milliseconds,
+         where 0 means immediate switch, and negative milliseconds indicates the auto data switch
+         feature is disabled.-->
+    <integer name="auto_data_switch_availability_stability_time_threshold_millis">10000</integer>
+    <java-symbol type="integer" name="auto_data_switch_availability_stability_time_threshold_millis" />
+
+    <!-- Define the maximum retry times when a validation for switching failed.-->
+    <integer name="auto_data_switch_validation_max_retry">7</integer>
+    <java-symbol type="integer" name="auto_data_switch_validation_max_retry" />
+
+    <!-- Boolean indicating whether ping test is required to pass on the target data SIM before the
+         device automatically switch to it. -->
+    <bool name="auto_data_switch_ping_test_before_switch">true</bool>
+    <java-symbol type="bool" name="auto_data_switch_ping_test_before_switch" />
+
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
          tunnels across service restart. If iwlan tunnels are not persisted across restart,
          Framework will clean up dangling data connections when service restarts -->
@@ -106,6 +121,27 @@
     <string name="config_qualified_networks_service_class" translatable="false"></string>
     <java-symbol type="string" name="config_qualified_networks_service_class" />
 
+    <!-- Telephony satellite service package name to bind to by default. -->
+    <string name="config_satellite_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_service_package" />
+
+    <!-- Telephony satellite gateway service package name to bind to by default. -->
+    <string name="config_satellite_gateway_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_gateway_service_package" />
+
+    <!-- Telephony pointing UI package name to be launched. -->
+    <string name="config_pointing_ui_package" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_package" />
+
+    <!-- Telephony pointing UI class name to be launched. -->
+    <string name="config_pointing_ui_class" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_class" />
+
+    <!-- Telephony resends received satellite datagram to listener
+         if ack is not received within this timeout -->
+    <integer name="config_timeout_to_receive_delivered_ack_millis">300000</integer>
+    <java-symbol type="integer" name="config_timeout_to_receive_delivered_ack_millis" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
@@ -114,18 +150,26 @@
     <bool name="config_enhanced_iwlan_handover_check">true</bool>
     <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
 
-    <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
-    <bool name="config_using_subscription_manager_service">false</bool>
-    <java-symbol type="bool" name="config_using_subscription_manager_service" />
-
     <!-- Whether asynchronously update the subscription database or not. Async mode increases
          the performance, but sync mode reduces the chance of database/cache out-of-sync. -->
     <bool name="config_subscription_database_async_update">true</bool>
     <java-symbol type="bool" name="config_subscription_database_async_update" />
 
-    <!--  Whether to enable getSubscriptionUserHandle() api.
-          If the value is true, return user handle associated with the subscription.
-          If the value is set to false, return null. -->
-    <bool name="config_enable_get_subscription_user_handle">true</bool>
-    <java-symbol type="bool" name="config_enable_get_subscription_user_handle" />
+    <!-- Boolean indicating whether the emergency numbers for a country, sourced from modem/config,
+         should be ignored if that country is 'locked' (i.e. ignore_modem_config set to true) in
+         Android Emergency DB. If this value is true, emergency numbers for a country, sourced from
+         modem/config, will be ignored if that country is 'locked' in Android Emergency DB. -->
+    <bool name="ignore_modem_config_emergency_numbers">false</bool>
+    <java-symbol type="bool" name="ignore_modem_config_emergency_numbers" />
+
+    <!-- Boolean indicating whether emergency numbers routing from the android emergency number
+         database should be ignored (i.e. routing will always be set to UNKNOWN). If this value is
+         true, routing from the android emergency number database will be ignored. -->
+    <bool name="ignore_emergency_number_routing_from_db">false</bool>
+    <java-symbol type="bool" name="ignore_emergency_number_routing_from_db" />
+
+    <!-- Whether "Virtual DSDA", i.e. in-call IMS connectivity can be provided on both subs with
+         only single logical modem, by using its data connection in addition to cellular IMS. -->
+    <bool name="config_enable_virtual_dsda">false</bool>
+    <java-symbol type="bool" name="config_enable_virtual_dsda" />
 </resources>

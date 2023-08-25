@@ -1996,7 +1996,21 @@ public final class Debug
     /** @hide */
     public static final int MEMINFO_UNEVICTABLE = 18;
     /** @hide */
-    public static final int MEMINFO_COUNT = 19;
+    public static final int MEMINFO_AVAILABLE = 19;
+    /** @hide */
+    public static final int MEMINFO_ACTIVE_ANON = 20;
+    /** @hide */
+    public static final int MEMINFO_INACTIVE_ANON = 21;
+    /** @hide */
+    public static final int MEMINFO_ACTIVE_FILE = 22;
+    /** @hide */
+    public static final int MEMINFO_INACTIVE_FILE = 23;
+    /** @hide */
+    public static final int MEMINFO_CMA_TOTAL = 24;
+    /** @hide */
+    public static final int MEMINFO_CMA_FREE = 25;
+    /** @hide */
+    public static final int MEMINFO_COUNT = 26;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields

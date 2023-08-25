@@ -16,16 +16,75 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Process;
+import android.os.UserHandle;
+import android.text.TextUtils;
+
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.List;
 
-/**
- * Util class for media server.
- */
-class MediaServerUtils {
+/** Util class for media server. */
+/* package */ class MediaServerUtils {
+
+    /**
+     * Returns whether the provided {@link ComponentName} and {@code action} resolve to a valid
+     * activity for the user defined by {@code userHandle}.
+     */
+    public static boolean isValidActivityComponentName(
+            @NonNull Context context,
+            @NonNull ComponentName componentName,
+            @NonNull String action,
+            @NonNull UserHandle userHandle) {
+        Intent intent = new Intent(action);
+        intent.setComponent(componentName);
+        List<ResolveInfo> resolveInfos =
+                context.getPackageManager()
+                        .queryIntentActivitiesAsUser(intent, /* flags= */ 0, userHandle);
+        return !resolveInfos.isEmpty();
+    }
+
+    /**
+     * Throws if the given {@code packageName} does not correspond to the given {@code uid}.
+     *
+     * <p>This method trusts calls from {@link Process#ROOT_UID} and {@link Process#SHELL_UID}.
+     *
+     * @param packageName A package name to verify (usually sent over binder by an app).
+     * @param uid The calling uid, obtained via {@link Binder#getCallingUid()}.
+     * @throws IllegalArgumentException If the given {@code packageName} does not correspond to the
+     *     given {@code uid}, and {@code uid} is not the root uid, or the shell uid.
+     */
+    public static void enforcePackageName(String packageName, int uid) {
+        if (uid == Process.ROOT_UID || uid == Process.SHELL_UID) {
+            return;
+        }
+        if (TextUtils.isEmpty(packageName)) {
+            throw new IllegalArgumentException("packageName may not be empty");
+        }
+        final PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        final int actualUid =
+                packageManagerInternal.getPackageUid(
+                        packageName, 0 /* flags */, UserHandle.getUserId(uid));
+        if (!UserHandle.isSameApp(uid, actualUid)) {
+            throw new IllegalArgumentException(
+                    "packageName does not belong to the calling uid; "
+                            + "pkg="
+                            + packageName
+                            + ", uid="
+                            + uid);
+        }
+    }
+
     /**
      * Verify that caller holds {@link android.Manifest.permission#DUMP}.
      */

@@ -110,7 +110,6 @@ Landroid/content/pm/IPackageInstallObserver2$Stub;-><init>()V
 Landroid/content/pm/IPackageInstallObserver2$Stub;->asInterface(Landroid/os/IBinder;)Landroid/content/pm/IPackageInstallObserver2;
 Landroid/content/pm/IPackageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/content/pm/IPackageManager$Stub$Proxy;->checkUidPermission(Ljava/lang/String;I)I
-Landroid/content/pm/IPackageManager$Stub$Proxy;->getAppOpPermissionPackages(Ljava/lang/String;)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstallLocation()I
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getLastChosenActivity(Landroid/content/Intent;Ljava/lang/String;I)Landroid/content/pm/ResolveInfo;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackagesForUid(I)[Ljava/lang/String;
@@ -262,5 +261,4 @@ Lcom/android/internal/telephony/IWapPushManager$Stub;->asInterface(Landroid/os/I
 Lcom/android/internal/textservice/ITextServicesManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/view/IInputMethodManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/view/IInputMethodManager$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodManager;
-Lcom/android/internal/view/IInputMethodSession$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/view/IInputMethodSession;
 Lcom/android/internal/widget/ILockSettings$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/widget/ILockSettings;

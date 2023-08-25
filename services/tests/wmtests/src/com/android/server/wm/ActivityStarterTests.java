@@ -65,13 +65,16 @@ import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK;
 import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowTestsBase.ActivityBuilder.DEFAULT_FAKE_UID;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -83,6 +86,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
@@ -99,6 +104,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.Pair;
 import android.util.Size;
@@ -108,13 +114,16 @@ import android.window.TaskFragmentOrganizerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.compatibility.common.util.DeviceConfigStateHelper;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.wm.utils.MockTracker;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoSession;
@@ -134,9 +143,6 @@ import java.util.Set;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityStarterTests extends WindowTestsBase {
-    private ActivityStartController mController;
-    private ActivityMetricsLogger mActivityMetricsLogger;
-    private PackageManagerInternal mMockPackageManager;
 
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
@@ -148,13 +154,20 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final int PRECONDITION_DIFFERENT_UID = 1 << 7;
     private static final int PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION = 1 << 8;
     private static final int PRECONDITION_CANNOT_START_ANY_ACTIVITY = 1 << 9;
-
     private static final int FAKE_CALLING_UID = 666;
     private static final int FAKE_REAL_CALLING_UID = 667;
     private static final String FAKE_CALLING_PACKAGE = "com.whatever.dude";
     private static final int UNIMPORTANT_UID = 12345;
     private static final int UNIMPORTANT_UID2 = 12346;
     private static final int CURRENT_IME_UID = 12347;
+
+    protected final DeviceConfigStateHelper mDeviceConfig = new DeviceConfigStateHelper(
+            DeviceConfig.NAMESPACE_WINDOW_MANAGER);
+
+    private ActivityStartController mController;
+    private ActivityMetricsLogger mActivityMetricsLogger;
+    private PackageManagerInternal mMockPackageManager;
+    private AppOpsManager mAppOpsManager;
 
     @Before
     public void setUp() throws Exception {
@@ -164,6 +177,15 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(balController).when(mController).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
+        mAppOpsManager = mAtm.getAppOpsManager();
+        doReturn(AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
+                anyInt(), any());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mDeviceConfig.close();
     }
 
     @Test
@@ -287,12 +309,12 @@ public class ActivityStarterTests extends WindowTestsBase {
                     PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION)) {
                 doAnswer((inv) -> {
                     throw new RemoteException();
-                }).when(packageManager).activitySupportsIntent(
-                        eq(source.mActivityComponent), eq(intent), any());
+                }).when(packageManager).activitySupportsIntentAsUser(
+                        eq(source.mActivityComponent), eq(intent), any(), anyInt());
             } else {
                 doReturn(!containsConditions(preconditions, PRECONDITION_NO_VOICE_SESSION_SUPPORT))
-                        .when(packageManager).activitySupportsIntent(eq(source.mActivityComponent),
-                        eq(intent), any());
+                        .when(packageManager).activitySupportsIntentAsUser(
+                                eq(source.mActivityComponent), eq(intent), any(), anyInt());
             }
         } catch (RemoteException e) {
         }
@@ -389,6 +411,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyLong(), anyLong(),
                 anyInt(), anyBoolean(), anyInt());
+        doReturn(null).when(mMockPackageManager).resolveIntentExported(any(), any(),
+                anyLong(), anyLong(), anyInt(), anyBoolean(), anyInt(), anyInt());
         doReturn(new ComponentName("", "")).when(mMockPackageManager).getSystemUiServiceComponent();
 
         // Never review permissions
@@ -511,12 +535,12 @@ public class ActivityStarterTests extends WindowTestsBase {
         // The fullscreen windowing mode activity will be moved to split-secondary by
         // TestSplitOrganizer when a split-primary task appears.
         final ActivityRecord splitPrimaryActivity = new TaskBuilder(mSupervisor)
-                .setParentTaskFragment(splitOrg.mPrimary)
+                .setParentTask(splitOrg.mPrimary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
         final ActivityRecord splitSecondActivity = new TaskBuilder(mSupervisor)
-                .setParentTaskFragment(splitOrg.mSecondary)
+                .setParentTask(splitOrg.mSecondary)
                 .setCreateActivity(true)
                 .build()
                 .getTopMostActivity();
@@ -618,11 +642,10 @@ public class ActivityStarterTests extends WindowTestsBase {
     @Test
     public void testBackgroundActivityStartsAllowed_noStartsAborted() {
         doReturn(true).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest("allowed_noStartsAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
     }
 
     /**
@@ -630,112 +653,251 @@ public class ActivityStarterTests extends WindowTestsBase {
      * disallowed.
      */
     @Test
-    public void testBackgroundActivityStartsDisallowed_unsupportedStartsAborted() {
+    public void testBackgroundActivityStartsDisallowed_unsupportedUsecaseAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_unsupportedUsecase_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingUidProcessStateTopAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidProcessStateTop_aborted", true,
                 UNIMPORTANT_UID, false, PROCESS_STATE_TOP,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_realCallingUidProcessStateTopAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_realCallingUidProcessStateTop_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_TOP,
-                false, false, false, false, false);
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_hasForegroundActivitiesAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_hasForegroundActivities_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                true, false, false, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                true, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that unsupported usecases are aborted when background starts are
+     * disallowed.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_pinnedSingleInstanceAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_pinned_singleinstance_aborted", true,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false, true);
-
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, true, false);
     }
 
     /**
      * This test ensures that supported usecases aren't aborted when background starts are
-     * disallowed.
-     * The scenarios each have only one condition that makes them supported.
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process runs as ROOT_UID.
      */
     @Test
-    public void testBackgroundActivityStartsDisallowed_supportedStartsNotAborted() {
+    public void testBackgroundActivityStartsDisallowed_rootUidNotAborted() {
         doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
-
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_rootUid_notAborted", false,
-                Process.ROOT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                Process.ROOT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process is running as SYSTEM_UID.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_systemUidNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_systemUid_notAborted", false,
-                Process.SYSTEM_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                Process.SYSTEM_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process is running as NFC_UID.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_nfcUidNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest("disallowed_nfcUid_notAborted", false,
-                Process.NFC_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                Process.NFC_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the calling process has a visible window.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingUidHasVisibleWindowNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingUidHasVisibleWindow_notAborted", false,
-                UNIMPORTANT_UID, true, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                UNIMPORTANT_UID, true, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * The sending app has a visible window, but does not (by default) allow the pending intent to
+     * start the background activity.
+     */
+    @Test
+    @Ignore("b/266015587")
+    public void testBackgroundActivityStartsDisallowed_realCallingUidHasVisibleWindowAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+
         runAndVerifyBackgroundActivityStartsSubtest(
-                "disallowed_realCallingUidHasVisibleWindow_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, true, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
+                "disallowed_realCallingUidHasVisibleWindow_abortedInU", true,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, true, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is in the recent activity list.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsRecentsNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsRecents_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, true, false, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, true, false, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is temporarily (10s) allowed to start.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsAllowedNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsAllowed_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, true, false, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, true, false, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller explicitly has background activity start privilege.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerIsInstrumentingWithBASPnotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callerIsInstrumentingWithBackgroundActivityStartPrivileges_notAborted",
                 false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, true, false);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, true, false, false, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is a device owner.
+     */
+    @Test
+    public void
+            testBackgroundActivityStartsDisallowed_callingPackageNameIsDeviceOwnerNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingPackageNameIsDeviceOwner_notAborted", false,
-                UNIMPORTANT_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, true);
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, true, false, false, false);
+    }
 
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is a affiliated profile owner.
+     */
+    @Test
+    public void
+            testBackgroundActivityStartsDisallowed_isAffiliatedProfileOwnerNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callingUidIsAffiliatedProfileOwner_notAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, true, false, false);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller has the OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callerHasSystemExemptAppOpNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
+        runAndVerifyBackgroundActivityStartsSubtest(
+                "disallowed_callerHasSystemExemptAppOpNotAborted", false,
+                UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, true);
+    }
+
+    /**
+     * This test ensures that supported usecases aren't aborted when background starts are
+     * disallowed. Each scenarios tests one condition that makes them supported in isolation. In
+     * this case the caller is an IME.
+     */
+    @Test
+    public void testBackgroundActivityStartsDisallowed_callingPackageNameIsImeNotAborted() {
+        doReturn(false).when(mAtm).isBackgroundActivityStartsEnabled();
         setupImeWindow();
         runAndVerifyBackgroundActivityStartsSubtest(
                 "disallowed_callingPackageNameIsIme_notAborted", false,
-                CURRENT_IME_UID, false, PROCESS_STATE_TOP + 1,
-                UNIMPORTANT_UID2, false, PROCESS_STATE_TOP + 1,
-                false, false, false, false, false);
-
-    }
-
-    private void runAndVerifyBackgroundActivityStartsSubtest(String name, boolean shouldHaveAborted,
-            int callingUid, boolean callingUidHasVisibleWindow, int callingUidProcState,
-            int realCallingUid, boolean realCallingUidHasVisibleWindow, int realCallingUidProcState,
-            boolean hasForegroundActivities, boolean callerIsRecents,
-            boolean callerIsTempAllowed,
-            boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-            boolean isCallingUidDeviceOwner) {
-        runAndVerifyBackgroundActivityStartsSubtest(name, shouldHaveAborted, callingUid,
-                callingUidHasVisibleWindow, callingUidProcState, realCallingUid,
-                realCallingUidHasVisibleWindow, realCallingUidProcState,
-                hasForegroundActivities, callerIsRecents, callerIsTempAllowed,
-                callerIsInstrumentingWithBackgroundActivityStartPrivileges,
-                isCallingUidDeviceOwner, false /* isPinnedSingleInstance */);
+                CURRENT_IME_UID, false, PROCESS_STATE_BOUND_TOP,
+                UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
+                false, false, false, false, false, false, false, false);
     }
 
     /**
@@ -756,10 +918,10 @@ public class ActivityStarterTests extends WindowTestsBase {
                 "allowed_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 UNIMPORTANT_UID2, false, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false);
+                false, true, false, false, false, false, false, false);
         verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
                 "",  // activity name
-                BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION,
+                BackgroundActivityStartController.BAL_ALLOW_PERMISSION,
                 UNIMPORTANT_UID,
                 UNIMPORTANT_UID2));
         mockingSession.finishMocking();
@@ -780,13 +942,14 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(PERMISSION_GRANTED).when(() -> ActivityTaskManagerService.checkPermission(
                 eq(START_ACTIVITIES_FROM_BACKGROUND),
                 anyInt(), anyInt()));
-        doReturn(true).when(
-                () -> PendingIntentRecord.isPendingIntentBalAllowedByCaller(anyObject()));
+        doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
+                () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                anyObject(), anyInt(), anyObject()));
         runAndVerifyBackgroundActivityStartsSubtest(
                 "allowed_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
                 Process.SYSTEM_UID, true, PROCESS_STATE_BOUND_TOP,
-                false, true, false, false, false);
+                false, true, false, false, false, false, false, false);
         verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
                 DEFAULT_COMPONENT_PACKAGE_NAME + "/" + DEFAULT_COMPONENT_PACKAGE_NAME,
                 BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT,
@@ -802,7 +965,9 @@ public class ActivityStarterTests extends WindowTestsBase {
             boolean callerIsTempAllowed,
             boolean callerIsInstrumentingWithBackgroundActivityStartPrivileges,
             boolean isCallingUidDeviceOwner,
-            boolean isPinnedSingleInstance) {
+            boolean isCallingUidAffiliatedProfileOwner,
+            boolean isPinnedSingleInstance,
+            boolean hasSystemExemptAppOp) {
         // window visibility
         doReturn(callingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(callingUid);
         doReturn(realCallingUidHasVisibleWindow).when(mAtm).hasActiveVisibleWindow(realCallingUid);
@@ -825,7 +990,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(callerIsRecents).when(recentTasks).isCallerRecents(callingUid);
         // caller is temp allowed
         if (callerIsTempAllowed) {
-            callerApp.addOrUpdateAllowBackgroundActivityStartsToken(new Binder(), null);
+            callerApp.addOrUpdateBackgroundStartPrivileges(new Binder(),
+                    BackgroundStartPrivileges.ALLOW_BAL);
         }
         // caller is instrumenting with background activity starts privileges
         callerApp.setInstrumenting(callerIsInstrumentingWithBackgroundActivityStartPrivileges,
@@ -833,6 +999,15 @@ public class ActivityStarterTests extends WindowTestsBase {
                 callerIsInstrumentingWithBackgroundActivityStartPrivileges);
         // callingUid is the device owner
         doReturn(isCallingUidDeviceOwner).when(mAtm).isDeviceOwner(callingUid);
+        // callingUid is the affiliated profile owner
+        doReturn(isCallingUidAffiliatedProfileOwner).when(mAtm)
+            .isAffiliatedProfileOwner(callingUid);
+
+        // caller has OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
+        doReturn(hasSystemExemptAppOp ? AppOpsManager.MODE_ALLOWED
+                : AppOpsManager.MODE_DEFAULT).when(mAppOpsManager).checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION),
+                anyInt(), any());
 
         int launchMode = LAUNCH_MULTIPLE;
         if (isPinnedSingleInstance) {
@@ -998,7 +1173,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         // Create another activity on top of the secondary display.
         final Task topStack = secondaryTaskContainer.createRootTask(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final Task topTask = new TaskBuilder(mSupervisor).setParentTaskFragment(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setParentTask(topStack).build();
         new ActivityBuilder(mAtm).setTask(topTask).build();
 
         doReturn(mActivityMetricsLogger).when(mSupervisor).getActivityMetricsLogger();
@@ -1194,7 +1369,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityStarter starter = prepareStarter(0 /* flags */);
         starter.mStartActivity = new ActivityBuilder(mAtm).build();
         final Task task = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTaskFragment(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
+                .setParentTask(createTask(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
                         ACTIVITY_TYPE_STANDARD))
                 .setUserId(10)
                 .build();
@@ -1444,7 +1619,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 .build();
         final ActivityOptions opts = ActivityOptions.makeLaunchIntoPip(params);
         ActivityRecord targetRecord = new ActivityBuilder(mAtm)
-                .setLaunchIntoPipActivityOptions(opts)
+                .setActivityOptions(opts)
                 .build();
 
         // Start the target launch-into-pip activity from a source
@@ -1558,12 +1733,137 @@ public class ActivityStarterTests extends WindowTestsBase {
         assertNull(starter2.mMovedToTopActivity);
     }
 
+    /**
+     * Tests a task with specific display category exist in system and then launching another
+     * activity with the same affinity but without define the display category. Make sure the
+     * lunching activity is placed on the different task.
+     */
+    @Test
+    public void testLaunchActivityWithoutDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */, null /* componentName */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm).setAffinity(info.taskAffinity)
+                .build();
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        startActivityInner(starter, target, null /* source */, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertNotEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with a specific display category exist in the system and then launches another
+     * activity with the different display category. Make sure the launching activity is not placed
+     * on the sourceRecord's task.
+     */
+    @Test
+    public void testLaunchActivityWithDifferentDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */, null /* componentName */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
+                .setAffinity(info.taskAffinity).build();
+        final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertNotEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with specific display category exist in system and then launching another
+     * activity with the same display category. Make sure the launching activity is placed on the
+     * same task.
+     */
+    @Test
+    public void testLaunchActivityWithSameDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
+                0 /* launchMode */, null /* componentName */);
+        info.requiredDisplayCategory = "automotive";
+        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
+                .build();
+
+        final ActivityRecord target = new ActivityBuilder(mAtm)
+                .setRequiredDisplayCategory(info.requiredDisplayCategory)
+                .setAffinity(info.taskAffinity).build();
+
+        final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        startActivityInner(starter, target,  task.getBottomMostActivity(), null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+
+        assertEquals(task, target.getTask());
+    }
+
+    /**
+     * Tests a task with specific display category exist in system and launching activity into the
+     * specific task within inTask attribute. Make sure the activity is not placed on the task since
+     * the display category is different.
+     */
+    @Test
+    public void testLaunchActivityInTaskWithDisplayCategory() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        info.requiredDisplayCategory = "automotive";
+        final Task inTask = new TaskBuilder(mSupervisor).setActivityInfo(info).build();
+        inTask.inRecents = true;
+
+        final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        final ActivityRecord target = new ActivityBuilder(mAtm).build();
+        startActivityInner(starter, target, null /* source */, null /* options */, inTask,
+                null /* inTaskFragment */);
+
+        assertNotEquals(inTask, target.getTask());
+    }
+
+    /**
+     * Tests a task without a specific display category exist in the system and launches activity
+     * with display category into the task within the inTask attribute. Make sure the activity is
+     * not placed on the task since the display category is different.
+     */
+    @Test
+    public void testLaunchDisplayCategoryActivityInTask() {
+        final Task inTask = new TaskBuilder(mSupervisor).build();
+        inTask.inRecents = true;
+
+        final ActivityStarter starter = prepareStarter(0, false);
+        spyOn(starter);
+        doReturn(START_SUCCESS).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        final ActivityRecord target = new ActivityBuilder(mAtm).setRequiredDisplayCategory("auto")
+                .build();
+        startActivityInner(starter, target, null /* source */, null /* options */, inTask,
+                null /* inTaskFragment */);
+
+        assertNotEquals(inTask, target.getTask());
+    }
+
     private static void startActivityInner(ActivityStarter starter, ActivityRecord target,
             ActivityRecord source, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment) {
         starter.startActivityInner(target, source, null /* voiceSession */,
-                null /* voiceInteractor */, 0 /* startFlags */, true /* doResume */,
+                null /* voiceInteractor */, 0 /* startFlags */,
                 options, inTask, inTaskFragment,
-                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */);
+                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */,
+                -1 /* realCallingUid */);
     }
 }

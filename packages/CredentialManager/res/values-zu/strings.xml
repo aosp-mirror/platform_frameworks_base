@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="4539824758261855508">"Umphathi Wezimfanelo"</string>
+    <string name="string_cancel" msgid="6369133483981306063">"Khansela"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Qhubeka"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Okunye okungakukhethwa kukho"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"Funda kabanzi"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"Bonisa iphasiwedi"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Fihla iphasiwedi"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Iphephe ngokhiye bokudlula"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Ngokhiye wokudlula, awudingi ukusungula noma ukukhumbula amaphasiwedi ayinkimbinkimbi"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Okhiye bokungena bangokhiye bedijithali ababethelwe obasungula usebenzisa isigxivizo somunwe sakho, ubuso, noma ukukhiya isikrini"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Okhiye bokudlula balondolozwa kusiphathi sephasiwedi, ukuze ukwazi ukungena ngemvume kwamanye amadivayisi"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Okuningi mayelana nokhiye bokudlula"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Ubuchwepheshe obungenaphasiwedi"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Okhiye bokudlula bakuvumela ukuthi ungene ngemvume ngaphandle kokuthembela kumaphasiwedi. Udinga nje ukusebenzisa izigxivizo zakho zominwe, ukubona ubuso, Iphinikhodi, noma iphethini yokuswayipha ukuze uqinisekise ubuwena futhi usungule ukhiye wokudlula."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"I-cryptography yokhiye osesidlangalaleni"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Ngokusekelwe ku-FIDO Alliance (ehlanganisa i-Google, i-Apple, i-Microsoft, nokwengeziwe) namazinga e-W3C, okhiye bokudlula basebenzisa amapheya okhiye be-cryptographic. Ngokungafani negama lomsebenzisi nezinhlamvu esizisebenzisela amaphasiwedi, ukhiye ogodliwe wasesidlangalaleni usungulelwe i-app noma iwebhusayithi. Ukhiye ogodliwe ugcinwe ngokuphephile kudivayisi yakho noma kumphathi wephasiwedi futhi uqinisekisa ubuwena. Ukhiye osesidlangalaleni wabiwe ne-app noma iseva yewebhusayithi. Ngokhiye abahambisanayo, ungabhalisa ngokushesha futhi ungene ngemvume."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Ukuvikeleka kwe-akhawunti okuthuthukisiwe"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Ukhiye ngamunye olinkwe ngokukhethekile ne-app noma iwebhusayithi usungulelwe yona, ngakho awukwazi ukungena ngemvume ku-app noma kuwebhusayithi yomgunyathi ngephutha. Futhi, ngamaseva agcina okhiye basesidlangalaleni kuphela, ukugebengu be-inthanethi bunzima kakhulu."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Ushintsho olulula"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Njengoba sibhekela kwikusasa elingenaphasiwedi, amagama ayimfihlo asazotholakala eceleni kokhiye bokudlula."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Khetha lapho ongagcina khona i-<xliff:g id="CREATETYPES">%1$s</xliff:g> yakho"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Khetha isiphathi sephasiwedi ukuze ulondoloze ulwazi lwakho futhi ungene ngemvume ngokushesha ngesikhathi esizayo."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Sungula ukhiye wokudlula we-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Londolozela amaphasiwedi ye-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Londoloza ulwazi lokungena lwe-<xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="passkey" msgid="632353688396759522">"ukhiye wokudlula"</string>
+    <string name="password" msgid="6738570945182936667">"iphasiwedi"</string>
+    <string name="passkeys" msgid="5733880786866559847">"okhiye bokudlula"</string>
+    <string name="passwords" msgid="5419394230391253816">"amaphasiwedi"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"ukungena ngemvume"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"ulwazi lokungena ngemvume"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Londoloza i-<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ku-"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Sungula ukhiye wokudlula kwenye idivayisi?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Sebenzisa i-<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> kukho konke ukungena kwakho ngemvume?"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Lesi siphathi sephasiwedi sika-<xliff:g id="USERNAME">%1$s</xliff:g> sizogcina amaphasiwedi akho nezikhiye zokungena ukuze zikusize ungene ngemvume kalula."</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Setha njengokuzenzakalelayo"</string>
+    <string name="use_once" msgid="9027366575315399714">"Sebenzisa kanye"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Amaphasiwedi angu-<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • okhiye bokudlula abangu-<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"Amaphasiwedi angu-<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Okhiye bokudlula abangu-<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Imininingwane yokungena engu-<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Ukhiye wokudlula"</string>
+    <string name="another_device" msgid="5147276802037801217">"Enye idivayisi"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Abanye abaphathi bephasiwedi"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Vala ishidi"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Buyela emuva ekhasini langaphambilini"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Vala"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Chitha"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Sebenzisa ukhiye wakho wokungena olondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Sebenzisa ukungena kwakho ngemvume okulondoloziwe <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Khetha ukungena ngemvume okulondoloziwe kwakho <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Khetha ongakhetha kukho kwe-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Sebenzisa lolu lwazi ku-<xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Ngena ngemvume ngenye indlela"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Buka okungakhethwa kukho"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Qhubeka"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Okungakhethwa kukho kokungena ngemvume"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Buka okwengeziwe"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Okuka-<xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Abaphathi bephasiwedi abakhiyiwe"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Thepha ukuze uvule"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Alukho ulwazi lokungena ngemvume"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Alukho ulwazi lokungena ngemvume lwe-<xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Phatha ukungena ngemvume"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Kusukela kwenye idivayisi"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Sebenzisa idivayisi ehlukile"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Isicelo sikhanselwe yi-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+</resources>

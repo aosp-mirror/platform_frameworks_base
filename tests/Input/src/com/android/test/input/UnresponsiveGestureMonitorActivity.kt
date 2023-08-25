@@ -45,7 +45,8 @@ class UnresponsiveGestureMonitorActivity : Activity() {
     private lateinit var mInputMonitor: InputMonitor
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mInputMonitor = InputManager.getInstance().monitorGestureInput(MONITOR_NAME, displayId)
+        val inputManager = getSystemService(InputManager::class.java)
+        mInputMonitor = inputManager.monitorGestureInput(MONITOR_NAME, displayId)
         mInputEventReceiver = UnresponsiveReceiver(
                 mInputMonitor.getInputChannel(), Looper.myLooper()!!)
     }

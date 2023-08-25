@@ -20,6 +20,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
@@ -54,6 +55,14 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
     private View mQSContainer;
+    private int mLastQSPaddingBottom;
+
+    /**
+     *  These are used to compute the bounding box containing the shade and the notification scrim,
+     *  which is then used to drive the Back gesture animation.
+     */
+    private final Rect mUpperRect = new Rect();
+    private final Rect mBoundingBoxRect = new Rect();
 
     @Nullable
     private Consumer<Configuration> mConfigurationChangedListener;
@@ -75,6 +84,10 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mQs = (QS) fragment;
         mQSFragmentAttachedListener.accept(mQs);
         mQSContainer = mQs.getView().findViewById(R.id.quick_settings_container);
+        // We need to restore the bottom padding as the fragment may have been recreated due to
+        // some special Configuration change, so we apply the last known padding (this will be
+        // correct even if it has changed while the fragment was destroyed and re-created).
+        setQSContainerPaddingBottom(mLastQSPaddingBottom);
     }
 
     @Override
@@ -101,6 +114,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     public void setQSContainerPaddingBottom(int paddingBottom) {
+        mLastQSPaddingBottom = paddingBottom;
         if (mQSContainer != null) {
             mQSContainer.setPadding(
                     mQSContainer.getPaddingLeft(),
@@ -171,5 +185,38 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     public void applyConstraints(ConstraintSet constraintSet) {
         constraintSet.applyTo(this);
+    }
+
+    /**
+     *  Scale multiple elements in tandem, for the predictive back animation.
+     *  This is how the Shade responds to the Back gesture (by scaling).
+     *  Without the common center, individual elements will scale about their respective centers.
+     *  Scaling the entire NotificationsQuickSettingsContainer will also resize the shade header
+     *  (which we don't want).
+     */
+    public void applyBackScaling(float scale, boolean usingSplitShade) {
+        if (mStackScroller == null || mQSContainer == null) {
+            return;
+        }
+
+        mQSContainer.getBoundsOnScreen(mUpperRect);
+        mStackScroller.getBoundsOnScreen(mBoundingBoxRect);
+        mBoundingBoxRect.union(mUpperRect);
+
+        float cx = mBoundingBoxRect.centerX();
+        float cy = mBoundingBoxRect.centerY();
+
+        mQSContainer.setPivotX(cx);
+        mQSContainer.setPivotY(cy);
+        mQSContainer.setScaleX(scale);
+        mQSContainer.setScaleY(scale);
+
+        // When in large-screen split-shade mode, the notification stack scroller scales correctly
+        // only if the pivot point is at the left edge of the screen (because of its dimensions).
+        // When not in large-screen split-shade mode, we can scale correctly via the (cx,cy) above.
+        mStackScroller.setPivotX(usingSplitShade ? 0.0f : cx);
+        mStackScroller.setPivotY(cy);
+        mStackScroller.setScaleX(scale);
+        mStackScroller.setScaleY(scale);
     }
 }

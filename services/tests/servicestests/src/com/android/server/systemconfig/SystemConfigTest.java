@@ -405,12 +405,11 @@ public class SystemConfigTest {
 
         mSysConfig.readApexPrivAppPermissions(parser, permissionFile, apexDir.toPath());
 
-        assertThat(mSysConfig.getApexPrivAppPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.FOO");
-        assertThat(mSysConfig.getApexPrivAppDenyPermissions("com.android.my_module",
-                "com.android.apk_in_apex"))
-            .containsExactly("android.permission.BAR");
+        ArrayMap<String, Boolean> permissions = mSysConfig.getPermissionAllowlist()
+                .getApexPrivilegedAppAllowlists().get("com.android.my_module")
+                .get("com.android.apk_in_apex");
+        assertThat(permissions)
+            .containsExactly("android.permission.FOO", true, "android.permission.BAR", false);
     }
 
     /**
@@ -593,6 +592,108 @@ public class SystemConfigTest {
                 + " </permissions>";
         parseSharedLibraries(contents);
         assertFooIsOnlySharedLibrary();
+    }
+
+    /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app}.
+     */
+    @Test
+    public void automaticRollbackDeny_vending() throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <automatic-rollback-denylisted-app package=\"com.android.vending\" />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages())
+            .containsExactly("com.android.vending");
+    }
+
+    /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app} without any packages.
+     */
+    @Test
+    public void automaticRollbackDeny_empty() throws IOException {
+        final String contents =
+                "<config>\n"
+                + "    <automatic-rollback-denylisted-app />\n"
+                + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "automatic-rollback-denylisted-app.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
+    }
+
+    /**
+     * Test that getRollbackDenylistedPackages works correctly for the tag:
+     * {@code automatic-rollback-denylisted-app} without the corresponding config.
+     */
+    @Test
+    public void automaticRollbackDeny_noConfig() throws IOException {
+        final File folder = createTempSubfolder("folder");
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getAutomaticRollbackDenylistedPackages()).isEmpty();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_successful() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" installer=\"com.bar\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo"))
+                .isEqualTo("com.bar");
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noPackage() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
+    }
+
+    /**
+     * Tests that readPermissions works correctly for the tag: {@code update-ownership}.
+     */
+    @Test
+    public void readPermissions_updateOwnership_noInstaller() throws IOException {
+        final String contents =
+                "<config>\n"
+                        + "    <update-ownership package=\"com.foo\" />\n"
+                        + "</config>";
+        final File folder = createTempSubfolder("folder");
+        createTempFile(folder, "update_ownership.xml", contents);
+
+        readPermissions(folder, /* Grant all permission flags */ ~0);
+
+        assertThat(mSysConfig.getSystemAppUpdateOwnerPackageName("com.foo")).isNull();
     }
 
     private void parseSharedLibraries(String contents) throws IOException {

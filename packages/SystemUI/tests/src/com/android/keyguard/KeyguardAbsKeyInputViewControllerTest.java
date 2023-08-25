@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
@@ -39,6 +41,8 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +80,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     @Mock
     private EmergencyButtonController mEmergencyButtonController;
 
+    private FakeFeatureFlags mFeatureFlags;
     private KeyguardAbsKeyInputViewController mKeyguardAbsKeyInputViewController;
 
     @Before
@@ -89,10 +94,18 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         when(mAbsKeyInputView.requireViewById(R.id.bouncer_message_area))
                 .thenReturn(mKeyguardMessageArea);
         when(mAbsKeyInputView.getResources()).thenReturn(getContext().getResources());
-        mKeyguardAbsKeyInputViewController = new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false);
+        mKeyguardAbsKeyInputViewController = createTestObject();
+        mKeyguardAbsKeyInputViewController.init();
+        reset(mKeyguardMessageAreaController);  // Clear out implicit call to init.
+    }
+
+    private KeyguardAbsKeyInputViewController createTestObject() {
+        return new KeyguardAbsKeyInputViewController(mAbsKeyInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mFalsingCollector,
-                mEmergencyButtonController) {
+                mEmergencyButtonController, mFeatureFlags) {
             @Override
             void resetState() {
             }
@@ -107,8 +120,16 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 return 0;
             }
         };
-        mKeyguardAbsKeyInputViewController.init();
-        reset(mKeyguardMessageAreaController);  // Clear out implicit call to init.
+    }
+
+    @Test
+    public void withFeatureFlagOn_oldMessage_isHidden() {
+        mFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
+        KeyguardAbsKeyInputViewController underTest = createTestObject();
+
+        underTest.init();
+
+        verify(mKeyguardMessageAreaController).disable();
     }
 
     @Test
@@ -156,5 +177,22 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     public void testReset() {
         mKeyguardAbsKeyInputViewController.reset();
         verify(mKeyguardMessageAreaController).setMessage("", false);
+    }
+
+    @Test
+    public void testResume() {
+        mKeyguardAbsKeyInputViewController.onResume(KeyguardSecurityView.VIEW_REVEALED);
+        verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt());
+    }
+
+    @Test
+    public void testLockedOut_verifyPasswordAndUnlock_doesNotEnableViewInput() {
+        mKeyguardAbsKeyInputViewController.handleAttemptLockout(
+                SystemClock.elapsedRealtime() + 1000);
+        mKeyguardAbsKeyInputViewController.verifyPasswordAndUnlock();
+        verify(mAbsKeyInputView).setPasswordEntryInputEnabled(false);
+        verify(mAbsKeyInputView).setPasswordEntryEnabled(false);
+        verify(mAbsKeyInputView, never()).setPasswordEntryInputEnabled(true);
+        verify(mAbsKeyInputView, never()).setPasswordEntryEnabled(true);
     }
 }

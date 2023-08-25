@@ -17,24 +17,22 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class GameAppHelper @JvmOverloads constructor(
+class GameAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.GAME_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-            ActivityOptions.GAME_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy =
-        LauncherStrategyFactory.getInstance(instr).launcherStrategy,
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    launcherName: String = ActivityOptions.Game.LABEL,
+    component: ComponentNameMatcher = ActivityOptions.Game.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
 
     /**
      * Swipes down in the mock game app.
@@ -42,13 +40,18 @@ class GameAppHelper @JvmOverloads constructor(
      * @return true if the swipe operation is successful.
      */
     fun swipeDown(): Boolean {
-        val gameView = uiDevice.wait(
-            Until.findObject(By.res(getPackage(), GAME_APP_VIEW_RES)), WAIT_TIME_MS)
+        val gameView =
+            uiDevice.wait(Until.findObject(By.res(getPackage(), GAME_APP_VIEW_RES)), WAIT_TIME_MS)
         require(gameView != null) { "Mock game app view not found." }
 
         val bound = gameView.getVisibleBounds()
         return uiDevice.swipe(
-            bound.centerX(), bound.top, bound.centerX(), bound.centerY(), SWIPE_STEPS)
+            bound.centerX(),
+            bound.top,
+            bound.centerX(),
+            bound.centerY(),
+            SWIPE_STEPS
+        )
     }
 
     /**
@@ -57,7 +60,6 @@ class GameAppHelper @JvmOverloads constructor(
      *
      * @param wmHelper Helper used to get window region.
      * @param direction UiAutomator Direction enum to indicate the swipe direction.
-     *
      * @return true if the swipe operation is successful.
      */
     fun switchToPreviousAppByQuickSwitchGesture(
@@ -65,20 +67,26 @@ class GameAppHelper @JvmOverloads constructor(
         direction: Direction
     ): Boolean {
         val ratioForScreenBottom = 0.99
-        val fullView = wmHelper.getWindowRegion(component)
-        require(!fullView.isEmpty) { "Target $component view not found." }
+        val fullView = wmHelper.getWindowRegion(componentMatcher)
+        require(!fullView.isEmpty) { "Target $componentMatcher view not found." }
 
         val bound = fullView.bounds
         val targetYPos = bound.bottom * ratioForScreenBottom
-        val endX = when (direction) {
-            Direction.LEFT -> bound.left
-            Direction.RIGHT -> bound.right
-            else -> {
-                throw IllegalStateException("Only left or right direction is allowed.")
+        val endX =
+            when (direction) {
+                Direction.LEFT -> bound.left
+                Direction.RIGHT -> bound.right
+                else -> {
+                    throw IllegalStateException("Only left or right direction is allowed.")
+                }
             }
-        }
         return uiDevice.swipe(
-            bound.centerX(), targetYPos.toInt(), endX, targetYPos.toInt(), SWIPE_STEPS)
+            bound.centerX(),
+            targetYPos.toInt(),
+            endX,
+            targetYPos.toInt(),
+            SWIPE_STEPS
+        )
     }
 
     /**
@@ -87,7 +95,6 @@ class GameAppHelper @JvmOverloads constructor(
      * @param packageName The targe application's package name.
      * @param identifier The resource id of the target object.
      * @param timeout The timeout duration in milliseconds.
-     *
      * @return true if the target object exists.
      */
     @JvmOverloads

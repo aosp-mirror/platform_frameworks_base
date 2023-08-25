@@ -27,6 +27,8 @@ import android.util.Slog;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.audio.AudioService;
 
+import java.util.Arrays;
+
 /**
  * Represents the ALSA specification, and attributes of an ALSA device.
  */
@@ -36,17 +38,21 @@ public final class UsbAlsaDevice {
 
     private final int mCardNum;
     private final int mDeviceNum;
+    private final String mAlsaCardDeviceString;
     private final String mDeviceAddress;
-    private final boolean mHasOutput;
-    private final boolean mHasInput;
 
-    private final boolean mIsInputHeadset;
-    private final boolean mIsOutputHeadset;
+    // The following two constant will be used as index to access arrays.
+    private static final int INPUT = 0;
+    private static final int OUTPUT = 1;
+    private static final int NUM_DIRECTIONS = 2;
+    private static final String[] DIRECTION_STR = {"INPUT", "OUTPUT"};
+    private final boolean[] mHasDevice = new boolean[NUM_DIRECTIONS];
+
+    private final boolean[] mIsHeadset = new boolean[NUM_DIRECTIONS];
     private final boolean mIsDock;
-
-    private boolean mSelected = false;
-    private int mOutputState;
-    private int mInputState;
+    private final int[] mDeviceType = new int[NUM_DIRECTIONS];
+    private boolean[] mIsSelected = new boolean[NUM_DIRECTIONS];
+    private int[] mState = new int[NUM_DIRECTIONS];
     private UsbAlsaJackDetector mJackDetector;
     private IAudioService mAudioService;
 
@@ -60,11 +66,13 @@ public final class UsbAlsaDevice {
         mCardNum = card;
         mDeviceNum = device;
         mDeviceAddress = deviceAddress;
-        mHasOutput = hasOutput;
-        mHasInput = hasInput;
-        mIsInputHeadset = isInputHeadset;
-        mIsOutputHeadset = isOutputHeadset;
+        mHasDevice[OUTPUT] = hasOutput;
+        mHasDevice[INPUT] = hasInput;
+        mIsHeadset[INPUT] = isInputHeadset;
+        mIsHeadset[OUTPUT] = isOutputHeadset;
         mIsDock = isDock;
+        initDeviceType();
+        mAlsaCardDeviceString = getAlsaCardDeviceString();
     }
 
     /**
@@ -104,28 +112,28 @@ public final class UsbAlsaDevice {
      * @return true if the device supports output.
      */
     public boolean hasOutput() {
-        return mHasOutput;
+        return mHasDevice[OUTPUT];
     }
 
     /**
      * @return true if the device supports input (recording).
      */
     public boolean hasInput() {
-        return mHasInput;
-    }
-
-    /**
-     * @return true if the device is a headset for purposes of input.
-     */
-    public boolean isInputHeadset() {
-        return mIsInputHeadset;
+        return mHasDevice[INPUT];
     }
 
     /**
      * @return true if the device is a headset for purposes of output.
      */
     public boolean isOutputHeadset() {
-        return mIsOutputHeadset;
+        return mIsHeadset[OUTPUT];
+    }
+
+    /**
+     * @return true if the device is a headset for purposes of input.
+     */
+    public boolean isInputHeadset() {
+        return mIsHeadset[INPUT];
     }
 
     /**
@@ -157,6 +165,9 @@ public final class UsbAlsaDevice {
 
     /** Begins a jack-detection thread. */
     private synchronized void startJackDetect() {
+        if (mJackDetector != null) {
+            return;
+        }
         // If no jack detect capabilities exist, mJackDetector will be null.
         mJackDetector = UsbAlsaJackDetector.startJackDetect(this);
     }
@@ -171,75 +182,152 @@ public final class UsbAlsaDevice {
 
     /** Start using this device as the selected USB Audio Device. */
     public synchronized void start() {
-        mSelected = true;
-        mInputState = 0;
-        mOutputState = 0;
+        startInput();
+        startOutput();
+    }
+
+    /** Start using this device as the selected USB input device. */
+    public synchronized void startInput() {
+        startDevice(INPUT);
+    }
+
+    /** Start using this device as selected USB output device. */
+    public synchronized void startOutput() {
+        startDevice(OUTPUT);
+    }
+
+    private void startDevice(int direction) {
+        if (mIsSelected[direction]) {
+            return;
+        }
+        mIsSelected[direction] = true;
+        mState[direction] = 0;
         startJackDetect();
-        updateWiredDeviceConnectionState(true);
+        updateWiredDeviceConnectionState(direction, true /*enable*/);
     }
 
     /** Stop using this device as the selected USB Audio Device. */
     public synchronized void stop() {
-        stopJackDetect();
-        updateWiredDeviceConnectionState(false);
-        mSelected = false;
+        stopInput();
+        stopOutput();
     }
 
-    /** Updates AudioService with the connection state of the alsaDevice.
-     *  Checks ALSA Jack state for inputs and outputs before reporting.
+    /** Stop using this device as the selected USB input device. */
+    public synchronized void stopInput() {
+        if (!mIsSelected[INPUT]) {
+            return;
+        }
+        if (!mIsSelected[OUTPUT]) {
+            // Stop jack detection when both input and output are stopped
+            stopJackDetect();
+        }
+        updateInputWiredDeviceConnectionState(false /*enable*/);
+        mIsSelected[INPUT] = false;
+    }
+
+    /** Stop using this device as the selected USB output device. */
+    public synchronized void stopOutput() {
+        if (!mIsSelected[OUTPUT]) {
+            return;
+        }
+        if (!mIsSelected[INPUT]) {
+            // Stop jack detection when both input and output are stopped
+            stopJackDetect();
+        }
+        updateOutputWiredDeviceConnectionState(false /*enable*/);
+        mIsSelected[OUTPUT] = false;
+    }
+
+    private void initDeviceType() {
+        mDeviceType[INPUT] = mHasDevice[INPUT]
+                ? (mIsHeadset[INPUT] ? AudioSystem.DEVICE_IN_USB_HEADSET
+                                     : AudioSystem.DEVICE_IN_USB_DEVICE)
+                : AudioSystem.DEVICE_NONE;
+        mDeviceType[OUTPUT] = mHasDevice[OUTPUT]
+                ? (mIsDock ? AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET
+                           : (mIsHeadset[OUTPUT] ? AudioSystem.DEVICE_OUT_USB_HEADSET
+                                                 : AudioSystem.DEVICE_OUT_USB_DEVICE))
+                : AudioSystem.DEVICE_NONE;
+    }
+
+    /**
+     * @return the output device type that will be used to notify AudioService about device
+     *         connection. If there is no output on this device, {@link AudioSystem#DEVICE_NONE}
+     *         will be returned.
      */
-    public synchronized void updateWiredDeviceConnectionState(boolean enable) {
-        if (!mSelected) {
-            Slog.e(TAG, "updateWiredDeviceConnectionState on unselected AlsaDevice!");
-            return;
-        }
-        String alsaCardDeviceString = getAlsaCardDeviceString();
-        if (alsaCardDeviceString == null) {
-            return;
-        }
-        try {
-            // Output Device
-            if (mHasOutput) {
-                int device = mIsDock ? AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET
-                        : (mIsOutputHeadset
-                            ? AudioSystem.DEVICE_OUT_USB_HEADSET
-                            : AudioSystem.DEVICE_OUT_USB_DEVICE);
-                if (DEBUG) {
-                    Slog.d(TAG, "pre-call device:0x" + Integer.toHexString(device)
-                            + " addr:" + alsaCardDeviceString
-                            + " name:" + mDeviceName);
-                }
-                boolean connected = isOutputJackConnected();
-                Slog.i(TAG, "OUTPUT JACK connected: " + connected);
-                int outputState = (enable && connected) ? 1 : 0;
-                if (outputState != mOutputState) {
-                    mOutputState = outputState;
-                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
-                            alsaCardDeviceString, mDeviceName);
-                    mAudioService.setWiredDeviceConnectionState(attributes, outputState, TAG);
-                }
-            }
-
-            // Input Device
-            if (mHasInput) {
-                int device = mIsInputHeadset
-                        ? AudioSystem.DEVICE_IN_USB_HEADSET
-                        : AudioSystem.DEVICE_IN_USB_DEVICE;
-                boolean connected = isInputJackConnected();
-                Slog.i(TAG, "INPUT JACK connected: " + connected);
-                int inputState = (enable && connected) ? 1 : 0;
-                if (inputState != mInputState) {
-                    mInputState = inputState;
-                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
-                            alsaCardDeviceString, mDeviceName);
-                    mAudioService.setWiredDeviceConnectionState(attributes, inputState, TAG);
-                }
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
-        }
+    public int getOutputDeviceType() {
+        return mDeviceType[OUTPUT];
     }
 
+    /**
+     * @return the input device type that will be used to notify AudioService about device
+     *         connection. If there is no input on this device, {@link AudioSystem#DEVICE_NONE}
+     *         will be returned.
+     */
+    public int getInputDeviceType() {
+        return mDeviceType[INPUT];
+    }
+
+    private boolean updateWiredDeviceConnectionState(int direction, boolean enable) {
+        if (!mIsSelected[direction]) {
+            Slog.e(TAG, "Updating wired device connection state on unselected device");
+            return false;
+        }
+        if (mDeviceType[direction] == AudioSystem.DEVICE_NONE) {
+            Slog.d(TAG,
+                    "Unable to set device connection state as " + DIRECTION_STR[direction]
+                    + " device type is none");
+            return false;
+        }
+        if (mAlsaCardDeviceString == null) {
+            Slog.w(TAG, "Failed to update " + DIRECTION_STR[direction] + " device connection "
+                    + "state failed as alsa card device string is null");
+            return false;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "pre-call device:0x" + Integer.toHexString(mDeviceType[direction])
+                    + " addr:" + mAlsaCardDeviceString
+                    + " name:" + mDeviceName);
+        }
+        boolean connected = direction == INPUT ? isInputJackConnected() : isOutputJackConnected();
+        Slog.i(TAG, DIRECTION_STR[direction] + " JACK connected: " + connected);
+        int state = (enable && connected) ? 1 : 0;
+        if (state != mState[direction]) {
+            mState[direction] = state;
+            AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                    mDeviceType[direction], mAlsaCardDeviceString, mDeviceName);
+            try {
+                mAudioService.setWiredDeviceConnectionState(attributes, state, TAG);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState for "
+                        + DIRECTION_STR[direction]);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Notify AudioService about the input device connection state.
+     *
+     * @param enable true to notify the device as connected.
+     * @return true only when it successfully notifies AudioService about the device
+     *         connection state.
+     */
+    public synchronized boolean updateInputWiredDeviceConnectionState(boolean enable) {
+        return updateWiredDeviceConnectionState(INPUT, enable);
+    }
+
+    /**
+     * Notify AudioService about the output device connection state.
+     *
+     * @param enable true to notify the device as connected.
+     * @return true only when it successfully notifies AudioService about the device
+     *         connection state.
+     */
+    public synchronized boolean updateOutputWiredDeviceConnectionState(boolean enable) {
+        return updateWiredDeviceConnectionState(OUTPUT, enable);
+    }
 
     /**
      * @Override
@@ -249,8 +337,8 @@ public final class UsbAlsaDevice {
         return "UsbAlsaDevice: [card: " + mCardNum
             + ", device: " + mDeviceNum
             + ", name: " + mDeviceName
-            + ", hasOutput: " + mHasOutput
-            + ", hasInput: " + mHasInput + "]";
+            + ", hasOutput: " + mHasDevice[OUTPUT]
+            + ", hasInput: " + mHasDevice[INPUT] + "]";
     }
 
     /**
@@ -262,8 +350,8 @@ public final class UsbAlsaDevice {
         dump.write("card", UsbAlsaDeviceProto.CARD, mCardNum);
         dump.write("device", UsbAlsaDeviceProto.DEVICE, mDeviceNum);
         dump.write("name", UsbAlsaDeviceProto.NAME, mDeviceName);
-        dump.write("has_output", UsbAlsaDeviceProto.HAS_PLAYBACK, mHasOutput);
-        dump.write("has_input", UsbAlsaDeviceProto.HAS_CAPTURE, mHasInput);
+        dump.write("has_output", UsbAlsaDeviceProto.HAS_PLAYBACK, mHasDevice[OUTPUT]);
+        dump.write("has_input", UsbAlsaDeviceProto.HAS_CAPTURE, mHasDevice[INPUT]);
         dump.write("address", UsbAlsaDeviceProto.ADDRESS, mDeviceAddress);
 
         dump.end(token);
@@ -294,10 +382,8 @@ public final class UsbAlsaDevice {
         UsbAlsaDevice other = (UsbAlsaDevice) obj;
         return (mCardNum == other.mCardNum
                 && mDeviceNum == other.mDeviceNum
-                && mHasOutput == other.mHasOutput
-                && mHasInput == other.mHasInput
-                && mIsInputHeadset == other.mIsInputHeadset
-                && mIsOutputHeadset == other.mIsOutputHeadset
+                && Arrays.equals(mHasDevice, other.mHasDevice)
+                && Arrays.equals(mIsHeadset, other.mIsHeadset)
                 && mIsDock == other.mIsDock);
     }
 
@@ -310,10 +396,10 @@ public final class UsbAlsaDevice {
         int result = 1;
         result = prime * result + mCardNum;
         result = prime * result + mDeviceNum;
-        result = prime * result + (mHasOutput ? 0 : 1);
-        result = prime * result + (mHasInput ? 0 : 1);
-        result = prime * result + (mIsInputHeadset ? 0 : 1);
-        result = prime * result + (mIsOutputHeadset ? 0 : 1);
+        result = prime * result + (mHasDevice[OUTPUT] ? 0 : 1);
+        result = prime * result + (mHasDevice[INPUT] ? 0 : 1);
+        result = prime * result + (mIsHeadset[INPUT] ? 0 : 1);
+        result = prime * result + (mIsHeadset[OUTPUT] ? 0 : 1);
         result = prime * result + (mIsDock ? 0 : 1);
 
         return result;

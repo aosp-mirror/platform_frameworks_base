@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -45,6 +46,9 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ComponentName;
@@ -71,6 +75,7 @@ import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -192,10 +197,21 @@ public class AccountManagerService
     private final IAccountAuthenticatorCache mAuthenticatorCache;
     private static final String PRE_N_DATABASE_NAME = "accounts.db";
     private static final Intent ACCOUNTS_CHANGED_INTENT;
+    private static final Bundle ACCOUNTS_CHANGED_OPTIONS = new BroadcastOptions()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .toBundle();
 
     private static final int SIGNATURE_CHECK_MISMATCH = 0;
     private static final int SIGNATURE_CHECK_MATCH = 1;
     private static final int SIGNATURE_CHECK_UID_MATCH = 2;
+
+    /**
+     * Apps targeting Android U and above need to declare the package visibility needs in the
+     * manifest to access the AccountManager APIs.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long ENFORCE_PACKAGE_VISIBILITY_FILTERING = 154726397;
 
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
@@ -528,7 +544,7 @@ public class AccountManagerService
      */
     private Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             List<String> accountTypes, Integer callingUid, UserAccounts accounts) {
-        if (!packageExistsForUser(packageName, accounts.userId)) {
+        if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
             Log.w(TAG, "getAccountsAndVisibilityForPackage#Package not found " + packageName);
             return new LinkedHashMap<>();
         }
@@ -629,6 +645,9 @@ public class AccountManagerService
                 } else {
                    return AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE;
                 }
+            }
+            if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
+                return AccountManager.VISIBILITY_NOT_VISIBLE;
             }
             return resolveAccountVisibility(account, packageName, accounts);
         } finally {
@@ -780,7 +799,7 @@ public class AccountManagerService
         try {
             UserAccounts accounts = getUserAccounts(userId);
             return setAccountVisibility(account, packageName, newVisibility, true /* notify */,
-                accounts);
+                    accounts, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -799,11 +818,12 @@ public class AccountManagerService
      * @param newVisibility New visibility calue
      * @param notify if the flag is set applications will get notification about visibility change
      * @param accounts UserAccount that currently hosts the account and application
+     * @param callingUid The caller's uid.
      *
      * @return True if account visibility was changed.
      */
     private boolean setAccountVisibility(Account account, String packageName, int newVisibility,
-            boolean notify, UserAccounts accounts) {
+            boolean notify, UserAccounts accounts, int callingUid) {
         synchronized (accounts.dbLock) {
             synchronized (accounts.cacheLock) {
                 Map<String, Integer> packagesToVisibility;
@@ -814,8 +834,8 @@ public class AccountManagerService
                                 getRequestingPackages(account, accounts);
                         accountRemovedReceivers = getAccountRemovedReceivers(account, accounts);
                     } else {
-                        if (!packageExistsForUser(packageName, accounts.userId)) {
-                            return false; // package is not installed.
+                        if (!canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
+                            return false; // package is not installed or not visible.
                         }
                         packagesToVisibility = new HashMap<>();
                         packagesToVisibility.put(packageName,
@@ -827,8 +847,8 @@ public class AccountManagerService
                     }
                 } else {
                     // Notifications will not be send - only used during add account.
-                    if (!isSpecialPackageKey(packageName) &&
-                            !packageExistsForUser(packageName, accounts.userId)) {
+                    if (!isSpecialPackageKey(packageName)
+                            && !canCallerAccessPackage(packageName, callingUid, accounts.userId)) {
                         // package is not installed and not meta value.
                         return false;
                     }
@@ -841,6 +861,7 @@ public class AccountManagerService
                 }
 
                 if (notify) {
+                    Log.i(TAG, "Notifying visibility changed for package=" + packageName);
                     for (Entry<String, Integer> packageToVisibility : packagesToVisibility
                             .entrySet()) {
                         int oldVisibility = packageToVisibility.getValue();
@@ -851,9 +872,14 @@ public class AccountManagerService
                         }
                     }
                     for (String packageNameToNotify : accountRemovedReceivers) {
-                        sendAccountRemovedBroadcast(account, packageNameToNotify, accounts.userId);
+                        sendAccountRemovedBroadcast(
+                                account,
+                                packageNameToNotify,
+                                accounts.userId,
+                                /*useCase=*/"setAccountVisibility");
                     }
-                    sendAccountsChangedBroadcast(accounts.userId);
+                    sendAccountsChangedBroadcast(
+                            accounts.userId, account.type, /*useCase=*/"setAccountVisibility");
                 }
                 return true;
             }
@@ -974,6 +1000,8 @@ public class AccountManagerService
      * @param accounts UserAccount that currently hosts the account
      */
     private void notifyPackage(String packageName, UserAccounts accounts) {
+        Log.i(TAG, "notifying package=" + packageName + " for userId=" + accounts.userId
+                +", sending broadcast of " + AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
         Intent intent = new Intent(AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED);
         intent.setPackage(packageName);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -1038,20 +1066,6 @@ public class AccountManagerService
         return (receivers != null && receivers.size() > 0);
     }
 
-    private boolean packageExistsForUser(String packageName, int userId) {
-        try {
-            final long identityToken = clearCallingIdentity();
-            try {
-                mPackageManager.getPackageUidAsUser(packageName, userId);
-                return true;
-            } finally {
-                restoreCallingIdentity(identityToken);
-            }
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-    }
-
     /**
      * Returns true if packageName is one of special values.
      */
@@ -1060,13 +1074,22 @@ public class AccountManagerService
                 || AccountManager.PACKAGE_NAME_KEY_LEGACY_NOT_VISIBLE.equals(packageName));
     }
 
-    private void sendAccountsChangedBroadcast(int userId) {
-        Log.i(TAG, "the accounts changed, sending broadcast of "
-                + ACCOUNTS_CHANGED_INTENT.getAction());
-        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId));
+    private void sendAccountsChangedBroadcast(
+            int userId, String accountType, @NonNull String useCase) {
+        Objects.requireNonNull(useCase, "useCase can't be null");
+        Log.i(TAG, "the accountType= " + (accountType == null ? "" : accountType)
+                + " changed with useCase=" + useCase + " for userId=" + userId
+                + ", sending broadcast of " + ACCOUNTS_CHANGED_INTENT.getAction());
+        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId),
+                null /* receiverPermission */, ACCOUNTS_CHANGED_OPTIONS);
     }
 
-    private void sendAccountRemovedBroadcast(Account account, String packageName, int userId) {
+    private void sendAccountRemovedBroadcast(
+            Account account, String packageName, int userId, @NonNull String useCase) {
+        Objects.requireNonNull(useCase, "useCase can't be null");
+        Log.i(TAG, "the account with type=" + account.type + " removed while useCase="
+                + useCase + " for userId=" + userId + ", sending broadcast of "
+                + AccountManager.ACTION_ACCOUNT_REMOVED);
         Intent intent = new Intent(AccountManager.ACTION_ACCOUNT_REMOVED);
         intent.setFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.setPackage(packageName);
@@ -1213,6 +1236,8 @@ public class AccountManagerService
                                 accountsDb.endTransaction();
                             }
                             accountDeleted = true;
+                            Log.i(TAG, "validateAccountsInternal#Deleted UserId="
+                                    + accounts.userId + ", AccountId=" + accountId);
 
                             logRecord(AccountsDb.DEBUG_ACTION_AUTHENTICATOR_REMOVE,
                                     AccountsDb.TABLE_ACCOUNTS, accountId, accounts);
@@ -1229,7 +1254,11 @@ public class AccountManagerService
                                 }
                             }
                             for (String packageName : accountRemovedReceivers) {
-                                sendAccountRemovedBroadcast(account, packageName, accounts.userId);
+                                sendAccountRemovedBroadcast(
+                                        account,
+                                        packageName,
+                                        accounts.userId,
+                                        /*useCase=*/"validateAccounts");
                             }
                         } else {
                             ArrayList<String> accountNames = accountNamesByType.get(account.type);
@@ -1254,7 +1283,10 @@ public class AccountManagerService
                     AccountManager.invalidateLocalAccountsDataCaches();
                 } finally {
                     if (accountDeleted) {
-                        sendAccountsChangedBroadcast(accounts.userId);
+                        sendAccountsChangedBroadcast(
+                                accounts.userId,
+                                /*accountType=*/"ambiguous",
+                                /*useCase=*/"validateAccounts");
                     }
                 }
             }
@@ -1477,13 +1509,7 @@ public class AccountManagerService
         Account[] sharedAccounts = getSharedAccountsAsUser(userId);
         if (sharedAccounts == null || sharedAccounts.length == 0) return;
         Account[] accounts = getAccountsAsUser(null, userId, mContext.getOpPackageName());
-        int parentUserId = UserManager.isSplitSystemUser()
-                ? getUserManager().getUserInfo(userId).restrictedProfileParentId
-                : UserHandle.USER_SYSTEM;
-        if (parentUserId < 0) {
-            Log.w(TAG, "User " + userId + " has shared accounts, but no parent user");
-            return;
-        }
+        int parentUserId = UserHandle.USER_SYSTEM;
         for (Account sa : sharedAccounts) {
             if (ArrayUtils.contains(accounts, sa)) continue;
             // Account doesn't exist. Copy it now.
@@ -1635,7 +1661,7 @@ public class AccountManagerService
 
         final long identityToken = clearCallingIdentity();
         try {
-            return getAuthenticatorTypesInternal(userId);
+            return getAuthenticatorTypesInternal(userId, callingUid);
 
         } finally {
             restoreCallingIdentity(identityToken);
@@ -1645,19 +1671,19 @@ public class AccountManagerService
     /**
      * Should only be called inside of a clearCallingIdentity block.
      */
-    private AuthenticatorDescription[] getAuthenticatorTypesInternal(int userId) {
+    private AuthenticatorDescription[] getAuthenticatorTypesInternal(int userId, int callingUid) {
         mAuthenticatorCache.updateServices(userId);
         Collection<AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription>>
                 authenticatorCollection = mAuthenticatorCache.getAllServices(userId);
-        AuthenticatorDescription[] types =
-                new AuthenticatorDescription[authenticatorCollection.size()];
-        int i = 0;
+        final List<AuthenticatorDescription> types =
+                new ArrayList<>(authenticatorCollection.size());
         for (AccountAuthenticatorCache.ServiceInfo<AuthenticatorDescription> authenticator
                 : authenticatorCollection) {
-            types[i] = authenticator.type;
-            i++;
+            if (canCallerAccessPackage(authenticator.type.packageName, callingUid, userId)) {
+                types.add(authenticator.type);
+            }
         }
-        return types;
+        return types.toArray(new AuthenticatorDescription[types.size()]);
     }
 
     private boolean isCrossUser(int callingUid, int userId) {
@@ -1858,7 +1884,7 @@ public class AccountManagerService
                     }
                     if (accounts.accountsDb.findAllDeAccounts().size() > 100) {
                         Log.w(TAG, "insertAccountIntoDatabase: " + account.toSafeString()
-                                + ", skipping since more than 50 accounts on device exist");
+                                + ", skipping since more than 100 accounts on device exist");
                         return false;
                     }
                     long accountId = accounts.accountsDb.insertCeAccount(account, password);
@@ -1891,7 +1917,7 @@ public class AccountManagerService
                         for (Entry<String, Integer> entry : packageToVisibility.entrySet()) {
                             setAccountVisibility(account, entry.getKey() /* package */,
                                     entry.getValue() /* visibility */, false /* notify */,
-                                    accounts);
+                                    accounts, callingUid);
                         }
                     }
                     accounts.accountsDb.setTransactionSuccessful();
@@ -1912,7 +1938,9 @@ public class AccountManagerService
 
         sendNotificationAccountUpdated(account, accounts);
         // Only send LOGIN_ACCOUNTS_CHANGED when the database changed.
-        sendAccountsChangedBroadcast(accounts.userId);
+        Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                + " added account");
+        sendAccountsChangedBroadcast(accounts.userId, account.type, /*useCase=*/"addAccount");
 
         logAddAccountExplicitlyMetrics(opPackageName, account.type, packageToVisibility);
         return true;
@@ -1994,7 +2022,7 @@ public class AccountManagerService
 
     @Override
     public void hasFeatures(IAccountManagerResponse response,
-            Account account, String[] features, String opPackageName) {
+            Account account, String[] features, int userId, String opPackageName) {
         int callingUid = Binder.getCallingUid();
         mAppOpsManager.checkPackage(callingUid, opPackageName);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2002,12 +2030,22 @@ public class AccountManagerService
                     + ", response " + response
                     + ", features " + Arrays.toString(features)
                     + ", caller's uid " + callingUid
+                    + ", userId " + userId
                     + ", pid " + Binder.getCallingPid());
         }
         Preconditions.checkArgument(account != null, "account cannot be null");
         Preconditions.checkArgument(response != null, "response cannot be null");
         Preconditions.checkArgument(features != null, "features cannot be null");
-        int userId = UserHandle.getCallingUserId();
+
+        if (userId != UserHandle.getCallingUserId()
+                && callingUid != Process.SYSTEM_UID
+                && mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("User " + UserHandle.getCallingUserId()
+                    + " trying to check account features for " + userId);
+        }
+
         checkReadAccountsPermitted(callingUid, account.type, userId,
                 opPackageName);
 
@@ -2102,6 +2140,8 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             UserAccounts accounts = getUserAccounts(userId);
+            Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                    + " performing rename account");
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
@@ -2212,9 +2252,14 @@ public class AccountManagerService
                 }
 
                 sendNotificationAccountUpdated(resultAccount, accounts);
-                sendAccountsChangedBroadcast(accounts.userId);
+                sendAccountsChangedBroadcast(
+                        accounts.userId, accountToRename.type, /*useCase=*/"renameAccount");
                 for (String packageName : accountRemovedReceivers) {
-                    sendAccountRemovedBroadcast(accountToRename, packageName, accounts.userId);
+                    sendAccountRemovedBroadcast(
+                            accountToRename,
+                            packageName,
+                            accounts.userId,
+                            /*useCase=*/"renameAccount");
                 }
 
                 AccountManager.invalidateLocalAccountsDataCaches();
@@ -2446,9 +2491,13 @@ public class AccountManagerService
                     }
 
                     // Only broadcast LOGIN_ACCOUNTS_CHANGED if a change occurred.
-                    sendAccountsChangedBroadcast(accounts.userId);
+                    Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
+                            + " removed account");
+                    sendAccountsChangedBroadcast(
+                            accounts.userId, account.type, /*useCase=*/"removeAccount");
                     for (String packageName : accountRemovedReceivers) {
-                        sendAccountRemovedBroadcast(account, packageName, accounts.userId);
+                        sendAccountRemovedBroadcast(
+                                account, packageName, accounts.userId, /*useCase=*/"removeAccount");
                     }
                     String action = userUnlocked ? AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE
                             : AccountsDb.DEBUG_ACTION_ACCOUNT_REMOVE_DE;
@@ -2722,7 +2771,9 @@ public class AccountManagerService
                     if (isChanged) {
                         // Send LOGIN_ACCOUNTS_CHANGED only if the something changed.
                         sendNotificationAccountUpdated(account, accounts);
-                        sendAccountsChangedBroadcast(accounts.userId);
+                        Log.i(TAG, "callingUid=" + callingUid + " changed password");
+                        sendAccountsChangedBroadcast(
+                                accounts.userId, account.type, /*useCase=*/"setPassword");
                     }
                 }
             }
@@ -2980,7 +3031,7 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             // Distill the caller's package signatures into a single digest.
-            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg, userId);
 
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
@@ -3104,7 +3155,7 @@ public class AccountManagerService
                             }
                         }
 
-                        Intent intent = result.getParcelable(AccountManager.KEY_INTENT, Intent.class);
+                        Intent intent = result.getParcelable(AccountManager.KEY_INTENT, android.content.Intent.class);
                         if (intent != null && notifyOnAuthFailure && !customTokens) {
                             /*
                              * Make sure that the supplied intent is owned by the authenticator
@@ -3144,12 +3195,12 @@ public class AccountManagerService
                 .write();
     }
 
-    private byte[] calculatePackageSignatureDigest(String callerPkg) {
+    private byte[] calculatePackageSignatureDigest(String callerPkg, int userId) {
         MessageDigest digester;
         try {
             digester = MessageDigest.getInstance("SHA-256");
-            PackageInfo pkgInfo = mPackageManager.getPackageInfo(
-                    callerPkg, PackageManager.GET_SIGNATURES);
+            PackageInfo pkgInfo = mPackageManager.getPackageInfoAsUser(
+                    callerPkg, PackageManager.GET_SIGNATURES, userId);
             for (Signature sig : pkgInfo.signatures) {
                 digester.update(sig.toByteArray());
             }
@@ -3493,10 +3544,10 @@ public class AccountManagerService
 
                 @Override
                 protected String toDebugString(long now) {
-                    String requiredFeaturesStr = TextUtils.join(",", requiredFeatures);
                     return super.toDebugString(now) + ", startAddAccountSession" + ", accountType "
                             + accountType + ", requiredFeatures "
-                            + (requiredFeatures != null ? requiredFeaturesStr : null);
+                            + (requiredFeatures != null
+                                ? TextUtils.join(",", requiredFeatures) : "null");
                 }
             }.bind();
         } finally {
@@ -4894,7 +4945,7 @@ public class AccountManagerService
          */
         protected boolean checkKeyIntent(int authUid, Bundle bundle) {
             if (!checkKeyIntentParceledCorrectly(bundle)) {
-            	EventLog.writeEvent(0x534e4554, "250588548", authUid, "");
+                EventLog.writeEvent(0x534e4554, "250588548", authUid, "");
                 return false;
             }
             Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT, Intent.class);
@@ -5047,7 +5098,6 @@ public class AccountManagerService
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mAuthenticator = null;
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 try {
@@ -5874,22 +5924,24 @@ public class AccountManagerService
     }
 
     private boolean canUserModifyAccountsForType(int userId, String accountType, int callingUid) {
-        // the managing app can always modify accounts
-        if (isProfileOwner(callingUid)) {
-            return true;
-        }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext
-                .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
-        if (typesArray == null) {
-            return true;
-        }
-        for (String forbiddenType : typesArray) {
-            if (forbiddenType.equals(accountType)) {
-                return false;
+        return Binder.withCleanCallingIdentity(() -> {
+            // the managing app can always modify accounts
+            if (isProfileOwner(callingUid)) {
+                return true;
             }
-        }
-        return true;
+            DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                    .getSystemService(Context.DEVICE_POLICY_SERVICE);
+            String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
+            if (typesArray == null) {
+                return true;
+            }
+            for (String forbiddenType : typesArray) {
+                if (forbiddenType.equals(accountType)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     private boolean isProfileOwner(int uid) {
@@ -5897,6 +5949,32 @@ public class AccountManagerService
                 LocalServices.getService(DevicePolicyManagerInternal.class);
         //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
         return (dpmi != null) && (dpmi.isActiveProfileOwner(uid) || dpmi.isActiveDeviceOwner(uid));
+    }
+
+    /**
+     * Filter the access to the target package by rules of the package visibility if the caller
+     * targeting API level U and above. Otherwise, returns true if the package is installed on
+     * the device.
+     *
+     * @param targetPkgName The package name to check.
+     * @param callingUid The caller that is going to access the package.
+     * @param userId The user ID where the target package resides.
+     * @return true if the caller is able to access the package.
+     */
+    private boolean canCallerAccessPackage(@NonNull String targetPkgName, int callingUid,
+            int userId) {
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        if (!CompatChanges.isChangeEnabled(ENFORCE_PACKAGE_VISIBILITY_FILTERING, callingUid)) {
+            return pmInternal.getPackageUid(
+                    targetPkgName, 0 /* flags */, userId) != Process.INVALID_UID;
+        }
+        final boolean canAccess = !pmInternal.filterAppAccess(targetPkgName, callingUid, userId);
+        if (!canAccess && Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Package " + targetPkgName + " is not visible to caller " + callingUid
+                    + " for user " + userId);
+        }
+        return canAccess;
     }
 
     @Override

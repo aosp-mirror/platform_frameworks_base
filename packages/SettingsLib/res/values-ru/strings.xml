@@ -53,22 +53,17 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Не подключено"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Отключено"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Ошибка IP-конфигурации"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Подключение невозможно из-за низкого качества сети"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Ошибка подключения Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Ошибка аутентификации"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Ошибка подключения"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Не удалось подключиться к сети \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Возможно, вы указали неверный пароль. Повторите попытку."</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Недоступна"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Подключение не будет выполняться автоматически"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к интернету"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к Интернету"</string>
     <string name="saved_network" msgid="7143698034077223645">"Сохранено: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Подключено к сети с ограниченным трафиком"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Автоматически подключено к %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Автоматически подключено через автора рейтинга сетей"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Подключено к %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Подключено через приложение \"<xliff:g id="NAME">%1$s</xliff:g>\"."</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Доступно через %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Нажмите, чтобы зарегистрироваться"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Нет подключения к Интернету"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Доступа к частному DNS-серверу нет."</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Нет подключения к Интернету"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Требуется выполнить вход."</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"К точке доступа подключено слишком много устройств"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Подключено к %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Доступно через %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Открытие <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>…"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Не удалось подключиться."</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Завершение регистрации…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Не удалось завершить регистрацию. Нажмите, чтобы повторить попытку."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Регистрация завершена. Подключение…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Очень медленная"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Медленная"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"ОК"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Средняя"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Быстрая"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Очень быстрая"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Срок действия истек"</string>
@@ -95,10 +86,9 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Подключено<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Подключение..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Устанавливается соединение..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Подключено (кроме звонков)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Подключено (кроме аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Подключено (кроме сообщений)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Подключено (кроме звонков и аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Подключено, уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Подключено (кроме звонков), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -151,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключается: неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключено: неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Тон по умолчанию"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Установить стандартный тон при озвучивании текста."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Очень медленная"</item>
-    <item msgid="1815382991399815061">"Медленная"</item>
-    <item msgid="3075292553049300105">"Обычная"</item>
-    <item msgid="1158955023692670059">"Умеренно быстрая"</item>
-    <item msgid="5664310435707146591">"Быстрая"</item>
-    <item msgid="5491266922147715962">"Очень быстрая"</item>
-    <item msgid="7659240015901486196">"Ускоренная"</item>
-    <item msgid="7147051179282410945">"Сильно ускоренная"</item>
-    <item msgid="581904787661470707">"Максимальная"</item>
+    <item msgid="4563475121751694801">"60 %"</item>
+    <item msgid="6323184326270638754">"80 %"</item>
+    <item msgid="2569200872125313769">"100 %"</item>
+    <item msgid="9010794089704942570">"150 %"</item>
+    <item msgid="4634010129655810634">"200 %"</item>
+    <item msgid="8929490998534497543">"250 %"</item>
+    <item msgid="8442352376763286772">"300 %"</item>
+    <item msgid="4446831566506165093">"350 %"</item>
+    <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбор профиля"</string>
     <string name="category_personal" msgid="6236798763159385225">"Личный профиль"</string>
@@ -267,7 +257,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить журнал HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>
@@ -376,11 +366,13 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Имитировать аномалию"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Вкл. трассировку OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Откл. передачу аудио (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Отключить автоматическую передачу на внешние USB-устройства"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Откл. автом. маршрутизацию на внеш. USB-устройства"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево вне зависимости от региональных настроек"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Прозрачная панель навигации"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Сделать цвет фона панели навигации прозрачным по умолчанию"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Размытие на уровне окон"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Увеличить продолжительность"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Уменьшить продолжительность"</string>
     <string name="cancel" msgid="5665114069455378395">"Отмена"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники и напоминания"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Этот планшет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Невозможно воспроизвести на этом устройстве."</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для переключения требуется премиум-аккаунт"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не удается воспроизвести скачанные файлы"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Повторите попытку после просмотра объявления"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Для воспроизведения выведите устройство из спящего режима."</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Для воспроизведения необходима авторизация."</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Невозможно воспроизвести медиафайл."</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ошибка подключения. Выключите и снова включите устройство."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Проводное аудиоустройство"</string>
     <string name="help_label" msgid="3528360748637781274">"Справка/отзыв"</string>
@@ -572,8 +577,14 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Добавить пользователя"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профиль с огр. доступом"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать профиль – отдельное пространство с выбранными приложениями, обоями и т. д. Новый пользователь настраивает его сам.\n\nИз профиля можно поменять и общие настройки устройства, например сеть Wi-Fi.\n\nОбновлять общие приложения могут все, однако специальные возможности настраиваются индивидуально."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать отдельный профиль – практически собственное пространство со своими приложениями, обоями и т. д. При этом из профиля можно поменять и настройки устройства, общие для всех, например выбрать сеть Wi-Fi.\n\nКогда вы добавляете нового пользователя, ему нужно настроить свой профиль.\n\nОбновлять общие приложения может любой пользователь, однако специальные возможности настраиваются индивидуально."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настроить профиль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свой профиль."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Настроить профиль?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"При этом начнется новый гостевой сеанс, а все данные и приложения предыдущего сеанса будут удалены."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйти из гостевого режима?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Все приложения и данные текущего гостевого сеанса будут удалены."</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйти"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Сохранить историю сеанса?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Сохраните историю текущего сеанса или удалите данные и приложения."</string>
@@ -613,8 +628,8 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Выйти из гостевого режима"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Сбросить гостевой сеанс"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйти из гостевого режима"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Можно сбросить историю сеанса прямо сейчас, либо удалить или сохранить ее при выходе."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анимации подсказки для жеста \"Назад\""</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Включить системную анимацию подсказки для жеста \"Назад\"."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"С помощью этого параметра можно включить системные анимации подсказок для жестов. Для этого нужно установить значение true для enableOnBackInvokedCallback в файле манифеста приложения."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Переместите палец влево"</item>
+    <item msgid="5425394847942513942">"Переместите палец вниз"</item>
+    <item msgid="7728484337962740316">"Переместите палец вправо"</item>
+    <item msgid="324200556467459329">"Переместите палец вверх"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

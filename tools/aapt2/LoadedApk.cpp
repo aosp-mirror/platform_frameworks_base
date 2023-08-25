@@ -72,12 +72,13 @@ static ApkFormat DetermineApkFormat(io::IFileCollection* apk) {
   }
 }
 
-std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, IDiagnostics* diag) {
-  Source source(path);
+std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(StringPiece path,
+                                                      android::IDiagnostics* diag) {
+  android::Source source(path);
   std::string error;
   std::unique_ptr<io::ZipFileCollection> apk = io::ZipFileCollection::Create(path, &error);
   if (apk == nullptr) {
-    diag->Error(DiagMessage(path) << "failed opening zip: " << error);
+    diag->Error(android::DiagMessage(path) << "failed opening zip: " << error);
     return {};
   }
 
@@ -88,13 +89,14 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, I
     case ApkFormat::kProto:
       return LoadProtoApkFromFileCollection(source, std::move(apk), diag);
     default:
-      diag->Error(DiagMessage(path) << "could not identify format of APK");
+      diag->Error(android::DiagMessage(path) << "could not identify format of APK");
       return {};
   }
 }
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
-    const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+    const android::Source& source, unique_ptr<io::IFileCollection> collection,
+    android::IDiagnostics* diag) {
   std::unique_ptr<ResourceTable> table;
 
   io::IFile* table_file = collection->FindFile(kProtoResourceTablePath);
@@ -102,20 +104,20 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     pb::ResourceTable pb_table;
     std::unique_ptr<io::InputStream> in = table_file->OpenInputStream();
     if (in == nullptr) {
-      diag->Error(DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
+      diag->Error(android::DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
       return {};
     }
 
     io::ProtoInputStreamReader proto_reader(in.get());
     if (!proto_reader.ReadMessage(&pb_table)) {
-      diag->Error(DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
+      diag->Error(android::DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
       return {};
     }
 
     std::string error;
     table = util::make_unique<ResourceTable>(ResourceTable::Validation::kDisabled);
     if (!DeserializeTableFromPb(pb_table, collection.get(), table.get(), &error)) {
-      diag->Error(DiagMessage(source)
+      diag->Error(android::DiagMessage(source)
                   << "failed to deserialize " << kProtoResourceTablePath << ": " << error);
       return {};
     }
@@ -123,27 +125,27 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
 
   io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
   if (manifest_file == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to find " << kAndroidManifestPath);
+    diag->Error(android::DiagMessage(source) << "failed to find " << kAndroidManifestPath);
     return {};
   }
 
   std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
   if (manifest_in == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to open " << kAndroidManifestPath);
+    diag->Error(android::DiagMessage(source) << "failed to open " << kAndroidManifestPath);
     return {};
   }
 
   pb::XmlNode pb_node;
   io::ProtoInputStreamReader proto_reader(manifest_in.get());
   if (!proto_reader.ReadMessage(&pb_node)) {
-    diag->Error(DiagMessage(source) << "failed to read proto " << kAndroidManifestPath);
+    diag->Error(android::DiagMessage(source) << "failed to read proto " << kAndroidManifestPath);
     return {};
   }
 
   std::string error;
   std::unique_ptr<xml::XmlResource> manifest = DeserializeXmlResourceFromPb(pb_node, &error);
   if (manifest == nullptr) {
-    diag->Error(DiagMessage(source)
+    diag->Error(android::DiagMessage(source)
                 << "failed to deserialize proto " << kAndroidManifestPath << ": " << error);
     return {};
   }
@@ -152,7 +154,8 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
 }
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
-    const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+    const android::Source& source, unique_ptr<io::IFileCollection> collection,
+    android::IDiagnostics* diag) {
   std::unique_ptr<ResourceTable> table;
 
   io::IFile* table_file = collection->FindFile(kApkResourceTablePath);
@@ -160,7 +163,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
     table = util::make_unique<ResourceTable>(ResourceTable::Validation::kDisabled);
     std::unique_ptr<io::IData> data = table_file->OpenAsData();
     if (data == nullptr) {
-      diag->Error(DiagMessage(source) << "failed to open " << kApkResourceTablePath);
+      diag->Error(android::DiagMessage(source) << "failed to open " << kApkResourceTablePath);
       return {};
     }
     BinaryResourceParser parser(diag, table.get(), source, data->data(), data->size(),
@@ -172,13 +175,13 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
 
   io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
   if (manifest_file == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to find " << kAndroidManifestPath);
+    diag->Error(android::DiagMessage(source) << "failed to find " << kAndroidManifestPath);
     return {};
   }
 
   std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
   if (manifest_data == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to open " << kAndroidManifestPath);
+    diag->Error(android::DiagMessage(source) << "failed to open " << kAndroidManifestPath);
     return {};
   }
 
@@ -186,7 +189,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
   std::unique_ptr<xml::XmlResource> manifest =
       xml::Inflate(manifest_data->data(), manifest_data->size(), &error);
   if (manifest == nullptr) {
-    diag->Error(DiagMessage(source)
+    diag->Error(android::DiagMessage(source)
                 << "failed to parse binary " << kAndroidManifestPath << ": " << error);
     return {};
   }
@@ -235,7 +238,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
     // Skip resources that are not referenced if requested.
     if (is_resource && referenced_resources.find(output_path) == referenced_resources.end()) {
       if (context->IsVerbose()) {
-        context->GetDiagnostics()->Note(DiagMessage()
+        context->GetDiagnostics()->Note(android::DiagMessage()
                                         << "Removing resource '" << path << "' from APK.");
       }
       continue;
@@ -243,14 +246,15 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
 
     if (!filters->Keep(path)) {
       if (context->IsVerbose()) {
-        context->GetDiagnostics()->Note(DiagMessage() << "Filtered '" << path << "' from APK.");
+        context->GetDiagnostics()->Note(android::DiagMessage()
+                                        << "Filtered '" << path << "' from APK.");
       }
       continue;
     }
 
     // The resource table needs to be re-serialized since it might have changed.
     if (format_ == ApkFormat::kBinary && path == kApkResourceTablePath) {
-      BigBuffer buffer(4096);
+      android::BigBuffer buffer(4096);
       // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
       // with sparse entries) b/35389232.
       TableFlattener flattener(options, &buffer);
@@ -282,12 +286,12 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
         return false;
       }
     } else if (manifest != nullptr && path == "AndroidManifest.xml") {
-      BigBuffer buffer(8192);
+      android::BigBuffer buffer(8192);
       XmlFlattenerOptions xml_flattener_options;
       xml_flattener_options.use_utf16 = true;
       XmlFlattener xml_flattener(&buffer, xml_flattener_options);
       if (!xml_flattener.Consume(context, manifest)) {
-        context->GetDiagnostics()->Error(DiagMessage(path) << "flattening failed");
+        context->GetDiagnostics()->Error(android::DiagMessage(path) << "flattening failed");
         return false;
       }
 
@@ -308,10 +312,10 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
 }
 
 std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_path,
-                                                     IDiagnostics* diag) const {
+                                                     android::IDiagnostics* diag) const {
   io::IFile* file = apk_->FindFile(file_path);
   if (file == nullptr) {
-    diag->Error(DiagMessage() << "failed to find file");
+    diag->Error(android::DiagMessage() << "failed to find file");
     return nullptr;
   }
 
@@ -319,34 +323,34 @@ std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_pat
   if (format_ == ApkFormat::kProto) {
     std::unique_ptr<io::InputStream> in = file->OpenInputStream();
     if (!in) {
-      diag->Error(DiagMessage() << "failed to open file");
+      diag->Error(android::DiagMessage() << "failed to open file");
       return nullptr;
     }
 
     pb::XmlNode pb_node;
     io::ProtoInputStreamReader proto_reader(in.get());
     if (!proto_reader.ReadMessage(&pb_node)) {
-      diag->Error(DiagMessage() << "failed to parse file as proto XML");
+      diag->Error(android::DiagMessage() << "failed to parse file as proto XML");
       return nullptr;
     }
 
     std::string err;
     doc = DeserializeXmlResourceFromPb(pb_node, &err);
     if (!doc) {
-      diag->Error(DiagMessage() << "failed to deserialize proto XML: " << err);
+      diag->Error(android::DiagMessage() << "failed to deserialize proto XML: " << err);
       return nullptr;
     }
   } else if (format_ == ApkFormat::kBinary) {
     std::unique_ptr<io::IData> data = file->OpenAsData();
     if (!data) {
-      diag->Error(DiagMessage() << "failed to open file");
+      diag->Error(android::DiagMessage() << "failed to open file");
       return nullptr;
     }
 
     std::string err;
     doc = xml::Inflate(data->data(), data->size(), &err);
     if (!doc) {
-      diag->Error(DiagMessage() << "failed to parse file as binary XML: " << err);
+      diag->Error(android::DiagMessage() << "failed to parse file as binary XML: " << err);
       return nullptr;
     }
   }

@@ -45,12 +45,14 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.ClockEvents;
+import com.android.systemui.plugins.ClockFaceConfig;
 import com.android.systemui.plugins.ClockFaceController;
 import com.android.systemui.plugins.ClockFaceEvents;
-import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.ClockTickRate;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -148,6 +150,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 .thenReturn(100);
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_large_clock_top_margin))
                 .thenReturn(-200);
+        when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
+                .thenReturn(View.INVISIBLE);
 
         when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
         when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
@@ -182,9 +186,14 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getEvents()).thenReturn(mClockEvents);
         when(mSmallClockController.getEvents()).thenReturn(mClockFaceEvents);
         when(mLargeClockController.getEvents()).thenReturn(mClockFaceEvents);
-        when(mClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mLargeClockController.getAnimations()).thenReturn(mClockAnimations);
+        when(mSmallClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, false, false));
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
@@ -315,8 +324,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetClockAnimationsForwardsToClock() {
-        assertEquals(mClockAnimations, mController.getClockAnimations());
+    public void testGetClock_ForwardsToClock() {
+        assertEquals(mClockController, mController.getClock());
     }
 
     @Test
@@ -367,9 +376,31 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetClockAnimations_nullClock_returnsNull() {
+    public void testChangeClockDateWeatherEnabled_SetsDateWeatherViewVisibility() {
+        ArgumentCaptor<ClockRegistry.ClockChangeListener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(ClockRegistry.ClockChangeListener.class);
+        when(mSmartspaceController.isEnabled()).thenReturn(true);
+        when(mSmartspaceController.isDateWeatherDecoupled()).thenReturn(true);
+        when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
+        mController.init();
+        mExecutor.runAllReady();
+        assertEquals(View.VISIBLE, mFakeDateView.getVisibility());
+
+        when(mSmallClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+        when(mLargeClockController.getConfig())
+                .thenReturn(new ClockFaceConfig(ClockTickRate.PER_MINUTE, true, false));
+        verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
+        listenerArgumentCaptor.getValue().onCurrentClockChanged();
+
+        mExecutor.runAllReady();
+        assertEquals(View.INVISIBLE, mFakeDateView.getVisibility());
+    }
+
+    @Test
+    public void testGetClock_nullClock_returnsNull() {
         when(mClockEventController.getClock()).thenReturn(null);
-        assertNull(mController.getClockAnimations());
+        assertNull(mController.getClock());
     }
 
     private void verifyAttachment(VerificationMode times) {

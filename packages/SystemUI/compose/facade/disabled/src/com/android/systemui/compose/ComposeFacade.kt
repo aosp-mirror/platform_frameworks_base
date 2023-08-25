@@ -21,8 +21,10 @@ import android.content.Context
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
+import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.util.time.SystemClock
 
 /** The Compose facade, when Compose is *not* available. */
 object ComposeFacade : BaseComposeFacade {
@@ -44,6 +46,14 @@ object ComposeFacade : BaseComposeFacade {
         context: Context,
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner
+    ): View {
+        throwComposeUnavailableError()
+    }
+
+    override fun createMultiShadeView(
+        context: Context,
+        viewModel: MultiShadeViewModel,
+        clock: SystemClock,
     ): View {
         throwComposeUnavailableError()
     }

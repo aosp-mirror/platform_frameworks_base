@@ -29,27 +29,34 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.accessibility.AccessibilityModule;
+import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.authentication.AuthenticationModule;
 import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
+import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.biometrics.dagger.UdfpsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
+import com.android.systemui.common.ui.data.repository.CommonRepositoryModule;
+import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
-import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
+import com.android.systemui.log.dagger.MonitorLog;
+import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.motiontool.MotionToolModule;
@@ -59,36 +66,44 @@ import com.android.systemui.people.PeopleModule;
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
+import com.android.systemui.process.condition.SystemProcessCondition;
 import com.android.systemui.qrcodescanner.dagger.QRCodeScannerModule;
 import com.android.systemui.qs.FgsManagerController;
 import com.android.systemui.qs.FgsManagerControllerImpl;
+import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.retail.dagger.RetailModeModule;
 import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeModule;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
+import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.connectivity.ConnectivityModule;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -115,15 +130,16 @@ import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import java.util.Optional;
-import java.util.concurrent.Executor;
-
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+
+import javax.inject.Named;
 
 /**
  * A dagger module for injecting components of System UI that are required by System UI.
@@ -137,13 +153,16 @@ import dagger.Provides;
  */
 @Module(includes = {
             AccessibilityModule.class,
+            AccessibilityRepositoryModule.class,
             AppOpsModule.class,
             AssistModule.class,
+            AuthenticationModule.class,
             BiometricsModule.class,
             BouncerViewModule.class,
             ClipboardOverlayModule.class,
             ClockInfoModule.class,
             ClockRegistryModule.class,
+            CommonRepositoryModule.class,
             ConnectivityModule.class,
             CoroutinesModule.class,
             DreamModule.class,
@@ -155,6 +174,7 @@ import dagger.Provides;
             FooterActionsModule.class,
             GarbageMonitorModule.class,
             KeyboardModule.class,
+            LetterboxModule.class,
             LogModule.class,
             MediaProjectionModule.class,
             MotionToolModule.class,
@@ -164,12 +184,14 @@ import dagger.Provides;
             PolicyModule.class,
             PrivacyModule.class,
             QRCodeScannerModule.class,
+            QSFragmentStartableModule.class,
+            RetailModeModule.class,
             ScreenshotModule.class,
             SensorModule.class,
-            MultiUserUtilsModule.class,
             SecurityRepositoryModule.class,
             ScreenRecordModule.class,
             SettingsUtilModule.class,
+            ShadeModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
             StatusBarPipelineModule.class,
@@ -188,13 +210,13 @@ import dagger.Provides;
         },
         subcomponents = {
             CentralSurfacesComponent.class,
+            ComplicationComponent.class,
             NavigationBarComponent.class,
             NotificationRowComponent.class,
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
             KeyguardBouncerComponent.class,
-            NotificationShelfComponent.class,
-            FragmentService.FragmentCreator.class
+            NotificationShelfComponent.class
         })
 public abstract class SystemUIModule {
 
@@ -221,6 +243,17 @@ public abstract class SystemUIModule {
         final SysUiState state = new SysUiState(displayTracker);
         dumpManager.registerDumpable(state);
         return state;
+    }
+
+    /**
+     * Provides the monitor for SystemUI that requires the process running as the system user.
+     */
+    @SysUISingleton
+    @Provides
+    @SystemUser
+    static Monitor provideSystemUserMonitor(@Main Executor executor,
+            SystemProcessCondition systemProcessCondition, @MonitorLog TableLogBuffer logBuffer) {
+        return new Monitor(executor, Collections.singleton(systemProcessCondition), logBuffer);
     }
 
     @BindsOptionalOf
@@ -261,6 +294,9 @@ public abstract class SystemUIModule {
     @BindsOptionalOf
     abstract SystemStatusAnimationScheduler optionalSystemStatusAnimationScheduler();
 
+    @BindsOptionalOf
+    abstract FingerprintReEnrollNotification optionalFingerprintReEnrollNotification();
+
     @SysUISingleton
     @Binds
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
@@ -279,13 +315,14 @@ public abstract class SystemUIModule {
             INotificationManager notificationManager,
             IDreamManager dreamManager,
             NotificationVisibilityProvider visibilityProvider,
-            NotificationInterruptStateProvider interruptionStateProvider,
+            VisualInterruptionDecisionProvider visualInterruptionDecisionProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             CommonNotifCollection notifCollection,
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             @Main Executor sysuiMainExecutor) {
         return Optional.ofNullable(BubblesManager.create(context,
                 bubblesOptional,
@@ -296,13 +333,14 @@ public abstract class SystemUIModule {
                 notificationManager,
                 dreamManager,
                 visibilityProvider,
-                interruptionStateProvider,
+                visualInterruptionDecisionProvider,
                 zenModeController,
                 notifUserManager,
                 notifCollection,
                 notifPipeline,
                 sysUiState,
                 featureFlags,
+                notifPipelineFlags,
                 sysuiMainExecutor));
     }
 
@@ -312,4 +350,11 @@ public abstract class SystemUIModule {
     @Binds
     abstract LargeScreenShadeInterpolator largeScreensShadeInterpolator(
             LargeScreenShadeInterpolatorImpl impl);
+
+    @SysUISingleton
+    @Provides
+    static VisualInterruptionDecisionProvider provideVisualInterruptionDecisionProvider(
+            NotificationInterruptStateProvider innerProvider) {
+        return new NotificationInterruptStateProviderWrapper(innerProvider);
+    }
 }

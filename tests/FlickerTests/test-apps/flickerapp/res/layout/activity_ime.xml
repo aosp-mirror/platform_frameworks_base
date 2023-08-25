@@ -40,7 +40,7 @@
             android:id="@+id/start_dialog_themed_activity_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dialog activity" />
+            android:text="Dialog themed activity" />
         <ToggleButton
             android:id="@+id/toggle_fixed_portrait_btn"
             android:layout_width="wrap_content"

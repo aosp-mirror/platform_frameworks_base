@@ -142,6 +142,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.wm.ActivityRecord.CustomAppTransition;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -289,13 +290,6 @@ public class AppTransition implements Dump {
         fetchAppTransitionSpecsFromFuture();
     }
 
-    void abort() {
-        if (mRemoteAnimationController != null) {
-            mRemoteAnimationController.cancelAnimation("aborted");
-        }
-        clear();
-    }
-
     boolean isRunning() {
         return mAppTransitionState == APP_STATE_RUNNING;
     }
@@ -407,9 +401,6 @@ public class AppTransition implements Dump {
         final AnimationAdapter topOpeningAnim = wc != null ? wc.getAnimation() : null;
 
         int redoLayout = notifyAppTransitionStartingLocked(
-                AppTransition.isKeyguardGoingAwayTransitOld(transit),
-                AppTransition.isKeyguardOccludeTransitOld(transit),
-                topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
                 topOpeningAnim != null
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
@@ -457,7 +448,7 @@ public class AppTransition implements Dump {
     }
 
     void freeze() {
-        final boolean keyguardGoingAway = mNextAppTransitionRequests.contains(
+        final boolean keyguardGoingAwayCancelled = mNextAppTransitionRequests.contains(
                 TRANSIT_KEYGUARD_GOING_AWAY);
 
         // The RemoteAnimationControl didn't register AppTransitionListener and
@@ -470,7 +461,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionRequests.clear();
         clear();
         setReady();
-        notifyAppTransitionCancelledLocked(keyguardGoingAway);
+        notifyAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
     }
 
     private void setAppTransitionState(int state) {
@@ -520,9 +511,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+    private void notifyAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
         for (int i = 0; i < mListeners.size(); i++) {
-            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAway);
+            mListeners.get(i).onAppTransitionCancelledLocked(keyguardGoingAwayCancelled);
         }
     }
 
@@ -532,14 +523,12 @@ public class AppTransition implements Dump {
         }
     }
 
-    private int notifyAppTransitionStartingLocked(boolean keyguardGoingAway,
-            boolean keyguardOcclude, long duration, long statusBarAnimationStartTime,
+    private int notifyAppTransitionStartingLocked(long statusBarAnimationStartTime,
             long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
-            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(keyguardGoingAway,
-                    keyguardOcclude, duration, statusBarAnimationStartTime,
-                    statusBarAnimationDuration);
+            redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(
+                    statusBarAnimationStartTime, statusBarAnimationDuration);
         }
         return redoLayout;
     }
@@ -898,9 +887,21 @@ public class AppTransition implements Dump {
                     a, appTransitionOldToString(transit), enter, Debug.getCallers(3));
         } else {
             int animAttr = mapOpenCloseTransitTypes(transit, enter);
-            a = animAttr == 0 ? null : (canCustomizeAppTransition
-                ? loadAnimationAttr(lp, animAttr, transit)
-                : mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit));
+            if (animAttr != 0) {
+                final CustomAppTransition customAppTransition =
+                        getCustomAppTransition(animAttr, container);
+                if (customAppTransition != null) {
+                    a = loadCustomActivityAnimation(customAppTransition, enter, container);
+                } else {
+                    if (canCustomizeAppTransition) {
+                        a = loadAnimationAttr(lp, animAttr, transit);
+                    } else {
+                        a = mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit);
+                    }
+                }
+            } else {
+                a = null;
+            }
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "
@@ -910,6 +911,45 @@ public class AppTransition implements Dump {
         }
         setAppTransitionFinishedCallbackIfNeeded(a);
 
+        return a;
+    }
+
+    CustomAppTransition getCustomAppTransition(int animAttr, WindowContainer container) {
+        ActivityRecord customAnimationSource = container.asActivityRecord();
+        if (customAnimationSource == null) {
+            return null;
+        }
+
+        // Only top activity can customize activity animation.
+        // If the animation is for the one below, try to get from the above activity.
+        if (animAttr == WindowAnimation_activityOpenExitAnimation
+                || animAttr == WindowAnimation_activityCloseEnterAnimation) {
+            customAnimationSource = customAnimationSource.getTask()
+                    .getActivityAbove(customAnimationSource);
+            if (customAnimationSource == null) {
+                return null;
+            }
+        }
+        switch (animAttr) {
+            case WindowAnimation_activityOpenEnterAnimation:
+            case WindowAnimation_activityOpenExitAnimation:
+                return customAnimationSource.getCustomAnimation(true /* open */);
+            case WindowAnimation_activityCloseEnterAnimation:
+            case WindowAnimation_activityCloseExitAnimation:
+                return customAnimationSource.getCustomAnimation(false /* open */);
+        }
+        return null;
+    }
+    private Animation loadCustomActivityAnimation(@NonNull CustomAppTransition custom,
+            boolean enter, WindowContainer container) {
+        final ActivityRecord customAnimationSource = container.asActivityRecord();
+        final Animation a = mTransitionAnimation.loadAppTransitionAnimation(
+                customAnimationSource.packageName, enter
+                        ? custom.mEnterAnim : custom.mExitAnim);
+        if (a != null && custom.mBackgroundColor != 0) {
+            a.setBackdropColor(custom.mBackgroundColor);
+            a.setShowBackdrop(true);
+        }
         return a;
     }
 

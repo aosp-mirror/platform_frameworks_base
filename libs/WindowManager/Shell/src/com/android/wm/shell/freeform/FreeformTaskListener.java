@@ -94,11 +94,12 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.taskId);
                 if (taskInfo.isVisible) {
-                    if (repository.addActiveTask(taskInfo.taskId)) {
+                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                                 "Adding active freeform task: #%d", taskInfo.taskId);
                     }
-                    repository.updateVisibleFreeformTasks(taskInfo.taskId, true);
+                    repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                            true);
                 }
             });
         }
@@ -117,7 +118,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                             "Removing active freeform task: #%d", taskInfo.taskId);
                 }
-                repository.updateVisibleFreeformTasks(taskInfo.taskId, false);
+                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId, false);
             });
         }
 
@@ -137,12 +138,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         if (DesktopModeStatus.isAnyEnabled()) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
-                    if (repository.addActiveTask(taskInfo.taskId)) {
+                    if (repository.addActiveTask(taskInfo.displayId, taskInfo.taskId)) {
                         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                                 "Adding active freeform task: #%d", taskInfo.taskId);
                     }
                 }
-                repository.updateVisibleFreeformTasks(taskInfo.taskId, taskInfo.isVisible);
+                repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId,
+                        taskInfo.isVisible);
             });
         }
     }

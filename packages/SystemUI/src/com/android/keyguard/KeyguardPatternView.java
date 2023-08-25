@@ -158,15 +158,18 @@ public class KeyguardPatternView extends KeyguardInputView
 
     public void startAppearAnimation() {
         enableClipping(false);
-        setAlpha(1f);
+        setAlpha(0f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 500 /* duration */,
                 0, mAppearAnimationUtils.getInterpolator(),
                 getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PATTERN_APPEAR));
-        mAppearAnimationUtils.startAnimation2d(
-                mLockPatternView.getCellStates(),
-                () -> enableClipping(true),
-                this);
+        mLockPatternView.post(() -> {
+            setAlpha(1f);
+            mAppearAnimationUtils.startAnimation2d(
+                    mLockPatternView.getCellStates(),
+                    () -> enableClipping(true),
+                    KeyguardPatternView.this);
+        });
         if (!TextUtils.isEmpty(mSecurityMessageDisplay.getText())) {
             mAppearAnimationUtils.createAnimation(mSecurityMessageDisplay, 0,
                     AppearAnimationUtils.DEFAULT_APPEAR_DURATION,

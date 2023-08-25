@@ -67,9 +67,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.companion.virtual.VirtualDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -91,6 +94,7 @@ import com.android.server.wm.DisplayRotation;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * This interface supplies all UI-specific behavior of the window manager.  An
@@ -136,10 +140,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     @IntDef({NAV_BAR_LEFT, NAV_BAR_RIGHT, NAV_BAR_BOTTOM})
     @interface NavigationBarPosition {}
 
-    @Retention(SOURCE)
-    @IntDef({ALT_BAR_UNKNOWN, ALT_BAR_LEFT, ALT_BAR_RIGHT, ALT_BAR_BOTTOM, ALT_BAR_TOP})
-    @interface AltBarPosition {}
-
     /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
@@ -172,10 +172,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition);
 
     /**
-     * Applies a keyguard occlusion change if one happened.
-     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
+     * Commit any queued changes to keyguard occlude status that had been deferred during the
+     * start of an animation or transition.
      */
-    int applyKeyguardOcclusionChange(boolean transitionStarted);
+    int applyKeyguardOcclusionChange();
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -335,8 +335,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Hint to window manager that the user is interacting with a display that should be treated
          * as the top display.
+         *
+         * Calling this method does not guarantee that the display will be moved to top. The window
+         * manager will make the final decision whether or not to move the display.
          */
-        void moveDisplayToTop(int displayId);
+        void moveDisplayToTopIfAllowed(int displayId);
 
         /**
          * Return whether the app transition state is idle.
@@ -359,6 +362,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          *                      windows even if the rotation hasn't changed.
          */
         void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
+
+        /**
+         * Invoked when a screenshot is taken of the given display to notify registered listeners.
+         */
+        List<ComponentName> notifyScreenshotListeners(int displayId);
     }
 
     /**
@@ -756,50 +764,84 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void setAllowLockscreenWhenOn(int displayId, boolean allow);
 
     /**
+     * Called when the global wakefulness is becoming awake.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void startedWakingUpGlobal(@PowerManager.WakeReason int reason);
+
+    /**
+     * Called when the global wakefulness has finished becoming awake.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void finishedWakingUpGlobal(@PowerManager.WakeReason int reason);
+
+    /**
+     * Called when the global wakefulness has started going to sleep.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void startedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason);
+
+    /**
+     * Called when the global wakefulness has finished going to sleep.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void finishedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason);
+
+    /**
      * Called when the device has started waking up.
      *
-     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
-     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
+     * @param displayGroupId The id of the display group that has started waking up. This will often
+     *                       be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is possible for other
+     *                       display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason this
+     *                     display group is waking up, such as WAKE_REASON_POWER_BUTTON or
+     *                     WAKE_REASON_GESTURE.
      */
-    void startedWakingUp(@PowerManager.WakeReason int pmWakeReason);
+    void startedWakingUp(int displayGroupId, @PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has finished waking up.
      *
-     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
-     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
+     * @param displayGroupId The id of the display group that has finished waking. This will often
+     *                       be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is possible for other
+     *                       display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason this
+     *                     display group is waking up, such as WAKE_REASON_POWER_BUTTON or
+     *                     WAKE_REASON_GESTURE.
      */
-    void finishedWakingUp(@PowerManager.WakeReason int pmWakeReason);
+    void finishedWakingUp(int displayGroupId, @PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has started going to sleep.
      *
+     * @param displayGroupId The id of the display group that has started going to sleep. This
+     *                       will often be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is
+     *                       possible for other display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
      * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
-     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
+     *                      this display group is going to sleep, such as
+     *                      GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void startedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
+    void startedGoingToSleep(int displayGroupId, @PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the device has finished going to sleep.
      *
+     * @param displayGroupId The id of the display group that has finished going to sleep. This
+     *                       will often be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is
+     *                       possible for other display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
      * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
-     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
+     *                      we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or
+     *                      GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
-
-    /**
-     * Called when a particular PowerGroup has changed wakefulness.
-     *
-     * @param groupId The id of the PowerGroup.
-     * @param wakefulness One of PowerManagerInternal.WAKEFULNESS_* indicating the wake state for
-     * the group
-     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the reason this
-     * group is going to sleep.
-     * @param globalWakefulness The global wakefulness, which may or may not match that of this
-     * group. One of PowerManagerInternal.WAKEFULNESS_*
-     */
-    void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
-            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness);
+    void finishedGoingToSleep(int displayGroupId, @PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the display is about to turn on to show content.
@@ -829,8 +871,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Called when the display has turned off.
+     * @param displayId The display to apply to.
+     * @param isSwappingDisplay Whether the display is swapping to another physical display.
      */
-    public void screenTurnedOff(int displayId);
+    void screenTurnedOff(int displayId, boolean isSwappingDisplay);
 
     public interface ScreenOnListener {
         void onScreenOn();
@@ -1130,11 +1174,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Notifies the keyguard to start fading out.
+     *  @param startTime the start time of the animation in uptime milliseconds
      *
-     * @param startTime the start time of the animation in uptime milliseconds
-     * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+    void startKeyguardExitAnimation(long startTime);
 
     /**
      * Called when System UI has been started.
@@ -1190,4 +1233,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * A new window on default display has been focused.
      */
     default void onDefaultDisplayFocusChangedLw(WindowState newFocus) {}
+
+    /**
+     * Returns {@code true} if the key will be handled globally and not forwarded to all apps.
+     *
+     * @param keyCode the key code to check
+     * @return {@code true} if the key will be handled globally.
+     */
+    boolean isGlobalKey(int keyCode);
 }

@@ -65,8 +65,6 @@ public class AudioSystem
 
     private static final String TAG = "AudioSystem";
 
-    private static final int SOURCE_CODEC_TYPE_OPUS = 6; // TODO remove in U
-
     // private constructor to prevent instantiating AudioSystem
     private AudioSystem() {
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
@@ -294,7 +292,7 @@ public class AudioSystem
             case AUDIO_FORMAT_APTX_HD: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_APTX_HD;
             case AUDIO_FORMAT_LDAC: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LDAC;
             case AUDIO_FORMAT_LC3: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3;
-            case AUDIO_FORMAT_OPUS: return SOURCE_CODEC_TYPE_OPUS; // TODO update in U
+            case AUDIO_FORMAT_OPUS: return BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS;
             default:
                 Log.e(TAG, "Unknown audio format 0x" + Integer.toHexString(audioFormat)
                         + " for conversion to BT codec");
@@ -337,7 +335,7 @@ public class AudioSystem
                 return AudioSystem.AUDIO_FORMAT_LDAC;
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_LC3:
                 return AudioSystem.AUDIO_FORMAT_LC3;
-            case SOURCE_CODEC_TYPE_OPUS: // TODO update in U
+            case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
                 return AudioSystem.AUDIO_FORMAT_OPUS;
             default:
                 Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
@@ -1239,6 +1237,9 @@ public class AudioSystem
     public static final Set<Integer> DEVICE_IN_ALL_SCO_SET;
     /** @hide */
     public static final Set<Integer> DEVICE_IN_ALL_USB_SET;
+    /** @hide */
+    public static final Set<Integer> DEVICE_IN_ALL_BLE_SET;
+
     static {
         DEVICE_IN_ALL_SET = new HashSet<>();
         DEVICE_IN_ALL_SET.add(DEVICE_IN_COMMUNICATION);
@@ -1278,6 +1279,66 @@ public class AudioSystem
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_ACCESSORY);
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_DEVICE);
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_HEADSET);
+
+        DEVICE_IN_ALL_BLE_SET = new HashSet<>();
+        DEVICE_IN_ALL_BLE_SET.add(DEVICE_IN_BLE_HEADSET);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothDevice(int deviceType) {
+        return isBluetoothA2dpOutDevice(deviceType)
+                || isBluetoothScoDevice(deviceType)
+                || isBluetoothLeDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothOutDevice(int deviceType) {
+        return isBluetoothA2dpOutDevice(deviceType)
+                || isBluetoothScoOutDevice(deviceType)
+                || isBluetoothLeOutDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothInDevice(int deviceType) {
+        return isBluetoothScoInDevice(deviceType)
+                || isBluetoothLeInDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothA2dpOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_A2DP_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_SCO_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoInDevice(int deviceType) {
+        return DEVICE_IN_ALL_SCO_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothScoDevice(int deviceType) {
+        return isBluetoothScoOutDevice(deviceType)
+                || isBluetoothScoInDevice(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeOutDevice(int deviceType) {
+        return DEVICE_OUT_ALL_BLE_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeInDevice(int deviceType) {
+        return DEVICE_IN_ALL_BLE_SET.contains(deviceType);
+    }
+
+    /** @hide */
+    public static boolean isBluetoothLeDevice(int deviceType) {
+        return isBluetoothLeOutDevice(deviceType)
+                || isBluetoothLeInDevice(deviceType);
     }
 
     /** @hide */
@@ -2067,12 +2128,46 @@ public class AudioSystem
 
     /**
      * @hide
+     * Remove device as role for product strategy.
+     * @param strategy the id of the strategy to configure
+     * @param role the role of the devices
+     * @param devices the list of devices to be removed as role for the given strategy
+     * @return {@link #SUCCESS} if successfully set
+     */
+    public static int removeDevicesRoleForStrategy(
+            int strategy, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            return BAD_VALUE;
+        }
+        int[] types = new int[devices.size()];
+        String[] addresses = new String[devices.size()];
+        for (int i = 0; i < devices.size(); ++i) {
+            types[i] = devices.get(i).getInternalType();
+            addresses[i] = devices.get(i).getAddress();
+        }
+        return removeDevicesRoleForStrategy(strategy, role, types, addresses);
+    }
+
+    /**
+     * @hide
      * Remove devices as role for the strategy
+     * @param strategy the id of the strategy to configure
+     * @param role the role of the devices
+     * @param types all device types
+     * @param addresses all device addresses
+     * @return {@link #SUCCESS} if successfully removed
+     */
+    public static native int removeDevicesRoleForStrategy(
+            int strategy, int role, @NonNull int[] types, @NonNull String[] addresses);
+
+    /**
+     * @hide
+     * Remove all devices as role for the strategy
      * @param strategy the id of the strategy to configure
      * @param role the role of the devices
      * @return {@link #SUCCESS} if successfully removed
      */
-    public static native int removeDevicesRoleForStrategy(int strategy, int role);
+    public static native int clearDevicesRoleForStrategy(int strategy, int role);
 
     /**
      * @hide
@@ -2264,6 +2359,20 @@ public class AudioSystem
 
     /**
      * @hide
+     * Register the sound dose callback with the audio server and returns the binder to the
+     * ISoundDose interface.
+     *
+     * @return ISoundDose interface with registered callback.
+     */
+    @Nullable
+    public static ISoundDose getSoundDoseInterface(ISoundDoseCallback callback) {
+        return ISoundDose.Stub.asInterface(nativeGetSoundDose(callback));
+    }
+
+    private static native IBinder nativeGetSoundDose(ISoundDoseCallback callback);
+
+    /**
+     * @hide
      * @param attributes audio attributes describing the playback use case
      * @param audioProfilesList the list of AudioProfiles that can be played as direct output
      * @return {@link #SUCCESS} if the list of AudioProfiles was successfully created (can be empty)
@@ -2430,6 +2539,42 @@ public class AudioSystem
      * Keep in sync with core/jni/android_media_DeviceCallback.h.
      */
     final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
+
+    /**
+     * @hide
+     * Query the mixer attributes that can be set as preferred mixer attributes for the given
+     * device.
+     */
+    public static native int getSupportedMixerAttributes(
+            int deviceId, @NonNull List<AudioMixerAttributes> mixerAttrs);
+
+    /**
+     * @hide
+     * Set preferred mixer attributes for a given device when playing particular
+     * audio attributes.
+     */
+    public static native int setPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes,
+            int portId,
+            int uid,
+            @NonNull AudioMixerAttributes mixerAttributes);
+
+    /**
+     * @hide
+     * Get preferred mixer attributes that is previously set via
+     * {link #setPreferredMixerAttributes}.
+     */
+    public static native int getPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId,
+            List<AudioMixerAttributes> mixerAttributesList);
+
+    /**
+     * @hide
+     * Clear preferred mixer attributes that is previously set via
+     * {@link #setPreferredMixerAttributes}
+     */
+    public static native int clearPreferredMixerAttributes(
+            @NonNull AudioAttributes attributes, int portId, int uid);
 
 
     /**

@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -159,7 +160,8 @@ public class EditUserInfoController {
                         userPhotoView);
             }
         }
-
+        ScrollView scrollView = content.findViewById(R.id.user_info_scroll);
+        scrollView.setClipToOutline(true);
         mEditUserInfoDialog = buildDialog(activity, content, userNameView, oldUserIcon,
                 defaultUserName, title, successCallback, cancelCallback);
 
@@ -182,7 +184,6 @@ public class EditUserInfoController {
             @Nullable Drawable oldUserIcon, String defaultUserName, String title,
             BiConsumer<String, Drawable> successCallback, Runnable cancelCallback) {
         return new AlertDialog.Builder(activity)
-                .setTitle(title)
                 .setView(content)
                 .setCancelable(true)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {

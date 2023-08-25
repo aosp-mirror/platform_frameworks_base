@@ -43,6 +43,7 @@ import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.loader.ResourcesLoader;
@@ -179,6 +180,7 @@ public class Resources {
      * mThemeRefNextFlushSize is reached.
      */
     private static final int MIN_THEME_REFS_FLUSH_SIZE = 32;
+    private static final int MAX_THEME_REFS_FLUSH_SIZE = 512;
     private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
 
     private int mBaseApkAssetsSize;
@@ -370,10 +372,10 @@ public class Resources {
 
         // Rebase the ThemeImpls using the new ResourcesImpl.
         synchronized (mThemeRefs) {
+            cleanupThemeReferences();
             final int count = mThemeRefs.size();
             for (int i = 0; i < count; i++) {
-                WeakReference<Theme> weakThemeRef = mThemeRefs.get(i);
-                Theme theme = weakThemeRef != null ? weakThemeRef.get() : null;
+                Theme theme = mThemeRefs.get(i).get();
                 if (theme != null) {
                     theme.rebase(mResourcesImpl);
                 }
@@ -2007,6 +2009,15 @@ public class Resources {
 
         private int mHashCode = 0;
 
+        private boolean containsValue(int resId, boolean force) {
+            for (int i = 0; i < mCount; ++i) {
+                if (mResId[i] == resId && mForce[i] == force) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void append(int resId, boolean force) {
             if (mResId == null) {
                 mResId = new int[4];
@@ -2014,6 +2025,11 @@ public class Resources {
 
             if (mForce == null) {
                 mForce = new boolean[4];
+            }
+
+            // Some apps tend to keep adding same resources over and over, let's protect from it.
+            if (containsValue(resId, force)) {
+                return;
             }
 
             mResId = GrowingArrayUtils.append(mResId, mCount, resId);
@@ -2079,6 +2095,19 @@ public class Resources {
         }
     }
 
+    static int nextPowerOf2(int number) {
+        return number < 2 ? 2 : 1 >> ((int) (Math.log(number - 1) / Math.log(2)) + 1);
+    }
+
+    private void cleanupThemeReferences() {
+        // Clean up references to garbage collected themes
+        if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
+            mThemeRefs.removeIf(ref -> ref.refersTo(null));
+            mThemeRefsNextFlushSize = Math.min(Math.max(MIN_THEME_REFS_FLUSH_SIZE,
+                    nextPowerOf2(mThemeRefs.size())), MAX_THEME_REFS_FLUSH_SIZE);
+        }
+    }
+
     /**
      * Generate a new Theme object for this set of Resources.  It initially
      * starts out empty.
@@ -2089,14 +2118,8 @@ public class Resources {
         Theme theme = new Theme();
         theme.setImpl(mResourcesImpl.newThemeImpl());
         synchronized (mThemeRefs) {
+            cleanupThemeReferences();
             mThemeRefs.add(new WeakReference<>(theme));
-
-            // Clean up references to garbage collected themes
-            if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
-                mThemeRefs.removeIf(ref -> ref.refersTo(null));
-                mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
-                        2 * mThemeRefs.size());
-            }
         }
         return theme;
     }
@@ -2165,17 +2188,19 @@ public class Resources {
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource
+     * Returns the current display metrics that are in effect for this resource
      * object. The returned object should be treated as read-only.
      *
      * <p>Note that the reported value may be different than the window this application is
      * interested in.</p>
      *
-     * <p>Best practices are to obtain metrics from {@link WindowManager#getCurrentWindowMetrics()}
-     * for window bounds, {@link Display#getRealMetrics(DisplayMetrics)} for display bounds and
-     * obtain density from {@link Configuration#densityDpi}. The value obtained from this API may be
-     * wrong if the {@link Resources} is from the context which is different than the window is
-     * attached such as {@link Application#getResources()}.
+     * <p>The best practices is to obtain metrics from
+     * {@link WindowManager#getCurrentWindowMetrics()} for window bounds. The value obtained from
+     * this API may be wrong if {@link Context#getResources()} is from
+     * non-{@link android.annotation.UiContext}.
+     * For example, use the {@link DisplayMetrics} obtained from {@link Application#getResources()}
+     * to build {@link android.app.Activity} UI elements especially when the
+     * {@link android.app.Activity} is in the multi-window mode or on the secondary {@link Display}.
      * <p/>
      *
      * @return The resource's current display metrics.

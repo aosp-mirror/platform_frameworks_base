@@ -17,15 +17,15 @@
 package com.android.server.locksettings;
 
 import android.annotation.Nullable;
-import android.content.pm.UserInfo;
-import android.os.UserHandle;
-import android.os.UserManager;
+import android.security.GateKeeper;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockscreenCredential;
 
 import java.security.GeneralSecurityException;
@@ -43,12 +43,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
- * Caches *unified* work challenge for user 0's managed profiles. Only user 0's profile is supported
- * at the moment because the cached credential is encrypted using a keystore key auth-bound to
- * user 0: this is to match how unified work challenge is similarly auth-bound to its parent user's
- * lockscreen credential normally. It's possible to extend this class to support managed profiles
- * for secondary users, that will require generating auth-bound keys to their corresponding parent
- * user though (which {@link KeyGenParameterSpec} does not support right now).
+ * Caches *unified* work challenge for managed profiles. The cached credential is encrypted using
+ * a keystore key auth-bound to the parent user's lockscreen credential, similar to how unified
+ * work challenge is normally secured.
  *
  * <p> The cache is filled whenever the managed profile's unified challenge is created or derived
  * (as part of the parent user's credential verification flow). It's removed when the profile is
@@ -59,6 +56,7 @@ import javax.crypto.spec.GCMParameterSpec;
  * <p> The encrypted credential is stored in-memory only so the cache does not persist across
  * reboots.
  */
+@VisibleForTesting // public visibility is needed for Mockito
 public class ManagedProfilePasswordCache {
 
     private static final String TAG = "ManagedProfilePasswordCache";
@@ -67,26 +65,21 @@ public class ManagedProfilePasswordCache {
 
     private final SparseArray<byte[]> mEncryptedPasswords = new SparseArray<>();
     private final KeyStore mKeyStore;
-    private final UserManager mUserManager;
 
-    public ManagedProfilePasswordCache(KeyStore keyStore, UserManager userManager) {
+    public ManagedProfilePasswordCache(KeyStore keyStore) {
         mKeyStore = keyStore;
-        mUserManager = userManager;
     }
 
     /**
      * Encrypt and store the password in the cache. Does NOT overwrite existing password cache
      * if one for the given user already exists.
+     *
+     * Should only be called on a profile userId.
      */
-    public void storePassword(int userId, LockscreenCredential password) {
+    public void storePassword(int userId, LockscreenCredential password, long parentSid) {
+        if (parentSid == GateKeeper.INVALID_SECURE_USER_ID) return;
         synchronized (mEncryptedPasswords) {
             if (mEncryptedPasswords.contains(userId)) {
-                return;
-            }
-            UserInfo parent = mUserManager.getProfileParent(userId);
-            if (parent == null || parent.id != UserHandle.USER_SYSTEM) {
-                // Since the cached password is encrypted using a keystore key auth-bound to user 0,
-                // only support caching password for user 0's profile.
                 return;
             }
             String keyName = getEncryptionKeyName(userId);
@@ -101,8 +94,8 @@ public class ManagedProfilePasswordCache {
                         .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                         .setNamespace(SyntheticPasswordCrypto.keyNamespace())
                         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        // Generate auth-bound key to user 0 (since we the caller is user 0)
                         .setUserAuthenticationRequired(true)
+                        .setBoundToSpecificSecureUserId(parentSid)
                         .setUserAuthenticationValidityDurationSeconds(CACHE_TIMEOUT_SECONDS)
                         .build());
                 key = generator.generateKey();
@@ -117,8 +110,7 @@ public class ManagedProfilePasswordCache {
                 cipher.init(Cipher.ENCRYPT_MODE, key);
                 byte[] ciphertext = cipher.doFinal(password.getCredential());
                 byte[] iv = cipher.getIV();
-                byte[] block = Arrays.copyOf(iv, ciphertext.length + iv.length);
-                System.arraycopy(ciphertext, 0, block, iv.length, ciphertext.length);
+                byte[] block = ArrayUtils.concat(iv, ciphertext);
                 mEncryptedPasswords.put(userId, block);
             } catch (GeneralSecurityException e) {
                 Slog.d(TAG, "Cannot encrypt", e);

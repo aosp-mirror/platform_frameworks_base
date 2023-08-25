@@ -23,11 +23,11 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**
@@ -84,7 +84,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mSplitShadeTargetTopMargin;
 
     /**
-     * @see NotificationPanelViewController#getExpandedFraction()
+     * @see ShadeViewController#getExpandedFraction()
      */
     private float mPanelExpansion;
 
@@ -229,17 +229,27 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    public float getLockscreenMinStackScrollerPadding() {
+    /**
+     * @param nsslTop NotificationStackScrollLayout top, which is below top of the srceen.
+     * @return Distance from nsslTop to top of the first view in the lockscreen shade.
+     */
+    public float getLockscreenNotifPadding(float nsslTop) {
         if (mBypassEnabled) {
-            return mUnlockedStackScrollerPadding;
+            return mUnlockedStackScrollerPadding - nsslTop;
         } else if (mIsSplitShade) {
-            return mSplitShadeTargetTopMargin + mUserSwitchHeight;
+            return mSplitShadeTargetTopMargin + mUserSwitchHeight - nsslTop;
         } else {
+            // Non-bypass portrait shade already uses values from nsslTop
+            // so we don't need to subtract it here.
             return mMinTopMargin + mKeyguardStatusHeight;
         }
     }
 
-    private int getExpandedPreferredClockY() {
+    /**
+     * give the static topMargin, used for lockscreen clocks to get the initial translationY
+     * to do counter translation
+     */
+    public int getExpandedPreferredClockY() {
         if (mIsSplitShade) {
             return mSplitShadeTargetTopMargin;
         } else {

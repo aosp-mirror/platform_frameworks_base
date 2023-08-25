@@ -25,8 +25,8 @@
 
 namespace android {
 
-static ::testing::AssertionResult TestParse(
-    const StringPiece& input, ConfigDescription* config = nullptr) {
+static ::testing::AssertionResult TestParse(StringPiece input,
+                                            ConfigDescription* config = nullptr) {
   if (ConfigDescription::Parse(input, config)) {
     return ::testing::AssertionSuccess() << input << " was successfully parsed";
   }
@@ -138,7 +138,7 @@ TEST(ConfigDescriptionTest, ParseVrAttribute) {
   EXPECT_EQ(std::string("vrheadset-v26"), config.toString().c_str());
 }
 
-static inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
+static inline ConfigDescription ParseConfigOrDie(android::StringPiece str) {
   ConfigDescription config;
   CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;
@@ -152,6 +152,24 @@ TEST(ConfigDescriptionTest, RangeQualifiersDoNotConflict) {
   EXPECT_FALSE(ParseConfigOrDie("h600dp").ConflictsWith(ParseConfigOrDie("h300dp")));
   EXPECT_FALSE(ParseConfigOrDie("w400dp").ConflictsWith(ParseConfigOrDie("w300dp")));
   EXPECT_FALSE(ParseConfigOrDie("600x400").ConflictsWith(ParseConfigOrDie("300x200")));
+}
+
+TEST(ConfigDescriptionTest, TestGrammaticalGenderQualifier) {
+  ConfigDescription config;
+  EXPECT_TRUE(TestParse("feminine", &config));
+  EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_FEMININE, config.grammaticalInflection);
+  EXPECT_EQ(SDK_U, config.sdkVersion);
+  EXPECT_EQ(std::string("feminine-v34"), config.toString().string());
+
+  EXPECT_TRUE(TestParse("masculine", &config));
+  EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_MASCULINE, config.grammaticalInflection);
+  EXPECT_EQ(SDK_U, config.sdkVersion);
+  EXPECT_EQ(std::string("masculine-v34"), config.toString().string());
+
+  EXPECT_TRUE(TestParse("neuter", &config));
+  EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_NEUTER, config.grammaticalInflection);
+  EXPECT_EQ(SDK_U, config.sdkVersion);
+  EXPECT_EQ(std::string("neuter-v34"), config.toString().string());
 }
 
 }  // namespace android

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 
 import android.app.ActivityManager;
 import android.app.TaskInfo;
+import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -30,6 +31,8 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,63 +49,61 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class ReachabilityEduWindowManagerTest extends ShellTestCase {
-
-    private static final int USER_ID = 1;
-    private static final int TASK_ID = 1;
-
     @Mock
     private SyncTransactionQueue mSyncTransactionQueue;
     @Mock
     private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock
-    private CompatUIController.CompatUICallback mCallback;
-    @Mock
     private CompatUIConfiguration mCompatUIConfiguration;
     @Mock
     private DisplayLayout mDisplayLayout;
-
     private TestShellExecutor mExecutor;
+    private TaskInfo mTaskInfo;
+    private ReachabilityEduWindowManager mWindowManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mExecutor = new TestShellExecutor();
+        mTaskInfo = new ActivityManager.RunningTaskInfo();
+        mTaskInfo.configuration.uiMode =
+                (mTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                        | Configuration.UI_MODE_NIGHT_NO;
+        mTaskInfo.configuration.uiMode =
+                (mTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_TYPE_MASK)
+                        | Configuration.UI_MODE_TYPE_NORMAL;
+        mWindowManager = createReachabilityEduWindowManager(mTaskInfo);
     }
 
     @Test
     public void testCreateLayout_notEligible_doesNotCreateLayout() {
-        final ReachabilityEduWindowManager windowManager = createReachabilityEduWindowManager(
-                createTaskInfo(/* userId= */ USER_ID, /*isLetterboxDoubleTapEnabled  */ false));
+        assertFalse(mWindowManager.createLayout(/* canShow= */ true));
 
-        assertFalse(windowManager.createLayout(/* canShow= */ true));
+        assertNull(mWindowManager.mLayout);
+    }
 
-        assertNull(windowManager.mLayout);
+    @Test
+    public void testWhenDockedStateHasChanged_needsToBeRecreated() {
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode =
+                (newTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_TYPE_MASK)
+                        | Configuration.UI_MODE_TYPE_DESK;
+
+        Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
+    }
+
+    @Test
+    public void testWhenDarkLightThemeHasChanged_needsToBeRecreated() {
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        mTaskInfo.configuration.uiMode =
+                (mTaskInfo.configuration.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                        | Configuration.UI_MODE_NIGHT_YES;
+
+        Assert.assertTrue(mWindowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
     }
 
     private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
         return new ReachabilityEduWindowManager(mContext, taskInfo, mSyncTransactionQueue,
                 mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor);
-    }
-
-    private static TaskInfo createTaskInfo(int userId, boolean isLetterboxDoubleTapEnabled) {
-        return createTaskInfo(userId, /* isLetterboxDoubleTapEnabled */ isLetterboxDoubleTapEnabled,
-                /* topActivityLetterboxVerticalPosition */ -1,
-                /* topActivityLetterboxHorizontalPosition */ -1,
-                /* topActivityLetterboxWidth */ -1,
-                /* topActivityLetterboxHeight */ -1);
-    }
-
-    private static TaskInfo createTaskInfo(int userId, boolean isLetterboxDoubleTapEnabled,
-            int topActivityLetterboxVerticalPosition, int topActivityLetterboxHorizontalPosition,
-            int topActivityLetterboxWidth, int topActivityLetterboxHeight) {
-        ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
-        taskInfo.userId = userId;
-        taskInfo.taskId = TASK_ID;
-        taskInfo.isLetterboxDoubleTapEnabled = isLetterboxDoubleTapEnabled;
-        taskInfo.topActivityLetterboxVerticalPosition = topActivityLetterboxVerticalPosition;
-        taskInfo.topActivityLetterboxHorizontalPosition = topActivityLetterboxHorizontalPosition;
-        taskInfo.topActivityLetterboxWidth = topActivityLetterboxWidth;
-        taskInfo.topActivityLetterboxHeight = topActivityLetterboxHeight;
-        return taskInfo;
     }
 }

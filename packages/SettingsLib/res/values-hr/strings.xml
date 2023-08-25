@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Nije povezano"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Konfiguracija IP-a nije uspjela"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Niste povezani jer je mreža loše kvalitete"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Povezivanje s Wi-Fijem nije uspjelo"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problem u autentifikaciji"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Povezivanje nije uspjelo"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Povezivanje s aplikacijom \"<xliff:g id="AP_NAME">%1$s</xliff:g>\" nije uspjelo"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Neće se povezati automatski"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Nema pristupa internetu"</string>
     <string name="saved_network" msgid="7143698034077223645">"Spremila aplik. <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Povezano s mrežom s ograničenim prometom"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatski povezan putem %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatski povezan putem ocjenjivača mreže"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Povezano putem %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Povezan putem mreže <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Dostupno putem %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Dodirnite da biste se registrirali"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Nema interneta"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Nije moguće pristupiti privatnom DNS poslužitelju"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Nema interneta"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Obavezna prijava"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Pristupna je točka privremeno puna"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Povezano putem mreže %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Dostupno putem mreže %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Otvaranje aplikacije <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Povezivanje nije uspjelo"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Dovršavanje registracije…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Nije moguće dovršiti registraciju. Dodirnite za ponovni pokušaj."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Registracija je dovršena. Povezivanje…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Vrlo sporo"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Sporo"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"U redu"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Srednje"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Brzo"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Vrlo brzo"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Isteklo"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Uparivanje…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Povezano (bez telefona): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Povezano (bez medija): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Povezano (bez pristupa porukama): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Povezano (bez telefona i medija): <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Povezano, baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Povezano (bez telefona), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Vrati visinu glasa na zadano"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Visinu glasa kojom se izgovara tekst vraća na zadano."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Vrlo sporo"</item>
-    <item msgid="1815382991399815061">"Sporo"</item>
-    <item msgid="3075292553049300105">"Uobičajeno"</item>
-    <item msgid="1158955023692670059">"Brzo"</item>
-    <item msgid="5664310435707146591">"Brže"</item>
-    <item msgid="5491266922147715962">"Vrlo brzo"</item>
-    <item msgid="7659240015901486196">"Ubrzano"</item>
-    <item msgid="7147051179282410945">"Vrlo ubrzano"</item>
-    <item msgid="581904787661470707">"Najbrže"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Odabir profila"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobno"</string>
@@ -233,7 +223,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Postavke dijeljenja veze nisu dostupne ovom korisniku"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke pristupne točke nisu dostupne ovom korisniku"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje pogrešaka putem USB-a"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za otklanjanje pogrešaka kada je priključen USB"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Otklanjanje pogrešaka putem USB-a"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Opoziv autorizacija za otklanjanje pogrešaka putem USB-a"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje pogrešaka"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način otklanjanja pogrešaka kad je Wi-Fi povezan"</string>
@@ -267,7 +257,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikaži gumb u izborniku napajanja za izradu izvješća o programskim pogreškama"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ne pokreći mirovanje"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Zaslon nikad neće prijeći u mirovanje tijekom punjenja"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući Bluetooth HCI snoop log"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Zapisi za Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Dohvati Bluetooth pakete. (Uključi Bluetooth nakon promjene ove postavke)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Neka kôd za pokretanje sustava bude otključan"</string>
@@ -281,7 +271,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući opširnu prijavu na Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje traženja Wi-Fija"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Nasumični odabir nepostojane MAC adrese za Wi-Fi"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Uvijek aktivni mobilni podaci"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilni podaci uvijek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzanje za modemsko povezivanje"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Onemogući apsolutnu glasnoću"</string>
@@ -326,8 +316,8 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Dopusti probne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Dopusti probne lokacije"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Omogući pregled atributa prikaza"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Mobilni podaci uvijek su aktivni, čak i kada je Wi‑Fi aktivan (za brzo prebacivanje s jedne na drugu mrežu)"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Upotrebljava se hardversko ubrzanje za modemsko povezivanje ako je dostupno"</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Neka mobilni podaci uvijek budu aktivni, čak i kada je Wi‑Fi aktivan (za brzo prebacivanje s jedne na drugu mrežu)"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Upotreba hardverskog ubrzanja za modemsko povezivanje ako je dostupno"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje pogrešaka putem USB-a?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje pogrešaka putem USB-a namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaju bez obavijesti i za čitanje dnevničkih zapisa."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Želite li omogućiti bežično otklanjanje pogrešaka?"</string>
@@ -354,52 +344,54 @@
     <string name="wait_for_debugger" msgid="7461199843335409809">"Čeka se program za otklanjanje pogrešaka"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Aplikacija čeka priključivanje programa za otklanjanje pogrešaka"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Ulaz"</string>
-    <string name="debug_drawing_category" msgid="5066171112313666619">"Crtanje"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"Crtež"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardverski ubrzano renderiranje"</string>
     <string name="media_category" msgid="8122076702526144053">"Mediji"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Nadzor"</string>
     <string name="strict_mode" msgid="889864762140862437">"Omogućen strogi način"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Zaslon bljeska kada operacije aplikacija u glavnoj niti dugo traju"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Zaslon bljeska kada operacije apl. u glavnoj niti dugo traju."</string>
     <string name="pointer_location" msgid="7516929526199520173">"Mjesto pokazivača"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Na zaslonu se prikazuju podaci o dodirima"</string>
     <string name="show_touches" msgid="8437666942161289025">"Prikaži dodire"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Prikazuju se vizualne povratne informacije za dodire"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Prikaži ažuriranja površine"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Sve površine prozora bljeskaju pri ažuriranju"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Prikaži vizualne povratne informacije za dodire"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Prikaži ažur. površine"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Površina prozora bljeska pri ažuriranju"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Prikaži ažuriranja prikaza"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Bljeskanje prikaza u prozorima pri crtanju"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Prikaži ažuriranja hardverskih slojeva"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardverski slojevi bljeskaju zeleno pri ažuriranju"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Rješavanje GPU preklapanja"</string>
-    <string name="disable_overlays" msgid="4206590799671557143">"Onemogući hardverska preklapanja"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Uvijek se koristi GPU za slaganje zaslona"</string>
+    <string name="disable_overlays" msgid="4206590799671557143">"Onemogući dijeljenje mem."</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Uvijek koristi GPU za slaganje zaslona"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulacija prostora boja"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Omogući OpenGL praćenja"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onemogući USB audiousmj."</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemogućuje se automatsko usmjeravanje na USB audioperiferiju"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemogući aut. usmjeravanje na USB audioperiferiju"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži okvir prikaza"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka"</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni smjer prikaza zdesna ulijevo"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nameće se smjer prikaza zdesna ulijevo za sve države/jezike"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni zdesna ulijevo"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Prozirna navigacijska traka"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Neka boja pozadine navigacijske trake bude prozirna prema zadanim postavkama"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Dopusti zamućenja na razini prozora"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Nametni 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"Omogućuje 4x MSAA u aplikacijama OpenGL ES 2.0"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"Omogući 4x MSAA u aplikacijama OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkloni pogreške operacija nepravokutnog isječka"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profil HWUI generiranja"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Omogući slojeve za otklanjanje pogrešaka GPU-a"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućuje učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućite učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Omogući opširni zapisnik"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uključite dodatne zapisnike dobavljača pojedinog uređaja u izvješća o programskim pogreškama koja mogu sadržavati privatne podatke, trošiti više baterije i/ili zauzeti više prostora za pohranu."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Brzina animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Brzina animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Razmjer duljine animatora"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sekundarnih zaslona"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sek. zaslona"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ukloni aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Aktivnost se uklanja čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Ograničenje pozadinskog procesa"</string>
-    <string name="show_all_anrs" msgid="9160563836616468726">"Prikaži pozadinske ANR-ove"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikazuje se dijaloški okvir o pozadinskim aplikacijama koje ne reagiraju"</string>
+    <string name="show_all_anrs" msgid="9160563836616468726">"Pokaži pozadinske ANR-ove"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloškog okvira o pozadinskim aplikacijama koje ne reagiraju"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavijesti"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikazuje upozorenje na zaslonu kada aplikacija objavi obavijest bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Prisilno dopusti aplikacije u vanjskoj pohrani"</string>
@@ -407,7 +399,7 @@
     <string name="force_resizable_activities" msgid="7143612144399959606">"Nametni mogućnost promjene veličine za aktivnosti"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Omogući mijenjanje veličine svih aktivnosti za više prozora, neovisno o vrijednostima manifesta."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogući prozore slobodnog oblika"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogućuje podršku za eksperimentalne prozore slobodnog oblika."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogući podršku za eksperimentalne prozore slobodnog oblika."</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Stolni način rada"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Zaporka sigurnosne kopije"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Potpune sigurnosne kopije na stolnom računalu trenutačno nisu zaštićene"</string>
@@ -494,7 +486,7 @@
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dopušteno"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nije dopušteno"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih aplikacija"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih apl."</string>
     <string name="home" msgid="973834627243661438">"Početni zaslon postavki"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Odustani"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"U redu"</string>
     <string name="done" msgid="381184316122520313">"Gotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
@@ -545,11 +543,18 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Do isključivanja"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo sad"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ovaj telefon"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nije moguće reproducirati na ovom uređaju"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nadogradite račun radi prebacivanja"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Preuzimanja se ne mogu reproducirati ovdje"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Pokušajte ponovo nakon oglasa"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktivirajte uređaj da biste na njemu reproducirali"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Uređaj nije odobren za reprodukciju"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Ti se mediji ne mogu reproducirati ovdje"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem s povezivanjem. Isključite i ponovo uključite uređaj"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žičani audiouređaj"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomoć i povratne informacije"</string>
@@ -571,9 +576,15 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Možete ograničiti pristup aplikacijama i sadržaju sa svojeg računa"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Korisnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ograničeni profil"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Želite li dodati novog korisnika?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Da biste ovaj uređaj dijelili s drugima, možete izraditi dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi vlastitim aplikacijama, pozadinama i drugim sadržajima. Korisnici mogu prilagoditi i postavke uređaja koje utječu na sve korisnike, na primjer Wi‑Fi.\n\nKada dodate novog korisnika, ta osoba mora postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Da biste ovaj uređaj dijelili s drugima, možete napraviti dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću vlastitih aplikacija, pozadine i tako dalje. Korisnici mogu prilagoditi i postavke uređaja koje utječu na sve ostale korisnike, na primjer Wi‑Fi.\n\nKada dodate novog korisnika, ta osoba mora postaviti svoj prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba mora postaviti vlastiti prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite li postaviti korisnika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Uređaj morate dati toj osobi da sama postavi svoj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Želite li sada postaviti profil?"</string>
@@ -592,8 +603,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Izrada novog korisnika nije uspjela"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Izrada novog gosta nije uspjela"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Dodajte korisnika"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajte gosta"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Dodavanje korisnika"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi gostujuću sesiju"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti gostujuću sesiju?"</string>
@@ -602,11 +613,15 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Poništavanje gostujuće sesije…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite li poništiti gostujuću sesiju?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija te izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Želite li izaći iz načina rada za goste?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija i izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Napustiti način rada za goste?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izlaz"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Želite li spremiti aktivnosti gosta?"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Spremiti aktivnosti gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Spremi"</string>
@@ -614,7 +629,7 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati na izlasku"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost sesije. Inače je možete spremiti ili izbrisati na izlasku."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiraj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>
@@ -657,7 +672,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Prekinuta je veza s ethernetom."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Bez poziva."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Odaberite profilnu sliku"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Odabir profilne slike"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Ikona zadanog korisnika"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizička tipkovnica"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tipkovnice"</string>
@@ -669,7 +684,14 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, vaše će se trenutačno emitiranje zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiranje aplikacije <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promjena izlaza"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka s pregledom"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućuje animaciju kad korisnik napravi povratnu kretnju."</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije za pokret povratka s predviđanjem"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogući animaciju kad korisnik napravi povratnu kretnju."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ova postavka omogućuje animacije sustava za animaciju pokreta s predviđanjem. Zahtijeva postavljanje dopuštenja enableOnBackInvokedCallback po aplikaciji na True u datoteci manifesta."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Pomicanje ulijevo"</item>
+    <item msgid="5425394847942513942">"Pomicanje prema dolje"</item>
+    <item msgid="7728484337962740316">"Pomicanje udesno"</item>
+    <item msgid="324200556467459329">"Pomicanje prema gore"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

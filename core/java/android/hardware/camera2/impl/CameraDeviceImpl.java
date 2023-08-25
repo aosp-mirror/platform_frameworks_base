@@ -20,15 +20,14 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraExtensionCharacteristics;
-import android.hardware.camera2.CameraExtensionSession;
-import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraExtensionCharacteristics;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CameraOfflineSession;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
@@ -63,17 +62,17 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
@@ -701,6 +700,14 @@ public class CameraDeviceImpl extends CameraDevice
                         + " input configuration yet.");
             }
 
+            if (mCurrentExtensionSession != null) {
+                mCurrentExtensionSession.commitStats();
+            }
+
+            if (mCurrentAdvancedExtensionSession != null) {
+                mCurrentAdvancedExtensionSession.commitStats();
+            }
+
             // Notify current session that it's going away, before starting camera operations
             // After this call completes, the session is not allowed to call into CameraDeviceImpl
             if (mCurrentSession != null) {
@@ -863,8 +870,13 @@ public class CameraDeviceImpl extends CameraDevice
             CameraMetadataNative resultMetadata = new
                     CameraMetadataNative(inputResult.getNativeCopy());
 
-            return new CaptureRequest.Builder(resultMetadata, /*reprocess*/true,
-                    inputResult.getSessionId(), getId(), /*physicalCameraIdSet*/ null);
+            CaptureRequest.Builder builder = new CaptureRequest.Builder(resultMetadata,
+                    /*reprocess*/true, inputResult.getSessionId(), getId(),
+                    /*physicalCameraIdSet*/ null);
+            builder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
+                    CameraMetadata.CONTROL_CAPTURE_INTENT_STILL_CAPTURE);
+
+            return builder;
         }
     }
 
@@ -1410,6 +1422,15 @@ public class CameraDeviceImpl extends CameraDevice
                 mOfflineSwitchService = null;
             }
 
+            // Let extension sessions commit stats before disconnecting remoteDevice
+            if (mCurrentExtensionSession != null) {
+                mCurrentExtensionSession.commitStats();
+            }
+
+            if (mCurrentAdvancedExtensionSession != null) {
+                mCurrentAdvancedExtensionSession.commitStats();
+            }
+
             if (mRemoteDevice != null) {
                 mRemoteDevice.disconnect();
                 mRemoteDevice.unlinkToDeath(this, /*flags*/0);
@@ -1904,18 +1925,21 @@ public class CameraDeviceImpl extends CameraDevice
                 Log.v(TAG, String.format("got error frame %d", frameNumber));
             }
 
-            // Update FrameNumberTracker for every frame during HFR mode.
-            if (mBatchOutputMap.containsKey(requestId)) {
-                for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
-                    mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+            // Do not update frame number tracker for physical camera result error.
+            if (errorPhysicalCameraId == null) {
+                // Update FrameNumberTracker for every frame during HFR mode.
+                if (mBatchOutputMap.containsKey(requestId)) {
+                    for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
+                        mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+                                /*error*/true, request.getRequestType());
+                    }
+                } else {
+                    mFrameNumberTracker.updateTracker(frameNumber,
                             /*error*/true, request.getRequestType());
                 }
-            } else {
-                mFrameNumberTracker.updateTracker(frameNumber,
-                        /*error*/true, request.getRequestType());
-            }
 
-            checkAndFireSequenceComplete();
+                checkAndFireSequenceComplete();
+            }
 
             // Dispatch the failure callback
             final long ident = Binder.clearCallingIdentity();
@@ -2516,14 +2540,19 @@ public class CameraDeviceImpl extends CameraDevice
     @Override
     public void createExtensionSession(ExtensionSessionConfiguration extensionConfiguration)
             throws CameraAccessException {
+        HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
+                mPhysicalIdsToChars);
+        characteristicsMap.put(mCameraId, mCharacteristics);
         try {
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
-                                this, mContext, extensionConfiguration, mNextSessionId++);
+                                this, characteristicsMap, mContext, extensionConfiguration,
+                                mNextSessionId++);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
-                        this, mContext, extensionConfiguration, mNextSessionId++);
+                        this, characteristicsMap, mContext, extensionConfiguration,
+                        mNextSessionId++);
             }
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);

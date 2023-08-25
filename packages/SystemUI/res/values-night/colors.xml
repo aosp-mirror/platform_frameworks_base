@@ -96,15 +96,12 @@
 
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#B3000000</color> <!-- 70% -->
+    <color name="accessibility_floating_menu_message_background">@*android:color/background_material_dark</color>
+    <color name="accessibility_floating_menu_message_text">@*android:color/primary_text_default_material_dark</color>
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
 
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#7DA7F1</color>
-    <color name="udfps_moving_target_fill">#475670</color>
-    <!-- 50% of udfps_moving_target_fill-->
-    <color name="udfps_moving_target_fill_error">#80475670</color>
-    <color name="udfps_enroll_progress">#7DA7F1</color>
-    <color name="udfps_enroll_progress_help">#607DA7F1</color>
-    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
+    <!-- Internet Dialog -->
+    <color name="connected_network_primary_color">@color/material_dynamic_primary80</color>
+    <color name="connected_network_secondary_color">@color/material_dynamic_secondary80</color>
 </resources>

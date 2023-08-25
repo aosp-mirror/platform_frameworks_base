@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 
@@ -34,6 +36,7 @@ import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.systemui.doze.util.BurnInHelperKt;
 
 import org.junit.Test;
@@ -84,7 +87,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         Pair<Float, Point> udfps = setupUdfps();
 
         // WHEN all authenticators are registered
-        mAuthControllerCallback.onAllAuthenticatorsRegistered();
+        mAuthControllerCallback.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT);
         mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as auth controller vals
@@ -105,7 +108,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         Pair<Float, Point> udfps = setupUdfps();
 
         // WHEN udfps location changes
-        mAuthControllerCallback.onUdfpsLocationChanged();
+        mAuthControllerCallback.onUdfpsLocationChanged(new UdfpsOverlayParams());
         mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as auth controller vals
@@ -135,27 +138,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN the lock icon view background should be disabled
         verify(mLockIconView).setUseBackground(false);
-    }
-
-    @Test
-    public void testUnlockIconShows_biometricUnlockedTrue() {
-        // GIVEN UDFPS sensor location is available
-        setupUdfps();
-
-        // GIVEN lock icon controller is initialized and view is attached
-        init(/* useMigrationFlag= */false);
-        captureKeyguardUpdateMonitorCallback();
-
-        // GIVEN user has unlocked with a biometric auth (ie: face auth)
-        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
-        reset(mLockIconView);
-
-        // WHEN face auth's biometric running state changes
-        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
-                BiometricSourceType.FACE);
-
-        // THEN the unlock icon is shown
-        verify(mLockIconView).setContentDescription(UNLOCKED_LABEL);
     }
 
     @Test
@@ -262,27 +244,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         // THEN the view is updated to NO translation (no burn-in offsets anymore)
         verify(mLockIconView).setTranslationY(0);
         verify(mLockIconView).setTranslationX(0);
-    }
-
-    @Test
-    public void lockIconShows_afterBiometricsCleared() {
-        // GIVEN lock icon controller is initialized and view is attached
-        init(/* useMigrationFlag= */false);
-        captureKeyguardUpdateMonitorCallback();
-
-        // GIVEN user has unlocked with a biometric auth (ie: face auth)
-        // and biometric running state changes
-        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
-        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
-                BiometricSourceType.FACE);
-        reset(mLockIconView);
-
-        // WHEN biometrics are cleared
-        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
-        mKeyguardUpdateMonitorCallback.onBiometricsCleared();
-
-        // THEN the lock icon is shown
-        verify(mLockIconView).setContentDescription(LOCKED_LABEL);
     }
 
     @Test

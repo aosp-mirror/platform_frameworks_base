@@ -50,17 +50,23 @@
             android:id="@+id/icon_area"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:focusable="false"
+            android:importantForAccessibility="no"
             android:background="@drawable/media_output_title_icon_area"
             android:layout_gravity="center_vertical|start">
             <ImageView
                 android:id="@+id/title_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:focusable="false"
+                android:importantForAccessibility="no"
                 android:animateLayoutChanges="true"
                 android:layout_gravity="center"/>
             <TextView
                 android:id="@+id/volume_value"
                 android:animateLayoutChanges="true"
+                android:focusable="false"
+                android:importantForAccessibility="no"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -71,6 +77,8 @@
 
         <TextView
             android:id="@+id/title"
+            android:focusable="false"
+            android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
@@ -102,7 +110,9 @@
                 android:id="@+id/subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:ellipsize="marquee"
+                android:singleLine="true"
                 android:maxLines="1"
                 android:textColor="@color/media_dialog_item_main_content"
                 android:textSize="14sp"
@@ -152,5 +162,16 @@
             android:button="@drawable/media_output_item_check_box"
             android:visibility="gone"
             />
+        <ImageView
+            android:id="@+id/media_output_item_end_click_icon"
+            android:src="@drawable/media_output_status_edit_session"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:focusable="false"
+            android:importantForAccessibility="no"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateOnly="true"
+            android:visibility="gone"/>
     </FrameLayout>
 </FrameLayout>

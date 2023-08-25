@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
@@ -32,9 +33,9 @@ import android.view.animation.Interpolator;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 /**
@@ -50,7 +51,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private View[][] mViews;
     private int mYTrans;
     private int mYTransOffset;
-    private View mBouncerMessageView;
+    private View mBouncerMessageArea;
     @DevicePostureInt private int mLastDevicePosture = DEVICE_POSTURE_UNKNOWN;
     public static final long ANIMATION_DURATION = 650;
 
@@ -144,7 +145,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         super.onFinishInflate();
 
         mContainer = findViewById(R.id.pin_container);
-        mBouncerMessageView = findViewById(R.id.bouncer_message_area);
+        mBouncerMessageArea = findViewById(R.id.bouncer_message_area);
         mViews = new View[][]{
                 new View[]{
                         findViewById(R.id.row0), null, null
@@ -184,6 +185,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         }
         mAppearAnimator.setDuration(ANIMATION_DURATION);
         mAppearAnimator.addUpdateListener(animation -> animate(animation.getAnimatedFraction()));
+        mAppearAnimator.addListener(getAnimationListener(CUJ_LOCKSCREEN_PIN_APPEAR));
         mAppearAnimator.start();
     }
 
@@ -219,9 +221,9 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         Interpolator legacyDecelerate = Interpolators.LEGACY_DECELERATE;
         float standardProgress = standardDecelerate.getInterpolation(progress);
 
-        mBouncerMessageView.setTranslationY(
+        mBouncerMessageArea.setTranslationY(
                 mYTrans - mYTrans * standardProgress);
-        mBouncerMessageView.setAlpha(standardProgress);
+        mBouncerMessageArea.setAlpha(standardProgress);
 
         for (int i = 0; i < mViews.length; i++) {
             View[] row = mViews[i];

@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Desligada"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Desativado"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Falha de configuração de IP"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Não ligado devido à baixa qualidade da rede"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Falha de ligação Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema de autenticação"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Não é possível ligar"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Não é possível ligar a \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Não é efetuada uma ligação automaticamente"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Sem acesso à Internet."</string>
     <string name="saved_network" msgid="7143698034077223645">"Guardada por <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Ligação estabelecida a uma rede de acesso limitado."</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Ligado automaticamente através de %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ligado automaticamente através do fornecedor de classificação de rede"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Ligado através de %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Ligado via <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Disponível através de %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Toque para se inscrever"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Sem Internet"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Não é possível aceder ao servidor DNS."</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Sem Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"É necessário iniciar sessão"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Ponto de acesso temporariamente cheio"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Ligado através de %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Disponível através de %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"A abrir <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Não foi possível estabelecer ligação"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"A concluir a inscrição…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Não foi possível concluir a inscrição. Toque para tentar novamente."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Inscrição concluída. A ligar…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Muito lenta"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Lenta"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Média"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muito rápida"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirada"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"A sincronizar..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Ligado (sem telemóvel)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Ligado (sem multimédia)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Ligado (sem acesso a mensagens)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Ligado (sem telemóvel nem multimédia)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Ligado, bateria a <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Ligado (sem telemóvel), bateria a <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -151,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: PIN ou chave de acesso errado."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou token de acesso incorreto."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Emparelhamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Repor tom da voz"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Repor a predefinição do tom a que o texto é falado."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Muito lenta"</item>
-    <item msgid="1815382991399815061">"Lenta"</item>
-    <item msgid="3075292553049300105">"Normal"</item>
-    <item msgid="1158955023692670059">"Rápida"</item>
-    <item msgid="5664310435707146591">"Mais rápida"</item>
-    <item msgid="5491266922147715962">"Muito rápida"</item>
-    <item msgid="7659240015901486196">"Acelerada"</item>
-    <item msgid="7147051179282410945">"Muito acelerada"</item>
-    <item msgid="581904787661470707">"A mais rápida"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Escolher perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pessoal"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Apresentar limites de clipes, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forçar direção do esquema RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra de navegação transparente"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Torne a cor de fundo da barra de navegação transparente por predefinição"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Permitir esbater janelas"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>
@@ -523,10 +515,16 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registado"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é aleatório."</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligado}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligados}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Concluir"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telemóvel"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Atualize a conta para mudar"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Não é possível reproduzir as transferências aqui"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Tente novamente depois do anúncio"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Ative o dispositivo para reproduzir aqui"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Dispositivo não aprovado para reprodução"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Não é possível reproduzir este conteúdo multimédia aqui"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de áudio com fios"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda e comentários"</string>
@@ -573,7 +578,13 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar perfil agora?"</string>
@@ -582,7 +593,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Adicionar"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo utilizador"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Dados do utilizador"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizador"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informação do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Antes de poder criar um perfil restrito, tem de configurar um bloqueio de ecrã para proteger as suas aplicações e dados pessoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Definir bloqueio"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta ação inicia uma nova sessão de convidado e elimina todas as apps e dados da sessão atual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo convidado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta ação elimina as apps e os dados da sessão de convidado atual"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Guardar atividade de convidado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pode guardar a atividade da sessão atual ou eliminar todas as apps e dados"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos para voltar preditivos"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ative as animações do sistema para gestos para voltar preditivos."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta definição ativa animações do sistema para a animação de gestos preditivos. Requer a definição do atributo enableOnBackInvokedCallback por app como verdadeiro no ficheiro de manifesto."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Mover para a esquerda"</item>
+    <item msgid="5425394847942513942">"Mover para baixo"</item>
+    <item msgid="7728484337962740316">"Mover para a direita"</item>
+    <item msgid="324200556467459329">"Mover para cima"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

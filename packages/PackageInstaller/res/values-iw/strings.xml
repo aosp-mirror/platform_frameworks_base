@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"האפליקציה הותקנה."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"האם ברצונך להתקין אפליקציה זו?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"האם ברצונך לעדכן אפליקציה זו?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"לקבל את העדכון לאפליקציה הזו מ-<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nהאפליקציה הזו בדרך כלל מקבלת עדכונים מ-<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. אם בחרת לעדכן ממקור אחר, יכול להיות שבעתיד יתקבלו עדכונים ממקורות אחרים בטלפון. תכונות האפליקציה יכולות להשתנות."</string>
     <string name="install_failed" msgid="5777824004474125469">"האפליקציה לא הותקנה."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"החבילה נחסמה להתקנה."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"האפליקציה לא הותקנה כי החבילה מתנגשת עם חבילה קיימת."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"למשתמש הזה אין הרשאה להתקין אפליקציות שאינן מוכרות"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"למשתמש הזה אין הרשאה להתקין אפליקציות"</string>
     <string name="ok" msgid="7871959885003339302">"אישור"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"אני רוצה לעדכן בכל זאת"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ניהול אפליקציות"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"אין מספיק מקום"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"לא ניתן להתקין את <xliff:g id="APP_NAME">%1$s</xliff:g>. יש לפנות מקום אחסון ולנסות שוב."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"האם להחליף את האפליקציה הזאת בגרסת היצרן? כל הנתונים יוסרו. הפעולה תשפיע על כל משתמשי המכשיר, כולל משתמשים בעלי פרופיל עבודה."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"שמירת <xliff:g id="SIZE">%1$s</xliff:g> מנתוני האפליקציה."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"למחוק את האפליקציה הזו?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"להסיר את ההתקנה של האפליקציה הזו? השכפול של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> גם יימחק."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"התקנות בתהליכי הסרה"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"הסרות התקנה שנכשלו"</string>
     <string name="uninstalling" msgid="8709566347688966845">"בתהליך הסרת התקנה..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"המערכת מסירה את ההתקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"הסרת ההתקנה הסתיימה."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"ההתקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> הוסרה"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"מחיקת השכפול של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"לא ניתן היה להסיר את ההתקנה."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"לא ניתן היה להסיר את ההתקנה של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"מחיקת השכפול של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> מתבצעת…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"לא ניתן להסיר את ההתקנה של אפליקציה פעילה של מנהל המכשיר"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"לא ניתן להסיר את ההתקנה של אפליקציה פעילה של מנהל המכשיר של <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"האפליקציה הזו נדרשת עבור חלק מהמשתמשים או הפרופילים, וההתקנה שלה הוסרה עבור משתמשים אחרים"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"לא ידוע"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"לצורכי אבטחה, הטאבלט שלך חסום להתקנת אפליקציות לא מוכרות מהמקור הזה. אפשר לשנות זאת ב\'הגדרות\'."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"לצורכי אבטחה, הטלוויזיה שלך חסומה להתקנת אפליקציות לא מוכרות מהמקור הזה. אפשר לשנות זאת ב\'הגדרות\'."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"לצורכי אבטחה, השעון שלך חסום להתקנת אפליקציות לא מוכרות מהמקור הזה. אפשר לשנות זאת ב\'הגדרות\'."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"לצורכי אבטחה, הטלפון שלך חסום להתקנת אפליקציות לא מוכרות מהמקור הזה. אפשר לשנות זאת ב\'הגדרות\'."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"נתוני הטלפון והנתונים האישיים שלך חשופים יותר בפני התקפות על ידי אפליקציות ממקורות לא ידועים. התקנת האפליקציה הזו מהווה את הסכמתך לכך שהאחריות הבלעדית היא שלך במקרה של אובדן נתונים או גרימת נזק לטלפון שלך בעקבות השימוש באפליקציה."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"נתוני הטאבלט והנתונים האישיים שלך חשופים יותר בפני התקפות על ידי אפליקציות ממקורות לא ידועים. התקנת האפליקציה הזו מהווה את הסכמתך לכך שהאחריות הבלעדית היא שלך במקרה של אובדן נתונים או גרימת נזק לטאבלט בעקבות השימוש באפליקציה."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"נתוני הטלוויזיה והנתונים האישיים שלך חשופים יותר בפני התקפות על ידי אפליקציות ממקורות לא ידועים. התקנת האפליקציה הזו מהווה את הסכמתך לכך שהאחריות הבלעדית היא שלך במקרה של אובדן נתונים או גרימת נזק לטלוויזיה שלך בעקבות השימוש באפליקציה."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"שכפול של <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"המשך"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"הגדרות"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏תהליך התקנה/הסרת התקנה של אפליקציות Wear"</string>

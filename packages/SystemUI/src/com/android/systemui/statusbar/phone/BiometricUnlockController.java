@@ -51,14 +51,11 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeController;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -153,7 +150,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final Handler mHandler;
     private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
-    private final com.android.systemui.shade.ShadeController mShadeController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -167,7 +163,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private PendingAuthenticated mPendingAuthenticated = null;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
     private boolean mFadedAwayAfterWakeAndUnlock;
-    private Set<BiometricModeListener> mBiometricModeListeners = new HashSet<>();
+    private Set<BiometricUnlockEventsListener> mBiometricUnlockEventsListeners = new HashSet<>();
 
     private final MetricsLogger mMetricsLogger;
     private final AuthController mAuthController;
@@ -194,7 +190,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
     }
 
-    @VisibleForTesting
     public enum BiometricUiEvent implements UiEventLogger.UiEventEnum {
 
         @UiEvent(doc = "A biometric event of type fingerprint succeeded.")
@@ -225,7 +220,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         BIOMETRIC_IRIS_ERROR(404),
 
         @UiEvent(doc = "Bouncer was shown as a result of consecutive failed UDFPS attempts.")
-        BIOMETRIC_BOUNCER_SHOWN(916);
+        BIOMETRIC_BOUNCER_SHOWN(916),
+
+        @UiEvent(doc = "Screen started waking up with the given PowerManager wake reason.")
+        STARTED_WAKING_UP(1378);
 
         private final int mId;
 
@@ -259,14 +257,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 );
     }
 
-    private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final ScreenOffAnimationController mScreenOffAnimationController;
 
     @Inject
     public BiometricUnlockController(
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
-            ShadeController shadeController,
             NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -280,7 +276,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             ScreenLifecycle screenLifecycle,
             AuthController authController,
             StatusBarStateController statusBarStateController,
-            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SessionTracker sessionTracker,
             LatencyTracker latencyTracker,
             ScreenOffAnimationController screenOffAnimationController,
@@ -288,7 +283,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             SystemClock systemClock
     ) {
         mPowerManager = powerManager;
-        mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
         mUpdateMonitor.registerCallback(this);
         mMediaManager = notificationMediaManager;
@@ -309,7 +303,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMetricsLogger = metricsLogger;
         mAuthController = authController;
         mStatusBarStateController = statusBarStateController;
-        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSessionTracker = sessionTracker;
         mScreenOffAnimationController = screenOffAnimationController;
         mVibratorHelper = vibrator;
@@ -323,14 +316,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mKeyguardViewController = keyguardViewController;
     }
 
-    /** Adds a {@link BiometricModeListener}. */
-    public void addBiometricModeListener(BiometricModeListener listener) {
-        mBiometricModeListeners.add(listener);
+    /** Adds a {@link BiometricUnlockEventsListener}. */
+    public void addListener(BiometricUnlockEventsListener listener) {
+        mBiometricUnlockEventsListeners.add(listener);
     }
 
-    /** Removes a {@link BiometricModeListener}. */
-    public void removeBiometricModeListener(BiometricModeListener listener) {
-        mBiometricModeListeners.remove(listener);
+    /** Removes a {@link BiometricUnlockEventsListener}. */
+    public void removeListener(BiometricUnlockEventsListener listener) {
+        mBiometricUnlockEventsListeners.remove(listener);
     }
 
     private final Runnable mReleaseBiometricWakeLockRunnable = new Runnable() {
@@ -396,7 +389,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     @Override
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) {
-        Trace.beginSection("BiometricUnlockController#onBiometricAuthenticated");
+        Trace.beginSection("BiometricUnlockController#onBiometricUnlocked");
         if (mUpdateMonitor.isGoingToSleep()) {
             mLogger.deferringAuthenticationDueToSleep(userId,
                     biometricSourceType,
@@ -420,10 +413,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             mKeyguardViewMediator.userActivity();
             startWakeAndUnlock(biometricSourceType, isStrongBiometric);
         } else {
-            mLogger.d("onBiometricAuthenticated aborted by bypass controller");
+            mLogger.d("onBiometricUnlocked aborted by bypass controller");
         }
     }
 
+    /**
+     * Wake and unlock the device in response to successful authentication using biometrics.
+     * @param biometricSourceType Biometric source that was used to authenticate.
+     * @param isStrongBiometric
+     */
     public void startWakeAndUnlock(BiometricSourceType biometricSourceType,
                                    boolean isStrongBiometric) {
         int mode = calculateMode(biometricSourceType, isStrongBiometric);
@@ -431,6 +429,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 || mode == MODE_WAKE_AND_UNLOCK_PULSING || mode == MODE_UNLOCK_COLLAPSING
                 || mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM || mode == MODE_DISMISS_BOUNCER) {
             vibrateSuccess(biometricSourceType);
+            onBiometricUnlockedWithKeyguardDismissal(biometricSourceType);
         }
         startWakeAndUnlock(mode);
     }
@@ -470,22 +469,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             case MODE_DISMISS_BOUNCER:
                 Trace.beginSection("MODE_DISMISS_BOUNCER");
                 mKeyguardViewController.notifyKeyguardAuthenticated(
-                        false /* strongAuth */);
+                        false /* primaryAuth */);
                 Trace.endSection();
                 break;
             case MODE_UNLOCK_COLLAPSING:
                 Trace.beginSection("MODE_UNLOCK_COLLAPSING");
-                // If the keyguard unlock controller is going to handle the unlock animation, it
-                // will fling the panel collapsed when it's ready.
-                if (!mKeyguardUnlockAnimationController.willHandleUnlockAnimation()) {
-                    mShadeController.animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_NONE,
-                            true /* force */,
-                            false /* delayed */,
-                            BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
-                }
                 mKeyguardViewController.notifyKeyguardAuthenticated(
-                        false /* strongAuth */);
+                        false /* primaryAuth */);
                 Trace.endSection();
                 break;
             case MODE_SHOW_BOUNCER:
@@ -520,8 +510,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     private void onModeChanged(@WakeAndUnlockMode int mode) {
-        for (BiometricModeListener listener : mBiometricModeListeners) {
+        for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
             listener.onModeChanged(mode);
+        }
+    }
+
+    private void onBiometricUnlockedWithKeyguardDismissal(BiometricSourceType biometricSourceType) {
+        for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
+            listener.onBiometricUnlockedWithKeyguardDismissal(biometricSourceType);
         }
     }
 
@@ -795,7 +791,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMode = MODE_NONE;
         mBiometricType = null;
         mNotificationShadeWindowController.setForceDozeBrightness(false);
-        for (BiometricModeListener listener : mBiometricModeListeners) {
+        for (BiometricUnlockEventsListener listener : mBiometricUnlockEventsListeners) {
             listener.onResetMode();
         }
         mNumConsecutiveFpFailures = 0;
@@ -913,10 +909,17 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     /** An interface to interact with the {@link BiometricUnlockController}. */
-    public interface BiometricModeListener {
+    public interface BiometricUnlockEventsListener {
         /** Called when {@code mMode} is reset to {@link #MODE_NONE}. */
         default void onResetMode() {}
         /** Called when {@code mMode} has changed in {@link #startWakeAndUnlock(int)}. */
         default void onModeChanged(@WakeAndUnlockMode int mode) {}
+
+        /**
+         * Called when the device is unlocked successfully using biometrics with the keyguard also
+         * being dismissed.
+         */
+        default void onBiometricUnlockedWithKeyguardDismissal(
+                BiometricSourceType biometricSourceType) { }
     }
 }

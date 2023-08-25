@@ -16,12 +16,21 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_OWN_FOCUS;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -29,8 +38,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -46,40 +53,57 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.pm.PackageManager;
+import android.content.pm.ActivityInfo;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.InputConfig;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
+import android.view.IWindow;
 import android.view.IWindowSessionCallback;
+import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.window.ClientWindowFrames;
+import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Build/Install/Run:
@@ -89,13 +113,11 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowManagerServiceTests extends WindowTestsBase {
-    @Rule
-    public ExpectedException mExpectedException = ExpectedException.none();
 
-    private boolean isAutomotive() {
-        return getInstrumentation().getTargetContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
-    }
+    @Rule
+    public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation(),
+            ADD_TRUSTED_DISPLAY);
 
     @Test
     public void testIsRequestedOrientationMapped() {
@@ -198,24 +220,39 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testRelayoutExitingWindow() {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
-        doReturn(true).when(surfaceController).hasSurface();
-        spyOn(win);
-        doReturn(true).when(win).isExitAnimationRunningSelfOrParent();
         win.mWinAnimator.mSurfaceController = surfaceController;
+        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        doReturn(true).when(surfaceController).hasSurface();
+        spyOn(win.mTransitionController);
+        doReturn(true).when(win.mTransitionController).isShellTransitionsEnabled();
+        doReturn(true).when(win.mTransitionController).inTransition(
+                eq(win.mActivityRecord));
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;
         win.mActivityRecord.mAppStopped = true;
-        win.mActivityRecord.setVisibleRequested(false);
-        win.mActivityRecord.setVisible(false);
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        spyOn(mWm.mWindowPlacerLocked);
+        // Skip unnecessary operations of relayout.
+        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
         final int w = 100;
         final int h = 200;
         final ClientWindowFrames outFrames = new ClientWindowFrames();
         final MergedConfiguration outConfig = new MergedConfiguration();
         final SurfaceControl outSurfaceControl = new SurfaceControl();
         final InsetsState outInsetsState = new InsetsState();
-        final InsetsSourceControl[] outControls = new InsetsSourceControl[0];
+        final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
         final Bundle outBundle = new Bundle();
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        // The window is in transition, so its destruction is deferred.
+        assertTrue(win.mAnimatingExit);
+        assertFalse(win.mDestroying);
+        assertTrue(win.mTransitionController.mAnimatingExitWindows.contains(win));
+
+        win.mAnimatingExit = false;
+        win.mViewVisibility = View.VISIBLE;
+        win.mActivityRecord.setVisibleRequested(false);
+        win.mActivityRecord.setVisible(false);
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
         // Because the window is already invisible, it doesn't need to apply exiting animation
@@ -235,6 +272,124 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 false /* useLatestConfig */, true /* relayoutVisible */);
         assertEquals(win.getConfiguration().densityDpi,
                 outConfig.getMergedConfiguration().densityDpi);
+    }
+
+    @Test
+    public void testRelayout_firstLayout_dwpcHelperCalledWithCorrectFlags() {
+        // When doing the first layout, the initial flags should be reported as changed to
+        // keepActivityOnWindowFlagsChanged.
+        testRelayoutFlagChanges(
+                /*firstRelayout=*/ true,
+                /*startFlags=*/ FLAG_SECURE,
+                /*startPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*newFlags=*/ FLAG_SECURE,
+                /*newPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*expectedChangedFlags=*/ FLAG_SECURE,
+                /*expectedChangedPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*expectedFlagsValue=*/ FLAG_SECURE,
+                /*expectedPrivateFlagsValue=*/ PRIVATE_FLAG_TRUSTED_OVERLAY);
+    }
+
+    @Test
+    public void testRelayout_secondLayoutFlagAdded_dwpcHelperCalledWithCorrectFlags() {
+        testRelayoutFlagChanges(
+                /*firstRelayout=*/ false,
+                /*startFlags=*/ 0,
+                /*startPrivateFlags=*/ 0,
+                /*newFlags=*/ FLAG_SECURE,
+                /*newPrivateFlags=*/ 0,
+                /*expectedChangedFlags=*/ FLAG_SECURE,
+                /*expectedChangedPrivateFlags=*/ 0,
+                /*expectedFlagsValue=*/ FLAG_SECURE,
+                /*expectedPrivateFlagsValue=*/ 0);
+    }
+
+    @Test
+    public void testRelayout_secondLayoutMultipleFlagsAddOne_dwpcHelperCalledWithCorrectFlags() {
+        testRelayoutFlagChanges(
+                /*firstRelayout=*/ false,
+                /*startFlags=*/ FLAG_NOT_FOCUSABLE,
+                /*startPrivateFlags=*/ 0,
+                /*newFlags=*/ FLAG_SECURE | FLAG_NOT_FOCUSABLE,
+                /*newPrivateFlags=*/ 0,
+                /*expectedChangedFlags=*/ FLAG_SECURE,
+                /*expectedChangedPrivateFlags=*/ 0,
+                /*expectedFlagsValue=*/ FLAG_SECURE | FLAG_NOT_FOCUSABLE,
+                /*expectedPrivateFlagsValue=*/ 0);
+    }
+
+    @Test
+    public void testRelayout_secondLayoutPrivateFlagAdded_dwpcHelperCalledWithCorrectFlags() {
+        testRelayoutFlagChanges(
+                /*firstRelayout=*/ false,
+                /*startFlags=*/ 0,
+                /*startPrivateFlags=*/ 0,
+                /*newFlags=*/ 0,
+                /*newPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*expectedChangedFlags=*/ 0,
+                /*expectedChangedPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*expectedFlagsValue=*/ 0,
+                /*expectedPrivateFlagsValue=*/ PRIVATE_FLAG_TRUSTED_OVERLAY);
+    }
+
+    @Test
+    public void testRelayout_secondLayoutFlagsRemoved_dwpcHelperCalledWithCorrectFlags() {
+        testRelayoutFlagChanges(
+                /*firstRelayout=*/ false,
+                /*startFlags=*/ FLAG_SECURE,
+                /*startPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*newFlags=*/ 0,
+                /*newPrivateFlags=*/ 0,
+                /*expectedChangedFlags=*/ FLAG_SECURE,
+                /*expectedChangedPrivateFlags=*/ PRIVATE_FLAG_TRUSTED_OVERLAY,
+                /*expectedFlagsValue=*/ 0,
+                /*expectedPrivateFlagsValue=*/ 0);
+    }
+
+    // Helper method to test relayout of a window, either for the initial layout, or a subsequent
+    // one, and makes sure that the flags and private flags changes and final values are properly
+    // reported to mDwpcHelper.keepActivityOnWindowFlagsChanged.
+    private void testRelayoutFlagChanges(boolean firstRelayout, int startFlags,
+            int startPrivateFlags, int newFlags, int newPrivateFlags, int expectedChangedFlags,
+            int expectedChangedPrivateFlags, int expectedFlagsValue,
+            int expectedPrivateFlagsValue) {
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
+        win.mRelayoutCalled = !firstRelayout;
+        mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        spyOn(mDisplayContent.mDwpcHelper);
+        when(mDisplayContent.mDwpcHelper.hasController()).thenReturn(true);
+
+        win.mAttrs.flags = startFlags;
+        win.mAttrs.privateFlags = startPrivateFlags;
+
+        LayoutParams newParams = new LayoutParams();
+        newParams.copyFrom(win.mAttrs);
+        newParams.flags = newFlags;
+        newParams.privateFlags = newPrivateFlags;
+
+        int seq = 1;
+        if (!firstRelayout) {
+            win.mRelayoutSeq = 1;
+            seq = 2;
+        }
+        mWm.relayoutWindow(win.mSession, win.mClient, newParams, 100, 200, View.VISIBLE, 0, seq,
+                0, new ClientWindowFrames(), new MergedConfiguration(),
+                new SurfaceControl(), new InsetsState(), new InsetsSourceControl.Array(),
+                new Bundle());
+
+        ArgumentCaptor<Integer> changedFlags = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> changedPrivateFlags = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> flagsValue = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> privateFlagsValue = ArgumentCaptor.forClass(Integer.class);
+
+        verify(mDisplayContent.mDwpcHelper).keepActivityOnWindowFlagsChanged(
+                any(ActivityInfo.class), changedFlags.capture(), changedPrivateFlags.capture(),
+                flagsValue.capture(), privateFlagsValue.capture());
+
+        assertThat(changedFlags.getValue()).isEqualTo(expectedChangedFlags);
+        assertThat(changedPrivateFlags.getValue()).isEqualTo(expectedChangedPrivateFlags);
+        assertThat(flagsValue.getValue()).isEqualTo(expectedFlagsValue);
+        assertThat(privateFlagsValue.getValue()).isEqualTo(expectedPrivateFlagsValue);
     }
 
     @Test
@@ -350,8 +505,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .getWindowType(eq(windowContextToken));
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
-                UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
-                new InsetsSourceControl[0], new Rect(), new float[1]);
+                UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
@@ -359,32 +514,186 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
     @Test
     public void testSetInTouchMode_instrumentedProcessGetPermissionToSwitchTouchMode() {
-        boolean currentTouchMode = mWm.getInTouchMode();
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
+
+        // Get current touch mode state and setup WMS to run setInTouchMode
+        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
         doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
 
-        mWm.setInTouchMode(!currentTouchMode);
+        mWm.setInTouchMode(!currentTouchMode, DEFAULT_DISPLAY);
 
         verify(mWm.mInputManager).setInTouchMode(
-                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true);
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
+                DEFAULT_DISPLAY);
     }
 
     @Test
     public void testSetInTouchMode_nonInstrumentedProcessDontGetPermissionToSwitchTouchMode() {
-        boolean currentTouchMode = mWm.getInTouchMode();
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
+
+        // Get current touch mode state and setup WMS to run setInTouchMode
+        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
         int callingPid = Binder.getCallingPid();
         int callingUid = Binder.getCallingUid();
         doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
         when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
                 android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(false);
 
-        mWm.setInTouchMode(!currentTouchMode);
+        mWm.setInTouchMode(!currentTouchMode, DEFAULT_DISPLAY);
 
         verify(mWm.mInputManager).setInTouchMode(
-                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false,
+                DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testSetInTouchMode_multiDisplay_globalTouchModeUpdate() {
+        // Disable global touch mode
+        mWm.mPerDisplayFocusEnabled = false;
+
+        // Create one extra display
+        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
+        final VirtualDisplay virtualDisplayOwnTouchMode =
+                createVirtualDisplay(/* ownFocus= */ true);
+        final int numberOfDisplays = mWm.mRoot.mChildren.size();
+        assertThat(numberOfDisplays).isAtLeast(3);
+        final int numberOfGlobalTouchModeDisplays = (int) mWm.mRoot.mChildren.stream()
+                .filter(d -> (d.getDisplay().getFlags() & FLAG_OWN_FOCUS) == 0)
+                .count();
+        assertThat(numberOfGlobalTouchModeDisplays).isAtLeast(2);
+
+        // Get current touch mode state and setup WMS to run setInTouchMode
+        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode, DEFAULT_DISPLAY);
+
+        verify(mWm.mInputManager, times(numberOfGlobalTouchModeDisplays)).setInTouchMode(
+                eq(!currentTouchMode), eq(callingPid), eq(callingUid),
+                /* hasPermission= */ eq(true), /* displayId= */ anyInt());
+    }
+
+    @Test
+    public void testSetInTouchMode_multiDisplay_perDisplayFocus_singleDisplayTouchModeUpdate() {
+        // Enable global touch mode
+        mWm.mPerDisplayFocusEnabled = true;
+
+        // Create one extra display
+        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
+        final int numberOfDisplays = mWm.mRoot.mChildren.size();
+        assertThat(numberOfDisplays).isAtLeast(2);
+
+        // Get current touch mode state and setup WMS to run setInTouchMode
+        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.getDisplay().getDisplayId());
+
+        // Ensure that new display touch mode state has changed.
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
+                virtualDisplay.getDisplay().getDisplayId());
+    }
+
+    @Test
+    public void testSetInTouchMode_multiDisplay_ownTouchMode_singleDisplayTouchModeUpdate() {
+        // Disable global touch mode
+        mWm.mPerDisplayFocusEnabled = false;
+
+        // Create one extra display
+        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ true);
+        final int numberOfDisplays = mWm.mRoot.mChildren.size();
+        assertThat(numberOfDisplays).isAtLeast(2);
+
+        // Get current touch mode state and setup WMS to run setInTouchMode
+        boolean currentTouchMode = mWm.isInTouchMode(DEFAULT_DISPLAY);
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        mWm.setInTouchMode(!currentTouchMode, virtualDisplay.getDisplay().getDisplayId());
+
+        // Ensure that new display touch mode state has changed.
+        verify(mWm.mInputManager).setInTouchMode(
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
+                virtualDisplay.getDisplay().getDisplayId());
+    }
+
+    @Test
+    public void testSetInTouchModeOnAllDisplays_perDisplayFocusDisabled() {
+        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ false);
+    }
+
+    @Test
+    public void testSetInTouchModeOnAllDisplays_perDisplayFocusEnabled() {
+        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ true);
+    }
+
+    private void testSetInTouchModeOnAllDisplays(boolean perDisplayFocusEnabled) {
+        // Set global touch mode with the value passed as argument.
+        mWm.mPerDisplayFocusEnabled = perDisplayFocusEnabled;
+
+        // Create a couple of extra displays.
+        // setInTouchModeOnAllDisplays should ignore the ownFocus setting.
+        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
+        final VirtualDisplay virtualDisplayOwnFocus = createVirtualDisplay(/* ownFocus= */ true);
+
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        for (boolean inTouchMode : new boolean[]{true, false}) {
+            mWm.setInTouchModeOnAllDisplays(inTouchMode);
+            for (int i = 0; i < mWm.mRoot.mChildren.size(); ++i) {
+                DisplayContent dc = mWm.mRoot.mChildren.get(i);
+                // All displays that are not already in the desired touch mode are requested to
+                // change their touch mode.
+                if (dc.isInTouchMode() != inTouchMode) {
+                    verify(mWm.mInputManager).setInTouchMode(
+                            true, callingPid, callingUid, /* hasPermission= */ true,
+                            dc.getDisplay().getDisplayId());
+                }
+            }
+        }
+    }
+
+    private VirtualDisplay createVirtualDisplay(boolean ownFocus) {
+        // Create virtual display
+        Point surfaceSize = new Point(
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
+                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
+        int flags = VIRTUAL_DISPLAY_FLAG_PUBLIC;
+        if (ownFocus) {
+            flags |= VIRTUAL_DISPLAY_FLAG_OWN_FOCUS | VIRTUAL_DISPLAY_FLAG_TRUSTED;
+        }
+        VirtualDisplay virtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",
+                surfaceSize.x, surfaceSize.y, DisplayMetrics.DENSITY_140, new Surface(), flags);
+        final int displayId = virtualDisplay.getDisplay().getDisplayId();
+        mWm.mRoot.onDisplayAdded(displayId);
+
+        // Ensure that virtual display was properly created and stored in WRC
+        assertThat(mWm.mRoot.getDisplayContent(
+                virtualDisplay.getDisplay().getDisplayId())).isNotNull();
+
+        return virtualDisplay;
     }
 
     @Test
@@ -459,6 +768,141 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 LETTERBOX_BACKGROUND_WALLPAPER)).isTrue();
         assertThat(setupLetterboxConfigurationWithBackgroundType(
                 LETTERBOX_BACKGROUND_SOLID_COLOR)).isFalse();
+    }
+
+    @Test
+    public void testCaptureDisplay() {
+        Rect displayBounds = new Rect(0, 0, 100, 200);
+        spyOn(mDisplayContent);
+        when(mDisplayContent.getBounds()).thenReturn(displayBounds);
+
+        // Null captureArgs
+        ScreenCapture.LayerCaptureArgs resultingArgs =
+                mWm.getCaptureArgs(DEFAULT_DISPLAY, null /* captureArgs */);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, didn't set rect
+        ScreenCapture.CaptureArgs captureArgs = new ScreenCapture.CaptureArgs.Builder<>().build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, invalid rect
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(new Rect(0, 0, -1, -1))
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, null rect
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(null)
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(displayBounds, resultingArgs.mSourceCrop);
+
+        // Non null captureArgs, valid rect
+        Rect validRect = new Rect(0, 0, 10, 50);
+        captureArgs = new ScreenCapture.CaptureArgs.Builder<>()
+                .setSourceCrop(validRect)
+                .build();
+        resultingArgs = mWm.getCaptureArgs(DEFAULT_DISPLAY, captureArgs);
+        assertEquals(validRect, resultingArgs.mSourceCrop);
+    }
+
+    @Test
+    public void testGrantInputChannel_sanitizeSpyWindowForApplications() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY,
+                        surfaceControl, window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE,
+                        PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY, TYPE_APPLICATION,
+                        null /* windowToken */, focusGrantToken, "TestInputChannel",
+                        inputChannel));
+    }
+
+    @Test
+    public void testGrantInputChannel_allowSpyWindowForInputMonitorPermission() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.SYSTEM_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                INPUT_FEATURE_SPY, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
+    }
+
+    @Test
+    public void testUpdateInputChannel_sanitizeSpyWindowForApplications() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.FIRST_APPLICATION_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == 0));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                        FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY,
+                        null /* region */));
+    }
+
+    @Test
+    public void testUpdateInputChannel_allowSpyWindowForInputMonitorPermission() {
+        final Session session = mock(Session.class);
+        final int callingUid = Process.SYSTEM_UID;
+        final int callingPid = 1234;
+        final SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        final IWindow window = mock(IWindow.class);
+        final IBinder windowToken = mock(IBinder.class);
+        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder focusGrantToken = mock(IBinder.class);
+
+        final InputChannel inputChannel = new InputChannel();
+        mWm.grantInputChannel(session, callingUid, callingPid, DEFAULT_DISPLAY, surfaceControl,
+                window, null /* hostInputToken */, FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY,
+                0 /* inputFeatures */, TYPE_APPLICATION, null /* windowToken */, focusGrantToken,
+                "TestInputChannel", inputChannel);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == 0));
+
+        mWm.updateInputChannel(inputChannel.getToken(), DEFAULT_DISPLAY, surfaceControl,
+                FLAG_NOT_FOCUSABLE, PRIVATE_FLAG_TRUSTED_OVERLAY, INPUT_FEATURE_SPY,
+                null /* region */);
+        verify(mTransaction).setInputWindowInfo(
+                eq(surfaceControl),
+                argThat(h -> (h.inputConfig & InputConfig.SPY) == InputConfig.SPY));
     }
 
     private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {

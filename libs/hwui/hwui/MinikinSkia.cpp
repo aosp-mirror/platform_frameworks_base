@@ -16,10 +16,13 @@
 
 #include "MinikinSkia.h"
 
-#include <SkFontDescriptor.h>
 #include <SkFont.h>
+#include <SkFontDescriptor.h>
 #include <SkFontMetrics.h>
 #include <SkFontMgr.h>
+#include <SkRect.h>
+#include <SkScalar.h>
+#include <SkStream.h>
 #include <SkTypeface.h>
 #include <log/log.h>
 

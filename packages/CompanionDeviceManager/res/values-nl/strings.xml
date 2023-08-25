@@ -17,32 +17,58 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
-    <string name="confirmation_title" msgid="3785000297483688997">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot je &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="confirmation_title" msgid="4593465730772390351">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"smartwatch"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Een <xliff:g id="PROFILE_NAME">%1$s</xliff:g> kiezen om te beheren met &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="summary_watch" msgid="3002344206574997652">"Deze app is vereist om je <xliff:g id="DEVICE_NAME">%1$s</xliff:g> te beheren. <xliff:g id="APP_NAME">%2$s</xliff:g> kan interactie hebben met je meldingen en toegang krijgen tot rechten voor Telefoon, Sms, Contacten, Agenda, Gesprekslijsten en Apparaten in de buurt."</string>
-    <string name="permission_apps" msgid="6142133265286656158">"Apps"</string>
-    <string name="permission_apps_summary" msgid="798718816711515431">"Stream de apps van je telefoon"</string>
+    <string name="summary_watch" msgid="898569637110705523">"Deze app is vereist om je <xliff:g id="DEVICE_NAME">%1$s</xliff:g> te beheren. <xliff:g id="APP_NAME">%2$s</xliff:g> mag informatie (zoals de naam van iemand die belt) synchroniseren, mag interactie hebben met je meldingen en krijgt toegang tot de rechten Telefoon, Sms, Contacten, Agenda, Gesprekslijsten en Apparaten in de buurt."</string>
+    <string name="summary_watch_single_device" msgid="3173948915947011333">"Deze app kan informatie synchroniseren (zoals de naam van iemand die belt) en krijgt toegang tot deze rechten op je <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
+    <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toestaan &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; te beheren?"</string>
+    <string name="profile_name_glasses" msgid="8488394059007275998">"brillen"</string>
+    <string name="summary_glasses_multi_device" msgid="615259525961937348">"Deze app is nodig om <xliff:g id="DEVICE_NAME">%1$s</xliff:g> te beheren. <xliff:g id="APP_NAME">%2$s</xliff:g> mag interactie hebben met je meldingen en krijgt toegang tot de rechten Telefoon, Sms, Contacten, Microfoon en Apparaten in de buurt."</string>
+    <string name="summary_glasses_single_device" msgid="3000909894067413398">"Deze app krijgt toegang tot deze rechten op je <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot deze informatie op je telefoon"</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Cross-device-services"</string>
-    <string name="helper_summary_app_streaming" msgid="5977509499890099">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> toestemming om apps te streamen tussen je apparaten"</string>
+    <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> toestemming om apps te streamen tussen je apparaten"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang geven tot deze informatie op je telefoon"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
-    <string name="permission_notification" msgid="693762568127741203">"Meldingen"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kan alle meldingen lezen, waaronder informatie zoals contacten, berichten en foto\'s"</string>
-    <string name="permission_storage" msgid="6831099350839392343">"Foto\'s en media"</string>
-    <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play-services"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> toegang tot de foto\'s, media en meldingen van je telefoon"</string>
+    <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens jouw <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> toegang tot de foto\'s, media en meldingen van je telefoon"</string>
+    <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Toestaan dat &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; deze actie uitvoert?"</string>
+    <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> vraagt namens je <xliff:g id="DEVICE_NAME">%2$s</xliff:g> toestemming om apps en andere systeemfuncties naar apparaten in de buurt te streamen"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"apparaat"</string>
-    <string name="summary_generic" msgid="2346762210105903720"></string>
+    <string name="summary_generic_single_device" msgid="4181180669689590417">"Deze app kan informatie, zoals de naam van iemand die belt, synchroniseren tussen je telefoon en <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="summary_generic" msgid="1761976003668044801">"Deze app kan informatie, zoals de naam van iemand die belt, synchroniseren tussen je telefoon en het gekozen apparaat"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Toestaan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Niet toestaan"</string>
     <string name="consent_back" msgid="2560683030046918882">"Terug"</string>
-    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"App-rechten overzetten naar je smartwatch"</string>
-    <string name="permission_sync_summary" msgid="8873391306499120778">"We willen het makkelijker voor je maken om je smartwatch in te stellen. Daarom gebruiken apps die tijdens het instellen worden geïnstalleerd op je smartwatch, dezelfde rechten als op je telefoon.\n\n Deze rechten kunnen toegang tot de microfoon en locatie van je smartwatch omvatten."</string>
+    <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Apps op de &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; dezelfde rechten geven als op de &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="permission_sync_summary" msgid="765497944331294275">"Dit kan &lt;strong&gt;Microfoon&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt; en &lt;strong&gt;Locatietoegang&lt;/strong&gt; en andere gevoelige rechten op de &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; omvatten. &lt;br/&gt;&lt;br/&gt;Je kunt deze rechten altijd wijzigen in je Instellingen op de &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_icon_description" msgid="4445875290032225965">"App-icoon"</string>
     <string name="vendor_header_button_description" msgid="6566660389500630608">"Knop Meer informatie"</string>
+    <string name="permission_phone" msgid="2661081078692784919">"Telefoon"</string>
+    <string name="permission_sms" msgid="6337141296535774786">"Sms"</string>
+    <string name="permission_contacts" msgid="3858319347208004438">"Contacten"</string>
+    <string name="permission_calendar" msgid="6805668388691290395">"Agenda"</string>
+    <string name="permission_microphone" msgid="2152206421428732949">"Microfoon"</string>
+    <string name="permission_call_logs" msgid="5546761417694586041">"Gesprekslijsten"</string>
+    <string name="permission_nearby_devices" msgid="7530973297737123481">"Apparaten in de buurt"</string>
+    <string name="permission_storage" msgid="6831099350839392343">"Foto\'s en media"</string>
+    <string name="permission_notification" msgid="693762568127741203">"Meldingen"</string>
+    <string name="permission_app_streaming" msgid="6009695219091526422">"Apps"</string>
+    <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Streaming"</string>
+    <string name="permission_phone_summary" msgid="6684396967861278044">"Kan telefoongesprekken starten en beheren"</string>
+    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Kan gesprekslijst lezen en ernaar schrijven"</string>
+    <string name="permission_sms_summary" msgid="3508442683678912017">"Kan sms-berichten sturen en bekijken"</string>
+    <string name="permission_contacts_summary" msgid="675861979475628708">"Heeft toegang tot je contacten"</string>
+    <string name="permission_calendar_summary" msgid="6460000922511766226">"Heeft toegang tot je agenda"</string>
+    <string name="permission_microphone_summary" msgid="3692091540613093394">"Kan audio opnemen"</string>
+    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Kan apparaten in de buurt vinden, er verbinding mee maken en de relatieve positie ervan bepalen"</string>
+    <string name="permission_notification_summary" msgid="884075314530071011">"Kan alle meldingen lezen, waaronder informatie zoals contacten, berichten en foto\'s"</string>
+    <string name="permission_app_streaming_summary" msgid="606923325679670624">"Stream de apps van je telefoon"</string>
+    <string name="permission_storage_summary" msgid="3918240895519506417"></string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Apps en andere systeemfuncties streamen vanaf je telefoon"</string>
+    <string name="device_type" product="default" msgid="8268703872070046263">"telefoon"</string>
+    <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

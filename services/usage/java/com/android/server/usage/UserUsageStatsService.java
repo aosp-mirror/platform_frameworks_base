@@ -34,7 +34,6 @@ import android.annotation.Nullable;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
@@ -50,6 +49,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
+import android.util.TimeSparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;

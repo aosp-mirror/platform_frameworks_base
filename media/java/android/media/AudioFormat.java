@@ -373,6 +373,8 @@ public final class AudioFormat implements Parcelable {
      * Use {@link #ENCODING_DTS_UHD_P2} to transmit DTS UHD Profile 2 (aka DTS:X Profile 2)
      * bitstream. */
     public static final int ENCODING_DTS_UHD_P2 = 30;
+    /** Audio data format: Direct Stream Digital */
+    public static final int ENCODING_DSD = 31;
 
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
@@ -437,6 +439,8 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_DTS_HD_MA";
             case ENCODING_DTS_UHD_P2:
                 return "ENCODING_DTS_UHD_P2";
+            case ENCODING_DSD:
+                return "ENCODING_DSD";
             default :
                 return "invalid encoding " + enc;
         }
@@ -539,6 +543,9 @@ public final class AudioFormat implements Parcelable {
     /** Output channel mask for 5.1 */
     public static final int CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
+    /** Output channel mask for 6.1
+     *  Same as 5.1 with the addition of the back center channel */
+    public static final int CHANNEL_OUT_6POINT1 = (CHANNEL_OUT_5POINT1 | CHANNEL_OUT_BACK_CENTER);
     /** @hide */
     public static final int CHANNEL_OUT_5POINT1_SIDE = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY |
@@ -600,6 +607,40 @@ public final class AudioFormat implements Parcelable {
             CHANNEL_OUT_BOTTOM_FRONT_CENTER |
             CHANNEL_OUT_LOW_FREQUENCY_2);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "CHANNEL_OUT", value = {
+            CHANNEL_OUT_FRONT_LEFT,
+            CHANNEL_OUT_FRONT_RIGHT,
+            CHANNEL_OUT_FRONT_CENTER,
+            CHANNEL_OUT_LOW_FREQUENCY,
+            CHANNEL_OUT_BACK_LEFT,
+            CHANNEL_OUT_BACK_RIGHT,
+            CHANNEL_OUT_FRONT_LEFT_OF_CENTER,
+            CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            CHANNEL_OUT_BACK_CENTER,
+            CHANNEL_OUT_SIDE_LEFT,
+            CHANNEL_OUT_SIDE_RIGHT,
+            CHANNEL_OUT_TOP_CENTER,
+            CHANNEL_OUT_TOP_FRONT_LEFT,
+            CHANNEL_OUT_TOP_FRONT_CENTER,
+            CHANNEL_OUT_TOP_FRONT_RIGHT,
+            CHANNEL_OUT_TOP_BACK_LEFT,
+            CHANNEL_OUT_TOP_BACK_CENTER,
+            CHANNEL_OUT_TOP_BACK_RIGHT,
+            CHANNEL_OUT_TOP_SIDE_LEFT,
+            CHANNEL_OUT_TOP_SIDE_RIGHT,
+            CHANNEL_OUT_BOTTOM_FRONT_LEFT,
+            CHANNEL_OUT_BOTTOM_FRONT_CENTER,
+            CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            CHANNEL_OUT_LOW_FREQUENCY_2,
+            CHANNEL_OUT_FRONT_WIDE_LEFT,
+            CHANNEL_OUT_FRONT_WIDE_RIGHT,
+            CHANNEL_OUT_HAPTIC_B,
+            CHANNEL_OUT_HAPTIC_A
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChannelOut {}
 
     /** Minimum value for sample rate,
      *  assuming AudioTrack and AudioRecord share the same limitations.
@@ -795,6 +836,7 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_DSD:
                 return true;
             default:
                 return false;
@@ -834,6 +876,7 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_DRA:
             case ENCODING_DTS_HD_MA:
             case ENCODING_DTS_UHD_P2:
+            case ENCODING_DSD:
                 return true;
             default:
                 return false;
@@ -1208,6 +1251,7 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DRA:
                 case ENCODING_DTS_HD_MA:
                 case ENCODING_DTS_UHD_P2:
+                case ENCODING_DSD:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1438,7 +1482,8 @@ public final class AudioFormat implements Parcelable {
         ENCODING_DTS_UHD_P1,
         ENCODING_DRA,
         ENCODING_DTS_HD_MA,
-        ENCODING_DTS_UHD_P2 }
+        ENCODING_DTS_UHD_P2,
+        ENCODING_DSD }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}

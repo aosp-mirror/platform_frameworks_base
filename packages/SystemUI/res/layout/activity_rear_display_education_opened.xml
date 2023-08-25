@@ -32,8 +32,8 @@
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/rear_display_folded_animation"
             android:importantForAccessibility="no"
-            android:layout_width="@dimen/rear_display_animation_width"
-            android:layout_height="@dimen/rear_display_animation_height"
+            android:layout_width="@dimen/rear_display_animation_width_opened"
+            android:layout_height="@dimen/rear_display_animation_height_opened"
             android:layout_gravity="center"
             android:contentDescription="@string/rear_display_accessibility_unfolded_animation"
             android:scaleType="fitXY"
@@ -49,8 +49,8 @@
         android:text="@string/rear_display_unfolded_bottom_sheet_title"
         android:textAppearance="@style/TextAppearance.Dialog.Title"
         android:lineSpacingExtra="2sp"
-        android:paddingTop="@dimen/rear_display_title_top_padding"
-        android:paddingBottom="@dimen/rear_display_title_bottom_padding"
+        android:paddingTop="@dimen/rear_display_title_top_padding_opened"
+        android:paddingBottom="@dimen/rear_display_title_bottom_padding_opened"
         android:gravity="center_horizontal|center_vertical"
     />
 

@@ -34,6 +34,7 @@ import android.app.ActivityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;
@@ -91,5 +92,6 @@ public class PhoneWindowManagerTests {
         when(mMockActivityTaskManagerInternal.startHomeOnDisplay(
                 anyInt(), anyString(), anyInt(), anyBoolean(), anyBoolean())).thenReturn(false);
         mPhoneWindowManager.mActivityTaskManagerInternal = mMockActivityTaskManagerInternal;
+        mPhoneWindowManager.mUserManagerInternal = mock(UserManagerInternal.class);
     }
 }

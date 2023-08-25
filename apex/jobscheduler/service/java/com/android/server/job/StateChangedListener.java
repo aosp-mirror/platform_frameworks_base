@@ -18,9 +18,11 @@ package com.android.server.job;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.Network;
 import android.util.ArraySet;
 
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.job.restrictions.JobRestriction;
 
 import java.util.List;
 
@@ -37,6 +39,16 @@ public interface StateChangedListener {
     void onControllerStateChanged(@Nullable ArraySet<JobStatus> changedJobs);
 
     /**
+     * Called by a {@link com.android.server.job.restrictions.JobRestriction} to notify the
+     * JobScheduler that it should check on the state of all jobs.
+     *
+     * @param stopOvertimeJobs Whether to stop any jobs that have run for more than their minimum
+     *                         execution guarantee and are restricted by the changed restriction
+     */
+    void onRestrictionStateChanged(@NonNull JobRestriction restriction,
+            boolean stopOvertimeJobs);
+
+    /**
      * Called by the controller to notify the JobManager that regardless of the state of the task,
      * it must be run immediately.
      * @param jobStatus The state of the task which is to be run immediately. <strong>null
@@ -45,6 +57,8 @@ public interface StateChangedListener {
     public void onRunJobNow(JobStatus jobStatus);
 
     public void onDeviceIdleStateChanged(boolean deviceIdle);
+
+    void onNetworkChanged(JobStatus jobStatus, Network newNetwork);
 
     /**
      * Called when these jobs are added or removed from the

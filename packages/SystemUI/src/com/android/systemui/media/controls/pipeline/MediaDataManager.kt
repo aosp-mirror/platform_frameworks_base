@@ -16,9 +16,12 @@
 
 package com.android.systemui.media.controls.pipeline
 
+import android.annotation.SuppressLint
+import android.app.BroadcastOptions
 import android.app.Notification
 import android.app.Notification.EXTRA_SUBSTITUTE_APP_NAME
 import android.app.PendingIntent
+import android.app.StatusBarManager
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
@@ -48,7 +51,9 @@ import android.service.notification.StatusBarNotification
 import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
+import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
@@ -135,6 +140,8 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA =
         expiryTimeMs = 0,
     )
 
+const val MEDIA_TITLE_ERROR_MESSAGE = "Invalid media data: title is null or blank."
+
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     return sbn.notification.isMediaNotification()
 }
@@ -213,8 +220,19 @@ class MediaDataManager(
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     // There should ONLY be at most one Smartspace media recommendation.
     var smartspaceMediaData: SmartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
-    private var smartspaceSession: SmartspaceSession? = null
+    @Keep private var smartspaceSession: SmartspaceSession? = null
     private var allowMediaRecommendations = allowMediaRecommendations(context)
+
+    private val artworkWidth =
+        context.resources.getDimensionPixelSize(
+            com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize
+        )
+    private val artworkHeight =
+        context.resources.getDimensionPixelSize(R.dimen.qs_media_session_height_expanded)
+
+    @SuppressLint("WrongConstant") // sysui allowed to call STATUS_BAR_SERVICE
+    private val statusBarManager =
+        context.getSystemService(Context.STATUS_BAR_SERVICE) as StatusBarManager
 
     /** Check whether this notification is an RCN */
     private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
@@ -364,26 +382,28 @@ class MediaDataManager(
 
     fun destroy() {
         smartspaceMediaDataProvider.unregisterListener(this)
+        smartspaceSession?.close()
+        smartspaceSession = null
         context.unregisterReceiver(appChangeReceiver)
     }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (useQsMediaPlayer && isMediaNotification(sbn)) {
-            var logEvent = false
+            var isNewlyActiveEntry = false
             Assert.isMainThread()
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
                 val instanceId = logger.getNewInstanceId()
                 val temp = LOADING.copy(packageName = sbn.packageName, instanceId = instanceId)
                 mediaEntries.put(key, temp)
-                logEvent = true
+                isNewlyActiveEntry = true
             } else if (oldKey != key) {
                 // Resume -> active conversion; move to new key
                 val oldData = mediaEntries.remove(oldKey)!!
-                logEvent = true
+                isNewlyActiveEntry = true
                 mediaEntries.put(key, oldData)
             }
-            loadMediaData(key, sbn, oldKey, logEvent)
+            loadMediaData(key, sbn, oldKey, isNewlyActiveEntry)
         } else {
             onNotificationRemoved(key)
         }
@@ -466,9 +486,9 @@ class MediaDataManager(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
-        logEvent: Boolean = false
+        isNewlyActiveEntry: Boolean = false,
     ) {
-        backgroundExecutor.execute { loadMediaDataInBg(key, sbn, oldKey, logEvent) }
+        backgroundExecutor.execute { loadMediaDataInBg(key, sbn, oldKey, isNewlyActiveEntry) }
     }
 
     /** Add a listener for changes in this class */
@@ -592,9 +612,11 @@ class MediaDataManager(
         }
     }
 
-    private fun removeEntry(key: String) {
+    private fun removeEntry(key: String, logEvent: Boolean = true) {
         mediaEntries.remove(key)?.let {
-            logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
+            if (logEvent) {
+                logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
+            }
         }
         notifyMediaDataRemoved(key)
     }
@@ -742,7 +764,7 @@ class MediaDataManager(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
-        logEvent: Boolean = false
+        isNewlyActiveEntry: Boolean = false,
     ) {
         val token =
             sbn.notification.extras.getParcelable(
@@ -763,6 +785,27 @@ class MediaDataManager(
             )
                 ?: getAppInfoFromPackage(sbn.packageName)
 
+        // App name
+        val appName = getAppName(sbn, appInfo)
+
+        // Song name
+        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        if (song.isNullOrBlank()) {
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
+        }
+        if (song.isNullOrBlank()) {
+            song = HybridGroupManager.resolveTitle(notif)
+        }
+        if (song.isNullOrBlank()) {
+            // For apps that don't include a title, log and add a placeholder
+            song = context.getString(R.string.controls_media_empty_title, appName)
+            try {
+                statusBarManager.logBlankMediaTitle(sbn.packageName, sbn.user.identifier)
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Error reporting blank media title for package ${sbn.packageName}")
+            }
+        }
+
         // Album art
         var artworkBitmap = metadata?.let { loadBitmapFromUri(it) }
         if (artworkBitmap == null) {
@@ -778,20 +821,8 @@ class MediaDataManager(
                 Icon.createWithBitmap(artworkBitmap)
             }
 
-        // App name
-        val appName = getAppName(sbn, appInfo)
-
         // App Icon
         val smallIcon = sbn.notification.smallIcon
-
-        // Song name
-        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-        if (song == null) {
-            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
-        }
-        if (song == null) {
-            song = HybridGroupManager.resolveTitle(notif)
-        }
 
         // Explicit Indicator
         var isExplicit = false
@@ -804,7 +835,7 @@ class MediaDataManager(
 
         // Artist name
         var artist: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST)
-        if (artist == null) {
+        if (artist.isNullOrBlank()) {
             artist = HybridGroupManager.resolveText(notif)
         }
 
@@ -864,7 +895,7 @@ class MediaDataManager(
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
         val appUid = appInfo?.uid ?: Process.INVALID_UID
 
-        if (logEvent) {
+        if (isNewlyActiveEntry) {
             logSingleVsMultipleMediaAdded(appUid, sbn.packageName, instanceId)
             logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
         } else if (playbackLocation != currentEntry?.playbackLocation) {
@@ -1220,7 +1251,9 @@ class MediaDataManager(
 
     private fun sendPendingIntent(intent: PendingIntent): Boolean {
         return try {
-            intent.send()
+            val options = BroadcastOptions.makeBasic()
+            options.setInteractive(true)
+            intent.send(options.toBundle())
             true
         } catch (e: PendingIntent.CanceledException) {
             Log.d(TAG, "Intent canceled", e)
@@ -1247,9 +1280,21 @@ class MediaDataManager(
             return null
         }
 
-        val source = ImageDecoder.createSource(context.getContentResolver(), uri)
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
         return try {
-            ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+            ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                val width = info.size.width
+                val height = info.size.height
+                val scale =
+                    MediaDataUtils.getScaleFactor(
+                        APair(width, height),
+                        APair(artworkWidth, artworkHeight)
+                    )
+
+                // Downscale if needed
+                if (scale != 0f && scale < 1) {
+                    decoder.setTargetSize((scale * width).toInt(), (scale * height).toInt())
+                }
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
             }
         } catch (e: IOException) {

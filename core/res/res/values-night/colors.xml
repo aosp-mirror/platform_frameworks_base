@@ -38,9 +38,17 @@
     <color name="user_icon_7">#fffbbc04</color><!-- yellow -->
     <color name="user_icon_8">#fffa903e</color><!-- orange -->
 
+    <!-- Lily Language Picker language item view colors -->
+    <color name="language_picker_item_text_color">#F1F3F4</color>
+    <color name="language_picker_item_text_color_secondary">#BDC1C6</color>
+    <color name="language_picker_item_text_color_selected">#202124</color>
+    <color name="language_picker_item_text_color_secondary_selected">#202124</color>
+    <color name="language_picker_item_selected_indicator">#202124</color>
+    <color name="language_picker_item_selected_bg">#92B3F2</color>
+    <color name="language_picker_item_selected_stroke">#185ABC</color>
+
     <!-- Color for side fps toast dark theme-->
     <color name="side_fps_toast_background">#2E3132</color>
     <color name="side_fps_text_color">#EFF1F2</color>
     <color name="side_fps_button_color">#33B9DB</color>
-
 </resources>

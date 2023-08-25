@@ -22,11 +22,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import android.window.TaskSnapshot;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.window.TaskSnapshot;
 
 import androidx.test.filters.MediumTest;
 
@@ -38,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 
 /**
- * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
+ * Test class for {@link TaskSnapshotPersister} and {@link AppSnapshotLoader}
  *
  * Build/Install/Run:
  * atest TaskSnapshotPersisterLoaderTest
@@ -67,7 +67,7 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
     @Test
     public void testPersistAndLoadSnapshot() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] files = new File[]{
                 new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg")};
@@ -91,7 +91,7 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
         final ArraySet<Integer> taskIds = new ArraySet<>();
         taskIds.add(1);
         mPersister.removeObsoleteFiles(taskIds, new int[]{mTestUserId});
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] existsFiles = new File[]{
                 new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg")};
@@ -111,7 +111,7 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
         taskIds.add(1);
         mPersister.removeObsoleteFiles(taskIds, new int[]{mTestUserId});
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         final File[] existsFiles = new File[]{
                 new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
                 new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
@@ -128,7 +128,7 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
     public void testReduced_notCached() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
-        mPersister.waitForQueueEmpty();
+        mSnapshotPersistQueue.waitForQueueEmpty();
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* isLowResolution */));
 

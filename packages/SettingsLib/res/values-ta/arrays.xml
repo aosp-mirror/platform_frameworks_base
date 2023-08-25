@@ -284,10 +284,4 @@
   </string-array>
   <string-array name="avatar_image_descriptions">
   </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"சிறியது"</item>
-    <item msgid="1484561228522634915">"இயல்பு"</item>
-    <item msgid="4014311587094503943">"பெரியது"</item>
-    <item msgid="2904569270831156685">"மிகப் பெரியது"</item>
-  </string-array>
 </resources>

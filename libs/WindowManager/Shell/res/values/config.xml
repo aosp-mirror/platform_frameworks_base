@@ -125,4 +125,7 @@
 
     <!-- Whether the additional education about reachability is enabled -->
     <bool name="config_letterboxIsReachabilityEducationEnabled">false</bool>
+
+    <!-- Whether DragAndDrop capability is enabled -->
+    <bool name="config_enableShellDragDrop">true</bool>
 </resources>

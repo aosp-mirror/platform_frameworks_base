@@ -47,45 +47,38 @@ public class TaskConstants {
             -2 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
-     * When a unresizable app is moved in the different configuration, a restart button appears
-     * allowing to adapt (~resize) app to the new configuration mocks.
+     * Compat UI components: reachability education, size compat restart
+     * button, letterbox education, restart dialog.
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_SIZE_COMPAT_RESTART_BUTTON =
-            TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_COMPAT_UI = TASK_CHILD_LAYER_REGION_SIZE;
 
-    /**
-     * Shown the first time an app is opened in size compat mode in landscape.
-     * @hide
-     */
-    public static final int TASK_CHILD_LAYER_LETTERBOX_EDUCATION = 2 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Captions, window frames and resize handlers around task windows.
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_WINDOW_DECORATIONS = 3 * TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_WINDOW_DECORATIONS = 2 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Overlays the task when going into PIP w/ gesture navigation.
      * @hide
      */
     public static final int TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY =
-            4 * TASK_CHILD_LAYER_REGION_SIZE;
+            3 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Allows other apps to add overlays on the task (i.e. game dashboard)
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 5 * TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_TASK_OVERLAY = 4 * TASK_CHILD_LAYER_REGION_SIZE;
+
 
     /**
-     * Legacy machanism to force an activity to the top of the task (i.e. for work profile
-     * comfirmation).
+     * Veil to cover task surface and other window decorations during resizes.
      * @hide
      */
-    public static final int TASK_CHILD_LAYER_TASK_OVERLAY_ACTIVITIES =
-            6 * TASK_CHILD_LAYER_REGION_SIZE;
+    public static final int TASK_CHILD_LAYER_RESIZE_VEIL = 6 * TASK_CHILD_LAYER_REGION_SIZE;
 
     /**
      * Z-orders of task child layers other than activities, task fragments and layers interleaved
@@ -95,12 +88,11 @@ public class TaskConstants {
     @IntDef({
             TASK_CHILD_LAYER_TASK_BACKGROUND,
             TASK_CHILD_LAYER_LETTERBOX_BACKGROUND,
-            TASK_CHILD_LAYER_SIZE_COMPAT_RESTART_BUTTON,
-            TASK_CHILD_LAYER_LETTERBOX_EDUCATION,
+            TASK_CHILD_LAYER_COMPAT_UI,
             TASK_CHILD_LAYER_WINDOW_DECORATIONS,
             TASK_CHILD_LAYER_RECENTS_ANIMATION_PIP_OVERLAY,
             TASK_CHILD_LAYER_TASK_OVERLAY,
-            TASK_CHILD_LAYER_TASK_OVERLAY_ACTIVITIES
+            TASK_CHILD_LAYER_RESIZE_VEIL
     })
     public @interface TaskChildLayer {}
 }

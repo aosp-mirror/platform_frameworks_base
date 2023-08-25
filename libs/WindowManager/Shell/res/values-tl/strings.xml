@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Mga Setting"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Pumasok sa split screen"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu ng Picture-in-Picture"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Nasa picture-in-picture ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Kung ayaw mong magamit ni <xliff:g id="NAME">%s</xliff:g> ang feature na ito, i-tap upang buksan ang mga setting at i-off ito."</string>
     <string name="pip_play" msgid="3496151081459417097">"I-play"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"I-resize"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"I-stash"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"I-unstash"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Posibleng hindi gumana ang app sa split screen."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Hindi sinusuportahan ng app ang split-screen."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Posibleng hindi gumana sa split screen ang app"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Hindi sinusuportahan ng app ang split-screen"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Sa 1 window lang puwedeng buksan ang app na ito."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Maaaring hindi gumana ang app sa pangalawang display."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Hindi sinusuportahan ng app ang paglulunsad sa mga pangalawang display."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Divider ng split-screen"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Divider ng split screen"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Divider ng split screen"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"I-full screen ang nasa kaliwa"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Gawing 70% ang nasa kaliwa"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Gawing 50% ang nasa kaliwa"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Hindi ito naayos?\nI-tap para i-revert"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Walang isyu sa camera? I-tap para i-dismiss."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Tumingin at gumawa ng higit pa"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Mag-drag ng ibang app para sa split screen"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Mag-drag ng isa pang app para sa split screen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Mag-double tap sa labas ng app para baguhin ang posisyon nito"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"I-expand para sa higit pang impormasyon."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Isara"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Isara ang Menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Buksan ang Menu"</string>
 </resources>

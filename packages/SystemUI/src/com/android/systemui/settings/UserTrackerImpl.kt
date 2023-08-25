@@ -35,7 +35,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.Assert
 import java.io.PrintWriter
-import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
@@ -57,7 +56,7 @@ import kotlin.reflect.KProperty
  *
  * Class constructed and initialized in [SettingsModule].
  */
-class UserTrackerImpl internal constructor(
+open class UserTrackerImpl internal constructor(
     private val context: Context,
     private val userManager: UserManager,
     private val iActivityManager: IActivityManager,
@@ -75,13 +74,13 @@ class UserTrackerImpl internal constructor(
     private val mutex = Any()
 
     override var userId: Int by SynchronizedDelegate(context.userId)
-        private set
+        protected set
 
     override var userHandle: UserHandle by SynchronizedDelegate(context.user)
-        private set
+        protected set
 
     override var userContext: Context by SynchronizedDelegate(context)
-        private set
+        protected set
 
     override val userContentResolver: ContentResolver
         get() = userContext.contentResolver
@@ -99,12 +98,12 @@ class UserTrackerImpl internal constructor(
      * modified.
      */
     override var userProfiles: List<UserInfo> by SynchronizedDelegate(emptyList())
-        private set
+        protected set
 
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
-    fun initialize(startingUser: Int) {
+    open fun initialize(startingUser: Int) {
         if (initialized) {
             return
         }
@@ -162,27 +161,31 @@ class UserTrackerImpl internal constructor(
 
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
+            override fun onBeforeUserSwitching(newUserId: Int) {
+                handleBeforeUserSwitching(newUserId)
+            }
+
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
-                backgroundHandler.run {
-                    handleUserSwitching(newUserId)
-                    reply?.sendResult(null)
-                }
+                handleUserSwitching(newUserId)
+                reply?.sendResult(null)
             }
 
             override fun onUserSwitchComplete(newUserId: Int) {
-                backgroundHandler.run {
-                    handleUserSwitchComplete(newUserId)
-                }
+                handleUserSwitchComplete(newUserId)
             }
         }, TAG)
     }
 
     @WorkerThread
-    private fun handleUserSwitching(newUserId: Int) {
+    protected open fun handleBeforeUserSwitching(newUserId: Int) {
+        Assert.isNotMainThread()
+        setUserIdInternal(newUserId)
+    }
+
+    @WorkerThread
+    protected open fun handleUserSwitching(newUserId: Int) {
         Assert.isNotMainThread()
         Log.i(TAG, "Switching to user $newUserId")
-
-        setUserIdInternal(newUserId)
 
         val list = synchronized(callbacks) {
             callbacks.toList()
@@ -202,11 +205,10 @@ class UserTrackerImpl internal constructor(
     }
 
     @WorkerThread
-    private fun handleUserSwitchComplete(newUserId: Int) {
+    protected open fun handleUserSwitchComplete(newUserId: Int) {
         Assert.isNotMainThread()
         Log.i(TAG, "Switched to user $newUserId")
 
-        setUserIdInternal(newUserId)
         notifySubscribers {
             onUserChanged(newUserId, userContext)
             onProfilesChanged(userProfiles)
@@ -214,7 +216,7 @@ class UserTrackerImpl internal constructor(
     }
 
     @WorkerThread
-    private fun handleProfilesChanged() {
+    protected open fun handleProfilesChanged() {
         Assert.isNotMainThread()
 
         val profiles = userManager.getProfiles(userId)

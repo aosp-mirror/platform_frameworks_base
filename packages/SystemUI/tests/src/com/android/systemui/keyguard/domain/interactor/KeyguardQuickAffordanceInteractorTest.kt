@@ -23,11 +23,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
@@ -37,6 +40,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
@@ -45,6 +49,7 @@ import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAff
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -59,6 +64,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -70,6 +76,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
 
@@ -80,6 +87,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -89,10 +97,14 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     private lateinit var quickAccessWallet: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScanner: FakeKeyguardQuickAffordanceConfig
     private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var dockManager: DockManagerFake
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
 
         repository = FakeKeyguardRepository()
         repository.setKeyguardShowing(true)
@@ -107,6 +119,9 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
+
+        dockManager = DockManagerFake()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
 
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -186,13 +201,17 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
+                biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
+                appContext = context,
             )
     }
 
     @Test
-    fun `quickAffordance - bottom start affordance is visible`() =
+    fun quickAffordance_bottomStartAffordanceIsVisible() =
         testScope.runTest {
             val configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
             homeControls.setState(
@@ -218,7 +237,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom end affordance is visible`() =
+    fun quickAffordance_bottomEndAffordanceIsVisible() =
         testScope.runTest {
             val configKey = BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
             quickAccessWallet.setState(
@@ -243,7 +262,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when all features are disabled by device policy`() =
+    fun quickAffordance_hiddenWhenAllFeaturesAreDisabledByDevicePolicy() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
@@ -262,7 +281,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when shortcuts feature is disabled by device policy`() =
+    fun quickAffordance_hiddenWhenShortcutsFeatureIsDisabledByDevicePolicy() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
@@ -281,7 +300,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - hidden when quick settings is visible`() =
+    fun quickAffordance_hiddenWhenQuickSettingsIsVisible() =
         testScope.runTest {
             repository.setQuickSettingsVisible(true)
             quickAccessWallet.setState(
@@ -299,9 +318,27 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom start affordance hidden while dozing`() =
+    fun quickAffordance_hiddenWhenUserIsInLockdownMode() =
         testScope.runTest {
-            repository.setDozing(true)
+            biometricSettingsRepository.setIsUserInLockdown(true)
+            quickAccessWallet.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                )
+            )
+
+            val collectedValue by
+                collectLastValue(
+                    underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
+                )
+
+            assertThat(collectedValue).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
+        }
+
+    @Test
+    fun quickAffordance_bottomStartAffordanceHiddenWhileDozing() =
+        testScope.runTest {
+            repository.setIsDozing(true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = ICON,
@@ -316,7 +353,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom start affordance hidden when lockscreen is not showing`() =
+    fun quickAffordance_bottomStartAffordanceHiddenWhenLockscreenIsNotShowing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
             homeControls.setState(
@@ -333,10 +370,10 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordanceAlwaysVisible - even when lock screen not showing and dozing`() =
+    fun quickAffordanceAlwaysVisible_evenWhenLockScreenNotShowingAndDozing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             val configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
@@ -420,7 +457,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = homeControls.key,
-                                    name = homeControls.pickerName,
+                                    name = homeControls.pickerName(),
                                     iconResourceId = homeControls.pickerIconResourceId,
                                 ),
                             ),
@@ -454,7 +491,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -491,7 +528,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -499,7 +536,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = qrCodeScanner.key,
-                                    name = qrCodeScanner.pickerName,
+                                    name = qrCodeScanner.pickerName(),
                                     iconResourceId = qrCodeScanner.pickerIconResourceId,
                                 ),
                             ),
@@ -508,7 +545,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `unselect - one`() =
+    fun unselect_one() =
         testScope.runTest {
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
@@ -555,7 +592,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -585,7 +622,47 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `unselect - all`() =
+    fun useLongPress_whenDocked_isFalse() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(true)
+
+            val useLongPress by collectLastValue(underTest.useLongPress())
+
+            assertThat(useLongPress).isFalse()
+        }
+
+    @Test
+    fun useLongPress_whenNotDocked_isTrue() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(false)
+
+            val useLongPress by collectLastValue(underTest.useLongPress())
+
+            assertThat(useLongPress).isTrue()
+        }
+
+    @Test
+    fun useLongPress_whenNotDocked_isTrue_changedTo_whenDocked_isFalse() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(false)
+            val firstUseLongPress by collectLastValue(underTest.useLongPress())
+            runCurrent()
+
+            assertThat(firstUseLongPress).isTrue()
+
+            dockManager.setIsDocked(true)
+            dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            val secondUseLongPress by collectLastValue(underTest.useLongPress())
+            runCurrent()
+
+            assertThat(secondUseLongPress).isFalse()
+        }
+
+    @Test
+    fun unselect_all() =
         testScope.runTest {
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             homeControls.setState(
@@ -610,7 +687,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                             listOf(
                                 KeyguardQuickAffordancePickerRepresentation(
                                     id = quickAccessWallet.key,
-                                    name = quickAccessWallet.pickerName,
+                                    name = quickAccessWallet.pickerName(),
                                     iconResourceId = quickAccessWallet.pickerIconResourceId,
                                 ),
                             ),
@@ -632,14 +709,14 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     companion object {
-        private val ICON: Icon = mock {
-            whenever(this.contentDescription)
-                .thenReturn(
+        private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
+        private val ICON: Icon =
+            Icon.Resource(
+                res = CONTENT_DESCRIPTION_RESOURCE_ID,
+                contentDescription =
                     ContentDescription.Resource(
                         res = CONTENT_DESCRIPTION_RESOURCE_ID,
-                    )
-                )
-        }
-        private const val CONTENT_DESCRIPTION_RESOURCE_ID = 1337
+                    ),
+            )
     }
 }

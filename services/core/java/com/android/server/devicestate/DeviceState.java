@@ -64,10 +64,34 @@ public final class DeviceState {
      */
     public static final int FLAG_EMULATED_ONLY = 1 << 2;
 
+    /**
+     * This flag indicates that the corresponding state should be automatically canceled when the
+     * requesting app is no longer on top. The app is considered not on top when (1) the top
+     * activity in the system is from a different app, (2) the device is in sleep mode, or
+     * (3) the keyguard shows up.
+     */
+    public static final int FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP = 1 << 3;
+
+    /**
+     * This flag indicates that the corresponding state should be disabled when the device is
+     * overheating and reaching the critical status.
+     */
+    public static final int FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL = 1 << 4;
+
+    /**
+     * This flag indicates that the corresponding state should be disabled when power save mode
+     * is enabled.
+     */
+    public static final int FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE = 1 << 5;
+
     /** @hide */
     @IntDef(prefix = {"FLAG_"}, flag = true, value = {
             FLAG_CANCEL_OVERRIDE_REQUESTS,
-            FLAG_APP_INACCESSIBLE
+            FLAG_APP_INACCESSIBLE,
+            FLAG_EMULATED_ONLY,
+            FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP,
+            FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL,
+            FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeviceStateFlags {}
@@ -115,7 +139,10 @@ public final class DeviceState {
     @Override
     public String toString() {
         return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\''
-                + ", app_accessible=" + !hasFlag(FLAG_APP_INACCESSIBLE) + "}";
+                + ", app_accessible=" + !hasFlag(FLAG_APP_INACCESSIBLE)
+                + ", cancel_when_requester_not_on_top="
+                + hasFlag(FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
+                + "}";
     }
 
     @Override

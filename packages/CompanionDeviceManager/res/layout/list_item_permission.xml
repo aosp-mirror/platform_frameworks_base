@@ -22,7 +22,8 @@
               android:orientation="horizontal"
               android:paddingStart="32dp"
               android:paddingEnd="32dp"
-              android:paddingBottom="14dp">
+              android:paddingTop="6dp"
+              android:paddingBottom="6dp">
 
     <ImageView
         android:id="@+id/permission_icon"
@@ -34,26 +35,44 @@
         android:contentDescription="@null"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_vertical"
-        android:padding="6dp">
+        android:padding="6dp"
+        android:layout_weight="1">
 
         <TextView
             android:id="@+id/permission_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
+            android:layout_marginTop="2dp"
+            style="@style/TextAppearance"
+            android:textColor="?android:attr/textColorPrimary"/>
 
         <TextView
             android:id="@+id/permission_summary"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
+            android:layout_marginTop="2dp"
+            style="@style/TextAppearance"
+            android:focusable="true"
             android:textColor="?android:attr/textColorSecondary"/>
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/permission_expand_button"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/btn_expand_more"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="24dp"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:importantForAccessibility="no"
+        android:contentDescription="@null"/>
 
 </LinearLayout>

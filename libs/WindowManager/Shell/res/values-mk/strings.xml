@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Поставки"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Влези во поделен екран"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Мени"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Мени за „Слика во слика“"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> е во слика во слика"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ако не сакате <xliff:g id="NAME">%s</xliff:g> да ја користи функцијава, допрете за да ги отворите поставките и да ја исклучите."</string>
     <string name="pip_play" msgid="3496151081459417097">"Пушти"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Промени големина"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Сокријте"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Прикажете"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Апликацијата може да не работи со поделен екран."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Апликацијата не поддржува поделен екран."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Апликацијата можеби нема да работи со поделен екран"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Апликацијата не поддржува поделен екран"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Апликацијава може да се отвори само во еден прозорец."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апликацијата може да не функционира на друг екран."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Апликацијата не поддржува стартување на други екрани."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Разделник на поделен екран"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Разделник на поделен екран"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Разделник на поделен екран"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Левиот на цел екран"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Левиот 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Левиот 50%"</string>
@@ -77,12 +79,12 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Балонче"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Управувајте"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Балончето е отфрлено."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"За подобар приказ, допрете за да ја рестартирате апликацијава."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Допрете за да ја рестартирате апликацијава за подобар приказ."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Проблеми со камерата?\nДопрете за да се совпадне повторно"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Не се поправи?\nДопрете за враќање"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нема проблеми со камерата? Допрете за отфрлање."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Погледнете и направете повеќе"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Повлечете во друга апликација за поделен екран"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Повлечете друга апликација за поделен екран"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Допрете двапати надвор од некоја апликација за да ја преместите"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Сфатив"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Проширете за повеќе информации."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Слика од екранот"</string>
     <string name="close_text" msgid="4986518933445178928">"Затворете"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Затворете го менито"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Отвори го менито"</string>
 </resources>

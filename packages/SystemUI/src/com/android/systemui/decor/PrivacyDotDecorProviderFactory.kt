@@ -33,7 +33,7 @@ import javax.inject.Inject
  * of the privacy dot views are controlled by the PrivacyDotViewController.
  */
 @SysUISingleton
-class PrivacyDotDecorProviderFactory @Inject constructor(
+open class PrivacyDotDecorProviderFactory @Inject constructor(
     @Main private val res: Resources
 ) : DecorProviderFactory() {
 

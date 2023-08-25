@@ -17,17 +17,6 @@
 #ifndef AAPT_RESOURCE_TABLE_H
 #define AAPT_RESOURCE_TABLE_H
 
-#include "Diagnostics.h"
-#include "Resource.h"
-#include "ResourceValues.h"
-#include "Source.h"
-#include "StringPool.h"
-#include "io/File.h"
-
-#include "android-base/macros.h"
-#include "androidfw/ConfigDescription.h"
-#include "androidfw/StringPiece.h"
-
 #include <functional>
 #include <map>
 #include <memory>
@@ -35,6 +24,16 @@
 #include <tuple>
 #include <unordered_map>
 #include <vector>
+
+#include "Resource.h"
+#include "ResourceValues.h"
+#include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/Source.h"
+#include "androidfw/StringPiece.h"
+#include "androidfw/StringPool.h"
+#include "io/File.h"
 
 using PolicyFlags = android::ResTable_overlayable_policy_header::PolicyFlags;
 
@@ -49,7 +48,7 @@ struct Visibility {
   };
 
   Level level = Level::kUndefined;
-  Source source;
+  android::Source source;
   std::string comment;
 
   // Indicates that the resource id may change across builds and that the public R.java identifier
@@ -60,28 +59,28 @@ struct Visibility {
 
 // Represents <add-resource> in an overlay.
 struct AllowNew {
-  Source source;
+  android::Source source;
   std::string comment;
 };
 
 // Represents the staged resource id of a finalized resource.
 struct StagedId {
   ResourceId id;
-  Source source;
+  android::Source source;
 };
 
 struct Overlayable {
   Overlayable() = default;
-   Overlayable(const android::StringPiece& name, const android::StringPiece& actor)
-       : name(name.to_string()), actor(actor.to_string()) {}
-   Overlayable(const android::StringPiece& name, const android::StringPiece& actor,
-                    const Source& source)
-       : name(name.to_string()), actor(actor.to_string()), source(source ){}
+  Overlayable(android::StringPiece name, android::StringPiece actor) : name(name), actor(actor) {
+  }
+  Overlayable(android::StringPiece name, android::StringPiece actor, const android::Source& source)
+      : name(name), actor(actor), source(source) {
+  }
 
   static const char* kActorScheme;
   std::string name;
   std::string actor;
-  Source source;
+  android::Source source;
 };
 
 // Represents a declaration that a resource is overlayable at runtime.
@@ -91,7 +90,7 @@ struct OverlayableItem {
   std::shared_ptr<Overlayable> overlayable;
   PolicyFlags policies = PolicyFlags::NONE;
   std::string comment;
-  Source source;
+  android::Source source;
 };
 
 class ResourceConfigValue {
@@ -105,8 +104,9 @@ class ResourceConfigValue {
   // The actual Value.
   std::unique_ptr<Value> value;
 
-  ResourceConfigValue(const android::ConfigDescription& config, const android::StringPiece& product)
-      : config(config), product(product.to_string()) {}
+  ResourceConfigValue(const android::ConfigDescription& config, android::StringPiece product)
+      : config(config), product(product) {
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
@@ -136,7 +136,8 @@ class ResourceEntry {
   // The resource's values for each configuration.
   std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
-  explicit ResourceEntry(const android::StringPiece& name) : name(name.to_string()) {}
+  explicit ResourceEntry(android::StringPiece name) : name(name) {
+  }
 
   ResourceConfigValue* FindValue(const android::ConfigDescription& config,
                                  android::StringPiece product = {});
@@ -144,7 +145,7 @@ class ResourceEntry {
                                        android::StringPiece product = {}) const;
 
   ResourceConfigValue* FindOrCreateValue(const android::ConfigDescription& config,
-                                         const android::StringPiece& product);
+                                         android::StringPiece product);
   std::vector<ResourceConfigValue*> FindAllValues(const android::ConfigDescription& config);
 
   template <typename Func>
@@ -168,7 +169,7 @@ class ResourceEntry {
 class ResourceTableType {
  public:
   // The logical type of resource (string, drawable, layout, etc.).
-  const ResourceType type;
+  const ResourceNamedType named_type;
 
   // Whether this type is public (and must maintain the same type ID across builds).
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
@@ -176,11 +177,13 @@ class ResourceTableType {
   // List of resources for this type.
   std::vector<std::unique_ptr<ResourceEntry>> entries;
 
-  explicit ResourceTableType(const ResourceType type) : type(type) {}
+  explicit ResourceTableType(const ResourceNamedTypeRef& type)
+      : named_type(type.ToResourceNamedType()) {
+  }
 
-  ResourceEntry* CreateEntry(const android::StringPiece& name);
-  ResourceEntry* FindEntry(const android::StringPiece& name) const;
-  ResourceEntry* FindOrCreateEntry(const android::StringPiece& name);
+  ResourceEntry* CreateEntry(android::StringPiece name);
+  ResourceEntry* FindEntry(android::StringPiece name) const;
+  ResourceEntry* FindOrCreateEntry(android::StringPiece name);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
@@ -192,12 +195,13 @@ class ResourceTablePackage {
 
   std::vector<std::unique_ptr<ResourceTableType>> types;
 
-  explicit ResourceTablePackage(const android::StringPiece& name) : name(name.to_string()) {
+  explicit ResourceTablePackage(android::StringPiece name) : name(name) {
   }
 
   ResourceTablePackage() = default;
-  ResourceTableType* FindType(ResourceType type) const;
-  ResourceTableType* FindOrCreateType(ResourceType type);
+  ResourceTableType* FindTypeWithDefaultName(const ResourceType type) const;
+  ResourceTableType* FindType(const ResourceNamedTypeRef& type) const;
+  ResourceTableType* FindOrCreateType(const ResourceNamedTypeRef& type);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
@@ -217,7 +221,7 @@ struct ResourceTableEntryView {
 };
 
 struct ResourceTableTypeView {
-  ResourceType type;
+  ResourceNamedType named_type;
   std::optional<uint8_t> id;
   Visibility::Level visibility_level = Visibility::Level::kUndefined;
 
@@ -297,7 +301,7 @@ class ResourceTable {
   ResourceTable() = default;
   explicit ResourceTable(Validation validation);
 
-  bool AddResource(NewResource&& res, IDiagnostics* diag);
+  bool AddResource(NewResource&& res, android::IDiagnostics* diag);
 
   // Retrieves a sorted a view of the packages, types, and entries sorted in ascending resource id
   // order.
@@ -316,8 +320,8 @@ class ResourceTable {
   // Returns the package struct with the given name, or nullptr if such a package does not
   // exist. The empty string is a valid package and typically is used to represent the
   // 'current' package before it is known to the ResourceTable.
-  ResourceTablePackage* FindPackage(const android::StringPiece& name) const;
-  ResourceTablePackage* FindOrCreatePackage(const android::StringPiece& name);
+  ResourceTablePackage* FindPackage(android::StringPiece name) const;
+  ResourceTablePackage* FindOrCreatePackage(android::StringPiece name);
 
   std::unique_ptr<ResourceTable> Clone() const;
 
@@ -330,7 +334,7 @@ class ResourceTable {
   // When `string_pool` references are destroyed (as they will be when `packages` is destroyed),
   // they decrement a refCount, which would cause invalid memory access if the pool was already
   // destroyed.
-  StringPool string_pool;
+  android::StringPool string_pool;
 
   // The list of packages in this table, sorted alphabetically by package name and increasing
   // package ID (missing ID being the lowest).

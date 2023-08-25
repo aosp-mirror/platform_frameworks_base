@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserTracker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,6 +109,7 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     private final Context mContext;
     private final Intent mServiceIntent;
+    private final UserTracker mUserTracker;
     private final int mFlags;
     private final Executor mExecutor;
     private final ServiceTransformer<T> mTransformer;
@@ -127,10 +129,12 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
      */
     @Inject
     public ObservableServiceConnection(Context context, Intent serviceIntent,
+            UserTracker userTracker,
             @Main Executor executor,
             ServiceTransformer<T> transformer) {
         mContext = context;
         mServiceIntent = serviceIntent;
+        mUserTracker = userTracker;
         mFlags = Context.BIND_AUTO_CREATE;
         mExecutor = executor;
         mTransformer = transformer;
@@ -145,7 +149,8 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
     public boolean bind() {
         boolean bindResult = false;
         try {
-            bindResult = mContext.bindService(mServiceIntent, mFlags, mExecutor, this);
+            bindResult = mContext.bindServiceAsUser(mServiceIntent, this, mFlags,
+                    mUserTracker.getUserHandle());
         } catch (SecurityException e) {
             Log.d(TAG, "Could not bind to service", e);
             mContext.unbindService(this);
@@ -228,11 +233,13 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        if (DEBUG) {
-            Log.d(TAG, "onServiceConnected");
-        }
-        mProxy = mTransformer.convert(service);
-        applyToCallbacksLocked(callback -> callback.onConnected(this, mProxy));
+        mExecutor.execute(() -> {
+            if (DEBUG) {
+                Log.d(TAG, "onServiceConnected");
+            }
+            mProxy = mTransformer.convert(service);
+            applyToCallbacksLocked(callback -> callback.onConnected(this, mProxy));
+        });
     }
 
     private void applyToCallbacksLocked(Consumer<Callback<T>> applicator) {
@@ -250,16 +257,16 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        onDisconnected(DISCONNECT_REASON_DISCONNECTED);
+        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_DISCONNECTED));
     }
 
     @Override
     public void onBindingDied(ComponentName name) {
-        onDisconnected(DISCONNECT_REASON_DISCONNECTED);
+        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_BINDING_DIED));
     }
 
     @Override
     public void onNullBinding(ComponentName name) {
-        onDisconnected(DISCONNECT_REASON_NULL_BINDING);
+        mExecutor.execute(() -> onDisconnected(DISCONNECT_REASON_NULL_BINDING));
     }
 }

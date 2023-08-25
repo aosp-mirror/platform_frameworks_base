@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -74,16 +75,14 @@ public final class SystemServiceManager implements Dumpable {
     // Constants used on onUser(...)
     // NOTE: do not change their values, as they're used on Trace calls and changes might break
     // performance tests that rely on them.
-    private static final String USER_STARTING = "Start"; // Logged as onStartUser
-    private static final String USER_UNLOCKING = "Unlocking"; // Logged as onUnlockingUser
-    private static final String USER_UNLOCKED = "Unlocked"; // Logged as onUnlockedUser
-    private static final String USER_SWITCHING = "Switch"; // Logged as onSwitchUser
-    private static final String USER_STOPPING = "Stop"; // Logged as onStopUser
-    private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
-    private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onCompletedEventUser
+    private static final String USER_STARTING = "Start"; // Logged as onUserStarting()
+    private static final String USER_UNLOCKING = "Unlocking"; // Logged as onUserUnlocking()
+    private static final String USER_UNLOCKED = "Unlocked"; // Logged as onUserUnlocked()
+    private static final String USER_SWITCHING = "Switch"; // Logged as onUserSwitching()
+    private static final String USER_STOPPING = "Stop"; // Logged as onUserStopping()
+    private static final String USER_STOPPED = "Cleanup"; // Logged as onUserStopped()
+    private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onUserCompletedEvent()
 
-    // Whether to use multiple threads to run user lifecycle phases in parallel.
-    private static boolean sUseLifecycleThreadPool = true;
     // The default number of threads to use if lifecycle thread pool is enabled.
     private static final int DEFAULT_MAX_USER_POOL_THREADS = 3;
     // The number of threads to use if lifecycle thread pool is enabled, dependent on the number of
@@ -122,15 +121,12 @@ public final class SystemServiceManager implements Dumpable {
      * {@link #onUserSwitching(int, int)} as the previous user might have been removed already.
      */
     @GuardedBy("mTargetUsers")
-    private @Nullable TargetUser mCurrentUser;
+    @Nullable private TargetUser mCurrentUser;
 
     SystemServiceManager(Context context) {
         mContext = context;
         mServices = new ArrayList<>();
         mServiceClassnames = new ArraySet<>();
-        // Disable using the thread pool for low ram devices
-        sUseLifecycleThreadPool = sUseLifecycleThreadPool
-                && !ActivityManager.isLowRamDeviceStatic();
         mNumUserPoolThreads = Math.min(Runtime.getRuntime().availableProcessors(),
                 DEFAULT_MAX_USER_POOL_THREADS);
     }
@@ -162,16 +158,17 @@ public final class SystemServiceManager implements Dumpable {
     /**
      * Returns true if the jar is in a test APEX.
      */
-    private static boolean isJarInTestApex(String pathStr) {
+    private boolean isJarInTestApex(String pathStr) {
         Path path = Paths.get(pathStr);
         if (path.getNameCount() >= 2 && path.getName(0).toString().equals("apex")) {
             String apexModuleName = path.getName(1).toString();
             ApexManager apexManager = ApexManager.getInstance();
             String packageName = apexManager.getActivePackageNameForApexModuleName(apexModuleName);
-            PackageInfo packageInfo = apexManager.getPackageInfo(
-                    packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
-            if (packageInfo != null) {
+            try {
+                PackageInfo packageInfo =  mContext.getPackageManager().getPackageInfo(packageName,
+                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_APEX));
                 return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+            } catch (Exception ignore) {
             }
         }
         return false;
@@ -338,13 +335,10 @@ public final class SystemServiceManager implements Dumpable {
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
     }
 
-    private @NonNull TargetUser getTargetUser(@UserIdInt int userId) {
-        final TargetUser targetUser;
+    @Nullable private TargetUser getTargetUser(@UserIdInt int userId) {
         synchronized (mTargetUsers) {
-            targetUser = mTargetUsers.get(userId);
+            return mTargetUsers.get(userId);
         }
-        Preconditions.checkState(targetUser != null, "No TargetUser for " + userId);
-        return targetUser;
     }
 
     private @NonNull TargetUser newTargetUser(@UserIdInt int userId) {
@@ -414,6 +408,7 @@ public final class SystemServiceManager implements Dumpable {
                 prevUser = mCurrentUser;
             }
             curUser = mCurrentUser = getTargetUser(to);
+            Preconditions.checkState(curUser != null, "No TargetUser for " + to);
             if (DEBUG) {
                 Slog.d(TAG, "Set mCurrentUser to " + mCurrentUser);
             }
@@ -455,21 +450,29 @@ public final class SystemServiceManager implements Dumpable {
         if (eventFlags == 0) {
             return;
         }
+
+        TargetUser targetUser = getTargetUser(userId);
+        if (targetUser == null) {
+            return;
+        }
+
         onUser(TimingsTraceAndSlog.newAsyncLog(),
                 USER_COMPLETED_EVENT,
                 /* prevUser= */ null,
-                getTargetUser(userId),
+                targetUser,
                 new UserCompletedEventType(eventFlags));
     }
 
     private void onUser(@NonNull String onWhat, @UserIdInt int userId) {
-        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null,
-                getTargetUser(userId));
+        TargetUser targetUser = getTargetUser(userId);
+        Preconditions.checkState(targetUser != null, "No TargetUser for " + userId);
+
+        onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null, targetUser);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
             @Nullable TargetUser prevUser, @NonNull TargetUser curUser) {
-        onUser(t, onWhat, prevUser, curUser, /* completedEventType=*/ null);
+        onUser(t, onWhat, prevUser, curUser, /* completedEventType= */ null);
     }
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
@@ -560,16 +563,10 @@ public final class SystemServiceManager implements Dumpable {
                 terminated = threadPool.awaitTermination(
                         USER_POOL_SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                Slog.wtf(TAG, "User lifecycle thread pool was interrupted while awaiting completion"
-                        + " of " + onWhat + " of user " + curUser, e);
-                if (!onWhat.equals(USER_COMPLETED_EVENT)) {
-                    Slog.e(TAG, "Couldn't terminate, disabling thread pool. "
-                            + "Please capture a bug report.");
-                    sUseLifecycleThreadPool = false;
-                }
+                logFailure(onWhat, curUser, "(user lifecycle threadpool was interrupted)", e);
             }
             if (!terminated) {
-                Slog.wtf(TAG, "User lifecycle thread pool was not terminated.");
+                logFailure(onWhat, curUser, "(user lifecycle threadpool was not terminated)", null);
             }
         }
         t.traceEnd(); // main entry
@@ -584,9 +581,9 @@ public final class SystemServiceManager implements Dumpable {
     private boolean useThreadPool(int userId, @NonNull String onWhat) {
         switch (onWhat) {
             case USER_STARTING:
-                // Limit the lifecycle parallelization to all users other than the system user
-                // and only for the user start lifecycle phase for now.
-                return sUseLifecycleThreadPool && userId != UserHandle.USER_SYSTEM;
+                // Don't allow lifecycle parallelization for user start on low ram devices and
+                // the system user.
+                return !ActivityManager.isLowRamDeviceStatic() && userId != UserHandle.USER_SYSTEM;
             case USER_COMPLETED_EVENT:
                 return true;
             default:
@@ -620,8 +617,6 @@ public final class SystemServiceManager implements Dumpable {
                         "on" + USER_STARTING + "User-" + curUserId);
             } catch (Exception e) {
                 logFailure(USER_STARTING, curUser, serviceName, e);
-                Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
-                sUseLifecycleThreadPool = false;
             } finally {
                 t.traceEnd();
             }

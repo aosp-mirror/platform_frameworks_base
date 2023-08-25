@@ -17,8 +17,8 @@
 package com.android.wm.shell.compatui;
 
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -46,12 +46,6 @@ import java.util.function.Consumer;
  */
 class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
-    /**
-     * The Letterbox Education should be the topmost child of the Task in case there can be more
-     * than one child.
-     */
-    public static final int Z_ORDER = Integer.MAX_VALUE;
-
     private final DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
 
     private final Transitions mTransitions;
@@ -73,9 +67,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @Nullable
     @VisibleForTesting
     LetterboxEduDialogLayout mLayout;
-
-    @NonNull
-    private TaskInfo mTaskInfo;
 
     /**
      * The vertical margin between the dialog container and the task stable bounds (excluding
@@ -104,7 +95,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
             DialogAnimationController<LetterboxEduDialogLayout> animationController,
             DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mTaskInfo = taskInfo;
         mTransitions = transitions;
         mOnDismissCallback = onDismissCallback;
         mAnimationController = animationController;
@@ -118,7 +108,7 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 2;
     }
 
     @Override
@@ -151,7 +141,6 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
         // startEnterAnimation will be called immediately if shell-transitions are disabled.
         mTransitions.runOnIdle(this::startEnterAnimation);
-
         return mLayout;
     }
 
@@ -202,7 +191,7 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
-            mOnDismissCallback.accept(Pair.create(mTaskInfo, getTaskListener()));
+            mOnDismissCallback.accept(Pair.create(getLastTaskInfo(), getTaskListener()));
         });
     }
 
@@ -215,10 +204,15 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
-        mTaskInfo = taskInfo;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
 
         return super.updateCompatInfo(taskInfo, taskListener, canShow);
+    }
+
+    @Override
+    boolean needsToBeRecreated(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        return super.needsToBeRecreated(taskInfo, taskListener)
+                && !mCompatUIConfiguration.getHasSeenLetterboxEducation(mUserId);
     }
 
     @Override

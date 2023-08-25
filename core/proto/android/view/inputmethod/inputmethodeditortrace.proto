@@ -50,6 +50,10 @@ message InputMethodClientsTraceFileProto {
         in MagicNumber */
     optional fixed64 magic_number = 1;
     repeated InputMethodClientsTraceProto entry = 2;
+
+    /* offset between real-time clock and elapsed time clock in nanoseconds.
+       Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+    optional fixed64 real_to_elapsed_time_offset_nanos = 3;
 }
 
 /* One dump entry for clients that use InputMethod. */
@@ -96,6 +100,10 @@ message InputMethodServiceTraceFileProto {
         in MagicNumber */
     optional fixed64 magic_number = 1;
     repeated InputMethodServiceTraceProto entry = 2;
+
+    /* offset between real-time clock and elapsed time clock in nanoseconds.
+       Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+    optional fixed64 real_to_elapsed_time_offset_nanos = 3;
 }
 
 /* One dump entry for InputMethodService. */
@@ -129,6 +137,10 @@ message InputMethodManagerServiceTraceFileProto {
         in MagicNumber */
     optional fixed64 magic_number = 1;
     repeated InputMethodManagerServiceTraceProto entry = 2;
+
+    /* offset between real-time clock and elapsed time clock in nanoseconds.
+       Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+    optional fixed64 real_to_elapsed_time_offset_nanos = 3;
 }
 
 /* One dump entry for InputMethodManagerService. */

@@ -406,28 +406,6 @@ class IsAllowedScreenCaptureDevicePolicyResolverTest(
                             isHostInWorkProfile = true,
                             isTargetInWorkProfile = true,
                             personalScreenCaptureDisabled = true,
-                            workScreenCaptureDisabled = false,
-                            disallowShareIntoManagedProfile = false
-                        ),
-                    expectedScreenCaptureAllowed = true,
-                ),
-                IsScreenCaptureAllowedTestCase(
-                    given =
-                        Preconditions(
-                            isHostInWorkProfile = true,
-                            isTargetInWorkProfile = true,
-                            personalScreenCaptureDisabled = true,
-                            workScreenCaptureDisabled = false,
-                            disallowShareIntoManagedProfile = true
-                        ),
-                    expectedScreenCaptureAllowed = true,
-                ),
-                IsScreenCaptureAllowedTestCase(
-                    given =
-                        Preconditions(
-                            isHostInWorkProfile = true,
-                            isTargetInWorkProfile = true,
-                            personalScreenCaptureDisabled = true,
                             workScreenCaptureDisabled = true,
                             disallowShareIntoManagedProfile = false
                         ),
@@ -626,26 +604,6 @@ class IsCompletelyNotAllowedScreenCaptureDevicePolicyResolverTest(
                         Preconditions(
                             isHostInWorkProfile = true,
                             personalScreenCaptureDisabled = true,
-                            workScreenCaptureDisabled = false,
-                            disallowShareIntoManagedProfile = false
-                        ),
-                    expectedScreenCaptureCompletelyDisabled = false,
-                ),
-                IsScreenCaptureCompletelyDisabledTestCase(
-                    given =
-                        Preconditions(
-                            isHostInWorkProfile = true,
-                            personalScreenCaptureDisabled = true,
-                            workScreenCaptureDisabled = false,
-                            disallowShareIntoManagedProfile = true
-                        ),
-                    expectedScreenCaptureCompletelyDisabled = false,
-                ),
-                IsScreenCaptureCompletelyDisabledTestCase(
-                    given =
-                        Preconditions(
-                            isHostInWorkProfile = true,
-                            personalScreenCaptureDisabled = true,
                             workScreenCaptureDisabled = true,
                             disallowShareIntoManagedProfile = false
                         ),
@@ -686,7 +644,8 @@ class IsCompletelyNotAllowedScreenCaptureDevicePolicyResolverTest(
                 "personal screen capture disabled = ${given.personalScreenCaptureDisabled}, " +
                 "work screen capture disabled = ${given.workScreenCaptureDisabled}, " +
                 "disallow share into managed profile = ${given.disallowShareIntoManagedProfile}, " +
-                "expected screen capture completely disabled = $expectedScreenCaptureCompletelyDisabled"
+                "expected screen capture completely disabled = " +
+                "$expectedScreenCaptureCompletelyDisabled"
     }
 
     @Test

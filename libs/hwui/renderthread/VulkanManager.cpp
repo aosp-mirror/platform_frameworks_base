@@ -23,13 +23,11 @@
 #include <GrDirectContext.h>
 #include <GrTypes.h>
 #include <android/sync.h>
+#include <gui/TraceUtils.h>
 #include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
 
-#include <cstring>
-
-#include <gui/TraceUtils.h>
 #include "Properties.h"
 #include "RenderThread.h"
 #include "pipeline/skia/ShaderCache.h"
@@ -41,6 +39,37 @@
 namespace android {
 namespace uirenderer {
 namespace renderthread {
+
+static std::array<std::string_view, 19> sEnableExtensions{
+        VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
+        VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE2_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE3_EXTENSION_NAME,
+        VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME,
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME,
+        VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
+        VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME,
+        VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER_EXTENSION_NAME,
+        VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
+        VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
+};
+
+static bool shouldEnableExtension(const std::string_view& extension) {
+    for (const auto& it : sEnableExtensions) {
+        if (it == extension) {
+            return true;
+        }
+    }
+    return false;
+}
 
 static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& features) {
     // All Vulkan structs that could be part of the features chain will start with the
@@ -59,28 +88,15 @@ static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& fe
     }
 }
 
-GrVkGetProc VulkanManager::sSkiaGetProp = [](const char* proc_name, VkInstance instance,
-                                             VkDevice device) {
-    if (device != VK_NULL_HANDLE) {
-        if (strcmp("vkQueueSubmit", proc_name) == 0) {
-            return (PFN_vkVoidFunction)VulkanManager::interceptedVkQueueSubmit;
-        } else if (strcmp("vkQueueWaitIdle", proc_name) == 0) {
-            return (PFN_vkVoidFunction)VulkanManager::interceptedVkQueueWaitIdle;
-        }
-        return vkGetDeviceProcAddr(device, proc_name);
-    }
-    return vkGetInstanceProcAddr(instance, proc_name);
-};
-
 #define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(VK_NULL_HANDLE, "vk" #F)
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
-sp<VulkanManager> VulkanManager::getInstance() {
-    // cache a weakptr to the context to enable a second thread to share the same vulkan state
-    static wp<VulkanManager> sWeakInstance = nullptr;
-    static std::mutex sLock;
+// cache a weakptr to the context to enable a second thread to share the same vulkan state
+static wp<VulkanManager> sWeakInstance = nullptr;
+static std::mutex sLock;
 
+sp<VulkanManager> VulkanManager::getInstance() {
     std::lock_guard _lock{sLock};
     sp<VulkanManager> vulkanManager = sWeakInstance.promote();
     if (!vulkanManager.get()) {
@@ -89,6 +105,11 @@ sp<VulkanManager> VulkanManager::getInstance() {
     }
 
     return vulkanManager;
+}
+
+sp<VulkanManager> VulkanManager::peekInstance() {
+    std::lock_guard _lock{sLock};
+    return sWeakInstance.promote();
 }
 
 VulkanManager::~VulkanManager() {
@@ -102,6 +123,7 @@ VulkanManager::~VulkanManager() {
     }
 
     mGraphicsQueue = VK_NULL_HANDLE;
+    mAHBUploadQueue = VK_NULL_HANDLE;
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
@@ -139,6 +161,11 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         bool hasKHRSurfaceExtension = false;
         bool hasKHRAndroidSurfaceExtension = false;
         for (const VkExtensionProperties& extension : mInstanceExtensionsOwner) {
+            if (!shouldEnableExtension(extension.extensionName)) {
+                ALOGV("Not enabling instance extension %s", extension.extensionName);
+                continue;
+            }
+            ALOGV("Enabling instance extension %s", extension.extensionName);
             mInstanceExtensions.push_back(extension.extensionName);
             if (!strcmp(extension.extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
                 hasKHRSurfaceExtension = true;
@@ -190,7 +217,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     mDriverVersion = physDeviceProperties.driverVersion;
 
     // query to get the initial queue props size
-    uint32_t queueCount;
+    uint32_t queueCount = 0;
     mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, nullptr);
     LOG_ALWAYS_FATAL_IF(!queueCount);
 
@@ -198,11 +225,14 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     std::unique_ptr<VkQueueFamilyProperties[]> queueProps(new VkQueueFamilyProperties[queueCount]);
     mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, queueProps.get());
 
+    constexpr auto kRequestedQueueCount = 2;
+
     // iterate to find the graphics queue
     mGraphicsQueueIndex = queueCount;
     for (uint32_t i = 0; i < queueCount; i++) {
         if (queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             mGraphicsQueueIndex = i;
+            LOG_ALWAYS_FATAL_IF(queueProps[i].queueCount < kRequestedQueueCount);
             break;
         }
     }
@@ -219,6 +249,11 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSwapchainExtension = false;
         for (const VkExtensionProperties& extension : mDeviceExtensionsOwner) {
+            if (!shouldEnableExtension(extension.extensionName)) {
+                ALOGV("Not enabling device extension %s", extension.extensionName);
+                continue;
+            }
+            ALOGV("Enabling device extension %s", extension.extensionName);
             mDeviceExtensions.push_back(extension.extensionName);
             if (!strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
                 hasKHRSwapchainExtension = true;
@@ -227,7 +262,14 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         LOG_ALWAYS_FATAL_IF(!hasKHRSwapchainExtension);
     }
 
-    grExtensions.init(sSkiaGetProp, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
+    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
+        if (device != VK_NULL_HANDLE) {
+            return vkGetDeviceProcAddr(device, proc_name);
+        }
+        return vkGetInstanceProcAddr(instance, proc_name);
+    };
+
+    grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
                       mInstanceExtensions.data(), mDeviceExtensions.size(),
                       mDeviceExtensions.data());
 
@@ -266,7 +308,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     // and we can't depend on it on all platforms
     features.features.robustBufferAccess = VK_FALSE;
 
-    float queuePriorities[1] = {0.0};
+    float queuePriorities[kRequestedQueueCount] = {0.0};
 
     void* queueNextPtr = nullptr;
 
@@ -299,7 +341,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
             queueNextPtr,                                // pNext
             0,                                           // VkDeviceQueueCreateFlags
             mGraphicsQueueIndex,                         // queueFamilyIndex
-            1,                                           // queueCount
+            kRequestedQueueCount,                        // queueCount
             queuePriorities,                             // pQueuePriorities
     };
 
@@ -357,25 +399,43 @@ void VulkanManager::initialize() {
     this->setupDevice(mExtensions, mPhysicalDeviceFeatures2);
 
     mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
+    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 1, &mAHBUploadQueue);
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;
     }
 }
 
-sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options,
+static void onGrContextReleased(void* context) {
+    VulkanManager* manager = (VulkanManager*)context;
+    manager->decStrong((void*)onGrContextReleased);
+}
+
+sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
                                                     ContextType contextType) {
+    auto getProc = [](const char* proc_name, VkInstance instance, VkDevice device) {
+        if (device != VK_NULL_HANDLE) {
+            return vkGetDeviceProcAddr(device, proc_name);
+        }
+        return vkGetInstanceProcAddr(instance, proc_name);
+    };
 
     GrVkBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
     backendContext.fDevice = mDevice;
-    backendContext.fQueue = mGraphicsQueue;
+    backendContext.fQueue =
+            (contextType == ContextType::kRenderThread) ? mGraphicsQueue : mAHBUploadQueue;
     backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
     backendContext.fMaxAPIVersion = mAPIVersion;
     backendContext.fVkExtensions = &mExtensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
-    backendContext.fGetProc = sSkiaGetProp;
+    backendContext.fGetProc = std::move(getProc);
+
+    LOG_ALWAYS_FATAL_IF(options.fContextDeleteProc != nullptr, "Conflicting fContextDeleteProcs!");
+    this->incStrong((void*)onGrContextReleased);
+    options.fContextDeleteContext = this;
+    options.fContextDeleteProc = onGrContextReleased;
 
     return GrDirectContext::MakeVulkan(backendContext, options);
 }
@@ -581,8 +641,6 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
     } else {
         ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
-
-        std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
     if (mDestroySemaphoreContext) {
@@ -597,7 +655,6 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
 void VulkanManager::destroySurface(VulkanSurface* surface) {
     // Make sure all submit commands have finished before starting to destroy objects.
     if (VK_NULL_HANDLE != mGraphicsQueue) {
-        std::lock_guard<std::mutex> lock(mGraphicsQueueMutex);
         mQueueWaitIdle(mGraphicsQueue);
     }
     mDeviceWaitIdle(mDevice);

@@ -1456,7 +1456,7 @@ public class PackageParser {
 
     private static AssetManager newConfiguredAssetManager() {
         AssetManager assetManager = new AssetManager();
-        assetManager.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        assetManager.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 Build.VERSION.RESOURCES_SDK_INT);
         return assetManager;
     }
@@ -9035,7 +9035,7 @@ public class PackageParser {
             }
 
             AssetManager assets = new AssetManager();
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
             assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
 
@@ -9110,7 +9110,7 @@ public class PackageParser {
 
         private static AssetManager createAssetManagerWithAssets(ApkAssets[] apkAssets) {
             final AssetManager assets = new AssetManager();
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
             assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
             return assets;

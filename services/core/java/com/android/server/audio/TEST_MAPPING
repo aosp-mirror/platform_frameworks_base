@@ -1,5 +1,5 @@
 {
-    "presubmit-large": [
+    "presubmit": [
         {
             "name": "CtsMediaAudioTestCases",
             "options": [
@@ -11,6 +11,34 @@
                 },
                 {
                     "include-filter": "android.media.audio.cts.SpatializerTest"
+                }
+            ]
+        },
+        {
+            "name": "audiopolicytest",
+            "options": [
+                {
+                    "include-filter": "com.android.audiopolicytest.AudioPolicyDeathTest"
+                },
+                {
+                    "include-annotation": "android.platform.test.annotations.Presubmit"
+                }
+            ]
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                  "include-filter": "com.android.server.audio"
+                },
+                {
+                  "include-annotation": "android.platform.test.annotations.Presubmit"
+                },
+                {
+                  "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                  "exclude-annotation": "org.junit.Ignore"
                 }
             ]
         }

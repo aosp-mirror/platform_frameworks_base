@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Imesakinisha programu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ungependa kusakinisha programu hii?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ungependa kusasisha programu hii?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Ungependa kusasisha hii programu kutoka kwa<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nProgramu hii kwa kawaida hupokea masasisho kutoka kwa <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kwa kusasisha kutoka chanzo tofauti, huenda ukapokea masasisho ya siku zijazo kutoka chanzo chochote kwenye simu yako. Utendaji wa programu unaweza kubadilika."</string>
     <string name="install_failed" msgid="5777824004474125469">"Imeshindwa kusakinisha programu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Kifurushi kimezuiwa kisisakinishwe."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programu haikusakinishwa kwa sababu kifurushi kinakinzana na kifurushi kingine kilichopo."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Mtumiaji huyu hana idhini ya kusakinisha programu ambazo hazijulikani"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Mtumiaji huyu haruhusiwi kusakinisha programu"</string>
     <string name="ok" msgid="7871959885003339302">"Sawa"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Sasisha tu"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Dhibiti programu"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nafasi imejaa"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Imeshindwa kusakinisha <xliff:g id="APP_NAME">%1$s</xliff:g>. Futa baadhi ya maudhui ili upate nafasi kisha ujaribu tena."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Ungependa kubadilisha programu hii na toleo la kiwandani? Data yote itaondolewa."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Ungependa kubadilisha programu hii na toleo la kiwandani? Data yote itaondolewa. Hatua hii itaathiri watumiaji wote wa kifaa hiki, ikiwa ni pamoja na wale walio na wasifu za kazini."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Dumisha <xliff:g id="SIZE">%1$s</xliff:g> ya data ya programu."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Ungependa kufuta programu hii?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Ungependa kuondoa programu hii? Nakala ya <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> pia itafutwa."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Programu zinazoondolewa"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mara ambazo programu haikuondolewa"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Inaondoa…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Inaondoa <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Imeondolewa."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Imeondoa <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Nakala ya <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> imefutwa"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Imeshindwa kuondoa."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Imeshindwa kuondoa <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Inafuta nakala ya <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Imeshindwa kuondoa programu inayotumika ya msimamizi wa kifaa"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Imeshindwa kuondoa programu inayotumika ya msimamizi wa kifaa cha <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Baadhi ya wasifu au watumiaji wanahitaji programu, kwa hivyo haijaondolewa kwa wengine"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Haijulikani"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Kwa sababu ya usalama wako, kompyuta yako kibao kwa sasa hairuhusiwi kusakinisha programu zisizojulikana kutoka chanzo hiki. Unaweza kubadilisha hili katika Mipangilio."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Kwa sababu ya usalama wako, TV yako kwa sasa hairuhusiwi kusakinisha programu zisizojulikana kutoka chanzo hiki. Unaweza kubadilisha hili katika Mipangilio."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Kwa sababu ya usalama wako, saa yako kwa sasa hairuhusiwi kusakinisha programu zisizojulikana kutoka chanzo hiki. Unaweza kubadilisha hili katika Mipangilio."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Kwa sababu ya usalama wako, simu yako kwa sasa hairuhusiwi kusakinisha programu zisizojulikana kutoka chanzo hiki. Unaweza kubadilisha hili katika Mipangilio."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Data yako ya binafsi na ya simu yako inaweza kuathiriwa na programu ambazo hazijulikani. Kwa kusakinisha programu hii, unakubali kuwajibikia uharibifu wowote kwenye simu yako au kupotea kwa data kutokana na matumizi yake."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Data yako ya binafsi na ya kompyuta yako kibao inaweza kuathiriwa na programu ambazo hazijulikani. Kwa kusakinisha programu hii, unakubali kuwajibikia uharibifu wowote kwenye kompyuta yako kibao au kupotea kwa data kutokana na matumizi yake."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Data yako ya binafsi na ya televisheni yako inaweza kuathiriwa na programu ambazo hazijulikani. Kwa kusakinisha programu hii, unakubali kuwajibikia uharibifu wowote kwenye televisheni yako au kupotea kwa data kutokana na matumizi yake."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Nakala ya <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Endelea"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Mipangilio"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Inasakinisha/inaondoa programu za Android Wear"</string>

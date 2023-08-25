@@ -53,6 +53,7 @@ public class CarrierTextController extends ViewController<CarrierText> {
         mCarrierTextManager = carrierTextManagerBuilder
                 .setShowAirplaneMode(mView.getShowAirplaneMode())
                 .setShowMissingSim(mView.getShowMissingSim())
+                .setDebugLocationString(mView.getDebugLocation())
                 .build();
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }

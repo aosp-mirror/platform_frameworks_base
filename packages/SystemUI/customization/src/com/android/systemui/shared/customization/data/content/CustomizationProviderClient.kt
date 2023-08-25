@@ -148,11 +148,11 @@ interface CustomizationProviderClient {
          */
         val isEnabled: Boolean = true,
         /**
-         * If the affordance is disabled, this is a set of instruction messages to be shown to the
-         * user when the disabled affordance is selected. The instructions should help the user
-         * figure out what to do in order to re-neable this affordance.
+         * If the affordance is disabled, this is the explanation to be shown to the user when the
+         * disabled affordance is selected. The instructions should help the user figure out what to
+         * do in order to re-neable this affordance.
          */
-        val enablementInstructions: List<String>? = null,
+        val enablementExplanation: String? = null,
         /**
          * If the affordance is disabled, this is a label for a button shown together with the set
          * of instruction messages when the disabled affordance is selected. The button should help
@@ -163,15 +163,14 @@ interface CustomizationProviderClient {
          */
         val enablementActionText: String? = null,
         /**
-         * If the affordance is disabled, this is a "component name" of the format
-         * `packageName/action` to be used as an `Intent` for `startActivity` when the action button
-         * (shown together with the set of instruction messages when the disabled affordance is
-         * selected) is clicked by the user. The button should help send the user to a flow that
-         * would help them achieve the instructions and re-enable this affordance.
+         * If the affordance is disabled, this is an [Intent] to be used with `startActivity` when
+         * the action button (shown together with the set of instruction messages when the disabled
+         * affordance is selected) is clicked by the user. The button should help send the user to a
+         * flow that would help them achieve the instructions and re-enable this affordance.
          *
          * If `null`, the button should not be shown.
          */
-        val enablementActionComponentName: String? = null,
+        val enablementActionIntent: Intent? = null,
         /** Optional [Intent] to use to start an activity to configure this affordance. */
         val configureIntent: Intent? = null,
     )
@@ -327,20 +326,20 @@ class CustomizationProviderClientImpl(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                                     .IS_ENABLED
                             )
-                        val enablementInstructionsColumnIndex =
+                        val enablementExplanationColumnIndex =
                             cursor.getColumnIndex(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                                    .ENABLEMENT_INSTRUCTIONS
+                                    .ENABLEMENT_EXPLANATION
                             )
                         val enablementActionTextColumnIndex =
                             cursor.getColumnIndex(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
                                     .ENABLEMENT_ACTION_TEXT
                             )
-                        val enablementComponentNameColumnIndex =
+                        val enablementActionIntentColumnIndex =
                             cursor.getColumnIndex(
                                 Contract.LockScreenQuickAffordances.AffordanceTable.Columns
-                                    .ENABLEMENT_COMPONENT_NAME
+                                    .ENABLEMENT_ACTION_INTENT
                             )
                         val configureIntentColumnIndex =
                             cursor.getColumnIndex(
@@ -352,9 +351,9 @@ class CustomizationProviderClientImpl(
                                 nameColumnIndex == -1 ||
                                 iconColumnIndex == -1 ||
                                 isEnabledColumnIndex == -1 ||
-                                enablementInstructionsColumnIndex == -1 ||
+                                enablementExplanationColumnIndex == -1 ||
                                 enablementActionTextColumnIndex == -1 ||
-                                enablementComponentNameColumnIndex == -1 ||
+                                enablementActionIntentColumnIndex == -1 ||
                                 configureIntentColumnIndex == -1
                         ) {
                             return@buildList
@@ -368,21 +367,22 @@ class CustomizationProviderClientImpl(
                                     name = cursor.getString(nameColumnIndex),
                                     iconResourceId = cursor.getInt(iconColumnIndex),
                                     isEnabled = cursor.getInt(isEnabledColumnIndex) == 1,
-                                    enablementInstructions =
-                                        cursor
-                                            .getString(enablementInstructionsColumnIndex)
-                                            ?.split(
-                                                Contract.LockScreenQuickAffordances.AffordanceTable
-                                                    .ENABLEMENT_INSTRUCTIONS_DELIMITER
-                                            ),
+                                    enablementExplanation =
+                                        cursor.getString(enablementExplanationColumnIndex),
                                     enablementActionText =
                                         cursor.getString(enablementActionTextColumnIndex),
-                                    enablementActionComponentName =
-                                        cursor.getString(enablementComponentNameColumnIndex),
+                                    enablementActionIntent =
+                                        cursor
+                                            .getString(enablementActionIntentColumnIndex)
+                                            ?.toIntent(
+                                                affordanceId = affordanceId,
+                                            ),
                                     configureIntent =
                                         cursor
                                             .getString(configureIntentColumnIndex)
-                                            ?.toIntent(affordanceId = affordanceId),
+                                            ?.toIntent(
+                                                affordanceId = affordanceId,
+                                            ),
                                 )
                             )
                         }
@@ -524,7 +524,7 @@ class CustomizationProviderClientImpl(
         affordanceId: String,
     ): Intent? {
         return try {
-            Intent.parseUri(this, 0)
+            Intent.parseUri(this, Intent.URI_INTENT_SCHEME)
         } catch (e: URISyntaxException) {
             Log.w(TAG, "Cannot parse Uri into Intent for affordance with ID \"$affordanceId\"!")
             null

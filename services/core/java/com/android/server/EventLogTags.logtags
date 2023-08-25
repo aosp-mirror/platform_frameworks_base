@@ -185,6 +185,10 @@ option java_package com.android.server
 # ---------------------------
 # Re-connecting to input method service because we haven't received its interface
 32000 imf_force_reconnect_ime (IME|4),(Time Since Connect|2|3),(Showing|1|1)
+# Indicates server show input method
+32001 imf_show_ime (token|3),(window|3),(reason|3),(softInputMode|3)
+# Indicates server hide input method
+32002 imf_hide_ime (token|3),(window|3),(reason|3),(softInputMode|3)
 
 
 # ---------------------------

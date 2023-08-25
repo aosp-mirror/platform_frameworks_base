@@ -18,7 +18,7 @@
 #define AAPT2_ABISPLITTER_H
 
 #include <memory>
-#include <string>
+#include <string_view>
 #include <unordered_set>
 #include <vector>
 
@@ -39,16 +39,16 @@ class AbiFilter : public IPathFilter {
   static std::unique_ptr<AbiFilter> FromAbiList(const std::vector<configuration::Abi>& abi_list);
 
   /** Returns true if the path is for a native library in the list of desired ABIs. */
-  bool Keep(const std::string& path) override;
+  bool Keep(std::string_view path) override;
 
  private:
-  explicit AbiFilter(std::unordered_set<std::string> abis) : abis_(std::move(abis)) {
+  explicit AbiFilter(std::unordered_set<std::string_view> abis) : abis_(std::move(abis)) {
   }
 
   /** The path prefix to where all native libs end up inside an APK file. */
   static constexpr const char* kLibPrefix = "lib/";
   static constexpr size_t kLibPrefixLen = 4;
-  const std::unordered_set<std::string> abis_;
+  const std::unordered_set<std::string_view> abis_;
 };
 
 }  // namespace aapt

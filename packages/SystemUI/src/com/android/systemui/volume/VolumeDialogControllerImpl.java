@@ -35,6 +35,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
@@ -412,6 +413,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
     }
 
+    private void onShowCsdWarningW(@AudioManager.CsdWarning int csdWarning, int durationMs) {
+            mCallbacks.onShowCsdWarning(csdWarning, durationMs);
+    }
+
     private void onGetCaptionsComponentStateW(boolean fromTooltip) {
         mCallbacks.onCaptionComponentStateChanged(
                 mCaptioningManager.isSystemAudioCaptioningUiEnabled(), fromTooltip);
@@ -709,6 +714,27 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             mWorker.obtainMessage(W.SHOW_SAFETY_WARNING, flags, 0).sendToTarget();
         }
 
+        /**
+         * Display a sound-dose related warning.
+         * This method will never be called if the CSD (Computed Sound Dose) feature is
+         * not enabled. See com.android.android.server.audio.SoundDoseHelper for the state of
+         * the feature.
+         * @param warning the type of warning to display, values are one of
+         *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REACHED_1X},
+         *        {@link android.media.AudioManager#CSD_WARNING_DOSE_REPEATED_5X},
+         *        {@link android.media.AudioManager#CSD_WARNING_MOMENTARY_EXPOSURE},
+         *        {@link android.media.AudioManager#CSD_WARNING_ACCUMULATION_START}.
+         * @param displayDurationMs the time expressed in milliseconds after which the dialog will be
+         *        automatically dismissed, or -1 if there is no automatic timeout.
+         */
+        @Override
+        public void displayCsdWarning(int csdWarning, int displayDurationMs) throws RemoteException
+        {
+            if (D.BUG) Log.d(TAG, "displayCsdWarning durMs=" + displayDurationMs);
+            mWorker.obtainMessage(W.SHOW_CSD_WARNING, csdWarning, displayDurationMs)
+                    .sendToTarget();
+        }
+
         @Override
         public void volumeChanged(int streamType, int flags) throws RemoteException {
             if (D.BUG) Log.d(TAG, "volumeChanged " + AudioSystem.streamToString(streamType)
@@ -771,6 +797,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         private static final int SHOW_SAFETY_WARNING = 14;
         private static final int ACCESSIBILITY_MODE_CHANGED = 15;
         private static final int GET_CAPTIONS_COMPONENT_STATE = 16;
+        private static final int SHOW_CSD_WARNING = 17;
 
         W(Looper looper) {
             super(looper);
@@ -796,6 +823,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 case GET_CAPTIONS_COMPONENT_STATE:
                     onGetCaptionsComponentStateW((Boolean) msg.obj); break;
                 case ACCESSIBILITY_MODE_CHANGED: onAccessibilityModeChanged((Boolean) msg.obj);
+                    break;
+                case SHOW_CSD_WARNING: onShowCsdWarningW(msg.arg1, msg.arg2); break;
             }
         }
     }
@@ -921,6 +950,21 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                     @Override
                     public void run() {
                         entry.getKey().onShowSafetyWarning(flags);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onShowCsdWarning(int csdWarning, int durationMs) {
+            if (Callbacks.VERSION < 2) {
+                return;
+            }
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onShowCsdWarning(csdWarning, durationMs);
                     }
                 });
             }
@@ -1232,23 +1276,16 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             String packageName = ctr.getPackageName();
             List<RoutingSessionInfo> sessions =
                     mRouter2Manager.getRoutingSessions(packageName);
-            boolean foundNonSystemSession = false;
-            boolean isGroup = false;
+
             for (RoutingSessionInfo session : sessions) {
-                if (!session.isSystemSession()) {
-                    foundNonSystemSession = true;
-                    int selectedRouteCount = session.getSelectedRoutes().size();
-                    if (selectedRouteCount > 1) {
-                        isGroup = true;
-                        break;
-                    }
+                if (!session.isSystemSession()
+                        && session.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+                    return true;
                 }
             }
-            if (!foundNonSystemSession) {
-                Log.d(TAG, "No routing session for " + packageName);
-                return false;
-            }
-            return !isGroup;
+
+            Log.d(TAG, "No routing session for " + packageName);
+            return false;
         }
 
         private Token findToken(int stream) {

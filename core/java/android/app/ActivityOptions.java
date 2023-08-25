@@ -21,6 +21,8 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
@@ -87,6 +89,16 @@ public class ActivityOptions extends ComponentOptions {
      * each key is a package name, whose value is a long containing the time (in ms).
      */
     public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
+
+    /** No explicit value chosen. The system will decide whether to grant privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 
     /**
      * The package name that created the options.
@@ -200,6 +212,12 @@ public class ActivityOptions extends ComponentOptions {
      * @see #setLockTaskEnabled(boolean)
      */
     private static final String KEY_LOCK_TASK_MODE = "android:activity.lockTaskMode";
+
+    /**
+     * Whether the launching app's identity should be available to the launched activity.
+     * @see #setShareIdentityEnabled(boolean)
+     */
+    private static final String KEY_SHARE_IDENTITY = "android:activity.shareIdentity";
 
     /**
      * The display id the activity should be launched into.
@@ -385,8 +403,11 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_SPLASH_SCREEN_STYLE =
             "android.activity.splashScreenStyle";
 
-    /** See {@link #setTransientLaunch()}. */
-    private static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
+    /**
+     * See {@link #setTransientLaunch()}.
+     * @hide
+     */
+    public static final String KEY_TRANSIENT_LAUNCH = "android.activity.transientLaunch";
 
     /** see {@link #makeLaunchIntoPip(PictureInPictureParams)}. */
     private static final String KEY_LAUNCH_INTO_PIP_PARAMS =
@@ -395,8 +416,8 @@ public class ActivityOptions extends ComponentOptions {
     /** See {@link #setDismissKeyguard()}. */
     private static final String KEY_DISMISS_KEYGUARD = "android.activity.dismissKeyguard";
 
-    private static final String KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE =
-            "android.activity.ignorePendingIntentCreatorForegroundState";
+    private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
+            "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
 
     /**
      * @see #setLaunchCookie
@@ -471,6 +492,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mLaunchTaskId = -1;
     private int mPendingIntentLaunchFlags;
     private boolean mLockTaskMode = false;
+    private boolean mShareIdentity = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mApplyActivityFlagsForBubbles;
     private boolean mApplyMultipleTaskFlagForShortcut;
@@ -498,7 +520,9 @@ public class ActivityOptions extends ComponentOptions {
     private boolean mTransientLaunch;
     private PictureInPictureParams mLaunchIntoPipParams;
     private boolean mDismissKeyguard;
-    private boolean mIgnorePendingIntentCreatorForegroundState;
+    @BackgroundActivityStartMode
+    private int mPendingIntentCreatorBackgroundActivityStartMode =
+            MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
     private boolean mDisableStartingWindow;
 
     /**
@@ -1204,7 +1228,7 @@ public class ActivityOptions extends ComponentOptions {
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
-        mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
+        mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS, android.graphics.Rect.class);
         mAnimationType = opts.getInt(KEY_ANIM_TYPE, ANIM_UNDEFINED);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
@@ -1232,7 +1256,7 @@ public class ActivityOptions extends ComponentOptions {
             case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
             case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
                 // Unpackage the HardwareBuffer from the parceled thumbnail
-                final HardwareBuffer buffer = opts.getParcelable(KEY_ANIM_THUMBNAIL);
+                final HardwareBuffer buffer = opts.getParcelable(KEY_ANIM_THUMBNAIL, android.hardware.HardwareBuffer.class);
                 if (buffer != null) {
                     mThumbnail = Bitmap.wrapHardwareBuffer(buffer, null);
                 }
@@ -1245,21 +1269,22 @@ public class ActivityOptions extends ComponentOptions {
                 break;
 
             case ANIM_SCENE_TRANSITION:
-                mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER);
+                mTransitionReceiver = opts.getParcelable(KEY_TRANSITION_COMPLETE_LISTENER, android.os.ResultReceiver.class);
                 mIsReturning = opts.getBoolean(KEY_TRANSITION_IS_RETURNING, false);
                 mSharedElementNames = opts.getStringArrayList(KEY_TRANSITION_SHARED_ELEMENTS);
-                mResultData = opts.getParcelable(KEY_RESULT_DATA);
+                mResultData = opts.getParcelable(KEY_RESULT_DATA, android.content.Intent.class);
                 mResultCode = opts.getInt(KEY_RESULT_CODE);
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
         mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
+        mShareIdentity = opts.getBoolean(KEY_SHARE_IDENTITY, false);
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
-        mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN);
+        mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN, android.window.WindowContainerToken.class);
         mLaunchTaskDisplayAreaFeatureId = opts.getInt(KEY_LAUNCH_TASK_DISPLAY_AREA_FEATURE_ID,
                 FEATURE_UNDEFINED);
-        mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN);
+        mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, android.window.WindowContainerToken.class);
         mLaunchTaskFragmentToken = opts.getBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
@@ -1289,28 +1314,29 @@ public class ActivityOptions extends ComponentOptions {
             mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
-        mSourceInfo = opts.getParcelable(KEY_SOURCE_INFO);
+        mSourceInfo = opts.getParcelable(KEY_SOURCE_INFO, android.app.ActivityOptions.SourceInfo.class);
         mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT, -1);
         mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
         if (opts.containsKey(KEY_SPECS_FUTURE)) {
             mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
                     KEY_SPECS_FUTURE));
         }
-        mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
+        mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER, android.view.RemoteAnimationAdapter.class);
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
-        mRemoteTransition = opts.getParcelable(KEY_REMOTE_TRANSITION);
+        mRemoteTransition = opts.getParcelable(KEY_REMOTE_TRANSITION, android.window.RemoteTransition.class);
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
         mSplashScreenThemeResName = opts.getString(KEY_SPLASH_SCREEN_THEME);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
         mLaunchedFromBubble = opts.getBoolean(KEY_LAUNCHED_FROM_BUBBLE);
         mTransientLaunch = opts.getBoolean(KEY_TRANSIENT_LAUNCH);
         mSplashScreenStyle = opts.getInt(KEY_SPLASH_SCREEN_STYLE);
-        mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS);
+        mLaunchIntoPipParams = opts.getParcelable(KEY_LAUNCH_INTO_PIP_PARAMS, android.app.PictureInPictureParams.class);
         mIsEligibleForLegacyPermissionPrompt =
                 opts.getBoolean(KEY_LEGACY_PERMISSION_PROMPT_ELIGIBLE);
         mDismissKeyguard = opts.getBoolean(KEY_DISMISS_KEYGUARD);
-        mIgnorePendingIntentCreatorForegroundState = opts.getBoolean(
-                KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE);
+        mPendingIntentCreatorBackgroundActivityStartMode = opts.getInt(
+                KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
     }
 
@@ -1508,6 +1534,20 @@ public class ActivityOptions extends ComponentOptions {
     }
 
     /**
+     * Returns whether the launching app has opted-in to sharing its identity with the launched
+     * activity.
+     *
+     * @return {@code true} if the launching app has opted-in to sharing its identity
+     *
+     * @see #setShareIdentityEnabled(boolean)
+     * @see Activity#getLaunchedFromUid()
+     * @see Activity#getLaunchedFromPackage()
+     */
+    public boolean isShareIdentityEnabled() {
+        return mShareIdentity;
+    }
+
+    /**
      * Gets whether the activity want to be launched as other theme for the splash screen.
      * @hide
      */
@@ -1576,6 +1616,33 @@ public class ActivityOptions extends ComponentOptions {
      */
     public ActivityOptions setLockTaskEnabled(boolean lockTaskMode) {
         mLockTaskMode = lockTaskMode;
+        return this;
+    }
+
+    /**
+     * Sets whether the identity of the launching app should be shared with the activity.
+     *
+     * <p>Use this option when starting an activity that needs to know the identity of the
+     * launching app; with this set to {@code true}, the activity will have access to the launching
+     * app's package name and uid.
+     *
+     * <p>Defaults to {@code false} if not set.
+     *
+     * <p>Note, even if the launching app does not explicitly enable sharing of its identity, if
+     * the activity is started with {@code Activity#startActivityForResult}, then {@link
+     * Activity#getCallingPackage()} will still return the launching app's package name to
+     * allow validation of the result's recipient. Also, an activity running within a package
+     * signed by the same key used to sign the platform (some system apps such as Settings will
+     * be signed with the platform's key) will have access to the launching app's identity.
+     *
+     * @param shareIdentity whether the launching app's identity should be shared with the activity
+     * @return {@code this} {@link ActivityOptions} instance.
+     * @see Activity#getLaunchedFromPackage()
+     * @see Activity#getLaunchedFromUid()
+     */
+    @NonNull
+    public ActivityOptions setShareIdentityEnabled(boolean shareIdentity) {
+        mShareIdentity = shareIdentity;
         return this;
     }
 
@@ -1756,7 +1823,9 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     public int getPendingIntentLaunchFlags() {
-        return mPendingIntentLaunchFlags;
+        // b/243794108: Ignore all flags except the new task flag, to be reconsidered in b/254490217
+        return mPendingIntentLaunchFlags &
+                (FLAG_ACTIVITY_NEW_TASK | FLAG_RECEIVER_FOREGROUND);
     }
 
     /**
@@ -1988,19 +2057,40 @@ public class ActivityOptions extends ComponentOptions {
 
     /**
      * Sets background activity launch logic won't use pending intent creator foreground state.
+     *
      * @hide
+     * @deprecated use {@link #setPendingIntentCreatorBackgroundActivityStartMode(int)} instead
      */
-    public void setIgnorePendingIntentCreatorForegroundState(boolean state) {
-        mIgnorePendingIntentCreatorForegroundState = state;
+    @Deprecated
+    public ActivityOptions setIgnorePendingIntentCreatorForegroundState(boolean ignore) {
+        mPendingIntentCreatorBackgroundActivityStartMode = ignore
+                ? MODE_BACKGROUND_ACTIVITY_START_DENIED : MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+        return this;
     }
 
     /**
-     * @return whether background activity launch logic should use pending intent creator
-     * foreground state.
-     * @hide
+     * Allow a {@link PendingIntent} to use the privilege of its creator to start background
+     * activities.
+     *
+     * @param mode the {@link android.app.ComponentOptions.BackgroundActivityStartMode} being set
+     * @throws IllegalArgumentException is the value is not a valid
+     * {@link android.app.ComponentOptions.BackgroundActivityStartMode}
      */
-    public boolean getIgnorePendingIntentCreatorForegroundState() {
-        return mIgnorePendingIntentCreatorForegroundState;
+    @NonNull
+    public ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int mode) {
+        mPendingIntentCreatorBackgroundActivityStartMode = mode;
+        return this;
+    }
+
+    /**
+     * Returns the mode to start background activities granted by the creator of the
+     * {@link PendingIntent}.
+     *
+     * @return the {@link android.app.ComponentOptions.BackgroundActivityStartMode} currently set
+     */
+    public @BackgroundActivityStartMode int getPendingIntentCreatorBackgroundActivityStartMode() {
+        return mPendingIntentCreatorBackgroundActivityStartMode;
     }
 
     /**
@@ -2079,6 +2169,7 @@ public class ActivityOptions extends ComponentOptions {
                 break;
         }
         mLockTaskMode = otherOptions.mLockTaskMode;
+        mShareIdentity = otherOptions.mShareIdentity;
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
@@ -2162,6 +2253,9 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mLockTaskMode) {
             b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
+        }
+        if (mShareIdentity) {
+            b.putBoolean(KEY_SHARE_IDENTITY, mShareIdentity);
         }
         if (mLaunchDisplayId != INVALID_DISPLAY) {
             b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
@@ -2277,9 +2371,10 @@ public class ActivityOptions extends ComponentOptions {
         if (mDismissKeyguard) {
             b.putBoolean(KEY_DISMISS_KEYGUARD, mDismissKeyguard);
         }
-        if (mIgnorePendingIntentCreatorForegroundState) {
-            b.putBoolean(KEY_IGNORE_PENDING_INTENT_CREATOR_FOREGROUND_STATE,
-                    mIgnorePendingIntentCreatorForegroundState);
+        if (mPendingIntentCreatorBackgroundActivityStartMode
+                != MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            b.putInt(KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
+                    mPendingIntentCreatorBackgroundActivityStartMode);
         }
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
@@ -2396,12 +2491,63 @@ public class ActivityOptions extends ComponentOptions {
 
     }
 
+    /**
+     * Sets the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * This is typically used in when executing {@link PendingIntent#send(Context, int, Intent,
+     * PendingIntent.OnFinished, Handler, String, Bundle)} or similar
+     * methods. A privileged sender of a PendingIntent should only grant
+     * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED} if the PendingIntent is from a trusted source
+     * and/or executed on behalf the user.
+     */
+    public @NonNull ActivityOptions setPendingIntentBackgroundActivityStartMode(
+            @BackgroundActivityStartMode int state) {
+        super.setPendingIntentBackgroundActivityStartMode(state);
+        return this;
+    }
+
+    /**
+     * Get the mode for allowing or denying the senders privileges to start background activities
+     * to the PendingIntent.
+     *
+     * @see #setPendingIntentBackgroundActivityStartMode(int)
+     */
+    public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
+        return super.getPendingIntentBackgroundActivityStartMode();
+    }
+
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     *
+     * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
+     * of states
+     */
+    @Override
+    @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller can start
+     * background activities.
+     *
+     * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
+     * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
+     * not match the actual behavior if the value was not explicitly set.
+     */
+    @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
+    }
+
     /** @hide */
     @Override
     public String toString() {
         return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
                 + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
-                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
+                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight + ", mLaunchDisplayId="
+                + mLaunchDisplayId;
     }
 
     /**

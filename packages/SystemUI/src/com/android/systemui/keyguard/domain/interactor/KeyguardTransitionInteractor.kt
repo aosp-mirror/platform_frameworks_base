@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
@@ -29,17 +30,22 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
 class KeyguardTransitionInteractor
 @Inject
 constructor(
-    repository: KeyguardTransitionRepository,
+    private val repository: KeyguardTransitionRepository,
+    @Application val scope: CoroutineScope,
 ) {
     /** (any)->GONE transition information */
     val anyStateToGoneTransition: Flow<TransitionStep> =
@@ -62,10 +68,6 @@ constructor(
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
 
-    /** LOCKSCREEN->PRIMARY_BOUNCER transition information. */
-    val mLockscreenToPrimaryBouncerTransition: Flow<TransitionStep> =
-        repository.transition(LOCKSCREEN, PRIMARY_BOUNCER)
-
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
         repository.transition(LOCKSCREEN, DREAMING)
@@ -82,6 +84,14 @@ constructor(
     val primaryBouncerToGoneTransition: Flow<TransitionStep> =
         repository.transition(PRIMARY_BOUNCER, GONE)
 
+    /** OFF->LOCKSCREEN transition information. */
+    val offToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(KeyguardState.OFF, LOCKSCREEN)
+
+    /** DOZING->LOCKSCREEN transition information. */
+    val dozingToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(KeyguardState.DOZING, LOCKSCREEN)
+
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
      * Lockscreen (0f).
@@ -92,19 +102,46 @@ constructor(
             lockscreenToAodTransition,
         )
 
-    /* The last [TransitionStep] with a [TransitionState] of STARTED */
+    /** The last [TransitionStep] with a [TransitionState] of STARTED */
     val startedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.STARTED }
 
-    /* The last [TransitionStep] with a [TransitionState] of CANCELED */
+    /** The last [TransitionStep] with a [TransitionState] of CANCELED */
     val canceledKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.CANCELED }
 
-    /* The last [TransitionStep] with a [TransitionState] of FINISHED */
+    /** The last [TransitionStep] with a [TransitionState] of FINISHED */
     val finishedKeyguardTransitionStep: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
-    /* The last completed [KeyguardState] transition */
-    val finishedKeyguardState: Flow<KeyguardState> =
-        finishedKeyguardTransitionStep.map { step -> step.to }
+    /** The destination state of the last started transition */
+    val startedKeyguardState: StateFlow<KeyguardState> =
+        startedKeyguardTransitionStep
+            .map { step -> step.to }
+            .stateIn(scope, SharingStarted.Eagerly, KeyguardState.OFF)
+
+    /** The last completed [KeyguardState] transition */
+    val finishedKeyguardState: StateFlow<KeyguardState> =
+        finishedKeyguardTransitionStep
+            .map { step -> step.to }
+            .stateIn(scope, SharingStarted.Eagerly, LOCKSCREEN)
+    /**
+     * The amount of transition into or out of the given [KeyguardState].
+     *
+     * The value will be `0` (or close to `0`, due to float point arithmetic) if not in this step or
+     * `1` when fully in the given state.
+     */
+    fun transitionValue(
+        state: KeyguardState,
+    ): Flow<Float> {
+        return repository.transitions
+            .filter { it.from == state || it.to == state }
+            .map {
+                if (it.from == state) {
+                    1 - it.value
+                } else {
+                    it.value
+                }
+            }
+    }
 }

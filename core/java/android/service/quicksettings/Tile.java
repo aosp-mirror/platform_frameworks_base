@@ -227,7 +227,6 @@ public final class Tile implements Parcelable {
 
     /**
      * Gets the Activity {@link PendingIntent} to be launched when the tile is clicked.
-     * @hide
      */
     @Nullable
     public PendingIntent getActivityLaunchForClick() {
@@ -243,7 +242,6 @@ public final class Tile implements Parcelable {
      * (This is the default behavior if this method is never called.)
      * @param pendingIntent a PendingIntent for an activity to be launched onclick, or {@code null}
      *                      to handle the clicks in the `TileService`.
-     * @hide
      */
     public void setActivityLaunchForClick(@Nullable PendingIntent pendingIntent) {
         if (pendingIntent != null && !pendingIntent.isActivity()) {

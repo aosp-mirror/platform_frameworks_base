@@ -214,12 +214,6 @@ public class Process {
     public static final int SE_UID = 1068;
 
     /**
-     * Defines the UID/GID for the iorapd.
-     * @hide
-     */
-    public static final int IORAPD_UID = 1071;
-
-    /**
      * Defines the UID/GID for the NetworkStack app.
      * @hide
      */
@@ -369,6 +363,11 @@ public class Process {
     public static final int FIRST_APPLICATION_CACHE_GID = 20000;
     /** {@hide} */
     public static final int LAST_APPLICATION_CACHE_GID = 29999;
+
+    /**
+     * An invalid PID value.
+     */
+    public static final int INVALID_PID = -1;
 
     /**
      * Standard priority of application threads.
@@ -1498,6 +1497,27 @@ public class Process {
      * @hide
      */
     public static final native int killProcessGroup(int uid, int pid);
+
+    /**
+     * Send a signal to all processes in a group under the given PID, but do not wait for the
+     * processes to be fully cleaned up, or for the cgroup to be removed before returning.
+     * Callers should also ensure that killProcessGroup is called later to ensure the cgroup is
+     * fully removed, otherwise system resources may leak.
+     * @hide
+     */
+    public static final native int sendSignalToProcessGroup(int uid, int pid, int signal);
+
+    /**
+      * Freeze the cgroup for the given UID.
+      * This cgroup may contain child cgroups which will also be frozen. If this cgroup or its
+      * children contain processes with Binder interfaces, those interfaces should be frozen before
+      * the cgroup to avoid blocking synchronous callers indefinitely.
+      *
+      * @param uid The UID to be frozen
+      * @param freeze true = freeze; false = unfreeze
+      * @hide
+      */
+    public static final native void freezeCgroupUid(int uid, boolean freeze);
 
     /**
      * Remove all process groups.  Expected to be called when ActivityManager

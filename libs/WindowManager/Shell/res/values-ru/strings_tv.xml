@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Переместить"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Развернуть"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Свернуть"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Элементы управления: дважды нажмите "<annotation icon="home_icon">" кнопку главного экрана "</annotation></string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Параметры: дважды нажмите "<annotation icon="home_icon">"кнопку главного экрана"</annotation></string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Меню \"Картинка в картинке\"."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Переместить влево"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Переместить вправо"</string>

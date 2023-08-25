@@ -87,6 +87,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.hardware.display.DisplayManager;
+import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -119,6 +120,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -230,7 +232,6 @@ public class AppStandbyControllerTests {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
-        boolean mIsRestrictedBucketEnabled = true;
         List<String> mNonIdleWhitelistApps = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
@@ -252,6 +253,8 @@ public class AppStandbyControllerTests {
                         .setLong("elapsed_threshold_rare", RARE_THRESHOLD)
                         .setLong("elapsed_threshold_restricted", RESTRICTED_THRESHOLD);
         DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener;
+        String mExpectedNoteEventPackage = null;
+        int mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -298,7 +301,7 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean hasExactAlarmPermission(String packageName, int uid) {
+        boolean shouldGetExactAlarmBucketElevation(String packageName, int uid) {
             return mClockApps.contains(Pair.create(packageName, uid));
         }
 
@@ -312,17 +315,15 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean isRestrictedBucketEnabled() {
-            return mIsRestrictedBucketEnabled;
-        }
-
-        @Override
         File getDataSystemDirectory() {
             return new File(getContext().getFilesDir(), Long.toString(sRandom.nextLong()));
         }
 
         @Override
         void noteEvent(int event, String packageName, int uid) throws RemoteException {
+            if (Objects.equals(mExpectedNoteEventPackage, packageName)) {
+                mLastNoteEvent = event;
+            }
         }
 
         @Override
@@ -1348,50 +1349,6 @@ public class AppStandbyControllerTests {
 
     @Test
     @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucketDisabled() throws Exception {
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-
-        // Nothing should be able to put it into the RESTRICTED bucket.
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_TIMEOUT);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_PREDICTED);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_USER);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
-    public void testRestrictedBucket_EnabledToDisabled() throws Exception {
-        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
-        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
-        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM);
-        assertBucket(STANDBY_BUCKET_RESTRICTED);
-
-        mInjector.mIsRestrictedBucketEnabled = false;
-        // Get the controller to read the new value. Capturing the ContentObserver isn't possible
-        // at the moment.
-        mController.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-
-        mController.checkIdleStates(USER_ID);
-        assertNotBucket(STANDBY_BUCKET_RESTRICTED);
-    }
-
-    @Test
-    @FlakyTest(bugId = 185169504)
     public void testPredictionRaiseFromRestrictedTimeout_highBucket() throws Exception {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
@@ -2117,6 +2074,50 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_BACKGROUND_LOCATION, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_TIMEOUT);
         assertBucket(STANDBY_BUCKET_FREQUENT, PACKAGE_BACKGROUND_LOCATION);
+    }
+
+    @Test
+    public void testBatteryStatsNoteEvent() throws Exception {
+        mInjector.mExpectedNoteEventPackage = PACKAGE_1;
+        reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
+
+        // Since we're staying on the PACKAGE_ACTIVE side, noteEvent shouldn't be called.
+        // Reset the last event to confirm the method isn't called.
+        mInjector.mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_WORKING_SET,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_NONE, mInjector.mLastNoteEvent);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
+
+        // Since we're staying on the PACKAGE_ACTIVE side, noteEvent shouldn't be called.
+        // Reset the last event to confirm the method isn't called.
+        mInjector.mLastNoteEvent = BatteryStats.HistoryItem.EVENT_NONE;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_NONE, mInjector.mLastNoteEvent);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE, mInjector.mLastNoteEvent);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_EXEMPTED,
+                REASON_MAIN_FORCED_BY_USER);
+        assertEquals(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE, mInjector.mLastNoteEvent);
     }
 
     private String getAdminAppsStr(int userId) {

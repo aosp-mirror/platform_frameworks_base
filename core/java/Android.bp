@@ -15,14 +15,6 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
-    exclude_srcs: [
-        // Remove election toolbar code from build time
-        "android/service/selectiontoolbar/*.aidl",
-        "android/service/selectiontoolbar/*.java",
-        "android/view/selectiontoolbar/*.aidl",
-        "android/view/selectiontoolbar/*.java",
-        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
-    ],
     visibility: ["//frameworks/base"],
 }
 
@@ -542,14 +534,3 @@ java_library {
 }
 
 // protolog end
-
-// temporary placeholder until the real module is available
-java_library {
-    name: "framework-configinfrastructure",
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework-configinfrastructure.stubs.module_lib",
-    sdk_version: "module_current",
-}

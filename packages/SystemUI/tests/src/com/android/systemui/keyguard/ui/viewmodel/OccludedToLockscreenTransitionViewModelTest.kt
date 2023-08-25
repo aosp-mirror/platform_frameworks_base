@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -28,6 +29,7 @@ import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -35,6 +37,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: OccludedToLockscreenTransitionViewModel
@@ -43,7 +46,7 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         repository = FakeKeyguardTransitionRepository()
-        val interactor = KeyguardTransitionInteractor(repository)
+        val interactor = KeyguardTransitionInteractor(repository, TestScope().backgroundScope)
         underTest = OccludedToLockscreenTransitionViewModel(interactor)
     }
 
@@ -88,6 +91,21 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
+
+            job.cancel()
+        }
+
+    @Test
+    fun lockscreenTranslationYResettedAfterJobCancelled() =
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
+
+            val pixels = 100
+            val job =
+                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
+            repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
+
+            assertThat(values.last()).isEqualTo(0f)
 
             job.cancel()
         }

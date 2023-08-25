@@ -33,6 +33,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
@@ -65,6 +66,8 @@ public class OneHandedModeTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private OneHandedModeTile mTile;
@@ -78,6 +81,7 @@ public class OneHandedModeTileTest extends SysuiTestCase {
 
         mTile = spy(new OneHandedModeTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

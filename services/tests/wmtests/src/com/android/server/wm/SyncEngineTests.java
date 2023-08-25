@@ -18,15 +18,16 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.BLASTSyncEngine.METHOD_BLAST;
 import static com.android.server.wm.BLASTSyncEngine.METHOD_NONE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static org.junit.Assert.assertEquals;
@@ -39,14 +40,21 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
+import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.testutils.StubTransaction;
+import com.android.server.testutils.TestHandler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 /**
  * Test class for {@link BLASTSyncEngine}.
@@ -112,6 +120,22 @@ public class SyncEngineTests extends WindowTestsBase {
         assertTrue(mockWC.onSyncFinishedDrawing());
         bse.onSurfacePlacement();
         verify(listener, times(1)).onTransactionReady(eq(id), notNull());
+
+        // The sync is not finished for a relaunching activity.
+        id = startSyncSet(bse, listener);
+        final ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final WindowState w = mock(WindowState.class);
+        doReturn(true).when(w).isVisibleRequested();
+        doReturn(true).when(w).fillsParent();
+        doReturn(true).when(w).isSyncFinished(any());
+        r.mChildren.add(w);
+        bse.addToSyncSet(id, r);
+        r.onSyncFinishedDrawing();
+        assertTrue(r.isSyncFinished(r.getSyncGroup()));
+        r.startRelaunching();
+        assertFalse(r.isSyncFinished(r.getSyncGroup()));
+        r.finishRelaunching();
+        assertTrue(r.isSyncFinished(r.getSyncGroup()));
     }
 
     @Test
@@ -224,7 +248,7 @@ public class SyncEngineTests extends WindowTestsBase {
         parentWC.onSyncFinishedDrawing();
         topChildWC.onSyncFinishedDrawing();
         // Even though bottom isn't finished, we should see callback because it is occluded by top.
-        assertFalse(botChildWC.isSyncFinished());
+        assertFalse(botChildWC.isSyncFinished(botChildWC.getSyncGroup()));
         bse.onSurfacePlacement();
         verify(listener, times(1)).onTransactionReady(eq(id), notNull());
 
@@ -302,6 +326,19 @@ public class SyncEngineTests extends WindowTestsBase {
         assertEquals(SYNC_STATE_NONE, parentWC.mSyncState);
         assertEquals(SYNC_STATE_NONE, topChildWC.mSyncState);
         assertEquals(SYNC_STATE_NONE, botChildWC.mSyncState);
+
+        // If the appearance of window won't change after reparenting, its sync state can be kept.
+        final WindowState w = createWindow(null, TYPE_BASE_APPLICATION, "win");
+        parentWC.onRequestedOverrideConfigurationChanged(w.getConfiguration());
+        w.reparent(botChildWC, POSITION_TOP);
+        parentWC.prepareSync();
+        // Assume the window has drawn with the latest configuration.
+        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, true /* relayoutVisible */);
+        assertTrue(w.onSyncFinishedDrawing());
+        assertEquals(SYNC_STATE_READY, w.mSyncState);
+        w.reparent(topChildWC, POSITION_TOP);
+        assertEquals(SYNC_STATE_READY, w.mSyncState);
     }
 
     @Test
@@ -363,7 +400,8 @@ public class SyncEngineTests extends WindowTestsBase {
         BLASTSyncEngine.TransactionReadyListener listener = mock(
                 BLASTSyncEngine.TransactionReadyListener.class);
 
-        int id = startSyncSet(bse, listener, METHOD_NONE);
+        final int id = startSyncSet(bse, listener);
+        bse.setSyncMethod(id, METHOD_NONE);
         bse.addToSyncSet(id, mAppWindow.mToken);
         mAppWindow.prepareSync();
         assertFalse(mAppWindow.shouldSyncWithBuffers());
@@ -371,14 +409,260 @@ public class SyncEngineTests extends WindowTestsBase {
         mAppWindow.removeImmediately();
     }
 
-    static int startSyncSet(BLASTSyncEngine engine,
-            BLASTSyncEngine.TransactionReadyListener listener) {
-        return startSyncSet(engine, listener, METHOD_BLAST);
+    @Test
+    public void testQueueSyncSet() {
+        final TestHandler testHandler = new TestHandler(null);
+        TestWindowContainer mockWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer mockWC2 = new TestWindowContainer(mWm, true /* waiter */);
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine(testHandler);
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = startSyncSet(bse, listener);
+        bse.addToSyncSet(id, mockWC);
+        bse.setReady(id);
+        bse.onSurfacePlacement();
+        verify(listener, times(0)).onTransactionReady(eq(id), notNull());
+
+        final int[] nextId = new int[]{-1};
+        bse.queueSyncSet(
+                () -> nextId[0] = startSyncSet(bse, listener),
+                () -> {
+                    bse.setReady(nextId[0]);
+                    bse.addToSyncSet(nextId[0], mockWC2);
+                });
+
+        // Make sure it is queued
+        assertEquals(-1, nextId[0]);
+
+        // Finish the original sync and see that we've started a new sync-set immediately but
+        // that the readiness was posted.
+        mockWC.onSyncFinishedDrawing();
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
+        bse.onSurfacePlacement();
+        verify(listener, times(1)).onTransactionReady(eq(id), notNull());
+
+        assertTrue(nextId[0] != -1);
+        assertFalse(bse.isReady(nextId[0]));
+
+        // now make sure the applySync callback was posted.
+        testHandler.flush();
+        assertTrue(bse.isReady(nextId[0]));
+    }
+
+    @Test
+    public void testStratifiedParallel() {
+        TestWindowContainer parentWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC = new TestWindowContainer(mWm, true /* waiter */);
+        parentWC.addChild(childWC, POSITION_TOP);
+        childWC.mVisibleRequested = true;
+        childWC.mFillsParent = true;
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener listenerChild = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+        BLASTSyncEngine.TransactionReadyListener listenerParent = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        // Start a sync-set for the "inner" stuff
+        int childSync = startSyncSet(bse, listenerChild);
+        bse.addToSyncSet(childSync, childWC);
+        bse.setReady(childSync);
+
+        // Start sync-set for the "outer" stuff but explicitly parallel (it should ignore child)
+        int parentSync = startSyncSet(bse, listenerParent, true /* parallel */);
+        bse.addToSyncSet(parentSync, parentWC);
+        bse.setReady(parentSync);
+
+        bse.onSurfacePlacement();
+        // Nothing should have happened yet
+        verify(listenerChild, times(0)).onTransactionReady(anyInt(), any());
+        verify(listenerParent, times(0)).onTransactionReady(anyInt(), any());
+
+        // Now, make PARENT ready, since they are in parallel, this should work
+        parentWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        // Parent should become ready while child is still waiting.
+        verify(listenerParent, times(1)).onTransactionReady(eq(parentSync), notNull());
+        verify(listenerChild, times(0)).onTransactionReady(anyInt(), any());
+
+        // Child should still work
+        childWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+        verify(listenerChild, times(1)).onTransactionReady(eq(childSync), notNull());
+    }
+
+    @Test
+    public void testDependencies() {
+        TestWindowContainer parentWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC2 = new TestWindowContainer(mWm, true /* waiter */);
+        parentWC.addChild(childWC, POSITION_TOP);
+        childWC.mVisibleRequested = true;
+        childWC.mFillsParent = true;
+        childWC2.mVisibleRequested = true;
+        childWC2.mFillsParent = true;
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        // This is non-parallel, so it is waiting on the child as-well
+        int sync1 = startSyncSet(bse, listener);
+        bse.addToSyncSet(sync1, parentWC);
+        bse.setReady(sync1);
+
+        // Create one which will end-up depending on the *next* sync
+        int sync2 = startSyncSet(bse, listener, true /* parallel */);
+
+        // If another sync tries to sync on the same subtree, it must now serialize with the other.
+        int sync3 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync3, childWC);
+        bse.addToSyncSet(sync3, childWC2);
+        bse.setReady(sync3);
+
+        // This will depend on sync3.
+        int sync4 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync4, childWC2);
+        bse.setReady(sync4);
+
+        // This makes sync2 depend on sync3. Since both sync2 and sync4 depend on sync3, when sync3
+        // finishes, sync2 should run first since it was created first.
+        bse.addToSyncSet(sync2, childWC2);
+        bse.setReady(sync2);
+
+        childWC.onSyncFinishedDrawing();
+        childWC2.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        // Nothing should be ready yet since everything ultimately depends on sync1.
+        verify(listener, times(0)).onTransactionReady(anyInt(), any());
+
+        parentWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        // They should all be ready, now, so just verify that the order is expected
+        InOrder readyOrder = Mockito.inOrder(listener);
+        // sync1 is the first one, so it should call ready first.
+        readyOrder.verify(listener).onTransactionReady(eq(sync1), any());
+        // everything else depends on sync3, so it should call ready next.
+        readyOrder.verify(listener).onTransactionReady(eq(sync3), any());
+        // both sync2 and sync4 depend on sync3, but sync2 started first, so it should go next.
+        readyOrder.verify(listener).onTransactionReady(eq(sync2), any());
+        readyOrder.verify(listener).onTransactionReady(eq(sync4), any());
+    }
+
+    @Test
+    public void testStratifiedParallelParentFirst() {
+        TestWindowContainer parentWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC = new TestWindowContainer(mWm, true /* waiter */);
+        parentWC.addChild(childWC, POSITION_TOP);
+        childWC.mVisibleRequested = true;
+        childWC.mFillsParent = true;
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        // This is parallel, so it should ignore children
+        int sync1 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync1, parentWC);
+        bse.setReady(sync1);
+
+        int sync2 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync2, childWC);
+        bse.setReady(sync2);
+
+        childWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        // Sync2 should have run in parallel
+        verify(listener, times(1)).onTransactionReady(eq(sync2), any());
+        verify(listener, times(0)).onTransactionReady(eq(sync1), any());
+
+        parentWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        verify(listener, times(1)).onTransactionReady(eq(sync1), any());
+    }
+
+    @Test
+    public void testDependencyCycle() {
+        TestWindowContainer parentWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC2 = new TestWindowContainer(mWm, true /* waiter */);
+        TestWindowContainer childWC3 = new TestWindowContainer(mWm, true /* waiter */);
+        parentWC.addChild(childWC, POSITION_TOP);
+        childWC.mVisibleRequested = true;
+        childWC.mFillsParent = true;
+        childWC2.mVisibleRequested = true;
+        childWC2.mFillsParent = true;
+        childWC3.mVisibleRequested = true;
+        childWC3.mFillsParent = true;
+
+        final BLASTSyncEngine bse = createTestBLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener listener = mock(
+                BLASTSyncEngine.TransactionReadyListener.class);
+
+        // This is non-parallel, so it is waiting on the child as-well
+        int sync1 = startSyncSet(bse, listener);
+        bse.addToSyncSet(sync1, parentWC);
+        bse.setReady(sync1);
+
+        // Sync 2 depends on sync1 AND childWC2
+        int sync2 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync2, childWC);
+        bse.addToSyncSet(sync2, childWC2);
+        bse.setReady(sync2);
+
+        // Sync 3 depends on sync2 AND childWC3
+        int sync3 = startSyncSet(bse, listener, true /* parallel */);
+        bse.addToSyncSet(sync3, childWC2);
+        bse.addToSyncSet(sync3, childWC3);
+        bse.setReady(sync3);
+
+        // Now make sync1 depend on WC3 (which would make it depend on sync3). This would form
+        // a cycle, so it should instead move childWC3 into sync1.
+        bse.addToSyncSet(sync1, childWC3);
+
+        // Sync3 should no-longer have childWC3 as a root-member since a window can currently only
+        // be directly watched by 1 syncgroup maximum (due to implementation of isSyncFinished).
+        assertFalse(bse.getSyncSet(sync3).mRootMembers.contains(childWC3));
+
+        childWC3.onSyncFinishedDrawing();
+        childWC2.onSyncFinishedDrawing();
+        parentWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        // make sure sync3 hasn't run even though all its (original) members are ready
+        verify(listener, times(0)).onTransactionReady(anyInt(), any());
+
+        // Now finish the last container and make sure everything finishes (didn't "deadlock" due
+        // to a dependency cycle.
+        childWC.onSyncFinishedDrawing();
+        bse.onSurfacePlacement();
+
+        InOrder readyOrder = Mockito.inOrder(listener);
+        readyOrder.verify(listener).onTransactionReady(eq(sync1), any());
+        readyOrder.verify(listener).onTransactionReady(eq(sync2), any());
+        readyOrder.verify(listener).onTransactionReady(eq(sync3), any());
     }
 
     static int startSyncSet(BLASTSyncEngine engine,
-            BLASTSyncEngine.TransactionReadyListener listener, int method) {
-        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "", method);
+            BLASTSyncEngine.TransactionReadyListener listener) {
+        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "Test", false /* parallel */);
+    }
+
+    static int startSyncSet(BLASTSyncEngine engine,
+            BLASTSyncEngine.TransactionReadyListener listener, boolean parallel) {
+        return engine.startSyncSet(listener, BLAST_TIMEOUT_DURATION, "Test", parallel);
     }
 
     static class TestWindowContainer extends WindowContainer {

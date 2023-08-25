@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Setelan"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Masuk ke mode layar terpisah"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu Picture-in-Picture"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> adalah picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, ketuk untuk membuka setelan dan menonaktifkannya."</string>
     <string name="pip_play" msgid="3496151081459417097">"Putar"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Ubah ukuran"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stash"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Batalkan stash"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikasi mungkin tidak berfungsi dengan layar terpisah."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"App tidak mendukung layar terpisah."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikasi mungkin tidak berfungsi dengan layar terpisah"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikasi tidak mendukung layar terpisah"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Aplikasi ini hanya dapat dibuka di 1 jendela."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikasi mungkin tidak berfungsi pada layar sekunder."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikasi tidak mendukung peluncuran pada layar sekunder."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Pembagi layar terpisah"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Pembagi layar terpisah"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Pembagi layar terpisah"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Layar penuh di kiri"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Kiri 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Kiri 50%"</string>
@@ -82,11 +84,11 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Tidak dapat diperbaiki?\nKetuk untuk mengembalikan"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Tidak ada masalah kamera? Ketuk untuk menutup."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Lihat dan lakukan lebih banyak hal"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Tarik aplikasi lain untuk menggunakan layar terpisah"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Tarik aplikasi lain untuk menggunakan layar terpisah"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Ketuk dua kali di luar aplikasi untuk mengubah posisinya"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Oke"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Luaskan untuk melihat informasi selengkapnya."</string>
-    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk melihat tampilan yang lebih baik?"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Mulai ulang untuk tampilan yang lebih baik?"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Anda dapat memulai ulang aplikasi agar terlihat lebih baik di layar, tetapi Anda mungkin kehilangan progres atau perubahan yang belum disimpan"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Batal"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Mulai ulang"</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Tutup"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Tutup Menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Buka Menu"</string>
 </resources>

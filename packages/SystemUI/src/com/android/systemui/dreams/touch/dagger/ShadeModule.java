@@ -23,11 +23,11 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.ShadeTouchHandler;
 
-import javax.inject.Named;
-
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
+import javax.inject.Named;
 
 /**
  * Dependencies for swipe down to notification over dream.

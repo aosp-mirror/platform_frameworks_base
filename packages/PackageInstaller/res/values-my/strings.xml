@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"အက်ပ်ထည့်သွင်းပြီးပါပြီ။"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ဤအက်ပ်ကို ထည့်သွင်းလိုသလား။"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ဤအက်ပ်ကို အပ်ဒိတ်လုပ်လိုသလား။"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ဤအက်ပ်ကို <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> မှ အပ်ဒိတ်လုပ်မလား။\n\nဤအက်ပ်သည် ပုံမှန်အားဖြင့် <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> မှ အပ်ဒိတ်များ ရရှိသည်။ မတူညီသောရင်းမြစ်မှ အပ်ဒိတ်လုပ်ခြင်းဖြင့် ဖုန်းပေါ်တွင် နောင်လာမည့်အပ်ဒိတ်များကို မည်သည့်ရင်းမြစ်မဆိုမှ လက်ခံရယူနိုင်သည်။ အက်ပ်လုပ်ဆောင်ချက် ပြောင်းလဲနိုင်သည်။"</string>
     <string name="install_failed" msgid="5777824004474125469">"အက်ပ်မထည့်သွင်းရသေးပါ"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ပက်ကေ့ဂျ်ထည့်သွင်းခြင်းကို ပိတ်ထားသည်။"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ပက်ကေ့ဂျ်အဖြစ် ထည့်သွင်းမထားသော အက်ပ်သည် လက်ရှိပက်ကေ့ဂျ်နှင့် တိုက်နေသည်။"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"အရင်းအမြစ်မသိသော အက်ပ်များကို ဤအသုံးပြုသူက ထည့်သွင်းခွင့်မရှိပါ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ဤအသုံးပြုသူသည် အက်ပ်များကို ထည့်သွင်းခွင့်မရှိပါ"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"ဘာဖြစ်ဖြစ် အပ်ဒိတ်လုပ်ရန်"</string>
     <string name="manage_applications" msgid="5400164782453975580">"အက်ပ်စီမံခြင်း"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"နေရာလွတ်မရှိပါ"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ထည့်သွင်း၍ မရနိုင်ပါ။ နေရာလွတ်ပြုလုပ်ပြီး ထပ်စမ်းကြည့်ပါ။"</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုပါသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ဤအက်ပ်ကို စက်ရုံထုတ်ဗားရှင်းဖြင့် အစားထိုးလိုသလား။ ဒေတာများအားလုံးကို ဖယ်ရှားလိုက်ပါမည်။ ၎င်းသည် အလုပ်ပရိုဖိုင်ဖြင့်သုံးသူများအပါအဝင် အသုံးပြုသူများအားလုံးကို အကျိုးသက်ရောက်စေပါမည်။"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"အက်ပ်ဒေတာများ၏ <xliff:g id="SIZE">%1$s</xliff:g> ကို ထားရှိရန်။"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ဤအက်ပ်ကို ဖျက်လိုသလား။"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ဤအက်ပ်ကို ဖယ်ရှားလိုသလား။ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ပုံတူပွားကိုလည်း ဖျက်လိုက်မည်။"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ပရိုဂရမ်ကို ဖယ်ရှားနေပါသည်"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ပရိုဂရမ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ပရိုဂရမ်ကို ဖယ်ရှားနေသည်..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှားနေပါသည်…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"ဖယ်ရှားပြီးပါပြီ။"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှားလိုက်ပါပြီ"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ပုံတူပွားကို ဖျက်လိုက်ပါပြီ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ဖယ်ရှား၍ မရပါ။"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ကို ဖယ်ရှား၍မရပါ။"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ပုံတူပွားကို ဖျက်နေသည်…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"အသုံးပြုနေသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဖွင့်ထားသော စက်စီမံအက်ပ်ကို ဖယ်ရှား၍မရပါ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ဤအက်ပ်သည် အချို့အသုံးပြုသူများ သို့မဟုတ် ပရိုဖိုင်များအတွက် လိုအပ်ပြီး အခြားသူများအတွက် ဖယ်ရှားထားသည်"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"အမည်မသိ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့်တက်ဘလက်တွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့် TV တွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို လုံခြုံရေးအရ သင့်လက်ပတ်နာရီတွင် လောလောဆယ် ထည့်သွင်းခွင့်မပြုပါ။ ၎င်းကို ဆက်တင်များတွင် ပြောင်းနိုင်သည်။"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့်လုံခြုံရေးအတွက် သင့်ဖုန်းတွင် လောလောဆယ် ထည့်သွင်းခွင့်ပြုမထားပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"သင်၏ဖုန်းနှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော ဖုန်းပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"သင်၏ တက်ဘလက်နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော တက်ဘလက်ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"သင်၏ TV နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော TV ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ပုံတူပွား"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ရှေ့ဆက်ရန်"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ဆက်တင်များ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear အက်ပ်ကိုထည့်သွင်းခြင်း/ဖယ်ရှားခြင်း"</string>

@@ -62,7 +62,7 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
-import androidx.core.animation.AnimatorTestRule2;
+import androidx.core.animation.AnimatorTestRule;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -110,7 +110,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
     @ClassRule
-    public static AnimatorTestRule2 mAnimatorTestRule = new AnimatorTestRule2();
+    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Before
     public void setUp() throws Exception {
@@ -140,7 +140,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
     private void setTestPendingIntent(RemoteInputViewController controller) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
         RemoteInput[] inputs = {input};
 

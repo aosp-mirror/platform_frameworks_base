@@ -16,8 +16,19 @@
 
 package com.android.internal.accessibility;
 
-import static junit.framework.Assert.assertEquals;
+import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
+import static com.android.internal.accessibility.util.AccessibilityUtils.MENU_SERVICE_RELATIVE_CLASS_NAME;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import android.content.ComponentName;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.text.ParcelableSpan;
 import android.text.SpannableString;
 import android.text.style.LocaleSpan;
@@ -26,9 +37,13 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -36,6 +51,15 @@ import java.util.Locale;
  */
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityUtilsTest {
+    private static final int USER_ID = 123;
+    @Mock
+    private PackageManager mMockPackageManager;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @Test
     public void textOrSpanChanged_stringChange_returnTextChange() {
         final CharSequence beforeText = "a";
@@ -44,7 +68,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.TEXT, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.TEXT);
     }
 
     @Test
@@ -55,7 +79,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.NONE, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.NONE);
     }
 
     @Test
@@ -68,7 +92,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.NONE, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.NONE);
     }
 
     @Test
@@ -81,7 +105,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.PARCELABLE_SPAN, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.PARCELABLE_SPAN);
     }
 
     @Test
@@ -96,7 +120,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.PARCELABLE_SPAN, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.PARCELABLE_SPAN);
     }
 
     @Test
@@ -110,7 +134,7 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.NONE, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.NONE);
     }
 
     @Test
@@ -124,6 +148,72 @@ public class AccessibilityUtilsTest {
 
         @AccessibilityUtils.A11yTextChangeType int type = AccessibilityUtils.textOrSpanChanged(
                 beforeText, afterText);
-        assertEquals(AccessibilityUtils.PARCELABLE_SPAN, type);
+        assertThat(type).isEqualTo(AccessibilityUtils.PARCELABLE_SPAN);
+    }
+
+    @Test
+    public void getAccessibilityMenuComponentToMigrate_isNull_whenNoMenuComponents() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(USER_ID))).thenReturn(List.of());
+
+        final ComponentName result = AccessibilityUtils.getAccessibilityMenuComponentToMigrate(
+                mMockPackageManager, USER_ID);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void getAccessibilityMenuComponentToMigrate_isNull_whenTooManyMenuComponents() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(USER_ID))).thenReturn(List.of(
+                createResolveInfo(ComponentName.createRelative("external1",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external2",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external3",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME))));
+
+        final ComponentName result = AccessibilityUtils.getAccessibilityMenuComponentToMigrate(
+                mMockPackageManager, USER_ID);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void getAccessibilityMenuComponentToMigrate_isNull_whenMenuInSystemNotFound() {
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(USER_ID))).thenReturn(List.of(
+                createResolveInfo(ComponentName.createRelative("external1",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME)),
+                createResolveInfo(ComponentName.createRelative("external2",
+                        MENU_SERVICE_RELATIVE_CLASS_NAME))));
+
+        final ComponentName result = AccessibilityUtils.getAccessibilityMenuComponentToMigrate(
+                mMockPackageManager, USER_ID);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void getAccessibilityMenuComponentToMigrate_returnsMenuOutsideSystem() {
+        ComponentName menuOutsideSystem = ComponentName.createRelative("external1",
+                MENU_SERVICE_RELATIVE_CLASS_NAME);
+        when(mMockPackageManager.queryIntentServicesAsUser(any(), any(),
+                eq(USER_ID))).thenReturn(List.of(
+                createResolveInfo(menuOutsideSystem),
+                createResolveInfo(ACCESSIBILITY_MENU_IN_SYSTEM)));
+
+        final ComponentName result = AccessibilityUtils.getAccessibilityMenuComponentToMigrate(
+                mMockPackageManager, USER_ID);
+
+        assertThat(result).isEqualTo(menuOutsideSystem);
+    }
+
+    private static ResolveInfo createResolveInfo(ComponentName componentName) {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.serviceInfo = new ServiceInfo();
+        resolveInfo.serviceInfo.packageName = componentName.getPackageName();
+        resolveInfo.serviceInfo.name = componentName.getClassName();
+        return resolveInfo;
     }
 }

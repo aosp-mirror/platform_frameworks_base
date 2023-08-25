@@ -21,9 +21,9 @@ package com.android.wm.shell.desktopmode;
  */
 interface IDesktopMode {
 
-    /** Show apps on the desktop */
-    void showDesktopApps();
+    /** Show apps on the desktop on the given display */
+    void showDesktopApps(int displayId);
 
-    /** Get count of visible desktop tasks */
-    int getVisibleTaskCount();
+    /** Get count of visible desktop tasks on the given display */
+    int getVisibleTaskCount(int displayId);
 }

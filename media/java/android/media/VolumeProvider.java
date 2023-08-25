@@ -17,6 +17,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.media.MediaRouter2.RoutingController;
 import android.media.session.MediaSession;
 
 import java.lang.annotation.Retention;
@@ -66,32 +67,28 @@ public abstract class VolumeProvider {
     private Callback mCallback;
 
     /**
-     * Create a new volume provider for handling volume events. You must specify
-     * the type of volume control, the maximum volume that can be used, and the
-     * current volume on the output.
+     * Creates a new volume provider for handling volume events.
      *
-     * @param volumeControl The method for controlling volume that is used by
-     *            this provider.
+     * @param volumeControl See {@link #getVolumeControl()}.
      * @param maxVolume The maximum allowed volume.
      * @param currentVolume The current volume on the output.
      */
-
     public VolumeProvider(@ControlType int volumeControl, int maxVolume, int currentVolume) {
         this(volumeControl, maxVolume, currentVolume, null);
     }
 
     /**
-     * Create a new volume provider for handling volume events. You must specify
-     * the type of volume control, the maximum volume that can be used, and the
-     * current volume on the output.
+     * Creates a new volume provider for handling volume events.
      *
-     * @param volumeControl The method for controlling volume that is used by
-     *            this provider.
+     * @param volumeControl See {@link #getVolumeControl()}.
      * @param maxVolume The maximum allowed volume.
      * @param currentVolume The current volume on the output.
-     * @param volumeControlId The volume control ID of this provider.
+     * @param volumeControlId See {@link #getVolumeControlId()}.
      */
-    public VolumeProvider(@ControlType int volumeControl, int maxVolume, int currentVolume,
+    public VolumeProvider(
+            @ControlType int volumeControl,
+            int maxVolume,
+            int currentVolume,
             @Nullable String volumeControlId) {
         mControlType = volumeControl;
         mMaxVolume = maxVolume;
@@ -100,7 +97,10 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Get the volume control type that this volume provider uses.
+     * Gets the volume control type that this volume provider uses.
+     *
+     * <p>One of {@link #VOLUME_CONTROL_FIXED}, {@link #VOLUME_CONTROL_ABSOLUTE}, or {@link
+     * #VOLUME_CONTROL_RELATIVE}.
      *
      * @return The volume control type for this volume provider
      */
@@ -110,7 +110,7 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Get the maximum volume this provider allows.
+     * Gets the maximum volume this provider allows.
      *
      * @return The max allowed volume.
      */
@@ -129,8 +129,8 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Notify the system that the current volume has been changed. This must be
-     * called every time the volume changes to ensure it is displayed properly.
+     * Notifies the system that the current volume has been changed. This must be called every time
+     * the volume changes to ensure it is displayed properly.
      *
      * @param currentVolume The current volume on the output.
      */
@@ -142,10 +142,11 @@ public abstract class VolumeProvider {
     }
 
     /**
-     * Gets the volume control ID. It can be used to identify which volume provider is
-     * used by the session.
+     * Gets the {@link RoutingController#getId() routing controller id} of the {@link
+     * RoutingController} associated with this volume provider, or null if unset.
      *
-     * @return the volume control ID or {@code null} if it isn't set.
+     * <p>This id allows mapping this volume provider to a routing controller, which provides
+     * information about the media route and allows controlling its volume.
      */
     @Nullable
     public final String getVolumeControlId() {

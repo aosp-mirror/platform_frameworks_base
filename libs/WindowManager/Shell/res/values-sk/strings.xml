@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Nastavenia"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Prejsť na rozdelenú obrazovku"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Ponuka"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Ponuka obrazu v obraze"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> je v režime obraz v obraze"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ak nechcete, aby aplikácia <xliff:g id="NAME">%s</xliff:g> používala túto funkciu, klepnutím otvorte nastavenia a vypnite ju."</string>
     <string name="pip_play" msgid="3496151081459417097">"Prehrať"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Zmeniť veľkosť"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Skryť"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Zrušiť skrytie"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Aplikácia nemusí fungovať s rozdelenou obrazovkou."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Aplikácia nepodporuje rozdelenú obrazovku."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikácia nemusí fungovať s rozdelenou obrazovkou"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikácia nepodporuje rozdelenú obrazovku"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Táto aplikácia môže byť otvorená iba v jednom okne."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikácia nemusí fungovať na sekundárnej obrazovke."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikácia nepodporuje spúšťanie na sekundárnych obrazovkách."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Rozdeľovač obrazovky"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Rozdeľovač obrazovky"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Rozdeľovač obrazovky"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Ľavá – na celú obrazovku"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Ľavá – 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Ľavá – 50 %"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nevyriešilo sa to?\nKlepnutím sa vráťte."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nemáte problémy s kamerou? Klepnutím zatvoríte."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Zobrazte si a zvládnite toho viac"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Rozdelenú obrazovku aktivujete presunutím ďalšie aplikácie"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Rozdelenú obrazovku môžete použiť presunutím do inej aplikácie"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvojitým klepnutím mimo aplikácie zmeníte jej pozíciu"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Dobre"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Po rozbalení sa dozviete viac."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Snímka obrazovky"</string>
     <string name="close_text" msgid="4986518933445178928">"Zavrieť"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Zavrieť ponuku"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Otvoriť ponuku"</string>
 </resources>

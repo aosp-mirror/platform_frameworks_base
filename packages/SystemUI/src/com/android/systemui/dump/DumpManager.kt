@@ -16,12 +16,12 @@
 
 package com.android.systemui.dump
 
-import android.util.ArrayMap
 import com.android.systemui.Dumpable
 import com.android.systemui.ProtoDumpable
 import com.android.systemui.dump.nano.SystemUIProtoDump
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
 import java.io.PrintWriter
+import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,8 +36,14 @@ import javax.inject.Singleton
  */
 @Singleton
 open class DumpManager @Inject constructor() {
-    private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
-    private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
+    // NOTE: Using TreeMap ensures that iteration is in a predictable & alphabetical order.
+    private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = TreeMap()
+    private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = TreeMap()
+
+    /** See [registerCriticalDumpable]. */
+    fun registerCriticalDumpable(module: Dumpable) {
+        registerCriticalDumpable(module::class.java.simpleName, module)
+    }
 
     /**
      * Registers a dumpable to be called during the CRITICAL section of the bug report.
@@ -127,7 +133,8 @@ open class DumpManager @Inject constructor() {
     }
 
     /**
-     * Dumps the first dumpable or buffer whose registered name ends with [target]
+     * Dumps the alphabetically first, shortest-named dumpable or buffer whose registered name ends
+     * with [target].
      */
     @Synchronized
     fun dumpTarget(
@@ -136,19 +143,14 @@ open class DumpManager @Inject constructor() {
         args: Array<String>,
         tailLength: Int,
     ) {
-        for (dumpable in dumpables.values) {
-            if (dumpable.name.endsWith(target)) {
-                dumpDumpable(dumpable, pw, args)
-                return
+        sequence {
+            findBestTargetMatch(dumpables, target)?.let {
+                yield(it.name to { dumpDumpable(it, pw, args) })
             }
-        }
-
-        for (buffer in buffers.values) {
-            if (buffer.name.endsWith(target)) {
-                dumpBuffer(buffer, pw, tailLength)
-                return
+            findBestTargetMatch(buffers, target)?.let {
+                yield(it.name to { dumpBuffer(it, pw, tailLength) })
             }
-        }
+        }.sortedBy { it.first }.minByOrNull { it.first.length }?.second?.invoke()
     }
 
     @Synchronized
@@ -157,11 +159,8 @@ open class DumpManager @Inject constructor() {
         protoDump: SystemUIProtoDump,
         args: Array<String>
     ) {
-        for (dumpable in dumpables.values) {
-            if (dumpable.dumpable is ProtoDumpable && dumpable.name.endsWith(target)) {
-                dumpProtoDumpable(dumpable.dumpable, protoDump, args)
-                return
-            }
+        findBestProtoTargetMatch(dumpables, target)?.let {
+            dumpProtoDumpable(it, protoDump, args)
         }
     }
 
@@ -298,6 +297,22 @@ open class DumpManager @Inject constructor() {
         val existingDumpable = dumpables[name]?.dumpable ?: buffers[name]?.dumpable
         return existingDumpable == null || newDumpable == existingDumpable
     }
+
+    private fun <V : Any> findBestTargetMatch(map: Map<String, V>, target: String): V? = map
+        .asSequence()
+        .filter { it.key.endsWith(target) }
+        .minByOrNull { it.key.length }
+        ?.value
+
+    private fun findBestProtoTargetMatch(
+        map: Map<String, RegisteredDumpable<Dumpable>>,
+        target: String
+    ): ProtoDumpable? = map
+        .asSequence()
+        .filter { it.key.endsWith(target) }
+        .filter { it.value.dumpable is ProtoDumpable }
+        .minByOrNull { it.key.length }
+        ?.value?.dumpable as? ProtoDumpable
 }
 
 private data class RegisteredDumpable<T>(

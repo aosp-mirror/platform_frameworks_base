@@ -69,6 +69,10 @@
 
     <!-- The size of the dots in the PIN unlock method. -->
     <dimen name="password_dot_size">9dp</dimen>
+
+    <!-- The size of the shape in the PIN unlock method. -->
+    <dimen name="password_shape_size">30dp</dimen>
+
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">40</integer>
 
@@ -91,6 +95,8 @@
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
     <!-- additional offset for clock switch area items -->
+    <dimen name="small_clock_height">114dp</dimen>
+    <dimen name="small_clock_padding_top">28dp</dimen>
     <dimen name="clock_padding_start">28dp</dimen>
     <dimen name="below_clock_padding_start">32dp</dimen>
     <dimen name="below_clock_padding_end">16dp</dimen>
@@ -137,4 +143,14 @@
 
     <!-- Translation y for appear animation -->
     <dimen name="keyguard_host_view_translation_y">80dp</dimen>
+
+    <!-- Attributes for placeholder dots in 6 digit PIN view -->
+    <dimen name="default_dot_diameter">34dp</dimen>
+    <dimen name="default_dot_spacing">0dp</dimen>
+
+    <!-- Weather clock smartspace scaling to apply for the weather clock -->
+    <item name="weather_clock_smartspace_scale" type="dimen" format="float">1.0</item>
+    <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
+    <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
+
 </resources>

@@ -226,6 +226,10 @@
     <dimen name="bubble_user_education_padding_end">58dp</dimen>
     <!-- Padding between the bubble and the user education text. -->
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
+    <!-- Size of the bubble bar (height), should match transient_taskbar_size in Launcher. -->
+    <dimen name="bubblebar_size">72dp</dimen>
+    <!-- The size of the drag handle / menu shown along with a bubble bar expanded view. -->
+    <dimen name="bubblebar_expanded_view_menu_size">16dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
     <dimen name="compat_button_margin">24dp</dimen>
@@ -367,19 +371,34 @@
     <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
-    <!-- Width of buttons (32dp each) + padding (128dp total). -->
-    <dimen name="freeform_decor_caption_menu_width">256dp</dimen>
+    <!-- The width of the handle menu in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
 
-    <dimen name="freeform_decor_caption_menu_height">250dp</dimen>
+    <!-- The height of the handle menu's "App Info" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_app_info_pill_height">52dp</dimen>
+
+    <!-- The height of the handle menu's "Windowing" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_windowing_pill_height">52dp</dimen>
+
+    <!-- The height of the handle menu's "More Actions" pill in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_more_actions_pill_height">156dp</dimen>
+
+    <!-- The top margin of the handle menu in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_margin_top">4dp</dimen>
+
+    <!-- The start margin of the handle menu in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_margin_start">6dp</dimen>
+
+    <!-- The margin between pills of the handle menu in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_pill_spacing_margin">2dp</dimen>
+
+    <!-- The radius of the caption menu corners. -->
+    <dimen name="desktop_mode_handle_menu_corner_radius">26dp</dimen>
+
+    <!-- The radius of the caption menu shadow. -->
+    <dimen name="desktop_mode_handle_menu_shadow_radius">2dp</dimen>
 
     <dimen name="freeform_resize_handle">30dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
-
-    <!-- The radius of the caption menu shadow. -->
-    <dimen name="caption_menu_shadow_radius">4dp</dimen>
-
-    <!-- The radius of the caption menu corners. -->
-    <dimen name="caption_menu_corner_radius">20dp</dimen>
-
 </resources>

@@ -30,8 +30,15 @@ android_test {
         "compatibility-device-util-axt",
         "androidx.test.runner",
         "truth-prebuilt",
+        "Harrier",
     ],
     platform_apis: true,
+    certificate: "platform",
     test_suites: ["device-tests"],
-    data: [":AppEnumerationSyncProviderTestApp"],
+    data: [
+        ":AppEnumerationCrossUserPackageVisibilityTestApp",
+        ":AppEnumerationHasAppOpPermissionTestApp",
+        ":AppEnumerationSharedUserTestApp",
+        ":AppEnumerationSyncProviderTestApp",
+    ],
 }

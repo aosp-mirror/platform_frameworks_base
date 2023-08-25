@@ -100,7 +100,9 @@ java_library_static {
     name: "services.core.unboosted",
     defaults: ["platform_service_defaults"],
     srcs: [
-        ":android.hardware.biometrics.face-V2-java-source",
+        ":android.hardware.biometrics.face-V3-java-source",
+        ":android.hardware.tv.hdmi.connection-V1-java-source",
+        ":android.hardware.tv.hdmi.earc-V1-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
         ":services.core-sources",
@@ -130,10 +132,12 @@ java_library_static {
         "android.hardware.vibrator-V2-java",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
+        "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
     ],
+    plugins: ["ImmutabilityAnnotationProcessor"],
 
     required: [
         "default_television.xml",
@@ -144,11 +148,13 @@ java_library_static {
     static_libs: [
         "android.frameworks.location.altitude-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
+        "android.hardware.authsecret-V1-java",
         "android.hardware.boot-V1.0-java", // HIDL
         "android.hardware.boot-V1.1-java", // HIDL
         "android.hardware.boot-V1.2-java", // HIDL
         "android.hardware.boot-V1-java",   // AIDL
-        "android.hardware.broadcastradio-V2.0-java",
+        "android.hardware.broadcastradio-V2.0-java", // HIDL
+        "android.hardware.broadcastradio-V1-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
@@ -159,28 +165,36 @@ java_library_static {
         "android.hardware.tv.cec-V1.1-java",
         "android.hardware.tv.hdmi.cec-V1-java",
         "android.hardware.tv.hdmi.connection-V1-java",
+        "android.hardware.tv.hdmi.earc-V1-java",
         "android.hardware.weaver-V1.0-java",
+        "android.hardware.weaver-V2-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.3-java",
-        "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.oemlock-V1-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
-        "android.hardware.soundtrigger-V2.3-java",
-        "android.hardware.power.stats-V1-java",
-        "android.hardware.power-V3-java",
+        "android.hardware.power.stats-V2-java",
+        "android.hardware.power-V4-java",
         "android.hidl.manager-V1.2-java",
-        "capture_state_listener-aidl-java",
         "cbor-java",
         "icu4j_calendar_astronomer",
         "netd-client",
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
+        "ImmutabilityAnnotation",
+        "securebox",
     ],
     javac_shard_size: 50,
+    javacflags: [
+        "-J--add-modules=jdk.compiler",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
 }
 
 java_genrule {

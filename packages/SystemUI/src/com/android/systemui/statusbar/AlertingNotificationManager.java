@@ -49,6 +49,7 @@ public abstract class AlertingNotificationManager {
     }
 
     protected int mMinimumDisplayTime;
+    protected int mStickyDisplayTime;
     protected int mAutoDismissNotificationDecay;
     @VisibleForTesting
     public Handler mHandler;
@@ -198,7 +199,7 @@ public abstract class AlertingNotificationManager {
         if (entry != null && entry.isExpandAnimationRunning()) {
             return;
         }
-
+        entry.demoteStickyHun();
         mAlertEntries.remove(key);
         onAlertEntryRemoved(alertEntry);
         entry.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
@@ -233,7 +234,7 @@ public abstract class AlertingNotificationManager {
 
     /**
      * @param key
-     * @return true if the entry is pinned
+     * @return true if the entry is (pinned and expanded) or (has an active remote input)
      */
     public boolean isSticky(String key) {
         AlertEntry alerting = mAlertEntries.get(key);
@@ -282,31 +283,38 @@ public abstract class AlertingNotificationManager {
         public void updateEntry(boolean updatePostTime) {
             mLogger.logUpdateEntry(mEntry, updatePostTime);
 
-            long currentTime = mClock.currentTimeMillis();
-            mEarliestRemovaltime = currentTime + mMinimumDisplayTime;
+            final long now = mClock.currentTimeMillis();
+            mEarliestRemovaltime = now + mMinimumDisplayTime;
+
             if (updatePostTime) {
-                mPostTime = Math.max(mPostTime, currentTime);
+                mPostTime = Math.max(mPostTime, now);
             }
             removeAutoRemovalCallbacks();
 
             if (!isSticky()) {
-                long finishTime = calculateFinishTime();
-                long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
-                mHandler.postDelayed(mRemoveAlertRunnable, removeDelay);
+                final long finishTime = calculateFinishTime();
+                final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
             }
         }
 
         /**
          * Whether or not the notification is "sticky" i.e. should stay on screen regardless
-         * of the timer and should be removed externally.
+         * of the timer (forever) and should be removed externally.
          * @return true if the notification is sticky
          */
         public boolean isSticky() {
+            // This implementation is overridden by HeadsUpManager HeadsUpEntry #isSticky
+            return false;
+        }
+
+        public boolean isStickyForSomeTime() {
+            // This implementation is overridden by HeadsUpManager HeadsUpEntry #isStickyForSomeTime
             return false;
         }
 
         /**
-         * Whether the notification has been on screen long enough and can be removed.
+         * Whether the notification has befen on screen long enough and can be removed.
          * @return true if the notification has been on screen long enough
          */
         public boolean wasShownLongEnough() {
@@ -341,8 +349,9 @@ public abstract class AlertingNotificationManager {
         public void removeAsSoonAsPossible() {
             if (mRemoveAlertRunnable != null) {
                 removeAutoRemovalCallbacks();
-                mHandler.postDelayed(mRemoveAlertRunnable,
-                        mEarliestRemovaltime - mClock.currentTimeMillis());
+
+                final long timeLeft = mEarliestRemovaltime - mClock.currentTimeMillis();
+                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
             }
         }
 
@@ -355,11 +364,12 @@ public abstract class AlertingNotificationManager {
         }
 
         /**
-         * Calculate when the notification should auto-dismiss itself.
-         * @return the finish time
+         * @return When the notification should auto-dismiss itself, based on
+         * {@link SystemClock#elapsedRealTime()}
          */
         protected long calculateFinishTime() {
-            return mPostTime + mAutoDismissNotificationDecay;
+            // Overridden by HeadsUpManager HeadsUpEntry #calculateFinishTime
+            return 0;
         }
     }
 

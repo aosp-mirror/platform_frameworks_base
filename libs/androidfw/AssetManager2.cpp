@@ -22,6 +22,7 @@
 #include <iterator>
 #include <map>
 #include <set>
+#include <span>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
@@ -43,28 +44,19 @@ namespace {
 
 using EntryValue = std::variant<Res_value, incfs::verified_map_ptr<ResTable_map_entry>>;
 
+/* NOTE: table_entry has been verified in LoadedPackage::GetEntryFromOffset(),
+ * and so access to ->value() and ->map_entry() are safe here
+ */
 base::expected<EntryValue, IOError> GetEntryValue(
     incfs::verified_map_ptr<ResTable_entry> table_entry) {
-  const uint16_t entry_size = dtohs(table_entry->size);
+  const uint16_t entry_size = table_entry->size();
 
   // Check if the entry represents a bag value.
-  if (entry_size >= sizeof(ResTable_map_entry) &&
-      (dtohs(table_entry->flags) & ResTable_entry::FLAG_COMPLEX)) {
-    const auto map_entry = table_entry.convert<ResTable_map_entry>();
-    if (!map_entry) {
-      return base::unexpected(IOError::PAGES_MISSING);
-    }
-    return map_entry.verified();
+  if (entry_size >= sizeof(ResTable_map_entry) && table_entry->is_complex()) {
+    return table_entry.convert<ResTable_map_entry>().verified();
   }
 
-  // The entry represents a non-bag value.
-  const auto entry_value = table_entry.offset(entry_size).convert<Res_value>();
-  if (!entry_value) {
-    return base::unexpected(IOError::PAGES_MISSING);
-  }
-  Res_value value;
-  value.copyFrom_dtoh(entry_value.value());
-  return value;
+  return table_entry->value();
 }
 
 } // namespace
@@ -120,7 +112,7 @@ void AssetManager2::BuildDynamicRefTable() {
   // A mapping from path of apk assets that could be target packages of overlays to the runtime
   // package id of its first loaded package. Overlays currently can only override resources in the
   // first package in the target resource table.
-  std::unordered_map<std::string, uint8_t> target_assets_package_ids;
+  std::unordered_map<std::string_view, uint8_t> target_assets_package_ids;
 
   // Overlay resources are not directly referenced by an application so their resource ids
   // can change throughout the application's lifetime. Assign overlay package ids last.
@@ -143,7 +135,7 @@ void AssetManager2::BuildDynamicRefTable() {
     if (auto loaded_idmap = apk_assets->GetLoadedIdmap(); loaded_idmap != nullptr) {
       // The target package must precede the overlay package in the apk assets paths in order
       // to take effect.
-      auto iter = target_assets_package_ids.find(std::string(loaded_idmap->TargetApkPath()));
+      auto iter = target_assets_package_ids.find(loaded_idmap->TargetApkPath());
       if (iter == target_assets_package_ids.end()) {
          LOG(INFO) << "failed to find target package for overlay "
                    << loaded_idmap->OverlayApkPath();
@@ -188,7 +180,7 @@ void AssetManager2::BuildDynamicRefTable() {
         if (overlay_ref_table != nullptr) {
           // If this package is from an overlay, use a dynamic reference table that can rewrite
           // overlay resource ids to their corresponding target resource ids.
-          new_group.dynamic_ref_table = overlay_ref_table;
+          new_group.dynamic_ref_table = std::move(overlay_ref_table);
         }
 
         DynamicRefTable* ref_table = new_group.dynamic_ref_table.get();
@@ -196,9 +188,9 @@ void AssetManager2::BuildDynamicRefTable() {
         ref_table->mAppAsLib = package->IsDynamic() && package->GetPackageId() == 0x7f;
       }
 
-      // Add the package and to the set of packages with the same ID.
+      // Add the package to the set of packages with the same ID.
       PackageGroup* package_group = &package_groups_[idx];
-      package_group->packages_.push_back(ConfiguredPackage{package.get(), {}});
+      package_group->packages_.emplace_back().loaded_package_ = package.get();
       package_group->cookies_.push_back(apk_assets_cookies[apk_assets]);
 
       // Add the package name -> build time ID mappings.
@@ -210,29 +202,38 @@ void AssetManager2::BuildDynamicRefTable() {
 
       if (auto apk_assets_path = apk_assets->GetPath()) {
         // Overlay target ApkAssets must have been created using path based load apis.
-        target_assets_package_ids.insert(std::make_pair(std::string(*apk_assets_path), package_id));
+        target_assets_package_ids.emplace(*apk_assets_path, package_id);
       }
     }
   }
 
   // Now assign the runtime IDs so that we have a build-time to runtime ID map.
-  const auto package_groups_end = package_groups_.end();
-  for (auto iter = package_groups_.begin(); iter != package_groups_end; ++iter) {
-    const std::string& package_name = iter->packages_[0].loaded_package_->GetPackageName();
-    for (auto iter2 = package_groups_.begin(); iter2 != package_groups_end; ++iter2) {
-      iter2->dynamic_ref_table->addMapping(String16(package_name.c_str(), package_name.size()),
-                                           iter->dynamic_ref_table->mAssignedPackageId);
-
-      // Add the alias resources to the dynamic reference table of every package group. Since
-      // staging aliases can only be defined by the framework package (which is not a shared
-      // library), the compile-time package id of the framework is the same across all packages
-      // that compile against the framework.
-      for (const auto& package : iter->packages_) {
-        for (const auto& entry : package.loaded_package_->GetAliasResourceIdMap()) {
-          iter2->dynamic_ref_table->addAlias(entry.first, entry.second);
-        }
-      }
+  DynamicRefTable::AliasMap aliases;
+  for (const auto& group : package_groups_) {
+    const std::string& package_name = group.packages_[0].loaded_package_->GetPackageName();
+    const auto name_16 = String16(package_name.c_str(), package_name.size());
+    for (auto&& inner_group : package_groups_) {
+      inner_group.dynamic_ref_table->addMapping(name_16,
+                                                group.dynamic_ref_table->mAssignedPackageId);
     }
+
+    for (const auto& package : group.packages_) {
+      const auto& package_aliases = package.loaded_package_->GetAliasResourceIdMap();
+      aliases.insert(aliases.end(), package_aliases.begin(), package_aliases.end());
+    }
+  }
+
+  if (!aliases.empty()) {
+    std::sort(aliases.begin(), aliases.end(), [](auto&& l, auto&& r) { return l.first < r.first; });
+
+    // Add the alias resources to the dynamic reference table of every package group. Since
+    // staging aliases can only be defined by the framework package (which is not a shared
+    // library), the compile-time package id of the framework is the same across all packages
+    // that compile against the framework.
+    for (auto& group : std::span(package_groups_.data(), package_groups_.size() - 1)) {
+      group.dynamic_ref_table->setAliases(aliases);
+    }
+    package_groups_.back().dynamic_ref_table->setAliases(std::move(aliases));
   }
 }
 
@@ -326,7 +327,7 @@ const std::unordered_map<std::string, std::string>*
   return &loaded_package->GetOverlayableMap();
 }
 
-bool AssetManager2::GetOverlayablesToString(const android::StringPiece& package_name,
+bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
                                             std::string* out) const {
   uint8_t package_id = 0U;
   for (const auto& apk_assets : apk_assets_) {
@@ -373,7 +374,7 @@ bool AssetManager2::GetOverlayablesToString(const android::StringPiece& package_
         const std::string name = ToFormattedResourceString(*res_name);
         output.append(base::StringPrintf(
             "resource='%s' overlayable='%s' actor='%s' policy='0x%08x'\n",
-            name.c_str(), info->name.c_str(), info->actor.c_str(), info->policy_flags));
+            name.c_str(), info->name.data(), info->actor.data(), info->policy_flags));
       }
     }
   }
@@ -501,7 +502,7 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
       continue;
     }
 
-    auto func = [&](const StringPiece& name, FileType type) {
+    auto func = [&](StringPiece name, FileType type) {
       AssetDir::FileInfo info;
       info.setFileName(String8(name.data(), name.size()));
       info.setFileType(type);
@@ -611,7 +612,21 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
       }
       if (overlay_entry.IsInlineValue()) {
         // The target resource is overlaid by an inline value not represented by a resource.
-        result->entry = overlay_entry.GetInlineValue();
+        ConfigDescription best_frro_config;
+        Res_value best_frro_value;
+        bool frro_found = false;
+        for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
+          if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
+              && config.match(*desired_config)) {
+            frro_found = true;
+            best_frro_config = config;
+            best_frro_value = value;
+          }
+        }
+        if (!frro_found) {
+          continue;
+        }
+        result->entry = best_frro_value;
         result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
         result->cookie = id_map.cookie;
 
@@ -800,17 +815,12 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     return base::unexpected(std::nullopt);
   }
 
-  auto best_entry_result = LoadedPackage::GetEntryFromOffset(best_type, best_offset);
-  if (!best_entry_result.has_value()) {
-    return base::unexpected(best_entry_result.error());
+  auto best_entry_verified = LoadedPackage::GetEntryFromOffset(best_type, best_offset);
+  if (!best_entry_verified.has_value()) {
+    return base::unexpected(best_entry_verified.error());
   }
 
-  const incfs::map_ptr<ResTable_entry> best_entry = *best_entry_result;
-  if (!best_entry) {
-    return base::unexpected(IOError::PAGES_MISSING);
-  }
-
-  const auto entry = GetEntryValue(best_entry.verified());
+  const auto entry = GetEntryValue(*best_entry_verified);
   if (!entry.has_value()) {
     return base::unexpected(entry.error());
   }
@@ -823,7 +833,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     .package_name = &best_package->GetPackageName(),
     .type_string_ref = StringPoolRef(best_package->GetTypeStringPool(), best_type->id - 1),
     .entry_string_ref = StringPoolRef(best_package->GetKeyStringPool(),
-                                      best_entry->key.index),
+                                      (*best_entry_verified)->key()),
     .dynamic_ref_table = package_group.dynamic_ref_table.get(),
   };
 }
@@ -1054,7 +1064,7 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::ResolveBag(
 base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(uint32_t resid) const {
   std::vector<uint32_t> found_resids;
   const auto bag = GetBag(resid, found_resids);
-  cached_bag_resid_stacks_.emplace(resid, found_resids);
+  cached_bag_resid_stacks_.emplace(resid, std::move(found_resids));
   return bag;
 }
 
@@ -1271,7 +1281,7 @@ base::expected<const ResolvedBag*, NullOrIOError> AssetManager2::GetBag(
   return result;
 }
 
-static bool Utf8ToUtf16(const StringPiece& str, std::u16string* out) {
+static bool Utf8ToUtf16(StringPiece str, std::u16string* out) {
   ssize_t len =
       utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(str.data()), str.size(), false);
   if (len < 0) {
@@ -1346,22 +1356,22 @@ base::expected<uint32_t, NullOrIOError> AssetManager2::GetResourceId(
 
 void AssetManager2::RebuildFilterList() {
   for (PackageGroup& group : package_groups_) {
-    for (ConfiguredPackage& impl : group.packages_) {
-      // Destroy it.
-      impl.filtered_configs_.~ByteBucketArray();
-
-      // Re-create it.
-      new (&impl.filtered_configs_) ByteBucketArray<FilteredConfigGroup>();
-
+    for (ConfiguredPackage& package : group.packages_) {
+      package.filtered_configs_.forEachItem([](auto, auto& fcg) { fcg.type_entries.clear(); });
       // Create the filters here.
-      impl.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
-        FilteredConfigGroup& group = impl.filtered_configs_.editItemAt(type_id - 1);
+      package.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
+        FilteredConfigGroup* group = nullptr;
         for (const auto& type_entry : type_spec.type_entries) {
           if (type_entry.config.match(configuration_)) {
-            group.type_entries.push_back(&type_entry);
+            if (!group) {
+              group = &package.filtered_configs_.editItemAt(type_id - 1);
+            }
+            group->type_entries.push_back(&type_entry);
           }
         }
       });
+      package.filtered_configs_.trimBuckets(
+          [](const auto& fcg) { return fcg.type_entries.empty(); });
     }
   }
 }
@@ -1402,8 +1412,21 @@ uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const 
 std::unique_ptr<Theme> AssetManager2::NewTheme() {
   constexpr size_t kInitialReserveSize = 32;
   auto theme = std::unique_ptr<Theme>(new Theme(this));
+  theme->keys_.reserve(kInitialReserveSize);
   theme->entries_.reserve(kInitialReserveSize);
   return theme;
+}
+
+void AssetManager2::ForEachPackage(base::function_ref<bool(const std::string&, uint8_t)> func,
+                                   package_property_t excluded_property_flags) const {
+  for (const PackageGroup& package_group : package_groups_) {
+    const auto loaded_package = package_group.packages_.front().loaded_package_;
+    if ((loaded_package->GetPropertyFlags() & excluded_property_flags) == 0U
+        && !func(loaded_package->GetPackageName(),
+                 package_group.dynamic_ref_table->mAssignedPackageId)) {
+      return;
+    }
+  }
 }
 
 Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
@@ -1412,19 +1435,10 @@ Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 Theme::~Theme() = default;
 
 struct Theme::Entry {
-  uint32_t attr_res_id;
   ApkAssetsCookie cookie;
   uint32_t type_spec_flags;
   Res_value value;
 };
-
-namespace {
-struct ThemeEntryKeyComparer {
-  bool operator() (const Theme::Entry& entry, uint32_t attr_res_id) const noexcept {
-    return entry.attr_res_id < attr_res_id;
-  }
-};
-} // namespace
 
 base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, bool force) {
   ATRACE_NAME("Theme::ApplyStyle");
@@ -1454,19 +1468,20 @@ base::expected<std::monostate, NullOrIOError> Theme::ApplyStyle(uint32_t resid, 
       continue;
     }
 
-    Theme::Entry new_entry{attr_res_id, it->cookie, (*bag)->type_spec_flags, it->value};
-    auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), attr_res_id,
-                                     ThemeEntryKeyComparer{});
-    if (entry_it != entries_.end() && entry_it->attr_res_id == attr_res_id) {
+    const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), attr_res_id);
+    const auto entry_it = entries_.begin() + (key_it - keys_.begin());
+    if (key_it != keys_.end() && *key_it == attr_res_id) {
       if (is_undefined) {
         // DATA_NULL_UNDEFINED clears the value of the attribute in the theme only when `force` is
-        /// true.
+        // true.
+        keys_.erase(key_it);
         entries_.erase(entry_it);
       } else if (force) {
-        *entry_it = new_entry;
+        *entry_it = Entry{it->cookie, (*bag)->type_spec_flags, it->value};
       }
     } else {
-      entries_.insert(entry_it, new_entry);
+      keys_.insert(key_it, attr_res_id);
+      entries_.insert(entry_it, Entry{it->cookie, (*bag)->type_spec_flags, it->value});
     }
   }
   return {};
@@ -1477,6 +1492,7 @@ void Theme::Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* 
   ATRACE_NAME("Theme::Rebase");
   // Reset the entries without changing the vector capacity to prevent reallocations during
   // ApplyStyle.
+  keys_.clear();
   entries_.clear();
   asset_manager_ = am;
   for (size_t i = 0; i < style_count; i++) {
@@ -1485,16 +1501,14 @@ void Theme::Rebase(AssetManager2* am, const uint32_t* style_ids, const uint8_t* 
 }
 
 std::optional<AssetManager2::SelectedValue> Theme::GetAttribute(uint32_t resid) const {
-
   constexpr const uint32_t kMaxIterations = 20;
   uint32_t type_spec_flags = 0u;
   for (uint32_t i = 0; i <= kMaxIterations; i++) {
-    auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), resid,
-                                     ThemeEntryKeyComparer{});
-    if (entry_it == entries_.end() || entry_it->attr_res_id != resid) {
+    const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), resid);
+    if (key_it == keys_.end() || *key_it != resid) {
       return std::nullopt;
     }
-
+    const auto entry_it = entries_.begin() + (key_it - keys_.begin());
     type_spec_flags |= entry_it->type_spec_flags;
     if (entry_it->value.dataType == Res_value::TYPE_ATTRIBUTE) {
       resid = entry_it->value.data;
@@ -1528,6 +1542,7 @@ base::expected<std::monostate, NullOrIOError> Theme::ResolveAttributeReference(
 }
 
 void Theme::Clear() {
+  keys_.clear();
   entries_.clear();
 }
 
@@ -1539,18 +1554,19 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
   type_spec_flags_ = source.type_spec_flags_;
 
   if (asset_manager_ == source.asset_manager_) {
+    keys_ = source.keys_;
     entries_ = source.entries_;
   } else {
-    std::map<ApkAssetsCookie, ApkAssetsCookie> src_to_dest_asset_cookies;
-    typedef std::map<int, int> SourceToDestinationRuntimePackageMap;
-    std::map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
+    std::unordered_map<ApkAssetsCookie, ApkAssetsCookie> src_to_dest_asset_cookies;
+    using SourceToDestinationRuntimePackageMap = std::unordered_map<int, int>;
+    std::unordered_map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
     // Determine which ApkAssets are loaded in both theme AssetManagers.
-    const auto src_assets = source.asset_manager_->GetApkAssets();
+    const auto& src_assets = source.asset_manager_->GetApkAssets();
     for (size_t i = 0; i < src_assets.size(); i++) {
       const ApkAssets* src_asset = src_assets[i];
 
-      const auto dest_assets = asset_manager_->GetApkAssets();
+      const auto& dest_assets = asset_manager_->GetApkAssets();
       for (size_t j = 0; j < dest_assets.size(); j++) {
         const ApkAssets* dest_asset = dest_assets[j];
         if (src_asset != dest_asset) {
@@ -1571,15 +1587,17 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         }
 
         src_to_dest_asset_cookies.insert(std::make_pair(i, j));
-        src_asset_cookie_id_map.insert(std::make_pair(i, package_map));
+        src_asset_cookie_id_map.insert(std::make_pair(i, std::move(package_map)));
         break;
       }
     }
 
     // Reset the data in the destination theme.
+    keys_.clear();
     entries_.clear();
 
-    for (const auto& entry : source.entries_) {
+    for (size_t i = 0, size = source.entries_.size(); i != size; ++i) {
+      const auto& entry = source.entries_[i];
       bool is_reference = (entry.value.dataType == Res_value::TYPE_ATTRIBUTE
                            || entry.value.dataType == Res_value::TYPE_REFERENCE
                            || entry.value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE
@@ -1619,13 +1637,15 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         }
       }
 
+      const auto source_res_id = source.keys_[i];
+
       // The package id of the attribute needs to be rewritten to the package id of the
       // attribute in the destination.
-      int attribute_dest_package_id = get_package_id(entry.attr_res_id);
+      int attribute_dest_package_id = get_package_id(source_res_id);
       if (attribute_dest_package_id != 0x01) {
         // Find the cookie of the attribute resource id in the source AssetManager
         base::expected<FindEntryResult, NullOrIOError> attribute_entry_result =
-            source.asset_manager_->FindEntry(entry.attr_res_id, 0 /* density_override */ ,
+            source.asset_manager_->FindEntry(source_res_id, 0 /* density_override */ ,
                                              true /* stop_at_first_match */,
                                              true /* ignore_configuration */);
         if (UNLIKELY(IsIOError(attribute_entry_result))) {
@@ -1649,16 +1669,15 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
         attribute_dest_package_id = attribute_dest_package->second;
       }
 
-      auto dest_attr_id = make_resid(attribute_dest_package_id, get_type_id(entry.attr_res_id),
-                                     get_entry_id(entry.attr_res_id));
-      Theme::Entry new_entry{dest_attr_id, data_dest_cookie, entry.type_spec_flags,
-                                            Res_value{.dataType = entry.value.dataType,
-                                                      .data = attribute_data}};
-
+      auto dest_attr_id = make_resid(attribute_dest_package_id, get_type_id(source_res_id),
+                                     get_entry_id(source_res_id));
+      const auto key_it = std::lower_bound(keys_.begin(), keys_.end(), dest_attr_id);
+      const auto entry_it = entries_.begin() + (key_it - keys_.begin());
       // Since the entries were cleared, the attribute resource id has yet been mapped to any value.
-      auto entry_it = std::lower_bound(entries_.begin(), entries_.end(), dest_attr_id,
-                                       ThemeEntryKeyComparer{});
-      entries_.insert(entry_it, new_entry);
+      keys_.insert(key_it, dest_attr_id);
+      entries_.insert(entry_it, Entry{data_dest_cookie, entry.type_spec_flags,
+                                      Res_value{.dataType = entry.value.dataType,
+                                                .data = attribute_data}});
     }
   }
   return {};
@@ -1666,9 +1685,11 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
 
 void Theme::Dump() const {
   LOG(INFO) << base::StringPrintf("Theme(this=%p, AssetManager2=%p)", this, asset_manager_);
-  for (auto& entry : entries_) {
+  for (size_t i = 0, size = keys_.size(); i != size; ++i) {
+    auto res_id = keys_[i];
+    const auto& entry = entries_[i];
     LOG(INFO) << base::StringPrintf("  entry(0x%08x)=(0x%08x) type=(0x%02x), cookie(%d)",
-                                    entry.attr_res_id, entry.value.data, entry.value.dataType,
+                                    res_id, entry.value.data, entry.value.dataType,
                                     entry.cookie);
   }
 }

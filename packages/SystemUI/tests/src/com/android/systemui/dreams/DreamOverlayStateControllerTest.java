@@ -31,7 +31,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -235,6 +235,23 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testComplicationsNotShownForLowLight() {
+        final Complication complication = Mockito.mock(Complication.class);
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        // Add a complication and verify it's returned in getComplications.
+        stateController.addComplication(complication);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications().contains(complication))
+                .isTrue();
+
+        stateController.setLowLightActive(true);
+        mExecutor.runAllReady();
+
+        assertThat(stateController.getComplications()).isEmpty();
+    }
+
+    @Test
     public void testNotifyLowLightChanged() {
         final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
 
@@ -288,21 +305,46 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldShowComplicationsSetToFalse_stillShowsSupportedTypes_featureEnabled() {
+    public void testNotifyDreamOverlayStatusBarVisibleChanged() {
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.isDreamOverlayStatusBarVisible()).isFalse();
+
+        stateController.setDreamOverlayStatusBarVisible(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.isDreamOverlayStatusBarVisible()).isTrue();
+    }
+
+    @Test
+    public void testNotifyHasAssistantAttentionChanged() {
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.hasAssistantAttention()).isFalse();
+
+        stateController.setHasAssistantAttention(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.hasAssistantAttention()).isTrue();
+    }
+
+    @Test
+    public void testShouldShowComplicationsSetToFalse_stillShowsHomeControls_featureEnabled() {
         when(mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)).thenReturn(true);
 
         final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
         stateController.setShouldShowComplications(true);
 
-        final Complication noneComplication = Mockito.mock(Complication.class);
-        when(noneComplication.getRequiredTypeAvailability())
-                .thenReturn(Complication.COMPLICATION_TYPE_NONE);
-
         final Complication homeControlsComplication = Mockito.mock(Complication.class);
         when(homeControlsComplication.getRequiredTypeAvailability())
                 .thenReturn(Complication.COMPLICATION_TYPE_HOME_CONTROLS);
 
-        stateController.addComplication(noneComplication);
         stateController.addComplication(homeControlsComplication);
 
         final DreamOverlayStateController.Callback callback =
@@ -320,7 +362,6 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
 
             verify(callback).onAvailableComplicationTypesChanged();
             final Collection<Complication> complications = stateController.getComplications();
-            assertThat(complications.contains(noneComplication)).isTrue();
             assertThat(complications.contains(homeControlsComplication)).isTrue();
         }
 
@@ -331,9 +372,36 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
 
             verify(callback).onAvailableComplicationTypesChanged();
             final Collection<Complication> complications = stateController.getComplications();
-            assertThat(complications.contains(noneComplication)).isTrue();
             assertThat(complications.contains(homeControlsComplication)).isTrue();
         }
+    }
+
+    @Test
+    public void testHomeControlsDoNotShowIfNotAvailable_featureEnabled() {
+        when(mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)).thenReturn(true);
+
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+        stateController.setShouldShowComplications(true);
+
+        final Complication homeControlsComplication = Mockito.mock(Complication.class);
+        when(homeControlsComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_HOME_CONTROLS);
+
+        stateController.addComplication(homeControlsComplication);
+
+        final DreamOverlayStateController.Callback callback =
+                Mockito.mock(DreamOverlayStateController.Callback.class);
+
+        stateController.addCallback(callback);
+        mExecutor.runAllReady();
+
+        // No home controls since it is not available.
+        assertThat(stateController.getComplications()).doesNotContain(homeControlsComplication);
+
+        stateController.setAvailableComplicationTypes(Complication.COMPLICATION_TYPE_HOME_CONTROLS
+                | Complication.COMPLICATION_TYPE_WEATHER);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications()).contains(homeControlsComplication);
     }
 
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {

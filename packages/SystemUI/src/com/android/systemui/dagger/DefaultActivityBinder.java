@@ -19,15 +19,20 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.contrast.ContrastDialogActivity;
 import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.screenshot.LongScreenshotActivity;
+import com.android.systemui.screenshot.appclips.AppClipsActivity;
+import com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
+import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity;
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
+import com.android.systemui.telephony.ui.activity.SwitchToManagedProfileForCallActivity;
 import com.android.systemui.tuner.TunerActivity;
 import com.android.systemui.usb.UsbAccessoryUriActivity;
 import com.android.systemui.usb.UsbConfirmActivity;
@@ -69,6 +74,12 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(BrightnessDialog.class)
     public abstract Activity bindBrightnessDialog(BrightnessDialog activity);
+
+    /** Inject into ContrastDialogActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(ContrastDialogActivity.class)
+    public abstract Activity bindContrastDialogActivity(ContrastDialogActivity activity);
 
     /** Inject into UsbDebuggingActivity. */
     @Binds
@@ -125,6 +136,18 @@ public abstract class DefaultActivityBinder {
     @ClassKey(LongScreenshotActivity.class)
     public abstract Activity bindLongScreenshotActivity(LongScreenshotActivity activity);
 
+    /** Inject into AppClipsTrampolineActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsTrampolineActivity.class)
+    public abstract Activity bindAppClipsTrampolineActivity(AppClipsTrampolineActivity activity);
+
+    /** Inject into AppClipsActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsActivity.class)
+    public abstract Activity bindAppClipsActivity(AppClipsActivity activity);
+
     /** Inject into LaunchConversationActivity. */
     @Binds
     @IntoMap
@@ -149,4 +172,18 @@ public abstract class DefaultActivityBinder {
     @ClassKey(HdmiCecSetMenuLanguageActivity.class)
     public abstract Activity bindHdmiCecSetMenuLanguageActivity(
             HdmiCecSetMenuLanguageActivity activity);
+
+    /** Inject into TvSensorPrivacyChangedActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvSensorPrivacyChangedActivity.class)
+    public abstract Activity bindTvSensorPrivacyChangedActivity(
+            TvSensorPrivacyChangedActivity activity);
+
+    /** Inject into SwitchToManagedProfileForCallActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(SwitchToManagedProfileForCallActivity.class)
+    public abstract Activity bindSwitchToManagedProfileForCallActivity(
+            SwitchToManagedProfileForCallActivity activity);
 }

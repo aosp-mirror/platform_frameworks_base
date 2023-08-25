@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
@@ -39,6 +40,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -87,24 +89,31 @@ public class RotationLockTileTest extends SysuiTestCase {
     DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
     @Mock
     RotationPolicyWrapper mRotationPolicyWrapper;
+    @Mock
+    QsEventLogger mUiEventLogger;
 
     private RotationLockController mController;
     private TestableLooper mTestableLooper;
     private RotationLockTile mLockTile;
+    private TestableResources mTestableResources;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
+        mTestableResources = mContext.getOrCreateTestableResources();
 
         when(mHost.getContext()).thenReturn(mContext);
         when(mHost.getUserContext()).thenReturn(mContext);
+        mTestableResources.addOverride(com.android.internal.R.bool.config_allowRotationResolver,
+                true);
 
         mController = new RotationLockControllerImpl(mRotationPolicyWrapper,
                 mDeviceStateRotationLockSettingController, DEFAULT_SETTINGS);
 
         mLockTile = new RotationLockTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -196,6 +205,32 @@ public class RotationLockTileTest extends SysuiTestCase {
     public void testSecondaryString_noCameraPermission_isEmpty() {
         doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
                 Manifest.permission.CAMERA, PACKAGE_NAME);
+
+        mLockTile.refreshState();
+        mTestableLooper.processAllMessages();
+
+        assertEquals("", mLockTile.getState().secondaryLabel.toString());
+    }
+
+    @Test
+    public void testSecondaryString_rotationResolverDisabled_isEmpty() {
+        mTestableResources.addOverride(com.android.internal.R.bool.config_allowRotationResolver,
+                false);
+        mLockTile = new RotationLockTile(
+                mHost,
+                mUiEventLogger,
+                mTestableLooper.getLooper(),
+                new Handler(mTestableLooper.getLooper()),
+                new FalsingManagerFake(),
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQSLogger,
+                mController,
+                mPrivacyManager,
+                mBatteryController,
+                new FakeSettings()
+        );
 
         mLockTile.refreshState();
         mTestableLooper.processAllMessages();

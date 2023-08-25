@@ -126,6 +126,11 @@ public:
      */
     Result close();
 
+    /**
+     * Set status check time interval.
+     */
+    Result setStatusCheckIntervalHint(int64_t durationInMs);
+
 private:
     /**
      * An AIDL Tuner Dvr Singleton assigned at the first time the Tuner Client
