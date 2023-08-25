@@ -228,6 +228,8 @@ public final class JobStatus {
     /** The minimum possible update delay is 1 second. */
     public static final long MIN_TRIGGER_MAX_DELAY = 1000;
 
+    private JobSchedulerInternal mJobSchedulerInternal;
+
     final JobInfo job;
     /**
      * Uid of the package requesting this job.  This can differ from the "source"
@@ -1152,8 +1154,10 @@ public final class JobStatus {
      * exemptions.
      */
     public int getEffectiveStandbyBucket() {
-        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
-        final boolean isBuggy = jsi.isAppConsideredBuggy(
+        if (mJobSchedulerInternal == null) {
+            mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
+        }
+        final boolean isBuggy = mJobSchedulerInternal.isAppConsideredBuggy(
                 getUserId(), getServiceComponent().getPackageName(),
                 getTimeoutBlameUserId(), getTimeoutBlamePackageName());
 
@@ -1262,12 +1266,15 @@ public final class JobStatus {
      * @return true if the exemption status changed
      */
     public boolean updateMediaBackupExemptionStatus() {
-        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        if (mJobSchedulerInternal == null) {
+            mJobSchedulerInternal = LocalServices.getService(JobSchedulerInternal.class);
+        }
         boolean hasMediaExemption = mHasExemptedMediaUrisOnly
                 && !job.hasLateConstraint()
                 && job.getRequiredNetwork() != null
                 && getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT
-                && sourcePackageName.equals(jsi.getCloudMediaProviderPackage(sourceUserId));
+                && sourcePackageName.equals(
+                        mJobSchedulerInternal.getCloudMediaProviderPackage(sourceUserId));
         if (mHasMediaBackupExemption == hasMediaExemption) {
             return false;
         }

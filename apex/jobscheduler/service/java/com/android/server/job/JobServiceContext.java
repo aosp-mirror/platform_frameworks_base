@@ -161,6 +161,7 @@ public final class JobServiceContext implements ServiceConnection {
     private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
     private final PowerManager mPowerManager;
+    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private PowerManager.WakeLock mWakeLock;
 
     // Execution state.
@@ -321,6 +322,7 @@ public final class JobServiceContext implements ServiceConnection {
         mNotificationCoordinator = notificationCoordinator;
         mCompletedListener = service;
         mPowerManager = mContext.getSystemService(PowerManager.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mAvailable = true;
         mVerb = VERB_FINISHED;
         mPreferredUid = NO_PREFERRED_UID;
@@ -536,9 +538,8 @@ public final class JobServiceContext implements ServiceConnection {
                 // Whatever.
             }
             final int jobUserId = job.getSourceUserId();
-            UsageStatsManagerInternal usageStats =
-                    LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
+            mUsageStatsManagerInternal
+                    .setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
