@@ -581,19 +581,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking splash screen status from previous activity
     boolean mSplashScreenStyleSolidColor = false;
 
-    Drawable mEnterpriseThumbnailDrawable;
-
     boolean mPauseSchedulePendingForPip = false;
 
     // Gets set to indicate that the activity is currently being auto-pipped.
     boolean mAutoEnteringPip = false;
-
-    private void updateEnterpriseThumbnailDrawable(Context context) {
-        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
-                WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
-                () -> context.getDrawable(R.drawable.ic_corp_badge));
-    }
 
     static final int LAUNCH_SOURCE_TYPE_SYSTEM = 1;
     static final int LAUNCH_SOURCE_TYPE_HOME = 2;
@@ -2208,8 +2199,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
-
-        updateEnterpriseThumbnailDrawable(mAtmService.getUiContext());
 
         boolean appActivityEmbeddingEnabled = false;
         try {
@@ -7695,9 +7684,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Rect frame = win.getRelativeFrame();
-        final Drawable thumbnailDrawable = task.mUserId == mWmService.mCurrentUserId
-                ? mAtmService.getUiContext().getDrawable(R.drawable.ic_account_circle)
-                : mEnterpriseThumbnailDrawable;
+        final Context context = mAtmService.getUiContext();
+        final Drawable thumbnailDrawable;
+        if (task.mUserId == mWmService.mCurrentUserId) {
+            thumbnailDrawable = context.getDrawable(R.drawable.ic_account_circle);
+        } else {
+            final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+            thumbnailDrawable = dpm.getResources().getDrawable(
+                    WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
+                    () -> context.getDrawable(R.drawable.ic_corp_badge));
+        }
         final HardwareBuffer thumbnail = getDisplayContent().mAppTransition
                 .createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
         if (thumbnail == null) {
