@@ -151,13 +151,24 @@ class NotificationLaunchAnimatorController(
         }
     }
 
-    private fun removeHun(animate: Boolean) {
-        if (!headsUpManager.isAlerting(notificationKey)) {
-            return
-        }
+    private val headsUpNotificationRow: ExpandableNotificationRow? get() {
+        val summaryEntry = notificationEntry.parent?.summary
 
+        return when {
+            headsUpManager.isAlerting(notificationKey) -> notification
+            summaryEntry == null -> null
+            headsUpManager.isAlerting(summaryEntry.key) -> summaryEntry.row
+            else -> null
+        }
+    }
+
+    private fun removeHun(animate: Boolean) {
+        val row = headsUpNotificationRow ?: return
+
+        // TODO: b/297247841 - Call on the row we're removing, which may differ from notification.
         HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(notification, animate)
-        headsUpManager.removeNotification(notificationKey, true /* releaseImmediately */, animate)
+
+        headsUpManager.removeNotification(row.entry.key, true /* releaseImmediately */, animate)
     }
 
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
