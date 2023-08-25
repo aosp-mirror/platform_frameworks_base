@@ -16,11 +16,15 @@
 
 package android.util;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.FontScaleConverter;
 import android.os.SystemProperties;
 import android.view.WindowManager;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * A structure describing general information about a display, such as its
@@ -39,6 +43,35 @@ import android.view.WindowManager;
  *
  */
 public class DisplayMetrics {
+
+    @IntDef(prefix = { "DENSITY_" }, value = {
+            DENSITY_LOW,
+            DENSITY_140,
+            DENSITY_MEDIUM,
+            DENSITY_180,
+            DENSITY_200,
+            DENSITY_TV,
+            DENSITY_220,
+            DENSITY_HIGH,
+            DENSITY_260,
+            DENSITY_280,
+            DENSITY_300,
+            DENSITY_XHIGH,
+            DENSITY_340,
+            DENSITY_360,
+            DENSITY_400,
+            DENSITY_420,
+            DENSITY_440,
+            DENSITY_450,
+            DENSITY_XXHIGH,
+            DENSITY_520,
+            DENSITY_560,
+            DENSITY_600,
+            DENSITY_XXXHIGH,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DensityDpi{}
+
     /**
      * Standard quantized DPI for low-density screens.
      */
@@ -282,6 +315,7 @@ public class DisplayMetrics {
      * versions may be backported to previous Android versions, so applications
      * should not strongly rely on density matching one of the enum constants.
      */
+    @DensityDpi
     public int densityDpi;
     /**
      * A scaling factor for fonts displayed on the display.  This is the same
