@@ -78,7 +78,7 @@
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"انتخاب روش ورود به سیستم برای <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"گزینه‌ای را برای <xliff:g id="APP_NAME">%1$s</xliff:g> انتخاب کنید؟"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"از این اطلاعات در <xliff:g id="APP_NAME">%1$s</xliff:g> استفاده شود؟"</string>
-    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ورود به سیستم به روشی دیگر"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ورود به سیستم به یک روش دیگر"</string>
     <string name="snackbar_action" msgid="37373514216505085">"مشاهده گزینه‌ها"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ادامه"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"گزینه‌های ورود به سیستم"</string>
