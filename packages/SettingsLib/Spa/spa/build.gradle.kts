@@ -63,7 +63,7 @@ dependencies {
     api("androidx.compose.ui:ui-tooling-preview:$jetpackComposeVersion")
     api("androidx.lifecycle:lifecycle-livedata-ktx")
     api("androidx.lifecycle:lifecycle-runtime-compose")
-    api("androidx.navigation:navigation-compose:2.7.0-rc01")
+    api("androidx.navigation:navigation-compose:2.7.1")
     api("com.github.PhilJay:MPAndroidChart:v3.1.0-alpha")
     api("com.google.android.material:material:1.7.0-alpha03")
     debugApi("androidx.compose.ui:ui-tooling:$jetpackComposeVersion")

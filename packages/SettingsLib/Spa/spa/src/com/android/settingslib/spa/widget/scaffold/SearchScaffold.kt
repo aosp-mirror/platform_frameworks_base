@@ -99,8 +99,8 @@ fun SearchScaffold(
                 .fillMaxSize(),
         ) {
             content(
-                bottomPadding = paddingValues.calculateBottomPadding(),
-                searchQuery = remember {
+                paddingValues.calculateBottomPadding(),
+                remember {
                     derivedStateOf { if (isSearchMode) viewModel.searchQuery.text else "" }
                 },
             )
