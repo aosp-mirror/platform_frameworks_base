@@ -28,8 +28,18 @@ import kotlinx.coroutines.launch
 import java.util.function.Consumer
 import javax.inject.Inject
 
+/** Processes a screenshot request sent from [ScreenshotHelper]. */
+interface ScreenshotRequestProcessor {
+    /**
+     * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
+     *
+     * @param screenshot the screenshot to process
+     */
+    suspend fun process(screenshot: ScreenshotData): ScreenshotData
+}
+
 /**
- * Processes a screenshot request sent from {@link ScreenshotHelper}.
+ * Implementation of [ScreenshotRequestProcessor]
  */
 @SysUISingleton
 class RequestProcessor @Inject constructor(
@@ -38,7 +48,7 @@ class RequestProcessor @Inject constructor(
         private val flags: FeatureFlags,
         /** For the Java Async version, to invoke the callback. */
         @Application private val mainScope: CoroutineScope
-) {
+) : ScreenshotRequestProcessor {
     /**
      * Inspects the incoming request, returning a potentially modified request depending on policy.
      *
@@ -57,7 +67,6 @@ class RequestProcessor @Inject constructor(
         // regardless of the managed profile status.
 
         if (request.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-
             val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
             Log.d(TAG, "findPrimaryContent: $info")
 
@@ -99,12 +108,7 @@ class RequestProcessor @Inject constructor(
         }
     }
 
-    /**
-     * Inspects the incoming ScreenshotData, potentially modifying it based upon policy.
-     *
-     * @param screenshot the screenshot to process
-     */
-    suspend fun process(screenshot: ScreenshotData): ScreenshotData {
+    override suspend fun process(screenshot: ScreenshotData): ScreenshotData {
         var result = screenshot
 
         // Apply work profile screenshots policy:
@@ -116,7 +120,7 @@ class RequestProcessor @Inject constructor(
         // regardless of the managed profile status.
 
         if (screenshot.type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            val info = policy.findPrimaryContent(policy.getDefaultDisplayId())
+            val info = policy.findPrimaryContent(screenshot.displayId)
             Log.d(TAG, "findPrimaryContent: $info")
             result.taskId = info.taskId
             result.topComponent = info.component
