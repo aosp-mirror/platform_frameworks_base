@@ -1596,7 +1596,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Ketuk untuk menghapus batasan."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Penggunaan data seluler tinggi"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Aplikasi Anda menggunakan lebih banyak kuota daripada biasanya"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> menggunakan lebih banyak kuota daripada biasanya"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> menggunakan lebih banyak data daripada biasanya"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Sertifikat keamanan"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Sertifikat ini valid."</string>
     <string name="issued_to" msgid="5975877665505297662">"Diterbitkan ke:"</string>

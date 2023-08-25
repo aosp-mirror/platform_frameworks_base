@@ -1598,7 +1598,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Нажмите, чтобы отменить ограничение."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Высокое потребление трафика"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"В ваших приложениях было передано больше трафика, чем обычно."</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"В приложении \"<xliff:g id="APP">%s</xliff:g>\" было передано больше трафика, чем обычно."</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" использовало больше трафика, чем обычно."</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Сертификат безопасности"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Этот сертификат действителен."</string>
     <string name="issued_to" msgid="5975877665505297662">"Кому выдан:"</string>

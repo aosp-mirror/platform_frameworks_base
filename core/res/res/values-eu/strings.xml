@@ -938,7 +938,7 @@
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Laguntzailea"</string>
     <string name="relationTypeBrother" msgid="7141662427379247820">"Anaia/Neba"</string>
     <string name="relationTypeChild" msgid="9076258911292693601">"Semea/Alaba"</string>
-    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotea"</string>
+    <string name="relationTypeDomesticPartner" msgid="7825306887697559238">"Izatezko bikotekidea"</string>
     <string name="relationTypeFather" msgid="3856225062864790596">"Aita"</string>
     <string name="relationTypeFriend" msgid="3192092625893980574">"Laguna"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Kudeatzailea"</string>
