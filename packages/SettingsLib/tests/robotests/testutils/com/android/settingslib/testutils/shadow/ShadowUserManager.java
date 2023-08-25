@@ -16,8 +16,6 @@
 
 package com.android.settingslib.testutils.shadow;
 
-import static android.os.Build.VERSION_CODES.N_MR1;
-
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -27,7 +25,8 @@ import android.os.UserManager;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBuild;
+import org.robolectric.versioning.AndroidVersions.NMR1;
+import org.robolectric.versioning.AndroidVersions.U;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +73,7 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
     /**
      * @return {@code false} by default, or the value specified via {@link #setIsAdminUser(boolean)}
      */
-    @Implementation(minSdk = N_MR1)
+    @Implementation(minSdk = NMR1.SDK_INT)
     public boolean isAdminUser() {
         return getUserInfo(UserHandle.myUserId()).isAdmin();
     }
@@ -98,7 +97,7 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
         mUserPropertiesMap.putIfAbsent(userId, userProperties);
     }
 
-    @Implementation(minSdk = ShadowBuild.UPSIDE_DOWN_CAKE)
+    @Implementation(minSdk = U.SDK_INT)
     protected UserProperties getUserProperties(UserHandle user) {
         return mUserPropertiesMap.getOrDefault(user.getIdentifier(),
             new UserProperties(new UserProperties.Builder().build()));
