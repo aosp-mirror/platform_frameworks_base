@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.view.View
+import android.view.View.OnLongClickListener
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,6 +20,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
+        onLongClickListener: OnLongClickListener,
         appName: CharSequence,
         appIcon: Drawable
 ) : DesktopModeWindowDecorationViewHolder(rootView) {
@@ -39,6 +41,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         openMenuButton.setOnTouchListener(onCaptionTouchListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         maximizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        maximizeWindowButton.onLongClickListener = onLongClickListener
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
         appIconImageView.setImageDrawable(appIcon)
