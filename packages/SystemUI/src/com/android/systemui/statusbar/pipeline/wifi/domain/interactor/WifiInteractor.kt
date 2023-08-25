@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
@@ -54,6 +55,9 @@ interface WifiInteractor {
 
     /** True if we're configured to force-hide the wifi icon and false otherwise. */
     val isForceHidden: Flow<Boolean>
+
+    /** True if there are networks available other than the currently-connected one */
+    val areNetworksAvailable: StateFlow<Boolean>
 }
 
 @SysUISingleton
@@ -91,4 +95,6 @@ constructor(
 
     override val isForceHidden: Flow<Boolean> =
         connectivityRepository.forceHiddenSlots.map { it.contains(ConnectivitySlot.WIFI) }
+
+    override val areNetworksAvailable: StateFlow<Boolean> = MutableStateFlow(false)
 }

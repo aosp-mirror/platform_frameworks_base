@@ -101,7 +101,7 @@ constructor(
         val common = commonViewModelForSub(subId)
         return LocationBasedMobileViewModel.viewModelForLocation(
             common,
-            mobileIconInteractorForSub(subId),
+            interactor.getMobileConnectionInteractorForSubId(subId),
             verboseLogger,
             location,
             scope,
@@ -112,20 +112,12 @@ constructor(
         return mobileIconSubIdCache[subId]
             ?: MobileIconViewModel(
                     subId,
-                    mobileIconInteractorForSub(subId),
+                    interactor.getMobileConnectionInteractorForSubId(subId),
                     airplaneModeInteractor,
                     constants,
                     scope,
                 )
                 .also { mobileIconSubIdCache[subId] = it }
-    }
-
-    @VisibleForTesting
-    fun mobileIconInteractorForSub(subId: Int): MobileIconInteractor {
-        return mobileIconInteractorSubIdCache[subId]
-            ?: interactor.createMobileConnectionInteractorForSubId(subId).also {
-                mobileIconInteractorSubIdCache[subId] = it
-            }
     }
 
     private fun invalidateCaches(subIds: List<Int>) {

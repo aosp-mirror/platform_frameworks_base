@@ -33,6 +33,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupR
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,6 +71,12 @@ interface MobileIconsInteractor {
     /** True if the active mobile data subscription has data enabled */
     val activeDataConnectionHasDataEnabled: StateFlow<Boolean>
 
+    /**
+     * Flow providing a reference to the Interactor for the active data subId. This represents the
+     * [MobileConnectionInteractor] responsible for the active data connection, if any.
+     */
+    val activeDataIconInteractor: StateFlow<MobileIconInteractor?>
+
     /** True if the RAT icon should always be displayed and false otherwise. */
     val alwaysShowDataRatIcon: StateFlow<Boolean>
 
@@ -96,9 +103,9 @@ interface MobileIconsInteractor {
 
     /**
      * Vends out a [MobileIconInteractor] tracking the [MobileConnectionRepository] for the given
-     * subId. Will throw if the ID is invalid
+     * subId.
      */
-    fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor
+    fun getMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor
 }
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -115,6 +122,9 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val context: Context,
 ) : MobileIconsInteractor {
+
+    // Weak reference lookup for created interactors
+    private val reuseCache = mutableMapOf<Int, WeakReference<MobileIconInteractor>>()
 
     override val mobileIsDefault =
         combine(
@@ -137,6 +147,17 @@ constructor(
         mobileConnectionsRepo.activeMobileDataRepository
             .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val activeDataIconInteractor: StateFlow<MobileIconInteractor?> =
+        mobileConnectionsRepo.activeMobileDataSubscriptionId
+            .mapLatest {
+                if (it != null) {
+                    getMobileConnectionInteractorForSubId(it)
+                } else {
+                    null
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     private val unfilteredSubscriptions: Flow<List<SubscriptionModel>> =
         mobileConnectionsRepo.subscriptions
@@ -306,21 +327,25 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     /** Vends out new [MobileIconInteractor] for a particular subId */
-    override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
+    override fun getMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
+        reuseCache[subId]?.get() ?: createMobileConnectionInteractorForSubId(subId)
+
+    private fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
         MobileIconInteractorImpl(
-            scope,
-            activeDataConnectionHasDataEnabled,
-            alwaysShowDataRatIcon,
-            alwaysUseCdmaLevel,
-            isSingleCarrier,
-            mobileIsDefault,
-            defaultMobileIconMapping,
-            defaultMobileIconGroup,
-            isDefaultConnectionFailed,
-            isForceHidden,
-            mobileConnectionsRepo.getRepoForSubId(subId),
-            context,
-        )
+                scope,
+                activeDataConnectionHasDataEnabled,
+                alwaysShowDataRatIcon,
+                alwaysUseCdmaLevel,
+                isSingleCarrier,
+                mobileIsDefault,
+                defaultMobileIconMapping,
+                defaultMobileIconGroup,
+                isDefaultConnectionFailed,
+                isForceHidden,
+                mobileConnectionsRepo.getRepoForSubId(subId),
+                context,
+            )
+            .also { reuseCache[subId] = WeakReference(it) }
 
     companion object {
         private const val LOGGING_PREFIX = "Intr"

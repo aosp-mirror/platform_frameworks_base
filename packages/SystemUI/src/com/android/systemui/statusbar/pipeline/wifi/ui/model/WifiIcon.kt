@@ -42,7 +42,7 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
      * description.
      */
     class Visible(
-        @DrawableRes res: Int,
+        @DrawableRes val res: Int,
         val contentDescription: ContentDescription.Loaded,
     ) : WifiIcon {
         val icon = Icon.Resource(res, contentDescription)
