@@ -117,6 +117,10 @@ public final class MediaProjectionManagerService extends SystemService
     // WindowManagerService -> MediaProjectionManagerService -> DisplayManagerService
     // See mediaprojection.md
     private final Object mLock = new Object();
+    // A handler for posting tasks that must interact with a service holding another lock,
+    // especially for services that will eventually acquire the WindowManager lock.
+    @NonNull private final Handler mHandler;
+
     private final Map<IBinder, IBinder.DeathRecipient> mDeathEaters;
     private final CallbackDelegate mCallbackDelegate;
 
@@ -145,6 +149,8 @@ public final class MediaProjectionManagerService extends SystemService
         super(context);
         mContext = context;
         mInjector = injector;
+        // Post messages on the main thread; no need for a separate thread.
+        mHandler = new Handler(Looper.getMainLooper());
         mClock = injector.createClock();
         mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
         mCallbackDelegate = new CallbackDelegate();
@@ -238,15 +244,20 @@ public final class MediaProjectionManagerService extends SystemService
             if (!mProjectionGrant.requiresForegroundService()) {
                 return;
             }
+        }
 
-            if (mActivityManagerInternal.hasRunningForegroundService(
-                    uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
-                // If there is any process within this UID running a FGS
-                // with the mediaProjection type, that's Okay.
-                return;
+        // Run outside the lock when calling into ActivityManagerService.
+        if (mActivityManagerInternal.hasRunningForegroundService(
+                uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
+            // If there is any process within this UID running a FGS
+            // with the mediaProjection type, that's Okay.
+            return;
+        }
+
+        synchronized (mLock) {
+            if (mProjectionGrant != null) {
+                mProjectionGrant.stop();
             }
-
-            mProjectionGrant.stop();
         }
     }
 
@@ -854,7 +865,6 @@ public final class MediaProjectionManagerService extends SystemService
             mTargetSdkVersion = targetSdkVersion;
             mIsPrivileged = isPrivileged;
             mCreateTimeMs = mClock.uptimeMillis();
-            // TODO(b/267740338): Add unit test.
             mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
                     MEDIA_PROJECTION_TOKEN_EVENT_CREATED);
         }
@@ -911,6 +921,10 @@ public final class MediaProjectionManagerService extends SystemService
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
+            // Cache result of calling into ActivityManagerService outside of the lock, to prevent
+            // deadlock with WindowManagerService.
+            final boolean hasFGS = mActivityManagerInternal.hasRunningForegroundService(
+                    uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
             synchronized (mLock) {
                 if (isCurrentProjection(asBinder())) {
                     Slog.w(TAG, "UID " + Binder.getCallingUid()
@@ -922,9 +936,7 @@ public final class MediaProjectionManagerService extends SystemService
                 }
 
                 if (REQUIRE_FG_SERVICE_FOR_PROJECTION
-                        && requiresForegroundService()
-                        && !mActivityManagerInternal.hasRunningForegroundService(
-                                uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
+                        && requiresForegroundService() && !hasFGS) {
                     throw new SecurityException("Media projections require a foreground service"
                             + " of type ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION");
                 }
@@ -1013,10 +1025,11 @@ public final class MediaProjectionManagerService extends SystemService
                 mToken = null;
                 unregisterCallback(mCallback);
                 mCallback = null;
-                // TODO(b/267740338): Add unit test.
-                mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
-                        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED);
             }
+            // Run on a separate thread, to ensure no lock is held when calling into
+            // ActivityManagerService.
+            mHandler.post(() -> mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
+                    MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED));
         }
 
         @Override // Binder call
