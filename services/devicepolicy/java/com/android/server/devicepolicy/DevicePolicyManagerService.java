@@ -679,7 +679,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 5;
+    static final int DPMS_VERSION = 6;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -875,8 +875,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FOR_FINANCE_FLAG = true;
 
     // TODO(b/265683382) remove the flag after rollout.
-    private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
-    public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
+    public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
@@ -23825,10 +23824,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private static boolean isKeepProfilesRunningFlagEnabled() {
-        return DeviceConfig.getBoolean(
-                NAMESPACE_DEVICE_POLICY_MANAGER,
-                KEEP_PROFILES_RUNNING_FLAG,
-                DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
+        return DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
     }
 
     private boolean isUnicornFlagEnabled() {
