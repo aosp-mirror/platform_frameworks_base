@@ -19,20 +19,30 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
+import com.android.settingslib.mobile.MobileMappings
+import com.android.settingslib.mobile.TelephonyIcons.G
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.settingslib.mobile.TelephonyIcons.UNKNOWN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.connectivity.MobileIconCarrierIdOverridesFake
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
-import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractorImpl
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,12 +61,18 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class MobileIconViewModelTest : SysuiTestCase() {
+    private var connectivityRepository = FakeConnectivityRepository()
+
     private lateinit var underTest: MobileIconViewModel
-    private lateinit var interactor: FakeMobileIconInteractor
+    private lateinit var interactor: MobileIconInteractorImpl
+    private lateinit var iconsInteractor: MobileIconsInteractorImpl
+    private lateinit var repository: FakeMobileConnectionRepository
+    private lateinit var connectionsRepository: FakeMobileConnectionsRepository
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -66,23 +82,53 @@ class MobileIconViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(constants.hasDataCapabilities).thenReturn(true)
 
+        connectionsRepository =
+            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogBuffer)
+
+        repository =
+            FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer).apply {
+                setNetworkTypeKey(connectionsRepository.GSM_KEY)
+                isInService.value = true
+                dataConnectionState.value = DataConnectionState.Connected
+                dataEnabled.value = true
+            }
+        connectionsRepository.activeMobileDataRepository.value = repository
+        connectionsRepository.mobileIsDefault.value = true
+
         airplaneModeRepository = FakeAirplaneModeRepository()
         airplaneModeInteractor =
             AirplaneModeInteractor(
                 airplaneModeRepository,
-                FakeConnectivityRepository(),
+                connectivityRepository,
             )
 
-        interactor = FakeMobileIconInteractor(tableLogBuffer)
-        interactor.apply {
-            setLevel(1)
-            setIsDefaultDataEnabled(true)
-            setIsFailedConnection(false)
-            setIsEmergencyOnly(false)
-            setNumberOfLevels(4)
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            isDataConnected.value = true
-        }
+        iconsInteractor =
+            MobileIconsInteractorImpl(
+                connectionsRepository,
+                carrierConfigTracker,
+                tableLogBuffer,
+                connectivityRepository,
+                FakeUserSetupRepository(),
+                testScope.backgroundScope,
+                context,
+            )
+
+        interactor =
+            MobileIconInteractorImpl(
+                testScope.backgroundScope,
+                iconsInteractor.activeDataConnectionHasDataEnabled,
+                iconsInteractor.alwaysShowDataRatIcon,
+                iconsInteractor.alwaysUseCdmaLevel,
+                iconsInteractor.isSingleCarrier,
+                iconsInteractor.mobileIsDefault,
+                iconsInteractor.defaultMobileIconMapping,
+                iconsInteractor.defaultMobileIconGroup,
+                iconsInteractor.isDefaultConnectionFailed,
+                iconsInteractor.isForceHidden,
+                repository,
+                context,
+                MobileIconCarrierIdOverridesFake()
+            )
         createAndSetViewModel()
     }
 
@@ -108,7 +154,6 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(false)
-            interactor.isForceHidden.value = false
 
             assertThat(latest).isTrue()
 
@@ -122,8 +167,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(true)
-            interactor.isAllowedDuringAirplaneMode.value = false
-            interactor.isForceHidden.value = false
+            repository.isAllowedDuringAirplaneMode.value = false
+            connectivityRepository.setForceHiddenIcons(setOf())
 
             assertThat(latest).isFalse()
 
@@ -138,8 +183,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(true)
-            interactor.isAllowedDuringAirplaneMode.value = true
-            interactor.isForceHidden.value = false
+            repository.isAllowedDuringAirplaneMode.value = true
+            connectivityRepository.setForceHiddenIcons(setOf())
 
             assertThat(latest).isTrue()
 
@@ -153,7 +198,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(false)
-            interactor.isForceHidden.value = true
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.MOBILE))
 
             assertThat(latest).isFalse()
 
@@ -167,145 +212,18 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
 
             airplaneModeRepository.setIsAirplaneMode(false)
-            interactor.isForceHidden.value = false
+            connectivityRepository.setForceHiddenIcons(setOf())
 
             assertThat(latest).isTrue()
 
             airplaneModeRepository.setIsAirplaneMode(true)
             assertThat(latest).isFalse()
 
-            interactor.isAllowedDuringAirplaneMode.value = true
+            repository.isAllowedDuringAirplaneMode.value = true
             assertThat(latest).isTrue()
 
-            interactor.isForceHidden.value = true
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.MOBILE))
             assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun iconId_correctLevel_notCutout() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-            val expected = defaultSignal()
-
-            assertThat(latest).isEqualTo(expected)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesLevelFromInteractor() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.level.value = 3
-            assertThat(latest!!.level).isEqualTo(3)
-
-            interactor.level.value = 1
-            assertThat(latest!!.level).isEqualTo(1)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesNumberOfLevelsFromInteractor() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.numberOfLevels.value = 5
-            assertThat(latest!!.numberOfLevels).isEqualTo(5)
-
-            interactor.numberOfLevels.value = 2
-            assertThat(latest!!.numberOfLevels).isEqualTo(2)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_defaultDataDisabled_showExclamationTrue() =
-        testScope.runTest {
-            interactor.setIsDefaultDataEnabled(false)
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_defaultConnectionFailed_showExclamationTrue() =
-        testScope.runTest {
-            interactor.isDefaultConnectionFailed.value = true
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_enabledAndNotFailed_showExclamationFalse() =
-        testScope.runTest {
-            interactor.setIsDefaultDataEnabled(true)
-            interactor.isDefaultConnectionFailed.value = false
-
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest!!.showExclamationMark).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesEmptyState_whenNotInService() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.isInService.value = false
-
-            var expected = emptySignal()
-
-            assertThat(latest).isEqualTo(expected)
-
-            // Changing the level doesn't overwrite the disabled state
-            interactor.level.value = 2
-            assertThat(latest).isEqualTo(expected)
-
-            // Once back in service, the regular icon appears
-            interactor.isInService.value = true
-            expected = defaultSignal(level = 2)
-            assertThat(latest).isEqualTo(expected)
-
-            job.cancel()
-        }
-
-    @Test
-    fun icon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
-        testScope.runTest {
-            var latest: SignalIconModel? = null
-            val job = underTest.icon.onEach { latest = it }.launchIn(this)
-
-            interactor.carrierNetworkChangeActive.value = true
-            interactor.level.value = 1
-
-            assertThat(latest!!.level).isEqualTo(1)
-            assertThat(latest!!.carrierNetworkChange).isTrue()
-
-            // SignalIconModel respects the current level
-            interactor.level.value = 2
-
-            assertThat(latest!!.level).isEqualTo(2)
-            assertThat(latest!!.carrierNetworkChange).isTrue()
 
             job.cancel()
         }
@@ -316,7 +234,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             var latest: ContentDescription? = null
             val job = underTest.contentDescription.onEach { latest = it }.launchIn(this)
 
-            interactor.isInService.value = false
+            repository.isInService.value = false
 
             assertThat((latest as ContentDescription.Resource).res)
                 .isEqualTo(PHONE_SIGNAL_STRENGTH_NONE)
@@ -330,13 +248,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
             var latest: ContentDescription? = null
             val job = underTest.contentDescription.onEach { latest = it }.launchIn(this)
 
-            interactor.isInService.value = true
-
-            interactor.level.value = 2
+            repository.setAllLevels(2)
             assertThat((latest as ContentDescription.Resource).res)
                 .isEqualTo(PHONE_SIGNAL_STRENGTH[2])
 
-            interactor.level.value = 0
+            repository.setAllLevels(0)
             assertThat((latest as ContentDescription.Resource).res)
                 .isEqualTo(PHONE_SIGNAL_STRENGTH[0])
 
@@ -351,7 +267,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     THREE_G.dataType,
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
+            connectionsRepository.mobileIsDefault.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -364,9 +281,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_null_whenDisabled() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.setIsDataEnabled(false)
-            interactor.mobileIsDefault.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            repository.setDataEnabled(false)
+            connectionsRepository.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
@@ -378,9 +295,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_null_whenCarrierNetworkChangeActive() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.carrierNetworkChangeActive.value = true
-            interactor.mobileIsDefault.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            repository.carrierNetworkChangeActive.value = true
+            connectionsRepository.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
@@ -397,10 +314,10 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     THREE_G.dataType,
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.setIsDataEnabled(true)
-            interactor.isDataConnected.value = true
-            interactor.mobileIsDefault.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            repository.setDataEnabled(true)
+            repository.dataConnectionState.value = DataConnectionState.Connected
+            connectionsRepository.mobileIsDefault.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
@@ -418,15 +335,13 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
 
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
             assertThat(latest).isEqualTo(initial)
 
-            interactor.isDataConnected.value = false
-            yield()
+            repository.dataConnectionState.value = DataConnectionState.Disconnected
 
             assertThat(latest).isNull()
 
@@ -441,15 +356,13 @@ class MobileIconViewModelTest : SysuiTestCase() {
                     THREE_G.dataType,
                     ContentDescription.Resource(THREE_G.dataContentDescription)
                 )
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.setIsDataEnabled(true)
+            repository.dataEnabled.value = true
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isEqualTo(expected)
 
-            interactor.setIsDataEnabled(false)
-            yield()
+            repository.dataEnabled.value = false
 
             assertThat(latest).isNull()
 
@@ -459,9 +372,10 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisabled() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.setIsDataEnabled(false)
-            interactor.alwaysShowDataRatIcon.value = true
+            repository.dataEnabled.value = false
+
+            connectionsRepository.defaultDataSubRatConfig.value =
+                MobileMappings.Config().also { it.alwaysShowDataRatIcon = true }
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -479,9 +393,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenDisconnected() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.isDataConnected.value = false
-            interactor.alwaysShowDataRatIcon.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            repository.dataConnectionState.value = DataConnectionState.Disconnected
+
+            connectionsRepository.defaultDataSubRatConfig.value =
+                MobileMappings.Config().also { it.alwaysShowDataRatIcon = true }
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -499,9 +415,10 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownEvenWhenFailedConnection() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.setIsFailedConnection(true)
-            interactor.alwaysShowDataRatIcon.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            connectionsRepository.mobileIsDefault.value = true
+            connectionsRepository.defaultDataSubRatConfig.value =
+                MobileMappings.Config().also { it.alwaysShowDataRatIcon = true }
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -517,16 +434,24 @@ class MobileIconViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun networkType_alwaysShow_notShownWhenInvalidDataTypeIcon() =
+    fun networkType_alwaysShow_usesDefaultIconWhenInvalid() =
         testScope.runTest {
-            // The UNKNOWN icon group doesn't have a valid data type icon ID
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(UNKNOWN)
-            interactor.alwaysShowDataRatIcon.value = true
+            // The UNKNOWN icon group doesn't have a valid data type icon ID, and the logic from the
+            // old pipeline was to use the default icon group if the map doesn't exist
+            repository.setNetworkTypeKey(UNKNOWN.name)
+            connectionsRepository.defaultDataSubRatConfig.value =
+                MobileMappings.Config().also { it.alwaysShowDataRatIcon = true }
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isNull()
+            val expected =
+                Icon.Resource(
+                    connectionsRepository.defaultMobileIconGroup.value.dataType,
+                    ContentDescription.Resource(G.dataContentDescription)
+                )
+
+            assertThat(latest).isEqualTo(expected)
 
             job.cancel()
         }
@@ -534,9 +459,10 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_alwaysShow_shownWhenNotDefault() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.mobileIsDefault.value = false
-            interactor.alwaysShowDataRatIcon.value = true
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            connectionsRepository.mobileIsDefault.value = false
+            connectionsRepository.defaultDataSubRatConfig.value =
+                MobileMappings.Config().also { it.alwaysShowDataRatIcon = true }
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -554,9 +480,9 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun networkType_notShownWhenNotDefault() =
         testScope.runTest {
-            interactor.networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(THREE_G)
-            interactor.isDataConnected.value = true
-            interactor.mobileIsDefault.value = false
+            repository.setNetworkTypeKey(connectionsRepository.GSM_KEY)
+            repository.dataConnectionState.value = DataConnectionState.Connected
+            connectionsRepository.mobileIsDefault.value = false
 
             var latest: Icon? = null
             val job = underTest.networkTypeIcon.onEach { latest = it }.launchIn(this)
@@ -569,13 +495,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun roaming() =
         testScope.runTest {
-            interactor.isRoaming.value = true
+            repository.setAllRoaming(true)
+
             var latest: Boolean? = null
             val job = underTest.roaming.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isTrue()
 
-            interactor.isRoaming.value = false
+            repository.setAllRoaming(false)
 
             assertThat(latest).isFalse()
 
@@ -599,7 +526,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val containerJob =
                 underTest.activityInVisible.onEach { containerVisible = it }.launchIn(this)
 
-            interactor.activity.value =
+            repository.dataActivityDirection.value =
                 DataActivityModel(
                     hasActivityIn = true,
                     hasActivityOut = true,
@@ -631,7 +558,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             val containerJob =
                 underTest.activityContainerVisible.onEach { containerVisible = it }.launchIn(this)
 
-            interactor.activity.value =
+            repository.dataActivityDirection.value =
                 DataActivityModel(
                     hasActivityIn = true,
                     hasActivityOut = false,
@@ -643,7 +570,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             assertThat(outVisible).isFalse()
             assertThat(containerVisible).isTrue()
 
-            interactor.activity.value =
+            repository.dataActivityDirection.value =
                 DataActivityModel(
                     hasActivityIn = false,
                     hasActivityOut = true,
@@ -653,7 +580,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             assertThat(outVisible).isTrue()
             assertThat(containerVisible).isTrue()
 
-            interactor.activity.value =
+            repository.dataActivityDirection.value =
                 DataActivityModel(
                     hasActivityIn = false,
                     hasActivityOut = false,

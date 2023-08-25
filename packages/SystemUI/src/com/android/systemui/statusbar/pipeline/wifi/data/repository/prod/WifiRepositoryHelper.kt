@@ -16,15 +16,21 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
+import android.annotation.SuppressLint
+import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import java.util.concurrent.Executor
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +69,34 @@ object WifiRepositoryHelper {
                 initialValue = ACTIVITY_DEFAULT,
             )
     }
+
+    /**
+     * Creates a flow that listens for new [ScanResult]s from [WifiManager]. Does not request a scan
+     */
+    fun createNetworkScanFlow(
+        wifiManager: WifiManager,
+        scope: CoroutineScope,
+        @Background dispatcher: CoroutineDispatcher,
+        inputLogger: () -> Unit,
+    ): StateFlow<List<WifiScanEntry>> {
+        return conflatedCallbackFlow {
+                val callback =
+                    object : WifiManager.ScanResultsCallback() {
+                        @SuppressLint("MissingPermission")
+                        override fun onScanResultsAvailable() {
+                            inputLogger.invoke()
+                            trySend(wifiManager.scanResults.toModel())
+                        }
+                    }
+
+                wifiManager.registerScanResultsCallback(dispatcher.asExecutor(), callback)
+
+                awaitClose { wifiManager.unregisterScanResultsCallback(callback) }
+            }
+            .stateIn(scope, SharingStarted.Eagerly, emptyList())
+    }
+
+    private fun List<ScanResult>.toModel(): List<WifiScanEntry> = map { WifiScanEntry(it.SSID) }
 
     // TODO(b/292534484): This print should only be done in [MessagePrinter] part of the log buffer.
     private fun prettyPrintActivity(activity: Int): String {

@@ -21,11 +21,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -56,7 +58,8 @@ class WifiInteractorImplTest : SysuiTestCase() {
     fun setUp() {
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
-        underTest = WifiInteractorImpl(connectivityRepository, wifiRepository)
+        underTest =
+            WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
     }
 
     @Test
@@ -299,5 +302,77 @@ class WifiInteractorImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             job.cancel()
+        }
+
+    @Test
+    fun areNetworksAvailable_noneActive_noResults() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areNetworksAvailable)
+
+            wifiRepository.wifiScanResults.value = emptyList()
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun areNetworksAvailable_noneActive_nonEmptyResults() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areNetworksAvailable)
+
+            wifiRepository.wifiScanResults.value =
+                listOf(
+                    WifiScanEntry(ssid = "ssid 1"),
+                    WifiScanEntry(ssid = "ssid 2"),
+                    WifiScanEntry(ssid = "ssid 3"),
+                )
+
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun areNetworksAvailable_activeNetwork_resultsIncludeOtherNetworks() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areNetworksAvailable)
+
+            wifiRepository.wifiScanResults.value =
+                listOf(
+                    WifiScanEntry(ssid = "ssid 1"),
+                    WifiScanEntry(ssid = "ssid 2"),
+                    WifiScanEntry(ssid = "ssid 3"),
+                )
+
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.Active(
+                    ssid = "ssid 2",
+                    networkId = 1,
+                    level = 2,
+                )
+            )
+
+            assertThat(latest).isTrue()
+        }
+
+    @Test
+    fun areNetworksAvailable_activeNetwork_onlyResultIsTheActiveNetwork() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areNetworksAvailable)
+
+            wifiRepository.wifiScanResults.value =
+                listOf(
+                    WifiScanEntry(ssid = "ssid 2"),
+                )
+
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.Active(
+                    ssid = "ssid 2",
+                    networkId = 1,
+                    level = 2,
+                )
+            )
+
+            assertThat(latest).isFalse()
         }
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
+import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -77,6 +79,7 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             featureFlags,
             testScope.backgroundScope,
             executor,
+            dispatcher,
             wifiPickerTrackerFactory,
             wifiManager,
             logger,
@@ -1137,6 +1140,58 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
                 .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
         }
 
+    @Test
+    fun wifiScanResults_containsSsidList() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiScanResults)
+
+            val scanResults =
+                listOf(
+                    ScanResult().also { it.SSID = "ssid 1" },
+                    ScanResult().also { it.SSID = "ssid 2" },
+                    ScanResult().also { it.SSID = "ssid 3" },
+                    ScanResult().also { it.SSID = "ssid 4" },
+                    ScanResult().also { it.SSID = "ssid 5" },
+                )
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            val expected =
+                listOf(
+                    WifiScanEntry(ssid = "ssid 1"),
+                    WifiScanEntry(ssid = "ssid 2"),
+                    WifiScanEntry(ssid = "ssid 3"),
+                    WifiScanEntry(ssid = "ssid 4"),
+                    WifiScanEntry(ssid = "ssid 5"),
+                )
+
+            assertThat(latest).isEqualTo(expected)
+        }
+
+    @Test
+    fun wifiScanResults_updates() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiScanResults)
+
+            var scanResults =
+                listOf(
+                    ScanResult().also { it.SSID = "ssid 1" },
+                    ScanResult().also { it.SSID = "ssid 2" },
+                    ScanResult().also { it.SSID = "ssid 3" },
+                    ScanResult().also { it.SSID = "ssid 4" },
+                    ScanResult().also { it.SSID = "ssid 5" },
+                )
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            // New scan representing no results
+            scanResults = listOf()
+            whenever(wifiManager.scanResults).thenReturn(scanResults)
+            getScanResultsCallback().onScanResultsAvailable()
+
+            assertThat(latest).isEmpty()
+        }
+
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {
         testScope.runCurrent()
         return callbackCaptor.value
@@ -1154,6 +1209,13 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             whenever(this.isPrimaryNetwork).thenReturn(true)
             whenever(this.deviceType).thenReturn(type)
         }
+    }
+
+    private fun getScanResultsCallback(): WifiManager.ScanResultsCallback {
+        testScope.runCurrent()
+        val callbackCaptor = argumentCaptor<WifiManager.ScanResultsCallback>()
+        verify(wifiManager).registerScanResultsCallback(any(), callbackCaptor.capture())
+        return callbackCaptor.value!!
     }
 
     private companion object {

@@ -82,8 +82,8 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
+        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository, scope)
         airplaneModeViewModel =
             AirplaneModeViewModelImpl(
                 AirplaneModeInteractor(
