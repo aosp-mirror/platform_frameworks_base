@@ -5632,7 +5632,7 @@ public final class ProcessList {
             if (logToDropbox) {
                 final long now = SystemClock.elapsedRealtime();
                 final StringBuilder sb = new StringBuilder();
-                mService.appendDropBoxProcessHeaders(app, app.processName, sb);
+                mService.appendDropBoxProcessHeaders(app, app.processName, null, sb);
                 sb.append("Reason: " + reason).append("\n");
                 sb.append("Requester UID: " + requester).append("\n");
                 dbox.addText(DROPBOX_TAG_IMPERCEPTIBLE_KILL, sb.toString());
