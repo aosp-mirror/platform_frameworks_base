@@ -16,12 +16,16 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
+import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
@@ -34,6 +38,7 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID
 import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
@@ -81,6 +86,7 @@ import kotlinx.coroutines.flow.stateIn
 @OptIn(ExperimentalCoroutinesApi::class)
 class MobileConnectionRepositoryImpl(
     override val subId: Int,
+    private val context: Context,
     subscriptionModel: StateFlow<SubscriptionModel?>,
     defaultNetworkName: NetworkNameModel,
     networkNameSeparator: String,
@@ -323,16 +329,35 @@ class MobileConnectionRepositoryImpl(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), telephonyManager.simCarrierId)
 
+    /** BroadcastDispatcher does not handle sticky broadcasts, so we can't use it here */
+    @SuppressLint("RegisterReceiverViaContext")
     override val networkName: StateFlow<NetworkNameModel> =
-        broadcastDispatcher
-            .broadcastFlow(
-                filter = IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED),
-                map = { intent, _ -> intent },
-            )
-            .filter { intent ->
-                intent.getIntExtra(EXTRA_SUBSCRIPTION_ID, INVALID_SUBSCRIPTION_ID) == subId
+        conflatedCallbackFlow {
+                val receiver =
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            if (
+                                intent.getIntExtra(
+                                    EXTRA_SUBSCRIPTION_INDEX,
+                                    INVALID_SUBSCRIPTION_ID
+                                ) == subId
+                            ) {
+                                logger.logServiceProvidersUpdatedBroadcast(intent)
+                                trySend(
+                                    intent.toNetworkNameModel(networkNameSeparator)
+                                        ?: defaultNetworkName
+                                )
+                            }
+                        }
+                    }
+
+                context.registerReceiver(
+                    receiver,
+                    IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED)
+                )
+
+                awaitClose { context.unregisterReceiver(receiver) }
             }
-            .map { intent -> intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
 
     override val dataEnabled = run {
@@ -349,6 +374,7 @@ class MobileConnectionRepositoryImpl(
     class Factory
     @Inject
     constructor(
+        private val context: Context,
         private val broadcastDispatcher: BroadcastDispatcher,
         private val telephonyManager: TelephonyManager,
         private val logger: MobileInputLogger,
@@ -366,6 +392,7 @@ class MobileConnectionRepositoryImpl(
         ): MobileConnectionRepository {
             return MobileConnectionRepositoryImpl(
                 subId,
+                context,
                 subscriptionModel,
                 defaultNetworkName,
                 networkNameSeparator,
