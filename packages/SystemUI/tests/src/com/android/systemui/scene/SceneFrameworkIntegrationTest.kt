@@ -28,6 +28,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.model.SysUiState
 import com.android.systemui.scene.SceneTestUtils.Companion.toDataLayer
@@ -118,6 +119,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val lockscreenSceneViewModel =
         LockscreenSceneViewModel(
             authenticationInteractor = authenticationInteractor,
+            longPress =
+                KeyguardLongPressViewModel(
+                    interactor = mock(),
+                ),
         )
 
     private val shadeSceneViewModel =

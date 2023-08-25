@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalFoundationApi::class)
 
 package com.android.systemui.keyguard.ui.composable
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.toComposeRect
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.isVisible
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -68,6 +81,7 @@ constructor(
     ) {
         LockscreenScene(
             viewProvider = viewProvider,
+            longPressViewModel = viewModel.longPress,
             modifier = modifier,
         )
     }
@@ -85,19 +99,69 @@ constructor(
 @Composable
 private fun LockscreenScene(
     viewProvider: () -> View,
+    longPressViewModel: KeyguardLongPressViewModel,
     modifier: Modifier = Modifier,
 ) {
-    AndroidView(
-        factory = { _ ->
-            val keyguardRootView = viewProvider()
-            // Remove the KeyguardRootView from any parent it might already have in legacy code just
-            // in case (a view can't have two parents).
-            (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
-            keyguardRootView
-        },
-        update = { keyguardRootView ->
-            keyguardRootView.requireViewById<View>(R.id.lock_icon_view)
-        },
+    var settingsMenu: View? = null
+
+    Box(
         modifier = modifier,
+    ) {
+        LongPressSurface(
+            viewModel = longPressViewModel,
+            isSettingsMenuVisible = { settingsMenu?.isVisible == true },
+            settingsMenuBounds = {
+                val bounds = android.graphics.Rect()
+                settingsMenu?.getHitRect(bounds)
+                bounds.toComposeRect()
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        AndroidView(
+            factory = { _ ->
+                val keyguardRootView = viewProvider()
+                // Remove the KeyguardRootView from any parent it might already have in legacy code
+                // just in case (a view can't have two parents).
+                (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
+                settingsMenu = keyguardRootView.requireViewById(R.id.keyguard_settings_button)
+                keyguardRootView
+            },
+            update = { keyguardRootView ->
+                keyguardRootView.requireViewById<View>(R.id.lock_icon_view)
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+@Composable
+private fun LongPressSurface(
+    viewModel: KeyguardLongPressViewModel,
+    isSettingsMenuVisible: () -> Boolean,
+    settingsMenuBounds: () -> Rect,
+    modifier: Modifier = Modifier,
+) {
+    val isEnabled: Boolean by viewModel.isLongPressHandlingEnabled.collectAsState(initial = false)
+
+    Box(
+        modifier =
+            modifier
+                .combinedClickable(
+                    enabled = isEnabled,
+                    onLongClick = viewModel::onLongPress,
+                    onClick = {},
+                )
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val pointerInputChange = awaitFirstDown()
+                        if (
+                            isSettingsMenuVisible() &&
+                                !settingsMenuBounds().contains(pointerInputChange.position)
+                        ) {
+                            viewModel.onTouchedOutside()
+                        }
+                    }
+                },
     )
 }

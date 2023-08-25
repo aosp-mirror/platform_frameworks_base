@@ -29,6 +29,7 @@ class LockscreenSceneViewModel
 @Inject
 constructor(
     authenticationInteractor: AuthenticationInteractor,
+    val longPress: KeyguardLongPressViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: Flow<SceneKey> =

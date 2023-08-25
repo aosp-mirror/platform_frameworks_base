@@ -23,6 +23,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,6 +45,10 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         LockscreenSceneViewModel(
             authenticationInteractor = authenticationInteractor,
+            longPress =
+                KeyguardLongPressViewModel(
+                    interactor = mock(),
+                ),
         )
 
     @Test
