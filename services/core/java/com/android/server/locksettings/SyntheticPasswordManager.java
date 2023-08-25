@@ -531,7 +531,7 @@ class SyntheticPasswordManager {
         }
     }
 
-    private IWeaver getWeaverService() {
+    private @Nullable IWeaver getWeaverServiceInternal() {
         // Try to get the AIDL service first
         try {
             IWeaver aidlWeaver = IWeaver.Stub.asInterface(
@@ -563,15 +563,20 @@ class SyntheticPasswordManager {
         return LockPatternUtils.isAutoPinConfirmFeatureAvailable();
     }
 
-    private synchronized boolean isWeaverAvailable() {
-        if (mWeaver != null) {
-            return true;
+    /**
+     * Returns a handle to the Weaver service, or null if Weaver is unavailable.  Note that not all
+     * devices support Weaver.
+     */
+    private synchronized @Nullable IWeaver getWeaverService() {
+        IWeaver weaver = mWeaver;
+        if (weaver != null) {
+            return weaver;
         }
 
         // Re-initialize weaver in case there was a transient error preventing access to it.
-        IWeaver weaver = getWeaverService();
+        weaver = getWeaverServiceInternal();
         if (weaver == null) {
-            return false;
+            return null;
         }
 
         final WeaverConfig weaverConfig;
@@ -579,19 +584,18 @@ class SyntheticPasswordManager {
             weaverConfig = weaver.getConfig();
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Failed to get weaver config", e);
-            return false;
+            return null;
         }
         if (weaverConfig == null || weaverConfig.slots <= 0) {
             Slog.e(TAG, "Invalid weaver config");
-            return false;
+            return null;
         }
 
         mWeaver = weaver;
         mWeaverConfig = weaverConfig;
         mPasswordSlotManager.refreshActiveSlots(getUsedWeaverSlots());
         Slog.i(TAG, "Weaver service initialized");
-
-        return true;
+        return weaver;
     }
 
     /**
@@ -601,7 +605,7 @@ class SyntheticPasswordManager {
      *
      * @return the value stored in the weaver slot, or null if the operation fails
      */
-    private byte[] weaverEnroll(int slot, byte[] key, @Nullable byte[] value) {
+    private byte[] weaverEnroll(IWeaver weaver, int slot, byte[] key, @Nullable byte[] value) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
             throw new IllegalArgumentException("Invalid slot for weaver");
         }
@@ -614,7 +618,7 @@ class SyntheticPasswordManager {
             value = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
         }
         try {
-            mWeaver.write(slot, key, value);
+            weaver.write(slot, key, value);
         } catch (RemoteException e) {
             Slog.e(TAG, "weaver write binder call failed, slot: " + slot, e);
             return null;
@@ -643,7 +647,7 @@ class SyntheticPasswordManager {
      * the verification is successful, throttled or failed. If successful, the bound secret
      * is also returned.
      */
-    private VerifyCredentialResponse weaverVerify(int slot, byte[] key) {
+    private VerifyCredentialResponse weaverVerify(IWeaver weaver, int slot, byte[] key) {
         if (slot == INVALID_WEAVER_SLOT || slot >= mWeaverConfig.slots) {
             throw new IllegalArgumentException("Invalid slot for weaver");
         }
@@ -654,7 +658,7 @@ class SyntheticPasswordManager {
         }
         final WeaverReadResponse readResponse;
         try {
-            readResponse = mWeaver.read(slot, key);
+            readResponse = weaver.read(slot, key);
         } catch (RemoteException e) {
             Slog.e(TAG, "weaver read failed, slot: " + slot, e);
             return VerifyCredentialResponse.ERROR;
@@ -846,14 +850,15 @@ class SyntheticPasswordManager {
         int slot = loadWeaverSlot(protectorId, userId);
         destroyState(WEAVER_SLOT_NAME, protectorId, userId);
         if (slot != INVALID_WEAVER_SLOT) {
-            if (!isWeaverAvailable()) {
+            final IWeaver weaver = getWeaverService();
+            if (weaver == null) {
                 Slog.e(TAG, "Cannot erase Weaver slot because Weaver is unavailable");
                 return;
             }
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
                 Slogf.i(TAG, "Erasing Weaver slot %d", slot);
-                weaverEnroll(slot, null, null);
+                weaverEnroll(weaver, slot, null, null);
                 mPasswordSlotManager.markSlotDeleted(slot);
             } else {
                 Slogf.i(TAG, "Weaver slot %d was already reused; not erasing it", slot);
@@ -931,13 +936,14 @@ class SyntheticPasswordManager {
 
         Slogf.i(TAG, "Creating LSKF-based protector %016x for user %d", protectorId, userId);
 
-        if (isWeaverAvailable()) {
+        final IWeaver weaver = getWeaverService();
+        if (weaver != null) {
             // Weaver is available, so make the protector use it to verify the LSKF.  Do this even
             // if the LSKF is empty, as that gives us support for securely deleting the protector.
             int weaverSlot = getNextAvailableWeaverSlot();
             Slogf.i(TAG, "Enrolling LSKF for user %d into Weaver slot %d", userId, weaverSlot);
-            byte[] weaverSecret = weaverEnroll(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf),
-                    null);
+            byte[] weaverSecret = weaverEnroll(weaver, weaverSlot,
+                    stretchedLskfToWeaverKey(stretchedLskf), null);
             if (weaverSecret == null) {
                 throw new IllegalStateException(
                         "Fail to enroll user password under weaver " + userId);
@@ -1024,7 +1030,8 @@ class SyntheticPasswordManager {
             }
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
-            if (!isWeaverAvailable()) {
+            final IWeaver weaver = getWeaverService();
+            if (weaver == null) {
                 Slog.e(TAG, "No weaver service to verify SP-based FRP credential");
                 return VerifyCredentialResponse.ERROR;
             }
@@ -1032,7 +1039,8 @@ class SyntheticPasswordManager {
             byte[] stretchedLskf = stretchLskf(userCredential, pwd);
             int weaverSlot = persistentData.userId;
 
-            return weaverVerify(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf)).stripPayload();
+            return weaverVerify(weaver, weaverSlot,
+                    stretchedLskfToWeaverKey(stretchedLskf)).stripPayload();
         } else {
             Slog.e(TAG, "persistentData.type must be TYPE_SP_GATEKEEPER or TYPE_SP_WEAVER, but is "
                     + persistentData.type);
@@ -1134,7 +1142,7 @@ class SyntheticPasswordManager {
         TokenData tokenData = new TokenData();
         tokenData.mType = type;
         final byte[] secdiscardable = SecureRandomUtils.randomBytes(SECDISCARDABLE_LENGTH);
-        if (isWeaverAvailable()) {
+        if (getWeaverService() != null) {
             tokenData.weaverSecret = SecureRandomUtils.randomBytes(mWeaverConfig.valueSize);
             tokenData.secdiscardableOnDisk = SyntheticPasswordCrypto.encrypt(tokenData.weaverSecret,
                             PERSONALIZATION_WEAVER_TOKEN, secdiscardable);
@@ -1177,10 +1185,11 @@ class SyntheticPasswordManager {
             return false;
         }
         Slogf.i(TAG, "Creating token-based protector %016x for user %d", tokenHandle, userId);
-        if (isWeaverAvailable()) {
+        final IWeaver weaver = getWeaverService();
+        if (weaver != null) {
             int slot = getNextAvailableWeaverSlot();
             Slogf.i(TAG, "Using Weaver slot %d for new token-based protector", slot);
-            if (weaverEnroll(slot, null, tokenData.weaverSecret) == null) {
+            if (weaverEnroll(weaver, slot, null, tokenData.weaverSecret) == null) {
                 Slog.e(TAG, "Failed to enroll weaver secret when activating token");
                 return false;
             }
@@ -1269,12 +1278,14 @@ class SyntheticPasswordManager {
         int weaverSlot = loadWeaverSlot(protectorId, userId);
         if (weaverSlot != INVALID_WEAVER_SLOT) {
             // Protector uses Weaver to verify the LSKF
-            if (!isWeaverAvailable()) {
+            final IWeaver weaver = getWeaverService();
+            if (weaver == null) {
                 Slog.e(TAG, "Protector uses Weaver, but Weaver is unavailable");
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
-            result.gkResponse = weaverVerify(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf));
+            result.gkResponse = weaverVerify(weaver, weaverSlot,
+                    stretchedLskfToWeaverKey(stretchedLskf));
             if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
                 return result;
             }
@@ -1442,12 +1453,13 @@ class SyntheticPasswordManager {
         }
         int slotId = loadWeaverSlot(protectorId, userId);
         if (slotId != INVALID_WEAVER_SLOT) {
-            if (!isWeaverAvailable()) {
+            final IWeaver weaver = getWeaverService();
+            if (weaver == null) {
                 Slog.e(TAG, "Protector uses Weaver, but Weaver is unavailable");
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
-            VerifyCredentialResponse response = weaverVerify(slotId, null);
+            VerifyCredentialResponse response = weaverVerify(weaver, slotId, null);
             if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK ||
                     response.getGatekeeperHAT() == null) {
                 Slog.e(TAG,
