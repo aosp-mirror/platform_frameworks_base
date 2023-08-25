@@ -1207,10 +1207,10 @@ public final class Choreographer {
                 DisplayEventReceiver.VsyncEventData latestVsyncEventData =
                         displayEventReceiver.getLatestVsyncEventData();
                 if (latestVsyncEventData == null) {
-                    throw new IllegalArgumentException(
-                            "Could not get VsyncEventData. Did SurfaceFlinger crash?");
+                    Log.w(TAG, "Could not get latest VsyncEventData. Did SurfaceFlinger crash?");
+                } else {
+                    update(frameTimeNanos, latestVsyncEventData);
                 }
-                update(frameTimeNanos, latestVsyncEventData);
             } else {
                 update(frameTimeNanos, newPreferredIndex);
             }
