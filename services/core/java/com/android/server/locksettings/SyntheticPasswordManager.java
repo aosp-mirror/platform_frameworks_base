@@ -72,7 +72,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
-
 /**
  * A class that manages a user's synthetic password (SP) ({@link #SyntheticPassword}), along with a
  * set of SP protectors that are independent ways that the SP is protected.
@@ -547,22 +546,48 @@ class SyntheticPasswordManager {
         }
     }
 
-    private @Nullable IWeaver getWeaverServiceInternal() {
-        // Try to get the AIDL service first
+    private @Nullable IWeaver getWeaverAidlService() {
+        final IWeaver aidlWeaver;
         try {
-            IWeaver aidlWeaver = IWeaver.Stub.asInterface(
-                    ServiceManager.waitForDeclaredService(IWeaver.DESCRIPTOR + "/default"));
-            if (aidlWeaver != null) {
-                Slog.i(TAG, "Using AIDL weaver service");
-                try {
-                    aidlWeaver.asBinder().linkToDeath(new WeaverDiedRecipient(), 0);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Unable to register Weaver death recipient", e);
-                }
-                return aidlWeaver;
-            }
+            aidlWeaver =
+                    IWeaver.Stub.asInterface(
+                            ServiceManager.waitForDeclaredService(IWeaver.DESCRIPTOR + "/default"));
         } catch (SecurityException e) {
             Slog.w(TAG, "Does not have permissions to get AIDL weaver service");
+            return null;
+        }
+        if (aidlWeaver == null) {
+            return null;
+        }
+        final int aidlVersion;
+        try {
+            aidlVersion = aidlWeaver.getInterfaceVersion();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Cannot get AIDL weaver service version", e);
+            return null;
+        }
+        if (aidlVersion < 2) {
+            Slog.w(TAG,
+                    "Ignoring AIDL weaver service v"
+                            + aidlVersion
+                            + " because only v2 and later are supported");
+            return null;
+        }
+        Slog.i(TAG, "Found AIDL weaver service v" + aidlVersion);
+        return aidlWeaver;
+    }
+
+    private @Nullable IWeaver getWeaverServiceInternal() {
+        // Try to get the AIDL service first
+        IWeaver aidlWeaver = getWeaverAidlService();
+        if (aidlWeaver != null) {
+            Slog.i(TAG, "Using AIDL weaver service");
+            try {
+                aidlWeaver.asBinder().linkToDeath(new WeaverDiedRecipient(), 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to register Weaver death recipient", e);
+            }
+            return aidlWeaver;
         }
 
         // If the AIDL service can't be found, look for the HIDL service
