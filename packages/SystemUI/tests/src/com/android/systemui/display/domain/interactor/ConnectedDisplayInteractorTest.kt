@@ -25,14 +25,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.display.data.repository.DisplayRepository
+import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.display.data.repository.display
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -131,18 +128,4 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
 
     private fun TestScope.lastValue(): FlowValue<State?> =
         collectLastValue(connectedDisplayStateProvider.connectedDisplayState)
-
-    private fun display(type: Int, flags: Int = 0): Display {
-        return mock<Display>().also { mockDisplay ->
-            whenever(mockDisplay.type).thenReturn(type)
-            whenever(mockDisplay.flags).thenReturn(flags)
-        }
-    }
-
-    private class FakeDisplayRepository : DisplayRepository {
-        private val flow = MutableSharedFlow<Set<Display>>()
-        suspend fun emit(value: Set<Display>) = flow.emit(value)
-        override val displays: Flow<Set<Display>>
-            get() = flow
-    }
 }
