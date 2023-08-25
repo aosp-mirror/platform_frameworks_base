@@ -23,6 +23,7 @@ import static com.android.server.wm.ActivityInterceptorCallback.VIRTUAL_DEVICE_S
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.companion.AssociationInfo;
@@ -95,6 +96,7 @@ public class VirtualDeviceManagerService extends SystemService {
     private final CompanionDeviceManager.OnAssociationsChangedListener mCdmAssociationListener =
             new CompanionDeviceManager.OnAssociationsChangedListener() {
                 @Override
+                @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
                 public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
                     syncVirtualDevicesToCdmAssociations(associations);
                 }
@@ -240,6 +242,7 @@ public class VirtualDeviceManagerService extends SystemService {
         return true;
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     private void syncVirtualDevicesToCdmAssociations(List<AssociationInfo> associations) {
         Set<VirtualDeviceImpl> virtualDevicesToRemove = new HashSet<>();
         synchronized (mVirtualDeviceManagerLock) {
@@ -265,6 +268,7 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     private void registerCdmAssociationListener() {
         final CompanionDeviceManager cdm = getContext().getSystemService(
                 CompanionDeviceManager.class);
@@ -272,6 +276,7 @@ public class VirtualDeviceManagerService extends SystemService {
                 mCdmAssociationListener);
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     private void unregisterCdmAssociationListener() {
         final CompanionDeviceManager cdm = getContext().getSystemService(
                 CompanionDeviceManager.class);
