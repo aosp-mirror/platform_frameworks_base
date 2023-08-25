@@ -296,7 +296,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm)
                 .setTask(task1).setUid(ActivityBuilder.DEFAULT_FAKE_UID + 1).build();
-        task1.setResumedActivity(activity1, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
 
         final ActivityRecord activity2 = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
