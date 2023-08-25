@@ -44,7 +44,7 @@
         </receiver>
 
         <activity android:name=".InstallStart"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                android:theme="@style/Theme.AlertDialogActivity"
                 android:exported="true"
                 android:excludeFromRecents="true">
             <intent-filter android:priority="1">
