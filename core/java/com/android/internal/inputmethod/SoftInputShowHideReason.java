@@ -69,6 +69,7 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS,
         SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS,
         SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE,
+        SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
 })
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
@@ -278,4 +279,9 @@ public @interface SoftInputShowHideReason {
      * focusable overlay window.
      */
     int HIDE_WHEN_INPUT_TARGET_INVISIBLE = ImeProtoEnums.REASON_HIDE_WHEN_INPUT_TARGET_INVISIBLE;
+
+    /**
+     * Hide soft input when {@link InputMethodManager#closeCurrentInput()} gets called.
+     */
+    int HIDE_CLOSE_CURRENT_SESSION = ImeProtoEnums.REASON_HIDE_CLOSE_CURRENT_SESSION;
 }

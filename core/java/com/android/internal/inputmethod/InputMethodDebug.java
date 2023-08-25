@@ -261,6 +261,8 @@ public final class InputMethodDebug {
                 return "REMOVE_IME_SCREENSHOT_FROM_IMMS";
             case SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE:
                 return "HIDE_WHEN_INPUT_TARGET_INVISIBLE";
+            case SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION:
+                return "HIDE_SOFT_INPUT_CLOSE_CURRENT_SESSION";
             default:
                 return "Unknown=" + reason;
         }

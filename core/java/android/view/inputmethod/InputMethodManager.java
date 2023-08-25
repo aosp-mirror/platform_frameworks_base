@@ -3019,9 +3019,10 @@ public final class InputMethodManager {
     void closeCurrentInput() {
         final ImeTracker.Token statsToken = ImeTracker.forLogging().onRequestHide(
                 null /* component */, Process.myUid(), ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION);
         ImeTracker.forLatency().onRequestHide(statsToken, ImeTracker.ORIGIN_CLIENT_HIDE_SOFT_INPUT,
-                SoftInputShowHideReason.HIDE_SOFT_INPUT, ActivityThread::currentApplication);
+                SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION,
+                ActivityThread::currentApplication);
 
         synchronized (mH) {
             if (mCurRootView == null || mCurRootView.getView() == null) {
@@ -3040,7 +3041,7 @@ public final class InputMethodManager {
                     statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
-                    SoftInputShowHideReason.HIDE_SOFT_INPUT);
+                    SoftInputShowHideReason.HIDE_CLOSE_CURRENT_SESSION);
         }
     }
 
