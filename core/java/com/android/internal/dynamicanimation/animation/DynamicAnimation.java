@@ -651,7 +651,7 @@ public abstract class DynamicAnimation<T extends DynamicAnimation<T>>
             if (!mStartValueIsSet) {
                 mValue = getPropertyValue();
             }
-            // Sanity check:
+            // Initial check:
             if (mValue > mMaxValue || mValue < mMinValue) {
                 throw new IllegalArgumentException("Starting value need to be in between min"
                         + " value and max value");
