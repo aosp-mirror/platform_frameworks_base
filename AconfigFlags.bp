@@ -20,6 +20,7 @@ java_defaults {
     srcs: [
         ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
+        ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ],
 }
 
@@ -54,5 +55,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.window.flags.window-aconfig-java",
     aconfig_declarations: "com.android.window.flags.window-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Text
+aconfig_declarations {
+    name: "com.android.text.flags-aconfig",
+    package: "com.android.text.flags",
+    srcs: ["core/java/android/text/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.text.flags-aconfig-java",
+    aconfig_declarations: "com.android.text.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
