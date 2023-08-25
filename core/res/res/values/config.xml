@@ -6668,4 +6668,7 @@
 
     <!-- Whether or not ActivityManager PSS profiling is disabled. -->
     <bool name="config_am_disablePssProfiling">false</bool>
+
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
 </resources>
