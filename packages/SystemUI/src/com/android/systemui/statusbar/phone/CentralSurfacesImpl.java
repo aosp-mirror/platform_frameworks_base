@@ -1480,7 +1480,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // - Shade is in QQS over keyguard - swiping up should take us back to keyguard
         if (!isKeyguardShowing()
                 || mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
-                || isOccluded()
+                || mKeyguardStateController.isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
                 || (mQsController.getExpanded() && trackingTouch)
@@ -1706,17 +1706,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void onKeyguardViewManagerStatesUpdated() {
         logStateToEventlog();
-    }
-
-    /**
-     * When the keyguard is showing and covered by a "showWhenLocked" activity it
-     * is occluded. This is controlled by {@link com.android.server.policy.PhoneWindowManager}
-     *
-     * @return whether the keyguard is currently occluded
-     */
-    @Override
-    public boolean isOccluded() {
-        return mKeyguardStateController.isOccluded();
     }
 
     @Override
@@ -2320,11 +2309,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // there's no surface we can show to the user. Note that the device goes fully interactive
         // late in the transition, so we also allow the device to start dozing once the screen has
         // turned off fully.
+        boolean keyguardShowingUnOccluded =
+                mKeyguardStateController.isShowing() && !mKeyguardStateController.isOccluded();
         boolean keyguardForDozing = mDozeServiceHost.getDozingRequested()
                 && (!mDeviceInteractive || (isGoingToSleep()
-                    && (isScreenFullyOff()
-                        || (mKeyguardStateController.isShowing() && !isOccluded()))));
-        boolean isWakingAndOccluded = isOccluded() && isWakingOrAwake();
+                && (isScreenFullyOff() || keyguardShowingUnOccluded)));
+        boolean isWakingAndOccluded = mKeyguardStateController.isOccluded() && isWakingOrAwake();
         boolean shouldBeKeyguard = (mStatusBarStateController.isKeyguardRequested()
                 || keyguardForDozing) && !wakeAndUnlocking && !isWakingAndOccluded;
         if (keyguardForDozing) {
@@ -3123,7 +3113,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if ((!isOccluded() || mShadeSurface.isPanelExpanded())
+            if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
                     && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                     || mTransitionToFullShadeProgress > 0f)) {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
@@ -3159,7 +3149,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             // This will cancel the keyguardFadingAway animation if it is running. We need to do
             // this as otherwise it can remain pending and leave keyguard in a weird state.
             mUnlockScrimCallback.onCancelled();
-        } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
+        } else if (mKeyguardStateController.isShowing()
+                && !mKeyguardStateController.isOccluded()
+                && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()
                 && !unlocking) {
