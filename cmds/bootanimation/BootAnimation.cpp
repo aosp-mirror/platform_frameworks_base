@@ -706,7 +706,7 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
 
 bool BootAnimation::preloadAnimation() {
     findBootAnimationFile();
-    if (!mZipFileName.isEmpty()) {
+    if (!mZipFileName.empty()) {
         mAnimation = loadAnimation(mZipFileName);
         return (mAnimation != nullptr);
     }
@@ -819,7 +819,7 @@ bool BootAnimation::threadLoop() {
 
     // We have no bootanimation file, so we use the stock android logo
     // animation.
-    if (mZipFileName.isEmpty()) {
+    if (mZipFileName.empty()) {
         ALOGD("No animation file");
         result = android();
     } else {
