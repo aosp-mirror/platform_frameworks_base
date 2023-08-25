@@ -455,13 +455,11 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * or seamless transformation in a rotated display.
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
-        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
-            // Expect a screenshot layer has covered the screen, so it is fine to let client side
-            // insets animation runner update the position directly.
-            return false;
-        }
-        return mTransitionOp != OP_LEGACY && !mIsStartTransactionCommitted
-                && isTargetToken(w.mToken);
+        // Non-change transition (OP_APP_SWITCH) and METHOD_BLAST don't use screenshot so the
+        // insets should keep original position before the start transaction is applied.
+        return mTransitionOp != OP_LEGACY && (mTransitionOp == OP_APP_SWITCH
+                || TransitionController.SYNC_METHOD == BLASTSyncEngine.METHOD_BLAST)
+                && !mIsStartTransactionCommitted && isTargetToken(w.mToken);
     }
 
     /**

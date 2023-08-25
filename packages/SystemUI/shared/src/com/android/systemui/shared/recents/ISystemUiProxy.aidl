@@ -67,6 +67,15 @@ interface ISystemUiProxy {
     oneway void startAssistant(in Bundle bundle) = 13;
 
     /**
+     * Indicates that the given Assist invocation types should be handled by Launcher via
+     * OverviewProxy#onAssistantOverrideInvoked and should not be invoked by SystemUI.
+     *
+     * @param invocationTypes The invocation types that will henceforth be handled via
+     *         OverviewProxy (Launcher); other invocation types should be handled by SysUI.
+     */
+    oneway void setAssistantOverridesRequested(in int[] invocationTypes) = 53;
+
+    /**
      * Notifies that the accessibility button in the system's navigation area has been clicked
      */
     oneway void notifyAccessibilityButtonClicked(int displayId) = 15;
@@ -135,5 +144,5 @@ interface ISystemUiProxy {
      */
     oneway void onStatusBarTrackpadEvent(in MotionEvent event) = 52;
 
-    // Next id = 53
+    // Next id = 54
 }

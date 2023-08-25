@@ -31,6 +31,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dependency
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.time.SystemClock
 import java.text.FieldPosition
@@ -80,6 +81,7 @@ private const val TAG = "VariableDateViewController"
 class VariableDateViewController(
     private val systemClock: SystemClock,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val shadeLogger: ShadeLogger,
     private val timeTickHandler: Handler,
     view: VariableDateView
 ) : ViewController<VariableDateView>(view) {
@@ -107,24 +109,29 @@ class VariableDateViewController(
 
     private val intentReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (
+                    Intent.ACTION_LOCALE_CHANGED == action ||
+                    Intent.ACTION_TIMEZONE_CHANGED == action
+            ) {
+                // need to get a fresh date format
+                dateFormat = null
+                shadeLogger.d("VariableDateViewController received intent to refresh date format")
+            }
+
+            val handler = mView.handler
+
             // If the handler is null, it means we received a broadcast while the view has not
             // finished being attached or in the process of being detached.
             // In that case, do not post anything.
-            val handler = mView.handler ?: return
-            val action = intent.action
-            if (
+            if (handler == null) {
+                shadeLogger.d("VariableDateViewController received intent but handler was null")
+            } else if (
                     Intent.ACTION_TIME_TICK == action ||
                     Intent.ACTION_TIME_CHANGED == action ||
                     Intent.ACTION_TIMEZONE_CHANGED == action ||
                     Intent.ACTION_LOCALE_CHANGED == action
             ) {
-                if (
-                        Intent.ACTION_LOCALE_CHANGED == action ||
-                        Intent.ACTION_TIMEZONE_CHANGED == action
-                ) {
-                    // need to get a fresh date format
-                    handler.post { dateFormat = null }
-                }
                 handler.post(::updateClock)
             }
         }
@@ -211,12 +218,14 @@ class VariableDateViewController(
     class Factory @Inject constructor(
         private val systemClock: SystemClock,
         private val broadcastDispatcher: BroadcastDispatcher,
+        private val shadeLogger: ShadeLogger,
         @Named(Dependency.TIME_TICK_HANDLER_NAME) private val handler: Handler
     ) {
         fun create(view: VariableDateView): VariableDateViewController {
             return VariableDateViewController(
                     systemClock,
                     broadcastDispatcher,
+                    shadeLogger,
                     handler,
                     view
             )
