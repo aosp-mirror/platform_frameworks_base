@@ -224,7 +224,7 @@ static jintArray nativeGetThreadIds(JNIEnv* env, jclass clazz, jlong nativeSessi
         return nullptr;
     }
     jint* threadIds = env->GetIntArrayElements(jintArr, 0);
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         threadIds[i] = tidsVector[i];
     }
     env->ReleaseIntArrayElements(jintArr, threadIds, 0);

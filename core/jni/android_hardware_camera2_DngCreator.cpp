@@ -1892,8 +1892,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         camera_metadata_entry entry =
             results.find(ANDROID_SENSOR_NOISE_PROFILE);
 
-        const status_t numPlaneColors = isBayer ? 3 : 1;
-        const status_t numCfaChannels = isBayer ? 4 : 1;
+        const unsigned long numPlaneColors = isBayer ? 3 : 1;
+        const unsigned long numCfaChannels = isBayer ? 4 : 1;
 
         uint8_t cfaOut[numCfaChannels];
         if ((err = convertCFA(cfaEnum, /*out*/cfaOut)) != OK) {

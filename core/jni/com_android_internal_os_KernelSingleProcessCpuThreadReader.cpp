@@ -147,7 +147,7 @@ static jboolean startAggregatingThreadCpuTimes(JNIEnv *env, jclass, jintArray se
     std::unique_ptr<ICpuTimeInStateReader> cpuTimeInStateReader(
             getCpuTimeInStateReader(env, cpuTimeInStateReaderObject));
 
-    for (int i = 0; i < selectedThreadIds.size(); i++) {
+    for (size_t i = 0; i < selectedThreadIds.size(); i++) {
         if (!cpuTimeInStateReader->startAggregatingTaskCpuTimes(selectedThreadIds[i],
                                                                 SELECTED_THREAD_AGGREGATION_KEY)) {
             return false;
@@ -312,11 +312,11 @@ MockCpuTimeInStateReader::getAggregatedTaskCpuFreqTimes(
         auto fields = android::base::Split(line.c_str(), ":");
         android::base::ParseUint(fields[0], &aggregationKey);
 
-        for (int j = 1; j < fields.size(); j++) {
+        for (size_t j = 1; j < fields.size(); j++) {
             auto numbers = android::base::Split(fields[j], " ");
 
             std::vector<uint64_t> chunk;
-            for (int k = 0; k < numbers.size(); k++) {
+            for (size_t k = 0; k < numbers.size(); k++) {
                 uint64_t time;
                 android::base::ParseUint(numbers[k], &time);
                 chunk.emplace_back(time);

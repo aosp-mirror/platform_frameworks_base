@@ -288,7 +288,7 @@ static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jobject sel
     }
 
     bool nonZero = false;
-    for (int i = 0; i < vector->size(); i++) {
+    for (size_t i = 0; i < vector->size(); i++) {
         jint index = scopedIndexMap[i];
         if (index < 0 || index >= size) {
             jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",
