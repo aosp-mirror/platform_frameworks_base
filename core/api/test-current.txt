@@ -497,14 +497,14 @@ package android.app {
     method public int describeContents();
     method public int getActivityType();
     method @Nullable public android.graphics.Rect getAppBounds();
-    method @NonNull public android.graphics.Rect getBounds();
+    method public android.graphics.Rect getBounds();
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
     method public static boolean isFloating(int);
     method public void setActivityType(int);
     method public void setAppBounds(@Nullable android.graphics.Rect);
-    method public void setBounds(@Nullable android.graphics.Rect);
+    method public void setBounds(android.graphics.Rect);
     method public void setMaxBounds(@Nullable android.graphics.Rect);
     method public void setRotation(int);
     method public void setTo(android.app.WindowConfiguration);
