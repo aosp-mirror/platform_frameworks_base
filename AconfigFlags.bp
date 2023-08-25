@@ -19,7 +19,7 @@ java_defaults {
     // Add java_aconfig_libraries to here to add them to the core framework
     srcs: [
         ":android.security.flags-aconfig-java{.generated_srcjars}",
-        ":com.android.hardware.camera2-aconfig-java{.generated_srcjars}",
+        ":camera_platform_flags_core_java_lib{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ],
@@ -34,15 +34,9 @@ java_defaults {
 }
 
 // Camera
-aconfig_declarations {
-    name: "com.android.hardware.camera2-aconfig",
-    package: "com.android.hardware.camera2",
-    srcs: ["core/java/android/hardware/camera2/camera_platform.aconfig"],
-}
-
 java_aconfig_library {
-    name: "com.android.hardware.camera2-aconfig-java",
-    aconfig_declarations: "com.android.hardware.camera2-aconfig",
+    name: "camera_platform_flags_core_java_lib",
+    aconfig_declarations: "camera_platform_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
