@@ -126,12 +126,14 @@ class ClockEventControllerTest : SysuiTestCase() {
         withDeps.featureFlags.apply {
             set(Flags.REGION_SAMPLING, false)
             set(Flags.DOZING_MIGRATION_1, false)
+            set(Flags.FACE_AUTH_REFACTOR, false)
         }
         underTest =
             ClockEventController(
                 withDeps.keyguardInteractor,
                 KeyguardTransitionInteractorFactory.create(
                         scope = TestScope().backgroundScope,
+                        featureFlags = withDeps.featureFlags,
                     )
                     .keyguardTransitionInteractor,
                 broadcastDispatcher,
