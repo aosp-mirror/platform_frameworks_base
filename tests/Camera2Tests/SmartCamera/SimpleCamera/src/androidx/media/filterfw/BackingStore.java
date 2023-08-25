@@ -14,17 +14,10 @@
 
 package androidx.media.filterfw;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.Type;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -42,14 +35,11 @@ final class BackingStore {
     static final int ACCESS_OBJECT = 0x08;
     /** Access mode Bitmap: Frame data will be accessed as a Bitmap. */
     static final int ACCESS_BITMAP = 0x10;
-    /** Access mode Allocation: Frame data will be accessed as a RenderScript Allocation. */
-    static final int ACCESS_ALLOCATION = 0x20;
 
     private static final int BACKING_BYTEBUFFER = 1;
     private static final int BACKING_TEXTURE = 2;
     private static final int BACKING_OBJECT = 3;
     private static final int BACKING_BITMAP = 4;
-    private static final int BACKING_ALLOCATION = 5;
 
     private final FrameType mType;
     private int[] mDimensions;
@@ -242,14 +232,6 @@ final class BackingStore {
                     break;
                 case ACCESS_BITMAP:
                     backing = new BitmapBacking();
-                    break;
-                case ACCESS_ALLOCATION:
-                    if (!AllocationBacking.isSupported()) {
-                        throw new RuntimeException(
-                                "Attempted to create an AllocationBacking in context that does " +
-                                "not support RenderScript!");
-                    }
-                    backing = new AllocationBacking(mFrameManager.getContext().getRenderScript());
                     break;
             }
             if (backing == null) {
@@ -518,20 +500,11 @@ final class BackingStore {
                 RenderTarget renderTarget = (RenderTarget) backing.lock(ACCESS_RENDERTARGET);
                 mBitmap.copyPixelsFromBuffer(
                         renderTarget.getPixelData(mDimensions[0], mDimensions[1]));
-            } else if ((access & ACCESS_ALLOCATION) != 0 && AllocationBacking.isSupported()) {
-                createBitmap();
-                syncToAllocationBacking(backing);
             } else {
                 throw new RuntimeException("Cannot sync bytebuffer backing!");
             }
             backing.unlock();
             mIsDirty = false;
-        }
-
-        @TargetApi(11)
-        private void syncToAllocationBacking(Backing backing) {
-            Allocation allocation = (Allocation) backing.lock(ACCESS_ALLOCATION);
-            allocation.copyTo(mBitmap);
         }
 
         @Override
@@ -612,21 +585,11 @@ final class BackingStore {
                 int w = mDimensions[0];
                 int h = mDimensions[1];
                 ImageShader.renderTextureToTarget(texture, getRenderTarget(), w, h);
-            } else if ((access & ACCESS_ALLOCATION) != 0 && AllocationBacking.isSupported()) {
-                syncToAllocationBacking(backing);
             } else {
                 throw new RuntimeException("Cannot sync bytebuffer backing!");
             }
             backing.unlock();
             mIsDirty = false;
-        }
-
-        @TargetApi(11)
-        private void syncToAllocationBacking(Backing backing) {
-            Allocation allocation = (Allocation) backing.lock(ACCESS_ALLOCATION);
-            ByteBuffer pixels = ByteBuffer.allocateDirect(getSize());
-            allocation.copyTo(pixels.array());
-            mTexture.allocateWithPixels(pixels, mDimensions[0], mDimensions[1]);
         }
 
         @Override
@@ -733,31 +696,12 @@ final class BackingStore {
                 ByteBuffer otherBuffer = (ByteBuffer) backing.lock(ACCESS_BYTES);
                 mBuffer.put(otherBuffer);
                 otherBuffer.rewind();
-            } else if ((access & ACCESS_ALLOCATION) != 0 && AllocationBacking.isSupported()) {
-                syncToAllocationBacking(backing);
             } else {
                 throw new RuntimeException("Cannot sync bytebuffer backing!");
             }
             backing.unlock();
             mBuffer.rewind();
             mIsDirty = false;
-        }
-
-        @TargetApi(11)
-        private void syncToAllocationBacking(Backing backing) {
-            Allocation allocation = (Allocation) backing.lock(ACCESS_ALLOCATION);
-            if (getElementId() == FrameType.ELEMENT_RGBA8888) {
-                byte[] bytes = mBuffer.array();
-                allocation.copyTo(bytes);
-            } else if (getElementId() == FrameType.ELEMENT_FLOAT32) {
-                float[] floats = new float[getSize() / 4];
-                allocation.copyTo(floats);
-                mBuffer.asFloatBuffer().put(floats);
-            } else {
-                throw new RuntimeException(
-                        "Trying to sync to an allocation with an unsupported element id: "
-                        + getElementId());
-            }
         }
 
         @Override
@@ -791,139 +735,4 @@ final class BackingStore {
         }
 
     }
-
-    @TargetApi(11)
-    static class AllocationBacking extends Backing {
-
-        private final RenderScript mRenderScript;
-        private Allocation mAllocation = null;
-
-        public AllocationBacking(RenderScript renderScript) {
-            mRenderScript = renderScript;
-        }
-
-        @Override
-        public void allocate(FrameType frameType) {
-            assertCompatible(frameType);
-
-            Element element = null;
-            switch (frameType.getElementId()) {
-                case FrameType.ELEMENT_RGBA8888:
-                    element = Element.RGBA_8888(mRenderScript);
-                    break;
-                case FrameType.ELEMENT_FLOAT32:
-                    element = Element.F32(mRenderScript);
-                    break;
-            }
-            Type.Builder imageTypeBuilder = new Type.Builder(mRenderScript, element);
-            imageTypeBuilder.setX(mDimensions.length >= 1 ? mDimensions[0] : 1);
-            imageTypeBuilder.setY(mDimensions.length == 2 ? mDimensions[1] : 1);
-            Type imageType = imageTypeBuilder.create();
-
-            mAllocation = Allocation.createTyped(mRenderScript, imageType);
-        }
-
-        @Override
-        public int readAccess() {
-            return ACCESS_ALLOCATION;
-        }
-
-        @Override
-        public int writeAccess() {
-            return ACCESS_ALLOCATION;
-        }
-
-        @Override
-        public boolean requiresGpu() {
-            return false;
-        }
-
-        @Override
-        public void syncTo(Backing backing) {
-            int access = backing.readAccess();
-            if ((access & ACCESS_TEXTURE) != 0) {
-                RenderTarget target = (RenderTarget) backing.lock(ACCESS_RENDERTARGET);
-                ByteBuffer pixels = ByteBuffer.allocateDirect(getSize());
-                GLToolbox.readTarget(target, pixels, mDimensions[0], mDimensions[1]);
-                mAllocation.copyFrom(pixels.array());
-            } else if ((access & ACCESS_BITMAP) != 0) {
-                Bitmap bitmap = (Bitmap) backing.lock(ACCESS_BITMAP);
-                mAllocation.copyFrom(bitmap);
-            } else if ((access & ACCESS_BYTES) != 0) {
-                ByteBuffer buffer = (ByteBuffer) backing.lock(ACCESS_BYTES);
-                if (buffer.order() != ByteOrder.nativeOrder()) {
-                    throw new RuntimeException(
-                            "Trying to sync to the ByteBufferBacking with non-native byte order!");
-                }
-                byte[] bytes;
-                if (buffer.hasArray()) {
-                    bytes = buffer.array();
-                } else {
-                    bytes = new byte[getSize()];
-                    buffer.get(bytes);
-                    buffer.rewind();
-                }
-                mAllocation.copyFromUnchecked(bytes);
-            } else {
-                throw new RuntimeException("Cannot sync allocation backing!");
-            }
-            backing.unlock();
-            mIsDirty = false;
-        }
-
-        @Override
-        public Object lock(int accessType) {
-            return mAllocation;
-        }
-
-        @Override
-        public void unlock() {
-        }
-
-        @Override
-        public int getType() {
-            return BACKING_ALLOCATION;
-        }
-
-        @Override
-        public boolean shouldCache() {
-            return true;
-        }
-
-        @Override
-        public void destroy() {
-            if (mAllocation != null) {
-                mAllocation.destroy();
-                mAllocation = null;
-            }
-        }
-
-        @Override
-        public int getSize() {
-            int elementCount = 1;
-            for (int dim : mDimensions) {
-                elementCount *= dim;
-            }
-            return getElementSize() * elementCount;
-        }
-
-        public static boolean isSupported() {
-            return Build.VERSION.SDK_INT >= 11;
-        }
-
-        private void assertCompatible(FrameType type) {
-            // TODO: consider adding support for other data types.
-            if (type.getElementId() != FrameType.ELEMENT_RGBA8888
-                    && type.getElementId() != FrameType.ELEMENT_FLOAT32) {
-                throw new RuntimeException(
-                        "Cannot allocate allocation with a non-RGBA or non-float data type!");
-            }
-            if (mDimensions == null || mDimensions.length > 2) {
-                throw new RuntimeException(
-                        "Cannot create an allocation with more than 2 dimensions!");
-            }
-        }
-
-    }
-
 }

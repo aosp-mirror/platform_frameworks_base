@@ -16,9 +16,6 @@
 
 package androidx.media.filterfw;
 
-import android.annotation.TargetApi;
-import android.renderscript.Allocation;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -38,19 +35,6 @@ public class FrameBuffer1D extends Frame {
     public ByteBuffer lockBytes(int mode) {
         assertAccessible(mode);
         return (ByteBuffer)mBackingStore.lockData(mode, BackingStore.ACCESS_BYTES);
-    }
-
-    /**
-     * Access frame's data using a RenderScript {@link Allocation}.
-     * This is a convenience method and is equivalent to calling {@code lockData} with an
-     * {@code accessFormat} of {@code ACCESS_ALLOCATION}.
-     *
-     * @return The Allocation instance holding the Frame's data.
-     */
-    @TargetApi(11)
-    public Allocation lockAllocation(int mode) {
-        assertAccessible(mode);
-        return (Allocation) mBackingStore.lockData(mode, BackingStore.ACCESS_ALLOCATION);
     }
 
     public int getLength() {
