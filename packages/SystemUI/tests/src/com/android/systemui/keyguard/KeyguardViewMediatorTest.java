@@ -403,8 +403,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.setKeyguardEnabled(false);
         TestableLooper.get(this).processAllMessages();
 
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
-                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -694,8 +693,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         startMockKeyguardExitAnimation();
         assertTrue(mViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
 
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
-                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         TestableLooper.get(this).processAllMessages();
         verify(mKeyguardUnlockAnimationController).notifyFinishedKeyguardExitAnimation(false);
@@ -756,8 +754,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
-                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -786,8 +783,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
         clearInvocations(mStatusBarKeyguardViewManager);
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
-                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
@@ -817,8 +813,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // Verify keyguard told of authentication
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
-                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(mUpdateMonitor.getCurrentUser());
         mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
         final ArgumentCaptor<Runnable> animationRunnableCaptor =
                 ArgumentCaptor.forClass(Runnable.class);
