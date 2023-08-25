@@ -1206,6 +1206,10 @@ public final class Choreographer {
             if (newPreferredDeadline < minimumDeadline) {
                 DisplayEventReceiver.VsyncEventData latestVsyncEventData =
                         displayEventReceiver.getLatestVsyncEventData();
+                if (latestVsyncEventData == null) {
+                    throw new IllegalArgumentException(
+                            "Could not get VsyncEventData. Did SurfaceFlinger crash?");
+                }
                 update(frameTimeNanos, latestVsyncEventData);
             } else {
                 update(frameTimeNanos, newPreferredIndex);
