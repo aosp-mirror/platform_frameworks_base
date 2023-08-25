@@ -3383,11 +3383,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    @Override
-    public void extendDozePulse(){
-        mDozeScrimController.extendPulse();
-    }
-
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override

@@ -364,8 +364,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @Deprecated
     float getDisplayDensity();
 
-    void extendDozePulse();
-
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 

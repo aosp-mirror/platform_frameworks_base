@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.DozeScrimController;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -120,6 +121,7 @@ public class NotificationShadeWindowViewController {
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
     private final DozeServiceHost mDozeServiceHost;
+    private final DozeScrimController mDozeScrimController;
     private final BackActionInteractor mBackActionInteractor;
     private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -155,6 +157,7 @@ public class NotificationShadeWindowViewController {
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
             DozeServiceHost dozeServiceHost,
+            DozeScrimController dozeScrimController,
             BackActionInteractor backActionInteractor,
             PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
@@ -193,6 +196,7 @@ public class NotificationShadeWindowViewController {
         mLockIconViewController.init();
         mService = centralSurfaces;
         mDozeServiceHost = dozeServiceHost;
+        mDozeScrimController = dozeScrimController;
         mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -336,7 +340,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.extendDozePulse();
+                    mDozeScrimController.extendPulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,

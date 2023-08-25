@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.data.repository.NotificationE
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.DozeScrimController
 import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -92,6 +93,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var dozeServiceHost: DozeServiceHost
+    @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var backActionInteractor: BackActionInteractor
     @Mock private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var dockManager: DockManager
@@ -171,6 +173,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                     lockIconViewController,
                     centralSurfaces,
                     dozeServiceHost,
+                    dozeScrimController,
                     backActionInteractor,
                     powerInteractor,
                     notificationShadeWindowController,

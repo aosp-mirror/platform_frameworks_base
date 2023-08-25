@@ -114,7 +114,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun setLaunchEmergencyActionOnFinishedWaking(launch: Boolean) {}
     override fun getQSPanelController(): QSPanelController? = null
     override fun getDisplayDensity() = 0f
-    override fun extendDozePulse() {}
     override fun setIsLaunchingActivityOverLockscreen(isLaunchingActivityOverLockscreen: Boolean) {}
     override fun getAnimatorControllerFromNotification(
         associatedView: ExpandableNotificationRow?,
