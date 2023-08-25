@@ -3079,7 +3079,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT, eventType, inputState,
-                inputType, displayName, vendorId, hdmiPort, tifSessionId);
+                inputType, vendorId, hdmiPort, tifSessionId, displayName);
     }
 
     private static final class UserState {
