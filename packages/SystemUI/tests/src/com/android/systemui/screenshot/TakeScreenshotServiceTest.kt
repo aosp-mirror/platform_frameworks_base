@@ -20,10 +20,6 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.SystemUi.SCREENSHOT_BLOCKED_BY_ADMIN
 import android.app.admin.DevicePolicyResourcesManager
 import android.content.ComponentName
-import android.graphics.Bitmap
-import android.graphics.Bitmap.Config.HARDWARE
-import android.graphics.ColorSpace
-import android.hardware.HardwareBuffer
 import android.os.UserHandle
 import android.os.UserManager
 import android.testing.AndroidTestingRunner
@@ -93,14 +89,6 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
         whenever(controllerFactory.create(any())).thenReturn(controller)
 
         // Stub request processor as a synchronous no-op for tests with the flag enabled
-        doAnswer {
-                val request: ScreenshotRequest = it.getArgument(0) as ScreenshotRequest
-                val consumer: Consumer<ScreenshotRequest> = it.getArgument(1)
-                consumer.accept(request)
-            }
-            .whenever(requestProcessor)
-            .processAsync(/* request= */ any(ScreenshotRequest::class.java), /* callback= */ any())
-
         doAnswer {
                 val request: ScreenshotData = it.getArgument(0) as ScreenshotData
                 val consumer: Consumer<ScreenshotData> = it.getArgument(1)
@@ -352,24 +340,4 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
         )
         return service
     }
-}
-
-private fun Bitmap.equalsHardwareBitmap(other: Bitmap): Boolean {
-    return config == HARDWARE &&
-        other.config == HARDWARE &&
-        hardwareBuffer == other.hardwareBuffer &&
-        colorSpace == other.colorSpace
-}
-
-/** A hardware Bitmap is mandated by use of ScreenshotHelper.HardwareBitmapBundler */
-private fun makeHardwareBitmap(width: Int, height: Int): Bitmap {
-    val buffer =
-        HardwareBuffer.create(
-            width,
-            height,
-            HardwareBuffer.RGBA_8888,
-            1,
-            HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
-        )
-    return Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB))!!
 }
