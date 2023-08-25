@@ -1111,9 +1111,12 @@ public final class TvInputManagerService extends SystemService {
                 || !inputState.info.getHdmiDeviceInfo().isCecDevice()) {
             return false;
         }
+        String newDisplayName = newInputInfo.getHdmiDeviceInfo().getDisplayName(),
+               currentDisplayName = inputState.info.getHdmiDeviceInfo().getDisplayName();
         int newVendorId = newInputInfo.getHdmiDeviceInfo().getVendorId(),
             currentVendorId = inputState.info.getHdmiDeviceInfo().getVendorId();
-        return newVendorId != currentVendorId;
+        return !TextUtils.equals(newDisplayName, currentDisplayName)
+                || newVendorId != currentVendorId;
     }
 
     @GuardedBy("mLock")
@@ -3052,12 +3055,12 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
-        // TODO: handle recording sessions
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
         TvInputState tvInputState = userState.inputMap.get(inputId);
         TvInputInfo tvInputInfo = tvInputState.info;
         int inputState = tvInputState.state;
         int inputType = tvInputInfo.getType();
+        String displayName = tvInputInfo.loadLabel(mContext).toString();
         // For non-CEC input, the value of vendorId is 0xFFFFFF (16777215 in decimal).
         int vendorId = 16777215;
         // For non-HDMI input, the value of hdmiPort is -1.
@@ -3067,13 +3070,16 @@ public final class TvInputManagerService extends SystemService {
         if (tvInputInfo.getType() == TvInputInfo.TYPE_HDMI) {
             HdmiDeviceInfo hdmiDeviceInfo = tvInputInfo.getHdmiDeviceInfo();
             if (hdmiDeviceInfo != null) {
-                vendorId = hdmiDeviceInfo.getVendorId();
                 hdmiPort = hdmiDeviceInfo.getPortId();
+                if (hdmiDeviceInfo.isCecDevice()) {
+                    displayName = hdmiDeviceInfo.getDisplayName();
+                    vendorId = hdmiDeviceInfo.getVendorId();
+                }
             }
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT, eventType, inputState,
-                inputType, vendorId, hdmiPort, tifSessionId);
+                inputType, displayName, vendorId, hdmiPort, tifSessionId);
     }
 
     private static final class UserState {
