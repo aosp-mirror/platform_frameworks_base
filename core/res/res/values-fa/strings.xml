@@ -393,7 +393,7 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"به برنامه امکان می‌دهد به فرآیندهای پس‌زمینه سایر برنامه‌ها پایان دهد. این ممکن است باعث شود سایر برنامه‌ها متوقف شوند."</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"این برنامه می‌تواند روی برنامه‌های دیگر ظاهر شود"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"این برنامه می‌تواند روی برنامه‌های دیگر یا سایر قسمت‌های صفحه ظاهر شود. ممکن است در عملکرد معمول برنامه‌های دیگر اختلال ایجاد کند و شیوه نمایش آن‌ها را تغییر دهد."</string>
-    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"پنهان کردن هم‌پوشانی برنامه‌های دیگر"</string>
+    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"پنهان کردن رونهاد برنامه‌های دیگر"</string>
     <string name="permdesc_hideOverlayWindows" msgid="5660242821651958225">"این برنامه می‌تواند از سیستم بخواهد تا هم‌پوشانی‌های ایجادشده توسط برنامه‌های دیگر را روی برنامه نشان ندهد."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"اجرا شدن در پس‌زمینه"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"این برنامه می‌تواند در پس‌زمینه اجرا شود. ممکن است شارژ باتری زودتر مصرف شود."</string>
@@ -1592,7 +1592,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"برای برداشتن محدودیت ضربه بزنید."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"مصرف بالای داده تلفن همراه"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"برنامه‌های شما بیش از معمول داده مصرف کرده‌اند"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"‫<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"گواهی امنیتی"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"این گواهی معتبر است."</string>
     <string name="issued_to" msgid="5975877665505297662">"صادرشده برای:"</string>
@@ -1639,7 +1639,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"در حال استفاده"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"صفحه نمایش از خود"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"‏صفحه HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"هم‌پوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"رونهاد #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"، امن"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"الگو را فراموش کرده‌اید"</string>
@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"لغو مکث"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"‫<xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"در <xliff:g id="APP">%s</xliff:g> شخصی باز شود؟"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"در <xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"تماس ازطریق برنامه کاری برقرار شود؟"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"به برنامه همراه اجازه می‌دهد سرویس‌های پیش‌نما را از پس‌زمینه راه‌اندازی کند."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"میکروفون دردسترس است"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"میکروفون مسدود شد"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"صفحه دوتایی"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"«صفحه دوتایی» روشن است"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"«صفحه دوتایی» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"‏‫Dual Screen دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دردسترس نیست"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دردسترس نیست چون «بهینه‌سازی باتری» روشن است. می‌توانید این ویژگی را در «تنظیمات» خاموش کنید."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>

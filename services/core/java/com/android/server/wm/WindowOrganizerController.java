@@ -559,6 +559,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 if (forceHiddenForPip) {
                     wc.asTask().setForceHidden(FLAG_FORCE_HIDDEN_FOR_PINNED_TASK, true /* set */);
+                    // When removing pip, make sure that onStop is sent to the app ahead of
+                    // onPictureInPictureModeChanged.
+                    // See also PinnedStackTests#testStopBeforeMultiWindowCallbacksOnDismiss
+                    wc.asTask().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+                    wc.asTask().mTaskSupervisor.processStoppingAndFinishingActivities(
+                            null /* launchedActivity */, false /* processPausingActivities */,
+                            "force-stop-on-removing-pip");
                 }
 
                 int containerEffect = applyWindowContainerChange(wc, entry.getValue(),

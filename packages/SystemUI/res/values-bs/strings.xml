@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni napajanja"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani ekran"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog pregrijavanja"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Vaš telefon sada radi normalno.\nDodirnite za više informacija"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Vaš telefon se pregrijao, pa se isključio da se ohladi. Telefon sada radi normalno.\n\nTelefon se može pregrijati ako:\n	• Koristite aplikacije koje troše puno resursa (kao što su aplikacije za igranje, videozapise ili navigaciju)\n	• Preuzimate ili otpremate velike fajlove\n	• Koristite telefon na visokim temperaturama"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pogledajte korake za zaštitu"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon se pregrijava"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Neke funkcije su ograničene dok se telefon hladi.\nDodirnite za više informacija"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Vaš telefon će se automatski pokušati ohladiti. I dalje možete koristi telefon, ali će možda raditi sporije.\n\nNakon što se ohladi, telefon će normalno raditi."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte korake za zaštitu"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Iskopčajte uređaj"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Uređaj se zagrijava u blizini priključka za punjenje. Ako je povezan s punjačem ili USB dodatkom, iskopčajte ga i vodite računa jer i kabl može biti topao."</string>

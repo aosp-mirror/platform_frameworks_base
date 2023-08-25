@@ -80,7 +80,7 @@
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Aquesta aplicació és necessària per al teu perfil i no es pot desinstal·lar."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"L\'administrador del dispositiu necessita l\'aplicació i no la pots desinstal·lar."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"Gestiona aplicacions d\'administració del dispositiu"</string>
-    <string name="manage_users" msgid="1243995386982560813">"Gestiona usuaris"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Gestiona els usuaris"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"No s\'ha pogut desinstal·lar <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Hi ha hagut un problema en analitzar el paquet."</string>
     <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>

@@ -40,6 +40,24 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"スマートフォンのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。仕事用プロファイルは削除され、プロファイルのデータはすべて消去されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、タブレットのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、スマートフォンのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"温度上昇により電源が OFF になりました"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"温度上昇により電源が OFF になりました"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"温度上昇により電源が OFF になりました"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"お使いのスマートフォンは現在、正常に動作しています。\nタップして詳細を表示"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"お使いのデバイスは現在、正常に動作しています。\nタップして詳細を表示"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"お使いのタブレットは現在、正常に動作しています。\nタップして詳細を表示"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"スマートフォンが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nスマートフォンは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"デバイスが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nデバイスは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"タブレットが熱くなりすぎたため電源が OFF になりました。現在は正常に動作しています。\n\nタブレットは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"スマートフォンの温度が上昇中"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"デバイスの温度が上昇中"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"タブレットの温度が上昇中"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"スマートフォンのクールダウン中は一部の機能が制限されます。\nタップして詳細を表示"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"デバイスのクールダウン中は一部の機能が制限されます。\nタップして詳細を表示"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"タブレットのクールダウン中は一部の機能が制限されます。\nタップして詳細を表示"</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"デバイスは自動的にクールダウンを行います。その間もデバイスを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"タブレットは自動的にクールダウンを行います。その間もタブレットを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指紋認証センサーは電源ボタンに内蔵されています。タブレット側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指紋認証センサーは電源ボタンに内蔵されています。デバイス側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指紋認証センサーは電源ボタンに内蔵されています。スマートフォン側面のボタンのうち、音量ボタンの横にあるフラットなボタンです。"</string>

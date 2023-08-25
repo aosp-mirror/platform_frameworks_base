@@ -38,8 +38,26 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="3280816298678433681">"您尝试解锁手机后失败的次数已达 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统将移除此工作资料，而这将删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4417100487251371559">"您尝试解锁平板电脑后失败的次数已达 <xliff:g id="NUMBER">%d</xliff:g> 次。系统将移除此工作资料，而这将删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"您尝试解锁手机后失败的次数已达 <xliff:g id="NUMBER">%d</xliff:g> 次。系统将移除此工作资料，而这将删除所有的工作资料数据。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件账号解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"您已 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件账号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"手机先前因过热而关机"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"设备先前因过热而关机"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"平板电脑先前因过热而关机"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"现在，您的手机已恢复正常运行。\n点按即可了解详情"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"现在，您的设备已恢复正常运行。\n点按即可了解详情"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"现在，您的平板电脑已恢复正常运行。\n点按即可了解详情"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"您的手机先前因过热而关机降温。现已恢复正常运行。\n\n以下情况可能会导致您的手机过热：\n	• 使用占用大量资源的应用（例如游戏、视频或导航应用）\n	• 下载或上传大型文件\n	• 在高温环境下使用手机"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"您的设备先前因过热而关机降温。现已恢复正常运行。\n\n以下情况可能会导致您的设备过热：\n	• 使用占用大量资源的应用（例如游戏、视频或导航应用）\n	• 下载或上传大型文件\n	• 在高温环境下使用设备"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"您的平板电脑先前因过热而关机降温。现已恢复正常运行。\n\n以下情况可能会导致您的平板电脑过热：\n	• 使用占用大量资源的应用（例如游戏、视频或导航应用）\n	• 下载或上传大型文件\n	• 在高温环境下使用平板电脑"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"手机温度上升中"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"设备温度上升中"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"平板电脑温度上升中"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"手机降温期间，部分功能的使用会受限制。\n点按即可了解详情"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"设备降温期间，部分功能的使用会受限制。\n点按即可了解详情"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"平板电脑降温期间，部分功能的使用会受限制。\n点按即可了解详情"</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"您的手机将自动尝试降温。您依然可以使用您的手机，但是它的运行速度可能会较慢。\n\n手机降温完毕后，就会恢复正常的运行速度。"</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"您的设备将自动尝试降温。您依然可以使用您的设备，但是它的运行速度可能会较慢。\n\n设备降温完毕后，就会恢复正常的运行速度。"</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"您的平板电脑将自动尝试降温。您依然可以使用您的平板电脑，但是它的运行速度可能会较慢。\n\n平板电脑降温完毕后，就会恢复正常的运行速度。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于平板电脑边缘凸起的音量按钮旁边。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于设备边缘凸起的音量按钮旁边。"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"指纹传感器在电源按钮上。电源按钮是一个扁平按钮，位于手机边缘凸起的音量按钮旁边。"</string>
