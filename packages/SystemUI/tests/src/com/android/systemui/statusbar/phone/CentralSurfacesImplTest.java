@@ -162,7 +162,7 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
+import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -194,6 +194,8 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
+
+import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -259,6 +261,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private Provider<CollapsedStatusBarFragment> mCollapsedStatusBarFragmentProvider;
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private Bubbles mBubbles;
@@ -277,8 +280,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private CentralSurfacesComponent.Factory mStatusBarComponentFactory;
-    @Mock private CentralSurfacesComponent mCentralSurfacesComponent;
     @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
@@ -405,7 +406,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mNotificationShadeWindowViewControllerLazy.get())
                 .thenReturn(mNotificationShadeWindowViewController);
 
-        when(mStatusBarComponentFactory.create()).thenReturn(mCentralSurfacesComponent);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -443,7 +443,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mock(FragmentService.class),
                 mLightBarController,
                 mAutoHideController,
-                new StatusBarInitializer(mStatusBarWindowController, emptySet()),
+                new StatusBarInitializer(
+                        mStatusBarWindowController,
+                        mCollapsedStatusBarFragmentProvider,
+                        emptySet()),
                 mStatusBarWindowController,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
@@ -504,7 +507,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDozeScrimController,
                 mVolumeComponent,
                 mCommandQueue,
-                mStatusBarComponentFactory,
                 () -> mCentralSurfacesCommandQueueCallbacks,
                 mPluginManager,
                 mShadeController,

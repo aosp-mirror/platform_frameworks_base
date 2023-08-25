@@ -222,9 +222,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
-import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -454,7 +452,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mNotificationShadeWindowViewControllerLazy;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
-    private final CentralSurfacesComponent.Factory mCentralSurfacesComponentFactory;
     private final PluginManager mPluginManager;
     private final ShadeController mShadeController;
     private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
@@ -499,8 +496,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final UserTracker mUserTracker;
     private final Provider<FingerprintManager> mFingerprintManager;
     private final ActivityStarter mActivityStarter;
-
-    private CentralSurfacesComponent mCentralSurfacesComponent;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
@@ -702,7 +697,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
-            CentralSurfacesComponent.Factory centralSurfacesComponentFactory,
             Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
@@ -813,7 +807,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
-        mCentralSurfacesComponentFactory = centralSurfacesComponentFactory;
         mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
@@ -1193,9 +1186,14 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         updateResources();
         updateTheme();
 
-        inflateStatusBarWindow();
+        setUpShade();
         getNotificationShadeWindowView().setOnTouchListener(getStatusBarWindowTouchListener());
         mWallpaperController.setRootView(getNotificationShadeWindowView());
+
+        mDemoModeController.addCallback(mDemoModeCallback);
+
+        mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
+        mCommandQueue.addCallback(mCommandQueueCallbacks);
 
         // TODO: Deal with the ugliness that comes from having some of the status bar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
@@ -1227,8 +1225,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
                     checkBarModes();
                 });
-        mStatusBarInitializer.initializeStatusBar(
-                mCentralSurfacesComponent::createCollapsedStatusBarFragment);
+        mStatusBarInitializer.initializeStatusBar();
 
         mStatusBarTouchableRegionManager.setup(this, getNotificationShadeWindowView());
 
@@ -1551,15 +1548,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         };
     }
 
-    private void inflateStatusBarWindow() {
-        if (mCentralSurfacesComponent != null) {
-            Log.e(TAG, "CentralSurfacesComponent being recreated; this is unexpected.");
-        }
-        mCentralSurfacesComponent = mCentralSurfacesComponentFactory.create();
-        mFragmentService.addFragmentInstantiationProvider(
-                CollapsedStatusBarFragment.class,
-                mCentralSurfacesComponent::createCollapsedStatusBarFragment);
-
+    private void setUpShade() {
         // Ideally, NotificationShadeWindowController could automatically fetch the window root view
         // in #attach or a CoreStartable.start method or something similar. But for now, to avoid
         // regressions, we'll continue standing up the root view in CentralSurfaces.
@@ -1568,12 +1557,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
         mBackActionInteractor.setup(mQsController, mShadeSurface);
-
-        // Listen for demo mode changes
-        mDemoModeController.addCallback(mDemoModeCallback);
-
-        mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
-        mCommandQueue.addCallback(mCommandQueueCallbacks);
     }
 
     protected NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
