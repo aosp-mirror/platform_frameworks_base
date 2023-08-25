@@ -154,6 +154,8 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.NotificationActivityStarter;
+import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -248,7 +250,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock private NotificationLaunchAnimatorControllerProvider mNotifLaunchAnimControllerProvider;
     @Mock private StatusBarNotificationPresenter mNotificationPresenter;
+    @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -289,6 +293,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private CentralSurfacesComponent.Factory mStatusBarComponentFactory;
     @Mock private CentralSurfacesComponent mCentralSurfacesComponent;
+    @Mock private CentralSurfacesCommandQueueCallbacks mCentralSurfacesCommandQueueCallbacks;
     @Mock private PluginManager mPluginManager;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
@@ -517,6 +522,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationShelfController,
                 mStackScrollerController,
                 mNotificationPresenter,
+                mNotificationActivityStarter,
+                mNotifLaunchAnimControllerProvider,
                 new NotificationExpansionRepository(),
                 mDozeParameters,
                 mScrimController,
@@ -531,6 +538,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mVolumeComponent,
                 mCommandQueue,
                 mStatusBarComponentFactory,
+                () -> mCentralSurfacesCommandQueueCallbacks,
                 mPluginManager,
                 mShadeController,
                 mStatusBarKeyguardViewManager,

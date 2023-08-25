@@ -54,6 +54,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
@@ -75,7 +76,6 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.wmshell.BubblesManager;
@@ -92,8 +92,8 @@ import javax.inject.Inject;
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
  */
-@CentralSurfacesComponent.CentralSurfacesScope
-class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
+@SysUISingleton
+public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
     private final Context mContext;
     private final int mDisplayId;

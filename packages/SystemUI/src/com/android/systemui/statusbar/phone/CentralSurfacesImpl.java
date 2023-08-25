@@ -308,6 +308,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final DeviceStateManager mDeviceStateManager;
+    private final Lazy<CentralSurfacesCommandQueueCallbacks> mCommandQueueCallbacksLazy;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
@@ -622,9 +623,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final SysuiStatusBarStateController mStatusBarStateController;
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
+    private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final NotificationPresenter mPresenter;
-    private NotificationActivityStarter mNotificationActivityStarter;
+    private final NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
     private final Lazy<NoteTaskController> mNoteTaskControllerLazy;
@@ -725,6 +726,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             NotificationPresenter notificationPresenter,
+            NotificationActivityStarter notificationActivityStarter,
+            NotificationLaunchAnimatorControllerProvider notifLaunchAnimatorControllerProvider,
             NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -739,6 +742,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             CentralSurfacesComponent.Factory centralSurfacesComponentFactory,
+            Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -833,6 +837,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
         mPresenter = notificationPresenter;
+        mNotificationActivityStarter = notificationActivityStarter;
+        mNotificationAnimationProvider = notifLaunchAnimatorControllerProvider;
         mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
@@ -847,6 +853,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mCentralSurfacesComponentFactory = centralSurfacesComponentFactory;
+        mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -1547,11 +1554,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Set up the initial notification state.
         mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
         mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
-        mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
-                mNotificationExpansionRepository,
-                mNotifListContainer,
-                mHeadsUpManager,
-                mJankMonitor);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -1608,17 +1610,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
         mBackActionInteractor.setup(mQsController, mShadeSurface);
-        mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
 
         // Listen for demo mode changes
         mDemoModeController.addCallback(mDemoModeCallback);
 
-        if (mCommandQueueCallbacks != null) {
-            mCommandQueue.removeCallback(mCommandQueueCallbacks);
-        }
-        mCommandQueueCallbacks =
-                mCentralSurfacesComponent.getCentralSurfacesCommandQueueCallbacks();
-        // Connect in to the status bar manager service
+        mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
     }
 
