@@ -97,7 +97,6 @@ import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_NOT_VISIBLE_ON_SCREEN;
 import static android.window.WindowProviderService.isWindowProviderService;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
@@ -8868,11 +8867,6 @@ public class WindowManagerService extends IWindowManager.Stub
             h.inputConfig |= InputConfig.NOT_FOCUSABLE;
         }
 
-        //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
-        if ((privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0) {
-            h.inputConfig |= InputConfig.TRUSTED_OVERLAY;
-        }
-
         h.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         h.ownerUid = callingUid;
         h.ownerPid = callingPid;
@@ -8892,6 +8886,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final SurfaceControl.Transaction t = mTransactionFactory.get();
+        //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
+        h.setTrustedOverlay(t, surface, (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0);
         t.setInputWindowInfo(surface, h);
         t.apply();
         t.close();

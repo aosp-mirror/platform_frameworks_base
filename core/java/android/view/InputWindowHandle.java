@@ -35,6 +35,8 @@ import java.lang.ref.WeakReference;
  * @hide
  */
 public final class InputWindowHandle {
+    // TODO (b/300094445): Convert to use correct flagging infrastructure
+    public static final boolean USE_SURFACE_TRUSTED_OVERLAY = true;
 
     /**
      * An internal annotation for all the {@link android.os.InputConfig} flags that can be
@@ -59,7 +61,6 @@ public final class InputWindowHandle {
             InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER,
             InputConfig.IS_WALLPAPER,
             InputConfig.PAUSE_DISPATCHING,
-            InputConfig.TRUSTED_OVERLAY,
             InputConfig.WATCH_OUTSIDE_TOUCH,
             InputConfig.SLIPPERY,
             InputConfig.DISABLE_USER_ACTIVITY,
@@ -271,5 +272,14 @@ public final class InputWindowHandle {
             return;
         }
         this.inputConfig &= ~inputConfig;
+    }
+
+    public void setTrustedOverlay(SurfaceControl.Transaction t, SurfaceControl sc,
+            boolean isTrusted) {
+        if (USE_SURFACE_TRUSTED_OVERLAY) {
+            t.setTrustedOverlay(sc, isTrusted);
+        } else if (isTrusted) {
+            inputConfig |= InputConfig.TRUSTED_OVERLAY;
+        }
     }
 }
