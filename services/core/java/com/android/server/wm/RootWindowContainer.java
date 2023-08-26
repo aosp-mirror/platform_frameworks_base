@@ -1513,10 +1513,30 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             throw new IllegalArgumentException(
                     "resolveSecondaryHomeActivity: Should not be default task container");
         }
-        // Resolve activities in the same package as currently selected primary home activity.
+
         Intent homeIntent = mService.getHomeIntent();
         ActivityInfo aInfo = resolveHomeActivity(userId, homeIntent);
-        if (aInfo != null) {
+        boolean lookForSecondaryHomeActivityInPrimaryHomePackage = aInfo != null;
+
+        if (android.companion.virtual.flags.Flags.vdmCustomHome()) {
+            // Resolve the externally set home activity for this display, if any. If it is unset or
+            // we fail to resolve it, fallback to the default secondary home activity.
+            final ComponentName customHomeComponent =
+                    taskDisplayArea.getDisplayContent() != null
+                            ? taskDisplayArea.getDisplayContent().getCustomHomeComponent()
+                            : null;
+            if (customHomeComponent != null) {
+                homeIntent.setComponent(customHomeComponent);
+                ActivityInfo customHomeActivityInfo = resolveHomeActivity(userId, homeIntent);
+                if (customHomeActivityInfo != null) {
+                    aInfo = customHomeActivityInfo;
+                    lookForSecondaryHomeActivityInPrimaryHomePackage = false;
+                }
+            }
+        }
+
+        if (lookForSecondaryHomeActivityInPrimaryHomePackage) {
+            // Resolve activities in the same package as currently selected primary home activity.
             if (ResolverActivity.class.getName().equals(aInfo.name)) {
                 // Always fallback to secondary home component if default home is not set.
                 aInfo = null;

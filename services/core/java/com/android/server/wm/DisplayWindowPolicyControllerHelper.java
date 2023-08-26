@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Process;
@@ -198,6 +199,17 @@ class DisplayWindowPolicyControllerHelper {
             return true;
         }
         return mDisplayWindowPolicyController.isEnteringPipAllowed(uid);
+    }
+
+    /**
+     * @see DisplayWindowPolicyController#getCustomHomeComponent
+     */
+    @Nullable
+    public ComponentName getCustomHomeComponent() {
+        if (mDisplayWindowPolicyController == null) {
+            return null;
+        }
+        return mDisplayWindowPolicyController.getCustomHomeComponent();
     }
 
     void dump(String prefix, PrintWriter pw) {
