@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobi
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.THREE_G
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -75,20 +76,10 @@ class MobileIconInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         underTest = createInteractor()
+
+        mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
+        connectionRepository.isInService.value = true
     }
-
-    @Test
-    fun gsm_level_default_unknown() =
-        testScope.runTest {
-            connectionRepository.isGsm.value = true
-
-            var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isEqualTo(CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
-
-            job.cancel()
-        }
 
     @Test
     fun gsm_usesGsmLevel() =
@@ -98,7 +89,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.cdmaLevel.value = CDMA_LEVEL
 
             var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.level }.launchIn(this)
 
             assertThat(latest).isEqualTo(GSM_LEVEL)
 
@@ -114,7 +105,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             mobileIconsInteractor.alwaysUseCdmaLevel.value = true
 
             var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.level }.launchIn(this)
 
             assertThat(latest).isEqualTo(GSM_LEVEL)
 
@@ -127,7 +118,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.isGsm.value = false
 
             var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.level }.launchIn(this)
 
             assertThat(latest).isEqualTo(CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
             job.cancel()
@@ -142,7 +133,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             mobileIconsInteractor.alwaysUseCdmaLevel.value = true
 
             var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.level }.launchIn(this)
 
             assertThat(latest).isEqualTo(CDMA_LEVEL)
 
@@ -158,7 +149,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             mobileIconsInteractor.alwaysUseCdmaLevel.value = false
 
             var latest: Int? = null
-            val job = underTest.level.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.level }.launchIn(this)
 
             assertThat(latest).isEqualTo(GSM_LEVEL)
 
@@ -169,7 +160,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
     fun numberOfLevels_comesFromRepo() =
         testScope.runTest {
             var latest: Int? = null
-            val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
+            val job = underTest.signalLevelIcon.onEach { latest = it.numberOfLevels }.launchIn(this)
 
             connectionRepository.numberOfLevels.value = 5
             assertThat(latest).isEqualTo(5)
@@ -290,50 +281,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             mobileIconsInteractor.alwaysShowDataRatIcon.value = false
             assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun alwaysUseCdmaLevel_matchesParent() =
-        testScope.runTest {
-            var latest: Boolean? = null
-            val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
-
-            mobileIconsInteractor.alwaysUseCdmaLevel.value = true
-            assertThat(latest).isTrue()
-
-            mobileIconsInteractor.alwaysUseCdmaLevel.value = false
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun test_isDefaultDataEnabled_matchesParent() =
-        testScope.runTest {
-            var latest: Boolean? = null
-            val job = underTest.isDefaultDataEnabled.onEach { latest = it }.launchIn(this)
-
-            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
-            assertThat(latest).isTrue()
-
-            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
-    fun test_isDefaultConnectionFailed_matchedParent() =
-        testScope.runTest {
-            val job = underTest.isDefaultConnectionFailed.launchIn(this)
-
-            mobileIconsInteractor.isDefaultConnectionFailed.value = false
-            assertThat(underTest.isDefaultConnectionFailed.value).isFalse()
-
-            mobileIconsInteractor.isDefaultConnectionFailed.value = true
-            assertThat(underTest.isDefaultConnectionFailed.value).isTrue()
 
             job.cancel()
         }
@@ -539,6 +486,142 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
             connectionRepository.isAllowedDuringAirplaneMode.value = false
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun iconId_correctLevel_notCutout() =
+        testScope.runTest {
+            connectionRepository.isInService.value = true
+            connectionRepository.primaryLevel.value = 1
+            connectionRepository.setDataEnabled(false)
+
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest?.level).isEqualTo(1)
+            assertThat(latest?.showExclamationMark).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_usesLevelFromInteractor() =
+        testScope.runTest {
+            connectionRepository.isInService.value = true
+
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.primaryLevel.value = 3
+            assertThat(latest!!.level).isEqualTo(3)
+
+            connectionRepository.primaryLevel.value = 1
+            assertThat(latest!!.level).isEqualTo(1)
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_usesNumberOfLevelsFromInteractor() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.numberOfLevels.value = 5
+            assertThat(latest!!.numberOfLevels).isEqualTo(5)
+
+            connectionRepository.numberOfLevels.value = 2
+            assertThat(latest!!.numberOfLevels).isEqualTo(2)
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_defaultDataDisabled_showExclamationTrue() =
+        testScope.runTest {
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = false
+
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest!!.showExclamationMark).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_defaultConnectionFailed_showExclamationTrue() =
+        testScope.runTest {
+            mobileIconsInteractor.isDefaultConnectionFailed.value = true
+
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest!!.showExclamationMark).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_enabledAndNotFailed_showExclamationFalse() =
+        testScope.runTest {
+            connectionRepository.isInService.value = true
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled.value = true
+            mobileIconsInteractor.isDefaultConnectionFailed.value = false
+
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest!!.showExclamationMark).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_usesEmptyState_whenNotInService() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.isInService.value = false
+
+            assertThat(latest?.level).isEqualTo(0)
+            assertThat(latest?.showExclamationMark).isTrue()
+
+            // Changing the level doesn't overwrite the disabled state
+            connectionRepository.primaryLevel.value = 2
+            assertThat(latest?.level).isEqualTo(0)
+            assertThat(latest?.showExclamationMark).isTrue()
+
+            // Once back in service, the regular icon appears
+            connectionRepository.isInService.value = true
+            assertThat(latest?.level).isEqualTo(2)
+            assertThat(latest?.showExclamationMark).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun icon_usesCarrierNetworkState_whenInCarrierNetworkChangeMode() =
+        testScope.runTest {
+            var latest: SignalIconModel? = null
+            val job = underTest.signalLevelIcon.onEach { latest = it }.launchIn(this)
+
+            connectionRepository.isInService.value = true
+            connectionRepository.carrierNetworkChangeActive.value = true
+            connectionRepository.primaryLevel.value = 1
+            connectionRepository.cdmaLevel.value = 1
+
+            assertThat(latest!!.level).isEqualTo(1)
+            assertThat(latest!!.carrierNetworkChange).isTrue()
+
+            // SignalIconModel respects the current level
+            connectionRepository.primaryLevel.value = 2
+
+            assertThat(latest!!.level).isEqualTo(2)
+            assertThat(latest!!.carrierNetworkChange).isTrue()
+
+            job.cancel()
         }
 
     private fun createInteractor(

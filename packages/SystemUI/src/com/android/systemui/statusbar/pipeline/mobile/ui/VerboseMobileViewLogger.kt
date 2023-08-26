@@ -22,8 +22,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.pipeline.dagger.VerboseMobileViewLog
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger.Companion.getIdForLogging
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import javax.inject.Inject
 
 /**

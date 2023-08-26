@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ገባኝ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ምንም የቅርብ ጊዜ አረፋዎች የሉም"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"የቅርብ ጊዜ አረፋዎች እና የተሰናበቱ አረፋዎች እዚህ ብቅ ይላሉ"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"አረፋ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ያቀናብሩ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"አረፋ ተሰናብቷል።"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"ለተሻለ ዕይታ ይህን መተግበሪያ ዳግም ለማስነሳት መታ ያድርጉ።"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"ለተሻለ ዕይታ ይህን መተግበሪያ እንደገና ለመጀመር መታ ያድርጉ"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"የዚህን መተግበሪያ ምጥጥነ ገፅታ በቅንብሮች ውስጥ ይለውጡ"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"የምጥጥነ ገፅታ ለውጥ"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"የካሜራ ችግሮች አሉ?\nዳግም ለማበጀት መታ ያድርጉ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"አልተስተካከለም?\nለማህደር መታ ያድርጉ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ምንም የካሜራ ችግሮች የሉም? ለማሰናበት መታ ያድርጉ።"</string>
@@ -106,7 +112,7 @@
     <string name="more_button_text" msgid="3655388105592893530">"ተጨማሪ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ተንሳፋፊ"</string>
     <string name="select_text" msgid="5139083974039906583">"ምረጥ"</string>
-    <string name="screenshot_text" msgid="1477704010087786671">"ቅጽበታዊ ገፅ እይታ"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ቅጽበታዊ ገፅ ዕይታ"</string>
     <string name="close_text" msgid="4986518933445178928">"ዝጋ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ምናሌ ዝጋ"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"ምናሌን ክፈት"</string>

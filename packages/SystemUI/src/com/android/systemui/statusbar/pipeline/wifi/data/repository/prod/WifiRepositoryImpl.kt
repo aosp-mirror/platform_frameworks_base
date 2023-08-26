@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -229,6 +230,14 @@ constructor(
             scope,
             wifiTableLogBuffer,
             logger::logActivity,
+        )
+
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> =
+        WifiRepositoryHelper.createNetworkScanFlow(
+            wifiManager,
+            scope,
+            bgDispatcher,
+            logger::logScanResults
         )
 
     companion object {

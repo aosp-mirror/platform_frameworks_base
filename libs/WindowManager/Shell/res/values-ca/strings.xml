@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Entesos"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"No hi ha bombolles recents"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Les bombolles recents i les ignorades es mostraran aquí"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bombolla"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestiona"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"La bombolla s\'ha ignorat."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Toca per reiniciar aquesta aplicació i obtenir una millor visualització."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Toca per reiniciar aquesta aplicació i obtenir una millor visualització"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Canvia la relació d\'aspecte d\'aquesta aplicació a Configuració"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Canvia la relació d\'aspecte"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Tens problemes amb la càmera?\nToca per resoldre\'ls"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"El problema no s\'ha resolt?\nToca per desfer els canvis"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"No tens cap problema amb la càmera? Toca per ignorar."</string>

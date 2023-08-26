@@ -586,16 +586,18 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 if (shouldTryToDismissKeyguard()) {
                     tryDismissingKeyguard();
                 }
-                onFingerDown(requestId,
-                        data.getPointerId(),
-                        data.getX(),
-                        data.getY(),
-                        data.getMinor(),
-                        data.getMajor(),
-                        data.getOrientation(),
-                        data.getTime(),
-                        data.getGestureStart(),
-                        mStatusBarStateController.isDozing());
+                if (!mOnFingerDown) {
+                    onFingerDown(requestId,
+                            data.getPointerId(),
+                            data.getX(),
+                            data.getY(),
+                            data.getMinor(),
+                            data.getMajor(),
+                            data.getOrientation(),
+                            data.getTime(),
+                            data.getGestureStart(),
+                            mStatusBarStateController.isDozing());
+                }
 
                 // Pilfer if valid overlap, don't allow following events to reach keyguard
                 shouldPilfer = true;

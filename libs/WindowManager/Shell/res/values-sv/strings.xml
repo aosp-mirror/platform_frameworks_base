@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Inga nya bubblor"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"De senaste bubblorna och ignorerade bubblor visas här"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bubbla"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Hantera"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bubblan ignorerades."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tryck för att starta om appen och få en bättre vy."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"Tryck för att starta om appen och få en bättre vy"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Ändra appens bildformat i inställningarna"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Ändra bildformat"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problem med kameran?\nTryck för att anpassa på nytt"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Löstes inte problemet?\nTryck för att återställa"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Inga problem med kameran? Tryck för att ignorera."</string>

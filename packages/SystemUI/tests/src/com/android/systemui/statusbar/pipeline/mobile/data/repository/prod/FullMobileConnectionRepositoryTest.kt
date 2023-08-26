@@ -674,6 +674,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         val realRepo =
             MobileConnectionRepositoryImpl(
                 SUB_ID,
+                context,
                 subscriptionModel,
                 DEFAULT_NAME_MODEL,
                 SEP,
