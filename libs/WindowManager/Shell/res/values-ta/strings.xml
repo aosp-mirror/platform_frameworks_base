@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"சரி"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"பபிள்"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"இங்கு தட்டி ஆப்ஸை மீண்டும் தொடங்கி, ஆப்ஸ் காட்சியை இன்னும் சிறப்பாக்கலாம்."</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"இங்கு தட்டுவதன் மூலம் இந்த ஆப்ஸை மீண்டும் தொடங்கி, ஆப்ஸ் காட்டப்படும் விதத்தை இன்னும் சிறப்பாக்கலாம்"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"அமைப்புகளில் இந்த ஆப்ஸின் தோற்ற விகிதத்தை மாற்றும்"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"தோற்ற விகிதத்தை மாற்றும்"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"கேமரா தொடர்பான சிக்கல்களா?\nமீண்டும் பொருத்த தட்டவும்"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"சிக்கல்கள் சரிசெய்யப்படவில்லையா?\nமாற்றியமைக்க தட்டவும்"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"கேமரா தொடர்பான சிக்கல்கள் எதுவும் இல்லையா? நிராகரிக்க தட்டவும்."</string>

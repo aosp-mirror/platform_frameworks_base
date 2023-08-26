@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Something went wrong. Try again."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Fingerprint icon"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Device unlock"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Try another way to unlock"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Use Face Unlock when your fingerprint isn\'t recognized, like when your fingers are wet"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Use Fingerprint Unlock when your face isn\'t recognized, like when there\'s not enough light"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Issue with Face Unlock"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tap to delete your face model, then add your face again"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Set up Face Unlock"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Unlock your phone by looking at it"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"To use Face Unlock, turn on "<b>"Camera access"</b>" in Settings &gt; Privacy"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Set up more ways to unlock"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tap to add a fingerprint"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Can’t use fingerprint sensor"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visit a repair provider."</string>

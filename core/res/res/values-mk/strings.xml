@@ -296,7 +296,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Безбеден режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Систем Android"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Префрли на личен профил"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Префрлете се на личен профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Префрли се на работен профил"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Префрлете се на личната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="managed_profile_app_label" msgid="367401088383965725">"Префрлете се на работната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Нешто не е во ред. Обидете се повторно."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Отклучување на уредот"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Пробајте друг начин на отклучување"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Користете „Отклучување со лик“ кога не ви се препознава отпечатокот, како кога прстите ви се влажни"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Користете „Отклучување со отпечаток“ кога не ви се препознава ликот, како кога нема доволно светлина"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лик, а потоа повторно додајте го ликот"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не може да се користи сензорот за отпечатоци"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>

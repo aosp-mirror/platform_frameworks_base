@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"មានអ្វីមួយខុសប្រក្រតី។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"រូបស្នាមម្រាមដៃ"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ការដោះសោ​ឧបករណ៍"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"សាកល្បងប្រើ​វិធីដោះសោ​ផ្សេងទៀត"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"ប្រើ​ការដោះសោ​ដោយស្កេនមុខ នៅពេលដែល​មិនស្គាល់​ស្នាមម្រាមដៃ​របស់អ្នក ដូចជា​នៅពេលដែល​ម្រាមដៃ​របស់អ្នក​សើមជាដើម"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"ប្រើ​ការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃ នៅពេលដែល​មិនស្គាល់​មុខរបស់អ្នក ដូចជា​នៅពេលដែល​មិនមានពន្លឺ​គ្រប់គ្រាន់ជាដើម"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ការដោះ​សោ​ដោយស្កេន​មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"មានបញ្ហា​ពាក់ព័ន្ធនឹង​មុខងារ​ដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ចុចដើម្បីលុប​គំរូមុខ​របស់អ្នក រួចបញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"រៀបចំ​ការដោះសោ​ដោយស្កេនមុខ"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"ដោះសោទូរសព្ទ​របស់អ្នកដោយសម្លឹងមើលវា"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"រៀបចំ​វិធីច្រើនទៀត​ដើម្បី​ដោះសោ"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ចុច​ដើម្បីបញ្ចូល​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"មិនអាចប្រើ​ឧបករណ៍ចាប់ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ទាក់ទងក្រុមហ៊ុន​ផ្ដល់ការជួសជុល។"</string>

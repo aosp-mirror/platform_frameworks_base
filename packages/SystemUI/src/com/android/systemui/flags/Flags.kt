@@ -375,6 +375,9 @@ object Flags {
 
     // 600- status bar
 
+    // TODO(b/291315866): Tracking Bug
+    @JvmField val SIGNAL_CALLBACK_DEPRECATION = unreleasedFlag("signal_callback_deprecation")
+
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
 
@@ -658,6 +661,10 @@ object Flags {
     @JvmField
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
+
+    @JvmField
+    val COROUTINE_TRACING =
+        unreleasedFlag("coroutine_tracing")
 
     // TODO(b/283071711): Tracking bug
     @JvmField

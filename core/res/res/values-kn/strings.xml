@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"ಏನೋ ತಪ್ಪಾಗಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ಸಾಧನದ ಅನ್‌ಲಾಕ್"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮತ್ತೊಂದು ವಿಧಾನವನ್ನು ಬಳಸಿ"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸದಿದ್ದಾಗ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸಿ, ಉದಾಹರಣೆಗೆ, ನಿಮ್ಮ ಬೆರಳುಗಳು ಒದ್ದೆಯಾಗಿದ್ದಾಗ"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"ನಿಮ್ಮ ಮುಖವನ್ನು ಗುರುತಿಸದಿದ್ದಾಗ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಸಿ, ಉದಾಹರಣೆಗೆ, ಸಾಕಷ್ಟು ಬೆಳಕು ಇಲ್ಲದಿದ್ದಾಗ"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಕುರಿತು ಸಮಸ್ಯೆ ಇದೆ"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಅಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ, ನಂತರ ನಿಮ್ಮ ಫೇಸ್ ಮಾಡೆಲ್ ಅನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿ"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"ಫೋನ್ ಅನ್ನು ನೋಡುವ ಮೂಲಕ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿ"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಬಳಸಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಗೌಪ್ಯತೆ ಎಂಬಲ್ಲಿ "<b>"ಕ್ಯಾಮರಾ ಪ್ರವೇಶವನ್ನು"</b>" ಆನ್ ಮಾಡಿ"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಹೆಚ್ಚಿನ ಮಾರ್ಗಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೇರಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್‌ಲಾಕ್"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಅನ್ನು ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"ರಿಪೇರಿ ಮಾಡುವವರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>

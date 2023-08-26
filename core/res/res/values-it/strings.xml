@@ -310,11 +310,11 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"Possono inviare e visualizzare SMS"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"File"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"Consente di accedere ai file sul tuo dispositivo"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"accedere ai file sul tuo dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musica e audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accesso a musica e audio sul tuo dispositivo"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accedere a musica e audio sul tuo dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto e video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accesso a foto e video sul tuo dispositivo"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accedere a foto e video sul tuo dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Possono registrare audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Attività fisica"</string>
@@ -322,7 +322,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"Possono scattare foto e registrare video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivi nelle vicinanze"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"Consente di rilevare dispositivi nelle vicinanze e di connettersi a tali dispositivi"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"rilevare e connettersi a dispositivi nelle vicinanze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registri chiamate"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"Possono leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefono"</string>
@@ -668,14 +668,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Si è verificato un errore. Riprova."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Icona dell\'impronta"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Sblocco dispositivo"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Prova un\'altra modalità di sblocco"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Usa lo sblocco con il volto se la tua impronta non viene riconosciuta, ad esempio quando hai le dita bagnate"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Usa lo sblocco con l\'impronta se il tuo volto non viene riconosciuto, ad esempio quando non c\'è abbastanza luce"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Sblocco con il volto"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema con Sblocco con il volto"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Tocca per eliminare il tuo modello del volto e poi riaggiungi il tuo volto"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configura lo sblocco con il volto"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Sblocca il telefono guardandolo"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Per utilizzare lo sblocco con il volto, attiva "<b>"l\'accesso alla fotocamera"</b>" in Impostazioni &gt; Privacy"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configura altri modi per sbloccare"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tocca per aggiungere un\'impronta"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Sblocco con l\'impronta"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Impossibile utilizzare il sensore di impronte digitali"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Contatta un fornitore di servizi di riparazione."</string>
@@ -1961,7 +1961,7 @@
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorizzazione necessaria"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotocamera non disponibile"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sul telefono"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sullo smartphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfono non disponibile"</string>
     <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store non disponibile"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Impostazioni di Android TV non disponibili"</string>

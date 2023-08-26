@@ -76,10 +76,16 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুঝেছি"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
+    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
+    <skip />
+    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
+    <skip />
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"আরও ভাল ভিউয়ের জন্য এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন।"</string>
+    <string name="restart_button_description" msgid="4564728020654658478">"আরও ভাল ভিউয়ের জন্য এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"সেটিংস থেকে এই অ্যাপের অ্যাস্পেক্ট রেশিও পরিবর্তন করুন"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"অ্যাস্পেক্ট রেশিও পরিবর্তন করুন"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ক্যামেরা সংক্রান্ত সমস্যা?\nরিফিট করতে ট্যাপ করুন"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এখনও সমাধান হয়নি?\nরিভার্ট করার জন্য ট্যাপ করুন"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ক্যামেরা সংক্রান্ত সমস্যা নেই? বাতিল করতে ট্যাপ করুন।"</string>

@@ -667,14 +667,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Хурууны хээний дүрс"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Төхөөрөмжийн түгжээг тайлна уу"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Түгжээг тайлах өөр аргыг оролдож үзнэ үү"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Таны хуруунууд чийгтэй байх зэрэг үед хурууны хээг тань танихгүй бол Царайгаар түгжээ тайлахыг ашиглана уу"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Хангалттай гэрэлгүй байх зэрэг үед таны царайг танихгүй бол Хурууны хээгээр түгжээ тайлахыг ашиглана уу"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Царайгаар түгжээ тайлах"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Царайгаар түгжээ тайлахтай холбоотой асуудал"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Нүүрний загвараа устгахын тулд товшоод, дараа нь царайгаа дахин нэмнэ үү"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Царайгаар түгжээ тайлахыг тохируулах"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Утас руугаа харж түгжээг нь тайлна уу"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Царайгаар түгжээ тайлахыг ашиглахын тулд Тохиргоо &gt; Нууцлал хэсэгт "<b>" Камерын хандалтыг "</b>" асаана уу"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Түгжээ тайлах илүү олон арга тохируулна уу"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Хурууны хээ нэмэхийн тулд товшино уу"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Хурууны хээгээр түгжээ тайлах"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Хурууны хээ мэдрэгч ашиглах боломжгүй"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Засварын үйлчилгээ үзүүлэгчид зочилно уу."</string>

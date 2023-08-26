@@ -518,8 +518,11 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             return WindowAreaComponent.STATUS_UNSUPPORTED;
         }
 
-        if (mCurrentDeviceState == mConcurrentDisplayState
-                || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mConcurrentDisplayState)
+        if (mCurrentDeviceState == mConcurrentDisplayState) {
+            return WindowAreaComponent.STATUS_ACTIVE;
+        }
+
+        if (!ArrayUtils.contains(mCurrentSupportedDeviceStates, mConcurrentDisplayState)
                 || isDeviceFolded()) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }

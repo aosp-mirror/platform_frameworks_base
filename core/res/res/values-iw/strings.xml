@@ -668,14 +668,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"משהו השתבש. עליך לנסות שוב."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"סמל טביעת אצבע"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"ביטול הנעילה של המכשיר"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"כדאי לנסות דרך אחרת לביטול הנעילה"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"אפשר להשתמש בפתיחה ע\"י זיהוי הפנים כשטביעת האצבע שלך לא מזוהה, למשל כשהאצבעות שלך רטובות"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"אפשר להשתמש בביטול הנעילה בטביעת אצבע כשהפנים שלך לא מזוהות, למשל כשאין מספיק אור"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"פתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"בעיה בפתיחה ע\"י זיהוי הפנים"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"יש להקיש כדי למחוק את התבנית לזיהוי הפנים, ואז להוסיף תבנית חדשה לזיהוי הפנים"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"הגדרת התכונה \'פתיחה ע\"י זיהוי הפנים\'"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"יש להביט בטלפון כדי לבטל את נעילתו"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"אפשר להגדיר דרכים נוספות לביטול נעילה"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"יש להקיש כדי להוסיף טביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"ביטול הנעילה בטביעת אצבע"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"לא ניתן להשתמש בחיישן טביעות האצבע"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"צריך ליצור קשר עם ספק תיקונים."</string>

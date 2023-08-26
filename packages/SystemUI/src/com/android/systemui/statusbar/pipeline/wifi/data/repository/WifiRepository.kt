@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository
 import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import kotlinx.coroutines.flow.StateFlow
 
 /** Provides data related to the wifi state. */
@@ -43,6 +44,12 @@ interface WifiRepository {
 
     /** Observable for the current wifi network activity. */
     val wifiActivity: StateFlow<DataActivityModel>
+
+    /**
+     * The list of known wifi networks, per [WifiManager.scanResults]. This list is passively
+     * updated and does not trigger a scan.
+     */
+    val wifiScanResults: StateFlow<List<WifiScanEntry>>
 
     /**
      * Returns true if the device is currently connected to a wifi network with a valid SSID and

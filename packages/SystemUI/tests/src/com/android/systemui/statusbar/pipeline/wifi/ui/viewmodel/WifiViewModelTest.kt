@@ -74,7 +74,8 @@ class WifiViewModelTest : SysuiTestCase() {
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
+        interactor =
+            WifiInteractorImpl(connectivityRepository, wifiRepository, testScope.backgroundScope)
         airplaneModeViewModel =
             AirplaneModeViewModelImpl(
                 AirplaneModeInteractor(

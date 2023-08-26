@@ -669,14 +669,18 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Нешта пайшло не так. Паўтарыце спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок адбіткаў пальцаў"</string>
+    <!-- no translation found for device_unlock_notification_name (2632928999862915709) -->
+    <skip />
+    <!-- no translation found for alternative_unlock_setup_notification_title (6241508547901933544) -->
+    <skip />
+    <!-- no translation found for alternative_face_setup_notification_content (3384959224091897331) -->
+    <skip />
+    <!-- no translation found for alternative_fp_setup_notification_content (7454096947415721639) -->
+    <skip />
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Распазнаванне твару"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Праблема з распазнаваннем твару"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Націсніце, каб выдаліць мадэль твару, пасля дадайце твар яшчэ раз"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Наладзьце распазнаванне твару"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Разблакіруйце свой тэлефон, паглядзеўшы на яго"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Каб выкарыстоўваць распазнаванне твару, уключыце "<b>"доступ да камеры"</b>" праз раздзел \"Налады &gt; Прыватнасць\""</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Наладзьце дадатковыя спосабы разблакіроўкі"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Націсніце, каб дадаць адбітак пальца"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіроўка адбіткам пальца"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не ўдалося скарыстаць сканер адбіткаў пальцаў"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
