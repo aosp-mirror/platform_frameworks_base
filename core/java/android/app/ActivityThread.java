@@ -223,6 +223,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
 
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.AppSpecializationHooks;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
@@ -1496,6 +1497,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfo(ParcelFileDescriptor pfd, Debug.MemoryInfo mem, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
@@ -1510,6 +1512,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
@@ -1666,6 +1669,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         @Override
         public void dumpMemInfoProto(ParcelFileDescriptor pfd, Debug.MemoryInfo mem,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
@@ -1679,6 +1683,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
+        @NeverCompile
         private void dumpMemInfo(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
                 boolean dumpFullInfo, boolean dumpDalvik,
                 boolean dumpSummaryOnly, boolean dumpUnreachable) {
@@ -3020,6 +3025,7 @@ public final class ActivityThread extends ClientTransactionHandler
         pw.println(String.format(format, objs));
     }
 
+    @NeverCompile
     public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
             boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
             int pid, String processName,
@@ -3349,6 +3355,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /**
      * Dump mem info data to proto.
      */
+    @NeverCompile
     public static void dumpMemInfoTable(ProtoOutputStream proto, Debug.MemoryInfo memInfo,
             boolean dumpDalvik, boolean dumpSummaryOnly,
             long nativeMax, long nativeAllocated, long nativeFree,
