@@ -4963,10 +4963,9 @@
   <java-symbol type="string" name="vdm_camera_access_denied" />
   <java-symbol type="string" name="vdm_secure_window" />
 
-  <java-symbol type="color" name="camera_privacy_light_day"/>
-  <java-symbol type="color" name="camera_privacy_light_night"/>
   <java-symbol type="integer" name="config_cameraPrivacyLightAlsAveragingIntervalMillis"/>
-  <java-symbol type="integer" name="config_cameraPrivacyLightAlsNightThreshold"/>
+  <java-symbol type="array" name="config_cameraPrivacyLightAlsLuxThresholds"/>
+  <java-symbol type="array" name="config_cameraPrivacyLightColors"/>
 
   <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
   <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
