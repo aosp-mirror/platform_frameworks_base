@@ -309,6 +309,7 @@ package android {
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String RENOUNCE_PERMISSIONS = "android.permission.RENOUNCE_PERMISSIONS";
+    field public static final String REPORT_USAGE_STATS = "android.permission.REPORT_USAGE_STATS";
     field @Deprecated public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
