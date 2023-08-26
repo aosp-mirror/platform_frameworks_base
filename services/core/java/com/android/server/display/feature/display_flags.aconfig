@@ -1,0 +1,10 @@
+package: "com.android.server.display.feature.flags"
+
+# Important: Flags must be accessed through DisplayManagerFlags.
+
+flag {
+    name: "enable_connected_display_management"
+    namespace: "display_manager"
+    description: "Feature flag for Connected Display managment"
+    bug: "280739508"
+}

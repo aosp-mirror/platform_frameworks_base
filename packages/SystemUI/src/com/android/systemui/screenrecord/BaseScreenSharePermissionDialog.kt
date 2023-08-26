@@ -121,7 +121,7 @@ open class BaseScreenSharePermissionDialog(
 
     private fun createOptionsView(@LayoutRes layoutId: Int?) {
         if (layoutId == null) return
-        val stub = findViewById<View>(R.id.options_stub) as ViewStub
+        val stub = requireViewById<View>(R.id.options_stub) as ViewStub
         stub.layoutResource = layoutId
         stub.inflate()
     }
@@ -144,8 +144,8 @@ private class OptionsAdapter(
     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.screen_share_dialog_spinner_item_text, parent, false)
-        val titleTextView = view.findViewById<TextView>(android.R.id.text1)
-        val errorTextView = view.findViewById<TextView>(android.R.id.text2)
+        val titleTextView = view.requireViewById<TextView>(android.R.id.text1)
+        val errorTextView = view.requireViewById<TextView>(android.R.id.text2)
         titleTextView.text = getItem(position)
         errorTextView.text = options[position].spinnerDisabledText
         if (isEnabled(position)) {

@@ -6099,6 +6099,10 @@
         android:protectionLevel="signature|privileged|development|appop|retailDemo" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- @SystemApi @hide Allows trusted system components to report events to UsageStatsManager -->
+    <permission android:name="android.permission.REPORT_USAGE_STATS"
+                android:protectionLevel="signature|module" />
+
     <!-- Allows an application to query broadcast response stats (see
          {@link android.app.usage.BroadcastResponseStats}).
          @SystemApi
@@ -7704,6 +7708,15 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.WRITE_FLAGS"
+        android:protectionLevel="signature" />
+
+    <!-- @hide Allows internal applications to manage displays.
+        <p>This means intercept internal signals about displays being (dis-)connected
+        and being able to enable or disable the external displays.
+        <p>Not for use by third-party applications.
+        <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.MANAGE_DISPLAYS"
         android:protectionLevel="signature" />
 
     <!-- Attribution for Geofencing service. -->

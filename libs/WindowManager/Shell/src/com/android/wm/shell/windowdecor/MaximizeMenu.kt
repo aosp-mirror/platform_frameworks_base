@@ -141,13 +141,13 @@ class MaximizeMenu(
     private fun setupMaximizeMenu() {
         val maximizeMenuView = maximizeMenu?.mWindowViewHost?.view ?: return
 
-        maximizeMenuView.findViewById<Button>(
+        maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_maximize_button
         ).setOnClickListener(onClickListener)
-        maximizeMenuView.findViewById<Button>(
+        maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_snap_right_button
         ).setOnClickListener(onClickListener)
-        maximizeMenuView.findViewById<Button>(
+        maximizeMenuView.requireViewById<Button>(
                 R.id.maximize_menu_snap_left_button
         ).setOnClickListener(onClickListener)
     }

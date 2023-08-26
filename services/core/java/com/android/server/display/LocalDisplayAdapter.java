@@ -83,14 +83,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private Context mOverlayContext;
 
     // Called with SyncRoot lock held.
-    public LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener) {
+    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
+            Handler handler, Listener listener) {
         this(syncRoot, context, handler, listener, new Injector());
     }
 
     @VisibleForTesting
-    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
-            Context context, Handler handler, Listener listener, Injector injector) {
+    LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context, Handler handler,
+            Listener listener, Injector injector) {
         super(syncRoot, context, handler, listener, TAG);
         mInjector = injector;
         mSurfaceControlProxy = mInjector.getSurfaceControlProxy();
@@ -231,7 +231,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
         // The active display vsync period in SurfaceFlinger
         private float mActiveRenderFrameRate;
-
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
 

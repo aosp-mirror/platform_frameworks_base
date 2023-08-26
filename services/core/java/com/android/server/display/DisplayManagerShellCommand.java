@@ -23,6 +23,8 @@ import android.os.ShellCommand;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.server.display.feature.DisplayManagerFlags;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 
@@ -30,9 +32,11 @@ class DisplayManagerShellCommand extends ShellCommand {
     private static final String TAG = "DisplayManagerShellCommand";
 
     private final DisplayManagerService mService;
+    private final DisplayManagerFlags mFlags;
 
-    DisplayManagerShellCommand(DisplayManagerService service) {
+    DisplayManagerShellCommand(DisplayManagerService service, DisplayManagerFlags flags) {
         mService = service;
+        mFlags = flags;
     }
 
     @Override
@@ -82,6 +86,10 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setDockedAndIdle();
             case "undock":
                 return unsetDockedAndIdle();
+            case "enable-display":
+                return setDisplayEnabled(true);
+            case "disable-display":
+                return setDisplayEnabled(false);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -142,6 +150,12 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
         pw.println("    Sets brightness to active (normal) screen brightness mode");
+        if (mFlags.isConnectedDisplayManagementEnabled()) {
+            pw.println("  enable-display DISPLAY_ID");
+            pw.println("    Enable the DISPLAY_ID. Only possible if this is a connected display.");
+            pw.println("  disable-display DISPLAY_ID");
+            pw.println("    Disable the DISPLAY_ID. Only possible if this is a connected display.");
+        }
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
@@ -421,6 +435,28 @@ class DisplayManagerShellCommand extends ShellCommand {
 
     private int unsetDockedAndIdle() {
         mService.setDockedAndIdleEnabled(false, Display.DEFAULT_DISPLAY);
+        return 0;
+    }
+
+    private int setDisplayEnabled(boolean enable) {
+        if (!mFlags.isConnectedDisplayManagementEnabled()) {
+            getErrPrintWriter()
+                    .println("Error: external display management is not available on this device.");
+            return 1;
+        }
+        final String displayIdText = getNextArg();
+        if (displayIdText == null) {
+            getErrPrintWriter().println("Error: no displayId specified");
+            return 1;
+        }
+        final int displayId;
+        try {
+            displayId = Integer.parseInt(displayIdText);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid displayId: '" + displayIdText + "'");
+            return 1;
+        }
+        mService.enableConnectedDisplay(displayId, enable);
         return 0;
     }
 }
