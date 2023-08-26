@@ -90,6 +90,8 @@ public final class DisplayManagerGlobal {
             EVENT_DISPLAY_REMOVED,
             EVENT_DISPLAY_BRIGHTNESS_CHANGED,
             EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
+            EVENT_DISPLAY_CONNECTED,
+            EVENT_DISPLAY_DISCONNECTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -99,6 +101,8 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_REMOVED = 3;
     public static final int EVENT_DISPLAY_BRIGHTNESS_CHANGED = 4;
     public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
+    public static final int EVENT_DISPLAY_CONNECTED = 6;
+    public static final int EVENT_DISPLAY_DISCONNECTED = 7;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -414,6 +418,9 @@ public final class DisplayManagerGlobal {
 
     private void updateCallbackIfNeededLocked() {
         int mask = calculateEventsMaskLocked();
+        if (DEBUG) {
+            Log.d(TAG, "Mask for listener: " + mask);
+        }
         if (mask != mRegisteredEventsMask) {
             try {
                 mDm.registerCallbackWithEventMask(mCallback, mask);
@@ -456,6 +463,33 @@ public final class DisplayManagerGlobal {
         // not be holding mLock when we do so
         for (DisplayListenerDelegate listener : mDisplayListeners) {
             listener.sendDisplayEvent(displayId, event, info);
+        }
+    }
+
+    /**
+     * Enable a connected display that is currently disabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void enableConnectedDisplay(int displayId) {
+        try {
+            mDm.enableConnectedDisplay(displayId);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to enable external display", ex);
+        }
+    }
+
+
+    /**
+     * Disable a connected display that is currently enabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void disableConnectedDisplay(int displayId) {
+        try {
+            mDm.disableConnectedDisplay(displayId);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to enable external display", ex);
         }
     }
 
@@ -1179,6 +1213,16 @@ public final class DisplayManagerGlobal {
                         mListener.onDisplayChanged(msg.arg1);
                     }
                     break;
+                case EVENT_DISPLAY_CONNECTED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                        mListener.onDisplayConnected(msg.arg1);
+                    }
+                    break;
+                case EVENT_DISPLAY_DISCONNECTED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                        mListener.onDisplayDisconnected(msg.arg1);
+                    }
+                    break;
             }
             if (DEBUG) {
                 Trace.endSection();
@@ -1302,6 +1346,10 @@ public final class DisplayManagerGlobal {
                 return "BRIGHTNESS_CHANGED";
             case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
                 return "HDR_SDR_RATIO_CHANGED";
+            case EVENT_DISPLAY_CONNECTED:
+                return "EVENT_DISPLAY_CONNECTED";
+            case EVENT_DISPLAY_DISCONNECTED:
+                return "EVENT_DISPLAY_DISCONNECTED";
         }
         return "UNKNOWN";
     }
