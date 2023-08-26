@@ -552,10 +552,6 @@
     <color name="accessibility_magnification_thumbnail_container_background_color">#99000000</color>
     <color name="accessibility_magnification_thumbnail_container_stroke_color">#FFFFFF</color>
 
-    <!-- Color of camera light when camera is in use -->
-    <color name="camera_privacy_light_day">#FFFFFF</color>
-    <color name="camera_privacy_light_night">#FFFFFF</color>
-
     <!-- Lily Language Picker language item view colors -->
     <color name="language_picker_item_text_color">#202124</color>
     <color name="language_picker_item_text_color_secondary">#5F6368</color>

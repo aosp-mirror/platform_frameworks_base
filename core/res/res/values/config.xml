@@ -6444,8 +6444,19 @@
 
     <!-- Interval in milliseconds to average light sensor values for camera light brightness -->
     <integer name="config_cameraPrivacyLightAlsAveragingIntervalMillis">3000</integer>
-    <!-- Light sensor's lux value to use as the threshold between using day or night brightness -->
-    <integer name="config_cameraPrivacyLightAlsNightThreshold">4</integer>
+    <!-- Ambient Light sensor's lux values to use as the threshold between brightness colors defined
+         by config_cameraPrivacyLightColors. If the ambient brightness less than the first element
+         in this array then lights of type "camera" will be set to the color in position 0 of
+         config_cameraPrivacyLightColors. This array must be strictly increasing and have a length
+         of zero means there is only one brightness -->
+    <integer-array name="config_cameraPrivacyLightAlsLuxThresholds">
+    </integer-array>
+    <!-- Colors to configure the camera privacy light at different brightnesses. This array must
+         have exactly one more entry than config_cameraPrivacyLightAlsLuxThresholds,
+         or a length of zero if the feature isn't supported. If nonempty and the device doesn't have
+         an ambient light sensor the last element in this array will be the only one used -->
+    <array name="config_cameraPrivacyLightColors">
+    </array>
 
     <!-- List of system components which are allowed to receive ServiceState entries in an
          un-sanitized form, even if the location toggle is off. This is intended ONLY for system
