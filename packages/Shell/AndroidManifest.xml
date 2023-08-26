@@ -167,6 +167,7 @@
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.REPORT_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />

@@ -1106,6 +1106,7 @@ public final class UsageStatsManager {
      * <p><em>This method is only for use by the system</em>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)
     public void reportUserInteraction(@NonNull String packageName, int userId) {
         try {
             mService.reportUserInteraction(packageName, userId);
@@ -1396,6 +1397,7 @@ public final class UsageStatsManager {
      * {@link UsageEvents}
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)
     public void reportChooserSelection(String packageName, int userId, String contentType,
                                        String[] annotations, String action) {
         try {
