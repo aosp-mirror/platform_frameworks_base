@@ -38,7 +38,7 @@ import android.util.TypedValue;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
-import com.android.server.LocalServices;
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.server.display.TestUtils;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.utils.AmbientFilter;
@@ -47,6 +47,7 @@ import com.android.server.display.utils.AmbientFilterStubber;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -89,6 +90,9 @@ public final class AmbientLuxTest {
     @Mock private TypedArray mStrongAmbientColorTemperatures;
     @Mock private TypedArray mStrongDisplayColorTemperatures;
     @Mock private ColorDisplayService.ColorDisplayServiceInternal mColorDisplayServiceInternalMock;
+
+    @Rule
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
 
     @Before
     public void setUp() throws Exception {
@@ -156,8 +160,9 @@ public final class AmbientLuxTest {
                 R.array.config_displayWhiteBalanceHighLightAmbientBiasesStrong))
                 .thenReturn(mHighLightBiasesStrong);
         mockThrottler();
-        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
-        LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
+
+        mLocalServiceKeeperRule.overrideLocalService(
+                ColorDisplayService.ColorDisplayServiceInternal.class,
                 mColorDisplayServiceInternalMock);
     }
 

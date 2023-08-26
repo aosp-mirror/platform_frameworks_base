@@ -801,6 +801,11 @@ public class RemoteViews implements Parcelable, Filter {
                     mActions.set(i, new SetRemoteCollectionItemListAdapterAction(itemsAction.viewId,
                             itemsAction.mServiceIntent));
                     isActionReplaced = true;
+                } else if (action instanceof SetRemoteViewsAdapterIntent intentAction
+                        && intentAction.viewId == viewId) {
+                    mActions.set(i, new SetRemoteCollectionItemListAdapterAction(
+                            intentAction.viewId, intentAction.intent));
+                    isActionReplaced = true;
                 } else if (action instanceof ViewGroupActionAdd groupAction
                         && groupAction.mNestedViews != null) {
                     isActionReplaced |= groupAction.mNestedViews.replaceRemoteCollections(viewId);
@@ -820,6 +825,42 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         return isActionReplaced;
+    }
+
+    /**
+     * @return True if has set remote adapter using service intent
+     * @hide
+     */
+    public boolean hasLegacyLists() {
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                Action action = mActions.get(i);
+                if ((action instanceof SetRemoteCollectionItemListAdapterAction itemsAction
+                        && itemsAction.mServiceIntent != null)
+                        || (action instanceof SetRemoteViewsAdapterIntent intentAction
+                                && intentAction.intent != null)
+                        || (action instanceof ViewGroupActionAdd groupAction
+                                && groupAction.mNestedViews != null
+                                && groupAction.mNestedViews.hasLegacyLists())) {
+                    return true;
+                }
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                if (mSizedRemoteViews.get(i).hasLegacyLists()) {
+                    return true;
+                }
+            }
+        }
+        if (mLandscape != null && mLandscape.hasLegacyLists()) {
+            return true;
+        }
+        if (mPortrait != null && mPortrait.hasLegacyLists()) {
+            return true;
+        }
+
+        return false;
     }
 
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {

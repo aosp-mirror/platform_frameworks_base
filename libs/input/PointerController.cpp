@@ -63,7 +63,7 @@ void PointerController::DisplayInfoListener::onPointerControllerDestroyed() {
 
 std::shared_ptr<PointerController> PointerController::create(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController) {
+        SpriteController& spriteController) {
     // using 'new' to access non-public constructor
     std::shared_ptr<PointerController> controller = std::shared_ptr<PointerController>(
             new PointerController(policy, looper, spriteController));
@@ -85,8 +85,7 @@ std::shared_ptr<PointerController> PointerController::create(
 }
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
-                                     const sp<Looper>& looper,
-                                     const sp<SpriteController>& spriteController)
+                                     const sp<Looper>& looper, SpriteController& spriteController)
       : PointerController(
                 policy, looper, spriteController,
                 [](const sp<android::gui::WindowInfosListener>& listener) {
@@ -97,8 +96,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
                 }) {}
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
-                                     const sp<Looper>& looper,
-                                     const sp<SpriteController>& spriteController,
+                                     const sp<Looper>& looper, SpriteController& spriteController,
                                      WindowListenerConsumer registerListener,
                                      WindowListenerConsumer unregisterListener)
       : mContext(policy, looper, spriteController, *this),
@@ -292,7 +290,7 @@ void PointerController::doInactivityTimeout() {
     fade(Transition::GRADUAL);
 }
 
-void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports) {
+void PointerController::onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports) {
     std::unordered_set<int32_t> displayIdSet;
     for (const DisplayViewport& viewport : viewports) {
         displayIdSet.insert(viewport.displayId);

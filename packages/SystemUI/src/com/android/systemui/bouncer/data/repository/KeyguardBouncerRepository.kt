@@ -58,7 +58,7 @@ interface KeyguardBouncerRepository {
      * ```
      */
     val panelExpansionAmount: StateFlow<Float>
-    val keyguardPosition: StateFlow<Float>
+    val keyguardPosition: StateFlow<Float?>
     val isBackButtonEnabled: StateFlow<Boolean?>
     /** Determines if user is already unlocked */
     val keyguardAuthenticated: StateFlow<Boolean?>
@@ -130,7 +130,7 @@ constructor(
      */
     private val _panelExpansionAmount = MutableStateFlow(EXPANSION_HIDDEN)
     override val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
-    private val _keyguardPosition = MutableStateFlow(0f)
+    private val _keyguardPosition = MutableStateFlow<Float?>(null)
     override val keyguardPosition = _keyguardPosition.asStateFlow()
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
@@ -244,6 +244,7 @@ constructor(
             .logDiffsForTable(buffer, "", "PanelExpansionAmountMillis", -1)
             .launchIn(applicationScope)
         keyguardPosition
+            .filterNotNull()
             .map { it.toInt() }
             .logDiffsForTable(buffer, "", "KeyguardPosition", -1)
             .launchIn(applicationScope)

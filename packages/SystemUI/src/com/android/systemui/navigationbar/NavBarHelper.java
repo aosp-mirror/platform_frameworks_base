@@ -453,6 +453,11 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void setAssistantOverridesRequested(int[] invocationTypes) {
+        mAssistManagerLazy.get().setAssistantOverridesRequested(invocationTypes);
+    }
+
+    @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateAssistantAvailability();

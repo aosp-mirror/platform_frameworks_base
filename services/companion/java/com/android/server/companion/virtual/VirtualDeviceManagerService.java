@@ -85,6 +85,7 @@ public class VirtualDeviceManagerService extends SystemService {
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
     private final VirtualDeviceManagerInternal mLocalService;
+    private VirtualDeviceLog mVirtualDeviceLog = new VirtualDeviceLog(getContext());
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
 
@@ -344,9 +345,11 @@ public class VirtualDeviceManagerService extends SystemService {
             final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
                     runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
             VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(), associationInfo,
-                    VirtualDeviceManagerService.this, token, attributionSource, deviceId,
+                    VirtualDeviceManagerService.this, mVirtualDeviceLog, token, attributionSource,
+                    deviceId,
                     cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
+
             synchronized (mVirtualDeviceManagerLock) {
                 if (mVirtualDevices.size() == 0) {
                     final long callindId = Binder.clearCallingIdentity();
@@ -521,6 +524,8 @@ public class VirtualDeviceManagerService extends SystemService {
             for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
                 virtualDevicesSnapshot.get(i).dump(fd, fout, args);
             }
+
+            mVirtualDeviceLog.dump(fout);
         }
     }
 

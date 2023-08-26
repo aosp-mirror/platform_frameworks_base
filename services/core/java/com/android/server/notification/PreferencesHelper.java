@@ -38,7 +38,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -53,7 +52,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
@@ -114,7 +112,6 @@ public class PreferencesHelper implements RankingConfig {
     private static final int XML_VERSION_REVIEW_PERMISSIONS_NOTIFICATION = 4;
     @VisibleForTesting
     static final int UNKNOWN_UID = UserHandle.USER_NULL;
-    private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
     @VisibleForTesting
     static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
@@ -196,6 +193,7 @@ public class PreferencesHelper implements RankingConfig {
     private final PermissionManager mPermissionManager;
     private final NotificationChannelLogger mNotificationChannelLogger;
     private final AppOpsManager mAppOps;
+    private final ManagedServices.UserProfiles mUserProfiles;
 
     private SparseBooleanArray mBadgingEnabled;
     private SparseBooleanArray mBubblesEnabled;
@@ -204,14 +202,12 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mCurrentUserHasChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
-    private boolean mShowReviewPermissionsNotification;
-
-    private boolean mAllowInvalidShortcuts = false;
+    private final boolean mShowReviewPermissionsNotification;
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper, PermissionManager permManager,
             NotificationChannelLogger notificationChannelLogger,
-            AppOpsManager appOpsManager,
+            AppOpsManager appOpsManager, ManagedServices.UserProfiles userProfiles,
             SysUiStatsEvent.BuilderFactory statsEventBuilderFactory,
             boolean showReviewPermissionsNotification) {
         mContext = context;
@@ -222,6 +218,7 @@ public class PreferencesHelper implements RankingConfig {
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
+        mUserProfiles = userProfiles;
         mStatsEventBuilderFactory = statsEventBuilderFactory;
         mShowReviewPermissionsNotification = showReviewPermissionsNotification;
 
@@ -435,7 +432,7 @@ public class PreferencesHelper implements RankingConfig {
                 channel.getConversationId() != null &&
                         channel.getConversationId().contains(
                                 PLACEHOLDER_CONVERSATION_ID);
-        return mAllowInvalidShortcuts || (!mAllowInvalidShortcuts && !isInvalidShortcutChannel);
+        return !isInvalidShortcutChannel;
     }
 
     private boolean isDeletionOk(NotificationChannel nc) {
@@ -1790,8 +1787,9 @@ public class PreferencesHelper implements RankingConfig {
      * Syncs {@link #mCurrentUserHasChannelsBypassingDnd} with the current user's notification
      * policy before updating. Must be called:
      * <ul>
-     *     <li>On system init, after channels and DND configurations are loaded.</li>
-     *     <li>When the current user changes, after the corresponding DND config is loaded.</li>
+     *     <li>On system init, after channels and DND configurations are loaded.
+     *     <li>When the current user is switched, after the corresponding DND config is loaded.
+     *     <li>If users are removed (the removed user could've been a profile of the current one).
      * </ul>
      */
     void syncChannelsBypassingDnd() {
@@ -1805,20 +1803,19 @@ public class PreferencesHelper implements RankingConfig {
     /**
      * Updates the user's NotificationPolicy based on whether the current userId has channels
      * bypassing DND. It should be called whenever a channel is created, updated, or deleted, or
-     * when the current user is switched.
+     * when the current user (or its profiles) change.
      */
     private void updateCurrentUserHasChannelsBypassingDnd(int callingUid,
             boolean fromSystemOrSystemUi) {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
-        final int currentUserId = getCurrentUser();
+        final IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
         synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
-                // Package isn't associated with the current userId
-                if (currentUserId != UserHandle.getUserId(r.uid)) {
-                    continue;
+                if (!currentUserIds.contains(UserHandle.getUserId(r.uid))) {
+                    continue; // Package isn't associated with any profile of the current userId.
                 }
 
                 for (NotificationChannel channel : r.channels.values()) {
@@ -1840,13 +1837,6 @@ public class PreferencesHelper implements RankingConfig {
             mCurrentUserHasChannelsBypassingDnd = haveBypassingApps;
             updateZenPolicy(mCurrentUserHasChannelsBypassingDnd, callingUid, fromSystemOrSystemUi);
         }
-    }
-
-    private int getCurrentUser() {
-        final long identity = Binder.clearCallingIdentity();
-        int currentUserId = ActivityManager.getCurrentUser();
-        Binder.restoreCallingIdentity(identity);
-        return currentUserId;
     }
 
     private boolean channelIsLiveLocked(PackagePreferences pkgPref, NotificationChannel channel) {

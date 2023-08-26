@@ -361,18 +361,6 @@ public final class Call {
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
 
     /**
-     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
-     * find any network and likely will not get connected. Upon receiving this event, the dialer
-     * app should show satellite SOS button if satellite is provisioned.
-     * <p>
-     * The dialer app receives this event via
-     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
-     * @hide
-     */
-    public static final String EVENT_DISPLAY_SOS_MESSAGE =
-            "android.telecom.event.DISPLAY_SOS_MESSAGE";
-
-    /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
      * call because they have declined to answer it.  This typically means that they are unable
      * to answer the call at this time and would prefer it be sent to voicemail.
@@ -726,8 +714,16 @@ public final class Call {
          */
         public static final int PROPERTY_CROSS_SIM = 0x00004000;
 
+        /**
+         * The connection is using transactional call APIs.
+         * <p>
+         * The underlying connection was added as a transactional call via the
+         * {@link TelecomManager#addCall} API.
+         */
+        public static final int PROPERTY_IS_TRANSACTIONAL = 0x00008000;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00004000
+        // Next PROPERTY value: 0x00010000
         //******************************************************************************************
 
         private final @CallState int mState;
@@ -924,6 +920,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_CROSS_SIM)) {
                 builder.append(" PROPERTY_CROSS_SIM");
+            }
+            if (hasProperty(properties, PROPERTY_IS_TRANSACTIONAL)) {
+                builder.append(" PROPERTY_IS_TRANSACTIONAL");
             }
             builder.append("]");
             return builder.toString();

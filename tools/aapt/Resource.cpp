@@ -15,6 +15,7 @@
 #include "ResourceTable.h"
 #include "StringPool.h"
 #include "Symbol.h"
+#include "Utils.h"
 #include "WorkQueue.h"
 #include "XMLNode.h"
 
@@ -321,7 +322,7 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
             str++;
         }
         String8 resPath = it.getPath();
-        resPath.convertToResPath();
+        convertToResPath(resPath);
         status_t result = table->addEntry(SourcePos(it.getPath(), 0),
                         String16(assets->getPackage()),
                         type16,

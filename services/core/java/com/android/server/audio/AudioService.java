@@ -43,6 +43,7 @@ import static com.android.server.utils.EventLogger.Event.ALOGI;
 import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -60,7 +61,6 @@ import android.app.NotificationManager;
 import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -1406,7 +1406,6 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -8676,13 +8675,18 @@ public class AudioService extends IAudioService.Stub
                 // fire changed intents for all streams, but only when the device it changed on
                 //  is the current device
                 if ((index != oldIndex) && isCurrentDevice) {
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
-                            mStreamVolumeAlias[mStreamType]);
-                    AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
-                            mStreamType, mStreamVolumeAlias[mStreamType], index));
-                    sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
+                    // for single volume devices, only send the volume change broadcast
+                    // on the alias stream
+                    if (!mIsSingleVolume || (mStreamVolumeAlias[mStreamType] == mStreamType)) {
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE,
+                                oldIndex);
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
+                                mStreamVolumeAlias[mStreamType]);
+                        AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
+                                mStreamType, mStreamVolumeAlias[mStreamType], index));
+                        sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
+                    }
                 }
             }
             return changed;
@@ -9619,7 +9623,7 @@ public class AudioService extends IAudioService.Stub
                 mDockState = dockState;
             } else if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)
                     || action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
-                mDeviceBroker.receiveBtEvent(intent);
+                mDeviceBroker.postReceiveBtEvent(intent);
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 if (mMonitorRotation) {
                     RotationHelper.enable();
@@ -9686,15 +9690,6 @@ public class AudioService extends IAudioService.Stub
                             UserManager.DISALLOW_RECORD_AUDIO, false, userId);
                 } catch (IllegalArgumentException e) {
                     Slog.w(TAG, "Failed to apply DISALLOW_RECORD_AUDIO restriction: " + e);
-                }
-            } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                        "BluetoothAdapter ACTION_STATE_CHANGED with state " + state));
-
-                if (state == BluetoothAdapter.STATE_OFF ||
-                        state == BluetoothAdapter.STATE_TURNING_OFF) {
-                    mDeviceBroker.disconnectAllBluetoothProfiles();
                 }
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
@@ -10005,6 +10000,14 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa, callingPackageName);
     }
 
+    /** see {@link AudioManager#getFocusDuckedUidsForTest()} */
+    @Override
+    @EnforcePermission("android.permission.QUERY_AUDIO_STATE")
+    public @NonNull List<Integer> getFocusDuckedUidsForTest() {
+        super.getFocusDuckedUidsForTest_enforcePermission();
+        return mPlaybackMonitor.getFocusDuckedUids();
+    }
+
     public void unregisterAudioFocusClient(String clientId) {
         new MediaMetrics.Item(mMetricsId + "focus")
                 .set(MediaMetrics.Property.CLIENT_NAME, clientId)
@@ -10021,6 +10024,68 @@ public class AudioService extends IAudioService.Stub
         return mMediaFocusControl.getFocusRampTimeMs(focusGain, attr);
     }
 
+    /**
+     * Test method to return the duration of the fade out applied on the players of a focus loser
+     * @see AudioManager#getFocusFadeOutDurationForTest()
+     * @return the fade out duration, in ms
+     */
+    @EnforcePermission("android.permission.QUERY_AUDIO_STATE")
+    public long getFocusFadeOutDurationForTest() {
+        super.getFocusFadeOutDurationForTest_enforcePermission();
+        return mMediaFocusControl.getFocusFadeOutDurationForTest();
+    }
+
+    /**
+     * Test method to return the length of time after a fade out before the focus loser is unmuted
+     * (and is faded back in).
+     * @see AudioManager#getFocusUnmuteDelayAfterFadeOutForTest()
+     * @return the time gap after a fade out completion on focus loss, and fade in start, in ms
+     */
+    @Override
+    @EnforcePermission("android.permission.QUERY_AUDIO_STATE")
+    public long getFocusUnmuteDelayAfterFadeOutForTest() {
+        super.getFocusUnmuteDelayAfterFadeOutForTest_enforcePermission();
+        return mMediaFocusControl.getFocusUnmuteDelayAfterFadeOutForTest();
+    }
+
+    /**
+     * Test method to start preventing applications from requesting audio focus during a test,
+     * which could interfere with the testing of the functionality/behavior under test.
+     * Calling this method needs to be paired with a call to {@link #exitAudioFocusFreezeForTest}
+     * when the testing is done. If this is not the case (e.g. in case of a test crash),
+     * a death observer mechanism will ensure the system is not left in a bad state, but this should
+     * not be relied on when implementing tests.
+     * @see AudioManager#enterAudioFocusFreezeForTest(List)
+     * @param cb IBinder to track the death of the client of this method
+     * @param exemptedUids a list of UIDs that are exempt from the freeze. This would for instance
+     *                     be those of the test runner and other players used in the test
+     * @return true if the focus freeze mode is successfully entered, false if there was an issue,
+     *     such as another freeze currently used.
+     */
+    @Override
+    @EnforcePermission("android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    public boolean enterAudioFocusFreezeForTest(IBinder cb, int[] exemptedUids) {
+        super.enterAudioFocusFreezeForTest_enforcePermission();
+        Objects.requireNonNull(exemptedUids);
+        Objects.requireNonNull(cb);
+        return mMediaFocusControl.enterAudioFocusFreezeForTest(cb, exemptedUids);
+    }
+
+    /**
+     * Test method to end preventing applications from requesting audio focus during a test.
+     * @see AudioManager#exitAudioFocusFreezeForTest()
+     * @param cb IBinder identifying the client of this method
+     * @return true if the focus freeze mode is successfully exited, false if there was an issue,
+     *     such as the freeze already having ended, or not started.
+     */
+    @Override
+    @EnforcePermission("android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    public boolean exitAudioFocusFreezeForTest(IBinder cb) {
+        super.exitAudioFocusFreezeForTest_enforcePermission();
+        Objects.requireNonNull(cb);
+        return mMediaFocusControl.exitAudioFocusFreezeForTest(cb);
+    }
+
     /** only public for mocking/spying, do not call outside of AudioService */
     @VisibleForTesting
     public boolean hasAudioFocusUsers() {
@@ -10028,6 +10093,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** see {@link AudioManager#getFadeOutDurationOnFocusLossMillis(AudioAttributes)} */
+    @Override
     public long getFadeOutDurationOnFocusLossMillis(AudioAttributes aa) {
         if (!enforceQueryAudioStateForTest("fade out duration")) {
             return 0;

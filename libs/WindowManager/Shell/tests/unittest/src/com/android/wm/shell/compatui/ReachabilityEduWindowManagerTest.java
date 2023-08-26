@@ -109,6 +109,6 @@ public class ReachabilityEduWindowManagerTest extends ShellTestCase {
     private ReachabilityEduWindowManager createReachabilityEduWindowManager(TaskInfo taskInfo) {
         return new ReachabilityEduWindowManager(mContext, taskInfo, mSyncTransactionQueue,
                 mTaskListener, mDisplayLayout, mCompatUIConfiguration, mExecutor,
-                mOnDismissCallback);
+                mOnDismissCallback, flags -> 0);
     }
 }

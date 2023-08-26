@@ -1210,13 +1210,16 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-         Stem primary button is only used on watch form factor. If a device is not
-         a watch, setting this config is no-op.
-            0 - Nothing
-            1 - Go to launch all apps
+        Stem primary button is only used on watch form factor. If a device is not
+        a watch, setting this config is no-op.
+           0 - Nothing
+           1 - Go to launch all apps
+           2 - Launch target activity defined by config_primaryShortPressTargetActivity if available
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+   <!-- Activity name for the default target activity to be launched. [DO NOT TRANSLATE] -->
+   <string name="config_primaryShortPressTargetActivity" translatable="false"></string>
 
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
@@ -5356,6 +5359,7 @@
         <item>1,1,1.0,0,1</item>
         <item>1,1,1.0,.4,1</item>
         <item>1,1,1.0,.15,15</item>
+        <item>0,0,0.7,0,1</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
@@ -5438,7 +5442,7 @@
          fingerprint and face. If a dual-modality device only enrolled a single biometric and
          experiences high FRR (above threshold), system notification will be sent to encourage user
          to enroll the other eligible biometric. -->
-    <fraction name="config_biometricNotificationFrrThreshold">30%</fraction>
+    <fraction name="config_biometricNotificationFrrThreshold">25%</fraction>
 
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
@@ -5938,9 +5942,9 @@
     <bool name="config_cecPowerControlModeTv_allowed">true</bool>
     <bool name="config_cecPowerControlModeTv_default">false</bool>
     <bool name="config_cecPowerControlModeTvAndAudioSystem_allowed">true</bool>
-    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">true</bool>
+    <bool name="config_cecPowerControlModeTvAndAudioSystem_default">false</bool>
     <bool name="config_cecPowerControlModeBroadcast_allowed">true</bool>
-    <bool name="config_cecPowerControlModeBroadcast_default">false</bool>
+    <bool name="config_cecPowerControlModeBroadcast_default">true</bool>
     <bool name="config_cecPowerControlModeNone_allowed">true</bool>
     <bool name="config_cecPowerControlModeNone_default">false</bool>
 
@@ -6624,11 +6628,6 @@
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 
-    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
-    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
-    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
-    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
-
     <!-- Whether we should persist the brightness value in nits for the default display even if
          the underlying display device changes. -->
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
@@ -6669,4 +6668,7 @@
 
     <!-- Whether or not ActivityManager PSS profiling is disabled. -->
     <bool name="config_am_disablePssProfiling">false</bool>
+
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
 </resources>

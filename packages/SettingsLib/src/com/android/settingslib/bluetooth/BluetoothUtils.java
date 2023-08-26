@@ -307,8 +307,8 @@ public class BluetoothUtils {
      */
     public static boolean isDeviceClassMatched(@NonNull BluetoothDevice bluetoothDevice,
             int device) {
-        return bluetoothDevice.getBluetoothClass() != null
-                && bluetoothDevice.getBluetoothClass().getDeviceClass() == device;
+        final BluetoothClass bluetoothClass = bluetoothDevice.getBluetoothClass();
+        return bluetoothClass != null && bluetoothClass.getDeviceClass() == device;
     }
 
     private static boolean isAdvancedHeaderEnabled() {

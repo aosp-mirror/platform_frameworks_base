@@ -54,7 +54,7 @@ public class KeyChainSystemService extends SystemService {
     /**
      * Maximum time limit for the KeyChain app to deal with packages being removed.
      */
-    private static final int KEYCHAIN_IDLE_WHITELIST_DURATION_MS = 30 * 1000;
+    private static final int KEYCHAIN_IDLE_ALLOWLIST_DURATION_MS = 30 * 1000;
 
     public KeyChainSystemService(final Context context) {
         super(context);
@@ -105,7 +105,7 @@ public class KeyChainSystemService extends SystemService {
         final DeviceIdleInternal idleController =
                 LocalServices.getService(DeviceIdleInternal.class);
         idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
-                KEYCHAIN_IDLE_WHITELIST_DURATION_MS, user.getIdentifier(), false,
+                KEYCHAIN_IDLE_ALLOWLIST_DURATION_MS, user.getIdentifier(), false,
                 REASON_KEY_CHAIN, "keychain");
 
         getContext().startServiceAsUser(intent, user);

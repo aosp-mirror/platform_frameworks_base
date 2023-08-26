@@ -67,6 +67,7 @@ import android.view.View;
 import android.window.WindowContextInfo;
 import android.window.WindowTokenClientController;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -629,6 +630,7 @@ public class ActivityThreadTest {
         });
     }
 
+    @FlakyTest(bugId = 295234586)
     @Test
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
@@ -643,7 +645,8 @@ public class ActivityThreadTest {
                     new Configuration(oldAppResources.getConfiguration());
             final DisplayMetrics oldApplicationMetrics = new DisplayMetrics();
             oldApplicationMetrics.setTo(oldAppResources.getDisplayMetrics());
-            assertEquals("Process config must match the top activity config by default",
+            assertEquals("Process config must match the top activity config by default"
+                    + ", activity=" + oldActivityConfig + ", app=" + oldAppConfig,
                     0, oldActivityConfig.diffPublicOnly(oldAppConfig));
             assertEquals("Process config must match the top activity config by default",
                     oldActivityMetrics, oldApplicationMetrics);

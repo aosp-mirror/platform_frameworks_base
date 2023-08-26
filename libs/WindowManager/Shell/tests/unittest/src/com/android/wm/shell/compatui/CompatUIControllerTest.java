@@ -41,6 +41,7 @@ import android.content.res.Configuration;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -113,6 +114,9 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Mock
     private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
 
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
 
@@ -139,7 +143,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         mController = new CompatUIController(mContext, mShellInit, mMockShellController,
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
-                mCompatUIConfiguration, mCompatUIShellCommandHandler) {
+                mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {

@@ -41,7 +41,7 @@ import com.android.systemui.settings.UserContextProvider
 
 /** Dialog to select screen recording options */
 class ScreenRecordPermissionDialog(
-    context: Context?,
+    context: Context,
     private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
@@ -52,7 +52,7 @@ class ScreenRecordPermissionDialog(
     BaseScreenSharePermissionDialog(
         context,
         createOptionList(),
-        null,
+        appName = null,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
     ) {

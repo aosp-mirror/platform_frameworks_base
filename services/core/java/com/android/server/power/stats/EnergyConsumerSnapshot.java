@@ -23,7 +23,6 @@ import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
-import android.os.BatteryStats.EnergyConsumerDetails;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -84,8 +83,6 @@ public class EnergyConsumerSnapshot {
      * If an id is present but a uid is not present, that uid's energy is 0.
      */
     private final SparseArray<SparseLongArray> mAttributionSnapshots;
-
-    private EnergyConsumerDetails mEnergyConsumerDetails;
 
     /**
      * Constructor that initializes to the given id->EnergyConsumer map, indicating which consumers
@@ -422,123 +419,5 @@ public class EnergyConsumerSnapshot {
         // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
         // since the last snapshot. Round off to the nearest whole long.
         return (deltaEnergyUJ * MILLIVOLTS_PER_VOLT + (avgVoltageMV / 2)) / avgVoltageMV;
-    }
-
-    /**
-     * Converts the EnergyConsumerDeltaData object to EnergyConsumerDetails, which can
-     * be saved in battery history.
-     */
-    EnergyConsumerDetails getEnergyConsumerDetails(
-            EnergyConsumerDeltaData delta) {
-        if (mEnergyConsumerDetails == null) {
-            mEnergyConsumerDetails = createEnergyConsumerDetails();
-        }
-
-        final long[] chargeUC = mEnergyConsumerDetails.chargeUC;
-        for (int i = 0; i < mEnergyConsumerDetails.consumers.length; i++) {
-            EnergyConsumerDetails.EnergyConsumer energyConsumer =
-                    mEnergyConsumerDetails.consumers[i];
-            switch (energyConsumer.type) {
-                case EnergyConsumerType.BLUETOOTH:
-                    chargeUC[i] = delta.bluetoothChargeUC;
-                    break;
-                case EnergyConsumerType.CPU_CLUSTER:
-                    if (delta.cpuClusterChargeUC != null) {
-                        chargeUC[i] = delta.cpuClusterChargeUC[energyConsumer.ordinal];
-                    } else {
-                        chargeUC[i] = UNAVAILABLE;
-                    }
-                    break;
-                case EnergyConsumerType.DISPLAY:
-                    if (delta.displayChargeUC != null) {
-                        chargeUC[i] = delta.displayChargeUC[energyConsumer.ordinal];
-                    } else {
-                        chargeUC[i] = UNAVAILABLE;
-                    }
-                    break;
-                case EnergyConsumerType.GNSS:
-                    chargeUC[i] = delta.gnssChargeUC;
-                    break;
-                case EnergyConsumerType.MOBILE_RADIO:
-                    chargeUC[i] = delta.mobileRadioChargeUC;
-                    break;
-                case EnergyConsumerType.WIFI:
-                    chargeUC[i] = delta.wifiChargeUC;
-                    break;
-                case EnergyConsumerType.CAMERA:
-                    chargeUC[i] = delta.cameraChargeUC;
-                    break;
-                case EnergyConsumerType.OTHER:
-                    if (delta.otherTotalChargeUC != null) {
-                        chargeUC[i] = delta.otherTotalChargeUC[energyConsumer.ordinal];
-                    } else {
-                        chargeUC[i] = UNAVAILABLE;
-                    }
-                    break;
-                default:
-                    chargeUC[i] = UNAVAILABLE;
-                    break;
-            }
-        }
-        return mEnergyConsumerDetails;
-    }
-
-    private EnergyConsumerDetails createEnergyConsumerDetails() {
-        EnergyConsumerDetails details = new EnergyConsumerDetails();
-        details.consumers =
-                new EnergyConsumerDetails.EnergyConsumer[mEnergyConsumers.size()];
-        for (int i = 0; i < mEnergyConsumers.size(); i++) {
-            EnergyConsumer energyConsumer = mEnergyConsumers.valueAt(i);
-            EnergyConsumerDetails.EnergyConsumer consumer =
-                    new EnergyConsumerDetails.EnergyConsumer();
-            consumer.type = energyConsumer.type;
-            consumer.ordinal = energyConsumer.ordinal;
-            switch (consumer.type) {
-                case EnergyConsumerType.BLUETOOTH:
-                    consumer.name = "BLUETOOTH";
-                    break;
-                case EnergyConsumerType.CPU_CLUSTER:
-                    consumer.name = "CPU";
-                    break;
-                case EnergyConsumerType.DISPLAY:
-                    consumer.name = "DISPLAY";
-                    break;
-                case EnergyConsumerType.GNSS:
-                    consumer.name = "GNSS";
-                    break;
-                case EnergyConsumerType.MOBILE_RADIO:
-                    consumer.name = "MOBILE_RADIO";
-                    break;
-                case EnergyConsumerType.WIFI:
-                    consumer.name = "WIFI";
-                    break;
-                case EnergyConsumerType.OTHER:
-                    consumer.name = sanitizeCustomBucketName(energyConsumer.name);
-                    break;
-                default:
-                    consumer.name = "UNKNOWN";
-                    break;
-            }
-            if (consumer.type != EnergyConsumerType.OTHER) {
-                boolean hasOrdinal = consumer.ordinal != 0;
-                if (!hasOrdinal) {
-                    // See if any other EnergyConsumer of the same type has an ordinal
-                    for (int j = 0; j < mEnergyConsumers.size(); j++) {
-                        EnergyConsumer aConsumer = mEnergyConsumers.valueAt(j);
-                        if (aConsumer.type == consumer.type && aConsumer.ordinal != 0) {
-                            hasOrdinal = true;
-                            break;
-                        }
-                    }
-                }
-                if (hasOrdinal) {
-                    consumer.name = consumer.name + "/" + energyConsumer.ordinal;
-                }
-            }
-            details.consumers[i] = consumer;
-        }
-
-        details.chargeUC = new long[details.consumers.length];
-        return details;
     }
 }

@@ -416,11 +416,22 @@
                         android:focusable="true"/>
                 </LinearLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_gravity="end|center_vertical">
+                    android:gravity="center_vertical">
+                    <Button
+                        android:id="@+id/share_wifi_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/share_wifi_button_text"
+                        style="?android:attr/buttonBarNeutralButtonStyle"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:layout_alignParentLeft="true"
+                        android:visibility="gone"/>
                     <Button
                         android:id="@+id/done_button"
                         android:layout_width="wrap_content"
@@ -430,8 +441,9 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:clickable="true"
-                        android:focusable="true"/>
-                </LinearLayout>
+                        android:focusable="true"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
             </LinearLayout>
 
         </LinearLayout>

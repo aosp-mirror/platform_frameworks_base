@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.Environment;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import org.json.JSONException;
@@ -72,14 +73,16 @@ public class AuthenticationStatsPersister {
                 JSONObject frrStatsJson = new JSONObject(frrStats);
                 if (modality == BiometricsProtoEnums.MODALITY_FACE) {
                     authenticationStatsList.add(new AuthenticationStats(
-                            getIntValue(frrStatsJson, USER_ID, -1 /* defaultValue */),
+                            getIntValue(frrStatsJson, USER_ID,
+                                    UserHandle.USER_NULL /* defaultValue */),
                             getIntValue(frrStatsJson, FACE_ATTEMPTS),
                             getIntValue(frrStatsJson, FACE_REJECTIONS),
                             getIntValue(frrStatsJson, ENROLLMENT_NOTIFICATIONS),
                             modality));
                 } else if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
                     authenticationStatsList.add(new AuthenticationStats(
-                            getIntValue(frrStatsJson, USER_ID, -1 /* defaultValue */),
+                            getIntValue(frrStatsJson, USER_ID,
+                                    UserHandle.USER_NULL /* defaultValue */),
                             getIntValue(frrStatsJson, FINGERPRINT_ATTEMPTS),
                             getIntValue(frrStatsJson, FINGERPRINT_REJECTIONS),
                             getIntValue(frrStatsJson, ENROLLMENT_NOTIFICATIONS),
@@ -138,13 +141,11 @@ public class AuthenticationStatsPersister {
 
             // If there's existing frr stats in the file, we want to update the stats for the given
             // modality and keep the stats for other modalities.
-            if (frrStatJson != null) {
-                frrStatsSet.add(buildFrrStats(frrStatJson, totalAttempts, rejectedAttempts,
-                        enrollmentNotifications, modality));
-            } else {
-                frrStatsSet.add(buildFrrStats(userId, totalAttempts, rejectedAttempts,
-                        enrollmentNotifications, modality));
+            if (frrStatJson == null) {
+                frrStatJson = new JSONObject().put(USER_ID, userId);
             }
+            frrStatsSet.add(buildFrrStats(frrStatJson, totalAttempts, rejectedAttempts,
+                    enrollmentNotifications, modality));
 
             mSharedPreferences.edit().putStringSet(KEY, frrStatsSet).apply();
 
@@ -174,29 +175,6 @@ public class AuthenticationStatsPersister {
                     .toString();
         } else {
             return frrStats.toString();
-        }
-    }
-
-    // Build string for new user and new authentication stats.
-    private String buildFrrStats(int userId, int totalAttempts, int rejectedAttempts,
-            int enrollmentNotifications, int modality)
-            throws JSONException {
-        if (modality == BiometricsProtoEnums.MODALITY_FACE) {
-            return new JSONObject()
-                    .put(USER_ID, userId)
-                    .put(FACE_ATTEMPTS, totalAttempts)
-                    .put(FACE_REJECTIONS, rejectedAttempts)
-                    .put(ENROLLMENT_NOTIFICATIONS, enrollmentNotifications)
-                    .toString();
-        } else if (modality == BiometricsProtoEnums.MODALITY_FINGERPRINT) {
-            return new JSONObject()
-                    .put(USER_ID, userId)
-                    .put(FINGERPRINT_ATTEMPTS, totalAttempts)
-                    .put(FINGERPRINT_REJECTIONS, rejectedAttempts)
-                    .put(ENROLLMENT_NOTIFICATIONS, enrollmentNotifications)
-                    .toString();
-        } else {
-            return "";
         }
     }
 

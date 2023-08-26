@@ -669,14 +669,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिंट आयकन"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"डिव्हाइस अनलॉक"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"अनलॉक करण्याचा दुसरी पद्धत वापरून पहा"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"तुमचे फिंगरप्रिंट ओळखले जात नाही, तेव्हा फेस अनलॉक वापरा, जसे की तुमची बोटे ओली असताना"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"तुमचा चेहरा ओळखला जात नाही, तेव्हा फिंगरप्रिंट अनलॉक वापरा, जसे की पुरेसा प्रकाश नसताना"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलॉकसंबंधित समस्या"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"फेस मॉडेल हटवण्यासाठी टॅप करा, त्यानंतर तुमचा चेहरा पुन्हा जोडा"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"फेस अनलॉक सेट करा"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"तुमच्या फोनकडे पाहून तो अनलॉक करा"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"फेस अनलॉक वापरण्यासाठी, सेटिंग्ज &gt; गोपनीयता येथे "<b>"कॅमेरा अ‍ॅक्सेस"</b>" सुरू करा"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"अनलॉक करण्याच्या आणखी पद्धती सेट करा"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"फिंगरप्रिंट जोडण्यासाठी टॅप करा"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"फिंगरप्रिंट अनलॉक"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"फिंगरप्रिंट सेन्सर वापरू शकत नाही"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"दुरुस्तीच्या सेवा पुरवठादाराला भेट द्या."</string>
@@ -1596,7 +1596,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"मोबाइल डेटाचा उच्च वापर"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"तुमच्या अ‍ॅप्सनी नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वपरला आहे"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="5975877665505297662">"यावर जारी केले:"</string>
@@ -2031,7 +2031,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g>, "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> आणि <xliff:g id="TYPE_1">%2$s</xliff:g>, "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मध्ये अपडेट करायचे का?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"हे आयटम "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> मध्ये अपडेट करायचे का?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"नाही, नको"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"आता नको"</string>

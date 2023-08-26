@@ -107,10 +107,8 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट डिवाइस"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इंटरनेट ऐक्सेस"</string>
-    <!-- no translation found for bluetooth_profile_pbap (2103406516858653017) -->
-    <skip />
-    <!-- no translation found for bluetooth_profile_pbap_summary (402819589201138227) -->
-    <skip />
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"संपर्क और कॉल इतिहास का ऐक्सेस दें"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"जानकारी का इस्तेमाल कॉल की सूचना देने वगैरह के लिए होगा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इंटरनेट कनेक्शन साझाकरण"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"लेख संदेश"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"सिम ऐक्सेस"</string>

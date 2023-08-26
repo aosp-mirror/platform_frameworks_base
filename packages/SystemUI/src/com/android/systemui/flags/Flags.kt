@@ -33,7 +33,7 @@ import com.android.systemui.flags.FlagsFactory.unreleasedFlag
  * On public release builds, flags will always return their default value. There is no way to change
  * their value on release builds.
  *
- * See [FeatureFlagsDebug] for instructions on flipping the flags via adb.
+ * See [FeatureFlagsClassicDebug] for instructions on flipping the flags via adb.
  */
 object Flags {
     @JvmField val TEAMFOOD = unreleasedFlag("teamfood")
@@ -70,8 +70,7 @@ object Flags {
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
-    val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        unreleasedFlag("notification_inline_reply_animation")
+    val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
 
     /** Makes sure notification panel is updated before the user switch is complete. */
     // TODO(b/278873737): Tracking Bug
@@ -175,7 +174,7 @@ object Flags {
 
     /** Flag to control the migration of face auth to modern architecture. */
     // TODO(b/262838215): Tracking bug
-    @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag("face_auth_refactor")
+    @JvmField val FACE_AUTH_REFACTOR = unreleasedFlag("face_auth_refactor", teamfood = true)
 
     /** Flag to control the revamp of keyguard biometrics progress animation */
     // TODO(b/244313043): Tracking bug
@@ -254,7 +253,7 @@ object Flags {
     // TODO(b/290652751): Tracking bug.
     @JvmField
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
-        unreleasedFlag("migrate_split_keyguard_bottom_area")
+        unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
 
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
@@ -269,7 +268,7 @@ object Flags {
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon")
+    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon", teamfood = true)
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag("widget_on_keyguard")
@@ -285,11 +284,7 @@ object Flags {
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
-    val WALLPAPER_PICKER_PREVIEW_ANIMATION =
-            unreleasedFlag(
-                    "wallpaper_picker_preview_animation",
-                teamfood = true
-            )
+    val WALLPAPER_PICKER_PREVIEW_ANIMATION = releasedFlag("wallpaper_picker_preview_animation")
 
     /**
      * TODO(b/278086361): Tracking bug
@@ -368,10 +363,6 @@ object Flags {
     // TODO(b/244064524): Tracking Bug
     @JvmField val QS_SECONDARY_DATA_SUB_INFO = releasedFlag("qs_secondary_data_sub_info")
 
-    /** Enables Font Scaling Quick Settings tile */
-    // TODO(b/269341316): Tracking Bug
-    @JvmField val ENABLE_FONT_SCALING_TILE = releasedFlag("enable_font_scaling_tile")
-
     /** Enables new QS Edit Mode visual refresh */
     // TODO(b/269787742): Tracking Bug
     @JvmField
@@ -397,6 +388,10 @@ object Flags {
 
     // TODO(b/294588085): Tracking Bug
     val WIFI_SECONDARY_NETWORKS = releasedFlag("wifi_secondary_networks")
+
+    // TODO(b/290676905): Tracking Bug
+    val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
+        unreleasedFlag("new_shade_carrier_group_mobile_icons")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -501,16 +496,6 @@ object Flags {
     @JvmField
     val WM_CAPTION_ON_SHELL =
         sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
-
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_BUBBLE =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_bubble", default = true)
-
-    @Keep
-    @JvmField
-    val ENABLE_FLING_TO_DISMISS_PIP =
-        sysPropBooleanFlag("persist.wm.debug.fling_to_dismiss_pip", default = true)
 
     // TODO(b/256873975): Tracking Bug
     @JvmField

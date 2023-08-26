@@ -151,6 +151,7 @@ public class InternalResourceService extends SystemService {
     private final BatteryManagerInternal mBatteryManagerInternal;
     private final PackageManager mPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final UserManagerInternal mUserManagerInternal;
 
     private IAppOpsService mAppOpsService;
     private IDeviceIdleController mDeviceIdleController;
@@ -357,6 +358,7 @@ public class InternalResourceService extends SystemService {
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
         mPackageManager = context.getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mEconomyManagerStub = new EconomyManagerStub();
         mAnalyst = new Analyst();
         mScribe = new Scribe(this, mAnalyst);
@@ -589,7 +591,7 @@ public class InternalResourceService extends SystemService {
     }
 
     void onExemptionListChanged() {
-        final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+        final int[] userIds = mUserManagerInternal.getUserIds();
         synchronized (mLock) {
             final ArraySet<String> removed = mExemptedApps;
             final ArraySet<String> added = new ArraySet<>();
@@ -979,9 +981,7 @@ public class InternalResourceService extends SystemService {
     @GuardedBy("mLock")
     private void loadInstalledPackageListLocked() {
         mPkgCache.clear();
-        final UserManagerInternal userManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
-        final int[] userIds = userManagerInternal.getUserIds();
+        final int[] userIds = mUserManagerInternal.getUserIds();
         for (int userId : userIds) {
             final List<PackageInfo> pkgs =
                     mPackageManager.getInstalledPackagesAsUser(PACKAGE_QUERY_FLAGS, userId);
@@ -1097,7 +1097,7 @@ public class InternalResourceService extends SystemService {
                 timeSinceUsersAdded = mScribe.getRealtimeSinceUsersAddedLocked(nowElapsed);
             }
 
-            final int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            final int[] userIds = mUserManagerInternal.getUserIds();
             for (int userId : userIds) {
                 final long timeSinceUserAddedMs = timeSinceUsersAdded.get(userId, 0);
                 // Temporarily mark installers as VIPs so they aren't subject to credit

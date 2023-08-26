@@ -19,6 +19,7 @@ package android.os;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +56,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.CpuScalingPolicies;
+import com.android.internal.os.PowerStats;
 
 import com.google.android.collect.Lists;
 
@@ -1793,75 +1795,55 @@ public abstract class BatteryStats {
     }
 
     /**
-     * Measured energy delta from the previous reading.
+     * An extension to the history item describing a proc state change for a UID.
      */
-    public static final class EnergyConsumerDetails {
-        /**
-         * Description of the energy consumer, such as CPU, DISPLAY etc
-         */
-        public static final class EnergyConsumer {
-            /**
-             * See android.hardware.power.stats.EnergyConsumerType
-             */
-            public int type;
-            /**
-             * Used when there are multipe energy consumers of the same type, such
-             * as CPU clusters, multiple displays on foldable devices etc.
-             */
-            public int ordinal;
-            /**
-             * Human-readable name of the energy consumer, e.g. "CPU"
-             */
-            public String name;
-        }
-        public EnergyConsumer[] consumers;
-        public long[] chargeUC;
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < consumers.length; i++) {
-                if (chargeUC[i] == POWER_DATA_UNAVAILABLE) {
-                    continue;
-                }
-                if (sb.length() != 0) {
-                    sb.append(' ');
-                }
-                sb.append(consumers[i].name);
-                sb.append('=');
-                sb.append(chargeUC[i]);
-            }
-            return sb.toString();
-        }
-    }
-
-    /**
-     * CPU usage for a given UID.
-     */
-    public static final class CpuUsageDetails {
-        /**
-         * Descriptions of CPU power brackets, see PowerProfile.getCpuPowerBracketDescription
-         */
-        public String[] cpuBracketDescriptions;
+    public static final class ProcessStateChange {
         public int uid;
-        /**
-         *  The delta, in milliseconds, per CPU power bracket, from the previous record for the
-         *  same UID.
-         */
-        public long[] cpuUsageMs;
+        public @BatteryConsumer.ProcessState int processState;
 
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            UserHandle.formatUid(sb, uid);
-            sb.append(": ");
-            for (int bracket = 0; bracket < cpuUsageMs.length; bracket++) {
-                if (bracket != 0) {
-                    sb.append(", ");
-                }
-                sb.append(cpuUsageMs[bracket]);
+        private static final int LARGE_UID_FLAG = 0x80000000;
+        private static final int SMALL_UID_MASK = 0x00FFFFFF;
+        private static final int PROC_STATE_MASK = 0x7F000000;
+        private static final int PROC_STATE_SHIFT = Integer.numberOfTrailingZeros(PROC_STATE_MASK);
+
+        /**
+         * Writes this object to the supplied parcel.
+         */
+        public void writeToParcel(Parcel out) {
+            int bits = processState << PROC_STATE_SHIFT;
+            if ((uid & ~SMALL_UID_MASK) == 0) {
+                bits |= uid;
+                out.writeInt(bits);
+            } else {
+                bits |= LARGE_UID_FLAG;
+                out.writeInt(bits);
+                out.writeInt(uid);
             }
-            return sb.toString();
+        }
+
+        /**
+         * Reads this object from the supplied parcel.
+         */
+        public void readFromParcel(Parcel in) {
+            int bits = in.readInt();
+            processState = (bits & PROC_STATE_MASK) >>> PROC_STATE_SHIFT;
+            if (processState >= BatteryConsumer.PROCESS_STATE_COUNT) {
+                Slog.e(TAG, "Unrecognized proc state in battery history: " + processState);
+                processState = BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
+            }
+            if ((bits & LARGE_UID_FLAG) == 0) {
+                uid = bits & ~PROC_STATE_MASK;
+            } else {
+                uid = in.readInt();
+            }
+        }
+
+        /**
+         * String representation for inclusion in the battery history dump.
+         */
+        public String formatForBatteryHistory() {
+            return UserHandle.formatUid(uid) + ": "
+                    + BatteryConsumer.processStateToString(processState);
         }
     }
 
@@ -2008,11 +1990,11 @@ public abstract class BatteryStats {
         // Non-null when there is more detailed information at this step.
         public HistoryStepDetails stepDetails;
 
-        // Non-null when there is energy consumer information
-        public EnergyConsumerDetails energyConsumerDetails;
+        // Non-null when there are power stats to be written to history
+        public PowerStats powerStats;
 
-        // Non-null when there is CPU usage information
-        public CpuUsageDetails cpuUsageDetails;
+        // Non-null when there is procstate change to be written to history
+        public ProcessStateChange processStateChange;
 
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
@@ -2110,6 +2092,7 @@ public abstract class BatteryStats {
         public final HistoryTag localWakelockTag = new HistoryTag();
         public final HistoryTag localWakeReasonTag = new HistoryTag();
         public final HistoryTag localEventTag = new HistoryTag();
+        public final ProcessStateChange localProcessStateChange = new ProcessStateChange();
 
         // Includes a tag's first occurrence in the parcel, so the value of the tag is written
         // rather than just its index in the history tag pool.
@@ -2222,8 +2205,8 @@ public abstract class BatteryStats {
             eventCode = EVENT_NONE;
             eventTag = null;
             tagsFirstOccurrence = false;
-            energyConsumerDetails = null;
-            cpuUsageDetails = null;
+            powerStats = null;
+            processStateChange = null;
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2273,8 +2256,8 @@ public abstract class BatteryStats {
             }
             tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
-            energyConsumerDetails = o.energyConsumerDetails;
-            cpuUsageDetails = o.cpuUsageDetails;
+            powerStats = o.powerStats;
+            processStateChange = o.processStateChange;
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -2434,8 +2417,14 @@ public abstract class BatteryStats {
      * Returns a BatteryStatsHistoryIterator. Battery history will continue being writable,
      * but the iterator will continue iterating over the snapshot taken at the time this method
      * is called.
+     *
+     * @param startTimeMs wall-clock time to start iterating from, inclusive
+     * @param endTimeMs wall-clock time to stop iterating, exclusive.
+     *                  Pass 0 to indicate current time.
      */
-    public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory();
+    public abstract BatteryStatsHistoryIterator iterateBatteryStatsHistory(
+            @CurrentTimeMillisLong long startTimeMs,
+            @CurrentTimeMillisLong long endTimeMs);
 
     /**
      * Returns the number of times the device has been started.
@@ -6911,25 +6900,6 @@ public abstract class BatteryStats {
         private String printNextItem(HistoryItem rec, long baseTime, boolean checkin,
                 boolean verbose) {
             StringBuilder item = new StringBuilder();
-
-            if (rec.cpuUsageDetails != null
-                    && rec.cpuUsageDetails.cpuBracketDescriptions != null
-                    && checkin) {
-                String[] descriptions = rec.cpuUsageDetails.cpuBracketDescriptions;
-                for (int bracket = 0; bracket < descriptions.length; bracket++) {
-                    item.append(BATTERY_STATS_CHECKIN_VERSION);
-                    item.append(',');
-                    item.append(HISTORY_DATA);
-                    item.append(",0,XB,");
-                    item.append(descriptions.length);
-                    item.append(',');
-                    item.append(bracket);
-                    item.append(',');
-                    item.append(descriptions[bracket]);
-                    item.append("\n");
-                }
-            }
-
             if (!checkin) {
                 item.append("  ");
                 TimeUtils.formatDuration(
@@ -7165,57 +7135,19 @@ public abstract class BatteryStats {
                         item.append("\"");
                     }
                 }
-                boolean firstExtension = true;
-                if (rec.energyConsumerDetails != null) {
-                    firstExtension = false;
+                if (rec.powerStats != null && verbose) {
                     if (!checkin) {
-                        item.append(" ext=energy:");
-                        item.append(rec.energyConsumerDetails);
-                    } else {
-                        item.append(",XE");
-                        for (int i = 0; i < rec.energyConsumerDetails.consumers.length; i++) {
-                            if (rec.energyConsumerDetails.chargeUC[i] != POWER_DATA_UNAVAILABLE) {
-                                item.append(',');
-                                item.append(rec.energyConsumerDetails.consumers[i].name);
-                                item.append('=');
-                                item.append(rec.energyConsumerDetails.chargeUC[i]);
-                            }
-                        }
+                        item.append(
+                                "\n                 Stats: ");
+                        item.append(rec.powerStats.formatForBatteryHistory(
+                                "\n                    "));
                     }
                 }
-                if (rec.cpuUsageDetails != null) {
+                if (rec.processStateChange != null && verbose) {
                     if (!checkin) {
-                        if (!firstExtension) {
-                            item.append("\n                ");
-                        }
-                        String[] descriptions = rec.cpuUsageDetails.cpuBracketDescriptions;
-                        if (descriptions != null) {
-                            for (int bracket = 0; bracket < descriptions.length; bracket++) {
-                                item.append(" ext=cpu-bracket:");
-                                item.append(bracket);
-                                item.append(":");
-                                item.append(descriptions[bracket]);
-                                item.append("\n                ");
-                            }
-                        }
-                        item.append(" ext=cpu:");
-                        item.append(rec.cpuUsageDetails);
-                    } else {
-                        if (!firstExtension) {
-                            item.append('\n');
-                            item.append(BATTERY_STATS_CHECKIN_VERSION);
-                            item.append(',');
-                            item.append(HISTORY_DATA);
-                            item.append(",0");
-                        }
-                        item.append(",XC,");
-                        item.append(rec.cpuUsageDetails.uid);
-                        for (int i = 0; i < rec.cpuUsageDetails.cpuUsageMs.length; i++) {
-                            item.append(',');
-                            item.append(rec.cpuUsageDetails.cpuUsageMs[i]);
-                        }
+                        item.append(" procstate: ");
+                        item.append(rec.processStateChange.formatForBatteryHistory());
                     }
-                    firstExtension = false;
                 }
                 item.append("\n");
                 if (rec.stepDetails != null) {
@@ -7537,7 +7469,7 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 try {
@@ -8460,7 +8392,7 @@ public abstract class BatteryStats {
         long baseTime = -1;
         boolean printed = false;
         HistoryEventTracker tracker = null;
-        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory()) {
+        try (BatteryStatsHistoryIterator iterator = iterateBatteryStatsHistory(0, 0)) {
             HistoryItem rec;
             while ((rec = iterator.next()) != null) {
                 lastTime = rec.time;

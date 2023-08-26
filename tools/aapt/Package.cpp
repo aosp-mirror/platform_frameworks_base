@@ -8,6 +8,7 @@
 #include "OutputSet.h"
 #include "ResourceTable.h"
 #include "ResourceFilter.h"
+#include "Utils.h"
 
 #include <androidfw/misc.h>
 
@@ -226,7 +227,7 @@ ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<const OutputSet>& o
             fprintf(stderr, "warning: null file being processed.\n");
         } else {
             String8 storagePath(entry.getPath());
-            storagePath.convertToResPath();
+            convertToResPath(storagePath);
             if (!processFile(bundle, zip, storagePath, entry.getFile())) {
                 return UNKNOWN_ERROR;
             }

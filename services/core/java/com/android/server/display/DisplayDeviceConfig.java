@@ -184,6 +184,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *        <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *        <lowerBlockingZoneConfigs>
  *          <defaultRefreshRate>75</defaultRefreshRate>
+ *          <refreshRateThermalThrottlingId>id_of_a_throttling_map</refreshRateThermalThrottlingId>
  *          <blockingZoneThreshold>
  *            <displayBrightnessPoint>
  *              <lux>50</lux>
@@ -252,13 +253,19 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *       <quirk>canSetBrightnessViaHwc</quirk>
  *      </quirks>
  *
- *      <autoBrightness enable="true">
+ *      <autoBrightness enabled="true">
  *          <brighteningLightDebounceMillis>
  *              2000
  *          </brighteningLightDebounceMillis>
  *          <darkeningLightDebounceMillis>
- *              1000
+ *              4000
  *          </darkeningLightDebounceMillis>
+ *          <brighteningLightDebounceIdleMillis>
+ *              2000
+ *          </brighteningLightDebounceIdleMillis>
+ *          <darkeningLightDebounceIdleMillis>
+ *              1000
+ *          </darkeningLightDebounceIdleMillis>
  *          <displayBrightnessMapping>
  *              <displayBrightnessPoint>
  *                  <lux>50</lux>
@@ -649,6 +656,14 @@ public class DisplayDeviceConfig {
     private long mAutoBrightnessDarkeningLightDebounce =
             INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
 
+    // Represents the auto-brightness brightening light debounce for idle screen brightness mode.
+    private long mAutoBrightnessBrighteningLightDebounceIdle =
+            INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
+
+    // Represents the auto-brightness darkening light debounce for idle screen brightness mode.
+    private long mAutoBrightnessDarkeningLightDebounceIdle =
+            INVALID_AUTO_BRIGHTNESS_LIGHT_DEBOUNCE;
+
     // This setting allows non-default displays to have autobrightness enabled.
     private boolean mAutoBrightnessAvailable = false;
     // This stores the raw value loaded from the config file - true if not written.
@@ -731,6 +746,12 @@ public class DisplayDeviceConfig {
      */
     private float[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
     private float[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+
+    /**
+     * Thermal throttling maps for the low and high blocking zones.
+     */
+    private String mLowBlockingZoneThermalMapId = null;
+    private String mHighBlockingZoneThermalMapId = null;
 
     private final HashMap<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
@@ -1440,6 +1461,20 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return Auto brightness darkening light debounce for idle screen brightness mode
+     */
+    public long getAutoBrightnessDarkeningLightDebounceIdle() {
+        return mAutoBrightnessDarkeningLightDebounceIdle;
+    }
+
+    /**
+     * @return Auto brightness brightening light debounce for idle screen brightness mode
+     */
+    public long getAutoBrightnessBrighteningLightDebounceIdle() {
+        return mAutoBrightnessBrighteningLightDebounceIdle;
+    }
+
+    /**
      * @return Auto brightness brightening ambient lux levels
      */
     public float[] getAutoBrightnessBrighteningLevelsLux() {
@@ -1536,6 +1571,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return The refresh rate thermal map for low blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getLowBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mLowBlockingZoneThermalMapId);
+    }
+
+    /**
      * @return An array of high display brightness thresholds. This, in combination with high
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
      * allowed.
@@ -1555,6 +1597,13 @@ public class DisplayDeviceConfig {
      */
     public float[] getHighAmbientBrightnessThresholds() {
         return mHighAmbientBrightnessThresholds;
+    }
+
+    /**
+     * @return The refresh rate thermal map for high blocking zone.
+     */
+    public SparseArray<SurfaceControl.RefreshRateRange> getHighBlockingZoneThermalMap() {
+        return getThermalRefreshRateThrottlingData(mHighBlockingZoneThermalMapId);
     }
 
     /**
@@ -1664,6 +1713,10 @@ public class DisplayDeviceConfig {
                 + mAutoBrightnessBrighteningLightDebounce
                 + ", mAutoBrightnessDarkeningLightDebounce= "
                 + mAutoBrightnessDarkeningLightDebounce
+                + ", mAutoBrightnessBrighteningLightDebounceIdle= "
+                + mAutoBrightnessBrighteningLightDebounceIdle
+                + ", mAutoBrightnessDarkeningLightDebounceIdle= "
+                + mAutoBrightnessDarkeningLightDebounceIdle
                 + ", mBrightnessLevelsLux= " + Arrays.toString(mBrightnessLevelsLux)
                 + ", mBrightnessLevelsNits= " + Arrays.toString(mBrightnessLevelsNits)
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
@@ -1677,6 +1730,8 @@ public class DisplayDeviceConfig {
                 + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
                 + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
+                + ", mLowBlockingZoneThermalMapId= " + mLowBlockingZoneThermalMapId
+                + ", mHighBlockingZoneThermalMapId= " + mHighBlockingZoneThermalMapId
                 + "\n"
                 + "mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
@@ -2127,9 +2182,13 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Loads the refresh rate configurations pertaining to the upper blocking zones.
+     * Loads the refresh rate configurations pertaining to the lower blocking zones.
      */
     private void loadLowerRefreshRateBlockingZones(BlockingZoneConfig lowerBlockingZoneConfig) {
+        if (lowerBlockingZoneConfig != null) {
+            mLowBlockingZoneThermalMapId =
+                    lowerBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadLowerBlockingZoneDefaultRefreshRate(lowerBlockingZoneConfig);
         loadLowerBrightnessThresholds(lowerBlockingZoneConfig);
     }
@@ -2138,6 +2197,10 @@ public class DisplayDeviceConfig {
      * Loads the refresh rate configurations pertaining to the upper blocking zones.
      */
     private void loadHigherRefreshRateBlockingZones(BlockingZoneConfig upperBlockingZoneConfig) {
+        if (upperBlockingZoneConfig != null) {
+            mHighBlockingZoneThermalMapId =
+                    upperBlockingZoneConfig.getRefreshRateThermalThrottlingId();
+        }
         loadHigherBlockingZoneDefaultRefreshRate(upperBlockingZoneConfig);
         loadHigherBrightnessThresholds(upperBlockingZoneConfig);
     }
@@ -2277,6 +2340,9 @@ public class DisplayDeviceConfig {
         final AutoBrightness autoBrightness = config.getAutoBrightness();
         loadAutoBrightnessBrighteningLightDebounce(autoBrightness);
         loadAutoBrightnessDarkeningLightDebounce(autoBrightness);
+        // Idle must be called after interactive, since we fall back to it if needed.
+        loadAutoBrightnessBrighteningLightDebounceIdle(autoBrightness);
+        loadAutoBrightnessDarkeningLightDebounceIdle(autoBrightness);
         loadAutoBrightnessDisplayBrightnessMapping(autoBrightness);
         loadEnableAutoBrightness(autoBrightness);
     }
@@ -2308,6 +2374,37 @@ public class DisplayDeviceConfig {
         } else {
             mAutoBrightnessDarkeningLightDebounce =
                     autoBrightnessConfig.getDarkeningLightDebounceMillis().intValue();
+        }
+    }
+
+    /**
+     * Loads the auto-brightness brightening light debounce for idle mode. Internally, this takes
+     * care of loading the value from the display config, and if not present, falls back to
+     * whichever interactive value was chosen.
+     */
+    private void loadAutoBrightnessBrighteningLightDebounceIdle(
+            AutoBrightness autoBrightnessConfig) {
+        if (autoBrightnessConfig == null
+                || autoBrightnessConfig.getBrighteningLightDebounceIdleMillis() == null) {
+            mAutoBrightnessBrighteningLightDebounceIdle = mAutoBrightnessBrighteningLightDebounce;
+        } else {
+            mAutoBrightnessBrighteningLightDebounceIdle =
+                    autoBrightnessConfig.getBrighteningLightDebounceIdleMillis().intValue();
+        }
+    }
+
+    /**
+     * Loads the auto-brightness darkening light debounce for idle mode. Internally, this takes
+     * care of loading the value from the display config, and if not present, falls back to
+     * whichever interactive value was chosen.
+     */
+    private void loadAutoBrightnessDarkeningLightDebounceIdle(AutoBrightness autoBrightnessConfig) {
+        if (autoBrightnessConfig == null
+                || autoBrightnessConfig.getDarkeningLightDebounceIdleMillis() == null) {
+            mAutoBrightnessDarkeningLightDebounceIdle = mAutoBrightnessDarkeningLightDebounce;
+        } else {
+            mAutoBrightnessDarkeningLightDebounceIdle =
+                    autoBrightnessConfig.getDarkeningLightDebounceIdleMillis().intValue();
         }
     }
 

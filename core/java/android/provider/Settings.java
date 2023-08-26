@@ -1450,7 +1450,7 @@ public final class Settings {
 
     /**
      * Activity Action: Ask the user to allow an app to ignore battery optimizations (that is,
-     * put them on the whitelist of apps shown by
+     * put them on the allowlist of apps shown by
      * {@link #ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}).  For an app to use this, it also
      * must hold the {@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
      * permission.
@@ -3524,7 +3524,6 @@ public final class Settings {
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
             String namespace = prefix.substring(0, prefix.length() - 1);
-            Config.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
             boolean needsGenerationTracker = false;
@@ -4580,6 +4579,16 @@ public final class Settings {
         public static final String WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE =
                 "wear_accessibility_gesture_enabled_during_oobe";
 
+
+        /**
+         * If the text-to-speech pre-warm is enabled.
+         * Set to 1 for true and 0 for false.
+         *
+         * This setting is used only internally.
+         * @hide
+         */
+        public static final String WEAR_TTS_PREWARM_ENABLED = "wear_tts_prewarm_enabled";
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AIRPLANE_MODE_ON} instead
          */
@@ -5302,7 +5311,6 @@ public final class Settings {
         public static final Uri DEFAULT_RINGTONE_URI = getUriFor(RINGTONE);
 
         /** {@hide} */
-        @Readable
         public static final String RINGTONE_CACHE = "ringtone_cache";
         /** {@hide} */
         public static final Uri RINGTONE_CACHE_URI = getUriFor(RINGTONE_CACHE);
@@ -6018,6 +6026,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ADVANCED_SETTINGS);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED);
             PRIVATE_SETTINGS.add(WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE);
+            PRIVATE_SETTINGS.add(WEAR_TTS_PREWARM_ENABLED);
             PRIVATE_SETTINGS.add(SCREEN_AUTO_BRIGHTNESS_ADJ);
             PRIVATE_SETTINGS.add(VIBRATE_INPUT_DEVICES);
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
@@ -12378,7 +12387,7 @@ public final class Settings {
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
         /**
-         * The package name for the custom bugreport handler app. This app must be whitelisted.
+         * The package name for the custom bugreport handler app. This app must be allowlisted.
          * This is currently used only by Power Menu short press.
          * @deprecated Use {@link android.provider.Settings.Secure#CUSTOM_BUGREPORT_HANDLER_APP}
          * instead
@@ -12794,7 +12803,7 @@ public final class Settings {
                 "location_background_throttle_proximity_alert_interval_ms";
 
         /**
-         * Packages that are whitelisted for background throttling (throttling will not be applied).
+         * Packages that are allowlisted for background throttling (throttling will not be applied).
          * @hide
          */
         @Readable
@@ -12802,7 +12811,7 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
-         * Packages that are whitelisted for ignoring location settings (may retrieve location even
+         * Packages that are allowlisted for ignoring location settings (may retrieve location even
          * when user location settings are off), for emergency purposes.
          * @deprecated No longer used from Android 12+
          * @hide
@@ -13386,7 +13395,7 @@ public final class Settings {
 
         /**
          * List of certificate (hex string representation of the application's certificate - SHA-1
-         * or SHA-256) and carrier app package pairs which are whitelisted to prompt the user for
+         * or SHA-256) and carrier app package pairs which are allowlisted to prompt the user for
          * install when a sim card with matching UICC carrier privilege rules is inserted.  The
          * certificate is used as a key, so the certificate encoding here must be the same as the
          * certificate encoding used on the SIM.
@@ -16787,7 +16796,7 @@ public final class Settings {
                 "enable_adb_incremental_install_default";
 
         /**
-         * The packages whitelisted to be run in autofill compatibility mode. The list
+         * The packages allowlisted to be run in autofill compatibility mode. The list
          * of packages is {@code ":"} colon delimited, and each entry has the name of the
          * package and an optional list of url bar resource ids (the list is delimited by
          * brackets&mdash{@code [} and {@code ]}&mdash and is also comma delimited).
@@ -16847,7 +16856,7 @@ public final class Settings {
         public static final String STYLUS_EVER_USED = "stylus_ever_used";
 
         /**
-         * Exemptions to the hidden API blacklist.
+         * Exemptions to the hidden API denylist.
          *
          * @hide
          */
@@ -19646,21 +19655,6 @@ public final class Settings {
         public static int checkCallingOrSelfPermission(@NonNull @PermissionName String permission) {
             return ActivityThread.currentApplication()
                .getApplicationContext().checkCallingOrSelfPermission(permission);
-        }
-
-        /**
-         * Enforces READ_DEVICE_CONFIG permission if namespace is not one of public namespaces.
-         * @hide
-         */
-        public static void enforceReadPermission(String namespace) {
-            if (ActivityThread.currentApplication().getApplicationContext()
-                    .checkCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG)
-                    != PackageManager.PERMISSION_GRANTED) {
-                if (!DeviceConfig.getPublicNamespaces().contains(namespace)) {
-                    throw new SecurityException("Permission denial: reading from settings requires:"
-                        + Manifest.permission.READ_DEVICE_CONFIG);
-                }
-            }
         }
 
         private static void setMonitorCallbackAsUser(

@@ -849,6 +849,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // True if the view text can be padded for compat reasons, when the view is translated.
     private final boolean mUseTextPaddingForUiTranslation;
 
+    private boolean mUseBoundsForWidth;
+
     @ViewDebug.ExportedProperty(category = "text")
     @UnsupportedAppUsage
     private int mGravity = Gravity.TOP | Gravity.START;
@@ -1618,6 +1620,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_NONE;
         }
+
+        mUseBoundsForWidth = false;  // TODO: Make enable this by default.
+
         // TODO(b/179693024): Use a ChangeId instead.
         mUseTextPaddingForUiTranslation = targetSdkVersion <= Build.VERSION_CODES.R;
 
@@ -1856,6 +1861,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean clickable = canInputOrMove || isClickable();
         boolean longClickable = canInputOrMove || isLongClickable();
         int focusable = getFocusable();
+        boolean isAutoHandwritingEnabled = true;
 
         n = a.getIndexCount();
         for (int i = 0; i < n; i++) {
@@ -1878,6 +1884,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.View_longClickable:
                     longClickable = a.getBoolean(attr, longClickable);
                     break;
+
+                case com.android.internal.R.styleable.View_autoHandwritingEnabled:
+                    isAutoHandwritingEnabled = a.getBoolean(attr, true);
+                    break;
             }
         }
         a.recycle();
@@ -1891,6 +1901,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         setClickable(clickable);
         setLongClickable(longClickable);
+        setAutoHandwritingEnabled(isAutoHandwritingEnabled);
 
         if (mEditor != null) mEditor.prepareCursorControllers();
 
@@ -2436,8 +2447,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!enabled) {
             // Hide the soft input if the currently active TextView is disabled
             InputMethodManager imm = getInputMethodManager();
-            if (imm != null && imm.isActive(this)) {
-                imm.hideSoftInputFromWindow(getWindowToken(), 0);
+            if (imm != null) {
+                imm.hideSoftInputFromView(this, 0);
             }
         }
 
@@ -4817,6 +4828,45 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Set true for using width of bounding box as a source of automatic line breaking and drawing.
+     *
+     * If this value is false, the TextView determines the View width, drawing offset and automatic
+     * line breaking based on total advances as text widths. By setting true, use glyph bound's as a
+     * source of text width.
+     *
+     * If the font used for this TextView has glyphs that has negative bearing X or glyph xMax is
+     * greater than advance, the glyph clipping can be happened because the drawing area may be
+     * bigger than advance. By setting this to true, the TextView will reserve more spaces for
+     * drawing are, so clipping can be prevented.
+     *
+     * This value is true by default if the target API version is 35 or later.
+     *
+     * @param useBoundsForWidth true for using bounding box for width. false for using advances for
+     *                          width.
+     * @see #getUseBoundsForWidth()
+     */
+    public void setUseBoundsForWidth(boolean useBoundsForWidth) {
+        if (mUseBoundsForWidth != useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * Returns true if using bounding box as a width, false for using advance as a width.
+     *
+     * @see #setUseBoundsForWidth(boolean)
+     * @return True if using bounding box for width, false if using advance for width.
+     */
+    public boolean getUseBoundsForWidth() {
+        return mUseBoundsForWidth;
     }
 
     /**
@@ -8008,8 +8058,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             } else if (actionCode == EditorInfo.IME_ACTION_DONE) {
                 InputMethodManager imm = getInputMethodManager();
-                if (imm != null && imm.isActive(this)) {
-                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                if (imm != null) {
+                    imm.hideSoftInputFromView(this, 0);
                 }
                 return;
             }
@@ -9672,8 +9722,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 // No target for next focus, but make sure the IME
                                 // if this came from it.
                                 InputMethodManager imm = getInputMethodManager();
-                                if (imm != null && imm.isActive(this)) {
-                                    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+                                if (imm != null) {
+                                    imm.hideSoftInputFromView(this, 0);
                                 }
                             }
                         }
@@ -10647,7 +10697,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setJustificationMode(mJustificationMode)
                         .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
                         .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
-                                mLineBreakStyle, mLineBreakWordStyle));
+                                mLineBreakStyle, mLineBreakWordStyle))
+                        .setUseBoundsForWidth(mUseBoundsForWidth);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
                             .setEllipsizedWidth(ellipsisWidth);
@@ -10709,6 +10760,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setJustificationMode(mJustificationMode)
                     .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
                             mLineBreakStyle, mLineBreakWordStyle))
+                    .setUseBoundsForWidth(mUseBoundsForWidth)
                     .setEllipsize(getKeyListener() == null ? effectiveEllipsize : null)
                     .setEllipsizedWidth(ellipsisWidth);
             result = builder.build();
@@ -10727,11 +10779,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     if (useSaved && mSavedLayout != null) {
                         result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
                                 wantWidth, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad);
+                                boring, mIncludePad, null, wantWidth,
+                                isFallbackLineSpacingForBoringLayout(),
+                                mUseBoundsForWidth);
                     } else {
-                        result = BoringLayout.make(mTransformed, mTextPaint,
-                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad);
+                        result = new BoringLayout(
+                                mTransformed,
+                                mTextPaint,
+                                wantWidth,
+                                alignment,
+                                mSpacingMult,
+                                mSpacingAdd,
+                                mIncludePad,
+                                isFallbackLineSpacingForBoringLayout(),
+                                wantWidth,
+                                null,
+                                boring,
+                                mUseBoundsForWidth);
                     }
 
                     if (useSaved) {
@@ -10742,12 +10806,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         result = mSavedLayout.replaceOrMake(mTransformed, mTextPaint,
                                 wantWidth, alignment, mSpacingMult, mSpacingAdd,
                                 boring, mIncludePad, effectiveEllipsize,
-                                ellipsisWidth);
+                                ellipsisWidth, isFallbackLineSpacingForBoringLayout(),
+                                mUseBoundsForWidth);
                     } else {
-                        result = BoringLayout.make(mTransformed, mTextPaint,
-                                wantWidth, alignment, mSpacingMult, mSpacingAdd,
-                                boring, mIncludePad, effectiveEllipsize,
-                                ellipsisWidth);
+                        result = new BoringLayout(
+                                mTransformed,
+                                mTextPaint,
+                                wantWidth,
+                                alignment,
+                                mSpacingMult,
+                                mSpacingAdd,
+                                mIncludePad,
+                                isFallbackLineSpacingForBoringLayout(),
+                                ellipsisWidth,
+                                effectiveEllipsize,
+                                boring,
+                                mUseBoundsForWidth);
                     }
                 }
             }
@@ -10765,7 +10839,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setJustificationMode(mJustificationMode)
                     .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
                     .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
-                            mLineBreakStyle, mLineBreakWordStyle));
+                            mLineBreakStyle, mLineBreakWordStyle))
+                    .setUseBoundsForWidth(mUseBoundsForWidth);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
                         .setEllipsizedWidth(ellipsisWidth);
@@ -10798,7 +10873,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    private static int desired(Layout layout) {
+    private static int desired(Layout layout, boolean useBoundsForWidth) {
         int n = layout.getLineCount();
         CharSequence text = layout.getText();
         float max = 0;
@@ -10814,6 +10889,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         for (int i = 0; i < n; i++) {
             max = Math.max(max, layout.getLineMax(i));
+        }
+
+        if (useBoundsForWidth) {
+            max = Math.max(max, layout.computeDrawingBoundingBox().width());
         }
 
         return (int) Math.ceil(max);
@@ -10884,7 +10963,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             width = widthSize;
         } else {
             if (mLayout != null && mEllipsize == null) {
-                des = desired(mLayout);
+                des = desired(mLayout, mUseBoundsForWidth);
             }
 
             if (des < 0) {
@@ -10900,11 +10979,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (boring == null || boring == UNKNOWN_BORING) {
                 if (des < 0) {
                     des = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mTransformed, 0,
-                            mTransformed.length(), mTextPaint, mTextDir, widthLimit));
+                            mTransformed.length(), mTextPaint, mTextDir, widthLimit,
+                            mUseBoundsForWidth));
                 }
                 width = des;
             } else {
-                width = boring.width;
+                if (mUseBoundsForWidth) {
+                    width = Math.max(boring.width,
+                            (int) Math.ceil(boring.getDrawingBoundingBox().width()));
+                } else {
+                    width = boring.width;
+                }
             }
 
             final Drawables dr = mDrawables;
@@ -10918,7 +11003,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int hintWidth;
 
                 if (mHintLayout != null && mEllipsize == null) {
-                    hintDes = desired(mHintLayout);
+                    hintDes = desired(mHintLayout, mUseBoundsForWidth);
                 }
 
                 if (hintDes < 0) {
@@ -10932,7 +11017,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (hintBoring == null || hintBoring == UNKNOWN_BORING) {
                     if (hintDes < 0) {
                         hintDes = (int) Math.ceil(Layout.getDesiredWidthWithLimit(mHint, 0,
-                                mHint.length(), mTextPaint, mTextDir, widthLimit));
+                                mHint.length(), mTextPaint, mTextDir, widthLimit,
+                                mUseBoundsForWidth));
                     }
                     hintWidth = hintDes;
                 } else {
@@ -11133,7 +11219,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE)
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineBreakConfig(LineBreakConfig.getLineBreakConfig(
-                        mLineBreakStyle, mLineBreakWordStyle));
+                        mLineBreakStyle, mLineBreakWordStyle))
+                .setUseBoundsForWidth(mUseBoundsForWidth);
 
         final StaticLayout layout = layoutBuilder.build();
 
@@ -12884,6 +12971,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return true if this TextView could be filled by an Autofill service. Note that disabled
+     * fields can still be filled.
+     */
+    @UnsupportedAppUsage
+    boolean isTextAutofillable() {
+        return mText instanceof Editable && onCheckIsTextEditor();
+    }
+
+    /**
      * Returns true, only while processing a touch gesture, if the initial
      * touch down event caused focus to move to the text view and as a result
      * its selection changed.  Only valid while processing the touch gesture
@@ -13605,7 +13701,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void autofill(AutofillValue value) {
-        if (!isTextEditable()) {
+        if (!isTextAutofillable()) {
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
         }
@@ -13621,7 +13717,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public @AutofillType int getAutofillType() {
-        return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
+        return isTextAutofillable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
     }
 
     /**
@@ -13635,7 +13731,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     @Nullable
     public AutofillValue getAutofillValue() {
-        if (isTextEditable()) {
+        if (isTextAutofillable()) {
             final CharSequence text = TextUtils.trimToParcelableSize(getText());
             return AutofillValue.forText(text);
         }

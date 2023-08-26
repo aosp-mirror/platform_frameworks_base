@@ -8338,12 +8338,18 @@ public class WindowManagerService extends IWindowManager.Stub
                             + displayId + " - DisplayContent not found.");
                     return null;
                 }
-                //TODO (b/210039666): Use a method like add/removeDisplayOverlay if available.
+                final SurfaceControl inputOverlay = dc.getInputOverlayLayer();
+                if (inputOverlay == null) {
+                    Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                            + " - Input overlay layer is not initialized.");
+                    return null;
+                }
+                // TODO(b/210039666): Use a method like add/removeDisplayOverlay if available.
                 return makeSurfaceBuilder(dc.getSession())
                         .setContainerLayer()
                         .setName("IME Handwriting Surface")
                         .setCallsite("getHandwritingSurfaceForDisplay")
-                        .setParent(dc.getSurfaceControl())
+                        .setParent(inputOverlay)
                         .build();
             }
         }

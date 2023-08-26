@@ -711,7 +711,7 @@ class TransitionController {
                 startTask.fillTaskInfo(info);
             }
             final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange);
+                    transition.mType, info, remoteTransition, displayChange, transition.getFlags());
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
@@ -1147,6 +1147,7 @@ class TransitionController {
             Transition.asyncTraceBegin("animating", 0x41bfaf1 /* hashcode of TAG */);
         } else if (!animatingState && mAnimatingState) {
             t.setEarlyWakeupEnd();
+            mAtm.mWindowManager.requestTraversal();
             mSnapshotController.setPause(false);
             mAnimatingState = false;
             Transition.asyncTraceEnd(0x41bfaf1 /* hashcode of TAG */);

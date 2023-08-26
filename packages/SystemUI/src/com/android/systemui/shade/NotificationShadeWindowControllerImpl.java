@@ -57,6 +57,7 @@ import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -91,6 +92,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private static final int MAX_STATE_CHANGES_BUFFER_SIZE = 100;
 
     private final Context mContext;
+    private final WindowRootViewComponent.Factory mWindowRootViewComponentFactory;
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
@@ -129,8 +131,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             new NotificationShadeWindowState.Buffer(MAX_STATE_CHANGES_BUFFER_SIZE);
 
     @Inject
-    public NotificationShadeWindowControllerImpl(Context context, WindowManager windowManager,
-            IActivityManager activityManager, DozeParameters dozeParameters,
+    public NotificationShadeWindowControllerImpl(
+            Context context,
+            WindowRootViewComponent.Factory windowRootViewComponentFactory,
+            WindowManager windowManager,
+            IActivityManager activityManager,
+            DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
@@ -143,6 +149,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             ShadeExpansionStateManager shadeExpansionStateManager,
             ShadeWindowLogger logger) {
         mContext = context;
+        mWindowRootViewComponentFactory = windowRootViewComponentFactory;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
         mDozeParameters = dozeParameters;
@@ -274,8 +281,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void setWindowRootView(ViewGroup view) {
-        mWindowRootView = view;
+    public void fetchWindowRootView() {
+        WindowRootViewComponent component = mWindowRootViewComponentFactory.create();
+        mWindowRootView = component.getWindowRootView();
     }
 
     @Override

@@ -19,7 +19,6 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.PackageManager
 import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.pip.PipUtils
 
 class PipAppOpsListener(
     private val mContext: Context,

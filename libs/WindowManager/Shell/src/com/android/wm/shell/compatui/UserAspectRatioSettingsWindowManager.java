@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
@@ -36,6 +37,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * Window manager for the user aspect ratio settings button which allows users to go to
@@ -45,11 +47,11 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
 
     private static final long SHOW_USER_ASPECT_RATIO_BUTTON_DELAY_MS = 500L;
 
-    private static final long HIDE_USER_ASPECT_RATIO_BUTTON_DELAY_MS = 4000L;
-
     private long mNextButtonHideTimeMs = -1L;
 
     private final BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> mOnButtonClicked;
+
+    private final Function<Integer, Integer> mDisappearTimeSupplier;
 
     private final ShellExecutor mShellExecutor;
 
@@ -69,12 +71,14 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
             @Nullable ShellTaskOrganizer.TaskListener taskListener,
             @NonNull DisplayLayout displayLayout, @NonNull CompatUIHintsState compatUIHintsState,
             @NonNull BiConsumer<TaskInfo, ShellTaskOrganizer.TaskListener> onButtonClicked,
-            @NonNull ShellExecutor shellExecutor) {
+            @NonNull ShellExecutor shellExecutor,
+            @NonNull Function<Integer, Integer> disappearTimeSupplier) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mShellExecutor = shellExecutor;
         mHasUserAspectRatioSettingsButton = getHasUserAspectRatioSettingsButton(taskInfo);
         mCompatUIHintsState = compatUIHintsState;
         mOnButtonClicked = onButtonClicked;
+        mDisappearTimeSupplier = disappearTimeSupplier;
     }
 
     @Override
@@ -140,9 +144,9 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
             return;
         }
         mLayout.setUserAspectRatioSettingsHintVisibility(/* show= */ true);
-        mNextButtonHideTimeMs = updateHideTime(HIDE_USER_ASPECT_RATIO_BUTTON_DELAY_MS);
-        mShellExecutor.executeDelayed(this::hideUserAspectRatioButton,
-                HIDE_USER_ASPECT_RATIO_BUTTON_DELAY_MS);
+        final long disappearTimeMs = getDisappearTimeMs();
+        mNextButtonHideTimeMs = updateHideTime(disappearTimeMs);
+        mShellExecutor.executeDelayed(this::hideUserAspectRatioButton, disappearTimeMs);
     }
 
     @Override
@@ -167,9 +171,9 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         if (mHasUserAspectRatioSettingsButton) {
             mShellExecutor.executeDelayed(this::showUserAspectRatioButton,
                     SHOW_USER_ASPECT_RATIO_BUTTON_DELAY_MS);
-            mNextButtonHideTimeMs = updateHideTime(HIDE_USER_ASPECT_RATIO_BUTTON_DELAY_MS);
-            mShellExecutor.executeDelayed(this::hideUserAspectRatioButton,
-                    HIDE_USER_ASPECT_RATIO_BUTTON_DELAY_MS);
+            final long disappearTimeMs = getDisappearTimeMs();
+            mNextButtonHideTimeMs = updateHideTime(disappearTimeMs);
+            mShellExecutor.executeDelayed(this::hideUserAspectRatioButton, disappearTimeMs);
         } else {
             mShellExecutor.removeCallbacks(this::showUserAspectRatioButton);
             mShellExecutor.execute(this::hideUserAspectRatioButton);
@@ -207,5 +211,9 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
         return  taskInfo.topActivityEligibleForUserAspectRatioButton
                 && (taskInfo.topActivityBoundsLetterboxed
                     || taskInfo.isUserFullscreenOverrideEnabled);
+    }
+
+    private long getDisappearTimeMs() {
+        return mDisappearTimeSupplier.apply(AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 }

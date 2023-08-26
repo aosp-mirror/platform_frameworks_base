@@ -6,3 +6,10 @@ flag {
   description: "This flag controls removing expired notification bitmaps"
   bug: "290381858"
 }
+
+flag {
+  name: "polite_notifications"
+  namespace: "systemui"
+  description: "This flag controls the polite notification feature"
+  bug: "270456865"
+}

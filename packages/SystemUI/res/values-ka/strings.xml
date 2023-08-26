@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"სისტემის ენის შეცვლა მოითხოვა სხვა მოწყობილობამ"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"ენის შეცვლა"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"მიმდინარე ენის დატოვება"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"დაუშვებთ ამ ქსელში შეცდომების უსადენო გამართვას?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"ქსელის სახელი (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWi‑Fi მისამართი (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"ყოველთვის დაშვება ამ ქსელში"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ნიმუში არასწორია"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"პაროლი არასწორია"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"დაფიქსირდა ძალიან ბევრი არასწორი მცდელობა.\nცადეთ ხელახლა <xliff:g id="NUMBER">%d</xliff:g> წამში."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"ცადეთ ხელახლა. მცდელობა <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> / <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>-დან."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"თქვენი მონაცემები წაიშლება"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"შემდეგი მცდელობისას განმბლოკავი ნიმუშის არასწორად შეყვანის შემთხვევაში, ამ მოწყობილობის მონაცემები წაიშლება."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"გაზიარების, ჩაწერის ან ტრანსლირების დროს, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ს აქვს წვდომა ყველაფერზე, რაც ჩანს თქვენს ეკრანზე ან უკრავს თქვენს მოწყობილობაზე. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"აპის გაზიარებისას, ჩაწერისას ან ტრანსლირებისას, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ს წვდომა აქვს ყველაფერზე, რაც ჩანს ან იკვრება აპში. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"დაწყება"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"გსურთ ტრანსლირების დაწყება?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"როდესაც თქვენ ტრანსლირებთ, ამ აპს აქვს წვდომა ყველაფერზე, რაც ჩანს თქვენს ეკრანზე ან უკრავს თქვენს მოწყობილობაზე. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"როდესაც აპს ტრანსლირებთ, Android-ს წვდომა აქვს ყველაფერზე, რაც ჩანს ან იკვრება აპში. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
@@ -1169,7 +1175,7 @@
     <string name="install_app" msgid="5066668100199613936">"აპის ინსტალაცია"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"მიკროფონი და კამერა"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"აპის ბოლოდროინდელი გამოყენება"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ბოლოდროინდელი წვდომის ნახვა"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ბოლო წვდომის ნახვა"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"მზადაა"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"გაფართოება და ვარიანტების ჩვენება"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"ჩაკეცვა"</string>

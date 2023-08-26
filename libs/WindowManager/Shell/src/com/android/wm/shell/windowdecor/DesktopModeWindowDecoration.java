@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -36,13 +37,16 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageButton;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -69,6 +73,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private DesktopModeWindowDecorationViewHolder mWindowDecorViewHolder;
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
+    private View.OnLongClickListener mOnCaptionLongClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
     private DragDetector mDragDetector;
@@ -80,6 +85,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Point mPositionInParent = new Point();
     private HandleMenu mHandleMenu;
 
+    private MaximizeMenu mMaximizeMenu;
+
     private ResizeVeil mResizeVeil;
 
     private Drawable mAppIcon;
@@ -89,6 +96,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private final Set<IBinder> mTransitionsPausingRelayout = new HashSet<>();
     private int mRelayoutBlock;
+    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -98,12 +106,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             SurfaceControl taskSurface,
             Handler handler,
             Choreographer choreographer,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         super(context, displayController, taskOrganizer, taskInfo, taskSurface);
 
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         loadAppInfo();
     }
@@ -121,9 +131,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void setCaptionListeners(
             View.OnClickListener onCaptionButtonClickListener,
-            View.OnTouchListener onCaptionTouchListener) {
+            View.OnTouchListener onCaptionTouchListener,
+            View.OnLongClickListener onLongClickListener) {
         mOnCaptionButtonClickListener = onCaptionButtonClickListener;
         mOnCaptionTouchListener = onCaptionTouchListener;
+        mOnCaptionLongClickListener = onLongClickListener;
     }
 
     void setCornersListener(TaskCornersListener cornersListener) {
@@ -207,6 +219,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         mResult.mRootView,
                         mOnCaptionTouchListener,
                         mOnCaptionButtonClickListener,
+                        mOnCaptionLongClickListener,
                         mAppName,
                         mAppIcon
                 );
@@ -218,6 +231,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
+            closeMaximizeMenu();
         }
 
         if (!isDragResizeable) {
@@ -255,6 +269,52 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             mCornersListener.onTaskCornersChanged(mTaskInfo.taskId, getGlobalCornersRegion());
         }
         mPositionInParent.set(mTaskInfo.positionInParent);
+
+        if (isMaximizeMenuActive()) {
+            if (!mTaskInfo.isVisible()) {
+                closeMaximizeMenu();
+            } else {
+                mMaximizeMenu.positionMenu(calculateMaximizeMenuPosition(), startT);
+            }
+        }
+    }
+
+    private PointF calculateMaximizeMenuPosition() {
+        final PointF position = new PointF();
+        final Resources resources = mContext.getResources();
+        final DisplayLayout displayLayout =
+                mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        if (displayLayout == null) return position;
+
+        final int displayWidth = displayLayout.width();
+        final int displayHeight = displayLayout.height();
+        final int captionHeight = loadDimensionPixelSize(
+                resources, R.dimen.freeform_decor_caption_height);
+
+        final ImageButton maximizeWindowButton =
+                mResult.mRootView.findViewById(R.id.maximize_window);
+        final int[] maximizeButtonLocation = new int[2];
+        maximizeWindowButton.getLocationInWindow(maximizeButtonLocation);
+
+        final int menuWidth = loadDimensionPixelSize(
+                resources, R.dimen.desktop_mode_maximize_menu_width);
+        final int menuHeight = loadDimensionPixelSize(
+                resources, R.dimen.desktop_mode_maximize_menu_height);
+
+        float menuLeft = (mPositionInParent.x + maximizeButtonLocation[0]);
+        float menuTop = (mPositionInParent.y + captionHeight);
+        final float menuRight = menuLeft + menuWidth;
+        final float menuBottom = menuTop + menuHeight;
+
+        // If the menu is out of screen bounds, shift it up/left as needed
+        if (menuRight > displayWidth) {
+            menuLeft = (displayWidth - menuWidth);
+        }
+        if (menuBottom > displayHeight) {
+            menuTop = (displayHeight - menuHeight);
+        }
+
+        return new PointF(menuLeft, menuTop);
     }
 
     boolean isHandleMenuActive() {
@@ -332,6 +392,29 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mResizeVeil == null) return;
         mResizeVeil.dispose();
         mResizeVeil = null;
+    }
+
+    /**
+     * Create and display maximize menu window
+     */
+    void createMaximizeMenu() {
+        mMaximizeMenu = new MaximizeMenu(mSyncQueue, mRootTaskDisplayAreaOrganizer,
+                mDisplayController, mTaskInfo, mOnCaptionButtonClickListener, mContext,
+                calculateMaximizeMenuPosition(), mSurfaceControlTransactionSupplier);
+        mMaximizeMenu.show();
+    }
+
+    /**
+     * Close the maximize menu window
+     */
+    void closeMaximizeMenu() {
+        if (!isMaximizeMenuActive()) return;
+        mMaximizeMenu.close();
+        mMaximizeMenu = null;
+    }
+
+    boolean isMaximizeMenuActive() {
+        return mMaximizeMenu != null;
     }
 
     /**
@@ -532,7 +615,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 SurfaceControl taskSurface,
                 Handler handler,
                 Choreographer choreographer,
-                SyncTransactionQueue syncQueue) {
+                SyncTransactionQueue syncQueue,
+                RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
@@ -541,7 +625,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     taskSurface,
                     handler,
                     choreographer,
-                    syncQueue);
+                    syncQueue,
+                    rootTaskDisplayAreaOrganizer);
         }
     }
 

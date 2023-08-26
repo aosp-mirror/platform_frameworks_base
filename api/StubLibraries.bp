@@ -487,7 +487,6 @@ java_library {
     static_libs: [
         "all-updatable-modules-system-stubs",
         "android-non-updatable.stubs.test",
-        "private-stub-annotations-jar",
     ],
     defaults: [
         "android.jar_defaults",
@@ -613,6 +612,7 @@ java_defaults {
     api_contributions: [
         "test-api-stubs-docs-non-updatable.api.contribution",
         "framework-virtualization.stubs.source.test.api.contribution",
+        "framework-location.stubs.source.test.api.contribution",
     ],
 }
 

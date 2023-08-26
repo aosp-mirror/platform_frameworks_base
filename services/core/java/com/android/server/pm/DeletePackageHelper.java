@@ -459,8 +459,8 @@ final class DeletePackageHelper {
                     // Do not uninstall the APK if an app should be cached
                     boolean keepUninstalledPackage =
                             mPm.shouldKeepUninstalledPackageLPr(packageName);
-                    if (ps.isAnyInstalled(
-                            mUserManagerInternal.getUserIds()) || keepUninstalledPackage) {
+                    if (ps.isInstalledOrHasDataOnAnyOtherUser(
+                            mUserManagerInternal.getUserIds(), userId) || keepUninstalledPackage) {
                         // Other users still have this package installed, so all
                         // we need to do is clear this user's data and save that
                         // it is uninstalled.
@@ -555,6 +555,7 @@ final class DeletePackageHelper {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
                 mAppDataHelper.destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+                ps.setCeDataInode(-1, nextUserId);
             }
             mAppDataHelper.clearKeystoreData(nextUserId, ps.getAppId());
             preferredActivityHelper.clearPackagePreferredActivities(ps.getPackageName(),
@@ -615,7 +616,9 @@ final class DeletePackageHelper {
                 Slog.d(TAG, "Marking package:" + ps.getPackageName()
                         + " uninstalled for user:" + nextUserId);
             }
-            ps.setUserState(nextUserId, 0, COMPONENT_ENABLED_STATE_DEFAULT,
+            ps.setUserState(nextUserId,
+                    ps.getCeDataInode(nextUserId),
+                    COMPONENT_ENABLED_STATE_DEFAULT,
                     false /*installed*/,
                     true /*stopped*/,
                     true /*notLaunched*/,

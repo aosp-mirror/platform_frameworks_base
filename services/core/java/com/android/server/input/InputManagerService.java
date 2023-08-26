@@ -381,6 +381,17 @@ public class InputManagerService extends IInputManager.Stub
     public static final int SW_CAMERA_LENS_COVER_BIT = 1 << SW_CAMERA_LENS_COVER;
     public static final int SW_MUTE_DEVICE_BIT = 1 << SW_MUTE_DEVICE;
 
+    // The following are layer numbers used for z-ordering the input overlay layers on the display.
+    // This is used for ordering layers inside {@code DisplayContent#getInputOverlayLayer()}.
+    //
+    // The layer where gesture monitors are added.
+    public static final int INPUT_OVERLAY_LAYER_GESTURE_MONITOR = 1;
+    // Place the handwriting layer above gesture monitors so that styluses cannot trigger
+    // system gestures (e.g. navigation bar, edge-back, etc) while there is an active
+    // handwriting session.
+    public static final int INPUT_OVERLAY_LAYER_HANDWRITING_SURFACE = 2;
+
+
     private final String mVelocityTrackerStrategy;
 
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */

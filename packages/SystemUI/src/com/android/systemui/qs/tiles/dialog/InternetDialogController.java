@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.dialog;
 
 import static com.android.settingslib.mobile.MobileMappings.getIconKey;
 import static com.android.settingslib.mobile.MobileMappings.mapIconSets;
+import static com.android.settingslib.wifi.WifiUtils.getHotspotIconResource;
 import static com.android.wifitrackerlib.WifiEntry.CONNECTED_STATE_CONNECTED;
 
 import android.animation.Animator;
@@ -73,6 +74,7 @@ import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.settingslib.wifi.WifiUtils;
+import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -89,6 +91,7 @@ import com.android.systemui.toast.SystemUIToast;
 import com.android.systemui.toast.ToastFactory;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.wifitrackerlib.HotspotNetworkEntry;
 import com.android.wifitrackerlib.MergedCarrierEntry;
 import com.android.wifitrackerlib.WifiEntry;
 
@@ -454,16 +457,31 @@ public class InternetDialogController implements AccessPointController.AccessPoi
 
     @Nullable
     Drawable getInternetWifiDrawable(@NonNull WifiEntry wifiEntry) {
-        if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
-            return null;
-        }
-        final Drawable drawable =
-                mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(), wifiEntry.getLevel());
+        Drawable drawable = getWifiDrawable(wifiEntry);
         if (drawable == null) {
             return null;
         }
         drawable.setTint(mContext.getColor(R.color.connected_network_primary_color));
         return drawable;
+    }
+
+    /**
+     * Returns a Wi-Fi icon {@link Drawable}.
+     *
+     * @param wifiEntry {@link WifiEntry}
+     */
+    @Nullable
+    Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
+        if (wifiEntry instanceof HotspotNetworkEntry) {
+            int deviceType = ((HotspotNetworkEntry) wifiEntry).getDeviceType();
+            return mContext.getDrawable(getHotspotIconResource(deviceType));
+        }
+        // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
+        // will be returned.
+        if (wifiEntry.getLevel() == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
+            return null;
+        }
+        return mWifiIconInjector.getIcon(wifiEntry.shouldShowXLevelIcon(), wifiEntry.getLevel());
     }
 
     Drawable getSignalStrengthDrawable(int subId) {
@@ -1314,8 +1332,16 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         mDefaultDataSubId = defaultDataSubId;
     }
 
-    public WifiUtils.InternetIconInjector getWifiIconInjector() {
-        return mWifiIconInjector;
+    boolean mayLaunchShareWifiSettings(WifiEntry wifiEntry) {
+        Intent intent = getConfiguratorQrCodeGeneratorIntentOrNull(wifiEntry);
+        if (intent == null) {
+            return false;
+        }
+        if (mCallback != null) {
+            mCallback.dismissDialog();
+        }
+        mActivityStarter.startActivity(intent, false /* dismissShade */);
+        return true;
     }
 
     interface InternetDialogCallback {
@@ -1402,5 +1428,18 @@ public class InternetDialogController implements AccessPointController.AccessPoi
                 }
             }
         }, SHORT_DURATION_TIMEOUT);
+    }
+
+    Intent getConfiguratorQrCodeGeneratorIntentOrNull(WifiEntry wifiEntry) {
+        if (!mFeatureFlags.isEnabled(Flags.SHARE_WIFI_QS_BUTTON) || wifiEntry == null
+                || mWifiManager == null || !wifiEntry.canShare()) {
+            return null;
+        }
+        Intent intent = new Intent();
+        intent.setAction(WifiDppIntentHelper.ACTION_CONFIGURATOR_AUTH_QR_CODE_GENERATOR);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        WifiDppIntentHelper.setConfiguratorIntentExtra(intent, mWifiManager,
+                wifiEntry.getWifiConfiguration());
+        return intent;
     }
 }

@@ -315,7 +315,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             throw new IllegalStateException(
                     "Battery history was not requested in the BatteryUsageStatsQuery");
         }
-        return new BatteryStatsHistoryIterator(mBatteryStatsHistory);
+        return new BatteryStatsHistoryIterator(mBatteryStatsHistory, 0, 0);
     }
 
     @Override

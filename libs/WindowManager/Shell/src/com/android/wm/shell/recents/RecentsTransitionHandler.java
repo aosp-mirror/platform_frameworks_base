@@ -16,12 +16,15 @@
 
 package com.android.wm.shell.recents;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
+
+import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -69,6 +72,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
 
     private final Transitions mTransitions;
     private final ShellExecutor mExecutor;
+    @Nullable
+    private final RecentTasksController mRecentTasksController;
     private IApplicationThread mAnimApp = null;
     private final ArrayList<RecentsController> mControllers = new ArrayList<>();
 
@@ -82,6 +87,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             @Nullable RecentTasksController recentTasksController) {
         mTransitions = transitions;
         mExecutor = transitions.getMainExecutor();
+        mRecentTasksController = recentTasksController;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) return;
         if (recentTasksController == null) return;
         shellInit.addInitCallback(() -> {
@@ -417,6 +423,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             mLeashMap = new ArrayMap<>();
             mKeyguardLocked = (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0;
 
+            int closingSplitTaskId = INVALID_TASK_ID;
             final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
             final ArrayList<RemoteAnimationTarget> wallpapers = new ArrayList<>();
             TransitionUtil.LeafTaskFilter leafTaskFilter = new TransitionUtil.LeafTaskFilter();
@@ -443,6 +450,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     apps.add(target);
                     if (TransitionUtil.isClosingType(change.getMode())) {
                         mPausingTasks.add(new TaskState(change, target.leash));
+                        closingSplitTaskId = change.getTaskInfo().taskId;
                         if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                                     "  adding pausing leaf home taskId=%d", taskInfo.taskId);
@@ -500,13 +508,16 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
             t.apply();
+            Bundle b = new Bundle(1 /*capacity*/);
+            b.putParcelable(KEY_EXTRA_SPLIT_BOUNDS,
+                    mRecentTasksController.getSplitBoundsForTaskId(closingSplitTaskId));
             try {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.start: calling onAnimationStart", mInstanceId);
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
-                        new Rect(0, 0, 0, 0), new Rect());
+                        new Rect(0, 0, 0, 0), new Rect(), b);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error starting recents animation", e);
                 cancel("onAnimationStart() failed");

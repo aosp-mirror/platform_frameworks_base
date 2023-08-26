@@ -92,7 +92,6 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
@@ -309,6 +308,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Context mContext;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final DeviceStateManager mDeviceStateManager;
+    private final Lazy<CentralSurfacesCommandQueueCallbacks> mCommandQueueCallbacksLazy;
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
@@ -623,9 +623,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final SysuiStatusBarStateController mStatusBarStateController;
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
-    private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
+    private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final NotificationPresenter mPresenter;
-    private NotificationActivityStarter mNotificationActivityStarter;
+    private final NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
     private final Lazy<NoteTaskController> mNoteTaskControllerLazy;
@@ -726,6 +726,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             NotificationPresenter notificationPresenter,
+            NotificationActivityStarter notificationActivityStarter,
+            NotificationLaunchAnimatorControllerProvider notifLaunchAnimatorControllerProvider,
             NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -740,6 +742,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             CentralSurfacesComponent.Factory centralSurfacesComponentFactory,
+            Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -834,6 +837,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
         mPresenter = notificationPresenter;
+        mNotificationActivityStarter = notificationActivityStarter;
+        mNotificationAnimationProvider = notifLaunchAnimatorControllerProvider;
         mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
@@ -848,6 +853,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mCentralSurfacesComponentFactory = centralSurfacesComponentFactory;
+        mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -1548,11 +1554,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Set up the initial notification state.
         mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
         mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
-        mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
-                mNotificationExpansionRepository,
-                mNotifListContainer,
-                mHeadsUpManager,
-                mJankMonitor);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -1601,25 +1602,19 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 CollapsedStatusBarFragment.class,
                 mCentralSurfacesComponent::createCollapsedStatusBarFragment);
 
-        ViewGroup windowRootView = mCentralSurfacesComponent.getWindowRootView();
-        // TODO(b/277762009): Inject [NotificationShadeWindowView] directly into the controller.
-        //  (Right now, there's a circular dependency.)
-        mNotificationShadeWindowController.setWindowRootView(windowRootView);
+        // Ideally, NotificationShadeWindowController could automatically fetch the window root view
+        // in #attach or a CoreStartable.start method or something similar. But for now, to avoid
+        // regressions, we'll continue standing up the root view in CentralSurfaces.
+        mNotificationShadeWindowController.fetchWindowRootView();
         getNotificationShadeWindowViewController().setupExpandedStatusBar();
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
         mBackActionInteractor.setup(mQsController, mShadeSurface);
-        mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
 
         // Listen for demo mode changes
         mDemoModeController.addCallback(mDemoModeCallback);
 
-        if (mCommandQueueCallbacks != null) {
-            mCommandQueue.removeCallback(mCommandQueueCallbacks);
-        }
-        mCommandQueueCallbacks =
-                mCentralSurfacesComponent.getCentralSurfacesCommandQueueCallbacks();
-        // Connect in to the status bar manager service
+        mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
         mCommandQueue.addCallback(mCommandQueueCallbacks);
     }
 
@@ -1686,11 +1681,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public AuthKeyguardMessageArea getKeyguardMessageArea() {
         return getNotificationShadeWindowViewController().getKeyguardMessageArea();
-    }
-
-    @Override
-    public int getStatusBarHeight() {
-        return mStatusBarWindowController.getStatusBarHeight();
     }
 
     private void updateReportRejectedTouchVisibility() {
@@ -1815,11 +1805,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean getCommandQueuePanelsEnabled() {
         return mCommandQueue.panelsEnabled();
-    }
-
-    @Override
-    public int getStatusBarWindowState() {
-        return mStatusBarWindowState;
     }
 
     @Override

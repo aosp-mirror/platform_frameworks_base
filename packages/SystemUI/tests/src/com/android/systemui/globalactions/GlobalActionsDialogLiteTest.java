@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,10 +71,10 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
@@ -89,7 +90,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -119,6 +119,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private IStatusBarService mStatusBarService;
     @Mock private LightBarController mLightBarController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private IWindowManager mWindowManager;
     @Mock private Executor mBackgroundExecutor;
     @Mock private UiEventLogger mUiEventLogger;
@@ -128,7 +129,6 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private Handler mHandler;
     @Mock private UserContextProvider mUserContextProvider;
     @Mock private VibratorHelper mVibratorHelper;
-    @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private DialogLaunchAnimator mDialogLaunchAnimator;
@@ -172,13 +172,13 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mStatusBarService,
                 mLightBarController,
                 mNotificationShadeWindowController,
+                mStatusBarWindowController,
                 mWindowManager,
                 mBackgroundExecutor,
                 mUiEventLogger,
                 mRingerModeTracker,
                 mHandler,
                 mPackageManager,
-                Optional.of(mCentralSurfaces),
                 mShadeController,
                 mKeyguardUpdateMonitor,
                 mDialogLaunchAnimator);
@@ -305,7 +305,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(true).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(true).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -329,7 +329,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(false).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
@@ -345,6 +345,34 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         gestureListener.onFling(start, end, 0, 1000);
         verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
         verify(mShadeController).animateExpandShade();
+    }
+
+    @Test
+    public void testSwipeDown_pastStatusBarHeight_shadeNotOpened() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        doReturn(false).when(mKeyguardStateController).isShowing();
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+        GlobalActionsDialogLite.ActionsDialogLite dialog = mGlobalActionsDialogLite.createDialog();
+
+        doReturn(100).when(mStatusBarWindowController).getStatusBarHeight();
+
+        GestureDetector.SimpleOnGestureListener gestureListener = spy(dialog.mGestureListener);
+        // WHEN the start y is larger than the status bar height
+        MotionEvent start = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 200, 0);
+        MotionEvent end = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 500, 0);
+        gestureListener.onFling(start, end, 0, 1000);
+
+        // THEN the shade isn't opened
+        verify(mShadeController, never()).animateExpandShade();
     }
 
     @Test
@@ -539,7 +567,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         doReturn(4).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
         doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
         doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
-        doReturn(false).when(mCentralSurfaces).isKeyguardShowing();
+        doReturn(false).when(mKeyguardStateController).isShowing();
         String[] actions = {
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,

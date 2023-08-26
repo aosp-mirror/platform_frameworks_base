@@ -466,6 +466,7 @@
   <java-symbol type="integer" name="config_shortPressOnSleepBehavior" />
   <java-symbol type="integer" name="config_longPressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_shortPressOnStemPrimaryBehavior" />
+  <java-symbol type="string" name="config_primaryShortPressTargetActivity" />
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="string" name="config_doublePressOnPowerTargetActivity" />
@@ -1079,6 +1080,7 @@
   <java-symbol type="string" name="managed_profile_label_badge_2" />
   <java-symbol type="string" name="managed_profile_label_badge_3" />
   <java-symbol type="string" name="clone_profile_label_badge" />
+  <java-symbol type="string" name="private_profile_label_badge" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />
@@ -1410,6 +1412,9 @@
   <java-symbol type="drawable" name="ic_qs_one_handed_mode" />
   <java-symbol type="drawable" name="ic_clone_icon_badge" />
   <java-symbol type="drawable" name="ic_clone_badge" />
+  <java-symbol type="drawable" name="ic_private_profile_icon_badge" />
+  <java-symbol type="drawable" name="ic_private_profile_badge" />
+  <java-symbol type="drawable" name="stat_sys_private_profile_status" />
 
   <java-symbol type="drawable" name="sim_light_blue" />
   <java-symbol type="drawable" name="sim_light_green" />
@@ -5089,6 +5094,7 @@
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
+  <java-symbol type="integer" name="config_defaultPowerStatsThrottlePeriodCpu" />
 
   <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
@@ -5212,4 +5218,7 @@
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
 
   <java-symbol type="raw" name="default_ringtone_vibration_effect" />
+
+  <!-- Whether we order unlocking and waking -->
+  <java-symbol type="bool" name="config_orderUnlockAndWake" />
 </resources>

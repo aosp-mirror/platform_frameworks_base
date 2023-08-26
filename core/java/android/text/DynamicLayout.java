@@ -286,6 +286,29 @@ public class DynamicLayout extends Layout {
         }
 
         /**
+         * Set true for using width of bounding box as a source of automatic line breaking and
+         * drawing.
+         *
+         * If this value is false, the Layout determines the drawing offset and automatic line
+         * breaking based on total advances. By setting true, use all joined glyph's bounding boxes
+         * as a source of text width.
+         *
+         * If the font has glyphs that have negative bearing X or its xMax is greater than advance,
+         * the glyph clipping can happen because the drawing area may be bigger. By setting this to
+         * true, the Layout will reserve more spaces for drawing.
+         *
+         * @param useBoundsForWidth True for using bounding box, false for advances.
+         * @return this builder instance
+         * @see Layout#getUseBoundsForWidth()
+         * @see Layout.Builder#setUseBoundsForWidth(boolean)
+         */
+        @NonNull
+        public Builder setUseBoundsForWidth(boolean useBoundsForWidth) {
+            mUseBoundsForWidth = useBoundsForWidth;
+            return this;
+        }
+
+        /**
          * Build the {@link DynamicLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this method.
@@ -317,6 +340,7 @@ public class DynamicLayout extends Layout {
         private TextUtils.TruncateAt mEllipsize;
         private int mEllipsizedWidth;
         private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
+        private boolean mUseBoundsForWidth;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -392,7 +416,7 @@ public class DynamicLayout extends Layout {
                 false /* fallbackLineSpacing */, ellipsizedWidth, ellipsize,
                 Integer.MAX_VALUE /* maxLines */, breakStrategy, hyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, justificationMode,
-                lineBreakConfig);
+                lineBreakConfig, false /* useBoundsForWidth */);
 
         final Builder b = Builder.obtain(base, paint, width)
                 .setAlignment(align)
@@ -418,7 +442,7 @@ public class DynamicLayout extends Layout {
                 b.mIncludePad, b.mFallbackLineSpacing, b.mEllipsizedWidth, b.mEllipsize,
                 Integer.MAX_VALUE /* maxLines */, b.mBreakStrategy, b.mHyphenationFrequency,
                 null /* leftIndents */, null /* rightIndents */, b.mJustificationMode,
-                b.mLineBreakConfig);
+                b.mLineBreakConfig, b.mUseBoundsForWidth);
 
         mDisplay = b.mDisplay;
         mIncludePad = b.mIncludePad;
@@ -445,6 +469,7 @@ public class DynamicLayout extends Layout {
     private void generate(@NonNull Builder b) {
         mBase = b.mBase;
         mFallbackLineSpacing = b.mFallbackLineSpacing;
+        mUseBoundsForWidth = b.mUseBoundsForWidth;
         if (b.mEllipsize != null) {
             mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
             mEllipsizedWidth = b.mEllipsizedWidth;
@@ -639,7 +664,9 @@ public class DynamicLayout extends Layout {
                 .setJustificationMode(mJustificationMode)
                 .setLineBreakConfig(mLineBreakConfig)
                 .setAddLastLineLineSpacing(!islast)
-                .setIncludePad(false);
+                .setIncludePad(false)
+                .setUseBoundsForWidth(mUseBoundsForWidth)
+                .setCalculateBounds(true);
 
         reflowed = b.buildPartialStaticLayoutForDynamicLayout(true /* trackpadding */, reflowed);
         int n = reflowed.getLineCount();
@@ -1289,6 +1316,8 @@ public class DynamicLayout extends Layout {
     private int mTopPadding, mBottomPadding;
 
     private Rect mTempRect = new Rect();
+
+    private boolean mUseBoundsForWidth;
 
     @UnsupportedAppUsage
     private static StaticLayout sStaticLayout = null;

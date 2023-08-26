@@ -97,6 +97,7 @@ cc_library_host_static {
         "ResourceTable.cpp",
         "SourcePos.cpp",
         "StringPool.cpp",
+        "Utils.cpp",
         "WorkQueue.cpp",
         "XMLNode.cpp",
         "ZipEntry.cpp",

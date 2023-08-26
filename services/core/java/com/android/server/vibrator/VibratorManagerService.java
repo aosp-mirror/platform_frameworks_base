@@ -54,6 +54,8 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorInfoFactory;
+import android.os.vibrator.persistence.ParsedVibration;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
@@ -157,6 +159,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private final VibrationScaler mVibrationScaler;
     private final InputDeviceDelegate mInputDeviceDelegate;
     private final DeviceAdapter mDeviceAdapter;
+
+    @GuardedBy("mLock")
+    @Nullable private VibratorInfo mCombinedVibratorInfo;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -1826,6 +1831,36 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
+    private VibratorInfo getCombinedVibratorInfo() {
+        synchronized (mLock) {
+            // Used a cached resolving vibrator if one exists.
+            if (mCombinedVibratorInfo != null) {
+                return mCombinedVibratorInfo;
+            }
+
+            // Return an empty resolving vibrator if the service has no vibrator.
+            if (mVibratorIds.length == 0) {
+                return mCombinedVibratorInfo = VibratorInfo.EMPTY_VIBRATOR_INFO;
+            }
+
+            // Combine the vibrator infos of all the service's vibrator to create a single resolving
+            // vibrator that is based on the combined info.
+            VibratorInfo[] infos = new VibratorInfo[mVibratorIds.length];
+            for (int i = 0; i < mVibratorIds.length; i++) {
+                VibratorInfo info = getVibratorInfo(mVibratorIds[i]);
+                // If any one of the service's vibrator does not have a valid vibrator info, stop
+                // trying to create and cache a combined resolving vibrator. Combine the infos only
+                // when infos for all vibrators are available.
+                if (info == null) {
+                    return null;
+                }
+                infos[i] = info;
+            }
+
+            return mCombinedVibratorInfo = VibratorInfoFactory.create(/* id= */ -1, infos);
+        }
+    }
+
     /** Implementation of {@link IExternalVibratorService} to be triggered on external control. */
     @VisibleForTesting
     final class ExternalVibratorService extends IExternalVibratorService.Stub {
@@ -2308,9 +2343,20 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         private CombinedVibration parseXml(String xml) {
             try {
-                VibrationEffect effect = VibrationXmlParser.parse(new StringReader(xml));
-                if (effect == null) {
+                ParsedVibration parsedVibration =
+                        VibrationXmlParser.parseDocument(new StringReader(xml));
+                if (parsedVibration == null) {
                     throw new IllegalArgumentException("Error parsing vibration XML " + xml);
+                }
+                VibratorInfo combinedVibratorInfo = getCombinedVibratorInfo();
+                if (combinedVibratorInfo == null) {
+                    throw new IllegalStateException(
+                            "No combined vibrator info to parse vibration XML " + xml);
+                }
+                VibrationEffect effect = parsedVibration.resolve(combinedVibratorInfo);
+                if (effect == null) {
+                    throw new IllegalArgumentException(
+                            "Parsed vibration cannot be resolved for vibration XML " + xml);
                 }
                 return CombinedVibration.createParallel(effect);
             } catch (IOException e) {
@@ -2335,6 +2381,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("  sequential [options] (-v <vibrator-id> <effect>...)...");
                 pw.println("    Vibrates different effects on each vibrator in sequence.");
                 pw.println("  xml [options] <xml>");
+                pw.println("    Vibrates using combined vibration described in given XML string");
+                pw.println("    on all vibrators in sync. The XML could be:");
+                pw.println("        XML containing a single effect, or");
+                pw.println("        A vibration select XML containing multiple effects.");
                 pw.println("    Vibrates using combined vibration described in given XML string.");
                 pw.println("    XML containing a single effect it runs on all vibrators in sync.");
                 pw.println("  cancel");

@@ -203,6 +203,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
         }
     }
 
+    @Nullable
+    public SplitBounds getSplitBoundsForTaskId(int taskId) {
+        if (taskId == INVALID_TASK_ID) {
+            return null;
+        }
+
+        // We could do extra verification of requiring both taskIds of a pair and verifying that
+        // the same split bounds object is returned... but meh. Seems unnecessary.
+        return mTaskSplitBoundsMap.get(taskId);
+    }
+
     @Override
     public Context getContext() {
         return mContext;

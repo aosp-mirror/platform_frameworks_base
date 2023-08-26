@@ -251,6 +251,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     };
 
+    @VisibleForTesting
+    public static UsageStatsManagerInternal sUsageStatsManagerInternal;
+
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
     /** Master list of jobs. */
@@ -358,8 +361,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     DeviceIdleInternal mLocalDeviceIdleController;
     @VisibleForTesting
     AppStateTrackerImpl mAppStateTracker;
-    final UsageStatsManagerInternal mUsageStats;
     private final AppStandbyInternal mAppStandbyInternal;
+    private final BatteryStatsInternal mBatteryStatsInternal;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -2416,7 +2419,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
-        mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        sUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
 
         final Categorizer quotaCategorizer = (userId, packageName, tag) -> {
             if (QUOTA_TRACKER_TIMEOUT_UIJ_TAG.equals(tag)) {
@@ -2466,6 +2469,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
         mAppStandbyInternal.addListener(mStandbyTracker);
+
+        mBatteryStatsInternal = LocalServices.getService(BatteryStatsInternal.class);
 
         // The job store needs to call back
         publishLocalService(JobSchedulerInternal.class, new LocalService());
@@ -4127,7 +4132,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return;
             }
 
-            long sinceLast = mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+            long sinceLast = sUsageStatsManagerInternal.getTimeSinceLastJobRun(packageName, userId);
             if (sinceLast > 2 * DateUtils.DAY_IN_MILLIS) {
                 // Too long ago, not worth logging
                 sinceLast = 0L;
@@ -4137,8 +4142,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobs.forEachJobForSourceUid(uid, counter);
             }
             if (counter.numDeferred() > 0 || sinceLast > 0) {
-                BatteryStatsInternal mBatteryStatsInternal = LocalServices.getService
-                        (BatteryStatsInternal.class);
                 mBatteryStatsInternal.noteJobsDeferred(uid, counter.numDeferred(), sinceLast);
                 FrameworkStatsLog.write_non_chained(
                         FrameworkStatsLog.DEFERRED_JOB_STATS_REPORTED, uid, null,
@@ -4183,10 +4186,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     // Static to support external callers
     public static int standbyBucketForPackage(String packageName, int userId, long elapsedNow) {
-        UsageStatsManagerInternal usageStats = LocalServices.getService(
-                UsageStatsManagerInternal.class);
-        int bucket = usageStats != null
-                ? usageStats.getAppStandbyBucket(packageName, userId, elapsedNow)
+        int bucket = sUsageStatsManagerInternal != null
+                ? sUsageStatsManagerInternal.getAppStandbyBucket(packageName, userId, elapsedNow)
                 : 0;
 
         bucket = standbyBucketToBucketIndex(bucket);

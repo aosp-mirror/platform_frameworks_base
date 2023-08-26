@@ -10408,7 +10408,7 @@ public class CarrierConfigManager {
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 5000);
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
@@ -10518,7 +10518,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "eHRPD", new int[]{10, 400, 600, 800, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "TD_SCDMA", new int[]{1, 100, 500, 1000});
+                "TD_SCDMA", new int[]{1, 50, 100, 500, 1000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "iDEN", new int[]{1, 2, 10, 50, 100});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
@@ -10536,7 +10536,7 @@ public class CarrierConfigManager {
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EvDo_0", new int[]{300, 600, 1000, 1500, 2000});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
-                "1xRTT", new int[]{50, 60, 70, 80});
+                "1xRTT", new int[]{50, 60, 70, 80, 90});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(
                 "EDGE", new int[]{154, 169, 183, 192, 267});
         auto_data_switch_rat_signal_score_string_bundle.putIntArray(

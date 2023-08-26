@@ -1,0 +1,10 @@
+package: "com.android.window.flags"
+
+# Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
+
+flag {
+    namespace: "windowing_sdk"
+    name: "sync_window_config_update_flag"
+    description: "Whether the feature to sync different window-related config updates is enabled"
+    bug: "260873529"
+}

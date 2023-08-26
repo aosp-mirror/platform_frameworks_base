@@ -82,6 +82,16 @@ public class WindowTokenClientController {
 
     private WindowTokenClientController() {}
 
+    /** Gets the {@link WindowContext} instance for the token. */
+    @Nullable
+    public Context getWindowContext(@NonNull IBinder clientToken) {
+        final WindowTokenClient windowTokenClient;
+        synchronized (mLock) {
+            windowTokenClient = mWindowTokenClientMap.get(clientToken);
+        }
+        return windowTokenClient != null ? windowTokenClient.getContext() : null;
+    }
+
     /**
      * Attaches a {@link WindowTokenClient} to a {@link com.android.server.wm.DisplayArea}.
      *

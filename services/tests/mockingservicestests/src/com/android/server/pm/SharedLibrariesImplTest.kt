@@ -131,7 +131,7 @@ class SharedLibrariesImplTest {
         wheneverStatic { HexEncoding.decode(STATIC_LIB_NAME, false) }
                 .thenReturn(PackageUtils.computeSha256DigestBytes(
                         mSettings.getPackageLPr(STATIC_LIB_PACKAGE_NAME)
-                            .pkg.signingDetails.signatures!![0].toByteArray()))
+                            .pkg!!.signingDetails.signatures!![0].toByteArray()))
     }
 
     @Test
@@ -239,7 +239,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg!!, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(1)
@@ -252,7 +252,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg!!, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(2)
@@ -266,7 +266,7 @@ class SharedLibrariesImplTest {
         testPackageSetting.setPkgStateLibraryFiles(listOf())
         assertThat(testPackageSetting.usesLibraryFiles).isEmpty()
 
-        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg, testPackageSetting,
+        mSharedLibrariesImpl.updateSharedLibraries(testPackageSetting.pkg!!, testPackageSetting,
                 null /* changingLib */, null /* changingLibSetting */, mExistingPackages)
 
         assertThat(testPackageSetting.usesLibraryFiles).hasSize(3)

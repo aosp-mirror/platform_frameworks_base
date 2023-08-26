@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification
 
+import android.util.Log
 import android.view.ViewGroup
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
@@ -24,15 +25,14 @@ import com.android.systemui.statusbar.notification.data.repository.NotificationE
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.statusbar.policy.HeadsUpUtil
-import javax.inject.Inject
 import kotlin.math.ceil
 import kotlin.math.max
 
+private const val TAG = "NotificationLaunchAnimatorController"
+
 /** A provider of [NotificationLaunchAnimatorController]. */
-@CentralSurfacesComponent.CentralSurfacesScope
-class NotificationLaunchAnimatorControllerProvider @Inject constructor(
+class NotificationLaunchAnimatorControllerProvider(
     private val notificationExpansionRepository: NotificationExpansionRepository,
     private val notificationListContainer: NotificationListContainer,
     private val headsUpManager: HeadsUpManagerPhone,
@@ -89,28 +89,33 @@ class NotificationLaunchAnimatorController(
         val clipStartLocation = notificationListContainer.topClippingStartLocation
         val roundedTopClipping = (clipStartLocation - location[1]).coerceAtLeast(0)
         val windowTop = location[1] + roundedTopClipping
-        val topCornerRadius = if (roundedTopClipping > 0) {
-            // Because the rounded Rect clipping is complex, we start the top rounding at
-            // 0, which is pretty close to matching the real clipping.
-            // We'd have to clipOut the overlaid drawable too with the outer rounded rect in case
-            // if we'd like to have this perfect, but this is close enough.
-            0f
-        } else {
-            notification.topCornerRadius
-        }
-        val params = LaunchAnimationParameters(
-            top = windowTop,
-            bottom = location[1] + height,
-            left = location[0],
-            right = location[0] + notification.width,
-            topCornerRadius = topCornerRadius,
-            bottomCornerRadius = notification.bottomCornerRadius
-        )
+        val topCornerRadius =
+            if (roundedTopClipping > 0) {
+                // Because the rounded Rect clipping is complex, we start the top rounding at
+                // 0, which is pretty close to matching the real clipping.
+                // We'd have to clipOut the overlaid drawable too with the outer rounded rect in
+                // case
+                // if we'd like to have this perfect, but this is close enough.
+                0f
+            } else {
+                notification.topCornerRadius
+            }
+        val params =
+            LaunchAnimationParameters(
+                top = windowTop,
+                bottom = location[1] + height,
+                left = location[0],
+                right = location[0] + notification.width,
+                topCornerRadius = topCornerRadius,
+                bottomCornerRadius = notification.bottomCornerRadius
+            )
 
         params.startTranslationZ = notification.translationZ
         params.startNotificationTop = location[1]
-        params.notificationParentTop = notificationListContainer
-                .getViewParentForNotification(notificationEntry).locationOnScreen[1]
+        params.notificationParentTop =
+            notificationListContainer
+                .getViewParentForNotification(notificationEntry)
+                .locationOnScreen[1]
         params.startRoundedTopClipping = roundedTopClipping
         params.startClipTopAmount = notification.clipTopAmount
         if (notification.isChildInGroup) {
@@ -135,6 +140,8 @@ class NotificationLaunchAnimatorController(
     }
 
     override fun onIntentStarted(willAnimate: Boolean) {
+        // TODO(b/288507023): Remove this log.
+        Log.d(TAG, "onIntentStarted(willAnimate=$willAnimate)")
         notificationExpansionRepository.setIsExpandAnimationRunning(willAnimate)
         notificationEntry.isExpandAnimationRunning = willAnimate
 
@@ -144,16 +151,30 @@ class NotificationLaunchAnimatorController(
         }
     }
 
-    private fun removeHun(animate: Boolean) {
-        if (!headsUpManager.isAlerting(notificationKey)) {
-            return
-        }
+    private val headsUpNotificationRow: ExpandableNotificationRow? get() {
+        val summaryEntry = notificationEntry.parent?.summary
 
+        return when {
+            headsUpManager.isAlerting(notificationKey) -> notification
+            summaryEntry == null -> null
+            headsUpManager.isAlerting(summaryEntry.key) -> summaryEntry.row
+            else -> null
+        }
+    }
+
+    private fun removeHun(animate: Boolean) {
+        val row = headsUpNotificationRow ?: return
+
+        // TODO: b/297247841 - Call on the row we're removing, which may differ from notification.
         HeadsUpUtil.setNeedsHeadsUpDisappearAnimationAfterClick(notification, animate)
-        headsUpManager.removeNotification(notificationKey, true /* releaseImmediately */, animate)
+
+        headsUpManager.removeNotification(row.entry.key, true /* releaseImmediately */, animate)
     }
 
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
+        // TODO(b/288507023): Remove this log.
+        Log.d(TAG, "onLaunchAnimationCancelled()")
+
         // TODO(b/184121838): Should we call InteractionJankMonitor.cancel if the animation started
         // here?
         notificationExpansionRepository.setIsExpandAnimationRunning(false)
@@ -166,11 +187,12 @@ class NotificationLaunchAnimatorController(
         notification.isExpandAnimationRunning = true
         notificationListContainer.setExpandingNotification(notification)
 
-        jankMonitor.begin(notification,
-            InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
+        jankMonitor.begin(notification, InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
+        // TODO(b/288507023): Remove this log.
+        Log.d(TAG, "onLaunchAnimationEnd()")
         jankMonitor.end(InteractionJankMonitor.CUJ_NOTIFICATION_APP_START)
 
         notification.isExpandAnimationRunning = false

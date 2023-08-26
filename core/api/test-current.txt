@@ -496,15 +496,15 @@ package android.app {
     method public int compareTo(android.app.WindowConfiguration);
     method public int describeContents();
     method public int getActivityType();
-    method public android.graphics.Rect getAppBounds();
-    method public android.graphics.Rect getBounds();
+    method @Nullable public android.graphics.Rect getAppBounds();
+    method @NonNull public android.graphics.Rect getBounds();
     method @NonNull public android.graphics.Rect getMaxBounds();
     method public int getRotation();
     method public int getWindowingMode();
     method public static boolean isFloating(int);
     method public void setActivityType(int);
-    method public void setAppBounds(android.graphics.Rect);
-    method public void setBounds(android.graphics.Rect);
+    method public void setAppBounds(@Nullable android.graphics.Rect);
+    method public void setBounds(@Nullable android.graphics.Rect);
     method public void setMaxBounds(@Nullable android.graphics.Rect);
     method public void setRotation(int);
     method public void setTo(android.app.WindowConfiguration);
@@ -837,6 +837,23 @@ package android.appwidget {
 
 package android.companion {
 
+  public static final class AssociationInfo.Builder {
+    ctor public AssociationInfo.Builder(int, int, @NonNull String);
+    ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
+    method @NonNull public android.companion.AssociationInfo build();
+    method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
+    method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
+    method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
+    method @NonNull public android.companion.AssociationInfo.Builder setLastTimeConnected(long);
+    method @NonNull public android.companion.AssociationInfo.Builder setNotifyOnDeviceNearby(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setRevoked(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSelfManaged(boolean);
+    method @NonNull public android.companion.AssociationInfo.Builder setSystemDataSyncFlags(int);
+    method @NonNull public android.companion.AssociationInfo.Builder setTag(@Nullable String);
+    method @NonNull public android.companion.AssociationInfo.Builder setTimeApproved(long);
+  }
+
   public final class CompanionDeviceManager {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
     field public static final int MESSAGE_REQUEST_PING = 1669362552; // 0x63807378
@@ -1164,6 +1181,7 @@ package android.credentials {
     method @Nullable public CharSequence getSettingsSubtitle();
     method @NonNull public boolean hasCapability(@NonNull String);
     method public boolean isEnabled();
+    method public boolean isPrimary();
     method public boolean isSystemProvider();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialProviderInfo> CREATOR;
@@ -1877,6 +1895,8 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
+    method @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED") public boolean enterAudioFocusFreezeForTest(@NonNull java.util.List<java.lang.Integer>);
+    method @RequiresPermission("Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED") public boolean exitAudioFocusFreezeForTest();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceComputeCsdOnAllDevices(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceUseFrameworkMel(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
@@ -1884,6 +1904,9 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getCsd();
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
+    method @NonNull @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public java.util.List<java.lang.Integer> getFocusDuckedUidsForTest();
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFocusFadeOutDurationForTest();
+    method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFocusUnmuteDelayAfterFadeOutForTest();
     method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
@@ -2682,8 +2705,14 @@ package android.os.vibrator {
 
 package android.os.vibrator.persistence {
 
+  public class ParsedVibration {
+    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffectListForTesting();
+    method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
+  }
+
   public final class VibrationXmlParser {
-    method @Nullable public static android.os.VibrationEffect parse(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.vibrator.persistence.ParsedVibration parseDocument(@NonNull java.io.Reader) throws java.io.IOException;
+    method @Nullable public static android.os.VibrationEffect parseVibrationEffect(@NonNull java.io.Reader) throws java.io.IOException;
   }
 
   public final class VibrationXmlSerializer {

@@ -221,7 +221,7 @@ import java.util.Objects;
             }
             final AdiDeviceState deviceState = new AdiDeviceState(deviceType,
                     internalDeviceType, fields[1]);
-            deviceState.setHasHeadTracker(Integer.parseInt(fields[2]) == 1);
+            deviceState.setSAEnabled(Integer.parseInt(fields[2]) == 1);
             deviceState.setHasHeadTracker(Integer.parseInt(fields[3]) == 1);
             deviceState.setHeadTrackerEnabled(Integer.parseInt(fields[4]) == 1);
             deviceState.setAudioDeviceCategory(audioDeviceCategory);

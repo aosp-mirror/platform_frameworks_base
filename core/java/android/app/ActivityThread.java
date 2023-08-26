@@ -3580,6 +3580,12 @@ public final class ActivityThread extends ClientTransactionHandler
         return mActivities.get(token);
     }
 
+    @Nullable
+    @Override
+    public Context getWindowContext(@NonNull IBinder clientToken) {
+        return WindowTokenClientController.getInstance().getWindowContext(clientToken);
+    }
+
     @VisibleForTesting(visibility = PACKAGE)
     public Configuration getConfiguration() {
         return mConfigurationController.getConfiguration();

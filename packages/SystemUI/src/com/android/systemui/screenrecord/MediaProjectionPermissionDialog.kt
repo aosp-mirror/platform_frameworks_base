@@ -16,16 +16,23 @@
 package com.android.systemui.screenrecord
 
 import android.content.Context
+import android.media.projection.MediaProjectionConfig
 import android.os.Bundle
 import com.android.systemui.R
 
 /** Dialog to select screen recording options */
 class MediaProjectionPermissionDialog(
-    context: Context?,
+    context: Context,
+    mediaProjectionConfig: MediaProjectionConfig?,
     private val onStartRecordingClicked: Runnable,
     private val onCancelClicked: Runnable,
     private val appName: String?
-) : BaseScreenSharePermissionDialog(context, createOptionList(appName), appName) {
+) :
+    BaseScreenSharePermissionDialog(
+        context,
+        createOptionList(context, appName, mediaProjectionConfig),
+        appName
+    ) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
@@ -49,7 +56,11 @@ class MediaProjectionPermissionDialog(
     }
 
     companion object {
-        private fun createOptionList(appName: String?): List<ScreenShareOption> {
+        private fun createOptionList(
+            context: Context,
+            appName: String?,
+            mediaProjectionConfig: MediaProjectionConfig?
+        ): List<ScreenShareOption> {
             val singleAppWarningText =
                 if (appName == null) {
                     R.string.media_projection_entry_cast_permission_dialog_warning_single_app
@@ -63,6 +74,19 @@ class MediaProjectionPermissionDialog(
                     R.string.media_projection_entry_app_permission_dialog_warning_entire_screen
                 }
 
+            val singleAppDisabledText =
+                if (
+                    appName != null &&
+                        mediaProjectionConfig?.regionToCapture ==
+                            MediaProjectionConfig.CAPTURE_REGION_FIXED_DISPLAY
+                ) {
+                    context.getString(
+                        R.string.media_projection_entry_app_permission_dialog_single_app_disabled,
+                        appName
+                    )
+                } else {
+                    null
+                }
             return listOf(
                 ScreenShareOption(
                     mode = ENTIRE_SCREEN,
@@ -72,7 +96,8 @@ class MediaProjectionPermissionDialog(
                 ScreenShareOption(
                     mode = SINGLE_APP,
                     spinnerText = R.string.screen_share_permission_dialog_option_single_app,
-                    warningText = singleAppWarningText
+                    warningText = singleAppWarningText,
+                    spinnerDisabledText = singleAppDisabledText,
                 )
             )
         }

@@ -103,6 +103,7 @@ public class SettingsBackupTest {
                     Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
+                    Settings.System.WEAR_TTS_PREWARM_ENABLED,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
                     );

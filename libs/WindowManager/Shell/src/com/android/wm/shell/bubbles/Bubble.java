@@ -60,7 +60,6 @@ import java.util.concurrent.Executor;
 /**
  * Encapsulates the data and UI elements of a bubble.
  */
-@VisibleForTesting
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
@@ -852,7 +851,10 @@ public class Bubble implements BubbleViewProvider {
         return mAppIntent;
     }
 
-    boolean isAppBubble() {
+    /**
+     * Returns whether this bubble is from an app versus a notification.
+     */
+    public boolean isAppBubble() {
         return mIsAppBubble;
     }
 

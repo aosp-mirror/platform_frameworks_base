@@ -87,7 +87,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBar;
@@ -324,6 +323,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void startAssistant(Bundle bundle) {
             verifyCallerAndClearCallingIdentityPostMain("startAssistant", () ->
                     notifyStartAssistant(bundle));
+        }
+
+        @Override
+        public void setAssistantOverridesRequested(int[] invocationTypes) {
+            verifyCallerAndClearCallingIdentityPostMain("setAssistantOverridesRequested", () ->
+                    notifyAssistantOverrideRequested(invocationTypes));
         }
 
         @Override
@@ -571,7 +576,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             SysUiState sysUiState,
             Provider<SceneInteractor> sceneInteractor,
             UserTracker userTracker,
-            ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
             UiEventLogger uiEventLogger,
             DisplayTracker displayTracker,
@@ -651,7 +655,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Listen for user setup
         mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
 
-        screenLifecycle.addObserver(mScreenLifecycleObserver);
         wakefulnessLifecycle.addObserver(mWakefulnessLifecycleObserver);
         // Connect to the service
         updateEnabledAndBinding();
@@ -911,6 +914,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAssistantOverrideRequested(int[] invocationTypes) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).setAssistantOverridesRequested(invocationTypes);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -922,60 +931,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
         }
     }
-
-    private final ScreenLifecycle.Observer mScreenLifecycleObserver =
-            new ScreenLifecycle.Observer() {
-                /**
-                 * Notifies the Launcher that screen turned on and ready to use
-                 */
-                @Override
-                public void onScreenTurnedOn() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurnedOn();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turned on event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurnedOn()", e);
-                    }
-                }
-
-                /**
-                 * Notifies the Launcher that screen is starting to turn on.
-                 */
-                @Override
-                public void onScreenTurningOff() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurningOff();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turning off event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurningOff()", e);
-                    }
-                }
-
-                /**
-                 * Notifies the Launcher that screen is starting to turn on.
-                 */
-                @Override
-                public void onScreenTurningOn() {
-                    try {
-                        if (mOverviewProxy != null) {
-                            mOverviewProxy.onScreenTurningOn();
-                        } else {
-                            Log.e(TAG_OPS,
-                                    "Failed to get overview proxy for screen turning on event.");
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG_OPS, "Failed to call onScreenTurningOn()", e);
-                    }
-                }
-            };
 
     private final WakefulnessLifecycle.Observer mWakefulnessLifecycleObserver =
             new WakefulnessLifecycle.Observer() {
@@ -1108,6 +1063,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+        default void setAssistantOverridesRequested(int[] invocationTypes) {}
     }
 
     /**

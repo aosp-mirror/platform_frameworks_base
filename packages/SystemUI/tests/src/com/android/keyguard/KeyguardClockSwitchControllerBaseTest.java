@@ -23,7 +23,6 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLE
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -136,6 +135,10 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        mFakeDateView.setTag(R.id.tag_smartspace_view, new Object());
+        mFakeWeatherView.setTag(R.id.tag_smartspace_view, new Object());
+        mFakeSmartspaceView.setTag(R.id.tag_smartspace_view, new Object());
+
         when(mView.findViewById(R.id.left_aligned_notification_icon_container))
                 .thenReturn(mNotificationIcons);
         when(mNotificationIcons.getLayoutParams()).thenReturn(
@@ -158,12 +161,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mSmartspaceController.buildAndConnectDateView(any())).thenReturn(mFakeDateView);
         when(mSmartspaceController.buildAndConnectWeatherView(any())).thenReturn(mFakeWeatherView);
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
-        doAnswer(invocation -> {
-            removeView(mFakeDateView);
-            removeView(mFakeWeatherView);
-            removeView(mFakeSmartspaceView);
-            return null;
-        }).when(mSmartspaceController).removeViewsFromParent(any());
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
         mFakeFeatureFlags.set(FACE_AUTH_REFACTOR, false);

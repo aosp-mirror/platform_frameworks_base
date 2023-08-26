@@ -2705,8 +2705,7 @@ class ActivityStarter {
             mTransientLaunch = mOptions.getTransientLaunch();
             final KeyguardController kc = mSupervisor.getKeyguardController();
             final int displayId = mPreferredTaskDisplayArea.getDisplayId();
-            mDisplayLockAndOccluded = kc.isKeyguardLocked(displayId)
-                    && kc.isDisplayOccluded(displayId);
+            mDisplayLockAndOccluded = kc.isKeyguardOccluded(displayId);
             // Recents animation on lock screen, do not resume & move launcher to top.
             if (mTransientLaunch && mDisplayLockAndOccluded
                     && mService.getTransitionController().isShellTransitionsEnabled()) {

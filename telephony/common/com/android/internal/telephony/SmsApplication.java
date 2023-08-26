@@ -791,7 +791,7 @@ public final class SmsApplication {
                         AppOpsManager.MODE_ALLOWED);
             }
         } catch (NameNotFoundException e) {
-            // No whitelisted system app on this device
+            // No allowlisted system app on this device
             Log.e(LOG_TAG, "Package not found: " + packageName);
         }
 

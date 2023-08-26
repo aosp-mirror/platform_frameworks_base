@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.UserHandle;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -44,16 +45,18 @@ public class AuthenticationStatsCollector {
     private static final String TAG = "AuthenticationStatsCollector";
 
     // The minimum number of attempts that will calculate the FRR and trigger the notification.
-    private static final int MINIMUM_ATTEMPTS = 500;
+    private static final int MINIMUM_ATTEMPTS = 150;
     // Upload the data every 50 attempts (average number of daily authentications).
     private static final int AUTHENTICATION_UPLOAD_INTERVAL = 50;
     // The maximum number of eligible biometric enrollment notification can be sent.
-    private static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 2;
+    @VisibleForTesting
+    static final int MAXIMUM_ENROLLMENT_NOTIFICATIONS = 1;
 
     @NonNull private final Context mContext;
 
     private final float mThreshold;
     private final int mModality;
+    private boolean mPersisterInitialized = false;
 
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
@@ -85,9 +88,15 @@ public class AuthenticationStatsCollector {
     }
 
     private void initializeUserAuthenticationStatsMap() {
-        mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
-        for (AuthenticationStats stats : mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
-            mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
+        try {
+            mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
+            for (AuthenticationStats stats :
+                    mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
+                mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
+            }
+            mPersisterInitialized = true;
+        } catch (IllegalStateException e) {
+            Slog.w(TAG, "Failed to initialize AuthenticationStatsPersister.", e);
         }
     }
 
@@ -106,9 +115,15 @@ public class AuthenticationStatsCollector {
 
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
 
+        if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS) {
+            return;
+        }
+
         authenticationStats.authenticate(authenticated);
 
-        persistDataIfNeeded(userId);
+        if (mPersisterInitialized) {
+            persistDataIfNeeded(userId);
+        }
         sendNotificationIfNeeded(userId);
     }
 
@@ -166,11 +181,13 @@ public class AuthenticationStatsCollector {
     }
 
     private void onUserRemoved(final int userId) {
-        if (mAuthenticationStatsPersister == null) {
+        if (!mPersisterInitialized) {
             initializeUserAuthenticationStatsMap();
         }
-        mUserAuthenticationStatsMap.remove(userId);
-        mAuthenticationStatsPersister.removeFrrStats(userId);
+        if (mPersisterInitialized) {
+            mUserAuthenticationStatsMap.remove(userId);
+            mAuthenticationStatsPersister.removeFrrStats(userId);
+        }
     }
 
     /**

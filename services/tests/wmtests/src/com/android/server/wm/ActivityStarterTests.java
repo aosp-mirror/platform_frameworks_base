@@ -1435,7 +1435,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
         doReturn(true).when(keyguard).isKeyguardLocked(anyInt());
-        doReturn(true).when(keyguard).isDisplayOccluded(anyInt());
+        doReturn(true).when(keyguard).isKeyguardOccluded(anyInt());
         registerTestTransitionPlayer();
         starter.setReason("testTransientLaunchWithKeyguard")
                 .setActivityOptions(ActivityOptions.makeBasic().setTransientLaunch().toBundle())

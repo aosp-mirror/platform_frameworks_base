@@ -57,6 +57,8 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Changement de langue système demandé par un autre appareil"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Changer de langue"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Garder la langue actuelle"</string>
+    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage sans fil sur ce réseau ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nom du réseau (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresse Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Toujours autoriser sur ce réseau"</string>
@@ -158,6 +160,8 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Schéma incorrect"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mot de passe incorrect"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Trop de tentatives incorrectes.\nVeuillez réessayer dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
+    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
+    <skip />
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Réessayez. Tentative <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> sur <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Risque de perte des données"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Si vous dessinez un schéma incorrect lors de la prochaine tentative, les données de cet appareil seront supprimées."</string>
@@ -411,6 +415,8 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Lorsque vous partagez, enregistrez ou castez, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Lorsque vous partagez, enregistrez ou castez une appli, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Commencer"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
+    <skip />
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Commencer à caster ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Lorsque vous castez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Lorsque vous castez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
@@ -865,8 +871,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Agrandir une partie de l\'écran"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ouvrir les paramètres d\'agrandissement"</string>
     <string name="magnification_close_settings_click_label" msgid="4642477260651704517">"Fermer les paramètres d\'agrandissement"</string>
-    <!-- no translation found for magnification_exit_edit_mode_click_label (1664818325144887117) -->
-    <skip />
+    <string name="magnification_exit_edit_mode_click_label" msgid="1664818325144887117">"Quitter le mode Édition"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Faire glisser le coin pour redimensionner"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Autoriser le défilement diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionner"</string>
@@ -1169,7 +1174,7 @@
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Définir une appli de notes par défaut dans les paramètres"</string>
     <string name="install_app" msgid="5066668100199613936">"Installer l\'appli"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micro et caméra"</string>
-    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Utilisation récente par une appli"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Utilisation récente par les applis"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Consulter les accès récents"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"OK"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Développer et afficher les options"</string>
@@ -1181,7 +1186,7 @@
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"En cours d\'utilisation par l\'appel téléphonique"</string>
     <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Récemment utilisé lors d\'un appel téléphonique"</string>
     <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"En cours d\'utilisation par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Récemment utilisé par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Utilisation récente par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"En cours d\'utilisation par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Récemment utilisé par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"En cours d\'utilisation par <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>

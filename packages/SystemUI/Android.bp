@@ -135,7 +135,10 @@ android_library {
 aconfig_declarations {
     name: "systemui_aconfig_flags",
     package: "com.android.systemui.aconfig",
-    srcs: ["src/com/android/systemui/aconfig/systemui.aconfig"],
+    srcs: [
+        "src/com/android/systemui/aconfig/systemui.aconfig",
+        "src/com/android/systemui/accessibility/aconfig/accessibility.aconfig",
+    ],
 }
 
 java_aconfig_library {

@@ -31,6 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -170,6 +172,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     AccessibilityTraceManager mMockTraceManager;
     @Mock
     FullScreenMagnificationVibrationHelper mMockFullScreenMagnificationVibrationHelper;
+    @Mock
+    FullScreenMagnificationGestureHandler.MagnificationLogger mMockMagnificationLogger;
 
     @Rule
     public final TestableContext mContext = new TestableContext(getInstrumentation().getContext());
@@ -253,7 +257,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0,
-                mMockFullScreenMagnificationVibrationHelper);
+                mMockFullScreenMagnificationVibrationHelper, mMockMagnificationLogger);
         if (isWatch()) {
             h.setSinglePanningEnabled(true);
         } else {
@@ -425,6 +429,70 @@ public class FullScreenMagnificationGestureHandlerTest {
         tap();
         // no fast forward
         verify(mMgh.getNext(), times(2)).onMotionEvent(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testLongTapAfterShortcutTriggered_neverLogMagnificationTripleTap() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        longTap();
+
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+    }
+
+    @Test
+    public void testSwipeAndHoldAfterShortcutTriggered_neverLogMagnificationTripleTap() {
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+    }
+
+    @Test
+    public void testTripleTap_isNotActivated_logMagnificationTripleTapIsEnabled() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        tap();
+        tap();
+        longTap();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(true);
+    }
+
+    @Test
+    public void testTripleTap_isActivated_logMagnificationTripleTapIsNotEnabled() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
+
+        tap();
+        tap();
+        longTap();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(false);
+    }
+
+    @Test
+    public void testTripleTapAndHold_isNotActivated_logMagnificationTripleTapIsEnabled() {
+        goFromStateIdleTo(STATE_IDLE);
+
+        tap();
+        tap();
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(true);
+    }
+
+    @Test
+    public void testTripleTapAndHold_isActivated_logMagnificationTripleTapIsNotEnabled() {
+        goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
+
+        tap();
+        tap();
+        swipeAndHold();
+
+        verify(mMockMagnificationLogger).logMagnificationTripleTap(false);
     }
 
     @Test

@@ -29,14 +29,14 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.eq
-import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class PackageManagerExtTest {
@@ -110,9 +110,10 @@ class PackageManagerExtTest {
             flags = PackageManager.GET_META_DATA,
         )
 
-        val flagsCaptor = ArgumentCaptor.forClass(ResolveInfoFlags::class.java)
-        verify(packageManager).resolveActivityAsUser(any(), flagsCaptor.capture(), eq(APP.userId))
-        assertThat(flagsCaptor.value.value).isEqualTo(PackageManager.GET_META_DATA.toLong())
+        argumentCaptor<ResolveInfoFlags> {
+            verify(packageManager).resolveActivityAsUser(any(), capture(), eq(APP.userId))
+            assertThat(firstValue.value).isEqualTo(PackageManager.GET_META_DATA.toLong())
+        }
     }
 
     private companion object {

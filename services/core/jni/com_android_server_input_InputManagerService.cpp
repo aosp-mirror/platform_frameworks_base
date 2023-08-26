@@ -262,7 +262,8 @@ static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array
 
 class NativeInputManager : public virtual InputReaderPolicyInterface,
                            public virtual InputDispatcherPolicyInterface,
-                           public virtual PointerControllerPolicyInterface {
+                           public virtual PointerControllerPolicyInterface,
+                           public virtual PointerChoreographerPolicyInterface {
 protected:
     virtual ~NativeInputManager();
 
@@ -370,6 +371,9 @@ public:
     virtual PointerIconStyle getCustomPointerIconId();
     virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position);
 
+    /* --- PointerControllerPolicyInterface implementation --- */
+    virtual std::shared_ptr<PointerControllerInterface> createPointerController() override;
+
 private:
     sp<InputManagerInterface> mInputManager;
 
@@ -400,10 +404,14 @@ private:
         PointerCaptureRequest pointerCaptureRequest{};
 
         // Sprite controller singleton, created on first use.
-        sp<SpriteController> spriteController{};
+        std::shared_ptr<SpriteController> spriteController{};
 
+        // TODO(b/293587049): Remove when the PointerChoreographer refactoring is complete.
         // Pointer controller singleton, created and destroyed as needed.
-        std::weak_ptr<PointerController> pointerController{};
+        std::weak_ptr<PointerController> legacyPointerController{};
+
+        // The list of PointerControllers created and managed by the PointerChoreographer.
+        std::list<std::weak_ptr<PointerController>> pointerControllers{};
 
         // Input devices to be disabled
         std::set<int32_t> disabledInputDevices{};
@@ -443,6 +451,9 @@ private:
             jmethodID method, const char* methodName,
             std::function<T(std::string)> opOnValue = [](auto&& v) { return std::move(v); });
 
+    void forEachPointerControllerLocked(std::function<void(PointerController&)> apply)
+            REQUIRES(mLock);
+
     static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
 
@@ -452,7 +463,7 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    InputManager* im = new InputManager(this, *this);
+    InputManager* im = new InputManager(this, *this, *this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
 }
@@ -465,10 +476,8 @@ NativeInputManager::~NativeInputManager() {
 
 void NativeInputManager::dump(std::string& dump) {
     dump += "Input Manager State:\n";
-    {
-        dump += StringPrintf(INDENT "Interactive: %s\n", toString(mInteractive.load()));
-    }
-    {
+    dump += StringPrintf(INDENT "Interactive: %s\n", toString(mInteractive.load()));
+    { // acquire lock
         std::scoped_lock _l(mLock);
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
@@ -480,11 +489,8 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
                              mLocked.pointerCaptureRequest.enable ? "Enabled" : "Disabled",
                              mLocked.pointerCaptureRequest.seq);
-        auto pointerController = mLocked.pointerController.lock();
-        if (pointerController != nullptr) {
-            pointerController->dump(dump);
-        }
-    }
+        forEachPointerControllerLocked([&dump](PointerController& pc) { pc.dump(dump); });
+    } // release lock
     dump += "\n";
 
     mInputManager->dump(dump);
@@ -524,10 +530,9 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     { // acquire lock
         std::scoped_lock _l(mLock);
         mLocked.viewports = viewports;
-        std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
-        if (controller != nullptr) {
-            controller->onDisplayViewportsUpdated(mLocked.viewports);
-        }
+        forEachPointerControllerLocked([viewports = std::move(viewports)](PointerController& pc) {
+            pc.onDisplayViewportsUpdated(viewports);
+        });
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -700,21 +705,49 @@ std::unordered_map<std::string, T> NativeInputManager::readMapFromInterleavedJav
     return map;
 }
 
+void NativeInputManager::forEachPointerControllerLocked(
+        std::function<void(PointerController&)> apply) {
+    if (auto pc = mLocked.legacyPointerController.lock(); pc) {
+        apply(*pc);
+    }
+
+    auto it = mLocked.pointerControllers.begin();
+    while (it != mLocked.pointerControllers.end()) {
+        auto pc = it->lock();
+        if (!pc) {
+            it = mLocked.pointerControllers.erase(it);
+            continue;
+        }
+        apply(*pc);
+    }
+}
+
+// TODO(b/293587049): Remove the old way of obtaining PointerController when the
+//  PointerChoreographer refactoring is complete.
 std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerController(
         int32_t /* deviceId */) {
     ATRACE_CALL();
     std::scoped_lock _l(mLock);
 
-    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
+    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
     if (controller == nullptr) {
         ensureSpriteControllerLocked();
 
-        controller = PointerController::create(this, mLooper, mLocked.spriteController);
-        mLocked.pointerController = controller;
+        controller = PointerController::create(this, mLooper, *mLocked.spriteController);
+        mLocked.legacyPointerController = controller;
         updateInactivityTimeoutLocked();
     }
 
     return controller;
+}
+
+std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerController() {
+    std::scoped_lock _l(mLock);
+    ensureSpriteControllerLocked();
+    std::shared_ptr<PointerController> pc =
+            PointerController::create(this, mLooper, *mLocked.spriteController);
+    mLocked.pointerControllers.emplace_back(pc);
+    return pc;
 }
 
 void NativeInputManager::onPointerDisplayIdChanged(int32_t pointerDisplayId,
@@ -738,17 +771,21 @@ sp<SurfaceControl> NativeInputManager::getParentSurfaceForPointers(int displayId
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
-    if (mLocked.spriteController == nullptr) {
-        JNIEnv* env = jniEnv();
-        jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
-        if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
-            layer = -1;
-        }
-        mLocked.spriteController = new SpriteController(mLooper, layer, [this](int displayId) {
-            return getParentSurfaceForPointers(displayId);
-        });
-        mLocked.spriteController->setHandlerController(mLocked.spriteController);
+    if (mLocked.spriteController) {
+        return;
     }
+    JNIEnv* env = jniEnv();
+    jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
+    if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
+        layer = -1;
+    }
+    mLocked.spriteController =
+            std::make_shared<SpriteController>(mLooper, layer, [this](int displayId) {
+                return getParentSurfaceForPointers(displayId);
+            });
+    // The SpriteController needs to be shared pointer because the handler callback needs to hold
+    // a weak reference so that we can avoid racy conditions when the controller is being destroyed.
+    mLocked.spriteController->setHandlerController(mLocked.spriteController);
 }
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
@@ -1067,13 +1104,9 @@ void NativeInputManager::setSystemUiLightsOut(bool lightsOut) {
 }
 
 void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
-    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
-    if (controller == nullptr) {
-        return;
-    }
-
-    controller->setInactivityTimeout(mLocked.systemUiLightsOut ? InactivityTimeout::SHORT
-                                                               : InactivityTimeout::NORMAL);
+    forEachPointerControllerLocked([lightsOut = mLocked.systemUiLightsOut](PointerController& pc) {
+        pc.setInactivityTimeout(lightsOut ? InactivityTimeout::SHORT : InactivityTimeout::NORMAL);
+    });
 }
 
 void NativeInputManager::setPointerDisplayId(int32_t displayId) {
@@ -1243,7 +1276,7 @@ void NativeInputManager::reloadCalibration() {
 
 void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
     std::scoped_lock _l(mLock);
-    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
+    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
     if (controller != nullptr) {
         controller->updatePointerIcon(iconId);
     }
@@ -1251,15 +1284,12 @@ void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
 
 void NativeInputManager::reloadPointerIcons() {
     std::scoped_lock _l(mLock);
-    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
-    if (controller != nullptr) {
-        controller->reloadPointerResources();
-    }
+    forEachPointerControllerLocked([](PointerController& pc) { pc.reloadPointerResources(); });
 }
 
 void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
     std::scoped_lock _l(mLock);
-    std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
+    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
     if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
     }
@@ -1652,7 +1682,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
 
 FloatPoint NativeInputManager::getMouseCursorPosition() {
     std::scoped_lock _l(mLock);
-    const auto pc = mLocked.pointerController.lock();
+    const auto pc = mLocked.legacyPointerController.lock();
     if (!pc) return {AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION};
 
     return pc->getPosition();

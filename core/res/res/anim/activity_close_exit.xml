@@ -32,7 +32,7 @@
 
     <translate
         android:fromXDelta="0"
-        android:toXDelta="10%"
+        android:toXDelta="96dp"
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
@@ -41,11 +41,11 @@
         android:duration="450" />
 
     <extend
-        android:fromExtendLeft="10%"
+        android:fromExtendLeft="96dp"
         android:fromExtendTop="0"
         android:fromExtendRight="0"
         android:fromExtendBottom="0"
-        android:toExtendLeft="10%"
+        android:toExtendLeft="96dp"
         android:toExtendTop="0"
         android:toExtendRight="0"
         android:toExtendBottom="0"

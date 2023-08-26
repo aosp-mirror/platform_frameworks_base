@@ -670,14 +670,14 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Algo deu errado. Tente de novo."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ícone de impressão digital"</string>
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Desbloqueio do dispositivo"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Tente desbloquear de outra maneira"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Use o Desbloqueio facial quando sua impressão digital não for reconhecida, como quando seus dedos estiverem molhados"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Use o Desbloqueio por impressão digital quando seu rosto não for reconhecido, como quando não houver luz suficiente"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problema com o Desbloqueio facial"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Toque para excluir seu modelo de rosto e crie um novo"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurar o Desbloqueio facial"</string>
-    <string name="face_setup_notification_content" msgid="5463999831057751676">"Desbloqueie o smartphone olhando para ele"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Para usar o Desbloqueio facial, ative o "<b>"acesso à câmera"</b>" em Configurações &gt; Privacidade"</string>
-    <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configure mais formas de desbloquear a tela"</string>
-    <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Toque para adicionar uma impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Desbloqueio por impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Não foi possível usar o sensor de impressão digital"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Entre em contato com uma assistência técnica."</string>
@@ -782,7 +782,7 @@
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"detectar observações nas condições da rede"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Permite que o app detecte observações nas condições da rede. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"alterar calibragem do dispositivo de entrada"</string>
-    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Permite que o app modifique os parâmetros de calibragem da tela sensível ao toque. Não deve ser necessário para apps normais."</string>
+    <string name="permdesc_setInputCalibration" msgid="2937872391426631726">"Permite que o app modifique os parâmetros de calibragem da tela touch. Não deve ser necessário para apps normais."</string>
     <string name="permlab_accessDrmCertificates" msgid="6473765454472436597">"acessar certificados de DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="6983139753493781941">"Permite que o app provisione e use certificados de DRM. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_handoverStatus" msgid="7620438488137057281">"receber status de transferência do Android Beam"</string>
@@ -1595,7 +1595,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"Você ultrapassou <xliff:g id="SIZE">%s</xliff:g> do limite definido"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"Dados de segundo plano restritos"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Toque para remover a restrição."</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Alto uso de dados móveis"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"Uso elevado de dados móveis"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Seus apps usaram mais dados do que o normal"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"O app <xliff:g id="APP">%s</xliff:g> usou mais dados do que o normal"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Certificado de segurança"</string>
@@ -2032,7 +2032,8 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Atualizar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Atualizar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Atualizar estes itens em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
+    <skip />
     <string name="autofill_save_yes" msgid="8035743017382012850">"Salvar"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Agora não"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Agora não"</string>

@@ -280,6 +280,11 @@ final class InstantAppResolverConnection implements DeathRecipient {
             } catch (NoSuchElementException ignore) { }
         }
         mRemoteInstance = null;
+
+        try {
+            mContext.unbindService(mServiceConnection);
+        } catch (Exception ignored) {
+        }
     }
 
     /**

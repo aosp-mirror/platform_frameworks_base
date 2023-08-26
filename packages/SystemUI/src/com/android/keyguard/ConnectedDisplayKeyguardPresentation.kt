@@ -66,7 +66,7 @@ constructor(
         window.isNavigationBarContrastEnforced = false
         window.navigationBarColor = Color.TRANSPARENT
 
-        clock = findViewById(R.id.clock)
+        clock = requireViewById(R.id.clock)
         keyguardStatusViewController =
             keyguardStatusViewComponentFactory.build(clock).keyguardStatusViewController.apply {
                 setDisplayedOnSecondaryDisplay()

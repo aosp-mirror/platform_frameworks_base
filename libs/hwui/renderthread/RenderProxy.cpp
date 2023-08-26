@@ -323,9 +323,11 @@ void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool reset
             }
         });
     }
-    std::string grallocInfo;
-    GraphicBufferAllocator::getInstance().dump(grallocInfo);
-    dprintf(fd, "%s\n", grallocInfo.c_str());
+    if (!Properties::isolatedProcess) {
+        std::string grallocInfo;
+        GraphicBufferAllocator::getInstance().dump(grallocInfo);
+        dprintf(fd, "%s\n", grallocInfo.c_str());
+    }
 }
 
 void RenderProxy::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {

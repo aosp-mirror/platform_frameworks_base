@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar.phone
 
-import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.content.res.Configuration
 import android.graphics.Point
@@ -34,6 +33,7 @@ import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UNFOLD_STATUS_BAR
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
@@ -53,6 +53,7 @@ class PhoneStatusBarViewController private constructor(
     view: PhoneStatusBarView,
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val centralSurfaces: CentralSurfaces,
+    private val statusBarWindowStateController: StatusBarWindowStateController,
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
     private val windowRootView: Provider<WindowRootView>,
@@ -148,7 +149,7 @@ class PhoneStatusBarViewController private constructor(
 
     /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
     fun onTouch(event: MotionEvent) {
-        if (centralSurfaces.statusBarWindowState == WINDOW_STATE_SHOWING) {
+        if (statusBarWindowStateController.windowIsShowing()) {
             val upOrCancel =
                 event.action == MotionEvent.ACTION_UP ||
                     event.action == MotionEvent.ACTION_CANCEL
@@ -242,6 +243,7 @@ class PhoneStatusBarViewController private constructor(
         private val featureFlags: FeatureFlags,
         private val userChipViewModel: StatusBarUserChipViewModel,
         private val centralSurfaces: CentralSurfaces,
+        private val statusBarWindowStateController: StatusBarWindowStateController,
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
         private val windowRootView: Provider<WindowRootView>,
@@ -264,6 +266,7 @@ class PhoneStatusBarViewController private constructor(
                 view,
                 progressProvider.getOrNull(),
                 centralSurfaces,
+                statusBarWindowStateController,
                 shadeController,
                 shadeViewController,
                 windowRootView,

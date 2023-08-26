@@ -19,6 +19,8 @@ package com.android.server.vibrator;
 import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.os.vibrator.persistence.ParsedVibration;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -105,10 +107,10 @@ final class HapticFeedbackCustomization {
      * @hide
      */
     @Nullable
-    static SparseArray<VibrationEffect> loadVibrations(Resources res)
+    static SparseArray<VibrationEffect> loadVibrations(Resources res, Vibrator vibrator)
             throws CustomizationParserException, IOException {
         try {
-            return loadVibrationsInternal(res);
+            return loadVibrationsInternal(res, vibrator);
         } catch (VibrationXmlParser.VibrationXmlParserException
                 | XmlParserException
                 | XmlPullParserException e) {
@@ -118,12 +120,13 @@ final class HapticFeedbackCustomization {
     }
 
     @Nullable
-    private static SparseArray<VibrationEffect> loadVibrationsInternal(Resources res) throws
-            CustomizationParserException,
-            IOException,
-            VibrationXmlParser.VibrationXmlParserException,
-            XmlParserException,
-            XmlPullParserException {
+    private static SparseArray<VibrationEffect> loadVibrationsInternal(
+            Resources res, Vibrator vibrator) throws
+                    CustomizationParserException,
+                    IOException,
+                    VibrationXmlParser.VibrationXmlParserException,
+                    XmlParserException,
+                    XmlPullParserException {
         String customizationFile =
                 res.getString(
                         com.android.internal.R.string.config_hapticFeedbackCustomizationFile);
@@ -164,16 +167,23 @@ final class HapticFeedbackCustomization {
             // Move the parser one step into the `<constant>` tag.
             XmlValidator.checkParserCondition(
                     XmlReader.readNextTagWithin(parser, customizationDepth),
-                    "Unsupported empty customization tag");
+                    "Unsupported empty customization tag for effect " + effectId);
 
-            VibrationEffect effect = VibrationXmlParser.parseTag(
+            ParsedVibration parsedVibration = VibrationXmlParser.parseElement(
                     parser, VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS);
-            if (effect.getDuration() == Long.MAX_VALUE) {
-                throw new CustomizationParserException(String.format(
-                        "Vibration for effect ID %d is repeating, which is not allowed as a"
-                        + " haptic feedback: %s", effectId, effect));
+            if (parsedVibration == null) {
+                throw new CustomizationParserException(
+                        "Unable to parse vibration element for effect " + effectId);
             }
-            mapping.put(effectId, effect);
+            VibrationEffect effect = parsedVibration.resolve(vibrator);
+            if (effect != null) {
+                if (effect.getDuration() == Long.MAX_VALUE) {
+                    throw new CustomizationParserException(String.format(
+                            "Vibration for effect ID %d is repeating, which is not allowed as a"
+                            + " haptic feedback: %s", effectId, effect));
+                }
+                mapping.put(effectId, effect);
+            }
 
             XmlReader.readEndTag(parser, TAG_CONSTANT, customizationDepth);
         }

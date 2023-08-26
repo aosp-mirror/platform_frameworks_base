@@ -24,7 +24,6 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
-import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils.logMagnificationTripleTap;
 import static com.android.server.accessibility.gestures.GestureUtils.distance;
 import static com.android.server.accessibility.gestures.GestureUtils.distanceClosestPointerToPoint;
 
@@ -65,6 +64,7 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.ViewConfiguration;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -143,6 +143,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     private final ScreenStateReceiver mScreenStateReceiver;
     private final WindowMagnificationPromptController mPromptController;
+    @NonNull private final MagnificationLogger mMagnificationLogger;
 
     @VisibleForTesting State mCurrentState;
     @VisibleForTesting State mPreviousState;
@@ -164,6 +165,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     public @interface OverscrollState {}
 
     @VisibleForTesting boolean mIsSinglePanningEnabled;
+
+    /**
+     * FullScreenMagnificationGestureHandler Constructor.
+     */
     public FullScreenMagnificationGestureHandler(@UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
             AccessibilityTraceManager trace,
@@ -173,6 +178,23 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             @NonNull WindowMagnificationPromptController promptController,
             int displayId,
             FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper) {
+        this(context, fullScreenMagnificationController, trace, callback, detectTripleTap,
+                detectShortcutTrigger, promptController, displayId,
+                fullScreenMagnificationVibrationHelper, /* magnificationLogger= */ null);
+    }
+
+    /** Constructor for tests. */
+    @VisibleForTesting
+    FullScreenMagnificationGestureHandler(@UiContext Context context,
+            FullScreenMagnificationController fullScreenMagnificationController,
+            AccessibilityTraceManager trace,
+            Callback callback,
+            boolean detectTripleTap,
+            boolean detectShortcutTrigger,
+            @NonNull WindowMagnificationPromptController promptController,
+            int displayId,
+            FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper,
+            MagnificationLogger magnificationLogger) {
         super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Log.i(mLogTag,
@@ -215,6 +237,17 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mMagnificationInfoChangedCallback);
 
         mPromptController = promptController;
+
+        if (magnificationLogger != null) {
+            mMagnificationLogger = magnificationLogger;
+        } else {
+            mMagnificationLogger = new MagnificationLogger() {
+                @Override
+                public void logMagnificationTripleTap(boolean enabled) {
+                    AccessibilityStatsLogUtils.logMagnificationTripleTap(enabled);
+                }
+            };
+        }
 
         mDelegatingState = new DelegatingState();
         mDetectingState = new DetectingState(context);
@@ -363,6 +396,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             mPanningScalingState.prepareForState();
         }
         mCurrentState = state;
+    }
+
+    /** An interface that allows testing magnification log events. */
+    interface MagnificationLogger {
+        void logMagnificationTripleTap(boolean enabled);
     }
 
     interface State {
@@ -930,10 +968,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     && isMultiTap(mPreLastDown, mLastDown)
                     && isMultiTap(mPreLastUp, mLastUp);
 
-            // Only log the triple tap event, use numTaps to filter.
+            // Only log the triple tap event, use numTaps to filter
             if (multitapTriggered && numTaps > 2) {
-                final boolean enabled = isActivated();
-                logMagnificationTripleTap(enabled);
+                final boolean enabled = !isActivated();
+                mMagnificationLogger.logMagnificationTripleTap(enabled);
             }
             return multitapTriggered;
         }
@@ -1094,16 +1132,17 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
             if (DEBUG_DETECTING) Slog.i(mLogTag, "onTripleTapAndHold()");
             final boolean shortcutTriggered = mShortcutTriggered;
+
+            // Only log the 3tap and hold event
+            if (!shortcutTriggered) {
+                // Triple tap and hold also belongs to triple tap event
+                final boolean enabled = !isActivated();
+                mMagnificationLogger.logMagnificationTripleTap(enabled);
+            }
             clear();
 
-            // Triple tap and hold also belongs to triple tap event.
-            final boolean enabled = !isActivated();
-            logMagnificationTripleTap(enabled);
-
             mViewportDraggingState.prepareForZoomInTemporary(shortcutTriggered);
-
             zoomInTemporary(down.getX(), down.getY(), shortcutTriggered);
-
             transitionTo(mViewportDraggingState);
         }
 

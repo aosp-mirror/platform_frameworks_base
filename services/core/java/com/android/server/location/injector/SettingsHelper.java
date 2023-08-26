@@ -93,37 +93,37 @@ public abstract class SettingsHelper {
             GlobalSettingChangedListener listener);
 
     /**
-     * Check if the given package is blacklisted for location access.
+     * Check if the given package is denylisted for location access.
      */
     public abstract boolean isLocationPackageBlacklisted(int userId, String packageName);
 
     /**
-     * Add a listener for changes to the location package blacklist. Callbacks occur on an
+     * Add a listener for changes to the location package denylist. Callbacks occur on an
      * unspecified thread.
      */
     public abstract void addOnLocationPackageBlacklistChangedListener(
             UserSettingChangedListener listener);
 
     /**
-     * Remove a listener for changes to the location package blacklist.
+     * Remove a listener for changes to the location package denylist.
      */
     public abstract void removeOnLocationPackageBlacklistChangedListener(
             UserSettingChangedListener listener);
 
     /**
-     * Retrieve the background throttle package whitelist.
+     * Retrieve the background throttle package allowlist.
      */
     public abstract Set<String> getBackgroundThrottlePackageWhitelist();
 
     /**
-     * Add a listener for changes to the background throttle package whitelist. Callbacks occur on
+     * Add a listener for changes to the background throttle package allowlist. Callbacks occur on
      * an unspecified thread.
      */
     public abstract void addOnBackgroundThrottlePackageWhitelistChangedListener(
             GlobalSettingChangedListener listener);
 
     /**
-     * Remove a listener for changes to the background throttle package whitelist.
+     * Remove a listener for changes to the background throttle package allowlist.
      */
     public abstract void removeOnBackgroundThrottlePackageWhitelistChangedListener(
             GlobalSettingChangedListener listener);
@@ -134,14 +134,14 @@ public abstract class SettingsHelper {
     public abstract boolean isGnssMeasurementsFullTrackingEnabled();
 
     /**
-     * Add a listener for changes to the background throttle package whitelist. Callbacks occur on
+     * Add a listener for changes to the background throttle package allowlist. Callbacks occur on
      * an unspecified thread.
      */
     public abstract void addOnGnssMeasurementsFullTrackingEnabledChangedListener(
             GlobalSettingChangedListener listener);
 
     /**
-     * Remove a listener for changes to the background throttle package whitelist.
+     * Remove a listener for changes to the background throttle package allowlist.
      */
     public abstract void removeOnGnssMeasurementsFullTrackingEnabledChangedListener(
             GlobalSettingChangedListener listener);
@@ -166,14 +166,14 @@ public abstract class SettingsHelper {
     public abstract PackageTagsList getIgnoreSettingsAllowlist();
 
     /**
-     * Add a listener for changes to the ignore settings package whitelist. Callbacks occur on an
+     * Add a listener for changes to the ignore settings package allowlist. Callbacks occur on an
      * unspecified thread.
      */
     public abstract void addIgnoreSettingsAllowlistChangedListener(
             GlobalSettingChangedListener listener);
 
     /**
-     * Remove a listener for changes to the ignore settings package whitelist.
+     * Remove a listener for changes to the ignore settings package allowlist.
      */
     public abstract void removeIgnoreSettingsAllowlistChangedListener(
             GlobalSettingChangedListener listener);

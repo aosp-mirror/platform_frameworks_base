@@ -30,7 +30,7 @@ import org.junit.runners.model.Statement
  */
 class LockStateTrackingRule : TestRule {
     private val context: Context = getApplicationContext()
-    private val windowManager = WindowManagerGlobal.getWindowManagerService()
+    private val windowManager = checkNotNull(WindowManagerGlobal.getWindowManagerService())
 
     @Volatile lateinit var lockState: LockState
         private set

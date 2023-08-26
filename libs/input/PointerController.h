@@ -47,7 +47,7 @@ class PointerController : public PointerControllerInterface {
 public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-            const sp<SpriteController>& spriteController);
+            SpriteController& spriteController);
 
     ~PointerController() override;
 
@@ -70,7 +70,7 @@ public:
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
-    void onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports);
+    void onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports);
 
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
@@ -83,13 +83,12 @@ protected:
 
     // Constructor used to test WindowInfosListener registration.
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      const sp<SpriteController>& spriteController,
-                      WindowListenerConsumer registerListener,
+                      SpriteController& spriteController, WindowListenerConsumer registerListener,
                       WindowListenerConsumer unregisterListener);
 
 private:
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      const sp<SpriteController>& spriteController);
+                      SpriteController& spriteController);
 
     friend PointerControllerContext::LooperCallback;
     friend PointerControllerContext::MessageHandler;

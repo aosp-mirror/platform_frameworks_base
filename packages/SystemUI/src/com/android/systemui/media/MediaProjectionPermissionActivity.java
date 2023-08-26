@@ -36,6 +36,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.media.projection.IMediaProjection;
+import android.media.projection.MediaProjectionConfig;
 import android.media.projection.MediaProjectionManager;
 import android.media.projection.ReviewGrantedConsentResult;
 import android.os.Bundle;
@@ -54,6 +55,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.screenrecord.MediaProjectionPermissionDialog;
 import com.android.systemui.screenrecord.ScreenShareOption;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -71,6 +73,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
     private final FeatureFlags mFeatureFlags;
     private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
+    private final ActivityStarter mActivityStarter;
 
     private String mPackageName;
     private int mUid;
@@ -86,8 +89,10 @@ public class MediaProjectionPermissionActivity extends Activity
 
     @Inject
     public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
-            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver) {
+            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
+            ActivityStarter activityStarter) {
         mFeatureFlags = featureFlags;
+        mActivityStarter = activityStarter;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
     }
 
@@ -208,11 +213,13 @@ public class MediaProjectionPermissionActivity extends Activity
         // the correct screen width when in split screen.
         Context dialogContext = getApplicationContext();
         if (isPartialScreenSharingEnabled()) {
-            mDialog = new MediaProjectionPermissionDialog(dialogContext, () -> {
-                ScreenShareOption selectedOption =
-                        ((MediaProjectionPermissionDialog) mDialog).getSelectedScreenShareOption();
-                grantMediaProjectionPermission(selectedOption.getMode());
-            }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
+            mDialog = new MediaProjectionPermissionDialog(dialogContext, getMediaProjectionConfig(),
+                    () -> {
+                        MediaProjectionPermissionDialog dialog =
+                                (MediaProjectionPermissionDialog) mDialog;
+                        ScreenShareOption selectedOption = dialog.getSelectedScreenShareOption();
+                        grantMediaProjectionPermission(selectedOption.getMode());
+                    }, () -> finish(RECORD_CANCEL, /* projection= */ null), appName);
         } else {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(dialogContext,
                     R.style.Theme_SystemUI_Dialog)
@@ -306,8 +313,16 @@ public class MediaProjectionPermissionActivity extends Activity
                 // Start activity from the current foreground user to avoid creating a separate
                 // SystemUI process without access to recent tasks because it won't have
                 // WM Shell running inside.
+                // It is also important to make sure the shade is dismissed, otherwise users won't
+                // see the app selector.
                 mUserSelectingTask = true;
-                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                mActivityStarter.startActivity(
+                        intent,
+                        /* dismissShade= */ true,
+                        /* animationController= */ null,
+                        /* showOverLockscreenWhenLocked= */ false,
+                        UserHandle.of(ActivityManager.getCurrentUser())
+                );
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
@@ -346,6 +361,16 @@ public class MediaProjectionPermissionActivity extends Activity
         if (!isFinishing()) {
             finish();
         }
+    }
+
+    @Nullable
+    private MediaProjectionConfig getMediaProjectionConfig() {
+        Intent intent = getIntent();
+        if (intent == null) {
+            return null;
+        }
+        return intent.getParcelableExtra(
+                MediaProjectionManager.EXTRA_MEDIA_PROJECTION_CONFIG);
     }
 
     private boolean isPartialScreenSharingEnabled() {

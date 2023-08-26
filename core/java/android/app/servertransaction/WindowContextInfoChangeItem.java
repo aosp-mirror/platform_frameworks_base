@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -43,6 +44,13 @@ public class WindowContextInfoChangeItem extends ClientTransactionItem {
     public void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleWindowContextInfoChanged(mClientToken, mInfo);
+    }
+
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
+            @Nullable IBinder token) {
+        return client.getWindowContext(mClientToken);
     }
 
     // ObjectPoolItem implementation

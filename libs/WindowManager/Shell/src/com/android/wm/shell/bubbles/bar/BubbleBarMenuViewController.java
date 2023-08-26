@@ -56,6 +56,11 @@ class BubbleBarMenuViewController {
                 SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
     }
 
+    /** Tells if the menu is visible or being animated */
+    boolean isMenuVisible() {
+        return mMenuView != null && mMenuView.getVisibility() == View.VISIBLE;
+    }
+
     /** Sets menu actions listener */
     void setListener(@Nullable Listener listener) {
         mListener = listener;

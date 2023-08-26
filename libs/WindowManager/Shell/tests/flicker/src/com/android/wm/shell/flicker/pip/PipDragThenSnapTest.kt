@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import android.graphics.Rect
-import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -82,8 +81,8 @@ class PipDragThenSnapTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     /**
      * Checks that the visible region area of [pipApp] moves to closest edge during the animation.
      */
-    @Presubmit
     @Test
+    @FlakyTest(bugId = 294993100)
     fun pipLayerMovesToClosestEdge() {
         flicker.assertLayers {
             val pipLayerList = layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
@@ -95,6 +94,90 @@ class PipDragThenSnapTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
                 }
             }
         }
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun entireScreenCovered() {
+        super.entireScreenCovered()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun hasAtMostOnePipDismissOverlayWindow() {
+        super.hasAtMostOnePipDismissOverlayWindow()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun navBarLayerIsVisibleAtStartAndEnd() {
+        super.navBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun navBarLayerPositionAtStartAndEnd() {
+        super.navBarLayerPositionAtStartAndEnd()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun navBarWindowIsAlwaysVisible() {
+        super.navBarWindowIsAlwaysVisible()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun statusBarLayerIsVisibleAtStartAndEnd() {
+        super.statusBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun statusBarLayerPositionAtStartAndEnd() {
+        super.statusBarLayerPositionAtStartAndEnd()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun statusBarWindowIsAlwaysVisible() {
+        super.statusBarWindowIsAlwaysVisible()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun taskBarLayerIsVisibleAtStartAndEnd() {
+        super.taskBarLayerIsVisibleAtStartAndEnd()
+    }
+
+    // Overridden to remove @Presubmit annotation
+    @Test
+    @FlakyTest(bugId = 294993100)
+    override fun taskBarWindowIsAlwaysVisible() {
+        super.taskBarWindowIsAlwaysVisible()
     }
 
     companion object {

@@ -621,13 +621,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         mFinishingActivities.remove(r);
 
         stopWaitingForActivityVisible(r);
-
-        final Task task = r.getTask();
-        if (task != null && task.mKillProcessesOnDestroyed && task.getTopMostActivity() == r) {
-            // The activity is destroyed or its process is died, so cancel the pending kill.
-            task.mKillProcessesOnDestroyed = false;
-            removeTimeoutOfKillProcessesOnDestroyed(task);
-        }
     }
 
     /** There is no valid launch time, just stop waiting. */
@@ -1910,13 +1903,27 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         killTaskProcessesIfPossible(task);
     }
 
-    private void removeTimeoutOfKillProcessesOnDestroyed(Task task) {
-        mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
+    void removeTimeoutOfKillProcessesOnProcessDied(@NonNull ActivityRecord r, @NonNull Task task) {
+        if (r.packageName.equals(task.getBasePackageName())) {
+            task.mKillProcessesOnDestroyed = false;
+            mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
+        }
     }
 
     void killTaskProcessesOnDestroyedIfNeeded(Task task) {
         if (task == null || !task.mKillProcessesOnDestroyed) return;
-        removeTimeoutOfKillProcessesOnDestroyed(task);
+        final int[] numDestroyingActivities = new int[1];
+        task.forAllActivities(r ->  {
+            if (r.finishing && r.lastVisibleTime > 0 && r.attachedToProcess()) {
+                numDestroyingActivities[0]++;
+            }
+        });
+        if (numDestroyingActivities[0] > 1) {
+            // Skip if there are still destroying activities. When the last activity reports
+            // destroyed, the number will be 1 to proceed the kill.
+            return;
+        }
+        mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
         killTaskProcessesIfPossible(task);
     }
 

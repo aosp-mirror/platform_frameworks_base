@@ -2277,7 +2277,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
         Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
-        forAllTasks(rootTask -> {
+        forAllRootTasks(rootTask -> {
             final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
             if (rootTask == focusedRootTask || finishedTask[0] == null) {
                 finishedTask[0] = t;
@@ -2405,6 +2405,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Prepare transition before resume top activity, so it can be collected.
             if (!displayShouldSleep && display.mTransitionController.isShellTransitionsEnabled()
                     && !display.mTransitionController.isCollecting()) {
+                // Use NONE if keyguard is not showing.
                 int transit = TRANSIT_NONE;
                 Task startTask = null;
                 if (!display.getDisplayPolicy().isAwake()) {
@@ -2416,11 +2417,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     transit = WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
                     startTask = display.getTaskOccludingKeyguard();
                 }
-                if (transit != TRANSIT_NONE) {
-                    display.mTransitionController.requestStartTransition(
-                            display.mTransitionController.createTransition(transit),
-                            startTask, null /* remoteTransition */, null /* displayChange */);
-                }
+                display.mTransitionController.requestStartTransition(
+                        display.mTransitionController.createTransition(transit),
+                        startTask, null /* remoteTransition */, null /* displayChange */);
             }
             // Set the sleeping state of the root tasks on the display.
             display.forAllRootTasks(rootTask -> {

@@ -38,12 +38,12 @@ public class FlagCommand implements Command {
     private final List<String> mOnCommands = List.of("true", "on", "1", "enabled");
     private final List<String> mOffCommands = List.of("false", "off", "0", "disable");
     private final List<String> mSetCommands = List.of("set", "put");
-    private final FeatureFlagsDebug mFeatureFlags;
+    private final FeatureFlagsClassicDebug mFeatureFlags;
     private final Map<String, Flag<?>> mAllFlags;
 
     @Inject
     FlagCommand(
-            FeatureFlagsDebug featureFlags,
+            FeatureFlagsClassicDebug featureFlags,
             @Named(ALL_FLAGS) Map<String, Flag<?>> allFlags
     ) {
         mFeatureFlags = featureFlags;

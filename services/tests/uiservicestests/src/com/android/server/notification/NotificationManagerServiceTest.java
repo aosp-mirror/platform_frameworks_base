@@ -6044,6 +6044,51 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testVisitUris_styleExtrasWithoutStyle() {
+        Notification.Builder notification = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+
+        Bundle messagingExtras = new Bundle();
+        messagingExtras.putParcelable(Notification.EXTRA_MESSAGING_PERSON,
+                personWithIcon("content://user"));
+        messagingExtras.putParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Heyhey!",
+                        System.currentTimeMillis() - 100,
+                        personWithIcon("content://historicalMessenger")).toBundle()});
+        messagingExtras.putParcelableArray(Notification.EXTRA_MESSAGES,
+                new Bundle[] { new Notification.MessagingStyle.Message("Are you there?",
+                        System.currentTimeMillis(),
+                        personWithIcon("content://messenger")).toBundle()});
+        messagingExtras.putParcelable(Notification.EXTRA_CONVERSATION_ICON,
+                Icon.createWithContentUri("content://conversationShortcut"));
+        notification.addExtras(messagingExtras);
+
+        Bundle callExtras = new Bundle();
+        callExtras.putParcelable(Notification.EXTRA_CALL_PERSON,
+                personWithIcon("content://caller"));
+        callExtras.putParcelable(Notification.EXTRA_VERIFICATION_ICON,
+                Icon.createWithContentUri("content://callVerification"));
+        notification.addExtras(callExtras);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        notification.build().visitUris(visitor);
+
+        verify(visitor).accept(eq(Uri.parse("content://user")));
+        verify(visitor).accept(eq(Uri.parse("content://historicalMessenger")));
+        verify(visitor).accept(eq(Uri.parse("content://messenger")));
+        verify(visitor).accept(eq(Uri.parse("content://conversationShortcut")));
+        verify(visitor).accept(eq(Uri.parse("content://caller")));
+        verify(visitor).accept(eq(Uri.parse("content://callVerification")));
+    }
+
+    private static Person personWithIcon(String iconUri) {
+        return new Person.Builder()
+                .setName("Mr " + iconUri)
+                .setIcon(Icon.createWithContentUri(iconUri))
+                .build();
+    }
+
+    @Test
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");

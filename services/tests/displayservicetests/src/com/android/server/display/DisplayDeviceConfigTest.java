@@ -112,8 +112,6 @@ public final class DisplayDeviceConfigTest {
         assertArrayEquals(mDisplayDeviceConfig.getBrightness(), BRIGHTNESS, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getNits(), NITS, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getBacklight(), BRIGHTNESS, ZERO_DELTA);
-        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
-        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
                 float[]{0.0f, 50.0f, 80.0f}, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
@@ -413,6 +411,17 @@ public final class DisplayDeviceConfigTest {
 
         assertArrayEquals(new int[]{ -1, 10, 20, 30, 40 },
                 mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
+
+        // Low/High zone thermal maps
+        assertEquals(new SurfaceControl.RefreshRateRange(30, 40),
+                mDisplayDeviceConfig.getLowBlockingZoneThermalMap()
+                .get(Temperature.THROTTLING_CRITICAL));
+        assertEquals(new SurfaceControl.RefreshRateRange(40, 60),
+                mDisplayDeviceConfig.getHighBlockingZoneThermalMap()
+                .get(Temperature.THROTTLING_EMERGENCY));
+
+        // Todo: Add asserts for DensityMapping,
+        // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 
     @Test
@@ -540,6 +549,16 @@ public final class DisplayDeviceConfigTest {
         assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);
     }
 
+    @Test
+    public void testLightDebounceFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounceIdle(), 2500);
+        assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounceIdle(), 1500);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -632,6 +651,24 @@ public final class DisplayDeviceConfigTest {
                + "        </refreshRateRange>\n"
                + "    </refreshRateThrottlingPoint>\n"
                + "</refreshRateThrottlingMap>\n"
+               + "<refreshRateThrottlingMap id=\"thermalLow\">\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>critical</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>30</minimum>\n"
+               + "            <maximum>40</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n"
+               + "<refreshRateThrottlingMap id=\"thermalHigh\">\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>emergency</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>40</minimum>\n"
+               + "            <maximum>60</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n"
                + "<refreshRateThrottlingMap id=\"test\">\n"
                + "    <refreshRateThrottlingPoint>\n"
                + "        <thermalStatus>emergency</thermalStatus>\n"
@@ -704,6 +741,12 @@ public final class DisplayDeviceConfigTest {
                 +   "<autoBrightness>\n"
                 +       "<brighteningLightDebounceMillis>2000</brighteningLightDebounceMillis>\n"
                 +       "<darkeningLightDebounceMillis>1000</darkeningLightDebounceMillis>\n"
+                +       "<brighteningLightDebounceIdleMillis>"
+                +           "2500"
+                +       "</brighteningLightDebounceIdleMillis>\n"
+                +       "<darkeningLightDebounceIdleMillis>"
+                +           "1500"
+                +       "</darkeningLightDebounceIdleMillis>\n"
                 +       "<displayBrightnessMapping>\n"
                 +            "<displayBrightnessPoint>\n"
                 +                "<lux>50</lux>\n"
@@ -969,6 +1012,8 @@ public final class DisplayDeviceConfigTest {
                 +       "<defaultRefreshRateInHbmSunlight>83</defaultRefreshRateInHbmSunlight>\n"
                 +       "<lowerBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
+                +           "<refreshRateThermalThrottlingId>thermalLow"
+                +           "</refreshRateThermalThrottlingId>\n"
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>50</lux>\n"
@@ -990,6 +1035,8 @@ public final class DisplayDeviceConfigTest {
                 +       "</lowerBlockingZoneConfigs>\n"
                 +       "<higherBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>90</defaultRefreshRate>\n"
+                +           "<refreshRateThermalThrottlingId>thermalHigh"
+                +           "</refreshRateThermalThrottlingId>\n"
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>70</lux>\n"

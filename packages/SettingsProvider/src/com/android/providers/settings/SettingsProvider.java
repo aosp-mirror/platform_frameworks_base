@@ -58,6 +58,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -76,6 +77,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.media.AudioManager;
+import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -110,6 +112,7 @@ import android.provider.settings.validators.Validator;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -129,7 +132,10 @@ import libcore.util.HexEncoding;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
@@ -251,7 +257,7 @@ public class SettingsProvider extends ContentProvider {
     public static final int WRITE_FALLBACK_SETTINGS_FILES_JOB_ID = 1;
     public static final long ONE_DAY_INTERVAL_MILLIS = 24 * 60 * 60 * 1000L;
 
-    // Overlay specified settings whitelisted for Instant Apps
+    // Overlay specified settings allowlisted for Instant Apps
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
@@ -849,29 +855,68 @@ public class SettingsProvider extends ContentProvider {
         uri = ContentProvider.getUriWithoutUserId(uri);
 
         final String cacheRingtoneSetting;
-        final String cacheName;
         if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
             cacheRingtoneSetting = Settings.System.RINGTONE;
-            cacheName = Settings.System.RINGTONE_CACHE;
         } else if (Settings.System.NOTIFICATION_SOUND_CACHE_URI.equals(uri)) {
             cacheRingtoneSetting = Settings.System.NOTIFICATION_SOUND;
-            cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
         } else if (Settings.System.ALARM_ALERT_CACHE_URI.equals(uri)) {
             cacheRingtoneSetting = Settings.System.ALARM_ALERT;
-            cacheName = Settings.System.ALARM_ALERT_CACHE;
         } else {
             throw new FileNotFoundException("Direct file access no longer supported; "
                     + "ringtone playback is available through android.media.Ringtone");
         }
 
+        final File cacheFile = getCacheFile(cacheRingtoneSetting, userId);
+        return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
+    }
+
+    @Nullable
+    private String getCacheName(String setting) {
+        if (Settings.System.RINGTONE.equals(setting)) {
+            return Settings.System.RINGTONE_CACHE;
+        } else if (Settings.System.NOTIFICATION_SOUND.equals(setting)) {
+            return Settings.System.NOTIFICATION_SOUND_CACHE;
+        } else if (Settings.System.ALARM_ALERT.equals(setting)) {
+            return Settings.System.ALARM_ALERT_CACHE;
+        }
+        return null;
+    }
+
+    @Nullable
+    private File getCacheFile(String setting, int userId) {
         int actualCacheOwner;
         // Redirect cache to parent if ringtone setting is owned by profile parent
         synchronized (mLock) {
-            actualCacheOwner = resolveOwningUserIdForSystemSettingLocked(userId,
-                    cacheRingtoneSetting);
+            actualCacheOwner = resolveOwningUserIdForSystemSettingLocked(userId, setting);
+        }
+        final String cacheName = getCacheName(setting);
+        if (cacheName == null) {
+            return null;
         }
         final File cacheFile = new File(getRingtoneCacheDir(actualCacheOwner), cacheName);
-        return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
+        return cacheFile;
+    }
+
+
+    /**
+     * Try opening the given ringtone locally first, but failover to
+     * {@link IRingtonePlayer} if we can't access it directly. Typically, happens
+     * when process doesn't hold {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
+     */
+    private static InputStream openRingtone(Context context, Uri uri) throws IOException {
+        final ContentResolver resolver = context.getContentResolver();
+        try {
+            return resolver.openInputStream(uri);
+        } catch (SecurityException | IOException e) {
+            Log.w(LOG_TAG, "Failed to open directly; attempting failover: " + e);
+            final IRingtonePlayer player = context.getSystemService(AudioManager.class)
+                    .getRingtonePlayer();
+            try {
+                return new ParcelFileDescriptor.AutoCloseInputStream(player.openRingtone(uri));
+            } catch (Exception e2) {
+                throw new IOException(e2);
+            }
+        }
     }
 
     private File getRingtoneCacheDir(int userId) {
@@ -1157,8 +1202,6 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getConfigSetting(" + name + ")");
         }
 
-        Settings.Config.enforceReadPermission(/*namespace=*/name.split("/")[0]);
-
         // Get the value.
         synchronized (mLock) {
             return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_CONFIG,
@@ -1337,9 +1380,6 @@ public class SettingsProvider extends ContentProvider {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
         }
-
-        Settings.Config.enforceReadPermission(
-                prefix != null ? prefix.split("/")[0] : null);
 
         synchronized (mLock) {
             // Get the settings.
@@ -1958,52 +1998,98 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
-        // Invalidate any relevant cache files
-        String cacheName = null;
-        if (Settings.System.RINGTONE.equals(name)) {
-            cacheName = Settings.System.RINGTONE_CACHE;
-        } else if (Settings.System.NOTIFICATION_SOUND.equals(name)) {
-            cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
-        } else if (Settings.System.ALARM_ALERT.equals(name)) {
-            cacheName = Settings.System.ALARM_ALERT_CACHE;
-        }
-        if (cacheName != null) {
-            final File cacheFile = new File(
-                    getRingtoneCacheDir(owningUserId), cacheName);
+        File cacheFile = getCacheFile(name, callingUserId);
+        if (cacheFile != null) {
+            if (!isValidAudioUri(name, value)) {
+                return false;
+            }
+            // Invalidate any relevant cache files
             cacheFile.delete();
         }
 
+        final boolean success;
         // Mutate the value.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     validateSystemSettingValue(name, value);
-                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    success = mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, value, null, false, callingPackage,
                             false, null, overrideableByRestore);
+                    break;
                 }
 
                 case MUTATION_OPERATION_DELETE: {
-                    return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    success = mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, false, null);
+                    break;
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     validateSystemSettingValue(name, value);
-                    return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    success = mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, value, null, false, callingPackage,
                             false, null);
+                    break;
                 }
 
                 case MUTATION_OPERATION_RESET: {
-                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SYSTEM,
+                    success = mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SYSTEM,
                             runAsUserId, callingPackage, mode, tag);
-                    return true;
+                    break;
                 }
+
+                default:
+                    success = false;
+                    Slog.e(LOG_TAG, "Unknown operation code: " + operation);
             }
-            Slog.e(LOG_TAG, "Unknown operation code: " + operation);
+        }
+
+        if (!success) {
             return false;
         }
+
+        if ((operation == MUTATION_OPERATION_INSERT || operation == MUTATION_OPERATION_UPDATE)
+                && cacheFile != null && value != null) {
+            final Uri ringtoneUri = Uri.parse(value);
+            // Stream selected ringtone into cache, so it's available for playback
+            // when CE storage is still locked
+            try (InputStream in = openRingtone(getContext(), ringtoneUri);
+                 OutputStream out = new FileOutputStream(cacheFile)) {
+                FileUtils.copy(in, out);
+            } catch (IOException e) {
+                Slog.w(LOG_TAG, "Failed to cache ringtone: " + e);
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidAudioUri(String name, String uri) {
+        if (uri != null) {
+            Uri audioUri = Uri.parse(uri);
+            if (Settings.AUTHORITY.equals(
+                    ContentProvider.getAuthorityWithoutUserId(audioUri.getAuthority()))) {
+                // Don't accept setting the default uri to self-referential URIs like
+                // Settings.System.DEFAULT_RINGTONE_URI, which is an alias to the value of this
+                // setting.
+                return false;
+            }
+            final String mimeType = getContext().getContentResolver().getType(audioUri);
+            if (mimeType == null) {
+                Slog.e(LOG_TAG,
+                        "mutateSystemSetting for setting: " + name + " URI: " + audioUri
+                        + " ignored: failure to find mimeType (no access from this context?)");
+                return false;
+            }
+            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg")
+                    || mimeType.equals("application/x-flac"))) {
+                Slog.e(LOG_TAG,
+                        "mutateSystemSetting for setting: " + name + " URI: " + audioUri
+                        + " ignored: associated mimeType: " + mimeType + " is not an audio type");
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasWriteSecureSettingsPermission() {
@@ -2155,7 +2241,7 @@ public class SettingsProvider extends ContentProvider {
 
     @GuardedBy("mLock")
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
-        // Don't enforce the instant app whitelist for now -- its too prone to unintended breakage
+        // Don't enforce the instant app allowlist for now -- its too prone to unintended breakage
         // in the current form.
         return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
     }
@@ -2196,7 +2282,7 @@ public class SettingsProvider extends ContentProvider {
         }
         if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)
                 && !getOverlayInstantAppAccessibleSettings(settingsType).contains(settingName)) {
-            // Don't enforce the instant app whitelist for now -- its too prone to unintended
+            // Don't enforce the instant app allowlist for now -- its too prone to unintended
             // breakage in the current form.
             Slog.w(LOG_TAG, "Instant App " + ai.packageName
                     + " trying to access unexposed setting, this will be an error in the future.");
@@ -3263,20 +3349,21 @@ public class SettingsProvider extends ContentProvider {
             return Global.SECURE_FRP_MODE.equals(setting.getName());
         }
 
-        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
+        public boolean resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag) {
-            resetSettingsLocked(type, userId, packageName, mode, tag, /*prefix=*/
+            return resetSettingsLocked(type, userId, packageName, mode, tag, /*prefix=*/
                     null);
         }
 
-        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
+        public boolean resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag, @Nullable String prefix) {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
-                return;
+                return false;
             }
 
+            boolean success = false;
             banConfigurationIfNecessary(type, prefix, settingsState);
             switch (mode) {
                 case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
@@ -3296,6 +3383,7 @@ public class SettingsProvider extends ContentProvider {
                         }
                         if (someSettingChanged) {
                             settingsState.persistSyncLocked();
+                            success = true;
                         }
                     }
                 } break;
@@ -3317,6 +3405,7 @@ public class SettingsProvider extends ContentProvider {
                         }
                         if (someSettingChanged) {
                             settingsState.persistSyncLocked();
+                            success = true;
                         }
                     }
                 } break;
@@ -3344,6 +3433,7 @@ public class SettingsProvider extends ContentProvider {
                         }
                         if (someSettingChanged) {
                             settingsState.persistSyncLocked();
+                            success = true;
                         }
                     }
                 } break;
@@ -3368,10 +3458,12 @@ public class SettingsProvider extends ContentProvider {
                         }
                         if (someSettingChanged) {
                             settingsState.persistSyncLocked();
+                            success = true;
                         }
                     }
                 } break;
             }
+            return success;
         }
 
         public void removeSettingsForPackageLocked(String packageName, int userId) {

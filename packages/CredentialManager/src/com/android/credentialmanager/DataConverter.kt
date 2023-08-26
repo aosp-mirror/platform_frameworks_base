@@ -68,11 +68,12 @@ fun getAppLabel(
 ): String? {
     return try {
         val pkgInfo = pm.getPackageInfo(appPackageName, PackageManager.PackageInfoFlags.of(0))
-        pkgInfo.applicationInfo.loadSafeLabel(
+        val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
+        applicationInfo.loadSafeLabel(
             pm, 0f,
             TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
         ).toString()
-    } catch (e: PackageManager.NameNotFoundException) {
+    } catch (e: Exception) {
         Log.e(Constants.LOG_TAG, "Caller app not found", e)
         null
     }
@@ -93,13 +94,14 @@ private fun getServiceLabelAndIcon(
                 providerFlattenedComponentName,
                 PackageManager.PackageInfoFlags.of(0)
             )
+            val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
             providerLabel =
-                pkgInfo.applicationInfo.loadSafeLabel(
+                applicationInfo.loadSafeLabel(
                     pm, 0f,
                     TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
                 ).toString()
-            providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
-        } catch (e: PackageManager.NameNotFoundException) {
+            providerIcon = applicationInfo.loadIcon(pm)
+        } catch (e: Exception) {
             Log.e(Constants.LOG_TAG, "Provider package info not found", e)
         }
     } else {
@@ -119,13 +121,14 @@ private fun getServiceLabelAndIcon(
                     component.packageName,
                     PackageManager.PackageInfoFlags.of(0)
                 )
+                val applicationInfo = checkNotNull(pkgInfo.applicationInfo)
                 providerLabel =
-                    pkgInfo.applicationInfo.loadSafeLabel(
+                    applicationInfo.loadSafeLabel(
                         pm, 0f,
                         TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
                     ).toString()
-                providerIcon = pkgInfo.applicationInfo.loadIcon(pm)
-            } catch (e: PackageManager.NameNotFoundException) {
+                providerIcon = applicationInfo.loadIcon(pm)
+            } catch (e: Exception) {
                 Log.e(Constants.LOG_TAG, "Provider package info not found", e)
             }
         }

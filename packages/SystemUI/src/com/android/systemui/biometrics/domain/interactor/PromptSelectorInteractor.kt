@@ -21,15 +21,18 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.getCredentialType
 import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -65,6 +68,9 @@ interface PromptSelectorInteractor {
      */
     val isConfirmationRequired: Flow<Boolean>
 
+    /** Fingerprint sensor type */
+    val sensorType: StateFlow<FingerprintSensorType>
+
     /** Use biometrics for authentication. */
     fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,
@@ -89,6 +95,7 @@ interface PromptSelectorInteractor {
 class PromptSelectorInteractorImpl
 @Inject
 constructor(
+    private val fingerprintPropertyRepository: FingerprintPropertyRepository,
     private val promptRepository: PromptRepository,
     lockPatternUtils: LockPatternUtils,
 ) : PromptSelectorInteractor {
@@ -139,6 +146,9 @@ constructor(
                 PromptKind.Biometric()
             }
         }
+
+    override val sensorType: StateFlow<FingerprintSensorType> =
+        fingerprintPropertyRepository.sensorType
 
     override fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,
