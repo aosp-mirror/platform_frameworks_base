@@ -18,7 +18,6 @@ package com.android.server.sensorprivacy;
 
 import static android.hardware.SensorManager.SENSOR_DELAY_NORMAL;
 
-import android.annotation.ColorInt;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -39,6 +38,7 @@ import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
 
 import java.util.ArrayDeque;
@@ -48,12 +48,10 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-
 class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedListener,
         SensorEventListener {
 
-    @VisibleForTesting
-    static final double LIGHT_VALUE_MULTIPLIER = 1 / Math.log(1.1);
+    private static final double LIGHT_VALUE_MULTIPLIER = 1 / Math.log(1.1);
 
     private final Handler mHandler;
     private final Executor mExecutor;
@@ -69,11 +67,6 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
 
     private LightsManager.LightsSession mLightsSession = null;
 
-    @ColorInt
-    private final int mDayColor;
-    @ColorInt
-    private final int mNightColor;
-
     private final Sensor mLightSensor;
 
     private boolean mIsAmbientLightListenerRegistered = false;
@@ -81,7 +74,9 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
     /** When average of the time integral over the past {@link #mMovingAverageIntervalMillis}
      *  milliseconds of the log_1.1(lux(t)) is greater than this value, use the daytime brightness
      *  else use nighttime brightness. */
-    private final long mNightThreshold;
+    private final long[] mThresholds;
+
+    private final int[] mColors;
     private final ArrayDeque<Pair<Long, Integer>> mAmbientLightValues = new ArrayDeque<>();
     /** Tracks the Riemann sum of {@link #mAmbientLightValues} to avoid O(n) operations when sum is
      *  needed */
@@ -101,6 +96,20 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
 
     @VisibleForTesting
     CameraPrivacyLightController(Context context, Looper looper) {
+        mColors = context.getResources().getIntArray(R.array.config_cameraPrivacyLightColors);
+        if (ArrayUtils.isEmpty(mColors)) {
+            mHandler = null;
+            mExecutor = null;
+            mContext = null;
+            mAppOpsManager = null;
+            mLightsManager = null;
+            mSensorManager = null;
+            mLightSensor = null;
+            mMovingAverageIntervalMillis = 0;
+            mThresholds = null;
+            // Return here before this class starts interacting with other services.
+            return;
+        }
         mContext = context;
 
         mHandler = new Handler(looper);
@@ -109,14 +118,20 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mLightsManager = mContext.getSystemService(LightsManager.class);
         mSensorManager = mContext.getSystemService(SensorManager.class);
-
-        mDayColor = mContext.getColor(R.color.camera_privacy_light_day);
-        mNightColor = mContext.getColor(R.color.camera_privacy_light_night);
         mMovingAverageIntervalMillis = mContext.getResources()
                 .getInteger(R.integer.config_cameraPrivacyLightAlsAveragingIntervalMillis);
-        mNightThreshold = (long) (Math.log(mContext.getResources()
-                .getInteger(R.integer.config_cameraPrivacyLightAlsNightThreshold))
-                * LIGHT_VALUE_MULTIPLIER);
+        int[] thresholdsLux = mContext.getResources().getIntArray(
+                R.array.config_cameraPrivacyLightAlsLuxThresholds);
+        if (thresholdsLux.length != mColors.length - 1) {
+            throw new IllegalStateException("There must be exactly one more color than thresholds."
+                    + " Found " + mColors.length + " colors and " + thresholdsLux.length
+                    + " thresholds.");
+        }
+        mThresholds = new long[thresholdsLux.length];
+        for (int i = 0; i < thresholdsLux.length; i++) {
+            int luxValue = thresholdsLux[i];
+            mThresholds[i] = (long) (Math.log(luxValue) * LIGHT_VALUE_MULTIPLIER);
+        }
 
         List<Light> lights = mLightsManager.getLights();
         for (int i = 0; i < lights.size(); i++) {
@@ -223,13 +238,8 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
             mLightsSession.close();
             mLightsSession = null;
         } else {
-            int lightColor;
-            if (mLightSensor != null && getLiveAmbientLightTotal()
-                    < getCurrentIntervalMillis() * mNightThreshold) {
-                lightColor = mNightColor;
-            } else {
-                lightColor = mDayColor;
-            }
+            int lightColor =
+                    mLightSensor == null ? mColors[mColors.length - 1] : computeCurrentLightColor();
 
             if (mLastLightColor == lightColor && mLightsSession != null) {
                 return;
@@ -250,6 +260,18 @@ class CameraPrivacyLightController implements AppOpsManager.OnOpActiveChangedLis
 
             mLightsSession.requestLights(requestBuilder.build());
         }
+    }
+
+    private int computeCurrentLightColor() {
+        long liveAmbientLightTotal = getLiveAmbientLightTotal();
+        long currentInterval = getCurrentIntervalMillis();
+
+        for (int i = 0; i < mThresholds.length; i++) {
+            if (liveAmbientLightTotal < currentInterval * mThresholds[i]) {
+                return mColors[i];
+            }
+        }
+        return mColors[mColors.length - 1];
     }
 
     private void updateSensorListener(boolean shouldSessionEnd) {
