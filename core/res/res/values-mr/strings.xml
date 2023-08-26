@@ -1592,7 +1592,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"मोबाइल डेटाचा उच्च वापर"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"तुमच्या अ‍ॅप्सनी नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वपरला आहे"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="5975877665505297662">"यावर जारी केले:"</string>
