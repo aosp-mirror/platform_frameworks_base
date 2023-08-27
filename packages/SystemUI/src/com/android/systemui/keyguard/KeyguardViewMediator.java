@@ -3181,7 +3181,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      *                        visible
      */
     public void exitKeyguardAndFinishSurfaceBehindRemoteAnimation(boolean showKeyguard) {
-        Log.d(TAG, "onKeyguardExitRemoteAnimationFinished");
+        Log.d(TAG, "exitKeyguardAndFinishSurfaceBehindRemoteAnimation");
         if (!mSurfaceBehindRemoteAnimationRunning && !mSurfaceBehindRemoteAnimationRequested) {
             Log.d(TAG, "skip onKeyguardExitRemoteAnimationFinished showKeyguard=" + showKeyguard
                     + " surfaceAnimationRunning=" + mSurfaceBehindRemoteAnimationRunning
@@ -3196,6 +3196,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         // Post layout changes to the next frame, so we don't hang at the end of the animation.
         DejankUtils.postAfterTraversal(() -> {
+            if (!mPM.isInteractive()) {
+                Log.e(TAG, "exitKeyguardAndFinishSurfaceBehindRemoteAnimation#postAfterTraversal" +
+                        "Not interactive after traversal. Don't hide the keyguard. This means we " +
+                        "re-locked the device during unlock.");
+                return;
+            }
+
             onKeyguardExitFinished();
 
             if (mKeyguardStateController.isDismissingFromSwipe() || wasShowing) {
