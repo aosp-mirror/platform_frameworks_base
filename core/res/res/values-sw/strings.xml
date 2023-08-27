@@ -298,7 +298,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Mfumo wa Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Tumia wasifu wa binafsi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Tumia wasifu wa kazini"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"Badili uweke wasifu wa binafsi <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Badili utumie wasifu wa binafsi wa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="managed_profile_app_label" msgid="367401088383965725">"Badili uweke wasifu wa kazini <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Anwani"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ifikie anwani zako"</string>
