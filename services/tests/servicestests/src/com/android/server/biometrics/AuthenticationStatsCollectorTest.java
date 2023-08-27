@@ -181,6 +181,7 @@ public class AuthenticationStatsCollectorTest {
                 .getAuthenticationStatsForUser(USER_ID_1);
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
     }
 
@@ -203,6 +204,8 @@ public class AuthenticationStatsCollectorTest {
                 .getAuthenticationStatsForUser(USER_ID_1);
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(500);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(400);
+        assertThat(authenticationStats.getEnrollmentNotifications())
+                .isEqualTo(MAXIMUM_ENROLLMENT_NOTIFICATIONS);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(0.8f);
     }
 
@@ -230,6 +233,7 @@ public class AuthenticationStatsCollectorTest {
                 .getAuthenticationStatsForUser(USER_ID_1);
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
     }
 
@@ -256,6 +260,7 @@ public class AuthenticationStatsCollectorTest {
                 .getAuthenticationStatsForUser(USER_ID_1);
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(0);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
     }
 
@@ -284,6 +289,8 @@ public class AuthenticationStatsCollectorTest {
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
+        // Assert that notification count has been updated.
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(1);
     }
 
     @Test
@@ -311,5 +318,7 @@ public class AuthenticationStatsCollectorTest {
         assertThat(authenticationStats.getTotalAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getRejectedAttempts()).isEqualTo(0);
         assertThat(authenticationStats.getFrr()).isWithin(0f).of(-1.0f);
+        // Assert that notification count has been updated.
+        assertThat(authenticationStats.getEnrollmentNotifications()).isEqualTo(1);
     }
 }
