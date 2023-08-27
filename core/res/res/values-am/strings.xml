@@ -249,7 +249,7 @@
     <string name="global_action_emergency" msgid="1387617624177105088">"ድንገተኛ አደጋ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"የሳንካ ሪፖርት"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ክፍለ-ጊዜን አብቃ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ቅጽበታዊ ገፅ እይታ"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ቅጽበታዊ ገፅ ዕይታ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"የሳንካ ሪፖርት"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ይሄ እንደ የኢሜይል መልዕክት አድርጎ የሚልከውን ስለመሣሪያዎ የአሁኑ ሁኔታ መረጃ ይሰበስባል። የሳንካ ሪፖርቱን ከመጀመር ጀምሮ እስኪላክ ድረስ ትንሽ ጊዜ ይወስዳል፤ እባክዎ ይታገሱ።"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"መስተጋብራዊ ሪፖርት"</string>
@@ -257,7 +257,7 @@
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"ሙሉ ሪፖርት"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"መሣሪያዎ ምላሽ የማይሰጥ ወይም በጣም ቀርፋፋ ከሆነ፣ ወይም ሁሉንም የሪፖርት ክፍሎች የሚያስፈልገዎት ከሆነ ለዝቅተኛ የስርዓት ጣልቃ-ገብነት ይህን አማራጭ ይጠቀሙ። ተጨማሪ ዝርዝሮችን እንዲያስገቡ ወይም ተጨማሪ ቅጽበታዊ ገፅ እይታዎችን እንዲያነሱ አያስችልዎትም።"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{በ# ሰከንድ ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገፅ ዕይታን በማንሳት ላይ።}one{በ# ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገፅ ዕይታን በማንሳት ላይ።}other{በ# ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገፅ ዕይታን በማንሳት ላይ።}}"</string>
-    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ቅጽበታዊ ገፅ እይታ ከሳንካ ሪፖርት ጋር ተነስቷል"</string>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ቅጽበታዊ ገፅ ዕይታ ከሳንካ ሪፖርት ጋር ተነስቷል"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ቅጽበታዊ ገፅ እይታን ከሳንካ ሪፖርት ጋር ማንሳት አልተሳካም"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"የፀጥታ ሁነታ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ድምፅ ጠፍቷል"</string>
@@ -351,8 +351,8 @@
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"የኹናቴ አሞሌ እንዲሆን ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_expandStatusBar" msgid="1184232794782141698">"የሁኔታ አሞሌ ዘርጋ/ሰብስብ"</string>
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"የሁኔታ አሞሌን ለመዝረጋት እና ለመሰብሰብ ለመተግበሪያው ይፈቅዳሉ።"</string>
-    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"በአንድ የተቆለፈ መሣሪያ ላይ ማሳወቂያዎችን እንደ የሙሉ ገፅ እይታ እንቅስቃሴዎችን ማሳየት"</string>
-    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"መተግበሪያው በአንድ የተቆለፈ መሣሪያ ላይ ማሳወቂያዎችን እንደ የሙሉ ገፅ እይታ እንቅስቃሴዎች አድርጎ እንዲያሳይ ያስችለዋል"</string>
+    <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"በአንድ የተቆለፈ መሣሪያ ላይ ማሳወቂያዎችን እንደ የሙሉ ገፅ ዕይታ እንቅስቃሴዎችን ማሳየት"</string>
+    <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"መተግበሪያው በአንድ የተቆለፈ መሣሪያ ላይ ማሳወቂያዎችን እንደ የሙሉ ገፅ ዕይታ እንቅስቃሴዎች አድርጎ እንዲያሳይ ያስችለዋል"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"አቋራጮችን ይጭናል"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"አንድ መተግበሪያ ያለተጠቃሚ ጣልቃ-ገብነት የመነሻ ማያ ገፅ አቋራጮችን እንዲያክል ያስችለዋል።"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"አቋራጮችን ያራግፋል"</string>
@@ -488,7 +488,7 @@
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"በበስተጀርባ ኦዲዮን ይቅዱ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ይህ መተግበሪያ በማናቸውም ጊዜ ማይክራፎኑን በመጠቀም ኦዲዮን መቅዳት ይችላል።"</string>
     <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"የመተግበሪያ መስኮቶች የማያ ገፅ ቀረጻዎችን ማወቅ"</string>
-    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"መተግበሪያው በጥቅም ላይ ሳለ ቅጽበታዊ ገፅ እይታ ሲነሳ ይህ መተግበሪያ ማሳወቂያ ይደርሰዋል።"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"መተግበሪያው በጥቅም ላይ ሳለ ቅጽበታዊ ገፅ ዕይታ ሲነሳ ይህ መተግበሪያ ማሳወቂያ ይደርሰዋል።"</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ወደ ሲሙ ትዕዛዞችን መላክ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"መተግበሪያው ትዕዛዞችን ወደ ሲሙ እንዲልክ ያስችለዋል። ይሄ በጣማ አደገኛ ነው።"</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"አካላዊ እንቅስቃሴን ለይቶ ማወቅ"</string>
@@ -2132,7 +2132,7 @@
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ፈጣን ቅንብሮች"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"የኃይል መገናኛ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"የማያ ገፅ ቁልፍ"</string>
-    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ቅጽበታዊ ገፅ እይታ"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ቅጽበታዊ ገፅ ዕይታ"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"የማዳመጫ መንጠቆ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"የማያ ገፅ ላይ ተደራሽነት አቋራጭ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"የማያ ገፅ ላይ ተደራሽነት አቋራጭ መራጭ"</string>
@@ -2152,8 +2152,8 @@
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"የግል"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ሥራ"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"የግል እይታ"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"የስራ እይታ"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"የግል ዕይታ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"የስራ ዕይታ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"በእርስዎ የአይቲ አስተዳዳሪ ታግዷል"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"ይህ ይዘት በሥራ መተግበሪያዎች መጋራት አይችልም"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ይህ ይዘት በሥራ መተግበሪያዎች መከፈት አይችልም"</string>
