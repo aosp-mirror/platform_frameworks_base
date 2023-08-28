@@ -1967,9 +1967,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mApexManager = injector.getApexManager();
         mAppsFilter = mInjector.getAppsFilter();
 
-        mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
-                mInjector.getUserManagerInternal(), new DeletePackageHelper(this));
-
         mChangedPackagesTracker = new ChangedPackagesTracker();
 
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
@@ -1983,8 +1980,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper);
+
+        mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
+                mInjector.getUserManagerInternal(), mDeletePackageHelper);
+
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
