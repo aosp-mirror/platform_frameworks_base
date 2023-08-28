@@ -3172,6 +3172,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         });
     }
 
+    void updateActivityApplicationInfo(int userId,
+            ArrayMap<String, ApplicationInfo> applicationInfoByPackage) {
+        forAllActivities(r -> {
+            if (r.mUserId != userId) {
+                return;
+            }
+
+            final ApplicationInfo aInfo = applicationInfoByPackage.get(r.packageName);
+            if (aInfo != null) {
+                r.updateApplicationInfo(aInfo);
+            }
+        });
+    }
+
     void finishVoiceTask(IVoiceInteractionSession session) {
         final IBinder binder = session.asBinder();
         forAllLeafTasks(t -> t.finishIfVoiceTask(binder), true /* traverseTopToBottom */);
