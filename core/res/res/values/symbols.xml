@@ -5160,4 +5160,7 @@
 
   <java-symbol type="drawable" name="focus_event_pressed_key_background" />
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
+
+  <!-- Whether we order unlocking and waking -->
+  <java-symbol type="bool" name="config_orderUnlockAndWake" />
 </resources>
