@@ -132,20 +132,6 @@ android_library {
     manifest: "AndroidManifest-res.xml",
 }
 
-aconfig_declarations {
-    name: "systemui_aconfig_flags",
-    package: "com.android.systemui.aconfig",
-    srcs: [
-        "src/com/android/systemui/aconfig/systemui.aconfig",
-        "src/com/android/systemui/accessibility/aconfig/accessibility.aconfig",
-    ],
-}
-
-java_aconfig_library {
-    name: "systemui_aconfig_flags_lib",
-    aconfig_declarations: "systemui_aconfig_flags",
-}
-
 android_library {
     name: "SystemUI-core",
     defaults: [
@@ -180,7 +166,7 @@ android_library {
         "SystemUISharedLib",
         "SystemUI-statsd",
         "SettingsLib",
-        "systemui_aconfig_flags_lib",
+        "com_android_systemui_flags_lib",
         "androidx.core_core-ktx",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
@@ -358,7 +344,7 @@ android_library {
         "SystemUICustomizationLib",
         "SystemUI-statsd",
         "SettingsLib",
-        "systemui_aconfig_flags_lib",
+        "com_android_systemui_flags_lib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",

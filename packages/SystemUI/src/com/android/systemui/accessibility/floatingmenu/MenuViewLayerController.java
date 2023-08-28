@@ -24,7 +24,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.systemui.aconfig.Flags;
+import com.android.systemui.Flags;
 import com.android.systemui.util.settings.SecureSettings;
 
 /**

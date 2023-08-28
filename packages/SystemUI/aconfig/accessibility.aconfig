@@ -1,4 +1,5 @@
-package: "com.android.systemui.aconfig"
+package: "com.android.systemui"
+
 flag {
     name: "floating_menu_overlaps_nav_bars_flag"
     namespace: "accessibility"
