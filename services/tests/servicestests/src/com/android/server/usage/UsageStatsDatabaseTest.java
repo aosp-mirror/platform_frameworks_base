@@ -24,11 +24,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import android.app.usage.Flags;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.PersistableBundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
 import android.util.LongSparseArray;
@@ -183,6 +185,17 @@ public class UsageStatsDatabaseTest {
                 case Event.LOCUS_ID_SET:
                     event.mLocusId = "locus" + (i % 7); //"random" locus
                     break;
+                case Event.USER_INTERACTION:
+                    if (Flags.userInteractionTypeApi()) {
+                        // "random" user interaction extras.
+                        PersistableBundle extras = new PersistableBundle();
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY,
+                                "fake.namespace.category" + (i % 13));
+                        extras.putString(UsageStatsManager.EXTRA_EVENT_ACTION,
+                                "fakeaction" + (i % 13));
+                        event.mExtras = extras;
+                    }
+                    break;
             }
 
             mIntervalStats.addEvent(event);
@@ -294,6 +307,18 @@ public class UsageStatsDatabaseTest {
                     case Event.LOCUS_ID_SET:
                         assertEquals(e1.mLocusIdToken, e2.mLocusIdToken,
                                 "Usage event " + debugId);
+                        break;
+                    case Event.USER_INTERACTION:
+                        if (Flags.userInteractionTypeApi()) {
+                            PersistableBundle extras1 = e1.getExtras();
+                            PersistableBundle extras2 = e2.getExtras();
+                            assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY),
+                                    extras2.getString(UsageStatsManager.EXTRA_EVENT_CATEGORY),
+                                    "Usage event " + debugId);
+                            assertEquals(extras1.getString(UsageStatsManager.EXTRA_EVENT_ACTION),
+                                    extras2.getString(UsageStatsManager.EXTRA_EVENT_ACTION),
+                                    "Usage event " + debugId);
+                        }
                         break;
                 }
                 // fallthrough
