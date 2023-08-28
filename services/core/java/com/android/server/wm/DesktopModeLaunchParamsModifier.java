@@ -40,8 +40,6 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     private static final boolean DEBUG = false;
 
     // Desktop mode feature flags.
-    private static final boolean DESKTOP_MODE_PROTO1_SUPPORTED =
-            SystemProperties.getBoolean("persist.wm.debug.desktop_mode", false);
     private static final boolean DESKTOP_MODE_PROTO2_SUPPORTED =
             SystemProperties.getBoolean("persist.wm.debug.desktop_mode_2", false);
     // Override default freeform task width when desktop mode is enabled. In dips.
@@ -142,6 +140,6 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     /** Whether desktop mode is supported. */
     static boolean isDesktopModeSupported() {
-        return DESKTOP_MODE_PROTO1_SUPPORTED || DESKTOP_MODE_PROTO2_SUPPORTED;
+        return DESKTOP_MODE_PROTO2_SUPPORTED;
     }
 }

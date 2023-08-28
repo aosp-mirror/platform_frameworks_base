@@ -428,7 +428,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setOnTouchListener(mOnCaptionTouchListener)
                 .setLayoutId(mRelayoutParams.mLayoutResId)
                 .setCaptionPosition(mRelayoutParams.mCaptionX, mRelayoutParams.mCaptionY)
-                .setWindowingButtonsVisible(DesktopModeStatus.isProto2Enabled())
+                .setWindowingButtonsVisible(DesktopModeStatus.isEnabled())
                 .build();
         mHandleMenu.show();
     }
@@ -549,9 +549,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private int getDesktopModeWindowDecorLayoutId(int windowingMode) {
-        if (DesktopModeStatus.isProto1Enabled()) {
-            return R.layout.desktop_mode_app_controls_window_decor;
-        }
         return windowingMode == WINDOWING_MODE_FREEFORM
                 ? R.layout.desktop_mode_app_controls_window_decor
                 : R.layout.desktop_mode_focused_window_decor;

@@ -55,7 +55,6 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -88,7 +87,6 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private DisplayController mDisplayController;
     @Mock private DisplayLayout mDisplayLayout;
     @Mock private SyncTransactionQueue mSyncQueue;
-    @Mock private DesktopModeController mDesktopModeController;
     @Mock private DesktopTasksController mDesktopTasksController;
     @Mock private InputMonitor mInputMonitor;
     @Mock private InputManager mInputManager;
@@ -121,7 +119,6 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                         mShellController,
                         mSyncQueue,
                         mTransitions,
-                        Optional.of(mDesktopModeController),
                         Optional.of(mDesktopTasksController),
                         mDesktopModeWindowDecorFactory,
                         mMockInputMonitorFactory,

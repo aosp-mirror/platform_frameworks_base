@@ -236,7 +236,7 @@ class HandleMenu {
             t.setPosition(mAppInfoPill.mWindowSurface,
                     mAppInfoPillPosition.x, mAppInfoPillPosition.y);
             // Only show windowing buttons in proto2. Proto1 uses a system-level mode only.
-            final boolean shouldShowWindowingPill = DesktopModeStatus.isProto2Enabled();
+            final boolean shouldShowWindowingPill = DesktopModeStatus.isEnabled();
             if (shouldShowWindowingPill) {
                 t.setPosition(mWindowingPill.mWindowSurface,
                         mWindowingPillPosition.x, mWindowingPillPosition.y);

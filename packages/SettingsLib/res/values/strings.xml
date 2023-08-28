@@ -954,9 +954,6 @@
     <!-- UI debug setting: enable freeform window support summary [CHAR LIMIT=150] -->
     <string name="enable_freeform_support_summary">Enable support for experimental freeform windows.</string>
 
-    <!-- UI debug setting: enable desktop mode [CHAR LIMIT=25] -->
-    <string name="desktop_mode">Desktop mode</string>
-
     <!-- Local (desktop) backup password menu title [CHAR LIMIT=25] -->
     <string name="local_backup_password_title">Desktop backup password</string>
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
