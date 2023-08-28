@@ -603,7 +603,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private boolean hasConnectionLocked() {
-        return mBindingController.hasConnection();
+        return mBindingController.hasMainConnection();
     }
 
     /** The token tracking the current IME request or {@code null} otherwise. */
