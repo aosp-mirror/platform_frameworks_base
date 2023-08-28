@@ -419,7 +419,6 @@ public class BubblesTest extends SysuiTestCase {
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
-                mTransitions,
                 mock(SyncTransactionQueue.class),
                 mock(IWindowManager.class),
                 mBubbleProperties);
@@ -508,11 +507,6 @@ public class BubblesTest extends SysuiTestCase {
     @Test
     public void instantiateController_registerConfigChangeListener() {
         verify(mShellController, times(1)).addConfigurationChangeListener(any());
-    }
-
-    @Test
-    public void instantiateController_registerTransitionObserver() {
-        verify(mTransitions).registerObserver(any());
     }
 
     @Test
