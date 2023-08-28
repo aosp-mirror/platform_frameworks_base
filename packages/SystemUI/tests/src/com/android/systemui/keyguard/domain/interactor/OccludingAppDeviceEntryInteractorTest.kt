@@ -116,13 +116,13 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                     keyguardUpdateMonitor,
                 ),
                 fingerprintAuthRepository,
-                KeyguardInteractor(
-                    keyguardRepository,
-                    commandQueue = mock(),
-                    featureFlags,
-                    bouncerRepository,
-                    configurationRepository,
-                ),
+                KeyguardInteractorFactory.create(
+                        featureFlags = featureFlags,
+                        repository = keyguardRepository,
+                        bouncerRepository = bouncerRepository,
+                        configurationRepository = configurationRepository,
+                    )
+                    .keyguardInteractor,
                 PrimaryBouncerInteractor(
                     bouncerRepository,
                     primaryBouncerView = mock(),

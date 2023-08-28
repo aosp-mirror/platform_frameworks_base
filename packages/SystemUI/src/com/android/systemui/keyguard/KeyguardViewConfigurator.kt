@@ -51,6 +51,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
@@ -90,6 +91,7 @@ constructor(
     private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
     private val communalWidgetViewModel: CommunalWidgetViewModel,
     private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
+    private val notificationStackScrollerLayoutController: NotificationStackScrollLayoutController,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -131,6 +133,7 @@ constructor(
             SharedNotificationContainerBinder.bind(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
+                notificationStackScrollerLayoutController,
             )
         }
     }

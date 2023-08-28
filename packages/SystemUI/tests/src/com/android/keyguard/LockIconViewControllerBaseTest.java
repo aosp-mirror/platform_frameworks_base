@@ -47,7 +47,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory;
 import com.android.systemui.plugins.FalsingManager;
@@ -92,7 +91,6 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
     protected @Mock ConfigurationController mConfigurationController;
     protected @Mock VibratorHelper mVibrator;
     protected @Mock AuthRippleController mAuthRippleController;
-    protected @Mock KeyguardTransitionRepository mTransitionRepository;
     protected FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
     protected FakeFeatureFlags mFeatureFlags;
     protected @Mock PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -165,8 +163,8 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mAuthRippleController,
                 mResources,
                 KeyguardTransitionInteractorFactory.create(
-                        TestScopeProvider.getTestScope().getBackgroundScope(),
-                                mTransitionRepository).getKeyguardTransitionInteractor(),
+                        TestScopeProvider.getTestScope().getBackgroundScope())
+                                .getKeyguardTransitionInteractor(),
                 KeyguardInteractorFactory.create(mFeatureFlags).getKeyguardInteractor(),
                 mFeatureFlags,
                 mPrimaryBouncerInteractor

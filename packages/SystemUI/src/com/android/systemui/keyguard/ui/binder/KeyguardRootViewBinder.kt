@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.DrawableRes
 import android.view.View
+import android.view.View.OnLayoutChangeListener
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -43,6 +44,9 @@ import kotlinx.coroutines.launch
 /** Bind occludingAppDeviceEntryMessageViewModel to run whenever the keyguard view is attached. */
 @ExperimentalCoroutinesApi
 object KeyguardRootViewBinder {
+
+    private var onLayoutChangeListener: OnLayoutChange? = null
+
     @JvmStatic
     fun bind(
         view: ViewGroup,
@@ -54,8 +58,8 @@ object KeyguardRootViewBinder {
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
-                if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
-                    repeatOnLifecycle(Lifecycle.State.CREATED) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
                         launch {
                             occludingAppDeviceEntryMessageViewModel.message.collect {
                                 biometricMessage ->
@@ -72,10 +76,8 @@ object KeyguardRootViewBinder {
                             }
                         }
                     }
-                }
 
-                if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-                    repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                         launch {
                             viewModel.keyguardRootViewVisibilityState.collect { visibilityState ->
                                 view.animate().cancel()
@@ -84,16 +86,21 @@ object KeyguardRootViewBinder {
                                 val isOcclusionTransitionRunning =
                                     visibilityState.occlusionTransitionRunning
                                 if (goingToFullShade) {
-                                    view.animate().alpha(0f).setStartDelay(
-                                        keyguardStateController.keyguardFadingAwayDelay
-                                    ).setDuration(
-                                        keyguardStateController.shortenedFadingAwayDuration
-                                    ).setInterpolator(
-                                        Interpolators.ALPHA_OUT
-                                    ).withEndAction { view.visibility = View.GONE }.start()
+                                    view
+                                        .animate()
+                                        .alpha(0f)
+                                        .setStartDelay(
+                                            keyguardStateController.keyguardFadingAwayDelay
+                                        )
+                                        .setDuration(
+                                            keyguardStateController.shortenedFadingAwayDuration
+                                        )
+                                        .setInterpolator(Interpolators.ALPHA_OUT)
+                                        .withEndAction { view.visibility = View.GONE }
+                                        .start()
                                 } else if (
                                     statusBarState == StatusBarState.KEYGUARD ||
-                                    statusBarState == StatusBarState.SHADE_LOCKED
+                                        statusBarState == StatusBarState.SHADE_LOCKED
                                 ) {
                                     view.visibility = View.VISIBLE
                                     if (!isOcclusionTransitionRunning) {
@@ -105,15 +112,30 @@ object KeyguardRootViewBinder {
                             }
                         }
 
+                        launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
+                    }
+
+                    if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
                         launch {
-                            viewModel.alpha.collect { alpha ->
-                                view.alpha = alpha
+                            viewModel.translationY.collect {
+                                val statusView =
+                                    view.requireViewById<View>(R.id.keyguard_status_view)
+                                statusView.translationY = it
                             }
                         }
                     }
                 }
             }
-        return disposableHandle
+
+        onLayoutChangeListener = OnLayoutChange(viewModel)
+        view.addOnLayoutChangeListener(onLayoutChangeListener)
+
+        return object : DisposableHandle {
+            override fun dispose() {
+                disposableHandle.dispose()
+                view.removeOnLayoutChangeListener(onLayoutChangeListener)
+            }
+        }
     }
 
     /**
@@ -122,10 +144,10 @@ object KeyguardRootViewBinder {
     private fun createChipbarInfo(message: String, @DrawableRes icon: Int): ChipbarInfo {
         return ChipbarInfo(
             startIcon =
-            TintedIcon(
-                Icon.Resource(icon, null),
-                ChipbarInfo.DEFAULT_ICON_TINT,
-            ),
+                TintedIcon(
+                    Icon.Resource(icon, null),
+                    ChipbarInfo.DEFAULT_ICON_TINT,
+                ),
             text = Text.Loaded(message),
             endItem = null,
             vibrationEffect = null,
@@ -136,6 +158,32 @@ object KeyguardRootViewBinder {
             priority = ViewPriority.CRITICAL,
             instanceId = null,
         )
+    }
+
+    private class OnLayoutChange(private val viewModel: KeyguardRootViewModel) :
+        OnLayoutChangeListener {
+        override fun onLayoutChange(
+            v: View,
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            oldLeft: Int,
+            oldTop: Int,
+            oldRight: Int,
+            oldBottom: Int
+        ) {
+            val ksv = v.findViewById(R.id.keyguard_status_view) as View?
+            val lockIcon = v.findViewById(R.id.lock_icon_view) as View?
+
+            if (ksv != null && lockIcon != null) {
+                // After layout, ensure the notifications are positioned correctly
+                viewModel.onSharedNotificationContainerPositionChanged(
+                    ksv!!.top.toFloat() + ksv!!.height,
+                    lockIcon!!.y
+                )
+            }
+        }
     }
 
     private const val ID = "occluding_app_device_entry_unlock_msg"

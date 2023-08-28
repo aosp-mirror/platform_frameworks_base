@@ -30,6 +30,7 @@ import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.test.TestScope
@@ -52,6 +53,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var configurationRepository: FakeConfigurationRepository
+    private lateinit var shadeRepository: FakeShadeRepository
 
     @Before
     fun setUp() {
@@ -62,6 +64,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
         repository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         configurationRepository = FakeConfigurationRepository()
+        shadeRepository = FakeShadeRepository()
         underTest =
             KeyguardInteractor(
                 repository,
@@ -69,6 +72,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
                 featureFlags,
                 bouncerRepository,
                 configurationRepository,
+                shadeRepository,
             )
     }
 

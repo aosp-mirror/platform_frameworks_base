@@ -58,9 +58,8 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         underTest = ShadeRepositoryImpl(shadeExpansionStateManager)
-        `when`(shadeExpansionStateManager.addExpansionListener(any())).thenReturn(
-            ShadeExpansionChangeEvent(0f, false, false, 0f)
-        )
+        `when`(shadeExpansionStateManager.addExpansionListener(any()))
+            .thenReturn(ShadeExpansionChangeEvent(0f, false, false, 0f))
     }
 
     @Test
@@ -119,6 +118,21 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
 
             underTest.setQsExpansion(1f)
             assertThat(underTest.qsExpansion.value).isEqualTo(1f)
+        }
+
+    @Test
+    fun updateShadeExpansion() =
+        testScope.runTest {
+            assertThat(underTest.shadeExpansion.value).isEqualTo(0f)
+
+            underTest.setShadeExpansion(.5f)
+            assertThat(underTest.shadeExpansion.value).isEqualTo(.5f)
+
+            underTest.setShadeExpansion(.82f)
+            assertThat(underTest.shadeExpansion.value).isEqualTo(.82f)
+
+            underTest.setShadeExpansion(1f)
+            assertThat(underTest.shadeExpansion.value).isEqualTo(1f)
         }
 
     @Test
