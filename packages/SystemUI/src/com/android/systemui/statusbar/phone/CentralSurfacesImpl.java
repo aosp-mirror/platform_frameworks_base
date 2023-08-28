@@ -2861,7 +2861,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                                     && mWakefulnessLifecycle.getLastWakeReason()
                                     == PowerManager.WAKE_REASON_POWER_BUTTON
                                     && mFingerprintManager.get().isPowerbuttonFps()
-                                    && mFingerprintManager.get().hasEnrolledFingerprints()
+                                    && mKeyguardUpdateMonitor
+                                    .getCachedIsUnlockWithFingerprintPossible(
+                                            mUserTracker.getUserId())
                                     && !touchToUnlockAnytime;
                     if (DEBUG_WAKEUP_DELAY) {
                         Log.d(TAG, "mShouldDelayWakeUpAnimation=" + mShouldDelayWakeUpAnimation);
