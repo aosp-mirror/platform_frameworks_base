@@ -20,7 +20,9 @@ import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
+import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.DvbDeviceInfo;
@@ -77,6 +79,8 @@ interface ITvInputManager {
     void tune(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
     void setCaptionEnabled(in IBinder sessionToken, boolean enabled, int userId);
     void selectTrack(in IBinder sessionToken, int type, in String trackId, int userId);
+    void selectAudioPresentation(in IBinder sessionToken, int presentationId, int programId,
+            int userId);
 
     void setInteractiveAppNotificationEnabled(in IBinder sessionToken, boolean enabled, int userId);
 
@@ -95,6 +99,7 @@ interface ITvInputManager {
     void timeShiftResume(in IBinder sessionToken, int userId);
     void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
     void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
+    void timeShiftSetMode(in IBinder sessionToken, int mode, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     List<TunedInfo> getCurrentTunedInfos(int userId);
@@ -111,6 +116,11 @@ interface ITvInputManager {
 
     // For ad request
     void requestAd(in IBinder sessionToken, in AdRequest request, int userId);
+    void notifyAdBufferReady(in IBinder sessionToken, in AdBuffer buffer, int userId);
+
+    // For TV Message
+    void notifyTvMessage(in IBinder sessionToken, int type, in Bundle data, int userId);
+    void setTvMessageEnabled(in IBinder sessionToken, int type, boolean enabled, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

@@ -305,7 +305,9 @@ public class ArtStatsLogUtils {
     }
 
     private static final Map<Integer, Integer> STATUS_MAP =
-            Map.of(BackgroundDexOptService.STATUS_OK,
+            Map.of(BackgroundDexOptService.STATUS_UNSPECIFIED,
+                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_UNKNOWN,
+                    BackgroundDexOptService.STATUS_OK,
                     ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_JOB_FINISHED,
                     BackgroundDexOptService.STATUS_ABORT_BY_CANCELLATION,
                     ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_BY_CANCELLATION,
@@ -316,7 +318,9 @@ public class ArtStatsLogUtils {
                     BackgroundDexOptService.STATUS_ABORT_BATTERY,
                     ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_ABORT_BATTERY,
                     BackgroundDexOptService.STATUS_DEX_OPT_FAILED,
-                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_JOB_FINISHED);
+                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_JOB_FINISHED,
+                    BackgroundDexOptService.STATUS_FATAL_ERROR,
+                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_FATAL_ERROR);
 
     /** Helper class to write background dexopt job stats to statsd. */
     public static class BackgroundDexoptJobStatsLogger {

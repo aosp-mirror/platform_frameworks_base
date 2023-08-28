@@ -49,8 +49,11 @@ public interface UsbGadgetHal {
      * This function is used to reset USB gadget driver.
      * Performs USB data connection reset. The connection will disconnect and
      * reconnect.
+     *
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
      */
-    public void reset();
+    public void reset(long transactionId);
 
     /**
      * Invoked to query the version of current gadget hal implementation.

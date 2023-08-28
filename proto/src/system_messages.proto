@@ -61,7 +61,7 @@ message SystemMessage {
 
     // Notify the user that they should select an input method
     // Package: android
-    NOTE_SELECT_INPUT_METHOD = 8;
+    NOTE_SELECT_INPUT_METHOD = 8 [deprecated = true];
 
     // Notify the user about limited functionality before decryption
     // Package: android
@@ -306,6 +306,10 @@ message SystemMessage {
     // Package: android
     NOTE_BT_APM_NOTIFICATION = 74;
 
+    // Inform that USB is configured as a Universal Video Class gadget
+    // Package: android
+    NOTE_USB_UVC = 75;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
@@ -392,5 +396,13 @@ message SystemMessage {
     // Note: this is a base ID, multiple notifications will be posted for each
     // abusive apps, with notification ID based off this ID.
     NOTE_ABUSIVE_BG_APPS_BASE = 0xc1b2508; // 203105544
+
+    // Notify the user that dialer and sms functionality are unavailable whilst the apps are
+    // paused in the work profile.
+    // Package: android
+    NOTE_ALL_MANAGED_SUBSCRIPTIONS_AND_MANAGED_PROFILE_OFF = 1006;
+
+    // Notify the user that audio was lowered based on Calculated Sound Dose (CSD)
+    NOTE_CSD_LOWER_AUDIO = 1007;
   }
 }

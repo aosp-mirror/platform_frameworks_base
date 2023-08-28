@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Hambisa"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Nweba"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Goqa"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Chofoza kabili "<annotation icon="home_icon">" IKHAYA"</annotation>" mayelana nezilawuli"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Chofoza kabili "<annotation icon="home_icon">" IKHAYA"</annotation>" mayelana nezilawuli"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Imenyu yesithombe-esithombeni"</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Yisa kwesokunxele"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Yisa kwesokudla"</string>

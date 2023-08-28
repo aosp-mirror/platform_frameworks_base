@@ -39,6 +39,7 @@ import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -198,8 +199,18 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
                 HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
 
         if (session.hasContextMethods()) {
-            return session.getSession().enrollWithContext(
-                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, getOperationContext());
+            final OperationContextExt opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().enrollWithContext(
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle,
+                    opContext.toAidlContext());
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
                     mHwPreviewHandle);
@@ -208,6 +219,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
     @Override
     protected void stopHalOperation() {
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();

@@ -462,11 +462,28 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /** @hide */
     public void scale(float scale) {
-        mBounds.scale(scale);
-        mMaxBounds.scale(scale);
+        scaleBounds(scale, mBounds);
+        scaleBounds(scale, mMaxBounds);
         if (mAppBounds != null) {
-            mAppBounds.scale(scale);
+            scaleBounds(scale, mAppBounds);
         }
+    }
+
+    /**
+     * Size based scaling. This avoid inconsistent length when rounding 4 sides.
+     * E.g. left=12, right=18, scale=0.8. The scaled width can be:
+     *   int((right - left) * scale + 0.5) = int(4.8 + 0.5) = 5
+     * But with rounding both left and right, the width will be inconsistent:
+     *   int(right * scale + 0.5) - int(left * scale + 0.5) = int(14.9) - int(10.1) = 4
+     * @hide
+     */
+    private static void scaleBounds(float scale, Rect bounds) {
+        final int w = bounds.width();
+        final int h = bounds.height();
+        bounds.left = (int) (bounds.left * scale + .5f);
+        bounds.top = (int) (bounds.top * scale + .5f);
+        bounds.right = bounds.left + (int) (w * scale + .5f);
+        bounds.bottom = bounds.top + (int) (h * scale + .5f);
     }
 
     /**
@@ -855,15 +872,6 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (mAlwaysOnTop != ALWAYS_ON_TOP_ON) return false;
         return mWindowingMode == WINDOWING_MODE_FREEFORM
                     || mWindowingMode == WINDOWING_MODE_MULTI_WINDOW;
-    }
-
-    /**
-     * Returns true if any visible windows belonging to apps with this window configuration should
-     * be kept on screen when the app is killed due to something like the low memory killer.
-     * @hide
-     */
-    public boolean keepVisibleDeadAppWindowOnScreen() {
-        return mWindowingMode != WINDOWING_MODE_PINNED;
     }
 
     /**

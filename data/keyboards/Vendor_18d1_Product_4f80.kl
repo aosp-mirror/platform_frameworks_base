@@ -16,6 +16,4 @@
 # Android Stylus
 #
 
-# Temporarily map the key reported by the stylus to an
-# arbitrary keycode for testing and development.
-key 0x242   VIDEO_APP_1
+key 0x242   STYLUS_BUTTON_TAIL

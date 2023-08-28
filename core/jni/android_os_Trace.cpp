@@ -22,6 +22,8 @@
 
 #include <array>
 
+static constexpr const char* kNullReplacement = "(null)";
+
 namespace android {
 
 inline static void sanitizeString(char* str) {
@@ -36,6 +38,11 @@ inline static void sanitizeString(char* str) {
 
 template<typename F>
 inline static void withString(JNIEnv* env, jstring jstr, F callback) {
+    if (CC_UNLIKELY(jstr == nullptr)) {
+        callback(kNullReplacement);
+        return;
+    }
+
     // We need to handle the worst case of 1 character -> 4 bytes
     // So make a buffer of size 4097 and let it hold a string with a maximum length
     // of 1024. The extra last byte for the null terminator.
@@ -52,14 +59,14 @@ inline static void withString(JNIEnv* env, jstring jstr, F callback) {
 
 static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jlong value) {
-    withString(env, nameStr, [tag, value](char* str) {
+    withString(env, nameStr, [tag, value](const char* str) {
         atrace_int64(tag, str, value);
     });
 }
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr) {
-    withString(env, nameStr, [tag](char* str) {
+    withString(env, nameStr, [tag](const char* str) {
         atrace_begin(tag, str);
     });
 }
@@ -70,22 +77,22 @@ static void android_os_Trace_nativeTraceEnd(JNIEnv*, jclass, jlong tag) {
 
 static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
-    withString(env, nameStr, [tag, cookie](char* str) {
+    withString(env, nameStr, [tag, cookie](const char* str) {
         atrace_async_begin(tag, str, cookie);
     });
 }
 
 static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass,
         jlong tag, jstring nameStr, jint cookie) {
-    withString(env, nameStr, [tag, cookie](char* str) {
+    withString(env, nameStr, [tag, cookie](const char* str) {
         atrace_async_end(tag, str, cookie);
     });
 }
 
 static void android_os_Trace_nativeAsyncTraceForTrackBegin(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jstring nameStr, jint cookie) {
-    withString(env, trackStr, [env, tag, nameStr, cookie](char* track) {
-        withString(env, nameStr, [tag, track, cookie](char* name) {
+    withString(env, trackStr, [env, tag, nameStr, cookie](const char* track) {
+        withString(env, nameStr, [tag, track, cookie](const char* name) {
             atrace_async_for_track_begin(tag, track, name, cookie);
         });
     });
@@ -93,7 +100,7 @@ static void android_os_Trace_nativeAsyncTraceForTrackBegin(JNIEnv* env, jclass,
 
 static void android_os_Trace_nativeAsyncTraceForTrackEnd(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jint cookie) {
-    withString(env, trackStr, [tag, cookie](char* track) {
+    withString(env, trackStr, [tag, cookie](const char* track) {
         atrace_async_for_track_end(tag, track, cookie);
     });
 }
@@ -108,15 +115,15 @@ static void android_os_Trace_nativeSetTracingEnabled(JNIEnv*, jclass, jboolean e
 
 static void android_os_Trace_nativeInstant(JNIEnv* env, jclass,
         jlong tag, jstring nameStr) {
-    withString(env, nameStr, [tag](char* str) {
+    withString(env, nameStr, [tag](const char* str) {
         atrace_instant(tag, str);
     });
 }
 
 static void android_os_Trace_nativeInstantForTrack(JNIEnv* env, jclass,
         jlong tag, jstring trackStr, jstring nameStr) {
-    withString(env, trackStr, [env, tag, nameStr](char* track) {
-        withString(env, nameStr, [tag, track](char* name) {
+    withString(env, trackStr, [env, tag, nameStr](const char* track) {
+        withString(env, nameStr, [tag, track](const char* name) {
             atrace_instant_for_track(tag, track, name);
         });
     });

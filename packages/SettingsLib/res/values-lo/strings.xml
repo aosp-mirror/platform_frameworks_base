@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"ຕັດການເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"ປິດການນຳໃຊ້"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"ການ​ຕັ້ງ​ຄ່າ IP ລົ້ມ​ເຫຼວ"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ບໍ່ໄດ້ເຊື່ອມຕໍ່ເນື່ອງຈາກຄຸນນະພາບເຄືອຂ່າຍຕໍ່າ"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"​ການ​ເຊື່ອມ​ຕໍ່ WiFi ລົ້ມ​ເຫຼວ"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ບັນຫາການພິສູດຢືນຢັນ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"ບໍ່ສາມາດເຊື່ອມຕໍ່ຫາ \'<xliff:g id="AP_NAME">%1$s</xliff:g>\' ໄດ້"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ຈະບໍ່ເຊື່ອມຕໍ່ອັດຕະໂນມັດ"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="saved_network" msgid="7143698034077223645">"ບັນທຶກ​​​ໂດຍ <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"ເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍທີ່ມີການວັດແທກແລ້ວ"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"ເຊື່ອມຕໍ່ຜ່ານທາງ %1$s ໂດຍອັດຕະໂນມັດ"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ເຊື່ອມຕໍ່ກັບອັດຕະໂນມັດແລ້ວຜ່ານຜູ້ໃຫ້ບໍລິການຄະແນນເຄືອຂ່າຍ"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"​ເຊື່ອມຕໍ່​ຜ່ານ %1$s ​ແລ້ວ"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"ເຊື່ອມ​ຕໍ່​ຜ່ານ <xliff:g id="NAME">%1$s</xliff:g> ແລ້ວ"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"ມີ​ໃຫ້​ຜ່ານ %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"ແຕະເພື່ອສະໝັກ"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"ບໍ່ມີອິນເຕີເນັດ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"ບໍ່ສາມາດເຂົ້າເຖິງເຊີບເວີ DNS ສ່ວນຕົວໄດ້"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ບໍ່ມີອິນເຕີເນັດ"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"ຈຳເປັນຕ້ອງເຂົ້າສູ່ລະບົບ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ຈຸດການເຂົ້າເຖິງເຕັມຊົ່ວຄາວ"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"ເຊື່ອມຕໍ່ຜ່ານ %1$s ແລ້ວ"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"ໃຊ້ໄດ້ຜ່ານ %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"ກຳລັງເປີດ <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"ກຳລັງສຳເລັດການສະໝັກ…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"ບໍ່ສາມາດສຳເລັດການສະໝັກໄດ້. ແຕະເພື່ອລອງໃໝ່."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"ສະໝັກສຳເລັດແລ້ວ. ກຳລັງເຊື່ອມຕໍ່…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"ຊ້າຫຼາຍ"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"ຊ້າ"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"ຕົກລົງ"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"ປານກາງ"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"ໄວ"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"ໄວຫຼາຍ"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"ໝົດອາຍຸແລ້ວ"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"ກຳລັງຈັບຄູ່..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີມີເດຍ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີສິດເຂົ້າອ່ານຂໍ້ຄວາມ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼື ມີເດຍ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"ເຊື່ອມຕໍ່ແລ້ວ, ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ຣີເຊັດລະດັບສຽງການເວົ້າ"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ຣີເຊັດລະດັບສຽງທີ່ເວົ້າຂໍ້ຄວາມອອກສຽງໃຫ້ເປັນຄ່າເລີ່ມຕົ້ນ."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"ຊ້າຫຼາຍ"</item>
-    <item msgid="1815382991399815061">"ຊ້າ"</item>
-    <item msgid="3075292553049300105">"ປົກ​ກ​ະ​ຕິ"</item>
-    <item msgid="1158955023692670059">"ໄວ"</item>
-    <item msgid="5664310435707146591">"ໄວກວ່າ"</item>
-    <item msgid="5491266922147715962">"ໄວຫຼາຍ"</item>
-    <item msgid="7659240015901486196">"ໄວ"</item>
-    <item msgid="7147051179282410945">"ໄວສຸດໆ"</item>
-    <item msgid="581904787661470707">"ໄວທີ່ສຸດ"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
@@ -373,7 +363,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"ແກ້ບັນຫາການແຕ້ມທັບຂອງ GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"ປິດການເຮັດວຽກ HW overlays"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ໃຊ້ GPU ໃນການວາງອົງປະກອບໜ້າຈໍສະເໝີ"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງຂອບເຂດສີ"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງ color space"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"ເປີດການໃຊ້ຮ່ອງຮອຍໃນ OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"ປິດ​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​ສຽງ USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"ປິດ​​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໄປ​ຫາອຸ​ປະ​ກອ​ນ​ຕໍ່​ພ່ວງ​ສຽງ​ USB"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະ ອື່ນໆ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ບັງ​ຄັບ​ໃຫ້ຮູບຮ່າງຂຽນຈາກຂວາຫາຊ້າຍ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"ແຖບການນຳທາງແບບໂປ່ງໃສ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ເຮັດໃຫ້ສີພື້ນຫຼັງແຖບການນຳທາງມີຄວາມໂປ່ງໃສແບບເລີ່ມຕົ້ນ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ອະນຸຍາດການມົວໃນລະດັບໜ້າຈໍ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"ບັງຄັບໃຊ້ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"ເປິດໃຊ້ 4x MSAA ໃນແອັບ OpenGL ES 2.0"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ເພີ່ມເວລາ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ຫຼຸດເວລາ."</string>
     <string name="cancel" msgid="5665114069455378395">"ຍົກເລີກ"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ຕົກລົງ"</string>
     <string name="done" msgid="381184316122520313">"ແລ້ວໆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ໂທລະສັບນີ້"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ແທັບເລັດນີ້"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ໂທລະສັບນີ້"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ຫຼິ້ນຢູ່ອຸປະກອນນີ້ບໍ່ໄດ້"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ອັບເກຣດບັນຊີເພື່ອສະຫຼັບ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ບໍ່ສາມາດຫຼິ້ນເນື້ອຫາທີ່ດາວໂຫຼດຢູ່ນີ້ໄດ້"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ລອງໃໝ່ຫຼັງຈາກໂຄສະນາ"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ປຸກອຸປະກອນເພື່ອຫຼິ້ນຢູ່ບ່ອນນີ້"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ອຸປະກອນບໍ່ອະນຸມັດໃຫ້ຫຼິ້ນ"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ຫຼິ້ນມີເດຍນີ້ຢູ່ບ່ອນນີ້ບໍ່ໄດ້"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ເກີດບັນຫາໃນການເຊື່ອມຕໍ່. ປິດອຸປະກອນແລ້ວເປີດກັບຄືນມາໃໝ່"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ອຸປະກອນສຽງແບບມີສາຍ"</string>
     <string name="help_label" msgid="3528360748637781274">"ຊ່ວຍເຫຼືອ ແລະ ຕິຊົມ"</string>
@@ -574,6 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກເຊດຊັນແຂກປັດຈຸບັນ"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ອອກ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ບັນທຶກການເຄື່ອນໄຫວແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ທ່ານສາມາດບັນທຶກການເຄື່ອນໄຫວຈາກເຊດຊັນປັດຈຸບັນ ຫຼື ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດໄດ້"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ອະນິເມຊັນກັບຫຼັງແບບຄາດເດົາ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບການກັບຫຼັງແບບຄາດເດົາ."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ການຕັ້ງຄ່ານີ້ຈະເປີດການນຳໃຊ້ອະນິເມຊັນລະບົບສຳລັບອະນິເມຊັນທ່າທາງແບບຄາດເດົາ. ມັນຕ້ອງໃຊ້ການຕັ້ງຄ່າຕໍ່ແອັບ enableOnBackInvokedCallback ເປັນ true ໃນໄຟລ໌ manifest."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ຍ້າຍໄປຊ້າຍ"</item>
+    <item msgid="5425394847942513942">"ຍ້າຍລົງ"</item>
+    <item msgid="7728484337962740316">"ຍ້າຍໄປຂວາ"</item>
+    <item msgid="324200556467459329">"ຍ້າຍຂຶ້ນ"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

@@ -40,11 +40,11 @@ final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
 
     ComposePrimitivesVibratorStep(VibrationStepConductor conductor, long startTime,
             VibratorController controller, VibrationEffect.Composed effect, int index,
-            long previousStepVibratorOffTimeout) {
+            long pendingVibratorOffDeadline) {
         // This step should wait for the last vibration to finish (with the timeout) and for the
         // intended step start time (to respect the effect delays).
-        super(conductor, Math.max(startTime, previousStepVibratorOffTimeout), controller, effect,
-                index, previousStepVibratorOffTimeout);
+        super(conductor, Math.max(startTime, pendingVibratorOffDeadline), controller, effect,
+                index, pendingVibratorOffDeadline);
     }
 
     @Override
@@ -60,18 +60,22 @@ final class ComposePrimitivesVibratorStep extends AbstractVibratorStep {
             if (primitives.isEmpty()) {
                 Slog.w(VibrationThread.TAG, "Ignoring wrong segment for a ComposePrimitivesStep: "
                         + effect.getSegments().get(segmentIndex));
-                return skipToNextSteps(/* segmentsSkipped= */ 1);
+                // Skip this step and play the next one right away.
+                return nextSteps(/* segmentsPlayed= */ 1);
             }
 
             if (VibrationThread.DEBUG) {
                 Slog.d(VibrationThread.TAG, "Compose " + primitives + " primitives on vibrator "
-                        + controller.getVibratorInfo().getId());
+                        + getVibratorId());
             }
+
             PrimitiveSegment[] primitivesArray =
                     primitives.toArray(new PrimitiveSegment[primitives.size()]);
-            mVibratorOnResult = controller.on(primitivesArray, getVibration().id);
-            getVibration().stats().reportComposePrimitives(mVibratorOnResult, primitivesArray);
+            long vibratorOnResult = controller.on(primitivesArray, getVibration().id);
+            handleVibratorOnResult(vibratorOnResult);
+            getVibration().stats.reportComposePrimitives(vibratorOnResult, primitivesArray);
 
+            // The next start and off times will be calculated from mVibratorOnResult.
             return nextSteps(/* segmentsPlayed= */ primitives.size());
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);

@@ -132,8 +132,7 @@ public class ButtonPreference extends Preference {
         }
     }
 
-    @Override
-    public CharSequence getTitle() {
+    @Override public CharSequence getTitle() {
         return mTitle;
     }
 

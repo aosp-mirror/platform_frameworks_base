@@ -33,10 +33,10 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
+import com.android.app.animation.Interpolators
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
 import com.android.systemui.util.registerAnimationOnBackInvoked
-import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"

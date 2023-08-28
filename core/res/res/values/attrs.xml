@@ -918,6 +918,10 @@
         <attr name="actionModeFindDrawable" format="reference" />
         <!-- Drawable to use for the Web Search action button in WebView selection action modes. -->
         <attr name="actionModeWebSearchDrawable" format="reference" />
+        <!-- Drawable to use for the Undo action button in WebView selection action modes. -->
+        <attr name="actionModeUndoDrawable" format="reference" />
+        <!-- Drawable to use for the Redo action button in WebView selection action modes. -->
+        <attr name="actionModeRedoDrawable" format="reference" />
 
         <!-- PopupWindow style to use for action modes when showing as a window overlay. -->
         <attr name="actionModePopupWindowStyle" format="reference" />
@@ -1210,6 +1214,136 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
+
+        <!-- A lower-emphasized variant of the color on the fixed secondary branding color. @hide
+             -->
+        <attr name="materialColorOnSecondaryFixedVariant" format="color"/>
+        <!-- A lower-emphasized variant of the color on the fixed tertiary branding color. @hide
+             -->
+        <attr name="materialColorOnTertiaryFixedVariant" format="color"/>
+        <!-- The container color of surface the most lowered. @hide -->
+        <attr name="materialColorSurfaceContainerLowest" format="color"/>
+        <!-- A lower-emphasized variant of the color on the fixed primary branding color. @hide -->
+        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the secondary container color. @hide -->
+        <attr name="materialColorOnSecondaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the tertiary container color. @hide -->
+        <attr name="materialColorOnTertiaryContainer" format="color"/>
+        <!-- The container color of surface slightly lowered, which replaces the previous surface
+             at elevation level 1. @hide -->
+        <attr name="materialColorSurfaceContainerLow" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             the primary container color. @hide -->
+        <attr name="materialColorOnPrimaryContainer" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed secondary branding color. @hide -->
+        <attr name="materialColorSecondaryFixedDim" format="color"/>
+        <!-- A tonal variation of the on error color that passes accessibility guidelines for
+             text/iconography when drawn on top of error container. @hide -->
+        <attr name="materialColorOnErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed secondary branding color.
+             @hide -->
+        <attr name="materialColorOnSecondaryFixed" format="color"/>
+        <!-- The "on surface" inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorOnSurfaceInverse" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed tertiary branding color. @hide -->
+        <attr name="materialColorTertiaryFixedDim" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed tertiary branding color.
+             @hide -->
+        <attr name="materialColorOnTertiaryFixed" format="color"/>
+        <!-- A stronger, more emphasized variant of the fixed primary branding color. @hide -->
+        <attr name="materialColorPrimaryFixedDim" format="color"/>
+        <!-- A tonal variation of the secondary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorSecondaryContainer" format="color"/>
+        <!-- A tonal variation of the error color suitable for background color of container views.
+             @hide -->
+        <attr name="materialColorErrorContainer" format="color"/>
+        <!-- The color text/iconography when drawn on top of the fixed primary branding color.
+             @hide -->
+        <attr name="materialColorOnPrimaryFixed" format="color"/>
+        <!-- The inverse color of colorPrimary. @hide -->
+        <attr name="materialColorPrimaryInverse" format="color"/>
+        <!-- A secondary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorSecondaryFixed" format="color"/>
+        <!-- The surface inverse color, useful for inverted backgrounds. @hide -->
+        <attr name="materialColorSurfaceInverse" format="color"/>
+        <!-- A tonal variation of the surface color. @hide -->
+        <attr name="materialColorSurfaceVariant" format="color"/>
+        <!-- A tonal variation of the tertiary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorTertiaryContainer" format="color"/>
+        <!-- A tertiary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorTertiaryFixed" format="color"/>
+        <!-- A tonal variation of the primary color suitable for background color of container
+             views. @hide -->
+        <attr name="materialColorPrimaryContainer" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             background. @hide -->
+        <attr name="materialColorOnBackground" format="color"/>
+        <!-- A primary branding color for the app, which stays the same between light and dark
+             themes. @hide -->
+        <attr name="materialColorPrimaryFixed" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             secondary. @hide -->
+        <attr name="materialColorOnSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             tertiary. @hide -->
+        <attr name="materialColorOnTertiary" format="color"/>
+        <!-- The surface color which always stay the dimmest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceDim" format="color"/>
+        <!-- The surface color which always stay the brightest in either dark or light theme. @hide
+             -->
+        <attr name="materialColorSurfaceBright" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             error. @hide -->
+        <attr name="materialColorOnError" format="color"/>
+        <!-- The color of surfaces such as cards, sheets, menus. @hide -->
+        <attr name="materialColorSurface" format="color"/>
+        <!-- The container color of surface slightly elevated, which replaces the previous surface
+             at elevation level 3. @hide -->
+        <attr name="materialColorSurfaceContainerHigh" format="color"/>
+        <!-- The tertiary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
+        <!-- The container color of surface the most elevated, which replaces the previous surface
+             variant. @hide -->
+        <attr name="materialColorSurfaceContainerHighest" format="color"/>
+        <!-- A tonal variation of the on surface color that passes accessibility guidelines for
+             text/iconography when drawn on top of surface variant. @hide -->
+        <attr name="materialColorOnSurfaceVariant" format="color"/>
+        <!-- A color meant to be used in element outlines. @hide -->
+        <attr name="materialColorOutline" format="color"/>
+        <!-- A color meant to be used in element outlines on the surface-variant color. @hide -->
+        <attr name="materialColorOutlineVariant" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             primary. @hide -->
+        <attr name="materialColorOnPrimary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
+             surface. @hide -->
+        <attr name="materialColorOnSurface" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+        <!-- The container color of surface, which replaces the previous surface at elevation level
+             2. @hide -->
+        <attr name="materialColorSurfaceContainer" format="color"/>
+         <!-- The primary branding color for the app. By default, this is the color applied to the
+             action bar background. @hide -->
+        <attr name="materialColorPrimary" format="color"/>
+        <!-- The secondary branding color for the app, usually a bright complement to the primary
+             branding color. @hide -->
+        <attr name="materialColorSecondary" format="color"/>
+        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
+             of tertiary. @hide -->
+        <attr name="materialColorTertiary" format="color"/>
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -2221,6 +2355,10 @@
         <!-- Elevation to use for the window. -->
         <attr name="windowElevation" format="dimension" />
 
+        <!-- Flag indicating whether this window should skip movement animations.
+             See also {@link android.view.WindowManager.LayoutParams#setCanPlayMoveAnimation} -->
+        <attr name="windowNoMoveAnimation" format="boolean" />
+
         <!-- Whether to clip window content to the outline of the window background. -->
         <attr name="windowClipToOutline" format="boolean" />
 
@@ -2653,6 +2791,10 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
+        <!-- Boolean that hints the Android System that the view is credential and associated with
+             CredentialManager -->
+        <attr name="isCredential" format="boolean" />
+
         <!-- Hints the Android System whether the this View should be considered a scroll capture target. -->
         <attr name="scrollCaptureHint">
             <!-- Let the Android System  determine if the view can be a scroll capture target. -->
@@ -3075,6 +3217,20 @@
             <enum name="noHideDescendants" value="4" />
         </attr>
 
+        <!-- Describes whether this view should allow interactions from AccessibilityServices only
+             if the service sets the isAccessibilityTool property. -->
+        <attr name="accessibilityDataSensitive" format="integer">
+            <!-- The system determines whether the view's accessibility data is sensitive
+                 - default (recommended). -->
+            <enum name="auto" value="0" />
+            <!-- Allow interactions from AccessibilityServices only if the service sets the
+                 isAccessibilityTool property. -->
+            <enum name="yes" value="1" />
+            <!-- Allow interactions from all AccessibilityServices, regardless of their
+                 isAccessibilityTool property. -->
+            <enum name="no" value="2" />
+        </attr>
+
         <!-- Indicates to accessibility services whether the user should be notified when
              this view changes. -->
         <attr name="accessibilityLiveRegion" format="integer">
@@ -3281,6 +3437,8 @@
             <enum name="grab" value="1020" />
             <!-- Pointer icon of a hand sign while grabbing something. -->
             <enum name="grabbing" value="1021" />
+            <!-- Pointer icon indicating handwriting. -->
+            <enum name="handwriting" value="1022"/>
         </attr>
 
         <!-- Whether this view has elements that may overlap when drawn. See
@@ -3385,6 +3543,50 @@
              <p>This is true by default.
              See {@link android.view.View#setAutoHandwritingEnabled}. -->
         <attr name="autoHandwritingEnabled" format="boolean" />
+
+        <!-- <p>The amount of offset that is applied to the left edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 10dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetLeft" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the top edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 40dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetTop" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the right edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 10dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for other views. -->
+        <attr name="handwritingBoundsOffsetRight" format="dimension" />
+
+        <!-- <p>The amount of offset that is applied to the bottom edge of the view's stylus
+             handwriting bounds, which by default is the view's visible bounds.
+
+             <p>This attribute is mainly used to enlarge the view's handwriting bounds for better
+             user experience. Note that a positive offset means the bounds is extended outwards,
+             and vice versa. See {@link android.view.View#setHandwritingBoundsOffsets}
+
+             <p> The default value is 40dp for {@link android.widget.TextView} and
+             {@link android.widget.EditText}, and 0dp for all other views. -->
+        <attr name="handwritingBoundsOffsetBottom" format="dimension" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3701,6 +3903,9 @@
             {@link android.inputmethodservice.InputMethodService#onFinishInput()}.
         -->
         <attr name="supportsStylusHandwriting" format="boolean" />
+        <!-- Class name of an activity that allows the user to modify the stylus handwriting
+            settings for this service -->
+        <attr name="stylusHandwritingSettingsActivity" format="string" />
 
     </declare-styleable>
 
@@ -3754,6 +3959,17 @@
         <!-- The BCP-47 Language Tag of the subtype.  This replaces
         {@link android.R.styleable#InputMethod_Subtype_imeSubtypeLocale}.  -->
         <attr name="languageTag" format="string" />
+        <!-- The BCP-47 Language Tag of the preferred physical keyboard of the subtype. If it's not
+             specified, {@link android.R.styleable#InputMethod_Subtype_languageTag} will be used.
+             See also
+             {@link android.view.inputmethod.InputMethodSubtype#getPhysicalKeyboardHintLanguageTag}.
+             -->
+        <attr name="physicalKeyboardHintLanguageTag" format="string" />
+        <!-- The layout type of the preferred physical keyboard of the subtype.
+             It matches the layout type string in the keyboard layout definition. See also
+             {@link android.view.inputmethod.InputMethodSubtype#getPhysicalKeyboardHintLayoutType}.
+             -->
+        <attr name="physicalKeyboardHintLayoutType" format="string" />
     </declare-styleable>
 
     <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
@@ -4451,6 +4667,8 @@
         </attr>
     </declare-styleable>
     <declare-styleable name="EditText">
+        <!-- Enables styling shortcuts, e.g. Ctrl+B for bold. This is off by default.  -->
+        <attr name="enableTextStylingShortcuts" format="boolean" />
     </declare-styleable>
     <declare-styleable name="FastScroll">
         <!-- Drawable used for the scroll bar thumb. -->
@@ -5063,6 +5281,15 @@
         <attr name="textLocale" format="string" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
+        <!-- Color of search results highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="searchResultHighlightColor" format="color" />
+        <!-- Color of focused search result highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="focusedSearchResultHighlightColor" format="color" />
+
         <!-- Color of the hint text. -->
         <attr name="textColorHint" />
         <!-- Color of the links. -->
@@ -5140,6 +5367,14 @@
         <attr name="textColor" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
+        <!-- Color of search results highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="searchResultHighlightColor" format="color" />
+        <!-- Color of focused search result highlight.
+             This color is typically used when TextView/EditText shows search result in-app text
+             search invoked with Ctrl+F. -->
+        <attr name="focusedSearchResultHighlightColor" format="color" />
         <!-- Color of the hint text. -->
         <attr name="textColorHint" />
         <!-- Base text color, typeface, size, and style. -->
@@ -8927,6 +9162,10 @@
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
              @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
+        <!-- The service that provides {@link android.service.voice.VisualQueryDetectionService}.
+             @hide @SystemApi -->
+        <attr name="visualQueryDetectionService" format="string" />
+
     </declare-styleable>
 
     <!-- Use <code>game-service</code> as the root tag of the XML resource that
@@ -9211,6 +9450,8 @@
         <attr name="pointerIconGrab" format="reference"/>
         <!-- Reference to a pointer drawable with STYLE_GRABBING. -->
         <attr name="pointerIconGrabbing" format="reference"/>
+        <!-- Reference to a pointer drawable with HANDWRITING. -->
+        <attr name="pointerIconHandwriting" format="reference"/>
     </declare-styleable>
 
     <declare-styleable name="PointerIcon">
@@ -9326,8 +9567,34 @@
         <attr name="label" />
         <!-- The key character map file resource. -->
         <attr name="keyboardLayout" format="reference" />
-        <!-- The locales the given keyboard layout corresponds to. -->
-        <attr name="locale" format="string" />
+        <!-- The locales the given keyboard layout corresponds to. This is a list of
+             BCP-47 conformant language tags separated by the delimiter ',' or '|'.
+             Some examples of language tags are: en-US, zh-Hans-CN, el-Grek-polyton.
+             It includes information for language code, country code, variant, and script
+             code like ‘Latn’, ‘Cyrl’, etc. -->
+        <attr name="keyboardLocale" format="string"/>
+        <!-- The layout type of the given keyboardLayout.
+             NOTE: The enum to int value mapping must remain stable -->
+        <attr name="keyboardLayoutType" format="enum">
+            <!-- Qwerty-based keyboard layout. -->
+            <enum name="qwerty" value="1" />
+            <!-- Qwertz-based keyboard layout. -->
+            <enum name="qwertz" value="2" />
+            <!-- Azerty-based keyboard layout. -->
+            <enum name="azerty" value="3" />
+            <!-- Dvorak keyboard layout. -->
+            <enum name="dvorak" value="4" />
+            <!-- Colemak keyboard layout. -->
+            <enum name="colemak" value="5" />
+            <!-- Workman keyboard layout. -->
+            <enum name="workman" value="6" />
+            <!-- Turkish-Q keyboard layout. -->
+            <enum name="turkish_q" value="7" />
+            <!-- Turkish-F keyboard layout. -->
+            <enum name="turkish_f" value="8" />
+            <!-- Keyboard layout that has been enhanced with a large number of extra characters. -->
+            <enum name="extended" value="9" />
+        </attr>
         <!-- The vendor ID of the hardware the given layout corresponds to. @hide -->
         <attr name="vendorId" format="integer" />
         <!-- The product ID of the hardware the given layout corresponds to. @hide -->
@@ -9833,5 +10100,28 @@
         <attr name="maxDrawableWidth" format="dimension"/>
         <!-- Maximum width of height drawable. Drawables exceeding this size will be downsampled. -->
         <attr name="maxDrawableHeight" format="dimension"/>
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- Credential Manager attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Contains Credential Provider related metadata. Since providers are exposed
+         as services these should live under the service.
+    -->
+    <declare-styleable name="CredentialProvider">
+        <!-- A string that is displayed to the user in the Credential Manager settings
+             screen that can be used to provide more information about a provider. For
+             longer strings (40 char) it will be truncated. If multiple services
+             show the subtitle then the string will be joined together. -->
+        <attr name="settingsSubtitle" format="string" />
+    </declare-styleable>
+
+    <!-- A list of capabilities that indicates to the OS what kinds of credentials
+             this provider supports. This list is defined in CredentialProviderService. -->
+    <declare-styleable name="CredentialProvider_Capabilities" parent="CredentialProvider">
+        <!-- An individual capability declared by the provider. -->
+        <attr name="capability" format="string" />
     </declare-styleable>
     </resources>

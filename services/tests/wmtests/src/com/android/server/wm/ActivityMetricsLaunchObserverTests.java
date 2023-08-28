@@ -19,14 +19,19 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.content.ComponentName.createRelative;
+import static android.view.WindowManager.TRANSIT_OPEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -75,6 +80,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     private ActivityRecord mTrampolineActivity;
     private ActivityRecord mTopActivity;
     private ActivityOptions mActivityOptions;
+    private Transition mTransition;
     private boolean mLaunchTopByTrampoline;
     private boolean mNewActivityCreated = true;
     private long mExpectedStartedId;
@@ -98,6 +104,11 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
                 .setTask(mTrampolineActivity.getTask())
                 .setComponent(createRelative(DEFAULT_COMPONENT_PACKAGE_NAME, "TopActivity"))
                 .build();
+        mTopActivity.mDisplayContent.mOpeningApps.add(mTopActivity);
+        mTransition = new Transition(TRANSIT_OPEN, 0 /* flags */,
+                mTopActivity.mTransitionController, createTestBLASTSyncEngine());
+        mTransition.mParticipants.add(mTopActivity);
+        mTopActivity.mTransitionController.moveToCollecting(mTransition);
         // becomes invisible when covered by mTopActivity
         mTrampolineActivity.setVisibleRequested(false);
     }
@@ -317,7 +328,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
         // The activity reports fully drawn before windows drawn, then the fully drawn event will
         // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
-        mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
+        mActivityMetricsLogger.notifyFullyDrawn(mTopActivity, false /* restoredFromBundle */);
         notifyTransitionStarting(mTopActivity);
         // The pending fully drawn event should send when the actual windows drawn event occurs.
         final ActivityMetricsLogger.TransitionInfoSnapshot info = notifyWindowsDrawn(mTopActivity);
@@ -330,7 +341,7 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         verifyNoMoreInteractions(mLaunchObserver);
 
         final ActivityMetricsLogger.TransitionInfoSnapshot fullyDrawnInfo = mActivityMetricsLogger
-                .logAppTransitionReportedDrawn(mTopActivity, false /* restoredFromBundle */);
+                .notifyFullyDrawn(mTopActivity, false /* restoredFromBundle */);
         assertWithMessage("Invisible event must be dropped").that(fullyDrawnInfo).isNull();
     }
 
@@ -377,7 +388,20 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     }
 
     private ActivityMetricsLogger.TransitionInfoSnapshot notifyWindowsDrawn(ActivityRecord r) {
-        return mActivityMetricsLogger.notifyWindowsDrawn(r, SystemClock.elapsedRealtimeNanos());
+        return mActivityMetricsLogger.notifyWindowsDrawn(r);
+    }
+
+    @Test
+    public void testInTaskActivityStart() {
+        mTrampolineActivity.setVisible(true);
+        doReturn(true).when(mTrampolineActivity).isReportedDrawn();
+        spyOn(mActivityMetricsLogger);
+
+        onActivityLaunched(mTopActivity);
+        transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
+
+        verify(mActivityMetricsLogger, timeout(TIMEOUT_MS)).logInTaskActivityStart(
+                any(), anyBoolean(), anyInt());
     }
 
     @Test
@@ -437,17 +461,31 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
     @Test
     public void testActivityDrawnBeforeTransition() {
         mTopActivity.setVisible(false);
-        notifyActivityLaunching(mTopActivity.intent);
+        onIntentStarted(mTopActivity.intent);
         // Assume the activity is launched the second time consecutively. The drawn event is from
         // the first time (omitted in test) launch that is earlier than transition.
         doReturn(true).when(mTopActivity).isReportedDrawn();
         notifyWindowsDrawn(mTopActivity);
+        verifyNoMoreInteractions(mLaunchObserver);
+
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         // If the launching activity was drawn when starting transition, the launch event should
         // be reported successfully.
         notifyTransitionStarting(mTopActivity);
 
         verifyOnActivityLaunched(mTopActivity);
+        verifyOnActivityLaunchFinished(mTopActivity);
+    }
+
+    @Test
+    public void testActivityDrawnWithoutTransition() {
+        mTopActivity.mDisplayContent.mOpeningApps.remove(mTopActivity);
+        mTransition.mParticipants.remove(mTopActivity);
+        onIntentStarted(mTopActivity.intent);
+        notifyAndVerifyActivityLaunched(mTopActivity);
+        notifyWindowsDrawn(mTopActivity);
+        // Even if there is no notifyTransitionStarting, the launch event can still be reported
+        // because the drawn activity is not involved in transition.
         verifyOnActivityLaunchFinished(mTopActivity);
     }
 
@@ -480,6 +518,12 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+
+        // Simulate a corner case that the trampoline activity is removed by CLEAR_TASK.
+        // The 2 launch events can still be coalesced to one by matching the uid.
+        mTrampolineActivity.takeFromHistory();
+        assertNull(mTrampolineActivity.getTask());
+
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }

@@ -18,10 +18,10 @@ package android.app.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.UnixEpochTime;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ShellCommand;
-import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -51,7 +51,7 @@ public final class ManualTimeSuggestion implements Parcelable {
 
     @NonNull private final TimeSuggestionHelper mTimeSuggestionHelper;
 
-    public ManualTimeSuggestion(@NonNull TimestampedValue<Long> unixEpochTime) {
+    public ManualTimeSuggestion(@NonNull UnixEpochTime unixEpochTime) {
         mTimeSuggestionHelper = new TimeSuggestionHelper(ManualTimeSuggestion.class, unixEpochTime);
     }
 
@@ -70,7 +70,7 @@ public final class ManualTimeSuggestion implements Parcelable {
     }
 
     @NonNull
-    public TimestampedValue<Long> getUnixEpochTime() {
+    public UnixEpochTime getUnixEpochTime() {
         return mTimeSuggestionHelper.getUnixEpochTime();
     }
 

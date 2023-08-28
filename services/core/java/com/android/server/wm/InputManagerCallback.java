@@ -25,7 +25,6 @@ import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
@@ -36,6 +35,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.input.InputManagerService;
 
@@ -95,14 +95,17 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public void notifyNoFocusedWindowAnr(@NonNull InputApplicationHandle applicationHandle) {
-        mService.mAnrController.notifyAppUnresponsive(
-                applicationHandle, "Application does not have a focused window");
+        TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchNoFocusedWindow(
+                timeoutMessage("Application does not have a focused window"));
+        mService.mAnrController.notifyAppUnresponsive(applicationHandle, timeoutRecord);
     }
 
     @Override
     public void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
-            @NonNull String reason) {
-        mService.mAnrController.notifyWindowUnresponsive(token, pid, reason);
+            String reason) {
+        TimeoutRecord timeoutRecord = TimeoutRecord.forInputDispatchWindowUnresponsive(
+                timeoutMessage(reason));
+        mService.mAnrController.notifyWindowUnresponsive(token, pid, timeoutRecord);
     }
 
     @Override
@@ -214,11 +217,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             // Look for the topmost non-default display
             return firstExternalDisplayId;
         }
-    }
-
-    @Override
-    public PointF getCursorPosition() {
-        return mService.getLatestMousePosition();
     }
 
     @Override
@@ -339,6 +337,13 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
 
     private void updateInputDispatchModeLw() {
         mService.mInputManager.setInputDispatchMode(mInputDispatchEnabled, mInputDispatchFrozen);
+    }
+
+    private String timeoutMessage(String reason) {
+        if (reason == null) {
+            return "Input dispatching timed out";
+        }
+        return "Input dispatching timed out (" + reason + ")";
     }
 
     void dump(PrintWriter pw, String prefix) {

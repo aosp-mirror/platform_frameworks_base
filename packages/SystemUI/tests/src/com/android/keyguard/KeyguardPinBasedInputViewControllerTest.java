@@ -36,6 +36,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.SingleTapClassifier;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -98,10 +100,13 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
                 .thenReturn(mDeleteButton);
         when(mPinBasedInputView.findViewById(R.id.key_enter))
                 .thenReturn(mOkButton);
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true);
+
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
-                mEmergencyButtonController, mFalsingCollector) {
+                mEmergencyButtonController, mFalsingCollector, featureFlags) {
             @Override
             public void onResume(int reason) {
                 super.onResume(reason);
@@ -119,5 +124,11 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     @Test
     public void testGetInitialMessageResId() {
         assertThat(mKeyguardPinViewController.getInitialMessageResId()).isNotEqualTo(0);
+    }
+
+    @Test
+    public void testMessageIsSetWhenReset() {
+        mKeyguardPinViewController.resetState();
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pin);
     }
 }

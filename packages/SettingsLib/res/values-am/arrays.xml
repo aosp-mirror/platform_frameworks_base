@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4ኬ (የተጠበቀ)"</item>
     <item msgid="7322156123728520872">"4ኬ (ከፍ ተድርጎ የተመጣጠነ)"</item>
     <item msgid="7735692090314849188">"4ኬ (ከፍ ተድርጎ የተመጣጠነ፣ የተጠበቀ)"</item>
-    <item msgid="7346816300608639624">"720ፒ፣ 1080ፒ (ሁለትዮሽ ማያ ገፅ)"</item>
+    <item msgid="7346816300608639624">"720ፒ፣ 1080ፒ (ሁለትዮሽ ማያ ገጽ)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"ምንም"</item>
@@ -258,7 +258,7 @@
   </string-array>
   <string-array name="track_frame_time_entries">
     <item msgid="634406443901014984">"ጠፍቷል"</item>
-    <item msgid="1288760936356000927">"ማያ ገፅ ላይ እንደ አሞሌዎች"</item>
+    <item msgid="1288760936356000927">"ማያ ገጽ ላይ እንደ አሞሌዎች"</item>
     <item msgid="5023908510820531131">"በ<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g> ውስጥ"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
@@ -283,11 +283,5 @@
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
-  </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"ትንሽ"</item>
-    <item msgid="1484561228522634915">"ነባሪ"</item>
-    <item msgid="4014311587094503943">"ትልቅ"</item>
-    <item msgid="2904569270831156685">"በጣም ትልቅ"</item>
   </string-array>
 </resources>

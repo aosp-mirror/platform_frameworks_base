@@ -21,6 +21,8 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
@@ -29,30 +31,32 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.util.mockito.any
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardLongPressInteractorTest : SysuiTestCase() {
 
-    @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var logger: UiEventLogger
+    @Mock private lateinit var accessibilityManager: AccessibilityManagerWrapper
 
     private lateinit var underTest: KeyguardLongPressInteractor
 
@@ -63,7 +67,23 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        overrideResource(R.bool.long_press_keyguard_customize_lockscreen_enabled, true)
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenAnswer {
+            it.arguments[0]
+        }
+
+        testScope = TestScope()
+        keyguardRepository = FakeKeyguardRepository()
+        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
+
         runBlocking { createUnderTest() }
+    }
+
+    @After
+    fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 
     @Test
@@ -84,7 +104,7 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isEnabled - always false when quick settings are visible`() =
+    fun isEnabled_alwaysFalseWhenQuickSettingsAreVisible() =
         testScope.runTest {
             val isEnabled = collectLastValue(underTest.isLongPressHandlingEnabled)
             KeyguardState.values().forEach { keyguardState ->
@@ -98,103 +118,193 @@ class KeyguardLongPressInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `long-pressed - pop-up clicked - starts activity`() =
+    fun isEnabled_alwaysFalseWhenConfigEnabledBooleanIsFalse() =
         testScope.runTest {
-            val menu = collectLastValue(underTest.menu)
+            overrideResource(R.bool.long_press_keyguard_customize_lockscreen_enabled, false)
+            createUnderTest()
+            val isEnabled by collectLastValue(underTest.isLongPressHandlingEnabled)
             runCurrent()
 
-            val x = 100
-            val y = 123
-            underTest.onLongPress(x, y)
-            assertThat(menu()).isNotNull()
-            assertThat(menu()?.position?.x).isEqualTo(x)
-            assertThat(menu()?.position?.y).isEqualTo(y)
-
-            menu()?.onClicked?.invoke()
-
-            assertThat(menu()).isNull()
-            verify(activityStarter).dismissKeyguardThenExecute(any(), any(), anyBoolean())
+            assertThat(isEnabled).isFalse()
         }
 
     @Test
-    fun `long-pressed - pop-up dismissed - never starts activity`() =
+    fun longPressed_menuClicked_showsSettings() =
         testScope.runTest {
-            val menu = collectLastValue(underTest.menu)
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
             runCurrent()
 
-            menu()?.onDismissed?.invoke()
+            underTest.onLongPress()
+            assertThat(isMenuVisible).isTrue()
 
-            assertThat(menu()).isNull()
-            verify(activityStarter, never()).dismissKeyguardThenExecute(any(), any(), anyBoolean())
+            underTest.onMenuTouchGestureEnded(/* isClick= */ true)
+
+            assertThat(isMenuVisible).isFalse()
+            assertThat(shouldOpenSettings).isTrue()
         }
 
-    @Suppress("DEPRECATION") // We're okay using ACTION_CLOSE_SYSTEM_DIALOGS on system UI.
     @Test
-    fun `long pressed - close dialogs broadcast received - popup dismissed`() =
+    fun onSettingsShown_consumesSettingsShowEvent() =
         testScope.runTest {
-            val menu = collectLastValue(underTest.menu)
+            val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
             runCurrent()
 
-            underTest.onLongPress(123, 456)
-            assertThat(menu()).isNotNull()
+            underTest.onLongPress()
+            underTest.onMenuTouchGestureEnded(/* isClick= */ true)
+            assertThat(shouldOpenSettings).isTrue()
+
+            underTest.onSettingsShown()
+            assertThat(shouldOpenSettings).isFalse()
+        }
+
+    @Test
+    fun onTouchedOutside_neverShowsSettings() =
+        testScope.runTest {
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
+            runCurrent()
+
+            underTest.onTouchedOutside()
+
+            assertThat(isMenuVisible).isFalse()
+            assertThat(shouldOpenSettings).isFalse()
+        }
+
+    @Test
+    fun longPressed_openWppDirectlyEnabled_doesNotShowMenu_opensSettings() =
+        testScope.runTest {
+            createUnderTest(isOpenWppDirectlyEnabled = true)
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            val shouldOpenSettings by collectLastValue(underTest.shouldOpenSettings)
+            runCurrent()
+
+            underTest.onLongPress()
+
+            assertThat(isMenuVisible).isFalse()
+            assertThat(shouldOpenSettings).isTrue()
+        }
+
+    @Test
+    fun longPressed_closeDialogsBroadcastReceived_popupDismissed() =
+        testScope.runTest {
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+
+            underTest.onLongPress()
+            assertThat(isMenuVisible).isTrue()
 
             fakeBroadcastDispatcher.registeredReceivers.forEach { broadcastReceiver ->
                 broadcastReceiver.onReceive(context, Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
             }
 
-            assertThat(menu()).isNull()
+            assertThat(isMenuVisible).isFalse()
         }
 
     @Test
-    fun `logs when menu is shown`() =
+    fun closesDialogAfterTimeout() =
         testScope.runTest {
-            collectLastValue(underTest.menu)
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
             runCurrent()
 
-            underTest.onLongPress(100, 123)
+            underTest.onLongPress()
+            assertThat(isMenuVisible).isTrue()
+
+            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+
+            assertThat(isMenuVisible).isFalse()
+        }
+
+    @Test
+    fun closesDialogAfterTimeout_onlyAfterTouchGestureEnded() =
+        testScope.runTest {
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+
+            underTest.onLongPress()
+            assertThat(isMenuVisible).isTrue()
+            underTest.onMenuTouchGestureStarted()
+
+            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+            assertThat(isMenuVisible).isTrue()
+
+            underTest.onMenuTouchGestureEnded(/* isClick= */ false)
+            advanceTimeBy(KeyguardLongPressInteractor.DEFAULT_POPUP_AUTO_HIDE_TIMEOUT_MS)
+            assertThat(isMenuVisible).isFalse()
+        }
+
+    @Test
+    fun logsWhenMenuIsShown() =
+        testScope.runTest {
+            collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+
+            underTest.onLongPress()
 
             verify(logger)
                 .log(KeyguardLongPressInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_SHOWN)
         }
 
     @Test
-    fun `logs when menu is clicked`() =
+    fun logsWhenMenuIsClicked() =
         testScope.runTest {
-            val menu = collectLastValue(underTest.menu)
+            collectLastValue(underTest.isMenuVisible)
             runCurrent()
 
-            underTest.onLongPress(100, 123)
-            menu()?.onClicked?.invoke()
+            underTest.onLongPress()
+            underTest.onMenuTouchGestureEnded(/* isClick= */ true)
 
             verify(logger)
                 .log(KeyguardLongPressInteractor.LogEvents.LOCK_SCREEN_LONG_PRESS_POPUP_CLICKED)
         }
 
+    @Test
+    fun showMenu_leaveLockscreen_returnToLockscreen_menuNotVisible() =
+        testScope.runTest {
+            val isMenuVisible by collectLastValue(underTest.isMenuVisible)
+            runCurrent()
+            underTest.onLongPress()
+            assertThat(isMenuVisible).isTrue()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    to = KeyguardState.GONE,
+                ),
+            )
+            assertThat(isMenuVisible).isFalse()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    to = KeyguardState.LOCKSCREEN,
+                ),
+            )
+            assertThat(isMenuVisible).isFalse()
+        }
+
     private suspend fun createUnderTest(
         isLongPressFeatureEnabled: Boolean = true,
         isRevampedWppFeatureEnabled: Boolean = true,
+        isOpenWppDirectlyEnabled: Boolean = false,
     ) {
-        testScope = TestScope()
-        keyguardRepository = FakeKeyguardRepository()
-        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
-
         underTest =
             KeyguardLongPressInteractor(
-                unsafeContext = context,
+                appContext = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor =
                     KeyguardTransitionInteractor(
-                        repository = keyguardTransitionRepository,
+                        keyguardTransitionRepository,
+                        testScope.backgroundScope
                     ),
                 repository = keyguardRepository,
-                activityStarter = activityStarter,
                 logger = logger,
                 featureFlags =
                     FakeFeatureFlags().apply {
                         set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
                         set(Flags.REVAMPED_WALLPAPER_UI, isRevampedWppFeatureEnabled)
+                        set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, isOpenWppDirectlyEnabled)
                     },
                 broadcastDispatcher = fakeBroadcastDispatcher,
+                accessibilityManager = accessibilityManager
             )
         setUpState()
     }

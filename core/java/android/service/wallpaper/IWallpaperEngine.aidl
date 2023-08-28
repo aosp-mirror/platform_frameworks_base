@@ -49,4 +49,5 @@ interface IWallpaperEngine {
     oneway void addLocalColorsAreas(in List<RectF> regions);
     SurfaceControl mirrorSurfaceControl();
     oneway void applyDimming(float dimAmount);
+    oneway void setWallpaperFlags(int which);
 }

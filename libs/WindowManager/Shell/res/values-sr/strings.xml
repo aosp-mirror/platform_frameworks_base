@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Подешавања"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Уђи на подељени екран"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Мени"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Мени слике у слици."</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> је слика у слици"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Ако не желите да <xliff:g id="NAME">%s</xliff:g> користи ову функцију, додирните да бисте отворили подешавања и искључили је."</string>
     <string name="pip_play" msgid="3496151081459417097">"Пусти"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Промените величину"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Ставите у тајну меморију"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Уклоните из тајне меморије"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Апликација можда неће радити са подељеним екраном."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Апликација не подржава подељени екран."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Апликација можда неће радити са подељеним екраном."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Апликација не подржава подељени екран."</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Ова апликација може да се отвори само у једном прозору."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апликација можда неће функционисати на секундарном екрану."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Апликација не подржава покретање на секундарним екранима."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Разделник подељеног екрана"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Разделник подељеног екрана"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Разделник подељеног екрана"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Режим целог екрана за леви екран"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Леви екран 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Леви екран 50%"</string>
@@ -82,12 +84,12 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблем није решен?\nДодирните да бисте вратили"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Немате проблема са камером? Додирните да бисте одбацили."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Видите и урадите више"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Превуците другу апликацију да бисте користили подељени екран"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Превуците другу апликацију да бисте користили подељени екран"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двапут додирните изван апликације да бисте променили њену позицију"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Важи"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Проширите за још информација."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Желите ли да рестартујете ради бољег приказа?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Можете да рестартујете апликацију да би изгледала боље на екрану, али можете да изгубите напредак или несачуване промене"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Можете да рестартујете апликацију да би изгледала боље на екрану, с тим што можете да изгубите оно што сте урадили или несачуване промене, ако их има"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Откажи"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Рестартуј"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Не приказуј поново"</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Снимак екрана"</string>
     <string name="close_text" msgid="4986518933445178928">"Затворите"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Затворите мени"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Отворите мени"</string>
 </resources>

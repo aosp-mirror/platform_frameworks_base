@@ -18,7 +18,8 @@ package com.android.systemui.temporarydisplay.chipbar
 
 import android.os.VibrationEffect
 import android.view.View
-import androidx.annotation.ColorRes
+import androidx.annotation.AttrRes
+import com.android.internal.logging.InstanceId
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -47,9 +48,12 @@ data class ChipbarInfo(
     override val timeoutMs: Int,
     override val id: String,
     override val priority: ViewPriority,
+    override val instanceId: InstanceId?,
 ) : TemporaryViewInfo() {
     companion object {
-        @ColorRes val DEFAULT_ICON_TINT = R.color.chipbar_text_and_icon_color
+        // LINT.IfChange
+        @AttrRes val DEFAULT_ICON_TINT = com.android.internal.R.attr.materialColorOnSecondaryFixed
+        // LINT.ThenChange(systemui/res/layout/chipbar.xml)
     }
 }
 

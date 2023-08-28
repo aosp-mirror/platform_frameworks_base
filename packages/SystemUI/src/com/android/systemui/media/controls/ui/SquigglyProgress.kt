@@ -31,8 +31,8 @@ import android.util.MathUtils.lerp
 import android.util.MathUtils.lerpInv
 import android.util.MathUtils.lerpInvSat
 import androidx.annotation.VisibleForTesting
+import com.android.app.animation.Interpolators
 import com.android.internal.graphics.ColorUtils
-import com.android.systemui.animation.Interpolators
 import kotlin.math.abs
 import kotlin.math.cos
 

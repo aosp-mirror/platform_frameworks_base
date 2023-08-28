@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Færa"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Stækka"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Minnka"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Ýttu tvisvar á "<annotation icon="home_icon">" HEIM "</annotation>" til að opna stillingar"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Ýttu tvisvar á "<annotation icon="home_icon">"HEIM"</annotation>" til að opna stillingar"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Valmynd fyrir mynd í mynd."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Færa til vinstri"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Færa til hægri"</string>

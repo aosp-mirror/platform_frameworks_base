@@ -387,7 +387,7 @@ public class MediaRouter {
                 try {
                     mMediaRouterService.registerClientGroupId(mClient, groupId);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to register group ID of the client.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -439,7 +439,7 @@ public class MediaRouter {
                     try {
                         mMediaRouterService.unregisterClient(mClient);
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to unregister media router client.", ex);
+                        ex.rethrowFromSystemServer();
                     }
                     mClient = null;
                 }
@@ -466,7 +466,7 @@ public class MediaRouter {
                     mMediaRouterService.setDiscoveryRequest(mClient,
                             mDiscoveryRequestRouteTypes, mDiscoverRequestActiveScan);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to publish media router client discovery request.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -478,7 +478,7 @@ public class MediaRouter {
                             mSelectedRoute != null ? mSelectedRoute.mGlobalRouteId : null,
                             explicit);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to publish media router client selected route.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -490,7 +490,7 @@ public class MediaRouter {
                 try {
                     mClientState = mMediaRouterService.getState(mClient);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to retrieve media router client state.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
             final ArrayList<MediaRouterClientState.RouteInfo> globalRoutes =
@@ -535,7 +535,7 @@ public class MediaRouter {
                     mMediaRouterService.requestSetVolume(mClient,
                             route.mGlobalRouteId, volume);
                 } catch (RemoteException ex) {
-                    Log.w(TAG, "Unable to request volume change.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -546,7 +546,7 @@ public class MediaRouter {
                     mMediaRouterService.requestUpdateVolume(mClient,
                             route.mGlobalRouteId, direction);
                 } catch (RemoteException ex) {
-                    Log.w(TAG, "Unable to request volume change.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -653,7 +653,7 @@ public class MediaRouter {
                 try {
                     return mMediaRouterService.isPlaybackActive(mClient);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to retrieve playback active state.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
             return false;
@@ -3184,7 +3184,7 @@ public class MediaRouter {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
                 updateWifiDisplayStatus((WifiDisplayStatus) intent.getParcelableExtra(
-                        DisplayManager.EXTRA_WIFI_DISPLAY_STATUS));
+                        DisplayManager.EXTRA_WIFI_DISPLAY_STATUS, android.hardware.display.WifiDisplayStatus.class));
             }
         }
     }

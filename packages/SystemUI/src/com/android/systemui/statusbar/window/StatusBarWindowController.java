@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.window;
 
+import static android.view.WindowInsets.Type.mandatorySystemGestures;
+import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowInsets.Type.tappableElement;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -27,6 +30,7 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -36,6 +40,7 @@ import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowManager;
+import android.view.InsetsFrameProvider;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,6 +85,7 @@ public class StatusBarWindowController {
     private final ViewGroup mLaunchAnimationContainer;
     private WindowManager.LayoutParams mLp;
     private final WindowManager.LayoutParams mLpChanged;
+    private final Binder mInsetsSourceOwner = new Binder();
 
     @Inject
     public StatusBarWindowController(
@@ -225,6 +231,19 @@ public class StatusBarWindowController {
         lp.setTitle("StatusBar");
         lp.packageName = mContext.getPackageName();
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        final InsetsFrameProvider gestureInsetsProvider =
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, mandatorySystemGestures());
+        final int safeTouchRegionHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.display_cutout_touchable_region_size);
+        if (safeTouchRegionHeight > 0) {
+            gestureInsetsProvider.setMinimalInsetsSizeInDisplayCutoutSafe(
+                    Insets.of(0, safeTouchRegionHeight, 0, 0));
+        }
+        lp.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars()),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement()),
+                gestureInsetsProvider
+        };
         return lp;
 
     }

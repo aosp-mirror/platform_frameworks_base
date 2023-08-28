@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Innstillinger"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivér delt skjerm"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meny"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Bilde-i-bilde-meny"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
     <string name="pip_play" msgid="3496151081459417097">"Spill av"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Endre størrelse"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Oppbevar"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Avslutt oppbevaring"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Appen støtter ikke delt skjerm."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Det kan hende at appen ikke fungerer med delt skjerm"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Appen støtter ikke delt skjerm"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Denne appen kan bare åpnes i ett vindu."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer kanskje ikke på en sekundær skjerm."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Appen kan ikke kjøres på sekundære skjermer."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Skilleelement for delt skjerm"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Skilleelement for delt skjerm"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Skilleelement for delt skjerm"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Utvid den venstre delen av skjermen til hele skjermen"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Sett størrelsen på den venstre delen av skjermen til 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Sett størrelsen på den venstre delen av skjermen til 50 %"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Ble ikke problemet løst?\nTrykk for å gå tilbake"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Har du ingen kameraproblemer? Trykk for å lukke."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Se og gjør mer"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Dra inn en annen app for å bruke delt skjerm"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Dra inn en annen app for å bruke delt skjerm"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dobbelttrykk utenfor en app for å flytte den"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Greit"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Vis for å få mer informasjon."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Skjermdump"</string>
     <string name="close_text" msgid="4986518933445178928">"Lukk"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Lukk menyen"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Åpne menyen"</string>
 </resources>

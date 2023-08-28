@@ -44,6 +44,12 @@
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
 
+    <!-- Whether or not lockscreen shortcuts can be customized -->
+    <bool name="custom_lockscreen_shortcuts_enabled">false</bool>
+
+    <!-- Whether or not long-pressing on keyguard will display to customize lockscreen -->
+    <bool name="long_press_keyguard_customize_lockscreen_enabled">false</bool>
+
     <bool name="config_dead_zone_flash">false</bool>
 
     <!-- Whether to enable dimming navigation buttons when wallpaper is not visible, should be
@@ -63,6 +69,10 @@
 
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
+
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of media recommendation items-->
+    <integer name="default_qs_media_rec_width_dp">380</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
 
@@ -99,6 +109,7 @@
         <item>accessibility_display_daltonizer_enabled:color_correction</item>
         <item>accessibility_display_inversion_enabled:inversion</item>
         <item>one_handed_mode_enabled:onehanded</item>
+        <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
     <!-- Use collapsed layout for media player in landscape QQS -->
@@ -119,6 +130,9 @@
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
+
+    <!-- Display time for a sticky heads up notification, in milliseconds. -->
+    <integer name="sticky_heads_up_notification_time">60000</integer>
 
     <!-- Whether to hide the notification header when the HUN is expanded. -->
     <bool name="heads_up_notification_hides_header">false</bool>
@@ -285,6 +299,9 @@
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
+    <!-- Determines whether the shell features all run on another thread. -->
+    <bool name="config_enableShellMainThread">true</bool>
+
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIInitializerImpl</string>
 
@@ -442,6 +459,13 @@
          screenshot has been saved to work profile. If blank, a default icon will be shown. -->
     <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
 
+    <!-- The component name of the screenshot editing activity that provides the App Clips flow.
+         The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
+         and finally letting user send the screenshot to the calling notes app. This activity
+         should not send the screenshot to the calling activity without user consent. -->
+    <string name="config_screenshotAppClipsActivityComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsActivity</string>
+
     <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
      This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_remoteCopyPackage" translatable="false"></string>
@@ -487,8 +511,8 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
-    <!-- Whether to show a severe low battery dialog. -->
-    <bool name="config_severe_battery_dialog">false</bool>
+    <!-- Whether to show extra battery saver confirmation dialog. -->
+    <bool name="config_extra_battery_saver_confirmation">false</bool>
 
     <!-- A path representing a shield. Will sometimes be displayed with the battery icon when
          needed. This path is a 10px wide and 13px tall. -->
@@ -559,6 +583,9 @@
     <!-- Whether to show the side fps hint while on bouncer -->
     <bool name="config_show_sidefps_hint_on_bouncer">true</bool>
 
+    <!-- Max number of lines we want to show for the bouncer secondary message -->
+    <integer name="bouncer_secondary_message_lines">2</integer>
+
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
 
@@ -582,11 +609,6 @@
         M44.9713,54.6267C42.5513,56.7167 39.2879,58.0001 35.5846,58.0001C32.2296,
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
-
-    <!-- The radius of the enrollment progress bar, in dp -->
-    <integer name="config_udfpsEnrollProgressBar" translatable="false">
-        280
-    </integer>
 
     <!-- The time (in ms) needed to trigger the lock icon view's long-press affordance -->
     <integer name="config_lockIconLongPress" translatable="false">200</integer>
@@ -833,4 +855,63 @@
     <!-- Whether the floating rotation button should be on the left/right in the device's natural
          orientation -->
     <bool name="floating_rotation_button_position_left">true</bool>
+
+    <!-- Configuration to set Learn more in device logs as URL link -->
+    <bool name="log_access_confirmation_learn_more_as_link">true</bool>
+
+    <!-- [START] MULTI SHADE -->
+    <!-- Whether the device should use dual shade. If false, the device uses single shade. -->
+    <bool name="dual_shade_enabled">true</bool>
+    <!--
+    When in dual shade, where should the horizontal split be on the screen to help determine whether
+    the user is pulling down the left shade or the right shade. Must be between 0.0 and 1.0,
+    inclusive. In other words: how much of the left-hand side of the screen, when pulled down on,
+    would reveal the left-hand side shade.
+
+    More concretely:
+    A value of 0.67 means that the left two-thirds of the screen are dedicated to the left-hand side
+    shade and the remaining one-third of the screen on the right is dedicated to the right-hand side
+    shade.
+    -->
+    <dimen name="dual_shade_split_fraction">0.67</dimen>
+    <!-- Width of the left-hand side shade. -->
+    <dimen name="left_shade_width">436dp</dimen>
+    <!-- Width of the right-hand side shade. -->
+    <dimen name="right_shade_width">436dp</dimen>
+    <!--
+    Opaque version of the scrim that shows up behind dual shades. The alpha channel is driven
+    programmatically.
+    -->
+    <color name="opaque_scrim">#D9D9D9</color>
+    <!-- Maximum opacity when the scrim that shows up behind the dual shades is fully visible. -->
+    <dimen name="dual_shade_scrim_alpha">0.1</dimen>
+    <!--
+    The amount that the user must swipe down when the shade is fully collapsed to automatically
+    expand once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully collapsed once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_expand_threshold">0.5</dimen>
+    <!--
+    The amount that the user must swipe up when the shade is fully expanded to automatically
+    collapse once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully expanded once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_collapse_threshold">0.5</dimen>
+    <!-- [END] MULTI SHADE -->
+
+    <!-- Time (in ms) to delay the bouncer views from showing when passive auth may be used for
+    device entry. -->
+    <integer name="primary_bouncer_passive_auth_delay">500</integer>
+
+    <!--
+    The package name of the app store app. If empty, features using this should be gracefully
+    disabled.
+    -->
+    <string name="config_appStorePackageName" translatable="false"></string>
+
+    <!-- Template for a link that leads to an app page in the relevant app store. If empty,
+    features using this should be gracefully disabled. If not empty, it must include a
+    "$packageName" part that will be replaced by the code with the package name of the target app.
+    -->
+    <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
 </resources>

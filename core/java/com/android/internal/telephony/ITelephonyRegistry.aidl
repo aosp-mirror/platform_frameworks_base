@@ -32,6 +32,8 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.MediaQualityStatus;
+
 import com.android.internal.telephony.ICarrierConfigChangeListener;
 import com.android.internal.telephony.ICarrierPrivilegesCallback;
 import com.android.internal.telephony.IPhoneStateListener;
@@ -67,8 +69,8 @@ interface ITelephonyRegistry {
     void notifyCellLocationForSubscriber(in int subId, in CellIdentity cellLocation);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
-    void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
-            int foregroundCallState, int backgroundCallState);
+    void notifyPreciseCallState(int phoneId, int subId, in int[] callStates, in String[] imsCallIds,
+            in int[] imsCallServiceTypes, in int[] imsCallTypes);
     void notifyDisconnectCause(int phoneId, int subId, int disconnectCause,
             int preciseDisconnectCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);
@@ -92,6 +94,7 @@ interface ITelephonyRegistry {
             in EmergencyNumber emergencyNumber);
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
+    void notifyMediaQualityStatusChanged(int phoneId, int subId, in MediaQualityStatus status);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
     void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
             String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
@@ -114,4 +117,7 @@ interface ITelephonyRegistry {
             String pkg, String featureId);
     void removeCarrierConfigChangeListener(ICarrierConfigChangeListener listener, String pkg);
     void notifyCarrierConfigChanged(int phoneId, int subId, int carrierId, int specificCarrierId);
+
+    void notifyCallbackModeStarted(int phoneId, int subId, int type);
+    void notifyCallbackModeStopped(int phoneId, int subId, int type, int reason);
 }

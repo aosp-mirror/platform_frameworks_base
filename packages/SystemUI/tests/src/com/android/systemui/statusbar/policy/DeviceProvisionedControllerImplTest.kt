@@ -27,8 +27,10 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.wrapper.BuildInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -36,9 +38,9 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -58,6 +60,8 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
     private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var listener: DeviceProvisionedController.DeviceProvisionedListener
+    @Mock
+    private lateinit var buildInfo: BuildInfo
     @Captor
     private lateinit var userTrackerCallbackCaptor: ArgumentCaptor<UserTracker.Callback>
 
@@ -72,12 +76,13 @@ class DeviceProvisionedControllerImplTest : SysuiTestCase() {
         mainExecutor = FakeExecutor(FakeSystemClock())
         settings = FakeSettings()
         `when`(userTracker.userId).thenReturn(START_USER)
-
+        whenever(buildInfo.isDebuggable).thenReturn(false)
         controller = DeviceProvisionedControllerImpl(
                 settings,
                 settings,
                 userTracker,
                 dumpManager,
+                buildInfo,
                 Handler(testableLooper.looper),
                 mainExecutor
         )

@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Параметрлер"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Бөлінген экранға кіру"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Mәзір"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"\"Сурет ішіндегі сурет\" мәзірі"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл мүмкіндікті пайдалануын қаламасаңыз, параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
     <string name="pip_play" msgid="3496151081459417097">"Ойнату"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Өлшемін өзгерту"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Жасыру"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Көрсету"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Қолданба экранды бөлу режимінде жұмыс істемеуі мүмкін."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Қодланба бөлінген экранды қолдамайды."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Қолданба экранды бөлу режимінде жұмыс істемеуі мүмкін."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Қолданбада экранды бөлу мүмкін емес."</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Бұл қолданбаны тек 1 терезеден ашуға болады."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Қолданба қосымша дисплейде жұмыс істемеуі мүмкін."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Қолданба қосымша дисплейлерде іске қосуды қолдамайды."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Бөлінген экран бөлгіші"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Экранды бөлу режимінің бөлгіші"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Экранды бөлу режимінің бөлгіші"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Сол жағын толық экранға шығару"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70% сол жақта"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50% сол жақта"</string>
@@ -77,12 +79,12 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Көпіршік"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Басқару"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Қалқыма хабар жабылды."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Түртсеңіз, қолданба жабылып, ыңғайлы көрініспен қайта ашылады."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Ыңғайлы көріністі реттеу үшін қолданбаны түртіп, өшіріп қосыңыз."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Камерада қателер шықты ма?\nЖөндеу үшін түртіңіз."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Жөнделмеді ме?\nҚайтару үшін түртіңіз."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Камерада қателер шықпады ма? Жабу үшін түртіңіз."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Қосымша ақпаратты қарап, әрекеттер жасау"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Экранды бөлу үшін басқа қолданбаға сүйреңіз."</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Экранды бөлу үшін басқа қолданбаға өтіңіз."</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Қолданбаның орнын өзгерту үшін одан тыс жерді екі рет түртіңіз."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Түсінікті"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Толығырақ ақпарат алу үшін терезені жайыңыз."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Скриншот"</string>
     <string name="close_text" msgid="4986518933445178928">"Жабу"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Мәзірді жабу"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Мәзірді ашу"</string>
 </resources>

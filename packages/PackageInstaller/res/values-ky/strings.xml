@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Колдонмо орнотулду."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Бул колдонмону орнотоюн деп жатасызбы?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Бул колдонмону жаңыртайын деп жатасызбы?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Колдонмо <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> аркылуу жаңыртылсынбы?\n\nАдатта бул колдонмо <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> жөнөткөн жаңыртууларды алат. Башка булактан жаңыртуу менен келечекте телефонуңуз ар кайсы булактардан жаңыртылып калат. Колдонмонун функциялары өзгөрүшү мүмкүн."</string>
     <string name="install_failed" msgid="5777824004474125469">"Колдонмо орнотулган жок."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Топтомду орнотууга болбойт."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Бул колдонуучу белгисиз колдонмолорду орното албайт"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Бул колдонуучу колдонмолорду орното албайт"</string>
     <string name="ok" msgid="7871959885003339302">"ЖАРАЙТ"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Баары бир жаңыртылсын"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Колд. башкаруу"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Бош орун жок"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун телефонуңузга орнотуу мүмкүн эмес. Орун бошотуп, кайталап орнотуп көрүңүз."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Бардык дайындар өчүп калат."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Түзмөктөгү бардык профилдердин, ошондой эле жумушчу профилдердин дайындары өчүп калат."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Колдонмонун <xliff:g id="SIZE">%1$s</xliff:g> дайындарын сактоо."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Бул колдонмону өчүрөсүзбү?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Бул колдонмону чыгарып саласызбы? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону да өчүрүлөт."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Чыгарылып салынууда"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Чыгарылып салынбай калгандар"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Чыгарылып салынууда…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылууда…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Чыгарылып салынды."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылып салынды"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону өчүрүлдү"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Чыгарылып салынган жок."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылып салынган жок."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону өчүрүлүүдө…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Түзмөктү башкарган колдонмо иштеп жатканда аны чыгарып салууга болбойт"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> колдонуучусунун түзмөктү башкарган колдонмосу иштеп жатканда, аны чыгарып салууга болбойт"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Колдонмо айрым колдонуучуларга же профилдерге керек. Ал башкалар үчүн чыгарылып салынган"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Белгисиз"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Коопсуздук максатында, планшетиңизге бул булактан колдонмолорду орнотууга болбойт. Бул параметрди каалаган убакта жөндөөлөрдөн өзгөртө аласыз."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Коопсуздук максатында, сыналгыңызга бул булактан колдонмолорду орнотууга болбойт. Бул параметрди каалаган убакта жөндөөлөрдөн өзгөртө аласыз."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Коопсуздукту сактоо максатында, азырынча саатыңызда бул булактан белгисиз колдонмолорду орнотууга уруксат жок. Муну параметрлерден өзгөртсөңүз болот."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Коопсуздук максатында, телефонуңузга бул булактан колдонмолорду орнотууга болбойт. Бул параметрди каалаган убакта жөндөөлөрдөн өзгөртө аласыз."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонуңуз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам телефонуңузга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшетиңиз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Улантуу"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Параметрлер"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>

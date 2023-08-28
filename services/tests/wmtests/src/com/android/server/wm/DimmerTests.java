@@ -36,6 +36,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.testutils.StubTransaction;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -147,8 +148,8 @@ public class DimmerTests extends WindowTestsBase {
 
         int width = 100;
         int height = 300;
-        Rect bounds = new Rect(0, 0, width, height);
-        mDimmer.updateDims(mTransaction, bounds);
+        mDimmer.mDimState.mDimBounds.set(0, 0, width, height);
+        mDimmer.updateDims(mTransaction);
 
         verify(mTransaction).setWindowCrop(getDimLayer(), width, height);
         verify(mTransaction).show(getDimLayer());
@@ -194,7 +195,7 @@ public class DimmerTests extends WindowTestsBase {
         SurfaceControl dimLayer = getDimLayer();
         mDimmer.resetDimStates();
 
-        mDimmer.updateDims(mTransaction, new Rect());
+        mDimmer.updateDims(mTransaction);
         verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
                 eq(ANIMATION_TYPE_DIMMER));
@@ -212,29 +213,29 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.resetDimStates();
         mDimmer.dimAbove(mTransaction, child, alpha);
 
-        mDimmer.updateDims(mTransaction, new Rect());
+        mDimmer.updateDims(mTransaction);
         verify(mTransaction).show(dimLayer);
         verify(mTransaction, never()).remove(dimLayer);
     }
 
     @Test
     public void testDimUpdateWhileDimming() {
-        Rect bounds = new Rect();
         TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, child, alpha);
+        final Rect bounds = mDimmer.mDimState.mDimBounds;
 
         SurfaceControl dimLayer = getDimLayer();
         bounds.set(0, 0, 10, 10);
-        mDimmer.updateDims(mTransaction, bounds);
+        mDimmer.updateDims(mTransaction);
         verify(mTransaction).setWindowCrop(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction, times(1)).show(dimLayer);
         verify(mTransaction).setPosition(dimLayer, 0, 0);
 
         bounds.set(10, 10, 30, 30);
-        mDimmer.updateDims(mTransaction, bounds);
+        mDimmer.updateDims(mTransaction);
         verify(mTransaction).setWindowCrop(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction).setPosition(dimLayer, 10, 10);
     }
@@ -246,17 +247,32 @@ public class DimmerTests extends WindowTestsBase {
 
         mDimmer.dimAbove(mTransaction, child, 1);
         SurfaceControl dimLayer = getDimLayer();
-        mDimmer.updateDims(mTransaction, new Rect());
+        mDimmer.updateDims(mTransaction);
         verify(mTransaction, times(1)).show(dimLayer);
 
         reset(mSurfaceAnimatorStarter);
         mDimmer.dontAnimateExit();
         mDimmer.resetDimStates();
-        mDimmer.updateDims(mTransaction, new Rect());
+        mDimmer.updateDims(mTransaction);
         verify(mSurfaceAnimatorStarter, never()).startAnimation(any(SurfaceAnimator.class), any(
                 SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean(),
                 eq(ANIMATION_TYPE_DIMMER));
         verify(mTransaction).remove(dimLayer);
+    }
+
+    @Test
+    public void testDimmerWithBlurUpdatesTransaction() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
+        mHost.addChild(child, 0);
+
+        final int blurRadius = 50;
+        mDimmer.dimBelow(mTransaction, child, 0, blurRadius);
+        SurfaceControl dimLayer = getDimLayer();
+
+        assertNotNull("Dimmer should have created a surface", dimLayer);
+
+        verify(mTransaction).setBackgroundBlurRadius(dimLayer, blurRadius);
+        verify(mTransaction).setRelativeLayer(dimLayer, child.mControl, -1);
     }
 
     private SurfaceControl getDimLayer() {

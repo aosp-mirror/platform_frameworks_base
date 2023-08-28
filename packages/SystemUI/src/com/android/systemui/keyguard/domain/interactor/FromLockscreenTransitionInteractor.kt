@@ -17,7 +17,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
@@ -27,6 +27,8 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import java.util.UUID
 import javax.inject.Inject
@@ -59,16 +61,23 @@ constructor(
     }
 
     private fun listenForLockscreenToDreaming() {
+        val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (isAbleToDream, lastStartedTransition) = pair
-                    if (
-                        isAbleToDream &&
-                            lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
-                            lastStartedTransition.from != KeyguardState.AOD
-                    ) {
+                .sample(
+                    combine(
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        keyguardTransitionInteractor.finishedKeyguardState,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isAbleToDream, lastStartedTransition, finishedKeyguardState) ->
+                    val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
+                    val isTransitionInterruptible =
+                        lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
+                            !invalidFromStates.contains(lastStartedTransition.from)
+                    if (isAbleToDream && (isOnLockscreen || isTransitionInterruptible)) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
@@ -137,7 +146,7 @@ constructor(
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.statusBarState,
                         keyguardInteractor.isKeyguardUnlocked,
-                        ::toTriple
+                        ::Triple
                     ),
                     ::toQuad
                 )

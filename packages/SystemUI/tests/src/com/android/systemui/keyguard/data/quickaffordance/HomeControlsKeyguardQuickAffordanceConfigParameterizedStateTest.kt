@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.app.Activity
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -24,6 +25,7 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -75,6 +77,7 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
     @Mock private lateinit var component: ControlsComponent
     @Mock private lateinit var controlsController: ControlsController
     @Mock private lateinit var controlsListingController: ControlsListingController
+    @Mock private lateinit var controlsUiController: ControlsUiController
     @Mock private lateinit var controlsServiceInfo: ControlsServiceInfo
     @Captor
     private lateinit var callbackCaptor:
@@ -98,6 +101,8 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
         whenever(component.getControlsController()).thenReturn(Optional.of(controlsController))
         whenever(component.getControlsListingController())
             .thenReturn(Optional.of(controlsListingController))
+        whenever(controlsUiController.resolveActivity()).thenReturn(FakeActivity::class.java)
+        whenever(component.getControlsUiController()).thenReturn(Optional.of(controlsUiController))
         if (hasPanels) {
             whenever(controlsServiceInfo.panelActivity).thenReturn(mock())
         }
@@ -178,4 +183,6 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
             )
         job.cancel()
     }
+
+    private class FakeActivity : Activity()
 }

@@ -18,11 +18,11 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE
-import com.android.systemui.shade.NotificationPanelViewController.FLING_EXPAND
-import com.android.systemui.shade.NotificationPanelViewController.FLING_HIDE
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_COLLAPSE
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_EXPAND
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_HIDE
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -54,7 +54,8 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         touchSlop: Float,
         qsExpanded: Boolean,
         keyguardShowing: Boolean,
-        qsExpansionEnabled: Boolean
+        qsExpansionEnabled: Boolean,
+        downTime: Long
     ) {
         buffer.log(
             TAG,
@@ -67,10 +68,11 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 bool1 = qsExpanded
                 bool2 = keyguardShowing
                 bool3 = qsExpansionEnabled
+                str1 = downTime.toString()
             },
             {
-                "QsTrackingNotStarted: initTouchY=$int1,y=$int2,h=$long1,slop=$double1,qsExpanded" +
-                    "=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
+                "QsTrackingNotStarted: downTime=$str1,initTouchY=$int1,y=$int2,h=$long1," +
+                        "slop=$double1,qsExpanded=$bool1,keyguardShowing=$bool2,qsExpansion=$bool3"
             }
         )
     }
@@ -253,6 +255,31 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logFlingExpands(
+            vel: Float,
+            vectorVel: Float,
+            interactionType: Int,
+            minVelocityPxPerSecond: Float,
+            expansionOverHalf: Boolean,
+            allowExpandForSmallExpansion: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                int1 = interactionType
+                long1 = vel.toLong()
+                long2 = vectorVel.toLong()
+                double1 = minVelocityPxPerSecond.toDouble()
+                bool1 = expansionOverHalf
+                bool2 = allowExpandForSmallExpansion
+            },
+            { "NPVC flingExpands called with vel: $long1, vectorVel: $long2, " +
+                    "interactionType: $int1, minVelocityPxPerSecond: $double1 " +
+                    "expansionOverHalf: $bool1, allowExpandForSmallExpansion: $bool2" }
+        )
+    }
+
     fun flingQs(flingType: Int, isClick: Boolean) {
         buffer.log(
             TAG,
@@ -281,39 +308,30 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
-    fun logNotificationsTopPadding(message: String, padding: Int) {
+    fun logUpdateNotificationPanelTouchState(
+        disabled: Boolean,
+        isGoingToSleep: Boolean,
+        shouldControlScreenOff: Boolean,
+        deviceInteractive: Boolean,
+        isPulsing: Boolean,
+        isFrpActive: Boolean,
+    ) {
         buffer.log(
             TAG,
             LogLevel.VERBOSE,
             {
-                str1 = message
-                int1 = padding
+                bool1 = disabled
+                bool2 = isGoingToSleep
+                bool3 = shouldControlScreenOff
+                bool4 = deviceInteractive
+                str1 = isPulsing.toString()
+                str2 = isFrpActive.toString()
             },
-            { "QSC NotificationsTopPadding $str1: $int1"}
-        )
-    }
-
-    fun logClippingTopBound(message: String, top: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
             {
-                str1 = message
-                int1 = top
-            },
-            { "QSC ClippingTopBound $str1: $int1" }
-        )
-    }
-
-    fun logNotificationsClippingTopBound(top: Int, nsslTop: Int) {
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                int1 = top
-                int2 = nsslTop
-            },
-            { "QSC NotificationsClippingTopBound set to $int1 - $int2" }
+                "CentralSurfaces updateNotificationPanelTouchState set disabled to: $bool1\n" +
+                        "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
+                        "!mDeviceInteractive: $bool4, !isPulsing: $str1, isFrpActive: $str2"
+            }
         )
     }
 }

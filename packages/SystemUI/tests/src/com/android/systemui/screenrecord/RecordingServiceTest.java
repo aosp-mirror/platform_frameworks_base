@@ -18,7 +18,6 @@ package com.android.systemui.screenrecord;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -47,6 +46,8 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -74,6 +75,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private UserContextProvider mUserContextTracker;
+    @Captor
+    private ArgumentCaptor<Runnable> mRunnableCaptor;
     private KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil() {
         public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
                 boolean requiresShadeOpen) {
@@ -94,6 +97,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         doReturn(mContext.getUserId()).when(mRecordingService).getUserId();
         doReturn(mContext.getPackageName()).when(mRecordingService).getPackageName();
         doReturn(mContext.getContentResolver()).when(mRecordingService).getContentResolver();
+        doReturn(mContext.getResources()).when(mRecordingService).getResources();
 
         // Mock notifications
         doNothing().when(mRecordingService).createRecordingNotification();
@@ -101,7 +105,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         doReturn(mNotification).when(mRecordingService).createSaveNotification(any());
         doNothing().when(mRecordingService).createErrorNotification();
         doNothing().when(mRecordingService).showErrorToast(anyInt());
-        doNothing().when(mRecordingService).stopForeground(anyBoolean());
+        doNothing().when(mRecordingService).stopForeground(anyInt());
 
         doNothing().when(mRecordingService).startForeground(anyInt(), any());
         doReturn(mScreenMediaRecorder).when(mRecordingService).getRecorder();
@@ -200,6 +204,17 @@ public class RecordingServiceTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_showsErrorNotification()
+            throws IOException {
+        doReturn(true).when(mController).isRecording();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+
+        mRecordingService.onStopped();
+
+        verify(mRecordingService).createErrorNotification();
+    }
+
+    @Test
     public void testOnSystemRequestedStop_recorderEndThrowsOOMError_releasesRecording()
             throws IOException {
         doReturn(true).when(mController).isRecording();
@@ -208,5 +223,20 @@ public class RecordingServiceTest extends SysuiTestCase {
         assertThrows(Throwable.class, () -> mRecordingService.onStopped());
 
         verify(mScreenMediaRecorder).release();
+    }
+
+    @Test
+    public void testOnErrorSaving() throws IOException {
+        // When the screen recording does not save properly
+        doThrow(new IllegalStateException("fail")).when(mScreenMediaRecorder).save();
+
+        Intent startIntent = RecordingService.getStopIntent(mContext);
+        mRecordingService.onStartCommand(startIntent, 0, 0);
+        verify(mExecutor).execute(mRunnableCaptor.capture());
+        mRunnableCaptor.getValue().run();
+
+        // Then the state is set to not recording and we cancel the notification
+        verify(mController).updateState(false);
+        verify(mNotificationManager).cancelAsUser(any(), anyInt(), any());
     }
 }

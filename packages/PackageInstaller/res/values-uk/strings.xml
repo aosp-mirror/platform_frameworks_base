@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Програму встановлено."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Установити цей додаток?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Оновити цей додаток?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Оновити цей додаток від <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nЗазвичай цей додаток отримує оновлення від <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Якщо встановити оновлення з іншого джерела, надалі на ваш телефон зможуть надходити оновлення з будь-яких джерел. Це може змінити функції додатка."</string>
     <string name="install_failed" msgid="5777824004474125469">"Програму не встановлено."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Встановлення пакета заблоковано."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Додаток не встановлено, оскільки пакет конфліктує з наявним пакетом."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Цей користувач не може встановлювати невідомі додатки"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Цей користувач не може встановлювати додатки"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Усе одно оновити"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Керувати додатками"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Недостат. місця"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Програму <xliff:g id="APP_NAME">%1$s</xliff:g> неможливо встановити. Звільніть місце та повторіть спробу."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Відновити заводську версію цього додатка? Усі дані буде видалено."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Відновити заводську версію цього додатка? Усі дані буде видалено. Це вплине на всіх користувачів цього пристрою, зокрема на користувачів із робочими профілями."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Залишити <xliff:g id="SIZE">%1$s</xliff:g> даних додатка."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Видалити цей додаток?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Видалити цей додаток? Копію <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> також буде видалено."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Активні видалення"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Невиконані видалення"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Видалення..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Видалення додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Видалено."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Додаток <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> видалено"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Копію <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> видалено"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Не видалено."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Не вдалося видалити додаток <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Видалення копії додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Не вдається видалити активний додаток адміністратора пристрою"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Не вдається видалити активний додаток адміністратора пристрою для користувача <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Цей додаток потрібен для деяких користувачів чи профілів, але його було видалено для інших"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Невідомо"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"З міркувань безпеки на вашому планшеті зараз заборонено встановлювати невідомі додатки з цього джерела. Ви можете змінити це в налаштуваннях."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"З міркувань безпеки на вашому телевізорі зараз заборонено встановлювати невідомі додатки з цього джерела. Ви можете змінити це в налаштуваннях."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"З міркувань безпеки на вашому годиннику зараз заборонено встановлювати невідомі додатки з цього джерела. Ви можете змінити це в налаштуваннях."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"З міркувань безпеки на вашому телефоні зараз заборонено встановлювати невідомі додатки з цього джерела. Ви можете змінити це в налаштуваннях."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Ваш телефон і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження телефона чи втрату даних унаслідок використання додатка."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ваш планшет і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження планшета чи втрату даних унаслідок використання додатка."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Ваш телевізор і особисті дані більш уразливі до атак невідомих додатків. Установлюючи цей додаток, ви берете на себе відповідальність за пошкодження телевізора чи втрату даних унаслідок використання додатка."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Копія додатка <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Продовжити"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Налаштування"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Встановлення або видалення додатків Wear"</string>

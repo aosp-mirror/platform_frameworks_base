@@ -46,4 +46,7 @@
     <!-- Whether to tint the icon of the sensor hardware privacy toggle unblock dialog.
         Set to false if using a custom icon. -->
     <bool name="config_unblockHwSensorIconEnableTint">true</bool>
+
+    <!-- Configuration to set Learn more in device logs as URL link -->
+    <bool name="log_access_confirmation_learn_more_as_link">false</bool>
 </resources>

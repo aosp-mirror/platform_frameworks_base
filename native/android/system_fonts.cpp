@@ -242,31 +242,23 @@ ASystemFontIterator* ASystemFontIterator_open() {
     std::unique_ptr<ASystemFontIterator> ite(new ASystemFontIterator());
 
     std::unordered_set<AFont, FontHasher> fonts;
-    minikin::SystemFonts::getFontMap(
-            [&fonts](const std::vector<std::shared_ptr<minikin::FontCollection>>& collections) {
-                for (const auto& fc : collections) {
-                    for (const auto& family : fc->getFamilies()) {
-                        for (uint32_t i = 0; i < family->getNumFonts(); ++i) {
-                            const minikin::Font* font = family->getFont(i);
-
-                            std::optional<std::string> locale;
-                            uint32_t localeId = font->getLocaleListId();
-                            if (localeId != minikin::kEmptyLocaleListId) {
-                                locale.emplace(minikin::getLocaleString(localeId));
-                            }
-                            std::vector<std::pair<uint32_t, float>> axes;
-                            for (const auto& [tag, value] : font->typeface()->GetAxes()) {
-                                axes.push_back(std::make_pair(tag, value));
-                            }
-
-                            fonts.insert(
-                                    {font->typeface()->GetFontPath(), std::move(locale),
-                                     font->style().weight(),
-                                     font->style().slant() == minikin::FontStyle::Slant::ITALIC,
-                                     static_cast<uint32_t>(font->typeface()->GetFontIndex()),
-                                     axes});
-                        }
+    minikin::SystemFonts::getFontSet(
+            [&fonts](const std::vector<std::shared_ptr<minikin::Font>>& fontSet) {
+                for (const auto& font : fontSet) {
+                    std::optional<std::string> locale;
+                    uint32_t localeId = font->getLocaleListId();
+                    if (localeId != minikin::kEmptyLocaleListId) {
+                        locale.emplace(minikin::getLocaleString(localeId));
                     }
+                    std::vector<std::pair<uint32_t, float>> axes;
+                    for (const auto& [tag, value] : font->typeface()->GetAxes()) {
+                        axes.push_back(std::make_pair(tag, value));
+                    }
+
+                    fonts.insert({font->typeface()->GetFontPath(), std::move(locale),
+                                  font->style().weight(),
+                                  font->style().slant() == minikin::FontStyle::Slant::ITALIC,
+                                  static_cast<uint32_t>(font->typeface()->GetFontIndex()), axes});
                 }
             });
 

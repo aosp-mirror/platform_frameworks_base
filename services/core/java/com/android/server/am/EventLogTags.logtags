@@ -1,4 +1,4 @@
-# See system/core/logcat/event.logtags for a description of the format of this file.
+# See system/logging/logcat/event.logtags for a description of the format of this file.
 
 option java_package com.android.server.am
 
@@ -101,12 +101,13 @@ option java_package com.android.server.am
 30073 uc_finish_user_stopping (userId|1|5)
 30074 uc_finish_user_stopped (userId|1|5)
 30075 uc_switch_user (userId|1|5)
-30076 uc_start_user_internal (userId|1|5)
+30076 uc_start_user_internal (userId|1|5),(foreground|1),(displayId|1|5)
 30077 uc_unlock_user (userId|1|5)
 30078 uc_finish_user_boot (userId|1|5)
 30079 uc_dispatch_user_switch (oldUserId|1|5),(newUserId|1|5)
 30080 uc_continue_user_switch (oldUserId|1|5),(newUserId|1|5)
 30081 uc_send_user_broadcast (userId|1|5),(IntentAction|3)
+
 # Tags below are used by SystemServiceManager - although it's technically part of am, these are
 # also user switch events and useful to be analyzed together with events above.
 30082 ssm_user_starting (userId|1|5)
@@ -117,10 +118,14 @@ option java_package com.android.server.am
 30087 ssm_user_stopped (userId|1|5)
 30088 ssm_user_completed_event (userId|1|5),(eventFlag|1|5)
 
-# Foreground service start/stop events.
-30100 am_foreground_service_start (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
-30101 am_foreground_service_denied (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
-30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3)
+# Similarly, tags below are used by UserManagerService
+30091 um_user_visibility_changed (userId|1|5),(visible|1)
 
+# Foreground service start/stop/denied/timed_out events.
+30100 am_foreground_service_start (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
+30101 am_foreground_service_denied (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
+30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
+30103 am_foreground_service_timed_out (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 
-
+# Intent Sender redirect for UserHandle.USER_CURRENT
+30110 am_intent_sender_redirect_user (userId|1|5)

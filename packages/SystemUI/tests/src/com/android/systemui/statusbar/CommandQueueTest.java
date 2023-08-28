@@ -18,8 +18,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,12 +28,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
-import android.view.InsetsVisibilities;
+import android.view.KeyEvent;
+import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -63,7 +62,6 @@ public class CommandQueueTest extends SysuiTestCase {
     };
 
     private CommandQueue mCommandQueue;
-
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private Callbacks mCallbacks;
     private static final int SECONDARY_DISPLAY = 1;
@@ -131,32 +129,34 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testOnSystemBarAttributesChanged() {
         doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test", TEST_LETTERBOX_DETAILS);
+                BEHAVIOR_DEFAULT, WindowInsets.Type.defaultVisible(), "test",
+                TEST_LETTERBOX_DETAILS);
     }
 
     @Test
     public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
         doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test", TEST_LETTERBOX_DETAILS);
+                BEHAVIOR_DEFAULT, WindowInsets.Type.defaultVisible(), "test",
+                TEST_LETTERBOX_DETAILS);
     }
 
     private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            @Behavior int behavior, @InsetsType int requestedVisibleTypes, String packageName,
             LetterboxDetails[] letterboxDetails) {
         mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                navbarColorManagedByIme, behavior, requestedVisibleTypes, packageName,
                 letterboxDetails);
         waitForIdleSync();
         verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
                 eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior),
-                eq(requestedVisibilities), eq(packageName), eq(letterboxDetails));
+                eq(requestedVisibleTypes), eq(packageName), eq(letterboxDetails));
     }
 
     @Test
     public void testShowTransient() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.showTransient(DEFAULT_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types), eq(true));
@@ -164,7 +164,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowTransientForSecondaryDisplay() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.showTransient(SECONDARY_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types), eq(true));
@@ -172,7 +172,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransient() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.abortTransient(DEFAULT_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(DEFAULT_DISPLAY), eq(types));
@@ -180,7 +180,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransientForSecondaryDisplay() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.abortTransient(SECONDARY_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(SECONDARY_DISPLAY), eq(types));
@@ -397,9 +397,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHandleSysKey() {
-        mCommandQueue.handleSystemKey(1);
+        KeyEvent testEvent = new KeyEvent(1, 1);
+        mCommandQueue.handleSystemKey(testEvent);
         waitForIdleSync();
-        verify(mCallbacks).handleSystemKey(eq(1));
+        verify(mCallbacks).handleSystemKey(eq(testEvent));
     }
 
     @Test
@@ -441,15 +442,13 @@ public class CommandQueueTest extends SysuiTestCase {
         final long operationId = 1;
         final String packageName = "test";
         final long requestId = 10;
-        final int multiSensorConfig = BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 
         mCommandQueue.showAuthenticationDialog(promptInfo, receiver, sensorIds,
-                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId,
-                multiSensorConfig);
+                credentialAllowed, requireConfirmation, userId, operationId, packageName, requestId);
         waitForIdleSync();
         verify(mCallbacks).showAuthenticationDialog(eq(promptInfo), eq(receiver), eq(sensorIds),
                 eq(credentialAllowed), eq(requireConfirmation), eq(userId), eq(operationId),
-                eq(packageName), eq(requestId), eq(multiSensorConfig));
+                eq(packageName), eq(requestId));
     }
 
     @Test
@@ -488,11 +487,12 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetUdfpsHbmListener() {
-        final IUdfpsHbmListener listener = mock(IUdfpsHbmListener.class);
-        mCommandQueue.setUdfpsHbmListener(listener);
+    public void testSetUdfpsRefreshRateCallback() {
+        final IUdfpsRefreshRateRequestCallback callback =
+                mock(IUdfpsRefreshRateRequestCallback.class);
+        mCommandQueue.setUdfpsRefreshRateCallback(callback);
         waitForIdleSync();
-        verify(mCallbacks).setUdfpsHbmListener(eq(listener));
+        verify(mCallbacks).setUdfpsRefreshRateCallback(eq(callback));
     }
 
     @Test

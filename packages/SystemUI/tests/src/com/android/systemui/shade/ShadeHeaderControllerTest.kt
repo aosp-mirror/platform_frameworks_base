@@ -16,6 +16,8 @@
 package com.android.systemui.shade
 
 import android.animation.Animator
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Resources
@@ -31,27 +33,30 @@ import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
+import com.android.app.animation.Interpolators
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
-import com.android.systemui.qs.carrier.QSCarrierGroup
-import com.android.systemui.qs.carrier.QSCarrierGroupController
+import com.android.systemui.shade.ShadeHeaderController.Companion.DEFAULT_CLOCK_INTENT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.carrier.ShadeCarrierGroup
+import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
@@ -73,6 +78,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -88,11 +94,12 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarIconController: StatusBarIconController
     @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
     @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
-    @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
-    @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
+    @Mock private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
+    @Mock
+    private lateinit var mShadeCarrierGroupControllerBuilder: ShadeCarrierGroupController.Builder
     @Mock private lateinit var clock: Clock
     @Mock private lateinit var date: VariableDateView
-    @Mock private lateinit var carrierGroup: QSCarrierGroup
+    @Mock private lateinit var carrierGroup: ShadeCarrierGroup
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
     @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
@@ -113,6 +120,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var qsBatteryModeController: QsBatteryModeController
+    @Mock private lateinit var nextAlarmController: NextAlarmController
+    @Mock private lateinit var activityStarter: ActivityStarter
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -131,7 +140,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
 
-        whenever<QSCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+        whenever<ShadeCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
 
         whenever<BatteryMeterView>(view.findViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
@@ -142,9 +151,10 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(view.context).thenReturn(viewContext)
         whenever(view.resources).thenReturn(context.resources)
         whenever(statusIcons.context).thenReturn(context)
-        whenever(qsCarrierGroupControllerBuilder.setQSCarrierGroup(any()))
-            .thenReturn(qsCarrierGroupControllerBuilder)
-        whenever(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
+        whenever(mShadeCarrierGroupControllerBuilder.setShadeCarrierGroup(any()))
+            .thenReturn(mShadeCarrierGroupControllerBuilder)
+        whenever(mShadeCarrierGroupControllerBuilder.build())
+            .thenReturn(mShadeCarrierGroupController)
         whenever(view.setVisibility(anyInt())).then {
             viewVisibility = it.arguments[0] as Int
             null
@@ -175,10 +185,12 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
                 dumpManager,
-                qsCarrierGroupControllerBuilder,
+                mShadeCarrierGroupControllerBuilder,
                 combinedShadeHeadersConstraintManager,
                 demoModeController,
                 qsBatteryModeController,
+                nextAlarmController,
+                activityStarter,
             )
         whenever(view.isAttachedToWindow).thenReturn(true)
         shadeHeaderController.init()
@@ -189,7 +201,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Test
     fun updateListeners_registersWhenVisible() {
         makeShadeVisible()
-        verify(qsCarrierGroupController).setListening(true)
+        verify(mShadeCarrierGroupController).setListening(true)
         verify(statusBarIconController).addIconGroup(any())
     }
 
@@ -213,7 +225,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun singleCarrier_enablesCarrierIconsInStatusIcons() {
-        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(true)
+        whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(true)
 
         makeShadeVisible()
 
@@ -222,7 +234,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun dualCarrier_disablesCarrierIconsInStatusIcons() {
-        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(false)
+        whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
 
         makeShadeVisible()
 
@@ -349,13 +361,13 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         verify(batteryMeterViewController).init()
         verify(batteryMeterViewController).ignoreTunerUpdates()
 
-        val inOrder = Mockito.inOrder(qsCarrierGroupControllerBuilder)
-        inOrder.verify(qsCarrierGroupControllerBuilder).setQSCarrierGroup(carrierGroup)
-        inOrder.verify(qsCarrierGroupControllerBuilder).build()
+        val inOrder = Mockito.inOrder(mShadeCarrierGroupControllerBuilder)
+        inOrder.verify(mShadeCarrierGroupControllerBuilder).setShadeCarrierGroup(carrierGroup)
+        inOrder.verify(mShadeCarrierGroupControllerBuilder).build()
     }
 
     @Test
-    fun `battery mode controller called when qsExpandedFraction changes`() {
+    fun batteryModeControllerCalledWhenQsExpandedFractionChanges() {
         whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(0f)))
             .thenReturn(BatteryMeterView.MODE_ON)
         whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(1f)))
@@ -376,7 +388,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(clock.isLayoutRtl).thenReturn(false)
 
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
 
         captor.value.onLayoutChange(clock, 0, 1, 2, 3, 4, 5, 6, 7)
         verify(clock).pivotX = 0f
@@ -389,7 +401,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever(clock.isLayoutRtl).thenReturn(true)
 
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
 
         captor.value.onLayoutChange(clock, 0, 1, 2, 3, 4, 5, 6, 7)
         verify(clock).pivotX = width.toFloat()
@@ -782,7 +794,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Test
     fun clockPivotYInCenter() {
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
-        verify(clock).addOnLayoutChangeListener(capture(captor))
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
         var height = 100
         val width = 50
 
@@ -814,16 +826,39 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `carrier left padding is set when clock layout changes`() {
-        val width = 200
-        whenever(clock.width).thenReturn(width)
-        whenever(clock.scaleX).thenReturn(2.57f) // 2.57 comes from qs_header.xml
+    fun carrierStartPaddingIsSetOnClockLayout() {
+        val clockWidth = 200
+        val maxClockScale = context.resources.getFloat(R.dimen.qqs_expand_clock_scale)
+        val expectedStartPadding = (clockWidth * maxClockScale).toInt()
+        whenever(clock.width).thenReturn(clockWidth)
+
         val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
+        verify(clock, times(2)).addOnLayoutChangeListener(capture(captor))
+        captor.allValues.forEach { clock.executeLayoutChange(0, 0, clockWidth, 0, it) }
 
-        verify(clock).addOnLayoutChangeListener(capture(captor))
-        captor.value.onLayoutChange(clock, 0, 0, width, 0, 0, 0, 0, 0)
+        verify(carrierGroup).setPaddingRelative(expectedStartPadding, 0, 0, 0)
+    }
 
-        verify(carrierGroup).setPaddingRelative(514, 0, 0, 0)
+    @Test
+    fun launchClock_launchesDefaultIntentWhenNoAlarmSet() {
+        shadeHeaderController.launchClockActivity()
+
+        verify(activityStarter).postStartActivityDismissingKeyguard(DEFAULT_CLOCK_INTENT, 0)
+    }
+
+    @Test
+    fun launchClock_launchesNextAlarmWhenExists() {
+        val pendingIntent = mock<PendingIntent>()
+        val aci = AlarmManager.AlarmClockInfo(12345, pendingIntent)
+        val captor =
+            ArgumentCaptor.forClass(NextAlarmController.NextAlarmChangeCallback::class.java)
+
+        verify(nextAlarmController).addCallback(capture(captor))
+        captor.value.onNextAlarmChanged(aci)
+
+        shadeHeaderController.launchClockActivity()
+
+        verify(activityStarter).postStartActivityDismissingKeyguard(pendingIntent)
     }
 
     private fun View.executeLayoutChange(

@@ -787,7 +787,7 @@ public class DataManager {
 
     private void updateDefaultSmsApp(@NonNull UserData userData) {
         ComponentName component = SmsApplication.getDefaultSmsApplicationAsUser(
-                mContext, /* updateIfNeeded= */ false, userData.getUserId());
+                mContext, /* updateIfNeeded= */ false, UserHandle.of(userData.getUserId()));
         String defaultSmsApp = component != null ? component.getPackageName() : null;
         userData.setDefaultSmsApp(defaultSmsApp);
     }
@@ -1339,7 +1339,7 @@ public class DataManager {
     /** Adds {@code listener} to be notified on conversation changes. */
     public void addConversationsListener(
             @NonNull PeopleService.ConversationsListener listener) {
-        synchronized (mConversationsListeners) {
+        synchronized (mLock) {
             mConversationsListeners.add(Objects.requireNonNull(listener));
         }
     }

@@ -17,6 +17,7 @@
 package com.android.settingslib.collapsingtoolbar;
 
 import android.app.ActionBar;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +60,8 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (mCustomizeLayoutResId > 0 && !BuildCompatUtils.isAtLeastS()) {
+        // for backward compatibility on R devices or wearable devices due to small device size.
+        if (mCustomizeLayoutResId > 0 && (!BuildCompatUtils.isAtLeastS() || isWatch())) {
             super.setContentView(mCustomizeLayoutResId);
             return;
         }
@@ -117,10 +119,28 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
 
     @Override
     public boolean onNavigateUp() {
-        if (!super.onNavigateUp()) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStackImmediate();
+        }
+
+        // Closes the activity if there is no fragment inside the stack. Otherwise the activity will
+        // has a blank screen since there is no any fragment.
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             finishAfterTransition();
         }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        // Closes the activity if there is no fragment inside the stack. Otherwise the activity will
+        // has a blank screen since there is no any fragment. onBackPressed() in Activity.java only
+        // handles popBackStackImmediate(). This will close activity to avoid a blank screen.
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            finishAfterTransition();
+        }
     }
 
     /**
@@ -137,6 +157,14 @@ public class CollapsingToolbarBaseActivity extends FragmentActivity {
     @Nullable
     public AppBarLayout getAppBarLayout() {
         return getToolbarDelegate().getAppBarLayout();
+    }
+
+    private boolean isWatch() {
+        PackageManager packageManager = getPackageManager();
+        if (packageManager == null) {
+            return false;
+        }
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH);
     }
 
     private CollapsingToolbarDelegate getToolbarDelegate() {

@@ -53,8 +53,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,6 +63,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
@@ -2048,6 +2048,9 @@ class ShortcutPackage extends ShortcutPackageItem {
                                         shortcutUser.getUserId(), fromBackup);
                                 // Don't use addShortcut(), we don't need to save the icon.
                                 ret.mShortcuts.put(si.getId(), si);
+                            } catch (IOException e) {
+                                // Don't ignore IO exceptions.
+                                throw e;
                             } catch (Exception e) {
                                 // b/246540168 malformed shortcuts should be ignored
                                 Slog.e(TAG, "Failed parsing shortcut.", e);

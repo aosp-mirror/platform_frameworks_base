@@ -17,12 +17,13 @@ package com.android.systemui.biometrics
 
 import android.hardware.biometrics.BiometricAuthenticator
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -37,9 +38,10 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@RoboPilotTest
 class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
     @JvmField
@@ -118,7 +120,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
 
     @Test
     fun testNegativeButton_beforeAuthentication_sendsActionButtonNegative() {
-        biometricView.onDialogAnimatedIn()
+        biometricView.onDialogAnimatedIn(fingerprintWasStarted = true)
         biometricView.mNegativeButton.performClick()
         TestableLooper.get(this).moveTimeForward(1000)
         waitForIdleSync()
@@ -210,7 +212,7 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     @Test
     fun testIgnoresUselessHelp() {
         biometricView.mAnimationDurationHideDialog = 10_000
-        biometricView.onDialogAnimatedIn()
+        biometricView.onDialogAnimatedIn(fingerprintWasStarted = true)
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticating).isTrue()

@@ -18,12 +18,11 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.Build
 import android.util.Log
-import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.log.dagger.BouncerLog
+import com.android.systemui.log.dagger.BouncerTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.util.time.SystemClock
@@ -65,8 +64,6 @@ interface KeyguardBouncerRepository {
     val keyguardAuthenticated: StateFlow<Boolean?>
     val showMessage: StateFlow<BouncerShowMessageModel?>
     val resourceUpdateRequests: StateFlow<Boolean>
-    val bouncerPromptReason: Int
-    val bouncerErrorMessage: CharSequence?
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
     val sideFpsShowing: StateFlow<Boolean>
@@ -106,10 +103,9 @@ interface KeyguardBouncerRepository {
 class KeyguardBouncerRepositoryImpl
 @Inject
 constructor(
-    private val viewMediatorCallback: ViewMediatorCallback,
     private val clock: SystemClock,
     @Application private val applicationScope: CoroutineScope,
-    @BouncerLog private val buffer: TableLogBuffer,
+    @BouncerTableLog private val buffer: TableLogBuffer,
 ) : KeyguardBouncerRepository {
     /** Values associated with the PrimaryBouncer (pin/pattern/password) input. */
     private val _primaryBouncerShow = MutableStateFlow(false)
@@ -145,11 +141,6 @@ constructor(
     override val showMessage = _showMessage.asStateFlow()
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
-    override val bouncerPromptReason: Int
-        get() = viewMediatorCallback.bouncerPromptReason
-    override val bouncerErrorMessage: CharSequence?
-        get() = viewMediatorCallback.consumeCustomMessage()
-
     /** Values associated with the AlternateBouncer */
     private val _alternateBouncerVisible = MutableStateFlow(false)
     override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()

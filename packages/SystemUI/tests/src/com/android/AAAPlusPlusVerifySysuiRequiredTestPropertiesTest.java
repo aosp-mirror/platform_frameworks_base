@@ -59,7 +59,7 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
 
     private static final String TAG = "AAA++VerifyTest";
 
-    private static final Class[] BASE_CLS_WHITELIST = {
+    private static final Class[] BASE_CLS_TO_INCLUDE = {
             SysuiTestCase.class,
             SysuiBaseFragmentTest.class,
     };
@@ -81,7 +81,7 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
             if (!isTestClass(cls)) continue;
 
             boolean hasParent = false;
-            for (Class<?> parent : BASE_CLS_WHITELIST) {
+            for (Class<?> parent : BASE_CLS_TO_INCLUDE) {
                 if (parent.isAssignableFrom(cls)) {
                     hasParent = true;
                     break;
@@ -137,7 +137,7 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
     }
 
     private String getClsStr() {
-        return TextUtils.join(",", Arrays.asList(BASE_CLS_WHITELIST)
+        return TextUtils.join(",", Arrays.asList(BASE_CLS_TO_INCLUDE)
                 .stream().map(cls -> cls.getSimpleName()).toArray());
     }
 

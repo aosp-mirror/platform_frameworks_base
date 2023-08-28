@@ -28,11 +28,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,6 +56,30 @@ public final class MediaRoute2Info implements Parcelable {
             return new MediaRoute2Info[size];
         }
     };
+
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the built-in media
+     * route.
+     *
+     * <p>A route with this id will only be visible to apps with permission to do system routing,
+     * which means having {@link android.Manifest.permission#BLUETOOTH_CONNECT} and {@link
+     * android.Manifest.permission#BLUETOOTH_SCAN}, or {@link
+     * android.Manifest.permission#MODIFY_AUDIO_ROUTING}.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEVICE = "DEVICE_ROUTE";
+
+    /**
+     * The {@link #getOriginalId() original id} of the route that represents the default system
+     * media route.
+     *
+     * <p>A route with this id will be visible to apps with no permission over system routing. See
+     * {@link #ROUTE_ID_DEVICE} for details.
+     *
+     * @hide
+     */
+    public static final String ROUTE_ID_DEFAULT = "DEFAULT_ROUTE";
 
     /** @hide */
     @IntDef({CONNECTION_STATE_DISCONNECTED, CONNECTION_STATE_CONNECTING,
@@ -104,133 +132,220 @@ public final class MediaRoute2Info implements Parcelable {
     public static final int PLAYBACK_VOLUME_VARIABLE = 1;
 
     /** @hide */
-    @IntDef({
-            TYPE_UNKNOWN, TYPE_BUILTIN_SPEAKER, TYPE_WIRED_HEADSET,
-            TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_A2DP, TYPE_HDMI, TYPE_USB_DEVICE,
-            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID, TYPE_BLE_HEADSET,
-            TYPE_REMOTE_TV, TYPE_REMOTE_SPEAKER, TYPE_GROUP})
+    @IntDef(
+            prefix = {"TYPE_"},
+            value = {
+                TYPE_UNKNOWN,
+                TYPE_BUILTIN_SPEAKER,
+                TYPE_WIRED_HEADSET,
+                TYPE_WIRED_HEADPHONES,
+                TYPE_BLUETOOTH_A2DP,
+                TYPE_HDMI,
+                TYPE_USB_DEVICE,
+                TYPE_USB_ACCESSORY,
+                TYPE_DOCK,
+                TYPE_USB_HEADSET,
+                TYPE_HEARING_AID,
+                TYPE_BLE_HEADSET,
+                TYPE_REMOTE_TV,
+                TYPE_REMOTE_SPEAKER,
+                TYPE_REMOTE_AUDIO_VIDEO_RECEIVER,
+                TYPE_REMOTE_TABLET,
+                TYPE_REMOTE_TABLET_DOCKED,
+                TYPE_REMOTE_COMPUTER,
+                TYPE_REMOTE_GAME_CONSOLE,
+                TYPE_REMOTE_CAR,
+                TYPE_REMOTE_SMARTWATCH,
+                TYPE_GROUP
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
     /**
-     * The default route type indicating the type is unknown.
+     * Indicates the route's type is unknown or undefined.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_UNKNOWN = 0;
 
     /**
-     * A route type describing the speaker system (i.e. a mono speaker or stereo speakers) built
-     * in a device.
+     * Indicates the route is the speaker system (i.e. a mono speaker or stereo speakers) built into
+     * the device.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BUILTIN_SPEAKER = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
 
     /**
-     * A route type describing a headset, which is the combination of a headphones and microphone.
+     * Indicates the route is a headset, which is the combination of a headphones and a microphone.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_WIRED_HEADSET = AudioDeviceInfo.TYPE_WIRED_HEADSET;
 
     /**
-     * A route type describing a pair of wired headphones.
+     * Indicates the route is a pair of wired headphones.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_WIRED_HEADPHONES = AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
 
     /**
-     * A route type indicating the presentation of the media is happening
-     * on a bluetooth device such as a bluetooth speaker.
+     * Indicates the route is a bluetooth device, such as a bluetooth speaker or headphones.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BLUETOOTH_A2DP = AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
 
     /**
-     * A route type describing an HDMI connection.
+     * Indicates the route is an HDMI connection.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
 
     /**
-     * A route type describing a USB audio device.
+     * Indicates the route is a USB audio device.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_DEVICE = AudioDeviceInfo.TYPE_USB_DEVICE;
 
     /**
-     * A route type describing a USB audio device in accessory mode.
+     * Indicates the route is a USB audio device in accessory mode.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_ACCESSORY = AudioDeviceInfo.TYPE_USB_ACCESSORY;
 
     /**
-     * A route type describing the audio device associated with a dock.
+     * Indicates the route is the audio device associated with a dock.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_DOCK = AudioDeviceInfo.TYPE_DOCK;
 
     /**
-     * A device type describing a USB audio headset.
+     * Indicates the route is a USB audio headset.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_HEADSET = AudioDeviceInfo.TYPE_USB_HEADSET;
 
     /**
-     * A route type describing a Hearing Aid.
+     * Indicates the route is a hearing aid.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
 
     /**
-     * A route type describing a BLE HEADSET.
+     * Indicates the route is a Bluetooth Low Energy (BLE) HEADSET.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
     /**
-     * A route type indicating the presentation of the media is happening on a TV.
+     * Indicates the route is a remote TV.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_REMOTE_TV = 1001;
 
     /**
-     * A route type indicating the presentation of the media is happening on a speaker.
+     * Indicates the route is a remote speaker.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_REMOTE_SPEAKER = 1002;
 
     /**
-     * A route type indicating the presentation of the media is happening on multiple devices.
+     * Indicates the route is a remote Audio/Video Receiver (AVR).
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     */
+    public static final int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 1003;
+
+    /**
+     * Indicates the route is a remote tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
      * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET = 1004;
+
+    /**
+     * Indicates the route is a remote docked tablet.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_TABLET_DOCKED = 1005;
+
+    /**
+     * Indicates the route is a remote computer.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_COMPUTER = 1006;
+
+    /**
+     * Indicates the route is a remote gaming console.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_GAME_CONSOLE = 1007;
+
+    /**
+     * Indicates the route is a remote car.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_CAR = 1008;
+
+    /**
+     * Indicates the route is a remote smartwatch.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
+     *
+     * @see #getType
+     * @hide
+     */
+    public static final int TYPE_REMOTE_SMARTWATCH = 1009;
+
+    /**
+     * Indicates the route is a group of devices.
+     *
+     * @see #getType
      */
     public static final int TYPE_GROUP = 2000;
 
@@ -349,6 +464,8 @@ public final class MediaRoute2Info implements Parcelable {
     final Set<String> mDeduplicationIds;
     final Bundle mExtras;
     final String mProviderId;
+    final boolean mIsVisibilityRestricted;
+    final Set<String> mAllowedPackages;
 
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
@@ -368,10 +485,13 @@ public final class MediaRoute2Info implements Parcelable {
         mDeduplicationIds = builder.mDeduplicationIds;
         mExtras = builder.mExtras;
         mProviderId = builder.mProviderId;
+        mIsVisibilityRestricted = builder.mIsVisibilityRestricted;
+        mAllowedPackages = builder.mAllowedPackages;
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
         mId = in.readString();
+        Preconditions.checkArgument(!TextUtils.isEmpty(mId));
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mFeatures = in.createStringArrayList();
         mType = in.readInt();
@@ -388,6 +508,8 @@ public final class MediaRoute2Info implements Parcelable {
         mDeduplicationIds = Set.of(in.readStringArray());
         mExtras = in.readBundle();
         mProviderId = in.readString();
+        mIsVisibilityRestricted = in.readBoolean();
+        mAllowedPackages = Set.of(in.createString8Array());
     }
 
     /**
@@ -401,7 +523,7 @@ public final class MediaRoute2Info implements Parcelable {
      */
     @NonNull
     public String getId() {
-        if (mProviderId != null) {
+        if (!TextUtils.isEmpty(mProviderId)) {
             return toUniqueId(mProviderId, mId);
         } else {
             return mId;
@@ -424,17 +546,32 @@ public final class MediaRoute2Info implements Parcelable {
         return mFeatures;
     }
 
+    // TODO (b/278728942): Add the following once the symbols are published in the SDK. Until then,
+    //     adding them would cause the generated link to be broken.
+    //     @see #TYPE_REMOTE_TABLET
+    //     @see #TYPE_REMOTE_TABLET_DOCKED
+    //     @see #TYPE_REMOTE_COMPUTER
+    //     @see #TYPE_REMOTE_GAME_CONSOLE
+    //     @see #TYPE_REMOTE_CAR
+    //     @see #TYPE_REMOTE_SMARTWATCH
     /**
-     * Gets the type of this route.
+     * Returns the type of this route.
      *
-     * @return The type of this route:
-     * {@link #TYPE_UNKNOWN},
-     * {@link #TYPE_BUILTIN_SPEAKER}, {@link #TYPE_WIRED_HEADSET}, {@link #TYPE_WIRED_HEADPHONES},
-     * {@link #TYPE_BLUETOOTH_A2DP}, {@link #TYPE_HDMI}, {@link #TYPE_DOCK},
-     * {@Link #TYPE_USB_DEVICE}, {@link #TYPE_USB_ACCESSORY}, {@link #TYPE_USB_HEADSET}
-     * {@link #TYPE_HEARING_AID},
-     * {@link #TYPE_REMOTE_TV}, {@link #TYPE_REMOTE_SPEAKER}, {@link #TYPE_GROUP}.
-     * @hide
+     * @see #TYPE_UNKNOWN
+     * @see #TYPE_BUILTIN_SPEAKER
+     * @see #TYPE_WIRED_HEADSET
+     * @see #TYPE_WIRED_HEADPHONES
+     * @see #TYPE_BLUETOOTH_A2DP
+     * @see #TYPE_HDMI
+     * @see #TYPE_DOCK
+     * @see #TYPE_USB_DEVICE
+     * @see #TYPE_USB_ACCESSORY
+     * @see #TYPE_USB_HEADSET
+     * @see #TYPE_HEARING_AID
+     * @see #TYPE_REMOTE_TV
+     * @see #TYPE_REMOTE_SPEAKER
+     * @see #TYPE_REMOTE_AUDIO_VIDEO_RECEIVER
+     * @see #TYPE_GROUP
      */
     @Type
     public int getType() {
@@ -537,9 +674,9 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the Deduplication ID of the route if available.
-     * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
-     * @hide
+     * Gets the deduplication IDs associated to the route.
+     *
+     * <p>Two routes with a matching deduplication ID originate from the same receiver device.
      */
     @NonNull
     public Set<String> getDeduplicationIds() {
@@ -622,6 +759,70 @@ public final class MediaRoute2Info implements Parcelable {
         return true;
     }
 
+    /**
+     * Returns whether this route is visible to the package with the given name.
+     * @hide
+     */
+    public boolean isVisibleTo(String packageName) {
+        return !mIsVisibilityRestricted || getPackageName().equals(packageName)
+                || mAllowedPackages.contains(packageName);
+    }
+
+    /**
+     * Dumps the current state of the object to the given {@code pw} as a human-readable string.
+     *
+     * <p> Used in the context of dumpsys. </p>
+     *
+     * @hide
+     */
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
+        pw.println(prefix + "MediaRoute2Info");
+
+        String indent = prefix + "  ";
+
+        pw.println(indent + "mId=" + mId);
+        pw.println(indent + "mName=" + mName);
+        pw.println(indent + "mFeatures=" + mFeatures);
+        pw.println(indent + "mType=" + getDeviceTypeString(mType));
+        pw.println(indent + "mIsSystem=" + mIsSystem);
+        pw.println(indent + "mIconUri=" + mIconUri);
+        pw.println(indent + "mDescription=" + mDescription);
+        pw.println(indent + "mConnectionState=" + mConnectionState);
+        pw.println(indent + "mClientPackageName=" + mClientPackageName);
+        pw.println(indent + "mPackageName=" + mPackageName);
+
+        dumpVolume(pw, indent);
+
+        pw.println(indent + "mAddress=" + mAddress);
+        pw.println(indent + "mDeduplicationIds=" + mDeduplicationIds);
+        pw.println(indent + "mExtras=" + mExtras);
+        pw.println(indent + "mProviderId=" + mProviderId);
+        pw.println(indent + "mIsVisibilityRestricted=" + mIsVisibilityRestricted);
+        pw.println(indent + "mAllowedPackages=" + mAllowedPackages);
+    }
+
+    private void dumpVolume(@NonNull PrintWriter pw, @NonNull String prefix) {
+        String volumeHandlingName;
+
+        switch (mVolumeHandling) {
+            case PLAYBACK_VOLUME_FIXED:
+                volumeHandlingName = "FIXED";
+                break;
+            case PLAYBACK_VOLUME_VARIABLE:
+                volumeHandlingName = "VARIABLE";
+                break;
+            default:
+                volumeHandlingName = "UNKNOWN";
+                break;
+        }
+
+        String volume = String.format(Locale.US,
+                "volume(current=%d, max=%d, handling=%s(%d))",
+                mVolume, mVolumeMax, volumeHandlingName, mVolumeHandling);
+
+        pw.println(prefix + volume);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -648,7 +849,9 @@ public final class MediaRoute2Info implements Parcelable {
                 && (mVolume == other.mVolume)
                 && Objects.equals(mAddress, other.mAddress)
                 && Objects.equals(mDeduplicationIds, other.mDeduplicationIds)
-                && Objects.equals(mProviderId, other.mProviderId);
+                && Objects.equals(mProviderId, other.mProviderId)
+                && (mIsVisibilityRestricted == other.mIsVisibilityRestricted)
+                && Objects.equals(mAllowedPackages, other.mAllowedPackages);
     }
 
     @Override
@@ -656,7 +859,8 @@ public final class MediaRoute2Info implements Parcelable {
         // Note: mExtras is not included.
         return Objects.hash(mId, mName, mFeatures, mType, mIsSystem, mIconUri, mDescription,
                 mConnectionState, mClientPackageName, mPackageName, mVolumeHandling, mVolumeMax,
-                mVolume, mAddress, mDeduplicationIds, mProviderId);
+                mVolume, mAddress, mDeduplicationIds, mProviderId, mIsVisibilityRestricted,
+                mAllowedPackages);
     }
 
     @Override
@@ -676,6 +880,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append(", volume=").append(getVolume())
                 .append(", deduplicationIds=").append(String.join(",", getDeduplicationIds()))
                 .append(", providerId=").append(getProviderId())
+                .append(", isVisibilityRestricted=").append(mIsVisibilityRestricted)
+                .append(", allowedPackages=").append(String.join(",", mAllowedPackages))
                 .append(" }");
         return result.toString();
     }
@@ -704,6 +910,56 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeStringArray(mDeduplicationIds.toArray(new String[mDeduplicationIds.size()]));
         dest.writeBundle(mExtras);
         dest.writeString(mProviderId);
+        dest.writeBoolean(mIsVisibilityRestricted);
+        dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
+    }
+
+    private static String getDeviceTypeString(@Type int deviceType) {
+        switch (deviceType) {
+            case TYPE_BUILTIN_SPEAKER:
+                return "BUILTIN_SPEAKER";
+            case TYPE_WIRED_HEADSET:
+                return "WIRED_HEADSET";
+            case TYPE_WIRED_HEADPHONES:
+                return "WIRED_HEADPHONES";
+            case TYPE_BLUETOOTH_A2DP:
+                return "BLUETOOTH_A2DP";
+            case TYPE_HDMI:
+                return "HDMI";
+            case TYPE_DOCK:
+                return "DOCK";
+            case TYPE_USB_DEVICE:
+                return "USB_DEVICE";
+            case TYPE_USB_ACCESSORY:
+                return "USB_ACCESSORY";
+            case TYPE_USB_HEADSET:
+                return "USB_HEADSET";
+            case TYPE_HEARING_AID:
+                return "HEARING_AID";
+            case TYPE_REMOTE_TV:
+                return "REMOTE_TV";
+            case TYPE_REMOTE_SPEAKER:
+                return "REMOTE_SPEAKER";
+            case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
+                return "REMOTE_AUDIO_VIDEO_RECEIVER";
+            case TYPE_REMOTE_TABLET:
+                return "REMOTE_TABLET";
+            case TYPE_REMOTE_TABLET_DOCKED:
+                return "REMOTE_TABLET_DOCKED";
+            case TYPE_REMOTE_COMPUTER:
+                return "REMOTE_COMPUTER";
+            case TYPE_REMOTE_GAME_CONSOLE:
+                return "REMOTE_GAME_CONSOLE";
+            case TYPE_REMOTE_CAR:
+                return "REMOTE_CAR";
+            case TYPE_REMOTE_SMARTWATCH:
+                return "REMOTE_SMARTWATCH";
+            case TYPE_GROUP:
+                return "GROUP";
+            case TYPE_UNKNOWN:
+            default:
+                return TextUtils.formatSimple("UNKNOWN(%d)", deviceType);
+        }
     }
 
     /**
@@ -730,6 +986,8 @@ public final class MediaRoute2Info implements Parcelable {
         Set<String> mDeduplicationIds;
         Bundle mExtras;
         String mProviderId;
+        boolean mIsVisibilityRestricted;
+        Set<String> mAllowedPackages;
 
         /**
          * Constructor for builder to create {@link MediaRoute2Info}.
@@ -752,6 +1010,7 @@ public final class MediaRoute2Info implements Parcelable {
             mName = name;
             mFeatures = new ArrayList<>();
             mDeduplicationIds = Set.of();
+            mAllowedPackages = Set.of();
         }
 
         /**
@@ -797,6 +1056,8 @@ public final class MediaRoute2Info implements Parcelable {
                 mExtras = new Bundle(routeInfo.mExtras);
             }
             mProviderId = routeInfo.mProviderId;
+            mIsVisibilityRestricted = routeInfo.mIsVisibilityRestricted;
+            mAllowedPackages = routeInfo.mAllowedPackages;
         }
 
         /**
@@ -846,7 +1107,8 @@ public final class MediaRoute2Info implements Parcelable {
 
         /**
          * Sets the route's type.
-         * @hide
+         *
+         * @see MediaRoute2Info#getType()
          */
         @NonNull
         public Builder setType(@Type int type) {
@@ -963,13 +1225,7 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the deduplication ID of the route.
-         * Routes have the same ID could be removed even when
-         * they are from different providers.
-         * <p>
-         * If it's {@code null}, the route will not be removed.
-         * @see RouteDiscoveryPreference#shouldRemoveDuplicates()
-         * @hide
+         * Sets the {@link MediaRoute2Info#getDeduplicationIds() deduplication IDs} of the route.
          */
         @NonNull
         public Builder setDeduplicationIds(@NonNull Set<String> id) {
@@ -1002,6 +1258,45 @@ public final class MediaRoute2Info implements Parcelable {
                 throw new IllegalArgumentException("providerId must not be null or empty");
             }
             mProviderId = providerId;
+            return this;
+        }
+
+        /**
+         * Sets the visibility of this route to public.
+         *
+         * <p>By default, unless you call {@link #setVisibilityRestricted}, the new route will be
+         * public.
+         *
+         * <p>Public routes are visible to any application with a matching {@link
+         * RouteDiscoveryPreference#getPreferredFeatures feature}.
+         *
+         * <p>Calls to this method override previous calls to {@link #setVisibilityPublic} and
+         * {@link #setVisibilityRestricted}.
+         */
+        @NonNull
+        public Builder setVisibilityPublic() {
+            mIsVisibilityRestricted = false;
+            mAllowedPackages = Set.of();
+            return this;
+        }
+
+        /**
+         * Sets the visibility of this route to restricted.
+         *
+         * <p>Routes with restricted visibility are only visible to its publisher application and
+         * applications whose package name is included in the provided {@code allowedPackages} set
+         * with a matching {@link RouteDiscoveryPreference#getPreferredFeatures feature}.
+         *
+         * <p>Calls to this method override previous calls to {@link #setVisibilityPublic} and
+         * {@link #setVisibilityRestricted}.
+         *
+         * @see #setVisibilityPublic
+         * @param allowedPackages set of package names which are allowed to see this route.
+         */
+        @NonNull
+        public Builder setVisibilityRestricted(@NonNull Set<String> allowedPackages) {
+            mIsVisibilityRestricted = true;
+            mAllowedPackages = Set.copyOf(allowedPackages);
             return this;
         }
 

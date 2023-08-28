@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Frakoblet"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Slått av"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP-konfigurasjonsfeil"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ikke tilkoblet på grunn av nettverk av lav kvalitet"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wifi-tilkoblingsfeil"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Autentiseringsproblem"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Kan ikke koble til"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Kan ikke koble til «<xliff:g id="AP_NAME">%1$s</xliff:g>»"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kobler ikke til automatisk"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internettilgang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Koble til et nettverk med datamåling"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisk tilkoblet via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisk tilkoblet via leverandør av nettverksvurdering"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Tilkoblet via %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Tilkoblet via <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Tilgjengelig via %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Trykk for å registrere deg"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Ingen internettilkobling"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Den private DNS-tjeneren kan ikke nås"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Ingen internettilkobling"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Pålogging kreves"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Tilgangspunktet er midlertidig fullt"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Tilkoblet via %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Tilgjengelig via %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Åpner <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Kunne ikke koble til"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Fullfører registreringen …"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Kunne ikke fullføre registreringen. Trykk for å prøve på nytt."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Registreringen er fullført. Kobler til …"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Veldig treg"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Treg"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"Ok"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Middels"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rask"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Veldig rask"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Utløpt"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Kobler til …"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Koblet til (ingen telefon) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Koblet til (ingen medier) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Koblet til (ingen meldingstilgang) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Koblet til (ingen telefon eller medier) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Koblet til, batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Koblet til (ingen telefon), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Tilbakestill talehastigheten"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Tilbakestill talehastigheten for tekst til standard."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Veldig langsom"</item>
-    <item msgid="1815382991399815061">"Langsom"</item>
-    <item msgid="3075292553049300105">"Vanlig"</item>
-    <item msgid="1158955023692670059">"Rask"</item>
-    <item msgid="5664310435707146591">"Litt raskere"</item>
-    <item msgid="5491266922147715962">"Veldig rask"</item>
-    <item msgid="7659240015901486196">"Hurtig"</item>
-    <item msgid="7147051179282410945">"Veldig hurtig"</item>
-    <item msgid="581904787661470707">"Raskest"</item>
+    <item msgid="4563475121751694801">"60 %"</item>
+    <item msgid="6323184326270638754">"80 %"</item>
+    <item msgid="2569200872125313769">"100 %"</item>
+    <item msgid="9010794089704942570">"150 %"</item>
+    <item msgid="4634010129655810634">"200 %"</item>
+    <item msgid="8929490998534497543">"250 %"</item>
+    <item msgid="8442352376763286772">"300 %"</item>
+    <item msgid="4446831566506165093">"350 %"</item>
+    <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Velg profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personlig"</string>
@@ -236,7 +226,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Feilsøkingsmodus når USB kobles til"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-feilsøking – opphev autorisasjon"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådløs feilsøking"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Feilsøkingsmodus når wifi er tilkoblet"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Feilsøkingsmodus når Wifi er tilkoblet"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Feil"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs feilsøking"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"For å se og bruke tilgjengelige enheter, slå på trådløs feilsøking"</string>
@@ -278,9 +268,9 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv posisjon: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert wifi-loggføring"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av wifi-skanning"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for wifi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wifi-loggføring"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
@@ -310,7 +300,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av wifi-logging – vis per SSID RSSI i wifi-velgeren"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av Wifi-logging – vis per SSID RSSI i Wifi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
@@ -326,7 +316,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Tillat simulert posisjon"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillat bruk av simulerte GPS-koordinater"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Slå på inspeksjon av visningsattributt"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Ha alltid mobildata slått på, selv når wifi er aktiv (for hurtig nettverksbytting)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Ha alltid mobildata slått på, selv når Wifi er aktiv (for hurtig nettverksbytting)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Bruk maskinvareakselerasjon for internettdeling hvis det er tilgjengelig"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Tillate USB-feilsøking?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-feilsøking er bare ment for utviklingsformål. Bruk det til å kopiere data mellom datamaskinen og enheten, installere apper på enheten uten varsel og lese loggdata."</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Vis kanter, marger osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Tvungen RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tving RTL-retning på skjermen for alle språk"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Gjennomsiktig navigasjonsrad"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Gjør bakgrunnsfargen på navigasjonsraden gjennomsiktig som standard"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Tillat uskarphet i vindu"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Tving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Slå på 4x MSAA i OpenGL ES 2.0-apper"</string>
@@ -400,7 +392,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Bakgrunnsprosessgrense"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Vis ANR-feil i bakgrunnen"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis advarsler om varselkanal"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis varselskanaladvarsler"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tillat alltid ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mer tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mindre tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Ferdig"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påminnelser"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dette nettbrettet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan ikke spille på denne enheten"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Oppgrader kontoen for å bytte"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan ikke spille av nedlastinger her"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prøv igjen etter annonsen"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Vekk enheten for å spille her"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheten er ikke godkjent for avspilling"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Kan ikke spille dette medieinnholdet her"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjelp og tilbakemelding"</string>
@@ -572,8 +577,14 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Bruker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrenset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sitt eget område de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for sitt område.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel Wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brukeren?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for at brukeren er tilgjengelig for å konfigurere området sitt på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du konfigurere profilen nå?"</string>
@@ -602,9 +613,13 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vil du tilbakestille gjesteøkten?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den nåværende økten"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Da slettes apper og data fra den nåværende gjesteøkten"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du lagre gjesteaktivitet?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan lagre aktivitet fra den gjeldende økten eller slette alle apper og data"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Tilbake-animasjoner med forslag"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Slå på systemanimasjoner for tilbakebevegelser med forslag."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Denne innstillingen slår på systemanimasjoner for bevegelsesanimasjoner med forslag. Den krever at enableOnBackInvokedCallback settes til sann i manifestfilen for hver app."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Flytt til venstre"</item>
+    <item msgid="5425394847942513942">"Flytt ned"</item>
+    <item msgid="7728484337962740316">"Flytt til høyre"</item>
+    <item msgid="324200556467459329">"Flytt opp"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Non connessa"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Disattivata"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Errore configurazione IP"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Impossibile connettersi a causa della bassa qualità della rete"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Errore connessione Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema di autenticazione"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Impossibile stabilire una connessione"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Impossibile connettersi a \"<xliff:g id="AP_NAME">%1$s</xliff:g>\""</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Non verrà eseguita la connessione automatica"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Nessun accesso a Internet"</string>
     <string name="saved_network" msgid="7143698034077223645">"Salvata da <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Connessione a rete a consumo effettuata"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Collegato automaticamente tramite %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Collegato automaticamente tramite fornitore di servizi di valutazione rete"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Collegato tramite %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Connesso tramite <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"Disponibile tramite %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Tocca per registrarti"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Internet assente"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Non è possibile accedere al server DNS privato"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Nessuna connessione a Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Accesso richiesto"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Punto di accesso momentaneamente al completo"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"Connesso tramite %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"Disponibile tramite %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"Apertura di <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>…"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Impossibile collegarsi"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Completamento della registrazione…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Impossibile completare la registrazione. Tocca per riprovare."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Registrazione completata. Connessione…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Molto lenta"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Lenta"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"OK"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Media"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Veloce"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Molto veloce"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Scaduta"</string>
@@ -95,10 +86,9 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento in corso…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (nessun accesso ai messaggi)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono o media esclusi)"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso, batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (telefono escluso), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -109,8 +99,8 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attiva, solo sinistra"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attiva, solo destra"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attivo, solo sinistra"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attivo, solo destra"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Reimposta tono voce"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Reimposta il tono predefinito di pronuncia del testo."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Molto lenta"</item>
-    <item msgid="1815382991399815061">"Lenta"</item>
-    <item msgid="3075292553049300105">"Normale"</item>
-    <item msgid="1158955023692670059">"Veloce"</item>
-    <item msgid="5664310435707146591">"Più veloce"</item>
-    <item msgid="5491266922147715962">"Molto veloce"</item>
-    <item msgid="7659240015901486196">"Rapida"</item>
-    <item msgid="7147051179282410945">"Molto rapida"</item>
-    <item msgid="581904787661470707">"Massima velocità"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra limiti, margini dei clip e così via"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forza direzione layout RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Direzione layout schermo RTL per tutte le lingue"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra di navigazione trasparente"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Rendi trasparente il colore di sfondo della barra di navigazione per impostazione predefinita"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Consenti sfocature finestre"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forza MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Attiva MSAA 4x in applicazioni OpenGL ES 2.0"</string>
@@ -527,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Più tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Meno tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
+    <string name="next" msgid="2699398661093607009">"Avanti"</string>
+    <string name="back" msgid="5554327870352703710">"Indietro"</string>
+    <string name="save" msgid="3745809743277153149">"Salva"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Fine"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
@@ -550,6 +545,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo telefono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo telefono"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossibile riprodurre su questo dispositivo"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Esegui l\'upgrade dell\'account per cambiare"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Qui non è possibile riprodurre i download"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Riprova dopo l\'annuncio"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Riattiva il dispositivo per riprodurre qui"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Dispositivo non approvato per la riproduzione"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossibile riprodurre questo contenuto multimediale qui"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema di connessione. Spegni e riaccendi il dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo audio cablato"</string>
     <string name="help_label" msgid="3528360748637781274">"Guida e feedback"</string>
@@ -572,8 +574,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. È possibile che i servizi e le impostazioni di accessibilità non vengano trasferiti al nuovo utente."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vuoi impostare questo utente come amministratore?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Gli amministratori hanno privilegi speciali che altri utenti non hanno. Un amministratore può gestire tutti gli utenti, aggiornare o resettare questo dispositivo, modificare le impostazioni, vedere tutte le app installate e concedere o revocare privilegi amministrativi per altri utenti."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Imposta come amministratore"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
@@ -605,6 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Verrà avviata una nuova sessione Ospite e verranno eliminati tutti i dati e le app della sessione corrente"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vuoi uscire da modalità Ospite?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Verranno eliminati i dati e le app della sessione Ospite corrente"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sì, imposta come amministratore"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, non impostare come amministratore"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Esci"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vuoi salvare l\'attività Ospite?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Puoi salvare l\'attività della sessione corrente o eliminare tutti i dati e le app"</string>
@@ -672,4 +679,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animazioni predittive per Indietro"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Attiva le animazioni di sistema per il gesto Indietro predittivo."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Questa impostazione attiva le animazioni di sistema per il gesto Indietro predittivo. Richiede di impostare il metodo enableOnBackInvokedCallback su true nel file manifest di tutte le app."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Sposta a sinistra"</item>
+    <item msgid="5425394847942513942">"Sposta in basso"</item>
+    <item msgid="7728484337962740316">"Sposta a destra"</item>
+    <item msgid="324200556467459329">"Sposta in alto"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

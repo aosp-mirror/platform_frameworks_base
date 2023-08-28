@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingAppliedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -151,6 +152,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private final LogBufferEulogizer mEulogizer;
     private final DumpManager mDumpManager;
     private final NotifCollectionInconsistencyTracker mInconsistencyTracker;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -183,7 +185,8 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             @Main Handler mainHandler,
             @Background Executor bgExecutor,
             LogBufferEulogizer logBufferEulogizer,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            NotificationDismissibilityProvider dismissibilityProvider) {
         mStatusBarService = statusBarService;
         mClock = clock;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -193,6 +196,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         mEulogizer = logBufferEulogizer;
         mDumpManager = dumpManager;
         mInconsistencyTracker = new NotifCollectionInconsistencyTracker(mLogger);
+        mDismissibilityProvider = dismissibilityProvider;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -303,7 +307,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             }
 
             entriesToLocallyDismiss.add(entry);
-            if (!isCanceled(entry)) {
+            if (!entry.isCanceled()) {
                 // send message to system server if this notification hasn't already been cancelled
                 mBgExecutor.execute(() -> {
                     try {
@@ -383,7 +387,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             entry.setDismissState(DISMISSED);
             mLogger.logNotifDismissed(entry);
 
-            if (isCanceled(entry)) {
+            if (entry.isCanceled()) {
                 canceledEntries.add(entry);
             } else {
                 // Mark any children as dismissed as system server will auto-dismiss them as well
@@ -392,7 +396,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                         if (shouldAutoDismissChildren(otherEntry, entry.getSbn().getGroupKey())) {
                             otherEntry.setDismissState(PARENT_DISMISSED);
                             mLogger.logChildDismissed(otherEntry);
-                            if (isCanceled(otherEntry)) {
+                            if (otherEntry.isCanceled()) {
                                 canceledEntries.add(otherEntry);
                             }
                         }
@@ -519,7 +523,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                             + logKey(entry)));
         }
 
-        if (!isCanceled(entry)) {
+        if (!entry.isCanceled()) {
             throw mEulogizer.record(
                     new IllegalStateException("Cannot remove notification " + logKey(entry)
                             + ": has not been marked for removal"));
@@ -559,6 +563,10 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                 .findFirst().orElse(null);
     }
 
+    private boolean isDismissable(NotificationEntry entry) {
+        return mDismissibilityProvider.isDismissable(entry);
+    }
+
     /**
      * Checks if the entry is the only child in the logical group;
      * it need not have a summary to qualify
@@ -579,7 +587,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private void applyRanking(@NonNull RankingMap rankingMap) {
         ArrayMap<String, NotificationEntry> currentEntriesWithoutRankings = null;
         for (NotificationEntry entry : mNotificationSet.values()) {
-            if (!isCanceled(entry)) {
+            if (!entry.isCanceled()) {
 
                 // TODO: (b/148791039) We should crash if we are ever handed a ranking with
                 //  incomplete entries. Right now, there's a race condition in NotificationListener
@@ -807,15 +815,6 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         return ranking;
     }
 
-    /**
-     * True if the notification has been canceled by system server. Usually, such notifications are
-     * immediately removed from the collection, but can sometimes stick around due to lifetime
-     * extenders.
-     */
-    private boolean isCanceled(NotificationEntry entry) {
-        return entry.mCancellationReason != REASON_NOT_CANCELED;
-    }
-
     private boolean cannotBeLifetimeExtended(NotificationEntry entry) {
         final boolean locallyDismissedByUser = entry.getDismissState() != NOT_DISMISSED;
         final boolean systemServerReportedUserCancel =
@@ -1035,6 +1034,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     public class FutureDismissal implements Runnable {
         private final NotificationEntry mEntry;
         private final DismissedByUserStatsCreator mStatsCreator;
+
         @Nullable
         private final NotificationEntry mSummaryToDismiss;
         private final String mLabel;
@@ -1059,7 +1059,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             if (isOnlyChildInGroup(entry)) {
                 String group = entry.getSbn().getGroupKey();
                 NotificationEntry summary = getGroupSummary(group);
-                if (summary != null && summary.isDismissable()) return summary;
+                if (summary != null && isDismissable(summary)) return summary;
             }
             return null;
         }

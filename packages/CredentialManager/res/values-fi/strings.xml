@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="4539824758261855508">"Kirjautumistietojen hallinta"</string>
+    <string name="string_cancel" msgid="6369133483981306063">"Peru"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Jatka"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Lisäasetukset"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"Lue lisää"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"Näytä salasana"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Piilota salasana"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Turvallisuutta avainkoodeilla"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Kun käytät avainkoodeja, sinun ei tarvitse luoda tai muistaa monimutkaisia salasanoja"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Avainkoodit ovat salattuja digitaalisia avaimia, joita voit luoda sormenjäljen, kasvojen tai näytön lukituksen avulla"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Ne tallennetaan salasanojen ylläpito-ohjelmaan, jotta voit kirjautua sisään muilla laitteilla"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Lisätietoa avainkoodeista"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Salasanaton teknologia"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Avainkoodien avulla voit kirjautua sisään ilman salasanaa. Voit vahvistaa henkilöllisyytesi ja luoda avainkoodin sormenjäljen, kasvojentunnistuksen, PIN-koodin tai pyyhkäisykuvion avulla."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Julkisen avaimen salaus"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"FIDO Alliancen (johon kuuluvat Google, Apple, Microsoft ja muita) ja W3C:n standardien mukaan avainkoodit käyttävät salausavainpareja. Käyttäjätunnuksen ja salasanan sijaan sovellusta tai sivustoa varten luodaan pari, jossa on yksityinen ja julkinen avain. Yksityinen avain tallennetaan suojatusti laitteelle tai Salasanoihin, ja se vahvistaa henkilöllisyytesi. Julkinen avain jaetaan sovelluksen tai sivuston palvelimelle. Yhteensopivalla avainparilla voit rekisteröityä ja kirjautua sisään heti."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Parempi tilin tietoturva"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Kukin avain yhdistetään vain sovellukseen tai sivustoon, jota varten se on luotu, joten et voi koskaan kirjautua vilpilliseen sovellukseen tai sivustolle vahingossa. Lisäksi palvelimet säilyttävät vain julkisia avaimia, mikä tekee hakkeroinnista paljon vaikeampaa."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Saumaton siirtymä"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kehitys kulkee kohti salasanatonta tulevaisuutta, mutta salasanat ovat edelleen käytettävissä avainkoodien ohella."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Valitse, minne <xliff:g id="CREATETYPES">%1$s</xliff:g> tallennetaan"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Valitse salasanojen ylläpitotyökalu, niin voit tallentaa tietosi ja kirjautua ensi kerralla nopeammin sisään"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Luodaanko avainkoodi (<xliff:g id="APPNAME">%1$s</xliff:g>)?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Tallennetaanko salasana (<xliff:g id="APPNAME">%1$s</xliff:g>)?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Tallennetaanko kirjautumistiedot (<xliff:g id="APPNAME">%1$s</xliff:g>)?"</string>
+    <string name="passkey" msgid="632353688396759522">"avainkoodi"</string>
+    <string name="password" msgid="6738570945182936667">"salasana"</string>
+    <string name="passkeys" msgid="5733880786866559847">"avainkoodit"</string>
+    <string name="passwords" msgid="5419394230391253816">"salasanat"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"sisäänkirjautumiset"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"kirjautumistiedot"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Tallenna <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> tänne:"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Luodaanko avainkoodi toisella laitteella?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Otetaanko <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> käyttöön kaikissa sisäänkirjautumisissa?"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tämä salasanojen ylläpitotyökalu, jota <xliff:g id="USERNAME">%1$s</xliff:g> käyttää, tallentaa salasanat ja avainkoodit, jotta voit kirjautua helposti sisään"</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Aseta oletukseksi"</string>
+    <string name="use_once" msgid="9027366575315399714">"Käytä kerran"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> salasanaa • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> avainkoodia"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> salasanaa"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> avainkoodia"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> kirjautumistietoa"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Avainkoodi"</string>
+    <string name="another_device" msgid="5147276802037801217">"Toinen laite"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Muut salasanojen ylläpitotyökalut"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Sulje taulukko"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Takaisin edelliselle sivulle"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Sulje"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Sulje"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Käytetäänkö tallennettua avainkoodiasi täällä: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Käytetäänkö tallennettuja kirjautumistietoja täällä: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Valitse tallennetut kirjautumistiedot (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Valitaanko vaihtoehto, jota <xliff:g id="APP_NAME">%1$s</xliff:g> käyttää?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Saako <xliff:g id="APP_NAME">%1$s</xliff:g> käyttää näitä tietoja?"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Kirjaudu sisään toisella tavalla"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Katseluasetukset"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Jatka"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Kirjautumisvaihtoehdot"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Näytä lisää"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Käyttäjä: <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Lukitut salasanojen ylläpitotyökalut"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Avaa napauttamalla"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Ei kirjautumistietoja"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Ei kirjautumistietoja (<xliff:g id="SOURCE">%1$s</xliff:g>)"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Muuta kirjautumistietoja"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Toiselta laitteelta"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Käytä toista laitetta"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"<xliff:g id="APP_NAME">%1$s</xliff:g> hylkäsi pyynnön"</string>
+</resources>

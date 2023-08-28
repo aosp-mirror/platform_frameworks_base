@@ -24,14 +24,13 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.hardware.display.DisplayManager;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -42,12 +41,12 @@ import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.app.animation.Interpolators;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
@@ -75,15 +74,11 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import dagger.Lazy;
 
@@ -124,6 +119,8 @@ public class NotificationMediaManager implements Dumpable {
     private ScrimController mScrimController;
     @Nullable
     private LockscreenWallpaper mLockscreenWallpaper;
+    @VisibleForTesting
+    boolean mIsLockscreenLiveWallpaperEnabled;
 
     private final DelayableExecutor mMainExecutor;
 
@@ -141,14 +138,6 @@ public class NotificationMediaManager implements Dumpable {
     private BackDropView mBackdrop;
     private ImageView mBackdropFront;
     private ImageView mBackdropBack;
-    private final Point mTmpDisplaySize = new Point();
-
-    private final DisplayManager mDisplayManager;
-    @Nullable
-    private List<String> mSmallerInternalDisplayUids;
-    private Display mCurrentDisplay;
-
-    private LockscreenWallpaper.WallpaperDrawable mWallapperDrawable;
 
     private final MediaController.Callback mMediaListener = new MediaController.Callback() {
         @Override
@@ -195,7 +184,7 @@ public class NotificationMediaManager implements Dumpable {
             SysuiColorExtractor colorExtractor,
             KeyguardStateController keyguardStateController,
             DumpManager dumpManager,
-            DisplayManager displayManager) {
+            WallpaperManager wallpaperManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -211,7 +200,7 @@ public class NotificationMediaManager implements Dumpable {
         mStatusBarStateController = statusBarStateController;
         mColorExtractor = colorExtractor;
         mKeyguardStateController = keyguardStateController;
-        mDisplayManager = displayManager;
+        mIsLockscreenLiveWallpaperEnabled = wallpaperManager.isLockscreenLiveWallpaperEnabled();
 
         setupNotifPipeline();
 
@@ -488,58 +477,19 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     /**
-     * Notify lockscreen wallpaper drawable the current internal display.
-     */
-    public void onDisplayUpdated(Display display) {
-        Trace.beginSection("NotificationMediaManager#onDisplayUpdated");
-        mCurrentDisplay = display;
-        if (mWallapperDrawable != null) {
-            mWallapperDrawable.onDisplayUpdated(isOnSmallerInternalDisplays());
-        }
-        Trace.endSection();
-    }
-
-    private boolean isOnSmallerInternalDisplays() {
-        if (mSmallerInternalDisplayUids == null) {
-            mSmallerInternalDisplayUids = findSmallerInternalDisplayUids();
-        }
-        return mSmallerInternalDisplayUids.contains(mCurrentDisplay.getUniqueId());
-    }
-
-    private List<String> findSmallerInternalDisplayUids() {
-        if (mSmallerInternalDisplayUids != null) {
-            return mSmallerInternalDisplayUids;
-        }
-        List<Display> internalDisplays = Arrays.stream(mDisplayManager.getDisplays(
-                        DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED))
-                .filter(display -> display.getType() == Display.TYPE_INTERNAL)
-                .collect(Collectors.toList());
-        if (internalDisplays.isEmpty()) {
-            return List.of();
-        }
-        Display largestDisplay = internalDisplays.stream()
-                .max(Comparator.comparingInt(this::getRealDisplayArea))
-                .orElse(internalDisplays.get(0));
-        internalDisplays.remove(largestDisplay);
-        return internalDisplays.stream().map(Display::getUniqueId).collect(Collectors.toList());
-    }
-
-    private int getRealDisplayArea(Display display) {
-        display.getRealSize(mTmpDisplaySize);
-        return mTmpDisplaySize.x * mTmpDisplaySize.y;
-    }
-
-    /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
+
+        if (mIsLockscreenLiveWallpaperEnabled) return;
+
         Trace.beginSection("CentralSurfaces#updateMediaMetaData");
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
             Trace.endSection();
             return;
         }
 
-        if (mBackdrop == null) {
+        if (getBackDropView() == null) {
             Trace.endSection();
             return; // called too early
         }
@@ -601,7 +551,7 @@ public class NotificationMediaManager implements Dumpable {
                     mLockscreenWallpaper != null ? mLockscreenWallpaper.getBitmap() : null;
             if (lockWallpaper != null) {
                 artworkDrawable = new LockscreenWallpaper.WallpaperDrawable(
-                        mBackdropBack.getResources(), lockWallpaper, isOnSmallerInternalDisplays());
+                        mBackdropBack.getResources(), lockWallpaper);
                 // We're in the SHADE mode on the SIM screen - yet we still need to show
                 // the lockscreen wallpaper in that mode.
                 allowWhenShade = mStatusBarStateController.getState() == KEYGUARD;
@@ -661,10 +611,6 @@ public class NotificationMediaManager implements Dumpable {
                     mBackdropBack.setBackgroundColor(0xFFFFFFFF);
                     mBackdropBack.setImageDrawable(new ColorDrawable(c));
                 } else {
-                    if (artworkDrawable instanceof LockscreenWallpaper.WallpaperDrawable) {
-                        mWallapperDrawable =
-                                (LockscreenWallpaper.WallpaperDrawable) artworkDrawable;
-                    }
                     mBackdropBack.setImageDrawable(artworkDrawable);
                 }
 
@@ -763,6 +709,19 @@ public class NotificationMediaManager implements Dumpable {
     @MainThread
     private void removeTask(AsyncTask<?, ?, ?> task) {
         mProcessArtworkTasks.remove(task);
+    }
+
+    // TODO(b/273443374): remove
+    public boolean isLockscreenWallpaperOnNotificationShade() {
+        return mBackdrop != null && mLockscreenWallpaper != null
+                && !mLockscreenWallpaper.isLockscreenLiveWallpaperEnabled()
+                && (mBackdropFront.isVisibleToUser() || mBackdropBack.isVisibleToUser());
+    }
+
+    // TODO(b/273443374) temporary test helper; remove
+    @VisibleForTesting
+    BackDropView getBackDropView() {
+        return mBackdrop;
     }
 
     /**

@@ -44,8 +44,8 @@ import java.util.Objects;
  *
  * <p>Once started, providers are expected to detect the time zone if possible, and report the
  * result via {@link #reportSuggestion(TimeZoneProviderSuggestion)} or {@link
- * #reportUncertain()}. Providers may also report that they have permanently failed
- * by calling {@link #reportPermanentFailure(Throwable)}. See the javadocs for each
+ * #reportUncertain(TimeZoneProviderStatus)}. Providers may also report that they have permanently
+ * failed by calling {@link #reportPermanentFailure(Throwable)}. See the javadocs for each
  * method for details.
  *
  * <p>After starting, providers are expected to issue their first callback within the timeout
@@ -203,6 +203,25 @@ public abstract class TimeZoneProviderService extends Service {
      * details.
      */
     public final void reportSuggestion(@NonNull TimeZoneProviderSuggestion suggestion) {
+        TimeZoneProviderStatus providerStatus = null;
+        reportSuggestionInternal(suggestion, providerStatus);
+    }
+
+    /**
+     * Indicates a successful time zone detection. See {@link TimeZoneProviderSuggestion} for
+     * details.
+     *
+     * @param providerStatus provider status information that can influence detector service
+     *   behavior and/or be reported via the device UI
+     */
+    public final void reportSuggestion(@NonNull TimeZoneProviderSuggestion suggestion,
+            @NonNull TimeZoneProviderStatus providerStatus) {
+        Objects.requireNonNull(providerStatus);
+        reportSuggestionInternal(suggestion, providerStatus);
+    }
+
+    private void reportSuggestionInternal(@NonNull TimeZoneProviderSuggestion suggestion,
+            @Nullable TimeZoneProviderStatus providerStatus) {
         Objects.requireNonNull(suggestion);
 
         mHandler.post(() -> {
@@ -212,7 +231,7 @@ public abstract class TimeZoneProviderService extends Service {
                     try {
                         TimeZoneProviderEvent thisEvent =
                                 TimeZoneProviderEvent.createSuggestionEvent(
-                                        SystemClock.elapsedRealtime(), suggestion);
+                                        SystemClock.elapsedRealtime(), suggestion, providerStatus);
                         if (shouldSendEvent(thisEvent)) {
                             manager.onTimeZoneProviderEvent(thisEvent);
                             mLastEventSent = thisEvent;
@@ -227,10 +246,30 @@ public abstract class TimeZoneProviderService extends Service {
 
     /**
      * Indicates the time zone is not known because of an expected runtime state or error, e.g. when
-     * the provider is unable to detect location, or there was a problem when resolving the location
-     * to a time zone.
+     * the provider is unable to detect location, or there was connectivity issue.
+     *
+     * <p>See {@link #reportUncertain(TimeZoneProviderStatus)} for a more expressive version
      */
     public final void reportUncertain() {
+        TimeZoneProviderStatus providerStatus = null;
+        reportUncertainInternal(providerStatus);
+    }
+
+    /**
+     * Indicates the time zone is not known because of an expected runtime state or error.
+     *
+     * <p>When the status changes then a certain or uncertain report must be made to move the
+     * detector service to the new status.
+     *
+     * @param providerStatus provider status information that can influence detector service
+     *   behavior and/or be reported via the device UI
+     */
+    public final void reportUncertain(@NonNull TimeZoneProviderStatus providerStatus) {
+        Objects.requireNonNull(providerStatus);
+        reportUncertainInternal(providerStatus);
+    }
+
+    private void reportUncertainInternal(@Nullable TimeZoneProviderStatus providerStatus) {
         mHandler.post(() -> {
             synchronized (mLock) {
                 ITimeZoneProviderManager manager = mManager;
@@ -238,7 +277,7 @@ public abstract class TimeZoneProviderService extends Service {
                     try {
                         TimeZoneProviderEvent thisEvent =
                                 TimeZoneProviderEvent.createUncertainEvent(
-                                        SystemClock.elapsedRealtime());
+                                        SystemClock.elapsedRealtime(), providerStatus);
                         if (shouldSendEvent(thisEvent)) {
                             manager.onTimeZoneProviderEvent(thisEvent);
                             mLastEventSent = thisEvent;
@@ -320,8 +359,8 @@ public abstract class TimeZoneProviderService extends Service {
      * <p>Between {@link #onStartUpdates(long)} and {@link #onStopUpdates()} calls, the Android
      * system server holds the latest report from the provider in memory. After an initial report,
      * provider implementations are only required to send a report via {@link
-     * #reportSuggestion(TimeZoneProviderSuggestion)} or via {@link #reportUncertain()} when it
-     * differs from the previous report.
+     * #reportSuggestion(TimeZoneProviderSuggestion, TimeZoneProviderStatus)} or via {@link
+     * #reportUncertain(TimeZoneProviderStatus)} when it differs from the previous report.
      *
      * <p>{@link #reportPermanentFailure(Throwable)} can also be called by provider implementations
      * in rare cases, after which the provider should consider itself stopped and not make any
@@ -333,7 +372,8 @@ public abstract class TimeZoneProviderService extends Service {
      * Android system server may move on to use other providers or detection methods. Providers
      * should therefore make best efforts during this time to generate a report, which could involve
      * increased power usage. Providers should preferably report an explicit {@link
-     * #reportUncertain()} if the time zone(s) cannot be detected within the initialization timeout.
+     * #reportUncertain(TimeZoneProviderStatus)} if the time zone(s) cannot be detected within the
+     * initialization timeout.
      *
      * @see #onStopUpdates() for the signal from the system server to stop sending reports
      */

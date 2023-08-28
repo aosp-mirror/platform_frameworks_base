@@ -26,7 +26,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -103,8 +102,18 @@ public final class MediaRouter2 {
 
     private final String mPackageName;
 
+    /**
+     * Stores the latest copy of all routes received from the system server, without any filtering,
+     * sorting, or deduplication.
+     *
+     * <p>Uses {@link MediaRoute2Info#getId()} to set each entry's key.
+     */
     @GuardedBy("mLock")
     final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    @Nullable
+    private RouteListingPreference mRouteListingPreference;
 
     final RoutingController mSystemController;
 
@@ -123,7 +132,22 @@ public final class MediaRouter2 {
 
     final Handler mHandler;
 
+    /**
+     * Stores an auxiliary copy of {@link #mFilteredRoutes} at the time of the last route callback
+     * dispatch. This is only used to determine what callback a route should be assigned to (added,
+     * removed, changed) in {@link #dispatchFilteredRoutesUpdatedOnHandler(List)}.
+     */
     private volatile ArrayMap<String, MediaRoute2Info> mPreviousRoutes = new ArrayMap<>();
+
+    /**
+     * Stores the latest copy of exposed routes after filtering, sorting, and deduplication. Can be
+     * accessed through {@link #getRoutes()}.
+     *
+     * <p>This list is a copy of {@link #mRoutes} which has undergone filtering, sorting, and
+     * deduplication using criteria in {@link #mDiscoveryPreference}.
+     *
+     * @see #filterRoutesWithCompositePreferenceLocked(List)
+     */
     private volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
     private volatile OnGetControllerHintsListener mOnGetControllerHintsListener;
 
@@ -184,18 +208,14 @@ public final class MediaRouter2 {
                 IMediaRouterService.Stub.asInterface(
                         ServiceManager.getService(Context.MEDIA_ROUTER_SERVICE));
         try {
-            // SecurityException will be thrown if there's no permission.
-            serviceBinder.enforceMediaContentControlPermission();
+            // verifyPackageExists throws SecurityException if the caller doesn't hold
+            // MEDIA_CONTENT_CONTROL permission.
+            if (!serviceBinder.verifyPackageExists(clientPackageName)) {
+                Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
+                return null;
+            }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-        }
-
-        PackageManager pm = context.getPackageManager();
-        try {
-            pm.getPackageInfo(clientPackageName, 0);
-        } catch (PackageManager.NameNotFoundException ex) {
-            Log.e(TAG, "Package " + clientPackageName + " not found. Ignoring.");
-            return null;
         }
 
         synchronized (sSystemRouterLock) {
@@ -284,7 +304,7 @@ public final class MediaRouter2 {
             currentSystemRoutes = mMediaRouterService.getSystemRoutes();
             currentSystemSessionInfo = mMediaRouterService.getSystemSessionInfo();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Unable to get current system's routes / session info", ex);
+            ex.rethrowFromSystemServer();
         }
 
         if (currentSystemRoutes == null || currentSystemRoutes.isEmpty()) {
@@ -386,14 +406,14 @@ public final class MediaRouter2 {
                     mMediaRouterService.registerRouter2(stub, mPackageName);
                     mStub = stub;
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to register MediaRouter2.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
             if (mStub != null && updateDiscoveryPreferenceIfNeededLocked()) {
                 try {
                     mMediaRouterService.setDiscoveryRequestWithRouter2(mStub, mDiscoveryPreference);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to set discovery request.", ex);
+                    ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -433,9 +453,82 @@ public final class MediaRouter2 {
                 try {
                     mMediaRouterService.unregisterRouter2(mStub);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Unable to unregister media router.", ex);
+                    ex.rethrowFromSystemServer();
                 }
                 mStub = null;
+            }
+        }
+    }
+
+    /**
+     * Shows the system output switcher dialog.
+     *
+     * <p>Should only be called when the context of MediaRouter2 is in the foreground and visible on
+     * the screen.
+     *
+     * <p>The appearance and precise behaviour of the system output switcher dialog may vary across
+     * different devices, OS versions, and form factors, but the basic functionality stays the same.
+     *
+     * <p>See <a
+     * href="https://developer.android.com/guide/topics/media/media-routing#output-switcher">Output
+     * Switcher documentation</a> for more details.
+     *
+     * @return {@code true} if the output switcher dialog is being shown, or {@code false} if the
+     * call is ignored because the app is in the background.
+     */
+    public boolean showSystemOutputSwitcher() {
+        synchronized (mLock) {
+            try {
+                return mMediaRouterService.showMediaOutputSwitcher(mPackageName);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the {@link RouteListingPreference} of the app associated to this media router.
+     *
+     * <p>Use this method to inform the system UI of the routes that you would like to list for
+     * media routing, via the Output Switcher.
+     *
+     * <p>You should call this method before {@link #registerRouteCallback registering any route
+     * callbacks} and immediately after receiving any {@link RouteCallback#onRoutesUpdated route
+     * updates} in order to keep the system UI in a consistent state. You can also call this method
+     * at any other point to update the listing preference dynamically.
+     *
+     * <p>Notes:
+     *
+     * <ol>
+     *   <li>You should not include the ids of two or more routes with a match in their {@link
+     *       MediaRoute2Info#getDeduplicationIds() deduplication ids}. If you do, the system will
+     *       deduplicate them using its own criteria.
+     *   <li>You can use this method to rank routes in the output switcher, placing the more
+     *       important routes first. The system might override the proposed ranking.
+     *   <li>You can use this method to avoid listing routes using dynamic criteria. For example,
+     *       you can limit access to a specific type of device according to runtime criteria.
+     * </ol>
+     *
+     * @param routeListingPreference The {@link RouteListingPreference} for the system to use for
+     *     route listing. When null, the system uses its default listing criteria.
+     */
+    public void setRouteListingPreference(@Nullable RouteListingPreference routeListingPreference) {
+        synchronized (mLock) {
+            if (Objects.equals(mRouteListingPreference, routeListingPreference)) {
+                // Nothing changed. We return early to save a call to the system server.
+                return;
+            }
+            mRouteListingPreference = routeListingPreference;
+            try {
+                if (mStub == null) {
+                    MediaRouter2Stub stub = new MediaRouter2Stub();
+                    mMediaRouterService.registerRouter2(stub, mPackageName);
+                    mStub = stub;
+                }
+                mMediaRouterService.setRouteListingPreference(mStub, mRouteListingPreference);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
             }
         }
     }
@@ -582,7 +675,7 @@ public final class MediaRouter2 {
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
         if (isSystemRouter()) {
-            sManager.selectRoute(mClientPackageName, route);
+            sManager.transfer(mClientPackageName, route);
             return;
         }
 
@@ -799,7 +892,7 @@ public final class MediaRouter2 {
         }
     }
 
-    void dispatchFilteredRoutesChangedLocked(List<MediaRoute2Info> newRoutes) {
+    void dispatchFilteredRoutesUpdatedOnHandler(List<MediaRoute2Info> newRoutes) {
         List<MediaRoute2Info> addedRoutes = new ArrayList<>();
         List<MediaRoute2Info> removedRoutes = new ArrayList<>();
         List<MediaRoute2Info> changedRoutes = new ArrayList<>();
@@ -842,29 +935,16 @@ public final class MediaRouter2 {
         if (!changedRoutes.isEmpty()) {
             notifyRoutesChanged(changedRoutes);
         }
-    }
 
-    void addRoutesOnHandler(List<MediaRoute2Info> routes) {
-        synchronized (mLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.put(route.getId(), route);
-            }
-            updateFilteredRoutesLocked();
+        // Note: We don't notify clients of changes in route ordering.
+        if (!addedRoutes.isEmpty() || !removedRoutes.isEmpty() || !changedRoutes.isEmpty()) {
+            notifyRoutesUpdated(newRoutes);
         }
     }
 
-    void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
+    void updateRoutesOnHandler(List<MediaRoute2Info> routes) {
         synchronized (mLock) {
-            for (MediaRoute2Info route : routes) {
-                mRoutes.remove(route.getId());
-            }
-            updateFilteredRoutesLocked();
-        }
-    }
-
-    void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
-        List<MediaRoute2Info> changedRoutes = new ArrayList<>();
-        synchronized (mLock) {
+            mRoutes.clear();
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
             }
@@ -879,8 +959,10 @@ public final class MediaRouter2 {
                 Collections.unmodifiableList(
                         filterRoutesWithCompositePreferenceLocked(List.copyOf(mRoutes.values())));
         mHandler.sendMessage(
-                obtainMessage(MediaRouter2::dispatchFilteredRoutesChangedLocked,
-                        this, mFilteredRoutes));
+                obtainMessage(
+                        MediaRouter2::dispatchFilteredRoutesUpdatedOnHandler,
+                        this,
+                        mFilteredRoutes));
     }
 
     /**
@@ -1190,6 +1272,14 @@ public final class MediaRouter2 {
         }
     }
 
+    private void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
+        for (RouteCallbackRecord record : mRouteCallbackRecords) {
+            List<MediaRoute2Info> filteredRoutes =
+                    filterRoutesWithIndividualPreference(routes, record.mPreference);
+            record.mExecutor.execute(() -> record.mRouteCallback.onRoutesUpdated(filteredRoutes));
+        }
+    }
+
     private void notifyPreferredFeaturesChanged(List<String> features) {
         for (RouteCallbackRecord record : mRouteCallbackRecords) {
             record.mExecutor.execute(
@@ -1225,27 +1315,42 @@ public final class MediaRouter2 {
     /** Callback for receiving events about media route discovery. */
     public abstract static class RouteCallback {
         /**
-         * Called when routes are added. Whenever you registers a callback, this will be invoked
-         * with known routes.
+         * Called when routes are added. Whenever you register a callback, this will be invoked with
+         * known routes.
          *
          * @param routes the list of routes that have been added. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are removed.
          *
          * @param routes the list of routes that have been removed. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
-         * Called when routes are changed. For example, it is called when the route's name or volume
-         * have been changed.
+         * Called when the properties of one or more existing routes are changed. For example, it is
+         * called when a route's name or volume have changed.
          *
          * @param routes the list of routes that have been changed. It's never empty.
+         * @deprecated Use {@link #onRoutesUpdated(List)} instead.
          */
+        @Deprecated
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+
+        /**
+         * Called when the route list is updated, which can happen when routes are added, removed,
+         * or modified. It will also be called when a route callback is registered.
+         *
+         * @param routes the updated list of routes filtered by the callback's individual discovery
+         *     preferences.
+         */
+        public void onRoutesUpdated(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when the client app's preferred features are changed. When this is called, it is
@@ -1434,6 +1539,16 @@ public final class MediaRouter2 {
                 deselectableRouteIds = mSessionInfo.getDeselectableRoutes();
             }
             return getRoutesWithIds(deselectableRouteIds);
+        }
+
+        /**
+         * Returns the current {@link RoutingSessionInfo} associated to this controller.
+         */
+        @NonNull
+        public RoutingSessionInfo getRoutingSessionInfo() {
+            synchronized (mControllerLock) {
+                return mSessionInfo;
+            }
         }
 
         /**
@@ -1736,7 +1851,7 @@ public final class MediaRouter2 {
                     try {
                         mMediaRouterService.releaseSessionWithRouter2(mStub, getId());
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "Unable to release session", ex);
+                        ex.rethrowFromSystemServer();
                     }
                 }
 
@@ -1754,7 +1869,7 @@ public final class MediaRouter2 {
                     try {
                         mMediaRouterService.unregisterRouter2(mStub);
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "releaseInternal: Unable to unregister media router.", ex);
+                        ex.rethrowFromSystemServer();
                     }
                     mStub = null;
                 }
@@ -1793,13 +1908,6 @@ public final class MediaRouter2 {
                             .append("}")
                             .append(" }");
             return result.toString();
-        }
-
-        @NonNull
-        RoutingSessionInfo getRoutingSessionInfo() {
-            synchronized (mControllerLock) {
-                return mSessionInfo;
-            }
         }
 
         void setRoutingSessionInfo(@NonNull RoutingSessionInfo info) {
@@ -1964,21 +2072,9 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void notifyRoutesAdded(List<MediaRoute2Info> routes) {
+        public void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
             mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::addRoutesOnHandler, MediaRouter2.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::removeRoutesOnHandler, MediaRouter2.this, routes));
-        }
-
-        @Override
-        public void notifyRoutesChanged(List<MediaRoute2Info> routes) {
-            mHandler.sendMessage(
-                    obtainMessage(MediaRouter2::changeRoutesOnHandler, MediaRouter2.this, routes));
+                    obtainMessage(MediaRouter2::updateRoutesOnHandler, MediaRouter2.this, routes));
         }
 
         @Override
@@ -2026,17 +2122,7 @@ public final class MediaRouter2 {
     class ManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
-        public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {
-            updateAllRoutesFromManager();
-        }
-
-        @Override
-        public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {
-            updateAllRoutesFromManager();
-        }
-
-        @Override
-        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {
+        public void onRoutesUpdated() {
             updateAllRoutesFromManager();
         }
 

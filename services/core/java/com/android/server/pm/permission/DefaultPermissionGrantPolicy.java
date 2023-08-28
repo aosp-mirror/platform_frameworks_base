@@ -62,12 +62,12 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.pm.KnownPackages;
@@ -169,6 +169,11 @@ final class DefaultPermissionGrantPolicy {
         COARSE_BACKGROUND_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
     }
 
+    private static final Set<String> FINE_LOCATION_PERMISSIONS = new ArraySet<>();
+    static {
+        FINE_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
+    }
+
     private static final Set<String> ACTIVITY_RECOGNITION_PERMISSIONS = new ArraySet<>();
     static {
         ACTIVITY_RECOGNITION_PERMISSIONS.add(Manifest.permission.ACTIVITY_RECOGNITION);
@@ -214,6 +219,7 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
         STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+        STORAGE_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
     }
 
     private static final Set<String> NEARBY_DEVICES_PERMISSIONS = new ArraySet<>();
@@ -789,8 +795,10 @@ final class DefaultPermissionGrantPolicy {
             for (String voiceInteractPackageName : voiceInteractPackageNames) {
                 grantPermissionsToSystemPackage(pm, voiceInteractPackageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
-                        PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                        PHONE_PERMISSIONS, SMS_PERMISSIONS, COARSE_BACKGROUND_LOCATION_PERMISSIONS,
                         NEARBY_DEVICES_PERMISSIONS, NOTIFICATION_PERMISSIONS);
+                revokeRuntimePermissions(pm, voiceInteractPackageName, FINE_LOCATION_PERMISSIONS,
+                        false, userId);
             }
         }
 
@@ -1079,7 +1087,7 @@ final class DefaultPermissionGrantPolicy {
     public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to active LUI app for user:" + userId);
         grantSystemFixedPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                CAMERA_PERMISSIONS);
+                CAMERA_PERMISSIONS, NOTIFICATION_PERMISSIONS);
     }
 
     public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
@@ -1805,6 +1813,15 @@ final class DefaultPermissionGrantPolicy {
             PermissionState permState;
             if (permIdx >= 0) {
                 permState = uidState.valueAt(permIdx);
+                // Quick and dirty fix for shared UID packages - we should grant permission with the
+                // correct package even if a previous checkPermission() used a package that isn't
+                // requesting the permission. Ideally we should use package manager snapshot and get
+                // rid of this entire inner class.
+                if (!ArrayUtils.contains(permState.mPkgRequestingPerm.requestedPermissions,
+                        permission) && ArrayUtils.contains(pkg.requestedPermissions,
+                        permission)) {
+                    permState.mPkgRequestingPerm = pkg;
+                }
             } else {
                 permState = new PermissionState(permission, pkg, user);
                 uidState.put(permission, permState);
@@ -1892,7 +1909,7 @@ final class DefaultPermissionGrantPolicy {
          */
         private class PermissionState {
             private final @NonNull String mPermission;
-            private final @NonNull PackageInfo mPkgRequestingPerm;
+            private @NonNull PackageInfo mPkgRequestingPerm;
             private final @NonNull UserHandle mUser;
 
             /** Permission flags when the state was created */

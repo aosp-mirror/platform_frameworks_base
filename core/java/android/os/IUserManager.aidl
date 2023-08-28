@@ -23,6 +23,7 @@ import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.IntentSender;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
@@ -50,6 +51,7 @@ interface IUserManager {
     String[] getPreInstallableSystemPackages(in String userType);
     void setUserEnabled(int userId);
     void setUserAdmin(int userId);
+    void revokeUserAdmin(int userId);
     void evictCredentialEncryptionKey(int userId);
     boolean removeUser(int userId);
     boolean removeUserEvenWhenDisallowed(int userId);
@@ -57,6 +59,8 @@ interface IUserManager {
     void setUserIcon(int userId, in Bitmap icon);
     ParcelFileDescriptor getUserIcon(int userId);
     UserInfo getPrimaryUser();
+    int getMainUserId();
+    int getPreviousFullUserToEnterForeground();
     List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying, boolean excludePreCreated);
     List<UserInfo> getProfiles(int userId, boolean enabledOnly);
     int[] getProfileIds(int userId, boolean enabledOnly);
@@ -68,14 +72,16 @@ interface IUserManager {
     boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
     UserInfo getProfileParent(int userId);
     boolean isSameProfileGroup(int userId, int otherUserHandle);
+    boolean isHeadlessSystemUserMode();
     boolean isUserOfType(int userId, in String userType);
     @UnsupportedAppUsage
     UserInfo getUserInfo(int userId);
+    UserProperties getUserPropertiesCopy(int userId);
     String getUserAccount(int userId);
     void setUserAccount(int userId, String accountName);
     long getUserCreationTime(int userId);
     int getUserSwitchability(int userId);
-    boolean isUserSwitcherEnabled(int mUserId);
+    boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable, int mUserId);
     boolean isRestricted(int userId);
     boolean canHaveRestrictedProfile(int userId);
     int getUserSerialNumber(int userId);
@@ -96,7 +102,7 @@ interface IUserManager {
     Bundle getDefaultGuestRestrictions();
     int removeUserWhenPossible(int userId, boolean overrideDevicePolicy);
     boolean markGuestForDeletion(int userId);
-    UserInfo findCurrentGuestUser();
+    List<UserInfo> getGuestUsers();
     boolean isQuietModeEnabled(int userId);
     UserHandle createUserWithAttributes(in String userName, in String userType, int flags,
             in Bitmap userIcon,
@@ -110,9 +116,8 @@ interface IUserManager {
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean someUserHasAccount(in String accountName, in String accountType);
     String getProfileType(int userId);
-    boolean isMediaSharedWithParent(int userId);
-    boolean isCredentialSharableWithParent(int userId);
     boolean isDemoUser(int userId);
+    boolean isAdminUser(int userId);
     boolean isPreCreated(int userId);
     UserInfo createProfileForUserEvenWhenDisallowedWithThrow(in String name, in String userType, int flags,
             int userId, in String[] disallowedPackages);
@@ -127,6 +132,9 @@ interface IUserManager {
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
     boolean isUserForeground(int userId);
+    boolean isUserVisible(int userId);
+    int[] getVisibleUsers();
+    int getMainDisplayIdAssignedToUser();
     boolean isUserNameSet(int userId);
     boolean hasRestrictedProfiles(int userId);
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userId, in IntentSender target, int flags);
@@ -134,4 +142,8 @@ interface IUserManager {
     long getUserStartRealtime();
     long getUserUnlockRealtime();
     boolean setUserEphemeral(int userId, boolean enableEphemeral);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS})")
+    void setBootUser(int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS})")
+    int getBootUser();
 }

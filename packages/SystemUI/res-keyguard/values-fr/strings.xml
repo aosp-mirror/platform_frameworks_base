@@ -20,9 +20,12 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Saisissez votre code"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Tracez votre schéma"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Saisissez le code d\'accès"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Saisissez le code"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Tracez le schéma"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Dessinez un schéma"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Saisissez votre mot de passe"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Saisissez le mot de passe"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Carte non valide."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Chargé"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • En charge sans fil"</string>
@@ -31,6 +34,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge rapide…"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge lente"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge optimisée pour protéger la batterie"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problème de recharge de l\'accessoire"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Appuyez sur \"Menu\" pour déverrouiller le clavier."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Réseau verrouillé"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Aucune SIM"</string>
@@ -51,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Impossible de désactiver la carte eSIM en raison d\'une erreur."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Entrée"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Schéma incorrect"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Schéma incorrect. Réessayez."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Mot de passe incorrect"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Mot de passe incorrect. Réessayez."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Code incorrect"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Code incorrect. Réessayez."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Ou déverrouillez avec votre empreinte digitale"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Empreinte non reconnue"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Visage non reconnu"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Réessayez ou saisissez le code"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Réessayez ou saisissez votre mot de passe"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Réessayez ou dessinez un schéma"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Code requis après trop de tentatives"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Mot de passe requis après trop de tentatives"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Schéma requis après trop de tentatives"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Déverrouillez avec code ou empreinte"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Déverrouillez avec mot de passe ou empreinte"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Déverrouillez avec schéma ou empreinte"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Appareil verrouillé par règle pro pour plus de sécurité"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Code requis après un blocage"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Mot de passe requis après un blocage"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Schéma requis après un blocage"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"La mise à jour sera installée pendant les heures d\'inactivité"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Code inutilisé depuis un moment. Renforcez la sécurité."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Mot de passe inutilisé depuis un moment. Renforcez la sécurité."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Schéma inutilisé depuis un moment. Renforcez la sécurité."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Appareil non déverrouillé depuis un moment. Renforcez la sécurité."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Déverrouillage facial impossible. Trop de tentatives."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Déverrouillage digital impossible. Trop de tentatives."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Agent de confiance non disponible"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Trop de tentatives avec un code incorrect"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Trop de tentatives avec un schéma incorrect"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Trop de tentatives avec un mot de passe incorrect"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Réessayez dans # seconde.}one{Réessayez dans # seconde.}many{Réessayez dans # secondes.}other{Réessayez dans # secondes.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Saisissez le code PIN de la carte SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
@@ -75,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Échec du déverrouillage à l\'aide de la clé PUK de la carte SIM."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Changer le mode de saisie"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Mode Avion"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Veuillez dessiner le schéma après le redémarrage de l\'appareil"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Veuillez saisir le code après le redémarrage de l\'appareil"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Veuillez saisir le mot de passe après le redémarrage de l\'appareil"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Schéma requis après redémarrage de l\'appareil"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Code requis après redémarrage de l\'appareil"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Mot de passe requis après redémarrage de l\'appareil"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Pour plus de sécurité, utilisez plutôt un schéma"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Pour plus de sécurité, utilisez plutôt un code"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Pour plus de sécurité, utilisez plutôt un mot de passe"</string>

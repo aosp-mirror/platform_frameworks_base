@@ -154,5 +154,5 @@ private val SCREENSHOT_REMOTE_RUNNER: IRemoteAnimationRunner.Stub =
             }
         }
 
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {}
+        override fun onAnimationCancelled() {}
     }

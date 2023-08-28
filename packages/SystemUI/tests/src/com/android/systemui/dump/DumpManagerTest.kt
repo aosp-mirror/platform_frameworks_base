@@ -19,7 +19,7 @@ package com.android.systemui.dump
 import androidx.test.filters.SmallTest
 import com.android.systemui.Dumpable
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.util.mockito.any
 import java.io.PrintWriter
 import org.junit.Before
@@ -60,16 +60,14 @@ class DumpManagerTest : SysuiTestCase() {
 
         // WHEN a dumpable is dumped explicitly
         val args = arrayOf<String>()
-        dumpManager.dumpTarget("dumpable2", pw, arrayOf(), tailLength = 0)
+        dumpManager.dumpTarget("dumpable2", pw, args, tailLength = 0)
 
         // THEN only the requested one has their dump() method called
-        verify(dumpable1, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
+        verify(dumpable1, never()).dump(any(), any())
         verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
-        verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
+        verify(dumpable3, never()).dump(any(), any())
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
     }
 
     @Test
@@ -82,17 +80,15 @@ class DumpManagerTest : SysuiTestCase() {
         dumpManager.registerBuffer("buffer2", buffer2)
 
         // WHEN a buffer is dumped explicitly
-        dumpManager.dumpTarget("buffer1", pw, arrayOf(), tailLength = 14)
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("buffer1", pw, args, tailLength = 14)
 
         // THEN only the requested one has their dump() method called
-        verify(dumpable1, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable2, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable2, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3, never()).dump(any(), any())
         verify(buffer1).dump(pw, tailLength = 14)
-        verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
     }
 
     @Test
@@ -106,6 +102,122 @@ class DumpManagerTest : SysuiTestCase() {
 
         // THEN its dump() method is called
         verify(dumpable1).dump(pw, args)
+    }
+
+    @Test
+    fun testDumpTarget_selectsShortestNamedDumpable() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerCriticalDumpable("first-dumpable", dumpable1)
+        dumpManager.registerCriticalDumpable("scnd-dumpable", dumpable2)
+        dumpManager.registerCriticalDumpable("third-dumpable", dumpable3)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("dumpable", pw, args, tailLength = 0)
+
+        // THEN the matching dumpable with the shorter name is dumped
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2).dump(pw, args)
+        verify(dumpable3, never()).dump(any(), any())
+    }
+
+    @Test
+    fun testDumpTarget_selectsShortestNamedBuffer() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerBuffer("first-buffer", buffer1)
+        dumpManager.registerBuffer("scnd-buffer", buffer2)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("buffer", pw, args, tailLength = 14)
+
+        // THEN the matching buffer with the shorter name is dumped
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2).dump(pw, tailLength = 14)
+    }
+
+    @Test
+    fun testDumpTarget_selectsShortestNamedMatch_dumpable() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
+        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
+        dumpManager.registerBuffer("big-buffer1", buffer1)
+        dumpManager.registerBuffer("big-buffer2", buffer2)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("2", pw, args, tailLength = 14)
+
+        // THEN the matching dumpable with the shorter name is dumped
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2).dump(pw, args)
+        verify(dumpable3, never()).dump(any(), any())
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
+    }
+
+    @Test
+    fun testDumpTarget_selectsShortestNamedMatch_buffer() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerCriticalDumpable("dumpable1", dumpable1)
+        dumpManager.registerCriticalDumpable("dumpable2", dumpable2)
+        dumpManager.registerCriticalDumpable("dumpable3", dumpable3)
+        dumpManager.registerBuffer("buffer1", buffer1)
+        dumpManager.registerBuffer("buffer2", buffer2)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("2", pw, args, tailLength = 14)
+
+        // THEN the matching buffer with the shorter name is dumped
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3, never()).dump(any(), any())
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2).dump(pw, tailLength = 14)
+    }
+
+    @Test
+    fun testDumpTarget_selectsTheAlphabeticallyFirstShortestMatch_dumpable() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerCriticalDumpable("d1x", dumpable1)
+        dumpManager.registerCriticalDumpable("d2x", dumpable2)
+        dumpManager.registerCriticalDumpable("a3x", dumpable3)
+        dumpManager.registerBuffer("ab1x", buffer1)
+        dumpManager.registerBuffer("b2x", buffer2)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("x", pw, args, tailLength = 14)
+
+        // THEN the alphabetically first dumpable/buffer (of the 3 letter names) is dumped
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3).dump(pw, args)
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
+    }
+
+    @Test
+    fun testDumpTarget_selectsTheAlphabeticallyFirstShortestMatch_buffer() {
+        // GIVEN a variety of registered dumpables and buffers
+        dumpManager.registerCriticalDumpable("d1x", dumpable1)
+        dumpManager.registerCriticalDumpable("d2x", dumpable2)
+        dumpManager.registerCriticalDumpable("az1x", dumpable3)
+        dumpManager.registerBuffer("b1x", buffer1)
+        dumpManager.registerBuffer("b2x", buffer2)
+
+        // WHEN a dumpable is dumped by a suffix that matches multiple options
+        val args = arrayOf<String>()
+        dumpManager.dumpTarget("x", pw, args, tailLength = 14)
+
+        // THEN the alphabetically first dumpable/buffer (of the 3 letter names) is dumped
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3, never()).dump(any(), any())
+        verify(buffer1).dump(pw, tailLength = 14)
+        verify(buffer2, never()).dump(any(), anyInt())
     }
 
     @Test
@@ -125,8 +237,8 @@ class DumpManagerTest : SysuiTestCase() {
         verify(dumpable1).dump(pw, args)
         verify(dumpable2).dump(pw, args)
         verify(dumpable3).dump(pw, args)
-        verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
-        verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
     }
 
     @Test
@@ -142,12 +254,9 @@ class DumpManagerTest : SysuiTestCase() {
         dumpManager.dumpBuffers(pw, tailLength = 1)
 
         // THEN all buffers are dumped (and no dumpables)
-        verify(dumpable1, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable2, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable3, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3, never()).dump(any(), any())
         verify(buffer1).dump(pw, tailLength = 1)
         verify(buffer2).dump(pw, tailLength = 1)
     }
@@ -168,10 +277,9 @@ class DumpManagerTest : SysuiTestCase() {
         // THEN only critical modules are dumped (and no buffers)
         verify(dumpable1).dump(pw, args)
         verify(dumpable2).dump(pw, args)
-        verify(dumpable3, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(buffer1, never()).dump(any(PrintWriter::class.java), anyInt())
-        verify(buffer2, never()).dump(any(PrintWriter::class.java), anyInt())
+        verify(dumpable3, never()).dump(any(), any())
+        verify(buffer1, never()).dump(any(), anyInt())
+        verify(buffer2, never()).dump(any(), anyInt())
     }
 
     @Test
@@ -188,10 +296,8 @@ class DumpManagerTest : SysuiTestCase() {
         dumpManager.dumpNormal(pw, args, tailLength = 2)
 
         // THEN the normal module and all buffers are dumped
-        verify(dumpable1, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable2, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
+        verify(dumpable1, never()).dump(any(), any())
+        verify(dumpable2, never()).dump(any(), any())
         verify(dumpable3).dump(pw, args)
         verify(buffer1).dump(pw, tailLength = 2)
         verify(buffer2).dump(pw, tailLength = 2)
@@ -213,9 +319,7 @@ class DumpManagerTest : SysuiTestCase() {
 
         // THEN the unregistered dumpables (both normal and critical) are not dumped
         verify(dumpable1).dump(pw, args)
-        verify(dumpable2, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
-        verify(dumpable3, never())
-            .dump(any(PrintWriter::class.java), any(Array<String>::class.java))
+        verify(dumpable2, never()).dump(any(), any())
+        verify(dumpable3, never()).dump(any(), any())
     }
 }

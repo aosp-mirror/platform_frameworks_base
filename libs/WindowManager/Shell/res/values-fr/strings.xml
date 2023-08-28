@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Paramètres"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Accéder à l\'écran partagé"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu \"Picture-in-picture\""</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> est en mode Picture-in-picture"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si vous ne voulez pas que l\'application <xliff:g id="NAME">%s</xliff:g> utilise cette fonctionnalité, appuyez ici pour ouvrir les paramètres et la désactiver."</string>
     <string name="pip_play" msgid="3496151081459417097">"Lecture"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Redimensionner"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Stash"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Application incompatible avec l\'écran partagé."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"L\'appli peut ne pas fonctionner en mode Écran partagé"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Appli incompatible avec l\'écran partagé"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Cette appli ne peut être ouverte que dans 1 fenêtre."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'application ne peut pas être lancée sur des écrans secondaires."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Séparateur d\'écran partagé"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Séparateur d\'écran partagé"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Séparateur d\'écran partagé"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Écran de gauche en plein écran"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Écran de gauche à 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Écran de gauche à 50 %"</string>
@@ -77,17 +79,17 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bulle"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle fermée."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Pour un meilleur affichage, appuyez pour redémarrer cette appli."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Appuyez pour redémarrer cette appli et avoir une meilleure vue."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problèmes d\'appareil photo ?\nAppuyez pour réajuster"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problème non résolu ?\nAppuyez pour rétablir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Aucun problème d\'appareil photo ? Appuyez pour ignorer."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Voir et interagir plus"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Faites glisser une autre appli pour utiliser l\'écran partagé"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Faites glisser une autre appli pour utiliser l\'écran partagé"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Appuyez deux fois en dehors d\'une appli pour la repositionner"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Développez pour obtenir plus d\'informations"</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Redémarrer pour améliorer l\'affichage ?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour un meilleur rendu sur votre écran, mais il se peut que vous perdiez votre progression ou les modifications non enregistrées"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour en améliorer son aspect sur votre écran, mais vous risquez de perdre votre progression ou les modifications non enregistrées"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annuler"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Redémarrer"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne plus afficher"</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Capture d\'écran"</string>
     <string name="close_text" msgid="4986518933445178928">"Fermer"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fermer le menu"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"Ouvrir le menu"</string>
 </resources>

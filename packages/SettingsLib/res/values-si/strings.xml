@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"විසන්ධි විය"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"අබලයි"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP වින්‍යාස කිරීම අසාර්ථකයි"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"අඩු ගුණත්වයේ ජාලය හේතුවෙන් සම්බන්ධ නොවීය"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi සම්බන්ධතාව අසාර්ථකයි"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"සත්‍යාපනයේ ගැටලුවකි"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"සම්බන්ධ විය නොහැකිය"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' වෙත සම්බන්ධ විය නොහැකිය"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ස්වයංක්‍රිය නැවත සම්බන්ධ නොවනු ඇත"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> විසින් සුරකින ලදී"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"මනුගත ජාලයට සම්බන්ධ කර ඇත"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s හරහා ස්වයංක්‍රියව සම්බන්ධ විය"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"ජාල ශ්‍රේණිගත සපයන්නා හරහා ස්වයංක්‍රියව සම්බන්ධ විය"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s හරහා සම්බන්ධ විය"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> හරහා සම්බන්ධයි"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"ලියාපදිංචි වීමට තට්ටු කරන්න"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"අන්තර්ජාලය නැත"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"පුද්ගලික DNS සේවාදායකයට ප්‍රවේශ වීමට නොහැකිය"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"අන්තර්ජාලය නැත"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"පිරීම අවශ්‍යයි"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"ප්‍රවේශ ලක්ෂ්‍ය තාවකාලිකව පිරී ඇත"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s හරහා සම්බන්ධ විය"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> විවෘත කරමින්"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"සබැඳීමට නොහැකි විය"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"ලියාපදිංචිය සම්පූර්ණ කරමින්…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"ලියාපදිංචිය සම්පූර්ණ කළ නොහැකි විය. නැවත උත්සාහ කිරීමට තට්ටු කරන්න."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"ලියාපදිංචිය සම්පූර්ණයි. සබැඳෙමින්…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"ඉතා මන්දගාමී"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"මන්දගාමී"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"හරි"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"මධ්‍යම"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"වේගවත්"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"ඉතා වේගවත්"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"කල් ඉකුත් විය"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"යුගල කරමින්…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"සම්බන්ධිතයි (දුරකථනය නැත) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"සම්බන්ධිතයි (මාධ්‍ය නැත)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"සම්බන්ධිතයි (පණිවිඩ ප්‍රවේශය නැත)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"සම්බන්ධිතයි (දුරකථනය හෝ මාධ්‍ය නැත) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"සම්බන්ධිතයි, බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"සම්බන්ධිතයි (දුරකථනය නැත), බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"කථන තාරතාව යළි සකසන්න"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"පෙළ කථා කරන තාරතාව පෙරනිමි වෙත යළි සකසන්න."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"ඉතා මන්දගාමී"</item>
-    <item msgid="1815382991399815061">"මන්දගාමී"</item>
-    <item msgid="3075292553049300105">"සාමාන්‍ය"</item>
-    <item msgid="1158955023692670059">"වේගවත්"</item>
-    <item msgid="5664310435707146591">"වේශවත්"</item>
-    <item msgid="5491266922147715962">"ඉතා වේගවත්"</item>
-    <item msgid="7659240015901486196">"ශීඝ්‍ර"</item>
-    <item msgid="7147051179282410945">"ඉතා ශීඝ්‍ර"</item>
-    <item msgid="581904787661470707">"ඉතාම වේගවත්"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"පැතිකඩ තෝරන්න"</string>
     <string name="category_personal" msgid="6236798763159385225">"පෞද්ගලික"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ක්ලිප් සීමා, මායිම්, ආදිය පෙන්වන්න."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"බල RTL පිරිසැලසුම් දිශාව"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"සියලු පෙදෙසි සඳහා RTL වෙත බල තිර පිරිසැලසුම"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"පාරදෘශ්‍ය සංචලන තීරුව"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"සංචලන තීරු පසුබිම් වර්ණය පෙරනිමියෙන් පාරදෘශ්‍ය කරන්න"</string>
     <string name="window_blurs" msgid="6831008984828425106">"කවුළු මට්. බොඳ කි. ඉඩ දෙ."</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA බල කරන්න"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 යෙදුම්හි 4x MSAA සබල කරන්න"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"වේලාව වැඩියෙන්."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"වේලාව අඩුවෙන්."</string>
     <string name="cancel" msgid="5665114069455378395">"අවලංගු කරන්න"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"හරි"</string>
     <string name="done" msgid="381184316122520313">"නිමයි"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"එලාම සහ සිහිකැඳවීම්"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"මෙම දුරකථනය"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"මෙම ටැබ්ලටය"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"මෙම දුරකථනය"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"මෙම උපාංගය මත ධාවනය කළ නොහැක"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"මාරු වීමට ගිණුම උත්ශ්‍රේණි කරන්න"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"මෙහි බාගැනීම් වාදනය කළ නොහැක"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"දැන්වීමෙන් පසු නැවත උත්සාහ කරන්න"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"මෙහි වාදනය කිරීමට උපාංගය අවදි කරන්න"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"උපාංගය වාදනය කිරීමට අනුමත කර නැත"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"මෙම මාධ්‍ය මෙහි වාදනය කළ නොහැක"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
     <string name="help_label" msgid="3528360748637781274">"උදවු &amp; ප්‍රතිපෝෂණ"</string>
@@ -574,6 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"අලුත් පරිශීලකයෙක් එක් කරන්නද?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"අමතර පරිශීලකයින් නිර්මාණය කිරීම මඟින් වෙනත් පුද්ගලයන් සමඟ මෙම උපාංගය ඔබට බෙදා ගත හැකිය. සෑම පරිශීලකයෙක්ටම ඔවුන්ගේම යෙදුම්, වෝල්පේපර, සහ වෙනත් ඒවා අභිරුචි කළ හැකි තමන්ට අයිති ඉඩක් ඇත. පරිශීලකයින්ට Wi‑Fi වැනි සෑම දෙනාටම බලපාන උපාංග සැකසීම්ද සීරුමාරු කළ හැක.\n\nඔබ නව පරිශීලකයෙකු එක් කළ විට ඔවුන්ගේ ඉඩ එම පුද්ගලයා සකසා ගත යුතු වේ.\n\nඕනෑම පරිශීලකයෙකුට අනෙක් සියලු පරිශීලකයන් සඳහා යෙදුම් යාවත්කාලීන කළ හැකිය. ප්‍රවේශයතා සැකසීම් සහ සේවා නව පරිශීලකයා වෙත මාරු නොකරනු ඇත."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ඔබ අලුත් පරිශීලකයෙක් එකතු කරන විට, එම පුද්ගලයා ඔහුගේ වැඩ කරන ඉඩ සකසා ගත යුතුය.\n\nසියළුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යාවත්කාලීන කළ හැක."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"දැන් පරිශීලකයා සකසන්නද?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"උපාංගය ලබාගෙන තමන්ගේ ඉඩ සකසා ගැනීමට අදාළ පුද්ගලයා සිටින බව තහවුරු කරගන්න"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"දැන් පැතිකඩ සකසන්නද?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"මෙය නව ආගන්තුක සැසියක් ආරම්භ කර වත්මන් සැසියෙන් සියලු යෙදුම් සහ දත්ත මකනු ඇත"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ආගන්තුක ප්‍රකාරයෙන් පිටවන්නද?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"මෙය වත්මන් ආගන්තුක සැසියෙන් යෙදුම් සහ දත්ත මකනු ඇත"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"පිටවන්න"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ආගන්තුක ක්‍රියාකාරකම් සුරකින්නද?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ඔබට වත්මන් සැසියෙන් ක්‍රියාකාරකම් සුරැකීමට හෝ සියලු යෙදුම් සහ දත්ත මැකීමට හැකිය"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"පුරෝකථනමය පසු සජීවිකරණ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"පුරෝකථනමය ආපසු සඳහා පද්ධති සජීවිකරණ සබල කරන්න."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"මෙම සැකසීම පුරෝකථනමය ඉංගිත සජීවිකරණය සඳහා පද්ධති සජීවිකරණ සබල කරයි. එයට මැනිෆෙස්ට් ගොනුව තුළ එක් යෙදුමකට enableOnBackInvokedCallback සත්‍ය ලෙස සැකසීම අවශ්‍ය වේ."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"වමට ගෙන යන්න"</item>
+    <item msgid="5425394847942513942">"පහළට ගෙන යන්න"</item>
+    <item msgid="7728484337962740316">"දකුණට ගෙන යන්න"</item>
+    <item msgid="324200556467459329">"ඉහළට ගෙන යන්න"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

@@ -412,6 +412,55 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
+            ActivityRecord boundary) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getActivity(callback, traverseTopToBottom, boundary);
+    }
+
+    @Override
+    Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return null;
+        }
+        return super.getTask(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllActivities(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllRootTasks(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllTasks(callback);
+    }
+
+    @Override
+    boolean forAllLeafTasks(Predicate<Task> callback) {
+        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+            return false;
+        }
+        return super.forAllLeafTasks(callback);
+    }
+
+    @Override
     void forAllDisplayAreas(Consumer<DisplayArea> callback) {
         super.forAllDisplayAreas(callback);
         callback.accept(this);
@@ -718,7 +767,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      */
     static class Dimmable extends DisplayArea<DisplayArea> {
         private final Dimmer mDimmer = new Dimmer(this);
-        private final Rect mTmpDimBoundsRect = new Rect();
 
         Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
             super(wms, type, name, featureId);
@@ -733,18 +781,24 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         void prepareSurfaces() {
             mDimmer.resetDimStates();
             super.prepareSurfaces();
-            // Bounds need to be relative, as the dim layer is a child.
-            getBounds(mTmpDimBoundsRect);
-            mTmpDimBoundsRect.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            final Rect dimBounds = mDimmer.getDimBounds();
+            if (dimBounds != null) {
+                // Bounds need to be relative, as the dim layer is a child.
+                getBounds(dimBounds);
+                dimBounds.offsetTo(0 /* newLeft */, 0 /* newTop */);
+            }
 
             // If SystemUI is dragging for recents, we want to reset the dim state so any dim layer
             // on the display level fades out.
-            if (forAllTasks(task -> !task.canAffectSystemUiFlags())) {
+            if (!mTransitionController.isShellTransitionsEnabled()
+                    && forAllTasks(task -> !task.canAffectSystemUiFlags())) {
                 mDimmer.resetDimStates();
             }
 
-            if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
-                scheduleAnimation();
+            if (dimBounds != null) {
+                if (mDimmer.updateDims(getSyncTransaction())) {
+                    scheduleAnimation();
+                }
             }
         }
     }

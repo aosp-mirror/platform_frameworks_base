@@ -19,12 +19,11 @@ package android.view;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.graphics.HardwareRenderer;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -40,7 +39,11 @@ import com.android.internal.util.FastPrintWriter;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.WeakHashMap;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 /**
  * Provides low-level communication with the system window manager for
@@ -137,6 +140,9 @@ public final class WindowManagerGlobal {
     private final ArraySet<View> mDyingViews = new ArraySet<View>();
 
     private final ArrayList<ViewRootImpl> mWindowlessRoots = new ArrayList<ViewRootImpl>();
+
+    /** A context token only has one remote registration to system. */
+    private WeakHashMap<IBinder, ProposedRotationListenerDelegate> mProposedRotationListenerMap;
 
     private Runnable mSystemPropertyUpdater;
 
@@ -524,9 +530,6 @@ public final class WindowManagerGlobal {
             }
             allViewsRemoved = mRoots.isEmpty();
         }
-        if (ThreadedRenderer.sTrimForeground) {
-            doTrimForeground();
-        }
 
         // If we don't have any views anymore in our process, we no longer need the
         // InsetsAnimationThread to save some resources.
@@ -543,65 +546,14 @@ public final class WindowManagerGlobal {
         return index;
     }
 
-    public static boolean shouldDestroyEglContext(int trimLevel) {
-        // On low-end gfx devices we trim when memory is moderate;
-        // on high-end devices we do this when low.
-        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE) {
-            return true;
-        }
-        if (trimLevel >= ComponentCallbacks2.TRIM_MEMORY_MODERATE
-                && !ActivityManager.isHighEndGfx()) {
-            return true;
-        }
-        return false;
-    }
-
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void trimMemory(int level) {
-
-        if (shouldDestroyEglContext(level)) {
-            // Destroy all hardware surfaces and resources associated to
-            // known windows
-            synchronized (mLock) {
-                for (int i = mRoots.size() - 1; i >= 0; --i) {
-                    mRoots.get(i).destroyHardwareResources();
-                }
-            }
-            // Force a full memory flush
-            level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-        }
-
         ThreadedRenderer.trimMemory(level);
-
-        if (ThreadedRenderer.sTrimForeground) {
-            doTrimForeground();
-        }
     }
 
-    public static void trimForeground() {
-        if (ThreadedRenderer.sTrimForeground) {
-            WindowManagerGlobal wm = WindowManagerGlobal.getInstance();
-            wm.doTrimForeground();
-        }
-    }
-
-    private void doTrimForeground() {
-        boolean hasVisibleWindows = false;
-        synchronized (mLock) {
-            for (int i = mRoots.size() - 1; i >= 0; --i) {
-                final ViewRootImpl root = mRoots.get(i);
-                if (root.mView != null && root.getHostVisibility() == View.VISIBLE
-                        && root.mAttachInfo.mThreadedRenderer != null) {
-                    hasVisibleWindows = true;
-                } else {
-                    root.destroyHardwareResources();
-                }
-            }
-        }
-        if (!hasVisibleWindows) {
-            ThreadedRenderer.trimMemory(
-                    ComponentCallbacks2.TRIM_MEMORY_COMPLETE);
-        }
+    /** @hide */
+    public void trimCaches(@HardwareRenderer.CacheTrimLevel int level) {
+        ThreadedRenderer.trimCaches(level);
     }
 
     public void dumpGfxInfo(FileDescriptor fd, String[] args) {
@@ -724,6 +676,126 @@ public final class WindowManagerGlobal {
             return getWindowManagerService().mirrorWallpaperSurface(displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Registers the listener to the context token and returns the current proposed rotation. */
+    public void registerProposedRotationListener(IBinder contextToken, Executor executor,
+            IntConsumer listener) {
+        ProposedRotationListenerDelegate delegate;
+        synchronized (mLock) {
+            if (mProposedRotationListenerMap == null) {
+                mProposedRotationListenerMap = new WeakHashMap<>(1);
+            }
+            delegate = mProposedRotationListenerMap.get(contextToken);
+            final ProposedRotationListenerDelegate existingDelegate = delegate;
+            if (delegate == null) {
+                mProposedRotationListenerMap.put(contextToken,
+                        delegate = new ProposedRotationListenerDelegate());
+            }
+            if (!delegate.add(executor, listener)) {
+                // Duplicated listener.
+                return;
+            }
+            if (existingDelegate != null) {
+                executor.execute(() -> listener.accept(existingDelegate.mLastRotation));
+                return;
+            }
+        }
+        try {
+            final int currentRotation = getWindowManagerService().registerProposedRotationListener(
+                    contextToken, delegate);
+            delegate.onRotationChanged(currentRotation);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Unregisters the proposed rotation listener of the given token. */
+    public void unregisterProposedRotationListener(IBinder contextToken, IntConsumer listener) {
+        final ProposedRotationListenerDelegate delegate;
+        synchronized (mLock) {
+            if (mProposedRotationListenerMap == null) {
+                return;
+            }
+            delegate = mProposedRotationListenerMap.get(contextToken);
+            if (delegate == null) {
+                return;
+            }
+            if (delegate.remove(listener)) {
+                // The delegate becomes empty.
+                mProposedRotationListenerMap.remove(contextToken);
+            } else {
+                // The delegate still contains other listeners.
+                return;
+            }
+        }
+        try {
+            getWindowManagerService().removeRotationWatcher(delegate);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    private static class ProposedRotationListenerDelegate extends IRotationWatcher.Stub {
+        static class ListenerWrapper {
+            final Executor mExecutor;
+            final WeakReference<IntConsumer> mListener;
+
+            ListenerWrapper(Executor executor, IntConsumer listener) {
+                mExecutor = executor;
+                mListener = new WeakReference<>(listener);
+            }
+        }
+
+        /** The registered listeners. */
+        private final ArrayList<ListenerWrapper> mListeners = new ArrayList<>(1);
+        /** A thread-safe copy of registered listeners for dispatching events. */
+        private volatile ListenerWrapper[] mListenerArray;
+        int mLastRotation;
+
+        boolean add(Executor executor, IntConsumer listener) {
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                if (mListeners.get(i).mListener.get() == listener) {
+                    // Ignore adding duplicated listener.
+                    return false;
+                }
+            }
+            mListeners.add(new ListenerWrapper(executor, listener));
+            mListenerArray = mListeners.toArray(new ListenerWrapper[0]);
+            return true;
+        }
+
+        boolean remove(IntConsumer listener) {
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                if (mListeners.get(i).mListener.get() == listener) {
+                    mListeners.remove(i);
+                    mListenerArray = mListeners.toArray(new ListenerWrapper[0]);
+                    return mListeners.isEmpty();
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onRotationChanged(int rotation) {
+            mLastRotation = rotation;
+            boolean alive = false;
+            for (ListenerWrapper listenerWrapper : mListenerArray) {
+                final IntConsumer listener = listenerWrapper.mListener.get();
+                if (listener != null) {
+                    listenerWrapper.mExecutor.execute(() -> listener.accept(rotation));
+                    alive = true;
+                }
+            }
+            if (!alive) {
+                // Unregister if there is no strong reference.
+                try {
+                    getWindowManagerService().removeRotationWatcher(this);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            }
         }
     }
 

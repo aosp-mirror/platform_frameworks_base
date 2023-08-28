@@ -43,26 +43,27 @@ namespace aapt {
 const char* Overlayable::kActorScheme = "overlay";
 
 namespace {
-bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs, ResourceType rhs) {
-  return lhs->type < rhs;
+bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
+                    const ResourceNamedTypeRef& rhs) {
+  return lhs->named_type < rhs;
 }
 
 template <typename T>
-bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const StringPiece& rhs) {
+bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, StringPiece rhs) {
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
 template <typename T>
-bool greater_than_struct_with_name(const StringPiece& lhs, const std::unique_ptr<T>& rhs) {
+bool greater_than_struct_with_name(StringPiece lhs, const std::unique_ptr<T>& rhs) {
   return rhs->name.compare(0, rhs->name.size(), lhs.data(), lhs.size()) > 0;
 }
 
 template <typename T>
 struct NameEqualRange {
-  bool operator()(const std::unique_ptr<T>& lhs, const StringPiece& rhs) const {
+  bool operator()(const std::unique_ptr<T>& lhs, StringPiece rhs) const {
     return less_than_struct_with_name<T>(lhs, rhs);
   }
-  bool operator()(const StringPiece& lhs, const std::unique_ptr<T>& rhs) const {
+  bool operator()(StringPiece lhs, const std::unique_ptr<T>& rhs) const {
     return greater_than_struct_with_name<T>(lhs, rhs);
   }
 };
@@ -77,7 +78,7 @@ bool less_than_struct_with_name_and_id(const T& lhs,
 }
 
 template <typename T, typename Func, typename Elements>
-T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Func action) {
+T* FindElementsRunAction(android::StringPiece name, Elements& entries, Func action) {
   const auto iter =
       std::lower_bound(entries.begin(), entries.end(), name, less_than_struct_with_name<T>);
   const bool found = iter != entries.end() && name == (*iter)->name;
@@ -86,7 +87,7 @@ T* FindElementsRunAction(const android::StringPiece& name, Elements& entries, Fu
 
 struct ConfigKey {
   const ConfigDescription* config;
-  const StringPiece& product;
+  StringPiece product;
 };
 
 template <typename T>
@@ -103,47 +104,53 @@ bool lt_config_key_ref(const T& lhs, const ConfigKey& rhs) {
 ResourceTable::ResourceTable(ResourceTable::Validation validation) : validation_(validation) {
 }
 
-ResourceTablePackage* ResourceTable::FindPackage(const android::StringPiece& name) const {
+ResourceTablePackage* ResourceTable::FindPackage(android::StringPiece name) const {
   return FindElementsRunAction<ResourceTablePackage>(
       name, packages, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceTablePackage* ResourceTable::FindOrCreatePackage(const android::StringPiece& name) {
+ResourceTablePackage* ResourceTable::FindOrCreatePackage(android::StringPiece name) {
   return FindElementsRunAction<ResourceTablePackage>(name, packages, [&](bool found, auto& iter) {
     return found ? iter->get() : packages.emplace(iter, new ResourceTablePackage(name))->get();
   });
 }
 
 template <typename Func, typename Elements>
-static ResourceTableType* FindTypeRunAction(ResourceType type, Elements& entries, Func action) {
+static ResourceTableType* FindTypeRunAction(const ResourceNamedTypeRef& type, Elements& entries,
+                                            Func action) {
   const auto iter = std::lower_bound(entries.begin(), entries.end(), type, less_than_type);
-  const bool found = iter != entries.end() && type == (*iter)->type;
+  const bool found = iter != entries.end() && type == (*iter)->named_type;
   return action(found, iter);
 }
 
-ResourceTableType* ResourceTablePackage::FindType(ResourceType type) const {
+ResourceTableType* ResourceTablePackage::FindTypeWithDefaultName(const ResourceType type) const {
+  auto named_type = ResourceNamedTypeWithDefaultName(type);
+  return FindType(named_type);
+}
+
+ResourceTableType* ResourceTablePackage::FindType(const ResourceNamedTypeRef& type) const {
   return FindTypeRunAction(type, types,
                            [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceTableType* ResourceTablePackage::FindOrCreateType(ResourceType type) {
+ResourceTableType* ResourceTablePackage::FindOrCreateType(const ResourceNamedTypeRef& type) {
   return FindTypeRunAction(type, types, [&](bool found, auto& iter) {
     return found ? iter->get() : types.emplace(iter, new ResourceTableType(type))->get();
   });
 }
 
-ResourceEntry* ResourceTableType::CreateEntry(const android::StringPiece& name) {
+ResourceEntry* ResourceTableType::CreateEntry(android::StringPiece name) {
   return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
     return entries.emplace(iter, new ResourceEntry(name))->get();
   });
 }
 
-ResourceEntry* ResourceTableType::FindEntry(const android::StringPiece& name) const {
+ResourceEntry* ResourceTableType::FindEntry(android::StringPiece name) const {
   return FindElementsRunAction<ResourceEntry>(
       name, entries, [&](bool found, auto& iter) { return found ? iter->get() : nullptr; });
 }
 
-ResourceEntry* ResourceTableType::FindOrCreateEntry(const android::StringPiece& name) {
+ResourceEntry* ResourceTableType::FindOrCreateEntry(android::StringPiece name) {
   return FindElementsRunAction<ResourceEntry>(name, entries, [&](bool found, auto& iter) {
     return found ? iter->get() : entries.emplace(iter, new ResourceEntry(name))->get();
   });
@@ -176,7 +183,7 @@ const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescrip
 }
 
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
-                                                      const StringPiece& product) {
+                                                      StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
                                lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
   if (iter != values.end()) {
@@ -329,7 +336,7 @@ struct PackageViewComparer {
 
 struct TypeViewComparer {
   bool operator()(const ResourceTableTypeView& lhs, const ResourceTableTypeView& rhs) {
-    return lhs.id != rhs.id ? lhs.id < rhs.id : lhs.type < rhs.type;
+    return lhs.id != rhs.id ? lhs.id < rhs.id : lhs.named_type < rhs.named_type;
   }
 };
 
@@ -355,7 +362,8 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
                                        id ? id.value().package_id() : std::optional<uint8_t>{}};
   auto view_package = package_inserter.Insert(table.packages, std::move(new_package));
 
-  ResourceTableTypeView new_type{type->type, id ? id.value().type_id() : std::optional<uint8_t>{}};
+  ResourceTableTypeView new_type{type->named_type,
+                                 id ? id.value().type_id() : std::optional<uint8_t>{}};
   auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
 
   if (visibility.level == Visibility::Level::kPublic) {
@@ -420,13 +428,14 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
     // we can reuse those packages for other types that need to be extracted from this package.
     // `start_index` is the index of the first newly created package that can be reused.
     const size_t start_index = new_packages.size();
-    std::map<ResourceType, size_t> type_new_package_index;
+    std::map<ResourceNamedType, size_t> type_new_package_index;
     for (auto type_it = package.types.begin(); type_it != package.types.end();) {
       auto& type = *type_it;
-      auto type_index_iter = type_new_package_index.find(type.type);
+      auto type_index_iter = type_new_package_index.find(type.named_type);
       if (type_index_iter == type_new_package_index.end()) {
         // First occurrence of the resource type in this package. Keep it in this package.
-        type_new_package_index.insert(type_index_iter, std::make_pair(type.type, start_index));
+        type_new_package_index.insert(type_index_iter,
+                                      std::make_pair(type.named_type, start_index));
         ++type_it;
         continue;
       }
@@ -440,7 +449,7 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
 
       // Move the type into a new package
       auto& other_package = new_packages[index];
-      type_new_package_index[type.type] = index + 1;
+      type_new_package_index[type.named_type] = index + 1;
       type_inserter.Insert(other_package.types, std::move(type));
       type_it = package.types.erase(type_it);
     }
@@ -455,25 +464,26 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
   return view;
 }
 
-bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
+bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) {
   CHECK(diag != nullptr) << "Diagnostic pointer is null";
 
   const bool validate = validation_ == Validation::kEnabled;
-  const Source source = res.value ? res.value->GetSource() : Source{};
+  const android::Source source = res.value ? res.value->GetSource() : android::Source{};
   if (validate && !res.allow_mangled && !IsValidResourceEntryName(res.name.entry)) {
-    diag->Error(DiagMessage(source)
+    diag->Error(android::DiagMessage(source)
                 << "resource '" << res.name << "' has invalid entry name '" << res.name.entry);
     return false;
   }
 
   if (res.id.has_value() && !res.id->first.is_valid()) {
-    diag->Error(DiagMessage(source) << "trying to add resource '" << res.name << "' with ID "
-                                    << res.id->first << " but that ID is invalid");
+    diag->Error(android::DiagMessage(source)
+                << "trying to add resource '" << res.name << "' with ID " << res.id->first
+                << " but that ID is invalid");
     return false;
   }
 
   auto package = FindOrCreatePackage(res.name.package);
-  auto type = package->FindOrCreateType(res.name.type.type);
+  auto type = package->FindOrCreateType(res.name.type);
   auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), res.name.entry,
                                    NameEqualRange<ResourceEntry>{});
   const size_t entry_count = std::distance(entry_it.first, entry_it.second);
@@ -504,7 +514,7 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   if (res.id.has_value()) {
     if (entry->id && entry->id.value() != res.id->first) {
       if (res.id->second != OnIdConflict::CREATE_ENTRY) {
-        diag->Error(DiagMessage(source)
+        diag->Error(android::DiagMessage(source)
                     << "trying to add resource '" << res.name << "' with ID " << res.id->first
                     << " but resource already has ID " << entry->id.value());
         return false;
@@ -532,9 +542,9 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
 
   if (res.overlayable.has_value()) {
     if (entry->overlayable_item) {
-      diag->Error(DiagMessage(res.overlayable->source)
+      diag->Error(android::DiagMessage(res.overlayable->source)
                   << "duplicate overlayable declaration for resource '" << res.name << "'");
-      diag->Error(DiagMessage(entry->overlayable_item.value().source)
+      diag->Error(android::DiagMessage(entry->overlayable_item.value().source)
                   << "previous declaration here");
       return false;
     }
@@ -572,9 +582,10 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
           break;
 
         case CollisionResult::kConflict:
-          diag->Error(DiagMessage(source) << "duplicate value for resource '" << res.name << "' "
-                                          << "with config '" << res.config << "'");
-          diag->Error(DiagMessage(source) << "resource previously defined here");
+          diag->Error(android::DiagMessage(source)
+                      << "duplicate value for resource '" << res.name << "' "
+                      << "with config '" << res.config << "'");
+          diag->Error(android::DiagMessage(source) << "resource previously defined here");
           return false;
 
         case CollisionResult::kKeepOriginal:
@@ -593,7 +604,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -612,7 +623,7 @@ std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(const Res
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -633,7 +644,7 @@ bool ResourceTable::RemoveResource(const ResourceNameRef& name, ResourceId id) c
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type.type);
+  ResourceTableType* type = package->FindType(name.type);
   if (type == nullptr) {
     return {};
   }
@@ -655,7 +666,7 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
   for (const auto& pkg : packages) {
     ResourceTablePackage* new_pkg = new_table->FindOrCreatePackage(pkg->name);
     for (const auto& type : pkg->types) {
-      ResourceTableType* new_type = new_pkg->FindOrCreateType(type->type);
+      ResourceTableType* new_type = new_pkg->FindOrCreateType(type->named_type);
       new_type->visibility_level = type->visibility_level;
 
       for (const auto& entry : type->entries) {

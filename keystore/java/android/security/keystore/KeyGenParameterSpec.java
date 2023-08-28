@@ -320,6 +320,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mCriticalToDeviceEncryption;
     private final int mMaxUsageCount;
     private final String mAttestKeyAlias;
+    private final long mBoundToSecureUserId;
+
     /*
      * ***NOTE***: All new fields MUST also be added to the following:
      * ParcelableKeyGenParameterSpec class.
@@ -362,7 +364,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean unlockedDeviceRequired,
             boolean criticalToDeviceEncryption,
             int maxUsageCount,
-            String attestKeyAlias) {
+            String attestKeyAlias,
+            long boundToSecureUserId) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -422,6 +425,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
         mMaxUsageCount = maxUsageCount;
         mAttestKeyAlias = attestKeyAlias;
+        mBoundToSecureUserId = boundToSecureUserId;
     }
 
     /**
@@ -842,10 +846,20 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
+     * Return the secure user id that this key should be bound to.
+     *
+     * Normally an authentication-bound key is tied to the secure user id of the current user
+     * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the authenticator
+     * id of the current biometric set for keys requiring explicit biometric authorization).
+     * If this parameter is set (this method returning non-zero value), the key should be tied to
+     * the specified secure user id, overriding the logic above.
+     *
+     * This is only applicable when {@link #isUserAuthenticationRequired} is {@code true}
+     *
      * @hide
      */
     public long getBoundToSpecificSecureUserId() {
-        return GateKeeper.INVALID_SECURE_USER_ID;
+        return mBoundToSecureUserId;
     }
 
     /**
@@ -920,6 +934,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mCriticalToDeviceEncryption = false;
         private int mMaxUsageCount = KeyProperties.UNRESTRICTED_USAGE_COUNT;
         private String mAttestKeyAlias = null;
+        private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -990,6 +1005,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mCriticalToDeviceEncryption = sourceSpec.isCriticalToDeviceEncryption();
             mMaxUsageCount = sourceSpec.getMaxUsageCount();
             mAttestKeyAlias = sourceSpec.getAttestKeyAlias();
+            mBoundToSecureUserId = sourceSpec.getBoundToSpecificSecureUserId();
         }
 
         /**
@@ -1727,6 +1743,27 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         /**
+         * Set the secure user id that this key should be bound to.
+         *
+         * Normally an authentication-bound key is tied to the secure user id of the current user
+         * (either the root SID from GateKeeper for auth-bound keys with a timeout, or the
+         * authenticator id of the current biometric set for keys requiring explicit biometric
+         * authorization). If this parameter is set (this method returning non-zero value), the key
+         * should be tied to the specified secure user id, overriding the logic above.
+         *
+         * This is only applicable when {@link #setUserAuthenticationRequired} is set to
+         * {@code true}
+         *
+         * @see KeyGenParameterSpec#getBoundToSpecificSecureUserId()
+         * @hide
+         */
+        @NonNull
+        public Builder setBoundToSpecificSecureUserId(long secureUserId) {
+            mBoundToSecureUserId = secureUserId;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1764,7 +1801,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mUnlockedDeviceRequired,
                     mCriticalToDeviceEncryption,
                     mMaxUsageCount,
-                    mAttestKeyAlias);
+                    mAttestKeyAlias,
+                    mBoundToSecureUserId);
         }
     }
 }

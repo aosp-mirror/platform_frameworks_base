@@ -42,8 +42,6 @@ import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
@@ -51,6 +49,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -98,7 +98,7 @@ final class SettingsState {
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 
     public static final int MAX_BYTES_PER_APP_PACKAGE_UNLIMITED = -1;
-    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 20000;
+    public static final int MAX_BYTES_PER_APP_PACKAGE_LIMITED = 40000;
 
     public static final int VERSION_UNDEFINED = -1;
 
@@ -253,6 +253,26 @@ final class SettingsState {
                 return "UNKNOWN";
             }
         }
+    }
+
+    public static boolean isConfigSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_CONFIG;
+    }
+
+    public static boolean isGlobalSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_GLOBAL;
+    }
+
+    public static boolean isSystemSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SYSTEM;
+    }
+
+    public static boolean isSecureSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SECURE;
+    }
+
+    public static boolean isSsaidSettingsKey(int key) {
+        return getTypeFromKey(key) == SETTINGS_TYPE_SSAID;
     }
 
     public static String keyToString(int key) {
@@ -732,19 +752,19 @@ final class SettingsState {
     }
 
     @GuardedBy("mLock")
-    private int getNewMemoryUsagePerPackageLocked(String packageName, int deltaKeySize,
+    private int getNewMemoryUsagePerPackageLocked(String packageName, int deltaKeyLength,
             String oldValue, String newValue, String oldDefaultValue, String newDefaultValue) {
         if (isExemptFromMemoryUsageCap(packageName)) {
             return 0;
         }
-        final Integer currentSize = mPackageToMemoryUsage.get(packageName);
-        final int oldValueSize = (oldValue != null) ? oldValue.length() : 0;
-        final int newValueSize = (newValue != null) ? newValue.length() : 0;
-        final int oldDefaultValueSize = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
-        final int newDefaultValueSize = (newDefaultValue != null) ? newDefaultValue.length() : 0;
-        final int deltaSize = deltaKeySize + newValueSize + newDefaultValueSize
-                - oldValueSize - oldDefaultValueSize;
-        return Math.max((currentSize != null) ? currentSize + deltaSize : deltaSize, 0);
+        final int currentSize = mPackageToMemoryUsage.getOrDefault(packageName, 0);
+        final int oldValueLength = (oldValue != null) ? oldValue.length() : 0;
+        final int newValueLength = (newValue != null) ? newValue.length() : 0;
+        final int oldDefaultValueLength = (oldDefaultValue != null) ? oldDefaultValue.length() : 0;
+        final int newDefaultValueLength = (newDefaultValue != null) ? newDefaultValue.length() : 0;
+        final int deltaSize = (deltaKeyLength + newValueLength + newDefaultValueLength
+                - oldValueLength - oldDefaultValueLength) * Character.BYTES;
+        return Math.max(currentSize + deltaSize, 0);
     }
 
     @GuardedBy("mLock")
@@ -757,6 +777,12 @@ final class SettingsState {
                     + " size: " + newSize + " bytes.");
         }
         mPackageToMemoryUsage.put(packageName, newSize);
+    }
+
+    public boolean hasSetting(String name) {
+        synchronized (mLock) {
+            return hasSettingLocked(name);
+        }
     }
 
     @GuardedBy("mLock")
@@ -1087,6 +1113,7 @@ final class SettingsState {
             parseStateLocked(parser);
             return true;
         } catch (XmlPullParserException | IOException e) {
+            Slog.e(LOG_TAG, "parse settings xml failed", e);
             return false;
         } finally {
             IoUtils.closeQuietly(in);

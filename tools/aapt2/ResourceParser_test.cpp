@@ -50,7 +50,7 @@ constexpr const char* kXmlPreamble = "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 TEST(ResourceParserSingleTest, FailToParseWithNoRootResourcesElement) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   ResourceTable table;
-  ResourceParser parser(context->GetDiagnostics(), &table, Source{"test"}, {});
+  ResourceParser parser(context->GetDiagnostics(), &table, android::Source{"test"}, {});
 
   std::string input = kXmlPreamble;
   input += R"(<attr name="foo"/>)";
@@ -65,13 +65,13 @@ class ResourceParserTest : public ::testing::Test {
     context_ = test::ContextBuilder().Build();
   }
 
-  ::testing::AssertionResult TestParse(const StringPiece& str) {
+  ::testing::AssertionResult TestParse(StringPiece str) {
     return TestParse(str, ConfigDescription{});
   }
 
-  ::testing::AssertionResult TestParse(const StringPiece& str, const ConfigDescription& config) {
+  ::testing::AssertionResult TestParse(StringPiece str, const ConfigDescription& config) {
     ResourceParserOptions parserOptions;
-    ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"}, config,
+    ResourceParser parser(context_->GetDiagnostics(), &table_, android::Source{"test"}, config,
                           parserOptions);
 
     std::string input = kXmlPreamble;
@@ -711,7 +711,7 @@ TEST_F(ResourceParserTest, ParseDeclareStyleablePreservingVisibility) {
         </declare-styleable>
         <public type="styleable" name="bar" />
       </resources>)");
-  ResourceParser parser(context_->GetDiagnostics(), &table_, Source{"test"},
+  ResourceParser parser(context_->GetDiagnostics(), &table_, android::Source{"test"},
                         ConfigDescription::DefaultConfig(),
                         ResourceParserOptions{.preserve_visibility_of_styleables = true});
 

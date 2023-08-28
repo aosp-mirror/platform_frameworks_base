@@ -36,14 +36,14 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -157,11 +157,16 @@ public abstract class RegisteredServicesCache<V> {
 
         migrateIfNecessaryLocked();
 
+        final boolean isCore = UserHandle.isCore(android.os.Process.myUid());
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
+        if (isCore) {
+            intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
         Handler handler = BackgroundThread.getHandler();
         mContext.registerReceiverAsUser(
                 mPackageReceiver, UserHandle.ALL, intentFilter, null, handler);
@@ -170,11 +175,17 @@ public abstract class RegisteredServicesCache<V> {
         IntentFilter sdFilter = new IntentFilter();
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+        if (isCore) {
+            sdFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
         mContext.registerReceiver(mExternalReceiver, sdFilter, null, handler);
 
         // Register for user-related events
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        if (isCore) {
+            userFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        }
         mContext.registerReceiver(mUserRemovedReceiver, userFilter, null, handler);
     }
 

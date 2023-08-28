@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Завжди дозволяти з цього комп’ютера"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Дозволити"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Ви не можете вмикати налагодження USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис основного користувача."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"Користувач поточного облікового запису не може вмикати налагодження через USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис адміністратора."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Змінити мову системи на таку: <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Запит на змінення мови системи надіслано з іншого пристрою"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Змінити мову"</string>
@@ -62,14 +62,14 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Завжди дозволяти в цій мережі"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Дозволити"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Налагодження через Wi-Fi заборонене"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"Користувач поточного облікового запису не може вмикати налагодження через Wi-Fi. Щоб активувати цю функцію, увійдіть в обліковий запис основного користувача."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"Користувач поточного облікового запису не може вмикати налагодження через Wi-Fi. Щоб активувати цю функцію, увійдіть в обліковий запис адміністратора."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"USB-порт вимкнено"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Щоб захистити ваш пристрій від рідини та сміття, USB-порт вимкнено. Він не виявлятиме жодних аксесуарів.\n\nКоли USB-порт можна буде використовувати, ви отримаєте сповіщення."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Порт USB виявлятиме зарядні пристрої та аксесуари"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Увімкнути USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Докладніше"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Знімок екрана"</string>
-    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock вимкнено"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock вимкнено"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"надіслане зображення"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Збереження знімка екрана..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Зберігання знімка екрана в робочому профілі…"</string>
@@ -95,6 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Файли"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Додаток <xliff:g id="APPNAME">%1$s</xliff:g> виявив цей знімок екрана."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> та інші відкриті додатки виявили цей знімок екрана."</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Додати до примітки"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запис відео з екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обробка записування екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Сповіщення про сеанс запису екрана"</string>
@@ -298,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Почати"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Зупинити"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Режим керування однією рукою"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Контраст"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартний"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Середній"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Високий"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Надати доступ до камери й мікрофона?"</string>
@@ -313,6 +318,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Мікрофон доступний"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камера доступна"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Мікрофон і камера доступні"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"Мікрофон увімкнено"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"Мікрофон вимкнено"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"Мікрофон увімкнено для всіх додатків і сервісів."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"Доступ до мікрофона вимкнено для всіх додатків і сервісів. Щоб надати доступ до мікрофона, виберіть \"Налаштування\" &gt; \"Конфіденційність\" &gt; \"Мікрофон\"."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"Доступ до мікрофона вимкнено для всіх додатків і сервісів. Щоб змінити це, виберіть \"Налаштування\" &gt; \"Конфіденційність\" &gt; \"Мікрофон\"."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"Камеру ввімкнено"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"Камеру вимкнено"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"Камеру ввімкнено для всіх додатків і сервісів."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"Доступ до камери вимкнено для всіх додатків і сервісів."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"Щоб використовувати кнопку мікрофона, надайте доступ до мікрофона в налаштуваннях."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Відкрити налаштування"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Інший пристрій"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Увімкнути або вимкнути огляд"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ви отримуватиме звукові та вібросигнали лише для вибраних будильників, нагадувань, подій і абонентів. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
@@ -331,12 +347,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Обличчя розпізнано. Натисніть значок розблокування."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Розблоковано (фейсконтроль)"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Обличчя розпізнано"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Перемістіть палець ліворуч"</item>
-    <item msgid="5558598599408514296">"Перемістіть палець униз"</item>
-    <item msgid="4844142668312841831">"Перемістіть палець праворуч"</item>
-    <item msgid="5640521437931460125">"Перемістіть палець угору"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Проведіть пальцем угору, щоб повторити спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Розблокуйте екран, щоб скористатись NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Цей пристрій належить вашій організації"</string>
@@ -452,6 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"вимкнути"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук і вібрація"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Налаштування"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Гучність знижено до безпечнішого рівня"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Аудіо відтворювалося з високою гучністю довше, ніж рекомендується"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Додаток закріплено"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ви постійно бачитимете екран, доки не відкріпите його. Щоб відкріпити екран, натисніть і втримуйте кнопки \"Назад\" та \"Огляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ви бачитимете цей екран, доки не відкріпите його. Для цього натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\"."</string>
@@ -478,7 +490,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звуку"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
@@ -608,14 +620,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Сповіщення"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Комбінації клавіш"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Змінити розкладку клавіатури"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Видалити текст"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Швидкі команди"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Пошук швидких команд"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Швидк. команд не знайдено"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Метод введення"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Відкр. додатки"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Поточн. додаток"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Відкрити панель сповіщень"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Зробити знімок усього екрана"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Відкрити список системних ярликів і ярликів додатків"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"Назад: повернутися до попереднього стану (кнопка \"Назад\")"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Перейти на головний екран"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Огляд відкритих додатків"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Перемикатися між останніми додатками (уперед)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Перемикатися між останніми додатками (назад)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Відкрити список усіх додатків і запитів (Пошук/Панель запуску)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Сховати або знову показати панель завдань"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Відкрити налаштування системи"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Відкрити Google Асистента"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокувати екран"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Відкривати додаток \"Нотатки\" для швидких приміток"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Багатозадачність системи"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Розділити екран із поточним додатком праворуч"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Розділити екран із поточним додатком ліворуч"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Перемкнути з розділеного екрана на весь екран"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"Під час розділення екрана: замінити додаток іншим"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Метод введення"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Змінити мову введення (наступна мова)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Змінити мову введення (попередня мова)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Відкрити смайли"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Відкрити голосовий ввід"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Додатки"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Помічник"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Веб-переглядач"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Веб-переглядач (за умовчанням – Chrome)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакти"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Електронна пошта"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Електронна пошта (за умовчанням – Gmail)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музика"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Календар"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Калькулятор"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Карти"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Не турбувати"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Кнопки гучності на корпусі"</string>
     <string name="battery" msgid="769686279459897127">"Акумулятор"</string>
@@ -792,15 +838,38 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"Перемикач режиму збільшення"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Збільшення всього екрана"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Збільшити частину екрана"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Перемкнути"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Відкрити налаштування збільшення"</string>
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Потягніть кут, щоб змінити розмір"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Дозволити прокручування по діагоналі"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"Змінити розмір"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Змінити тип збільшення"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Завершити змінення розміру"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"Верхній маркер"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Лівий маркер"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Правий маркер"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Нижній маркер"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Налаштування збільшення"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Розмір лупи"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Масштаб"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Звичайна"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"Мала"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"Велика"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"На весь екран"</string>
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"Готово"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Змінити"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Налаштування розміру лупи"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Торкніться, щоб відкрити функції доступності. Змінити або замінити цю кнопку можна в Налаштуваннях.\n\n"<annotation id="link">"Налаштування"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Щоб тимчасово сховати кнопку, перемістіть її на край екрана"</string>
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Відмінити"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Ярлик функції \"<xliff:g id="FEATURE_NAME">%s</xliff:g>\" вилучено"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# ярлик вилучено}one{# ярлик вилучено}few{# ярлики вилучено}many{# ярликів вилучено}other{# ярлика вилучено}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перемістити ліворуч угору"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перемістити праворуч угору"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Перемістити ліворуч униз"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Перемістити праворуч униз"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Перемістити до краю, приховати"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Перемістити від краю, показати"</string>
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Вилучити"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"перемкнути"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Керування пристроями"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Виберіть, для якого додатка налаштувати елементи керування"</string>
@@ -816,11 +885,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"видалити з вибраного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Перемістити на позицію <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Елементи керування"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Виберіть, які елементи керування мають бути доступні в швидких налаштуваннях"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Щоб змінити порядок елементів керування, перетягуйте їх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усі елементи керування вилучено"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Зміни не збережено"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Переглянути інші додатки"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Упорядкувати"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Додати елементи керування"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Повернутися до редагування"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Не вдалося завантажити елементи керування. Перевірте в додатку <xliff:g id="APP">%s</xliff:g>, чи його налаштування не змінились."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Сумісні елементи керування недоступні"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Інше"</string>
@@ -896,7 +969,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки й екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Пропоновані пристрої"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Потрібен платний обліковий запис"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляція"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Люди поблизу, які мають сумісні пристрої з Bluetooth, можуть слухати медіаконтент, який ви транслюєте."</string>
@@ -937,7 +1009,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Слухаю аудіо"</string>
     <string name="game_status" msgid="1340694320630973259">"Граю в гру"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Друзі"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Поспілкуймося"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Поспілкуймося!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Незабаром тут з\'явиться контент"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропущений виклик"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1003,13 +1075,14 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"змінити"</string>
     <string name="add" msgid="81036585205287996">"Додати"</string>
     <string name="manage_users" msgid="1823875311934643849">"Керувати користувачами"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"Це сповіщення не підтримує режим розділеного екрана."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Це сповіщення не підтримує режим розділеного екрана"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Мережа Wi-Fi недоступна"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Режим пріоритету"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будильник установлено"</string>
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Камеру вимкнено"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Мікрофон вимкнено"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камеру й мікрофон вимкнено"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Асистент слухає"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# сповіщення}one{# сповіщення}few{# сповіщення}many{# сповіщень}other{# сповіщення}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Створення нотаток"</string>
@@ -1021,6 +1094,12 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Невідомо"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"Надати додатку <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> доступ до всіх журналів пристрою?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Надати доступ лише цього разу"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не надавати"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Докладніше"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Докладніше: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Відкрити <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Додаток налаштовано"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Принаймні одну картку додано в Гаманець"</string>
@@ -1044,10 +1123,15 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Відповідно до правил організації ви можете телефонувати лише з робочого профілю"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Перейти в робочий профіль"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрити"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Параметри заблокованого екрана"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Налаштувати заблокований екран"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Мережа Wi-Fi недоступна"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камеру заблоковано"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камеру й мікрофон заблоковано"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Мікрофон заблоковано"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Режим пріоритету ввімкнено"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Асистента активовано"</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

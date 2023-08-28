@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String BLUETOOTH_STACK = "android.permission.BLUETOOTH_STACK";
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
@@ -72,6 +73,8 @@ package android.app.admin {
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getLogoutUser();
+    method public boolean hasManagedProfileCallerIdAccess(@NonNull android.os.UserHandle, @NonNull String);
+    method public boolean hasManagedProfileContactsAccess(@NonNull android.os.UserHandle, @NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int logoutUser();
     field public static final String ACTION_SHOW_NEW_USER_DISCLAIMER = "android.app.action.SHOW_NEW_USER_DISCLAIMER";
   }
@@ -89,6 +92,8 @@ package android.content {
   }
 
   public abstract class Context {
+    method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String REMOTE_AUTH_SERVICE = "remote_auth";
@@ -109,6 +114,10 @@ package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
+    field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
+    field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0
+    field public static final int HIDDEN_API_ENFORCEMENT_ENABLED = 2; // 0x2
+    field public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1; // 0x1
   }
 
   public abstract class PackageManager {
@@ -169,13 +178,13 @@ package android.media {
     method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast();
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpSamplingRate(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpVolume(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setLeAudioSuspended(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setA2dpSuspended(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpSamplingRate(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpVolume(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setLeAudioSuspended(boolean);
     method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
@@ -308,6 +317,17 @@ package android.net.netstats {
 
 }
 
+package android.net.wifi {
+
+  public final class WifiKeystore {
+    method @NonNull public static byte[] get(@NonNull String);
+    method @NonNull public static String[] list(@NonNull String);
+    method public static boolean put(@NonNull String, @NonNull byte[]);
+    method public static boolean remove(@NonNull String);
+  }
+
+}
+
 package android.nfc {
 
   public class NfcFrameworkInitializer {
@@ -333,6 +353,14 @@ package android.nfc {
 }
 
 package android.os {
+
+  public class ArtModuleServiceManager {
+    method @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdServiceRegisterer();
+  }
+
+  public static final class ArtModuleServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder waitForService();
+  }
 
   public final class BatteryStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
@@ -446,10 +474,45 @@ package android.provider {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.ContentResolver, long);
   }
 
-  public final class DeviceConfig {
-    field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
-    field public static final String NAMESPACE_APP_STANDBY = "app_standby";
-    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+  public class DeviceConfigInitializer {
+    method @Nullable public static android.provider.DeviceConfigServiceManager getDeviceConfigServiceManager();
+    method public static void setDeviceConfigServiceManager(@NonNull android.provider.DeviceConfigServiceManager);
+  }
+
+  public class DeviceConfigServiceManager {
+    method @NonNull public android.provider.DeviceConfigServiceManager.ServiceRegisterer getDeviceConfigUpdatableServiceRegisterer();
+  }
+
+  public static class DeviceConfigServiceManager.ServiceNotFoundException extends java.lang.Exception {
+  }
+
+  public static final class DeviceConfigServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.provider.DeviceConfigServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
+  public final class Settings {
+    field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
+    field public static final int RESET_MODE_TRUSTED_DEFAULTS = 4; // 0x4
+    field public static final int RESET_MODE_UNTRUSTED_CHANGES = 3; // 0x3
+    field public static final int RESET_MODE_UNTRUSTED_DEFAULTS = 2; // 0x2
+  }
+
+  public static final class Settings.Config extends android.provider.Settings.NameValueTable {
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean putString(@NonNull String, @NonNull String, @Nullable String, boolean);
+    method public static void registerContentObserver(@Nullable String, boolean, @NonNull android.database.ContentObserver);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void setMonitorCallback(@NonNull android.content.ContentResolver, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.MonitorCallback);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setStrings(@NonNull String, @NonNull java.util.Map<java.lang.String,java.lang.String>) throws android.provider.DeviceConfig.BadConfigException;
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void setSyncDisabledMode(int);
+    method public static void unregisterContentObserver(@NonNull android.database.ContentObserver);
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

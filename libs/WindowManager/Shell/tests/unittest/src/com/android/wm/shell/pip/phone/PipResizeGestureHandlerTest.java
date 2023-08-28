@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
@@ -37,6 +38,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -87,11 +89,16 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
 
     private PipSizeSpecHandler mPipSizeSpecHandler;
 
+    private PipDisplayLayoutState mPipDisplayLayoutState;
+
+    private PipTouchState mPipTouchState;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
         final PipSnapAlgorithm pipSnapAlgorithm = new PipSnapAlgorithm();
         final PipKeepClearAlgorithmInterface pipKeepClearAlgorithm =
                 new PipKeepClearAlgorithmInterface() {};
@@ -100,8 +107,12 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
+
+        mPipTouchState = new PipTouchState(ViewConfiguration.get(mContext),
+                () -> {}, () -> {}, mMainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(mContext, pipBoundsAlgorithm,
-                mPipBoundsState, motionHelper, mPipTaskOrganizer, mPipDismissTargetHandler,
+                mPipBoundsState, motionHelper, mPipTouchState, mPipTaskOrganizer,
+                mPipDismissTargetHandler,
                 (Rect bounds) -> new Rect(), () -> {}, mPipUiEventLogger, mPhonePipMenuController,
                 mMainExecutor) {
             @Override

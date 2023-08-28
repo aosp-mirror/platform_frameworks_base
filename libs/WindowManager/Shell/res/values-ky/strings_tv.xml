@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Жылдыруу"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Жайып көрсөтүү"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Жыйыштыруу"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Башкаруу элементтерин ачуу үчүн "<annotation icon="home_icon">" БАШКЫ БЕТ "</annotation>" баскычын эки жолу басыңыз"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Башкаруу элементтерин ачуу үчүн "<annotation icon="home_icon">" БАШКЫ БЕТ "</annotation>" баскычын эки жолу басыңыз"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Сүрөт ичиндеги сүрөт менюсу."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Солго жылдыруу"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Оңго жылдыруу"</string>

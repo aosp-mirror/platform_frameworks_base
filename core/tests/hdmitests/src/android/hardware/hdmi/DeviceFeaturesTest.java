@@ -22,6 +22,8 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 
 import com.google.common.testing.EqualsTester;
@@ -31,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /** Tests for {@link DeviceFeatures} */
+@Presubmit
 @RunWith(JUnit4.class)
 @SmallTest
 public class DeviceFeaturesTest {

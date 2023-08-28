@@ -62,8 +62,6 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -148,8 +146,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @VisibleForTesting
     boolean mIsAddingTaskToTargets;
-    @VisibleForTesting
-    boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
     private ActivityRecord mNavBarAttachedApp;
 
@@ -161,15 +157,14 @@ public class RecentsAnimationController implements DeathRecipient {
      */
     final AppTransitionListener mAppTransitionListener = new AppTransitionListener() {
         @Override
-        public int onAppTransitionStartingLocked(boolean keyguardGoingAway,
-                boolean keyguardOccluding, long duration, long statusBarAnimationStartTime,
+        public int onAppTransitionStartingLocked(long statusBarAnimationStartTime,
                 long statusBarAnimationDuration) {
             continueDeferredCancel();
             return 0;
         }
 
         @Override
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAway) {
+        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
             continueDeferredCancel();
         }
 
@@ -382,8 +377,6 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mDisplayContent = service.mRoot.getDisplayContent(displayId);
-        mShouldAttachNavBarToAppDuringTransition =
-                mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition();
     }
 
     /**
@@ -404,11 +397,11 @@ public class RecentsAnimationController implements DeathRecipient {
         final Task targetRootTask = mDisplayContent.getDefaultTaskDisplayArea()
                 .getRootTask(WINDOWING_MODE_UNDEFINED, targetActivityType);
         if (targetRootTask != null) {
-            final PooledConsumer c = PooledLambda.obtainConsumer((t, outList) ->
-	            { if (!outList.contains(t)) outList.add(t); }, PooledLambda.__(Task.class),
-                    visibleTasks);
-            targetRootTask.forAllLeafTasks(c, true /* traverseTopToBottom */);
-            c.recycle();
+            targetRootTask.forAllLeafTasks(t -> {
+                if (!visibleTasks.contains(t)) {
+                    visibleTasks.add(t);
+                }
+            }, true /* traverseTopToBottom */);
         }
 
         final int taskCount = visibleTasks.size();
@@ -580,7 +573,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     private void attachNavigationBarToApp() {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null) {
             return;
@@ -655,7 +648,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void animateNavigationBarForAppLaunch(long duration) {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null
                 || mNavigationBarAttachedToApp
@@ -907,7 +900,7 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             final Task task = adapter.mTask;
-            snapshotController.recordTaskSnapshot(task, false /* allowSnapshotHome */);
+            snapshotController.recordSnapshot(task, false /* allowSnapshotHome */);
             final TaskSnapshot snapshot = snapshotController.getSnapshot(task.mTaskId, task.mUserId,
                     false /* restoreFromDisk */, false /* isLowResolution */);
             if (snapshot != null) {

@@ -35,12 +35,15 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -106,6 +109,12 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Mock
     private WifiManager mWifiManager;
+    @Mock
+    private ConnectivityManager mConnectivityManager;
+    @Mock
+    private Network mNetwork;
+    @Mock
+    private NetworkCapabilities mNetworkCapabilities;
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
@@ -206,7 +215,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController = new InternetDialogController(mContext,
                 mock(UiEventLogger.class), mock(ActivityStarter.class), mAccessPointController,
                 mSubscriptionManager, mTelephonyManager, mWifiManager,
-                mock(ConnectivityManager.class), mHandler, mExecutor, mBroadcastDispatcher,
+                mConnectivityManager, mHandler, mExecutor, mBroadcastDispatcher,
                 mock(KeyguardUpdateMonitor.class), mGlobalSettings, mKeyguardStateController,
                 mWindowManager, mToastFactory, mWorkerHandler, mCarrierConfigTracker,
                 mLocationController, mDialogLaunchAnimator, mWifiStateWorker, mFlags);
@@ -226,6 +235,14 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void connectCarrierNetwork_mergedCarrierEntryCanConnect_connectAndCreateSysUiToast() {
+        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        when(mConnectivityManager.getActiveNetwork()).thenReturn(mNetwork);
+        when(mConnectivityManager.getNetworkCapabilities(mNetwork))
+                .thenReturn(mNetworkCapabilities);
+        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                .thenReturn(false);
+
         when(mMergedCarrierEntry.canConnect()).thenReturn(true);
         mTestableResources.addOverride(R.string.wifi_wont_autoconnect_for_now,
             TOAST_MESSAGE_STRING);
@@ -234,6 +251,52 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
         verify(mMergedCarrierEntry).connect(null /* callback */, false /* showToast */);
         verify(mToastFactory).createToast(any(), eq(TOAST_MESSAGE_STRING), anyString(), anyInt(),
+            anyInt());
+    }
+
+    @Test
+    public void connectCarrierNetwork_mergedCarrierEntryCanConnect_doNothingWhenSettingsOff() {
+        when(mTelephonyManager.isDataEnabled()).thenReturn(false);
+
+        mTestableResources.addOverride(R.string.wifi_wont_autoconnect_for_now,
+            TOAST_MESSAGE_STRING);
+        mInternetDialogController.connectCarrierNetwork();
+
+        verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
+        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+            anyInt());
+    }
+
+    @Test
+    public void connectCarrierNetwork_mergedCarrierEntryCanConnect_doNothingWhenKeyguardLocked() {
+        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        mTestableResources.addOverride(R.string.wifi_wont_autoconnect_for_now,
+            TOAST_MESSAGE_STRING);
+        mInternetDialogController.connectCarrierNetwork();
+
+        verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
+        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
+            anyInt());
+    }
+
+    @Test
+    public void connectCarrierNetwork_mergedCarrierEntryCanConnect_doNothingWhenMobileIsPrimary() {
+        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+        when(mConnectivityManager.getActiveNetwork()).thenReturn(mNetwork);
+        when(mConnectivityManager.getNetworkCapabilities(mNetwork))
+                .thenReturn(mNetworkCapabilities);
+        when(mNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                .thenReturn(true);
+
+        mTestableResources.addOverride(R.string.wifi_wont_autoconnect_for_now,
+            TOAST_MESSAGE_STRING);
+        mInternetDialogController.connectCarrierNetwork();
+
+        verify(mMergedCarrierEntry, never()).connect(null /* callback */, false /* showToast */);
+        verify(mToastFactory, never()).createToast(any(), anyString(), anyString(), anyInt(),
             anyInt());
     }
 
@@ -897,6 +960,26 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         String dds = spyController.getMobileNetworkSummary(SUB_ID);
 
         assertThat(dds).contains(mContext.getString(R.string.carrier_network_change_mode));
+    }
+
+    @Test
+    public void onStop_cleanUp() {
+        doReturn(SUB_ID).when(mTelephonyManager).getSubscriptionId();
+        assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.get(SUB_ID)).isEqualTo(
+                mTelephonyManager);
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.get(SUB_ID)).isNotNull();
+
+        mInternetDialogController.onStop();
+
+        verify(mTelephonyManager).unregisterTelephonyCallback(any(TelephonyCallback.class));
+        assertThat(mInternetDialogController.mSubIdTelephonyDisplayInfoMap.isEmpty()).isTrue();
+        assertThat(mInternetDialogController.mSubIdTelephonyManagerMap.isEmpty()).isTrue();
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.isEmpty()).isTrue();
+        verify(mSubscriptionManager).removeOnSubscriptionsChangedListener(mInternetDialogController
+                .mOnSubscriptionsChangedListener);
+        verify(mAccessPointController).removeAccessPointCallback(mInternetDialogController);
+        verify(mConnectivityManager).unregisterNetworkCallback(
+                any(ConnectivityManager.NetworkCallback.class));
     }
 
     private String getResourcesString(String name) {

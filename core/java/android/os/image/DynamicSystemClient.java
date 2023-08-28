@@ -456,7 +456,7 @@ public class DynamicSystemClient {
                 Bundle bundle = (Bundle) msg.obj;
                 long progress = bundle.getLong(KEY_INSTALLED_SIZE);
                 ParcelableException t = (ParcelableException) bundle.getSerializable(
-                        KEY_EXCEPTION_DETAIL);
+                        KEY_EXCEPTION_DETAIL, android.os.ParcelableException.class);
 
                 Throwable detail = t == null ? null : t.getCause();
 

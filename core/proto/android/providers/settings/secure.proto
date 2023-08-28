@@ -89,6 +89,12 @@ message SecureSettingsProto {
         // Setting for accessibility magnification for following typing.
         optional SettingProto accessibility_magnification_follow_typing_enabled = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto contrast_level = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_magnification_always_on_enabled = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_ringtone_routing = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_call_routing = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_media_routing = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_system_sounds_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_magnification_joystick_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for font scaling
         optional SettingProto accessibility_font_scaling_has_been_changed = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
@@ -188,6 +194,7 @@ message SecureSettingsProto {
     optional Backup backup = 10;
 
     optional SettingProto bluetooth_on_while_driving = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto bugreport_in_power_menu = 95 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Camera {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -598,6 +605,15 @@ message SecureSettingsProto {
     optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    message TrackpadGesture {
+        optional SettingProto trackpad_gesture_back_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto trackpad_gesture_home_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto trackpad_gesture_overview_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto trackpad_gesture_notification_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto trackpad_gesture_quick_switch_enabled = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional TrackpadGesture trackpad_gesture = 94;
+
     message Tts {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -689,5 +705,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 94;
+    // Next tag = 96;
 }

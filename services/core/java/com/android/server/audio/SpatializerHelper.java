@@ -47,6 +47,7 @@ import android.util.Pair;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class SpatializerHelper {
 
     //------------------------------------------------------------
 
-    private static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(15) {
+    private static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(14) {
         {
             append(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_WIRED_HEADSET, SpatializationMode.SPATIALIZER_BINAURAL);
@@ -90,7 +91,6 @@ public class SpatializerHelper {
             append(AudioDeviceInfo.TYPE_LINE_ANALOG, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_LINE_DIGITAL, SpatializationMode.SPATIALIZER_TRANSAURAL);
             append(AudioDeviceInfo.TYPE_AUX_LINE, SpatializationMode.SPATIALIZER_TRANSAURAL);
-            append(AudioDeviceInfo.TYPE_HEARING_AID, SpatializationMode.SPATIALIZER_BINAURAL);
             append(AudioDeviceInfo.TYPE_BLE_HEADSET, SpatializationMode.SPATIALIZER_BINAURAL);
             append(AudioDeviceInfo.TYPE_BLE_SPEAKER, SpatializationMode.SPATIALIZER_TRANSAURAL);
             // assumption that BLE broadcast would be mostly consumed on headsets
@@ -1770,11 +1770,11 @@ public class SpatializerHelper {
     }
 
     private static void loglogi(String msg) {
-        AudioService.sSpatialLogger.loglogi(msg, TAG);
+        AudioService.sSpatialLogger.enqueueAndLog(msg, EventLogger.Event.ALOGI, TAG);
     }
 
     private static String logloge(String msg) {
-        AudioService.sSpatialLogger.loglog(msg, AudioEventLogger.Event.ALOGE, TAG);
+        AudioService.sSpatialLogger.enqueueAndLog(msg, EventLogger.Event.ALOGE, TAG);
         return msg;
     }
 

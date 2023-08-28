@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"நகர்த்து"</string>
     <string name="pip_expand" msgid="1051966011679297308">"விரி"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"சுருக்கு"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" கட்டுப்பாடுகள்: "<annotation icon="home_icon">" முகப்பு "</annotation>" பட்டனை இருமுறை அழுத்துக"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"கட்டுப்பாடுகளுக்கு "<annotation icon="home_icon">"முகப்பு"</annotation>" பட்டனை இருமுறை அழுத்துக"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"பிக்ச்சர்-இன்-பிக்ச்சர் மெனு."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"இடப்புறம் நகர்த்து"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"வலப்புறம் நகர்த்து"</string>

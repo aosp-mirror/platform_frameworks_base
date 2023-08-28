@@ -30,7 +30,7 @@ import android.graphics.drawable.shapes.RoundRectShape
 import android.os.Trace
 import com.android.systemui.R
 import com.android.systemui.util.boundsOnScreen
-import com.android.wm.shell.TaskView
+import com.android.wm.shell.taskview.TaskView
 import java.util.concurrent.Executor
 
 class PanelTaskViewController(
@@ -40,6 +40,10 @@ class PanelTaskViewController(
     val taskView: TaskView,
     private val hide: () -> Unit = {}
 ) {
+
+    init {
+        taskView.alpha = 0f
+    }
 
     private var detailTaskId = INVALID_TASK_ID
 
@@ -96,6 +100,7 @@ class PanelTaskViewController(
 
             override fun onTaskCreated(taskId: Int, name: ComponentName?) {
                 detailTaskId = taskId
+                taskView.alpha = 1f
             }
 
             override fun onReleased() {

@@ -126,6 +126,9 @@ class Dimmer {
         boolean isVisible;
         SurfaceAnimator mSurfaceAnimator;
 
+        // TODO(b/64816140): Remove after confirming dimmer layer always matches its container.
+        final Rect mDimBounds = new Rect();
+
         /**
          * Determines whether the dim layer should animate before destroying.
          */
@@ -173,6 +176,10 @@ class Dimmer {
     Dimmer(WindowContainer host, SurfaceAnimatorStarter surfaceAnimatorStarter) {
         mHost = host;
         mSurfaceAnimatorStarter = surfaceAnimatorStarter;
+    }
+
+    WindowContainer<?> getHost() {
+        return mHost;
     }
 
     private SurfaceControl makeDimLayer() {
@@ -262,9 +269,17 @@ class Dimmer {
      * a chance to request dims to continue.
      */
     void resetDimStates() {
-        if (mDimState != null && !mDimState.mDontReset) {
+        if (mDimState == null) {
+            return;
+        }
+        if (!mDimState.mDontReset) {
             mDimState.mDimming = false;
         }
+    }
+
+    /** Returns non-null bounds if the dimmer is showing. */
+    Rect getDimBounds() {
+        return mDimState != null ? mDimState.mDimBounds : null;
     }
 
     void dontAnimateExit() {
@@ -275,13 +290,13 @@ class Dimmer {
 
     /**
      * Call after invoking {@link WindowContainer#prepareSurfaces} on children as
-     * described in {@link #resetDimStates}.
+     * described in {@link #resetDimStates}. The dim bounds returned by {@link #resetDimStates}
+     * should be set before calling this method.
      *
      * @param t      A transaction in which to update the dims.
-     * @param bounds The bounds at which to dim.
      * @return true if any Dims were updated.
      */
-    boolean updateDims(SurfaceControl.Transaction t, Rect bounds) {
+    boolean updateDims(SurfaceControl.Transaction t) {
         if (mDimState == null) {
             return false;
         }
@@ -297,6 +312,7 @@ class Dimmer {
             mDimState = null;
             return false;
         } else {
+            final Rect bounds = mDimState.mDimBounds;
             // TODO: Once we use geometry from hierarchy this falls away.
             t.setPosition(mDimState.mDimLayer, bounds.left, bounds.top);
             t.setWindowCrop(mDimState.mDimLayer, bounds.width(), bounds.height());

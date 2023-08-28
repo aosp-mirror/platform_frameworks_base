@@ -71,7 +71,7 @@ import java.util.Set;
 
 @SuppressLint("LongLogTag")
 class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
-    private static final String TAG = "CompanionDevice_PresenceMonitor_BLE";
+    private static final String TAG = "CDM_BleCompanionDeviceScanner";
 
     /**
      * When using {@link ScanSettings#SCAN_MODE_LOW_POWER}, it usually takes from 20 seconds to

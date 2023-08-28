@@ -20,8 +20,9 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Schließen"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Maximieren"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Einstellungen"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Splitscreen aktivieren"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"„Geteilter Bildschirm“ aktivieren"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menü „Bild im Bild“"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
     <string name="pip_play" msgid="3496151081459417097">"Wiedergeben"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Größe anpassen"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"In Stash legen"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen im Splitscreen-Modus nicht."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Splitscreen-Modus wird in dieser App nicht unterstützt."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"Die App funktioniert bei geteiltem Bildschirm unter Umständen nicht"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"„Geteilter Bildschirm“ wird in dieser App nicht unterstützt"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Diese App kann nur in einem einzigen Fenster geöffnet werden."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Die App unterstützt den Start auf sekundären Displays nicht."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"Bildschirmteiler"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"Bildschirmteiler"</string>
+    <string name="divider_title" msgid="1963391955593749442">"Bildschirmteiler"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Vollbild links"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70 % links"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50 % links"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Das Problem ist nicht behoben?\nZum Rückgängigmachen tippen."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Keine Probleme mit der Kamera? Zum Schließen tippen."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Mehr sehen und erledigen"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Für Splitscreen-Modus weitere App hineinziehen"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Weitere App hineinziehen, um den Bildschirm zu teilen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Außerhalb einer App doppeltippen, um die Position zu ändern"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Ok"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Für weitere Informationen maximieren."</string>
@@ -100,11 +102,13 @@
     <string name="app_icon_text" msgid="2823268023931811747">"App-Symbol"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Vollbild"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Desktopmodus"</string>
-    <string name="split_screen_text" msgid="1396336058129570886">"Splitscreen"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Geteilter Bildschirm"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mehr"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Frei schwebend"</string>
     <string name="select_text" msgid="5139083974039906583">"Auswählen"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="close_text" msgid="4986518933445178928">"Schließen"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Menü schließen"</string>
+    <!-- no translation found for expand_menu_text (3847736164494181168) -->
+    <skip />
 </resources>

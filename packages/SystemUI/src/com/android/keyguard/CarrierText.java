@@ -33,6 +33,8 @@ public class CarrierText extends TextView {
 
     private final boolean mShowAirplaneMode;
 
+    private final String mDebugLocation;
+
     public CarrierText(Context context) {
         this(context, null);
     }
@@ -46,6 +48,7 @@ public class CarrierText extends TextView {
             useAllCaps = a.getBoolean(R.styleable.CarrierText_allCaps, false);
             mShowAirplaneMode = a.getBoolean(R.styleable.CarrierText_showAirplaneMode, false);
             mShowMissingSim = a.getBoolean(R.styleable.CarrierText_showMissingSim, false);
+            mDebugLocation = a.getString(R.styleable.CarrierText_debugLocation);
         } finally {
             a.recycle();
         }
@@ -68,6 +71,10 @@ public class CarrierText extends TextView {
 
     public boolean getShowMissingSim() {
         return mShowMissingSim;
+    }
+
+    public String getDebugLocation() {
+        return mDebugLocation;
     }
 
     private static class CarrierTextTransformationMethod extends SingleLineTransformationMethod {

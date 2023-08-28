@@ -52,7 +52,6 @@ import java.io.PrintWriter
 
 @SmallTest
 class ActiveUnlockConfigTest : SysuiTestCase() {
-
     private lateinit var secureSettings: FakeSettings
     @Mock
     private lateinit var contentResolver: ContentResolver
@@ -73,6 +72,7 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
         currentUser = KeyguardUpdateMonitor.getCurrentUser()
         secureSettings = FakeSettings()
         activeUnlockConfig = ActiveUnlockConfig(
@@ -314,6 +314,10 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
                 assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(wakeReason))
             }
         }
+        assertTrue(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_LIFT))
+        assertTrue(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_TAP))
+        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
+            PowerManager.WAKE_REASON_UNFOLD_DEVICE))
     }
 
     @Test
@@ -327,6 +331,11 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
             assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(wakeReason))
         }
+        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
+            PowerManager.WAKE_REASON_LIFT))
+        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_TAP))
+        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
+            PowerManager.WAKE_REASON_UNFOLD_DEVICE))
     }
 
     @Test

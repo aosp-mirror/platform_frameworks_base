@@ -58,11 +58,11 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.ContextualButton;
@@ -74,7 +74,7 @@ import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -149,7 +149,7 @@ public class NavigationBarView extends FrameLayout {
     private NavigationBarInflaterView mNavigationInflaterView;
     private Optional<Recents> mRecentsOptional = Optional.empty();
     @Nullable
-    private NotificationPanelViewController mPanelView;
+    private ShadeViewController mPanelView;
     private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
@@ -346,7 +346,8 @@ public class NavigationBarView extends FrameLayout {
         mRecentsOptional = recentsOptional;
     }
 
-    public void setComponents(NotificationPanelViewController panel) {
+    /** */
+    public void setComponents(ShadeViewController panel) {
         mPanelView = panel;
         updatePanelSystemUiStateFlags();
     }

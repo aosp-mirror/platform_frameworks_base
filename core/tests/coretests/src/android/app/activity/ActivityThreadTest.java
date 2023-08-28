@@ -16,6 +16,7 @@
 
 package android.app.activity;
 
+import static android.content.Context.DEVICE_ID_INVALID;
 import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
@@ -33,6 +34,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
+import android.app.Application;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.ResourcesManager;
@@ -46,6 +48,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -59,7 +62,6 @@ import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -68,6 +70,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.content.ReferrerIntent;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -92,7 +95,8 @@ public class ActivityThreadTest {
     // few sequence numbers the framework used to launch the test activity.
     private static final int BASE_SEQ = 10000;
 
-    private final ActivityTestRule<TestActivity> mActivityTestRule =
+    @Rule
+    public final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
 
@@ -175,6 +179,100 @@ public class ActivityThreadTest {
             assertTrue("Custom intent must be preserved after recreate",
                     customIntent.filterEquals(lastActivity.getIntent()));
         });
+    }
+
+    @Test
+    public void testOverrideScale() throws Exception {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final Application app = activity.getApplication();
+        final ActivityThread activityThread = activity.getActivityThread();
+        final IApplicationThread appThread = activityThread.getApplicationThread();
+        final DisplayMetrics originalAppMetrics = new DisplayMetrics();
+        originalAppMetrics.setTo(app.getResources().getDisplayMetrics());
+        final Configuration originalAppConfig =
+                new Configuration(app.getResources().getConfiguration());
+        final DisplayMetrics originalActivityMetrics = new DisplayMetrics();
+        originalActivityMetrics.setTo(activity.getResources().getDisplayMetrics());
+        final Configuration originalActivityConfig =
+                new Configuration(activity.getResources().getConfiguration());
+
+        final Configuration newConfig = new Configuration(originalAppConfig);
+        newConfig.seq = BASE_SEQ + 1;
+        newConfig.smallestScreenWidthDp++;
+
+        final float originalScale = CompatibilityInfo.getOverrideInvertedScale();
+        float scale = 0.5f;
+        CompatibilityInfo.setOverrideInvertedScale(scale);
+        try {
+            // Send process level config change.
+            ClientTransaction transaction = newTransaction(activityThread, null);
+            transaction.addCallback(ConfigurationChangeItem.obtain(
+                    new Configuration(newConfig), DEVICE_ID_INVALID));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertScreenScale(scale, app, originalAppConfig, originalAppMetrics);
+            // The activity's config doesn't change because ConfigurationChangeItem is process level
+            // that won't affect activity's override config.
+            assertEquals(originalActivityConfig.densityDpi,
+                    activity.getResources().getConfiguration().densityDpi);
+
+            scale = 0.8f;
+            CompatibilityInfo.setOverrideInvertedScale(scale);
+            // Send activity level config change.
+            newConfig.seq++;
+            newConfig.smallestScreenWidthDp++;
+            transaction = newTransaction(activityThread, activity.getActivityToken());
+            transaction.addCallback(ActivityConfigurationChangeItem.obtain(
+                    new Configuration(newConfig)));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
+
+            // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
+            // the config should not be scaled again.
+            final Configuration currentConfig = activity.getResources().getConfiguration();
+            final ClientTransaction localTransaction =
+                    newTransaction(activityThread, activity.getActivityToken());
+            localTransaction.addCallback(ActivityRelaunchItem.obtain(
+                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
+                    new MergedConfiguration(currentConfig, currentConfig),
+                    true /* preserveWindow */));
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> activityThread.executeTransaction(localTransaction));
+
+            assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
+        } finally {
+            CompatibilityInfo.setOverrideInvertedScale(originalScale);
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> restoreConfig(activityThread, originalAppConfig));
+        }
+        assertScreenScale(originalScale, app, originalAppConfig, originalAppMetrics);
+    }
+
+    private static void assertScreenScale(float scale, Context context,
+            Configuration origConfig, DisplayMetrics origMetrics) {
+        final int expectedDpi = (int) (origConfig.densityDpi * scale + .5f);
+        final float expectedDensity = origMetrics.density * scale;
+        final int expectedWidthPixels = (int) (origMetrics.widthPixels * scale + .5f);
+        final int expectedHeightPixels = (int) (origMetrics.heightPixels * scale + .5f);
+        final Configuration expectedConfig = new Configuration(origConfig);
+        CompatibilityInfo.scaleConfiguration(scale, expectedConfig);
+        final Rect expectedBounds = expectedConfig.windowConfiguration.getBounds();
+        final Rect expectedAppBounds = expectedConfig.windowConfiguration.getAppBounds();
+        final Rect expectedMaxBounds = expectedConfig.windowConfiguration.getMaxBounds();
+
+        final Configuration currentConfig = context.getResources().getConfiguration();
+        final DisplayMetrics currentMetrics = context.getResources().getDisplayMetrics();
+        assertEquals(expectedDpi, currentConfig.densityDpi);
+        assertEquals(expectedDpi, currentMetrics.densityDpi);
+        assertEquals(expectedDensity, currentMetrics.density, 0.001f);
+        assertEquals(expectedWidthPixels, currentMetrics.widthPixels);
+        assertEquals(expectedHeightPixels, currentMetrics.heightPixels);
+        assertEquals(expectedBounds, currentConfig.windowConfiguration.getBounds());
+        assertEquals(expectedAppBounds, currentConfig.windowConfiguration.getAppBounds());
+        assertEquals(expectedMaxBounds, currentConfig.windowConfiguration.getMaxBounds());
     }
 
     @Test
@@ -332,12 +430,14 @@ public class ActivityThreadTest {
         activity.mTestLatch = new CountDownLatch(1);
 
         ClientTransaction transaction = newTransaction(activityThread, null);
-        transaction.addCallback(ConfigurationChangeItem.obtain(processConfigLandscape));
+        transaction.addCallback(ConfigurationChangeItem.obtain(
+                processConfigLandscape, DEVICE_ID_INVALID));
         appThread.scheduleTransaction(transaction);
 
         transaction = newTransaction(activityThread, activity.getActivityToken());
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigLandscape));
-        transaction.addCallback(ConfigurationChangeItem.obtain(processConfigPortrait));
+        transaction.addCallback(ConfigurationChangeItem.obtain(
+                processConfigPortrait, DEVICE_ID_INVALID));
         transaction.addCallback(ActivityConfigurationChangeItem.obtain(activityConfigPortrait));
         appThread.scheduleTransaction(transaction);
 
@@ -351,10 +451,8 @@ public class ActivityThreadTest {
         final Rect bounds = activity.getWindowManager().getCurrentWindowMetrics().getBounds();
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
-        // Ensure that Activity#onConfigurationChanged() not be called because the changes in
-        // WindowConfiguration shouldn't be reported, and we only apply the latest Configuration
-        // update in transaction.
-        assertEquals(numOfConfig, activity.mNumOfConfigChanges);
+        // Ensure changes in window configuration bounds are reported
+        assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
     }
 
     @Test
@@ -449,7 +547,7 @@ public class ActivityThreadTest {
                     ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
 
             activityThread.updatePendingConfiguration(newAppConfig);
-            activityThread.handleConfigurationChanged(newAppConfig);
+            activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
             try {
                 assertEquals("Virtual display orientation must not change when process"
@@ -459,17 +557,15 @@ public class ActivityThreadTest {
             } finally {
                 // Make sure to reset the process config to prevent side effects to other
                 // tests.
-                Configuration activityThreadConfig = activityThread.getConfiguration();
-                activityThreadConfig.seq = originalAppConfig.seq - 1;
-
-                Configuration resourceManagerConfig = ResourcesManager.getInstance()
-                        .getConfiguration();
-                resourceManagerConfig.seq = originalAppConfig.seq - 1;
-
-                activityThread.updatePendingConfiguration(originalAppConfig);
-                activityThread.handleConfigurationChanged(originalAppConfig);
+                restoreConfig(activityThread, originalAppConfig);
             }
         });
+    }
+
+    private static void restoreConfig(ActivityThread thread, Configuration originalConfig) {
+        thread.getConfiguration().seq = originalConfig.seq - 1;
+        ResourcesManager.getInstance().getConfiguration().seq = originalConfig.seq - 1;
+        thread.handleConfigurationChanged(originalConfig, DEVICE_ID_INVALID);
     }
 
     @Test
@@ -517,7 +613,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    @FlakyTest(bugId = 176134235)
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
 
@@ -547,7 +642,7 @@ public class ActivityThreadTest {
             newAppConfig.seq++;
 
             final ActivityThread activityThread = activity.getActivityThread();
-            activityThread.handleConfigurationChanged(newAppConfig);
+            activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
             // Verify that application config update was applied, but didn't change activity config.
             assertEquals("Activity config must not change if the process config changes",

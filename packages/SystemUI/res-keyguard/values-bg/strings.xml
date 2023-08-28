@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Въведете ПИН кода си"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Въведете ПИН кода"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Въведете фигурата си"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Начертайте фигурата"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Въведете паролата си"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Въведете паролата"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Картата е невалидна."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Заредена"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се безжично"</string>
@@ -31,6 +34,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се бързо"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарежда се бавно"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зареждането е оптимизирано с цел запазване на батерията"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Проблем със зарядното устройство"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Натиснете „Меню“, за да отключите."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Мрежата е заключена"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Няма SIM карта"</string>
@@ -51,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Електронната SIM карта не може да бъде деактивирана поради грешка."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"„Enter“"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Грешна фигура"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Грешна фигура. Нов опит."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Грешна парола"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Грешна парола. Нов опит."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Грешен ПИН код"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Грешен ПИН. Опитайте пак."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Или отключете с отпечатък"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отпечатъкът не е разпознат"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Лицето не е разпознато"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Опитайте отново или въведете ПИН кода"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Опитайте отново или въведете паролата"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Опитайте отново или начертайте фигурата"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"След твърде много опити се изисква ПИН код"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"След твърде много опити се изисква парола"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"След твърде много опити се изисква фигура"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Отключете с ПИН/отпечатък"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Отключ. с парола/отпечатък"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Отключ. с фигура/отпечатък"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Устройството бе заключено от служебните правила"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"След заключването се изисква ПИН код"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"След заключването се изисква парола"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"След заключването се изисква фигура"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Актуализацията ще се инсталира при неактивност"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Изисква се допъл. защита. ПИН кодът не е ползван скоро."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Изисква се допъл. защита. Паролата не е ползвана скоро."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Изисква се допъл. защита. Фигурата не е ползвана скоро."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Изисква се допъл. защита. У-вото не е отключвано скоро."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Не може да се отключи с лице. Твърде много опити."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Не може да се откл. с отпечатък. Твърде много опити."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Функцията за надежден агент не е налице"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Твърде много опити с грешен ПИН код"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Твърде много опити с грешна фигура"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Твърде много опити с грешна парола"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Опитайте отново след # секунда.}other{Опитайте отново след # секунди.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Въведете ПИН кода за SIM картата."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Въведете ПИН кода на SIM картата за „<xliff:g id="CARRIER">%1$s</xliff:g>“."</string>
@@ -75,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Превключване на метода на въвеждане"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Самолетен режим"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"След рестартиране на устройството се изисква фигура"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"След рестартиране на устройството се изисква ПИН код"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"След рестартиране на устройството се изисква парола"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"След рестартирането на у-вото се изисква фигура"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"След рестартирането на у-вото се изисква ПИН код"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"След рестартирането на у-вото се изисква парола"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"За допълнителна сигурност използвайте фигура вместо това"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"За допълнителна сигурност използвайте ПИН код вместо това"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"За допълнителна сигурност използвайте парола вместо това"</string>
@@ -90,5 +124,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Стандартен"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонен"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогов"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отключете устройството, за да продължите"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отключете устройството си, за да продължите"</string>
 </resources>

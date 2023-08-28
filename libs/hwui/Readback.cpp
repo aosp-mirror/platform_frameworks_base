@@ -16,12 +16,28 @@
 
 #include "Readback.h"
 
+#include <SkBitmap.h>
+#include <SkBlendMode.h>
+#include <SkCanvas.h>
+#include <SkColorSpace.h>
+#include <SkImage.h>
+#include <SkImageInfo.h>
+#include <SkMatrix.h>
+#include <SkPaint.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkSamplingOptions.h>
+#include <SkSurface.h>
+#include "include/gpu/GpuTypes.h" // from Skia
+#include <gui/TraceUtils.h>
+#include <private/android/AHardwareBufferHelpers.h>
+#include <shaders/shaders.h>
 #include <sync/sync.h>
 #include <system/window.h>
 
-#include <gui/TraceUtils.h>
 #include "DeferredLayerUpdater.h"
 #include "Properties.h"
+#include "Tonemapper.h"
 #include "hwui/Bitmap.h"
 #include "pipeline/skia/LayerDrawable.h"
 #include "renderthread/EglManager.h"
@@ -37,8 +53,7 @@ namespace uirenderer {
 
 #define ARECT_ARGS(r) float((r).left), float((r).top), float((r).right), float((r).bottom)
 
-CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRect,
-                                     SkBitmap* bitmap) {
+void Readback::copySurfaceInto(ANativeWindow* window, const std::shared_ptr<CopyRequest>& request) {
     ATRACE_CALL();
     // Setup the source
     AHardwareBuffer* rawSourceBuffer;
@@ -51,44 +66,57 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
     // Really this shouldn't ever happen, but better safe than sorry.
     if (err == UNKNOWN_TRANSACTION) {
         ALOGW("Readback failed to ANativeWindow_getLastQueuedBuffer2 - who are we talking to?");
-        return copySurfaceIntoLegacy(window, inSrcRect, bitmap);
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
     ALOGV("Using new path, cropRect=" RECT_STRING ", transform=%x", ARECT_ARGS(cropRect),
           windowTransform);
 
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
-        return CopyResult::UnknownError;
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
     if (rawSourceBuffer == nullptr) {
         ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return CopyResult::SourceEmpty;
+        return request->onCopyFinished(CopyResult::SourceEmpty);
     }
     UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(sourceBuffer.get(), &description);
     if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
         ALOGW("Surface is protected, unable to copy from it");
-        return CopyResult::SourceInvalid;
+        return request->onCopyFinished(CopyResult::SourceInvalid);
     }
 
-    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
-        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return CopyResult::Timeout;
+    {
+        ATRACE_NAME("sync_wait");
+        if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
+            ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
+            return request->onCopyFinished(CopyResult::Timeout);
+        }
     }
 
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
-            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
+    int32_t dataspace = ANativeWindow_getBuffersDataSpace(window);
+
+    // If the application is not updating the Surface themselves, e.g., another
+    // process is producing buffers for the application to display, then
+    // ANativeWindow_getBuffersDataSpace will return an unknown answer, so grab
+    // the dataspace from buffer metadata instead, if it exists.
+    if (dataspace == 0) {
+        dataspace = AHardwareBuffer_getDataSpace(sourceBuffer.get());
+    }
+
+    sk_sp<SkColorSpace> colorSpace =
+            DataSpaceToColorSpace(static_cast<android_dataspace>(dataspace));
     sk_sp<SkImage> image =
             SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
 
     if (!image.get()) {
-        return CopyResult::UnknownError;
+        return request->onCopyFinished(CopyResult::UnknownError);
     }
 
     sk_sp<GrDirectContext> grContext = mRenderThread.requireGrContext();
 
-    SkRect srcRect = inSrcRect.toSkRect();
+    SkRect srcRect = request->srcRect.toSkRect();
 
     SkRect imageSrcRect = SkRect::MakeIWH(description.width, description.height);
     SkISize imageWH = SkISize::Make(description.width, description.height);
@@ -136,23 +164,26 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
         ALOGV("intersecting " RECT_STRING " with " RECT_STRING, SK_RECT_ARGS(srcRect),
               SK_RECT_ARGS(textureRect));
         if (!srcRect.intersect(textureRect)) {
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
+    SkBitmap skBitmap = request->getDestinationBitmap(srcRect.width(), srcRect.height());
+    SkBitmap* bitmap = &skBitmap;
     sk_sp<SkSurface> tmpSurface =
-            SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+            SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), skgpu::Budgeted::kYes,
                                         bitmap->info(), 0, kTopLeft_GrSurfaceOrigin, nullptr);
 
     // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
     // attempt to do the intermediate rendering step in 8888
     if (!tmpSurface.get()) {
         SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
-        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+                                                 skgpu::Budgeted::kYes,
                                                  tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
@@ -211,6 +242,10 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
     const bool hasBufferCrop = cropRect.left < cropRect.right && cropRect.top < cropRect.bottom;
     auto constraint =
             hasBufferCrop ? SkCanvas::kStrict_SrcRectConstraint : SkCanvas::kFast_SrcRectConstraint;
+
+    static constexpr float kMaxLuminanceNits = 4000.f;
+    tonemapPaint(image->imageInfo(), canvas->imageInfo(), kMaxLuminanceNits, paint);
+
     canvas->drawImageRect(image, imageSrcRect, imageDstRect, sampling, &paint, constraint);
     canvas->restore();
 
@@ -223,52 +258,13 @@ CopyResult Readback::copySurfaceInto(ANativeWindow* window, const Rect& inSrcRec
             !tmpBitmap.tryAllocPixels(tmpInfo) || !tmpSurface->readPixels(tmpBitmap, 0, 0) ||
             !tmpBitmap.readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
             ALOGW("Unable to convert content into the provided bitmap");
-            return CopyResult::UnknownError;
+            return request->onCopyFinished(CopyResult::UnknownError);
         }
     }
 
     bitmap->notifyPixelsChanged();
 
-    return CopyResult::Success;
-}
-
-CopyResult Readback::copySurfaceIntoLegacy(ANativeWindow* window, const Rect& srcRect,
-                                           SkBitmap* bitmap) {
-    // Setup the source
-    AHardwareBuffer* rawSourceBuffer;
-    int rawSourceFence;
-    Matrix4 texTransform;
-    status_t err = ANativeWindow_getLastQueuedBuffer(window, &rawSourceBuffer, &rawSourceFence,
-                                                     texTransform.data);
-    base::unique_fd sourceFence(rawSourceFence);
-    texTransform.invalidateType();
-    if (err != NO_ERROR) {
-        ALOGW("Failed to get last queued buffer, error = %d", err);
-        return CopyResult::UnknownError;
-    }
-    if (rawSourceBuffer == nullptr) {
-        ALOGW("Surface doesn't have any previously queued frames, nothing to readback from");
-        return CopyResult::SourceEmpty;
-    }
-
-    UniqueAHardwareBuffer sourceBuffer{rawSourceBuffer};
-    AHardwareBuffer_Desc description;
-    AHardwareBuffer_describe(sourceBuffer.get(), &description);
-    if (description.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT) {
-        ALOGW("Surface is protected, unable to copy from it");
-        return CopyResult::SourceInvalid;
-    }
-
-    if (sourceFence != -1 && sync_wait(sourceFence.get(), 500 /* ms */) != NO_ERROR) {
-        ALOGE("Timeout (500ms) exceeded waiting for buffer fence, abandoning readback attempt");
-        return CopyResult::Timeout;
-    }
-
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(
-            static_cast<android_dataspace>(ANativeWindow_getBuffersDataSpace(window)));
-    sk_sp<SkImage> image =
-            SkImage::MakeFromAHardwareBuffer(sourceBuffer.get(), kPremul_SkAlphaType, colorSpace);
-    return copyImageInto(image, srcRect, bitmap);
+    return request->onCopyFinished(CopyResult::Success);
 }
 
 CopyResult Readback::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
@@ -306,13 +302,13 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap
 CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, const Rect& srcRect,
                                    SkBitmap* bitmap) {
     ATRACE_CALL();
+    if (!image.get()) {
+        return CopyResult::UnknownError;
+    }
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         mRenderThread.requireGlContext();
     } else {
         mRenderThread.requireVkContext();
-    }
-    if (!image.get()) {
-        return CopyResult::UnknownError;
     }
     int imgWidth = image->width();
     int imgHeight = image->height();
@@ -351,14 +347,17 @@ bool Readback::copyLayerInto(Layer* layer, const SkRect* srcRect, const SkRect* 
      * software buffer.
      */
     sk_sp<SkSurface> tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                              SkBudgeted::kYes, bitmap->info(), 0,
+                                                              skgpu::Budgeted::kYes,
+                                                              bitmap->info(),
+                                                              0,
                                                               kTopLeft_GrSurfaceOrigin, nullptr);
 
     // if we can't generate a GPU surface that matches the destination bitmap (e.g. 565) then we
     // attempt to do the intermediate rendering step in 8888
     if (!tmpSurface.get()) {
         SkImageInfo tmpInfo = bitmap->info().makeColorType(SkColorType::kN32_SkColorType);
-        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(), SkBudgeted::kYes,
+        tmpSurface = SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
+                                                 skgpu::Budgeted::kYes,
                                                  tmpInfo, 0, kTopLeft_GrSurfaceOrigin, nullptr);
         if (!tmpSurface.get()) {
             ALOGW("Unable to generate GPU buffer in a format compatible with the provided bitmap");

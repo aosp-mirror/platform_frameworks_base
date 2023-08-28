@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ການໂທ Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"ການໂທ Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ໂທຜ່ານ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ໂທຜ່ານເຄືອຂ່າຍມືຖື"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ແອັບສ່ວນຕົວຈະຖືກບລັອກໃນວັນທີ <xliff:g id="DATE">%1$s</xliff:g> ເວລາ <xliff:g id="TIME">%2$s</xliff:g>. ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ປິດໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານເກີນ <xliff:g id="NUMBER">%3$d</xliff:g> ມື້."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ເປີດໃຊ້"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ປິດການໂທ ແລະ ຂໍ້ຄວາມໄວ້ແລ້ວ"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ທ່ານໄດ້ຢຸດແອັບບ່ອນເຮັດວຽກໄວ້ຊົ່ວຄາວແລ້ວ. ທ່ານຈະບໍ່ໄດ້ຮັບການໂທທາງໂທລະສັບ ຫຼື ຂໍ້ຄວາມ."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ຍົກເລີກການຢຸດແອັບເຮັດວຽກຊົ່ວຄາວ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ຕົວເລືອກ Android TV"</string>
@@ -267,7 +271,6 @@
     <string name="global_action_lockdown" msgid="2475471405907902963">"ລັອກໄວ້"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"ການແຈ້ງເຕືອນໃໝ່"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"ແປ້ນພິມສະເໝືອນ"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ແປ້ນພິມພາຍນອກ"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"ຄວາມປອດໄພ"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"ໂໝດຂັບລົດ"</string>
@@ -388,16 +391,48 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"ອະນຸຍາດໃຫ້ແອັບຯປິດໂປຣເຊສພື້ນຫຼັງຂອງແອັບຯອື່ນໄດ້. ນີ້ອາດເຮັດໃຫ້ແອັບຯອື່ນນັ້ນຢຸດການເຮັດວຽກໄປນຳ."</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"This app can appear on top of other apps"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"This app can appear on top of other apps or other parts of the screen. This may interfere with normal app usage and change the way that other apps appear."</string>
+    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"ເຊື່ອງການວາງທັບແອັບອື່ນ"</string>
+    <string name="permdesc_hideOverlayWindows" msgid="5660242821651958225">"ແອັບນີ້ສາມາດຮ້ອງຂໍໃຫ້ລະບົບເຊື່ອງການວາງທັບທີ່ມາຈາກແອັບທີ່ບໍ່ໃຫ້ສະແດງຢູ່ເທິງສຸດຂອງມັນ."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"ເຮັດວຽກໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"ແອັບນີ້ສາມາດເຮັດວຽກໃນພື້ນຫຼັງໄດ້. ນີ້ອາດເຮັດໃຫ້ໃຊ້ແບັດເຕີຣີໝົດໄວຂຶ້ນ."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"ໃຊ້ອິນເຕີເນັດໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"ແອັບນີ້ສາມາດໃຊ້ອິນເຕີເນັດໃນພື້ນຫຼັງໄດ້. ນີ້ອາດເຮັດໃຫ້ໃຊ້ອິນເຕີເນັດຫຼາຍຂຶ້ນ."</string>
+    <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"ກຳນົດເວລາສຳລັບຄຳສັ່ງທີ່ມີເວລາແນ່ນອນ"</string>
+    <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"ແອັບນີ້ສາມາດກຳນົດເວລາເຮັດວຽກໃຫ້ເກີດຂຶ້ນຕາມເວລາທີ່ຕ້ອງການໃນອະນາຄົດໄດ້. ເຊິ່ງຍັງໝາຍຄວາມວ່າແອັບດັ່ງກ່າວສາມາດເຮັດວຽກເມື່ອທ່ານບໍ່ໄດ້ກຳລັງໃຊ້ອຸປະກອນຢູ່ໄດ້ນຳ."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"ກຳນົດເວລາໂມງປຸກ ຫຼື ການແຈ້ງເຕືອນກິດຈະກຳ"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"ແອັບນີ້ສາມາດກຳນົດເວລາສຳລັບຄຳສັ່ງຕ່າງໆໄດ້ ເຊັ່ນ: ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນເພື່ອແຈ້ງໃຫ້ທ່ານຊາບຕາມເວລາທີ່ຕ້ອງການໃນອະນາຄົດ."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"ເຮັດໃຫ້ແອັບຯເຮັດວຽກຕະຫຼອດເວລາ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເຮັດໃຫ້ບາງພາກສ່ວນຂອງມັນເອັງ ຄົງໂຕໃນໜ່ວຍຄວາມຈຳ. ສິ່ງນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ສາມາດໃຊ້ໄດ້ໂດຍແອັບຯອື່ນ ເຮັດໃຫ້ແທັບເລັດຊ້າລົງ."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"ອະນຸຍາດໃຫ້ແອັບເຮັດໃຫ້ພາກສ່ວນຂອງຕົວມັນຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ. ນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ແອັບອື່ນສາມາດໃຊ້ໄດ້ເຊິ່ງຈະເຮັດໃຫ້ອຸປະກອນ Android TV ຂອງທ່ານຊ້າລົງ."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດໃຫ້ສ່ວນນຶ່ງຂອງຕົນເອງ ຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ ເຊິ່ງອາດສາມາດ ເຮັດໃຫ້ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງແອັບຯ ອື່ນຖືກຈຳກັດ ສົ່ງຜົນເຮັດໃຫ້ມືຖືຂອງທ່ານເຮັດວຽກຊ້າລົງໄດ້."</string>
     <string name="permlab_foregroundService" msgid="1768855976818467491">"ໃຊ້ບໍລິການພື້ນໜ້າ"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ບໍລິການພື້ນໜ້າ."</string>
+    <string name="permlab_foregroundServiceCamera" msgid="7814751737955715297">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ກ້ອງຖ່າຍຮູບ\""</string>
+    <string name="permdesc_foregroundServiceCamera" msgid="6973701931250595727">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ກ້ອງຖ່າຍຮູບ\""</string>
+    <string name="permlab_foregroundServiceConnectedDevice" msgid="3019650546176872501">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ອຸປະກອນທີ່ເຊື່ອມຕໍ່\""</string>
+    <string name="permdesc_foregroundServiceConnectedDevice" msgid="1067457315741352963">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ອຸປະກອນທີ່ເຊື່ອມຕໍ່\""</string>
+    <string name="permlab_foregroundServiceDataSync" msgid="5847463514326881076">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຊິ້ງຂໍ້ມູນ\""</string>
+    <string name="permdesc_foregroundServiceDataSync" msgid="2267140263423973050">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຊິ້ງຂໍ້ມູນ\""</string>
+    <string name="permlab_foregroundServiceLocation" msgid="3745428302378535690">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສະຖານທີ່\""</string>
+    <string name="permdesc_foregroundServiceLocation" msgid="118894034365177183">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສະຖານທີ່\""</string>
+    <string name="permlab_foregroundServiceMediaPlayback" msgid="4002687983891935514">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຫຼິ້ນມີເດຍ\""</string>
+    <string name="permdesc_foregroundServiceMediaPlayback" msgid="3638032446063968043">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຫຼິ້ນມີເດຍ\""</string>
+    <string name="permlab_foregroundServiceMediaProjection" msgid="2630868915733312527">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການສາຍພາບມີເດຍ\""</string>
+    <string name="permdesc_foregroundServiceMediaProjection" msgid="4805677128082002298">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການສາຍພາບມີເດຍ\""</string>
+    <string name="permlab_foregroundServiceMicrophone" msgid="7390033424890545399">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄມໂຄຣໂຟນ\""</string>
+    <string name="permdesc_foregroundServiceMicrophone" msgid="1206041516173483201">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄມໂຄຣໂຟນ\""</string>
+    <string name="permlab_foregroundServicePhoneCall" msgid="627937743867697892">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສາຍໂທ\""</string>
+    <string name="permdesc_foregroundServicePhoneCall" msgid="5941660252587015147">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສາຍໂທ\""</string>
+    <string name="permlab_foregroundServiceHealth" msgid="3675776442080928184">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສຸຂະພາບ\""</string>
+    <string name="permdesc_foregroundServiceHealth" msgid="2024586220562667185">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ສຸຂະພາບ\""</string>
+    <string name="permlab_foregroundServiceRemoteMessaging" msgid="105670277002780950">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຮັບສົ່ງຂໍ້ຄວາມຈາກໄລຍະໄກ\""</string>
+    <string name="permdesc_foregroundServiceRemoteMessaging" msgid="8767598075877576277">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຮັບສົ່ງຂໍ້ຄວາມຈາກໄລຍະໄກ\""</string>
+    <string name="permlab_foregroundServiceSystemExempted" msgid="1597663713590612685">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄດ້ຮັບການຍົກເວັ້ນຈາກລະບົບ\""</string>
+    <string name="permdesc_foregroundServiceSystemExempted" msgid="947381760834649622">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ໄດ້ຮັບການຍົກເວັ້ນຈາກລະບົບ\""</string>
+    <string name="permlab_foregroundServiceFileManagement" msgid="2585000987966045030">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຈັດການໄຟລ໌\""</string>
+    <string name="permdesc_foregroundServiceFileManagement" msgid="417103601269698508">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການຈັດການໄຟລ໌\""</string>
+    <string name="permlab_foregroundServiceSpecialUse" msgid="7973536745876645082">"ເອີ້ນໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການນຳໃຊ້ພິເສດ\""</string>
+    <string name="permdesc_foregroundServiceSpecialUse" msgid="646713654541885919">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ປະໂຫຍດຈາກບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍມີປະເພດເປັນ \"ການນຳໃຊ້ພິເສດ\""</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"ກວດສອບພື້ນທີ່ຈັດເກັບຂໍ້ມູນແອັບຯ"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"ອະນຸຍາດໃຫ້ແອັບຯດຶງໂຄດ, ຂໍ້ມູນ ແລະຂະໜາດ cache ຂອງມັນໄດ້."</string>
     <string name="permlab_writeSettings" msgid="8057285063719277394">"ແກ້ໄຂການຕັ້ງຄ່າລະບົບ"</string>
@@ -450,6 +485,8 @@
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່ໄດ້."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ບັນທຶກສຽງໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ແອັບນີ້ສາມາດບັນທຶກສຽງດ້ວຍໄມໂຄຣໂຟນຕອນໃດກໍໄດ້."</string>
+    <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ກວດຫາການຖ່າຍຮູບໜ້າຈໍຂອງໜ້າຈໍແອັບ"</string>
+    <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"ແອັບນີ້ຈະໄດ້ຮັບການແຈ້ງເຕືອນເມື່ອມີການຖ່າຍຮູບໜ້າຈໍໃນຂະນະທີ່ກຳລັງໃຊ້ແອັບຢູ່."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ສົ່ງ​ຄຳ​ສັ່ງ​ຫາ SIM"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຄຳສັ່ງຫາ SIM. ສິ່ງນີ້ອັນຕະລາຍຫຼາຍ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ຈຳແນກກິດຈະກຳທາງກາຍ"</string>
@@ -551,14 +588,14 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ເຫດການທຸລະກໍາອົງປະກອບຄວາມປອດໄພ"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນກ່ຽວກັບທຸລະກໍາທີ່ເກີດຂຶ້ນຢູ່ໃນອົງປະກອບທີ່ປອດໄພ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ປິດການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ຮ້ອງຂໍຄວາມຊັບຊ້ອນການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"ອະນຸຍາດໃຫ້ແອັບສຶກສາລະດັບຄວາມຊັບຊ້ອນຂອງໜ້າຈໍລັອກ (ສູງ, ກາງ ຫຼື ບໍ່ມີ), ເຊິ່ງລະບຸຂອບເຂດຄວາມເປັນໄປໄດ້ຂອງຄວາມຍາວ ແລະ ປະເພດຂອງການລັອກໜ້າຈໍ. ແອັບນີ້ສາມາດແນະນຳຜູ້ໃຊ້ວ່າເຂົາເຈົ້າສາມາດອັບເດດໜ້າຈໍລັອກເປັນລະດັບໃດໜຶ່ງເປັນການສະເພາະໄດ້, ແຕ່ຜູ້ໃຊ້ສາມາດທີ່ຈະບໍ່ສົນໃຈ ຫຼື ເປີດໄປອັນອື່ນໄດ້. ກະລຸນາຮັບຊາບວ່າການລັອກໜ້າຈໍບໍ່ໄດ້ບັນທຶກໃນແບບຂໍ້ຄວາມທຳມະດາ, ດັ່ງນັ້ນແອັບຈະບໍ່ຮູ້ລະຫັດຜ່ານທີ່ແນ່ນອນ."</string>
     <string name="permlab_postNotification" msgid="4875401198597803658">"ສະແດງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ອະນຸຍາດໃຫ້ແອັບສະແດງການແຈ້ງເຕືອນ"</string>
+    <string name="permlab_turnScreenOn" msgid="219344053664171492">"ເປີດໜ້າຈໍ"</string>
+    <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"ອະນຸຍາດໃຫ້ແອັບເປີດໜ້າຈໍໄດ້."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"ໃຊ້ຮາດແວຊີວະມິຕິ"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"ອະນຸຍາດໃຫ້ແອັບນຳໃຊ້ຮາດແວຊີວະມິຕິສຳລັບການພິສູດຢືນຢັນ"</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"ຈັດ​ການ​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື"</string>
@@ -672,7 +709,8 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ຜູ້ໃຊ້ຍົກເລີກການປົດລັອກດ້ວຍໜ້າແລ້ວ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດການນຳໃຊ້ການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
+    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
+    <skip />
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາເຂົ້າການລັອກໜ້າຈໍແທນ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າເທື່ອ"</string>
@@ -701,6 +739,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ວິດີໂອຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ຜູ້ໃຊ້ເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ທ່ານເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ອະນຸຍາດໃຫ້ແອັບຂຽນເນື້ອຫາຕ່າງໆຂອງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
@@ -757,6 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການເບິ່ງຂໍ້ມູນຄຸນສົມບັດສຳລັບແອັບໃດໜຶ່ງ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີໃນອັດຕາຕົວຢ່າງສູງ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ອະນຸຍາດໃຫ້ແອັບສຸ່ມຕົວຢ່າງຂໍ້ມູນເຊັນເຊີໃນອັດຕາທີ່ຫຼາຍກວ່າ 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ອັບເດດແອັບໂດຍບໍ່ຕ້ອງມີຄຳສັ່ງຜູ້ໃຊ້"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ອະນຸຍາດໃຫ້ຜູ້ຖືອັບເດດແອັບທີ່ໄດ້ຕິດຕັ້ງໄວ້ກ່ອນໜ້າໂດຍບໍ່ຕ້ອງມີຄຳສັ່ງຜູ້ໃຊ້"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
@@ -1022,50 +1064,12 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ອອກຈາກໜ້ານີ້"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ຢູ່ທີ່ໜ້ານີ້ຕໍ່ໄປ"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການອອກໄປຈາກໜ້ານີ້?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"ຢືນຢັນ"</string>
-    <string name="double_tap_toast" msgid="7065519579174882778">"ເຄັດລັບ: ແຕະສອງຄັ້ງເພື່ອຊູມເຂົ້າ ແລະຊູມອອກ."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"ຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"ຕັ້ງການຕື່ມຂໍ້ມູນອັດຕະໂນມັດ"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"ຕື່ມຂໍ້ມູນອັດຕະໂນມັດດ້ວຍ <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
-    <string name="autofill_address_name_separator" msgid="8190155636149596125">" "</string>
-    <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
-    <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
-    <string name="autofill_address_summary_format" msgid="8417010069362125194">"$1$2$3"</string>
-    <string name="autofill_province" msgid="3676846437741893159">"ແຂວງ"</string>
-    <string name="autofill_postal_code" msgid="7034789388968295591">"ລະຫັດໄປສະນີ"</string>
-    <string name="autofill_state" msgid="3341725337190434069">"ລັດ"</string>
-    <string name="autofill_zip_code" msgid="1315503730274962450">"ລະຫັດ ZIP"</string>
-    <string name="autofill_county" msgid="7781382735643492173">"ປະເທດ"</string>
-    <string name="autofill_island" msgid="5367139008536593734">"ເກາະ"</string>
-    <string name="autofill_district" msgid="6428712062213557327">"ເມືອງ"</string>
-    <string name="autofill_department" msgid="9047276226873531529">"ພະແນກ"</string>
-    <string name="autofill_prefecture" msgid="7267397763720241872">"ເຂດປົກຄອງ"</string>
-    <string name="autofill_parish" msgid="6847960518334530198">"ເຂດການປົກຄອງທ້ອງຖິ່ນ"</string>
-    <string name="autofill_area" msgid="8289022370678448983">"ພື້ນທີ່"</string>
-    <string name="autofill_emirate" msgid="2544082046790551168">"ອີມິເຣດ"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="9102293913842539697">"ອ່ານບຸກມາກ ແລະປະຫວັດເວັບໄຊຂອງທ່ານ"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດຂອງ URL ທັງໝົດທີ່ໂປຣແກຣມທ່ອງເວັບເຄີຍເຂົ້າເບິ່ງ ຮວມທັງ ບຸກມາກທັງໝົດຂອງໂປຣແກຣມທ່ອງເວັບນຳ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"ຂຽນຂໍ້ມູນບຸກມາກ ແລະປະຫວັດເວັບໄຊ"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂປະຫວັດໃນການທ່ອງເວັບ ຫຼືບຸກມາກທີ່ບັນທຶກໃນແທັບເລັດຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບໄດ້. ໝາຍເຫດ: ການອະນຸຍາດນີ້ອາດເປັນຜົນບັງຄັບໃຊ້ ຈາກໂປຣແກຣມທ່ອງເວັບພາຍນອກ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ສາມາດເຂົ້າເວັບໄດ້."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"ອະນຸຍາດໃຫ້ແອັບແກ້ໄຂປະຫວັດຂອງໂປຣແກຣມທ່ອງເວບ ຫຼື ບຸກມາກທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ. ຄຸນສົມບັດນີ້ສາມາດອະນຸຍາດໃຫ້ແອັບລຶບ ຫຼື ແກ້ໄຂໂປຣໄຟລ໌ທ່ອງເວັບໄດ້. ໝາຍເຫດ: ສິດອະນຸຍາດນີ້ອາດບໍ່ຖືກບັງຄັບໃຊ້ໂດຍໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼື ແອັບພລິເຄຊັນອື່ນທີ່ຄວາມສາມາດໃນການເຮັດວຽກຮ່ວມກັບຂອງໂປຣແກຣມທ່ອງເວັບ."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂປະຫວັດໂປຣແກຣມທ່ອງເວັບ ຫຼືບຸກມາກທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ຖືກບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"ຕັ້ງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງໂມງປຸກໃນແອັບຯໂມງປຸກທີ່ຕິດຕັ້ງໄວ້. ບາງແອັບຯໂມງປຸກອາດບໍ່ມີຄຸນສົມບັດແບບນີ້ເທື່ອ."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"ເພີ່ມຂໍ້ຄວາມສຽງ"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເພີ່ມຂໍ້ຄວາມໃສ່ອິນບັອກຂໍ້ຄວາມສຽງຂອງທ່ານໄດ້."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"ແກ້ໄຂສິດທາງສະຖານທີ່ພູມສາດຂອງໂປຣແກຣມທ່ອງເວັບ"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂ ການອະນຸຍາດຕຳແໜ່ງທາງພູມສາດ ຂອງໂປຣແກຣມທ່ອງເວັບ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ ເພື່ອສົ່ງຂໍ້ມູນສະຖານທີ່ໄປໃຫ້ເວັບໄຊຕ່າງໆໄດ້."</string>
-    <string name="save_password_message" msgid="2146409467245462965">"ທ່ານຕ້ອງການໃຫ້ໂປຣແກຣມທ່ອງເວັບນີ້ຈື່ລະຫັດຜ່ານນີ້ບໍ່?"</string>
-    <string name="save_password_notnow" msgid="2878327088951240061">"ບໍ່ແມ່ນຕອນນີ້"</string>
-    <string name="save_password_remember" msgid="6490888932657708341">"ຈື່ໄວ້"</string>
-    <string name="save_password_never" msgid="6776808375903410659">"ບໍ່ຕ້ອງຈື່"</string>
-    <string name="open_permission_deny" msgid="5136793905306987251">"ທ່ານບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ເປີດໜ້ານີ້."</string>
-    <string name="text_copied" msgid="2531420577879738860">"ສຳເນົາຂໍ້ຄວາມໃສ່ຄລິບບອດແລ້ວ."</string>
-    <string name="pasted_from_app" msgid="5627698450808256545">"ວາງ <xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ຈາກ <xliff:g id="SOURCE_APP_NAME">%2$s</xliff:g> ແລ້ວ"</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຈາກຄລິບບອດຂອງທ່ານແລ້ວ"</string>
-    <string name="pasted_text" msgid="4298871641549173733">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຂໍ້ຄວາມທີ່ທ່ານສຳເນົາແລ້ວ"</string>
-    <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງຮູບທີ່ທ່ານສຳເນົາແລ້ວ"</string>
-    <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> ວາງເນື້ອຫາທີ່ທ່ານສຳເນົາແລ້ວ"</string>
     <string name="more_item_label" msgid="7419249600215749115">"ເພີ່ມເຕີມ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"ເມນູ+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+"</string>
@@ -1172,6 +1176,7 @@
     <string name="not_checked" msgid="7972320087569023342">"ບໍ່ໄດ້ໝາຍຖືກ"</string>
     <string name="selected" msgid="6614607926197755875">"ເລືອກແລ້ວ"</string>
     <string name="not_selected" msgid="410652016565864475">"ບໍ່ໄດ້ເລືອກແລ້ວ"</string>
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ໜຶ່ງດາວຈາກເຕັມ {max} ດາວ}other{# ດາວຈາກເຕັມ {max} ດາວ}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ກຳລັງດຳເນີນການ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ດຳເນີນການໂດຍໃຊ້"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"ສຳ​ເລັດ​​​ການ​ດຳ​ເນີນ​ການ​ໂດຍ​ໃຊ້ %1$s"</string>
@@ -1244,10 +1249,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"ກຳ​ລັງ​ເລີ່ມລະ​ບົບ​ Android …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ກຳລັງເລີ່ມແທັບເລັດ…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ກຳລັງເລີ່ມອຸປະກອນ…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ການ​ປັບ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ໃຫ້​ເໝາະ​ສົມ."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"ກຳລັງສຳເລັດການອັບເດດລະບົບ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"ກຳລັງອັບເກຣດ<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"ກຳ​ລັງ​ກຽມ <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
@@ -1359,6 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"ເປີດໂໝດ PTP ຜ່ານ USB ແລ້ວ"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ເປີດໂໝດ USB tethering ແລ້ວ"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"ເປີດໃຊ້ MIDI ຜ່ານ USB ແລ້ວ"</string>
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ເຊື່ອມຕໍ່ອຸປະກອນເປັນເວັບແຄມ"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"ເຊື່ອມຕໍ່ອຸປະກອນເສີມ USB ແລ້ວ"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ກຳລັງສາກອຸປະກອນທີ່ເຊື່ອມຕໍ່. ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
@@ -1389,7 +1393,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ເລືອກຮູບແບບການປ້ອນ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ເປີດໃຊ້ໃຫ້ມັນຢູ່ໃນໜ້າຈໍໃນຂະນະທີ່ໃຊ້ແປ້ນພິມພາຍນອກຢູ່"</string>
     <string name="hardware" msgid="1800597768237606953">"ສະແດງແປ້ນພິມສະເໝືອນ"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ຕັ້ງຄ່າແປ້ນພິມພາຍນອກ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"ຕັ້ງຄ່າ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ຕັ້ງຄ່າແປ້ນພິມແທ້"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ແຕະເພື່ອເລືອກພາສາ ແລະ ໂຄງແປ້ນພິມ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1676,6 +1681,10 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ລຶບອອກ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ເພີ່ມ​ລະ​ດັບ​ສຽງ​ໃຫ້​ເກີນກວ່າ​ລະ​ດັບ​ທີ່​ແນະ​ນຳ​ບໍ?\n\n​ການ​ຮັບ​ຟັງ​ສຽງ​ໃນ​ລະ​ດັບ​ທີ່​ສູງ​ເປັນ​ໄລ​ຍະ​ເວ​ລາ​ດົນ​​ອາດ​ເຮັດ​ໃຫ້​ການ​ຟັງ​ຂອງ​ທ່ານ​ມີ​ບັນ​ຫາ​ໄດ້."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"ຄຳເຕືອນ,\nທ່ານມີສັນຍານສຽງດັງເກີນຈຳນວນທີ່ຄົນເຮົາສາມາດຟັງໄດ້ຢ່າງປອດໄພໃນໜຶ່ງອາທິດຜ່ານຫູຟັງ.\n\nການໃຊ້ເກີນຂີດຈຳກັດນີ້ຈະທຳລາຍການໄດ້ຍິນຂອງທ່ານຢ່າງຖາວອນ."</string>
+    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"ຄຳເຕືອນ,\nທ່ານມີສັນຍານສຽງດັງເກີນ 5 ເທື່ອຂອງສັນຍານສຽງທີ່ຄົນເຮົາສາມາດຟັງໄດ້ຢ່າງປອດໄພໃນໜຶ່ງອາທິດຜ່ານຫູຟັງ.\n\nໄດ້ຫຼຸດລະດັບສຽງລົງແລ້ວເພື່ອປົກປ້ອງການໄດ້ຍິນຂອງທ່ານ."</string>
+    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ລະດັບທີ່ທ່ານກໍາລັງຟັງສື່ສາມາດສົ່ງຜົນໃຫ້ເກີດຄວາມເສຍຫາຍຕໍ່ການໄດ້ຍິນເມື່ອຖືກຄົງໄວ້ເປັນເວລາດົນນານ.\n\nການສືບຕໍ່ຫຼິ້ນໃນລະດັບນີ້ເປັນເວລາດົນອາດເຮັດໃຫ້ການໄດ້ຍິນຂອງທ່ານເສຍຫາຍໄດ້."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ຄຳເຕືອນ,\nປັດຈຸບັນນີ້ທ່ານກຳລັງຟັງເນື້ອຫາທີ່ມີສຽງດັງໃນລະດັບທີ່ບໍ່ປອດໄພ.\n\nການສືບຕໍ່ຟັງສຽງດັງນີ້ຈະທໍາລາຍການໄດ້ຍິນຂອງທ່ານຢ່າງຖາວອນ."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ໃຊ້ປຸ່ມລັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ເມື່ອເປີດໃຊ້ທາງລັດແລ້ວ, ການກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີຈະເປັນການເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ເປີດໃຊ້ທາງລັດສຳລັບຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
@@ -1703,13 +1712,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ແລ້ວໆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ປິດປຸ່ມລັດ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"ການປີ້ນສີ"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ການແກ້ໄຂຄ່າສີ"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"ການປີ້ນສີ"</string>
+    <string name="color_correction_feature_name" msgid="7975133554160979214">"ການແກ້ໄຂສີ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ໂໝດມືດຽວ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ຫຼຸດແສງເປັນພິເສດ"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ອຸປະກອນຊ່ວຍຟັງ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ກົດປຸ່ມສຽງທັງສອງພ້ອມກັນຄ້າງໄວ້ສາມວິນາທີເພື່ອໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ປ່ອຍປຸ່ມລະດັບສຽງ. ເພື່ອເປີດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ໃຫ້ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີ."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ເມື່ອທ່ານແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສອງນິ້ວ):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສາມນິ້ວ):"</string>
@@ -1853,6 +1863,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"ບ່ອນເຮັດວຽກທີ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"ບ່ອນເຮັດວຽກທີ 3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ໂຄລນ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
@@ -1931,6 +1942,8 @@
     <string name="search_language_hint" msgid="7004225294308793583">"ພິມຊື່ພາສາ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"ແນະນຳ"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"ແນະນຳ"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ພາສາທີ່ແນະນຳ"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ພາກ​ພື້ນ​ທີ່ແນະ​ນໍາ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ທຸກພາ​ສາ​"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ທຸກຂົງເຂດ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ຄົ້ນຫາ"</string>
@@ -1938,9 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ຍົກເລີກການຢຸດແອັບຊົ່ວຄາວ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ເປີດໃຊ້ແອັບບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການແຈ້ງເຕືອນຂອງທ່ານ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ຍົກເລີກການຢຸດຊົ່ວຄາວແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ສຸກເສີນ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"ບໍ່ສາມາດໃຊ້ <xliff:g id="ACTIVITY">%1$s</xliff:g> ໄດ້"</string>
@@ -1961,7 +1974,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
-    <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
+    <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ແອັບນີ້ສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນເກົ່າ. ມັນອາດເຮັດວຽກບໍ່ຖືກຕ້ອງ ແລະ ຮວມທັງບໍ່ມີຄວາມປອດໄພ ແລະ ການປ້ອງກັນຄວາມເປັນສ່ວນຕົວຫຼ້າສຸດ. ກວດສອບເພື່ອອັບເດດ ຫຼື ຕິດຕໍ່ນັກພັດທະນາແອັບ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ເປີດແອັບ SMS ເພື່ອເບິ່ງ"</string>
@@ -2050,12 +2063,6 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ຖອນການຕິດຕັ້ງ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ຢືນຢັນການເປີດ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ກວດສອບແອັບທີ່ເປັນອັນຕະລາຍ"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດບໍ?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ອະນຸຍາດການເຂົ້າເຖິງແບບເທື່ອດຽວ"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ບໍ່ອະນຸຍາດ"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້.\n\nສຶກສາເພີ່ມເຕີມໄດ້ຢູ່ g.co/android/devicelogs."</string>
-    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ຕ້ອງການສະແດງ <xliff:g id="APP_2">%2$s</xliff:g> ສະໄລ້"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ແກ້ໄຂ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ການໂທ ແລະ ການແຈ້ງເຕືອນຈະສັ່ນ"</string>
@@ -2087,8 +2094,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ການແຈ້ງເຕືອນແບບປັບຕົວໄດ້ຂອງ Android ຖືກແທນທີ່ດ້ວຍການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນໃນ Android 12 ແລ້ວ. ຄຸນສົມບັດນີ້ສະແດງຄຳສັ່ງ ແລະ ການຕອບກັບທີ່ແນະນຳ ແລະ ຈັດລະບຽບການແຈ້ງເຕືອນຂອງທ່ານ.\n\nການແຈ້ງເຕືອນທີ່ປັບປຸງໃຫ້ດີຂຶ້ນສາມາດເຂົ້າເຖິງເນື້ອຫາການແຈ້ງເຕືອນໄດ້, ຮວມທັງຂໍ້ມູນສ່ວນຕົວ ເຊັ່ນ: ຊື່ຜູ້ຕິດຕໍ່ ແລະ ຂໍ້ຄວາມ. ຄຸນສົມບັດນີ້ສາມາດປິດ ຫຼື ຕອບກັບຫາການແຈ້ງເຕືອນໄດ້ນຳ ເຊັ່ນ: ການຮັບສາຍໂທລະສັບ ແລະ ຄວບຄຸມໂໝດຫ້າມລົບກວນ."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີແລ້ວ"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ກຳລັງຫຼຸດການໃຊ້ແບັດເຕີຣີເພື່ອຍືດອາຍຸແບັດເຕີຣີ"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ຕົວປະຢັດແບັດເຕີຣີ"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ປິດຕົວປະຢັດແບັດເຕີຣີແລ້ວ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ໂທລະສັບມີໄຟພຽງພໍແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
@@ -2156,8 +2163,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ແຕະເພື່ອເປີດໃຊ້"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ບໍ່ມີແອັບບ່ອນເຮັດວຽກ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ບໍ່ມີແອັບສ່ວນຕົວ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານບໍ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານບໍ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ປົດລັອກເຄືອຂ່າຍຊິມ"</string>
@@ -2296,6 +2305,33 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ບໍ່ສາມາດເຂົ້າເຖິງເນື້ອຫານີ້ໄດ້ໃນຂະນະທີ່ຍັງສະຕຣີມຢູ່. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ບໍ່ສາມາດເບິ່ງການສະແດງຜົນຊ້ອນກັນໃນຂະນະທີ່ສະຕຣີມໄດ້"</string>
     <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ບັດ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
+    <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ສິດການອະນຸຍາດສຳລັບໂປຣໄຟລ໌ໃນໂມງຊ່ວຍເຫຼືອເພື່ອຈັດການໂມງ"</string>
+    <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"ອະນຸຍາດໃຫ້ແອັບຊ່ວຍເຫຼືອຈັດການໂມງ."</string>
+    <string name="permlab_observeCompanionDevicePresence" msgid="9008994909653990465">"ສັງເກດການປາກົດຂອງອຸປະກອນຊ່ວຍເຫຼືອ"</string>
+    <string name="permdesc_observeCompanionDevicePresence" msgid="3011699826788697852">"ອະນຸຍາດໃຫ້ແອັບຊ່ວຍເຫຼືອສັງເກດການປາກົດຂອງອຸປະກອນຊ່ວຍເຫຼືອເມື່ອອຸປະກອນຢູ່ໃກ້ຄຽງ ຫຼື ໄກອອກໄປ."</string>
+    <string name="permlab_deliverCompanionMessages" msgid="3931552294842980887">"ສົ່ງຂໍ້ຄວາມຊ່ວຍເຫຼືອ"</string>
+    <string name="permdesc_deliverCompanionMessages" msgid="2170847384281412850">"ອະນຸຍາດໃຫ້ແອັບຊ່ວຍເຫຼືອສົ່ງຂໍ້ຄວາມຊ່ວຍເຫຼືອໄປຫາອຸປະກອນອື່ນໆ."</string>
+    <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"ເລີ່ມໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າໂດຍໃຫ້ອະນຸຍາດຈາກເບື້ອງຫຼັງ"</string>
+    <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ອະນຸຍາດຈາກເບື້ອງຫຼັງໃຫ້ແອັບຊ່ວຍເຫຼືອເລີ່ມໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າ."</string>
+    <string name="mic_access_on_toast" msgid="2666925317663845156">"ໄມໂຄຣໂຟນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="mic_access_off_toast" msgid="8111040892954242437">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ໜ້າຈໍຄູ່"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ເປີດໜ້າຈໍຄູ່ຢູ່"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ຈໍສະແດງຜົນທັງສອງເພື່ອສະແດງເນື້ອຫາ"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ອຸປະກອນຮ້ອນເກີນໄປ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ໜ້າຈໍຄູ່ບໍ່ພ້ອມໃຫ້ນຳໃຊ້ເນື່ອງຈາກໂທລະສັບຂອງທ່ານຮ້ອນເກີນໄປ"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ໃຊ້ບໍ່ໄດ້"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ໃຊ້ບໍ່ໄດ້ເນື່ອງຈາກເປີດຕົວປະຢັດແບັດເຕີຣີຢູ່. ທ່ານສາມາດປິດສິ່ງນີ້ໄດ້ໃນການຕັ້ງຄ່າ."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ເຂົ້າໄປການຕັ້ງຄ່າ"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ປິດໄວ້"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"ຕັ້ງຄ່າ <xliff:g id="DEVICE_NAME">%s</xliff:g> ແລ້ວ"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ຕັ້ງຄ່າໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ແຕະເພື່ອປ່ຽນແປງ."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ຕັ້ງຄ່າແປ້ນພິມແທ້ແລ້ວ"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ແຕະເພື່ອເບິ່ງແປ້ນພິມ"</string>
 </resources>

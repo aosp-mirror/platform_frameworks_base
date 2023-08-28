@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="4539824758261855508">"ຕົວຈັດການຂໍ້ມູນການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="string_cancel" msgid="6369133483981306063">"ຍົກເລີກ"</string>
+    <string name="string_continue" msgid="1346732695941131882">"ສືບຕໍ່"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"ຕົວເລືອກເພີ່ມເຕີມ"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"ສະແດງລະຫັດຜ່ານ"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"ເຊື່ອງລະຫັດຜ່ານ"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ປອດໄພຂຶ້ນດ້ວຍກະແຈຜ່ານ"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ໂດຍການໃຊ້ກະແຈຜ່ານ, ທ່ານບໍ່ຈຳເປັນຕ້ອງສ້າງ ຫຼື ຈື່ລະຫັດຜ່ານທີ່ຊັບຊ້ອນ"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ກະແຈຜ່ານແມ່ນກະແຈດິຈິຕອນທີ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້ເຊິ່ງທ່ານສ້າງຂຶ້ນໂດຍໃຊ້ລາຍນິ້ວມື, ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານ"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"ພວກມັນຖືກບັນທຶກໄວ້ຢູ່ໃນຕົວຈັດການລະຫັດຜ່ານ, ດັ່ງນັ້ນທ່ານສາມາດເຂົ້າສູ່ລະບົບຢູ່ອຸປະກອນອື່ນໆໄດ້"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"ເພີ່ມເຕີມກ່ຽວກັບກະແຈຜ່ານ"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"ເທັກໂນໂລຢີທີ່ບໍ່ມີລະຫັດຜ່ານ"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"ກະແຈຜ່ານເຮັດໃຫ້ທ່ານສາມາດເຂົ້າສູ່ລະບົບໄດ້ໂດຍບໍ່ຕ້ອງອີງອາໄສລະຫັດຜ່ານ. ທ່ານພຽງແຕ່ຕ້ອງໃຊ້ລາຍນິ້ວມືຂອງທ່ານ, ການຈຳແນກໃບໜ້າ, PIN ຫຼື ຮູບແບບການປັດເພື່ອຢັ້ງຢືນຕົວຕົນຂອງທ່ານ ແລະ ສ້າງກະແຈຜ່ານ."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"ການເຂົ້າລະຫັດກະແຈສາທາລະນະ"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"ໂດຍອ້າງອີງໃສ່ພັນທະມິດ FIDO (ເຊິ່ງຮວມມີ Google, Apple, Microsoft ແລະ ອື່ນໆ) ແລະ ມາດຕະຖານ W3C, ກະແຈຜ່ານຈະໃຊ້ຈັບຄູ່ກະແຈການເຂົ້າລະຫັດ. ບໍ່ຄືກັນກັບຊື່ຜູ້ໃຊ້ ແລະ ສະຕຣິງຕົວອັກສອນທີ່ພວກເຮົາໃຊ້ສຳລັບລະຫັດຜ່ານ, ກະແຈສາທາລະນະ-ສ່ວນຕົວແມ່ນຖືກສ້າງມາສຳລັບແອັບ ຫຼື ເວັບໄຊ. ກະແຈສ່ວນຕົວແມ່ນຖືກຈັດເກັບໄວ້ຢ່າງປອດໄພຢູ່ອຸປະກອນຂອງທ່ານ ຫຼື ຕົວຈັດການລະຫັດຜ່ານ ແລະ ມັນຢືນຢັນຕົວຕົນຂອງທ່ານ. ກະແຈສາທາລະນະແມ່ນແບ່ງປັນກັບແອັບ ຫຼື ເຊີບເວີເວັບໄຊ. ດ້ວຍກະແຈທີ່ກົງກັນ, ທ່ານຈະສາມາດລົງທະບຽນ ແລະ ເຂົ້າສູ່ລະບົບໄດ້ທັນທີ."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"ປັບປຸງຄວາມປອດໄພບັນຊີ"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"ກະແຈແຕ່ລະອັນແມ່ນລິ້ງເຈາະຈົງກັບແອັບ ຫຼື ເວັບໄຊທີ່ພວກມັນຖືກສ້າງໃຫ້, ດັ່ງນັ້ນທ່ານຈະບໍ່ສາມາດເຂົ້າສູ່ລະບົບຫາແອັບ ຫຼື ເວັບໄຊສໍ້ໂກງຕ່າງໆໂດຍບໍ່ໄດ້ຕັ້ງໃຈໄດ້. ນອກຈາກນັ້ນ, ເຊີບເວີຍັງມີການເກັບກະແຈສາທາລະນະໄວ້ເທົ່ານັ້ນ, ການແຮັກຈຶ່ງເປັນເລື່ອງຍາກຂຶ້ນຫຼາຍ."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"ການປ່ຽນຜ່ານທີ່ຕໍ່ເນື່ອງ"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"ໃນຂະນະທີ່ພວກເຮົາກ້າວໄປສູ່ອະນາຄົດທີ່ບໍ່ຕ້ອງໃຊ້ລະຫັດຜ່ານ, ລະຫັດຜ່ານຈະຍັງຄົງໃຊ້ໄດ້ຄວບຄູ່ໄປກັບກະແຈຜ່ານ."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"ເລືອກບ່ອນທີ່ຈະບັນທຶກ <xliff:g id="CREATETYPES">%1$s</xliff:g> ຂອງທ່ານ"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"ເລືອກຕົວຈັດການລະຫັດຜ່ານເພື່ອບັນທຶກຂໍ້ມູນຂອງທ່ານ ແລະ ເຂົ້າສູ່ລະບົບໄວຂຶ້ນໃນເທື່ອຕໍ່ໄປ"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"ສ້າງກະແຈຜ່ານສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"ບັນທຶກລະຫັດຜ່ານສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"ບັນທຶກຂໍ້ມູນການເຂົ້າສູ່ລະບົບສຳລັບ <xliff:g id="APPNAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="passkey" msgid="632353688396759522">"ກະແຈຜ່ານ"</string>
+    <string name="password" msgid="6738570945182936667">"ລະຫັດຜ່ານ"</string>
+    <string name="passkeys" msgid="5733880786866559847">"ກະແຈຜ່ານ"</string>
+    <string name="passwords" msgid="5419394230391253816">"ລະຫັດຜ່ານ"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"ການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"ຂໍ້ມູນການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"ບັນທຶກ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ໃສ່"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ສ້າງກະແຈຜ່ານໃນອຸປະກອນອື່ນບໍ?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"ໃຊ້ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ສຳລັບການເຂົ້າສູ່ລະບົບທັງໝົດຂອງທ່ານບໍ?"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"ຕົວຈັດການລະຫັດຜ່ານນີ້ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ຈະຈັດເກັບລະຫັດຜ່ານ ແລະ ກະແຈຜ່ານຂອງທ່ານໄວ້ເພື່ອຊ່ວຍໃຫ້ທ່ານເຂົ້າສູ່ລະບົບໄດ້ຢ່າງງ່າຍດາຍ"</string>
+    <string name="set_as_default" msgid="4415328591568654603">"ຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ"</string>
+    <string name="use_once" msgid="9027366575315399714">"ໃຊ້ເທື່ອດຽວ"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ກະແຈຜ່ານ"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> ກະແຈຜ່ານ"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"ຂໍ້ມູນການເຂົ້າສູ່ລະບົບ <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> ລາຍການ"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"ກະແຈຜ່ານ"</string>
+    <string name="another_device" msgid="5147276802037801217">"ອຸປະກອນອື່ນ"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"ຕົວຈັດການລະຫັດຜ່ານອື່ນໆ"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"ປິດຊີດ"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ກັບຄືນໄປຫາໜ້າກ່ອນໜ້ານີ້"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"ປິດ"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ປິດໄວ້"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ເລືອກຕົວເລືອກສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ໃຊ້ຂໍ້ມູນນີ້ຢູ່ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ເຂົ້າສູ່ລະບົບດ້ວຍວິທີອື່ນ"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"ເບິ່ງຕົວເລືອກ"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"ສືບຕໍ່"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ຕົວເລືອກການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"ເບິ່ງເພີ່ມເຕີມ"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ຕົວຈັດການລະຫັດຜ່ານທີ່ລັອກໄວ້"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"ແຕະເພື່ອປົດລັອກ"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"ບໍ່ມີຂໍ້ມູນການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"ບໍ່ມີຂໍ້ມູນການເຂົ້າສູ່ລະບົບໃນ <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ຈັດການການເຂົ້າສູ່ລະບົບ"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ຈາກອຸປະກອນອື່ນ"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ໃຊ້ອຸປະກອນອື່ນ"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"ການຮ້ອງຂໍຖືກຍົກເລີກໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+</resources>

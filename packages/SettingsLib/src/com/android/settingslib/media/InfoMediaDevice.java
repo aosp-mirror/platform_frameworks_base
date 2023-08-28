@@ -15,22 +15,25 @@
  */
 package com.android.settingslib.media;
 
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK;
-import static android.media.MediaRoute2Info.FEATURE_REMOTE_VIDEO_PLAYBACK;
 import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RouteListingPreference;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
-
-import java.util.List;
 
 /**
  * InfoMediaDevice extends MediaDevice to represents wifi device.
@@ -40,9 +43,14 @@ public class InfoMediaDevice extends MediaDevice {
     private static final String TAG = "InfoMediaDevice";
 
     InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
-            String packageName) {
-        super(context, routerManager, info, packageName);
+            String packageName, RouteListingPreference.Item item) {
+        super(context, routerManager, info, packageName, item);
         initDeviceRecord();
+    }
+
+    InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
+            String packageName) {
+        this(context, routerManager, info, packageName, null);
     }
 
     @Override
@@ -63,11 +71,12 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return mContext.getDrawable(getDrawableResIdByFeature());
+        return mContext.getDrawable(getDrawableResIdByType());
     }
 
     @VisibleForTesting
-    int getDrawableResId() {
+    @SuppressWarnings("NewApi")
+    int getDrawableResIdByType() {
         int resId;
         switch (mRouteInfo.getType()) {
             case TYPE_GROUP:
@@ -76,26 +85,29 @@ public class InfoMediaDevice extends MediaDevice {
             case TYPE_REMOTE_TV:
                 resId = R.drawable.ic_media_display_device;
                 break;
+            case TYPE_REMOTE_TABLET:
+                resId = R.drawable.ic_media_tablet;
+                break;
+            case TYPE_REMOTE_TABLET_DOCKED:
+                resId = R.drawable.ic_dock_device;
+                break;
+            case TYPE_REMOTE_COMPUTER:
+                resId = R.drawable.ic_media_computer;
+                break;
+            case TYPE_REMOTE_GAME_CONSOLE:
+                resId = R.drawable.ic_media_game_console;
+                break;
+            case TYPE_REMOTE_CAR:
+                resId = R.drawable.ic_media_car;
+                break;
+            case TYPE_REMOTE_SMARTWATCH:
+                resId = R.drawable.ic_media_smartwatch;
+                break;
             case TYPE_REMOTE_SPEAKER:
             default:
                 resId = R.drawable.ic_media_speaker_device;
                 break;
         }
-        return resId;
-    }
-
-    @VisibleForTesting
-    int getDrawableResIdByFeature() {
-        int resId;
-        final List<String> features = mRouteInfo.getFeatures();
-        if (features.contains(FEATURE_REMOTE_GROUP_PLAYBACK)) {
-            resId = R.drawable.ic_media_group_device;
-        } else if (features.contains(FEATURE_REMOTE_VIDEO_PLAYBACK)) {
-            resId = R.drawable.ic_media_display_device;
-        } else {
-            resId = R.drawable.ic_media_speaker_device;
-        }
-
         return resId;
     }
 

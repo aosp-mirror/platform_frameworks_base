@@ -275,7 +275,7 @@
     <item msgid="6506681373060736204">"সৰ্বাধিক ৪টা প্ৰক্ৰিয়া"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="3358668781763928157">"চাৰ্জ কৰি থকা হৈছে"</item>
+    <item msgid="3358668781763928157">"চ্চাৰ্জ কৰি থকা হৈছে"</item>
     <item msgid="7804797564616858506">"এমটিপি (মিডিয়া ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
     <item msgid="910925519184248772">"পিটিপি (পিকচাৰ ট্ৰান্সফাৰ প্ৰ’ট’কল)"</item>
     <item msgid="3825132913289380004">"RNDIS (USB ইথাৰনেট)"</item>
@@ -283,11 +283,5 @@
     <item msgid="8688681727755534982">"এমআইডিআই"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
-  </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"সৰু"</item>
-    <item msgid="1484561228522634915">"ডিফ’ল্ট"</item>
-    <item msgid="4014311587094503943">"ডাঙৰ"</item>
-    <item msgid="2904569270831156685">"আটাইতকৈ ডাঙৰ"</item>
   </string-array>
 </resources>

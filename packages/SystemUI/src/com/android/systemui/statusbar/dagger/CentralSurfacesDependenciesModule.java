@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.dagger;
 
 import android.app.IActivityManager;
+import android.app.WallpaperManager;
 import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -39,8 +39,8 @@ import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteracto
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.carrier.QSCarrierGroupController;
 import com.android.systemui.settings.DisplayTracker;
+import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
@@ -55,6 +55,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -106,6 +107,7 @@ public interface CentralSurfacesDependenciesModule {
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger,
             DumpManager dumpManager) {
@@ -118,6 +120,7 @@ public interface CentralSurfacesDependenciesModule {
                 centralSurfacesOptionalLazy,
                 statusBarStateController,
                 remoteInputUriController,
+                remoteInputControllerLogger,
                 clickNotifier,
                 actionClickLogger,
                 dumpManager);
@@ -141,7 +144,7 @@ public interface CentralSurfacesDependenciesModule {
             SysuiColorExtractor colorExtractor,
             KeyguardStateController keyguardStateController,
             DumpManager dumpManager,
-            DisplayManager displayManager) {
+            WallpaperManager wallpaperManager) {
         return new NotificationMediaManager(
                 context,
                 centralSurfacesOptionalLazy,
@@ -157,7 +160,7 @@ public interface CentralSurfacesDependenciesModule {
                 colorExtractor,
                 keyguardStateController,
                 dumpManager,
-                displayManager);
+                wallpaperManager);
     }
 
     /** */
@@ -271,8 +274,8 @@ public interface CentralSurfacesDependenciesModule {
 
     /** */
     @Binds
-    QSCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
-            QSCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
+    ShadeCarrierGroupController.SlotIndexResolver provideSlotIndexResolver(
+            ShadeCarrierGroupController.SubscriptionManagerSlotIndexResolver impl);
 
     /**
      */

@@ -141,6 +141,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      */
     static final int FLAG_SEND_MOTION_EVENTS = 0x00000400;
 
+    /** Flag for intercepting generic motion events. */
+    static final int FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS = 0x00000800;
+
     static final int FEATURES_AFFECTING_MOTION_EVENTS =
             FLAG_FEATURE_INJECT_MOTION_EVENTS
                     | FLAG_FEATURE_AUTOCLICK
@@ -149,7 +152,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     | FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER
                     | FLAG_SERVICE_HANDLES_DOUBLE_TAP
                     | FLAG_REQUEST_MULTI_FINGER_GESTURES
-                    | FLAG_REQUEST_2_FINGER_PASSTHROUGH;
+                    | FLAG_REQUEST_2_FINGER_PASSTHROUGH
+                    | FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS;
 
     private final Context mContext;
 
@@ -182,6 +186,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private final SparseArray<EventStreamState> mTouchScreenStreamStates = new SparseArray<>(0);
 
+    // State tracking for generic MotionEvents is display-agnostic so we only need one.
+    private GenericMotionEventStreamState mGenericMotionEventStreamState;
+    private int mCombinedGenericMotionEventSources = 0;
+
     private EventStreamState mKeyboardStreamState;
 
     AccessibilityInputFilter(Context context, AccessibilityManagerService service) {
@@ -205,6 +213,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mInstalled = true;
         disableFeatures();
         enableFeatures();
+        mAms.onInputFilterInstalled(true);
         super.onInstalled();
     }
 
@@ -215,21 +224,17 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
         mInstalled = false;
         disableFeatures();
+        mAms.onInputFilterInstalled(false);
         super.onUninstalled();
     }
 
     void onDisplayAdded(@NonNull Display display) {
-        if (mInstalled) {
-            resetStreamStateForDisplay(display.getDisplayId());
-            enableFeaturesForDisplay(display);
-        }
+        enableFeaturesForDisplayIfInstalled(display);
+
     }
 
     void onDisplayRemoved(int displayId) {
-        if (mInstalled) {
-            disableFeaturesForDisplay(displayId);
-            resetStreamStateForDisplay(displayId);
-        }
+        disableFeaturesForDisplayIfInstalled(displayId);
     }
 
     @Override
@@ -296,7 +301,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     private EventStreamState getEventStreamState(InputEvent event) {
         if (event instanceof MotionEvent) {
             final int displayId = event.getDisplayId();
+            if (mGenericMotionEventStreamState == null) {
+                mGenericMotionEventStreamState = new GenericMotionEventStreamState();
+            }
 
+            if (mGenericMotionEventStreamState.shouldProcessMotionEvent((MotionEvent) event)) {
+                return mGenericMotionEventStreamState;
+            }
             if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)) {
                 EventStreamState touchScreenStreamState = mTouchScreenStreamStates.get(displayId);
                 if (touchScreenStreamState == null) {
@@ -362,8 +373,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         mPm.userActivity(event.getEventTime(), false);
         MotionEvent transformedEvent = MotionEvent.obtain(event);
         final int displayId = event.getDisplayId();
-        mEventHandler.get(isDisplayIdValid(displayId) ? displayId : Display.DEFAULT_DISPLAY)
-                .onMotionEvent(transformedEvent, event, policyFlags);
+        EventStreamTransformation eventStreamTransformation = mEventHandler.get(
+                isDisplayIdValid(displayId) ? displayId : Display.DEFAULT_DISPLAY);
+        if (eventStreamTransformation != null) {
+            eventStreamTransformation.onMotionEvent(transformedEvent, event, policyFlags);
+        }
         transformedEvent.recycle();
     }
 
@@ -460,6 +474,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         final Context displayContext = mContext.createDisplayContext(display);
         final int displayId = display.getDisplayId();
+        if (mAms.isDisplayProxyed(displayId)) {
+            return;
+        }
         if (!mServiceDetectsGestures.contains(displayId)) {
             mServiceDetectsGestures.put(displayId, false);
         }
@@ -488,6 +505,19 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             explorer.setServiceDetectsGestures(mServiceDetectsGestures.get(displayId));
             addFirstEventHandler(displayId, explorer);
             mTouchExplorer.put(displayId, explorer);
+        }
+
+        if ((mEnabledFeatures & FLAG_FEATURE_INTERCEPT_GENERIC_MOTION_EVENTS) != 0) {
+            addFirstEventHandler(displayId, new BaseEventStreamTransformation() {
+                @Override
+                public void onMotionEvent(MotionEvent event, MotionEvent rawEvent,
+                        int policyFlags) {
+                    if (!anyServiceWantsGenericMotionEvent(rawEvent)
+                            || !mAms.sendMotionEventToListeningServices(rawEvent)) {
+                        super.onMotionEvent(event, rawEvent, policyFlags);
+                    }
+                }
+            });
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
@@ -570,8 +600,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mTouchExplorer.remove(displayId);
         }
 
-        final MagnificationGestureHandler handler =
-                mMagnificationGestureHandler.get(displayId);
+        final MagnificationGestureHandler handler = mMagnificationGestureHandler.get(displayId);
         if (handler != null) {
             handler.onDestroy();
             mMagnificationGestureHandler.remove(displayId);
@@ -580,6 +609,18 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);
         if (eventStreamTransformation != null) {
             mEventHandler.remove(displayId);
+        }
+    }
+    void enableFeaturesForDisplayIfInstalled(Display display) {
+        if (mInstalled) {
+            resetStreamStateForDisplay(display.getDisplayId());
+            enableFeaturesForDisplay(display);
+        }
+    }
+    void disableFeaturesForDisplayIfInstalled(int displayId) {
+        if (mInstalled) {
+            disableFeaturesForDisplay(displayId);
+            resetStreamStateForDisplay(displayId);
         }
     }
 
@@ -843,6 +884,32 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
+    private class GenericMotionEventStreamState extends EventStreamState {
+        @Override
+        public boolean shouldProcessMotionEvent(MotionEvent event) {
+            return anyServiceWantsGenericMotionEvent(event);
+        }
+        @Override
+        public boolean shouldProcessScroll() {
+            return true;
+        }
+    }
+
+    private boolean anyServiceWantsGenericMotionEvent(MotionEvent event) {
+        // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
+        // touch exploration.
+        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+                && (mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
+            return false;
+        }
+        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+        return (mCombinedGenericMotionEventSources & eventSourceWithoutClass) != 0;
+    }
+
+    public void setCombinedGenericMotionEventSources(int sources) {
+        mCombinedGenericMotionEventSources = sources;
+    }
+
     /**
      * Keeps state of streams of events from all keyboard devices.
      */
@@ -909,6 +976,7 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     public void resetServiceDetectsGestures() {
         mServiceDetectsGestures.clear();
     }
+
     public void requestTouchExploration(int displayId) {
         if (mTouchExplorer.contains(displayId)) {
             mTouchExplorer.get(displayId).requestTouchExploration();

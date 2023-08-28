@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"已中斷連線"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"已停用"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 設定失敗"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"網路品質不佳，因此未連線"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi 連線失敗"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"驗證問題"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"無法連線"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"無法連線至「<xliff:g id="AP_NAME">%1$s</xliff:g>」"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"無法自動連線"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"沒有可用的網際網路連線"</string>
     <string name="saved_network" msgid="7143698034077223645">"由「<xliff:g id="NAME">%1$s</xliff:g>」儲存"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"已連線到計量付費網路"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"已透過 %1$s 自動連線"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"已透過網路評分供應商自動連線"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"已透過 %1$s 連線"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"透過「<xliff:g id="NAME">%1$s</xliff:g>」連線"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"可透過 %1$s 使用"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"輕觸即可註冊"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"沒有網際網路連線"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"無法存取私人 DNS 伺服器"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"沒有網際網路連線"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"必須登入"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"存取點暫時滿載"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"已透過 %1$s 連線"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"可透過 %1$s 使用"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"正在開啟 <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"無法連線"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"正在完成註冊程序…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"無法完成註冊程序。輕觸即可重試。"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"註冊完成。連線中…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"非常慢"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"慢"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"確定"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"適中"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"快"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"非常快"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"已失效"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"配對中…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無手機音訊)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無媒體音訊)"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無訊息存取權)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無手機或媒體音訊)"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"已連線，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"已連線 (無手機音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"重設語音音調"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"將文字轉語音的播放音調重設為預設值。"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"很慢"</item>
-    <item msgid="1815382991399815061">"慢"</item>
-    <item msgid="3075292553049300105">"一般"</item>
-    <item msgid="1158955023692670059">"快"</item>
-    <item msgid="5664310435707146591">"較快"</item>
-    <item msgid="5491266922147715962">"很快"</item>
-    <item msgid="7659240015901486196">"非常快"</item>
-    <item msgid="7147051179282410945">"極快"</item>
-    <item msgid="581904787661470707">"最快"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"選擇設定檔"</string>
     <string name="category_personal" msgid="6236798763159385225">"個人"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"顯示剪輯範圍、邊界等"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"強制使用從右至左版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"透明導覽列"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"使用透明色做為導覽列的預設背景顏色"</string>
     <string name="window_blurs" msgid="6831008984828425106">"允許視窗層級模糊處理"</string>
     <string name="force_msaa" msgid="4081288296137775550">"強制 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
@@ -527,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"增加時間。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"減少時間。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
+    <string name="next" msgid="2699398661093607009">"繼續"</string>
+    <string name="back" msgid="5554327870352703710">"返回"</string>
+    <string name="save" msgid="3745809743277153149">"儲存"</string>
     <string name="okay" msgid="949938843324579502">"確定"</string>
     <string name="done" msgid="381184316122520313">"完成"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"鬧鐘與提醒"</string>
@@ -550,6 +545,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"這支手機"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"這台平板電腦"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"這支手機"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"無法在這部裝置上播放"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"請升級要切換的帳戶"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"這裡無法播放下載內容"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"請在廣告結束後再試一次"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"必須喚醒裝置才能在此播放"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"裝置未獲准播放"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"無法在此播放這個媒體內容"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連線，請關閉裝置後再重新開啟"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音訊裝置"</string>
     <string name="help_label" msgid="3528360748637781274">"說明與意見回饋"</string>
@@ -574,6 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"要新增使用者嗎？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"你可以建立其他使用者，藉此與他人共用這個裝置。每位使用者都有自己的專屬空間，並可使用應用程式、桌布等項目自訂個人空間。此外，使用者也可以調整會影響所有人的裝置設定，例如 Wi‑Fi 設定。\n\n新增的使用者需要自行設定個人空間。\n\n任何使用者都可以為所有其他使用者更新應用程式。無障礙設定和服務可能無法轉移到新的使用者。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新增的使用者需要自行設定個人空間。\n\n任何使用者皆可為其他所有使用者更新應用程式。"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"要將這位使用者設為管理員嗎？"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"管理員具備其他使用者沒有的權限，例如可管理所有使用者、更新或重設這部裝置、修改設定、查看所有已安裝的應用程式，以及將管理員權限授予他人，或撤銷他人的管理員權限。"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"設為管理員"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"立即設定使用者？"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"請確保對方可以使用裝置並設定自己的空間"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"立即建立個人資料？"</string>
@@ -605,6 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"如果重設，系統會開始新的訪客工作階段，並刪除目前工作階段中的所有應用程式和資料"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要結束訪客模式嗎？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"如果結束，系統會刪除目前訪客工作階段中的所有應用程式和資料"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"是，將這位使用者設為管理員"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"否，不要將這位使用者設為管理員"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"結束"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要儲存訪客活動嗎？"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"你可以儲存目前工作階段中的活動，也可以刪除所有應用程式和資料"</string>
@@ -672,4 +679,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"預測返回操作動畫"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"為預測返回操作啟用系統動畫。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"這項設定會啟用系統動畫做為預測手勢動畫。這必須在資訊清單檔案中將個別應用程式的 enableOnBackInvokedCallback 設為 true。"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"向左移"</item>
+    <item msgid="5425394847942513942">"向下移"</item>
+    <item msgid="7728484337962740316">"向右移"</item>
+    <item msgid="324200556467459329">"向上移"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

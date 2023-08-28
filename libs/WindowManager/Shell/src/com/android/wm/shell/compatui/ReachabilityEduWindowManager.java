@@ -18,8 +18,8 @@ package com.android.wm.shell.compatui;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -41,11 +41,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  */
 class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
 
-    /**
-     * The Compat UI should be below the Letterbox Education.
-     */
-    private static final int Z_ORDER = LetterboxEduWindowManager.Z_ORDER - 1;
-
     // The time to wait before hiding the education
     private static final long DISAPPEAR_DELAY_MS = 4000L;
 
@@ -55,9 +50,6 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     private final CompatUIConfiguration mCompatUIConfiguration;
 
     private final ShellExecutor mMainExecutor;
-
-    @NonNull
-    private TaskInfo mTaskInfo;
 
     private boolean mIsActivityLetterboxed;
 
@@ -90,7 +82,6 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
             ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
             CompatUIConfiguration compatUIConfiguration, ShellExecutor mainExecutor) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mTaskInfo = taskInfo;
         mIsActivityLetterboxed = taskInfo.isLetterboxDoubleTapEnabled;
         mLetterboxVerticalPosition = taskInfo.topActivityLetterboxVerticalPosition;
         mLetterboxHorizontalPosition = taskInfo.topActivityLetterboxHorizontalPosition;
@@ -102,7 +93,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 1;
     }
 
     @Override
@@ -140,7 +131,6 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
-        mTaskInfo = taskInfo;
         final boolean prevIsActivityLetterboxed = mIsActivityLetterboxed;
         final int prevLetterboxVerticalPosition = mLetterboxVerticalPosition;
         final int prevLetterboxHorizontalPosition = mLetterboxHorizontalPosition;
@@ -226,14 +216,14 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
         if (mLayout == null) {
             return;
         }
-
+        final TaskInfo lastTaskInfo = getLastTaskInfo();
         final boolean eligibleForDisplayHorizontalEducation = mForceUpdate
-                || !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(mTaskInfo)
+                || !mCompatUIConfiguration.hasSeenHorizontalReachabilityEducation(lastTaskInfo)
                 || (mHasUserDoubleTapped
                     && (mLetterboxHorizontalPosition == REACHABILITY_LEFT_OR_UP_POSITION
                         || mLetterboxHorizontalPosition == REACHABILITY_RIGHT_OR_BOTTOM_POSITION));
         final boolean eligibleForDisplayVerticalEducation = mForceUpdate
-                || !mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(mTaskInfo)
+                || !mCompatUIConfiguration.hasSeenVerticalReachabilityEducation(lastTaskInfo)
                 || (mHasUserDoubleTapped
                     && (mLetterboxVerticalPosition == REACHABILITY_LEFT_OR_UP_POSITION
                         || mLetterboxVerticalPosition == REACHABILITY_RIGHT_OR_BOTTOM_POSITION));
@@ -245,7 +235,7 @@ class ReachabilityEduWindowManager extends CompatUIWindowManagerAbstract {
             mLayout.handleVisibility(eligibleForDisplayHorizontalEducation,
                     eligibleForDisplayVerticalEducation,
                     mLetterboxVerticalPosition, mLetterboxHorizontalPosition, availableWidth,
-                    availableHeight, mCompatUIConfiguration, mTaskInfo);
+                    availableHeight, mCompatUIConfiguration, lastTaskInfo);
             if (!mHasLetterboxSizeChanged) {
                 updateHideTime();
                 mMainExecutor.executeDelayed(this::hideReachability, DISAPPEAR_DELAY_MS);

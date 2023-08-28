@@ -775,9 +775,13 @@ public class PeopleSpaceWidgetManager {
                 NotificationChannel channel,
                 int modificationType) {
             if (channel.isConversation()) {
-                updateWidgets(mAppWidgetManager.getAppWidgetIds(
-                        new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
-                ));
+                mBgExecutor.execute(() -> {
+                    if (mUserManager.isUserUnlocked(user)) {
+                        updateWidgets(mAppWidgetManager.getAppWidgetIds(
+                                new ComponentName(mContext, PeopleSpaceWidgetProvider.class)
+                        ));
+                    }
+                });
             }
         }
     };

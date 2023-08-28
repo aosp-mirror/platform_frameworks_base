@@ -21,8 +21,10 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -42,8 +44,14 @@ import com.android.systemui.statusbar.notification.collection.provider.SeenNotif
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.indentIfPossible
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
+import java.io.PrintWriter
+import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,13 +65,11 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
-import javax.inject.Inject
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Filters low priority and privacy-sensitive notifications from the lockscreen, and hides section
@@ -74,17 +80,19 @@ class KeyguardCoordinator
 @Inject
 constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
+    private val dumpManager: DumpManager,
     private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
     private val keyguardRepository: KeyguardRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
+    private val logger: KeyguardCoordinatorLogger,
     private val notifPipelineFlags: NotifPipelineFlags,
     @Application private val scope: CoroutineScope,
     private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
     private val secureSettings: SecureSettings,
     private val seenNotifsProvider: SeenNotificationsProviderImpl,
     private val statusBarStateController: StatusBarStateController,
-) : Coordinator {
+) : Coordinator, Dumpable {
 
     private val unseenNotifications = mutableSetOf<NotificationEntry>()
     private var unseenFilterEnabled = false
@@ -95,9 +103,7 @@ constructor(
         pipeline.addFinalizeFilter(notifFilter)
         keyguardNotificationVisibilityProvider.addOnStateChangedListener(::invalidateListFromFilter)
         updateSectionHeadersVisibility()
-        if (notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard) {
-            attachUnseenFilter(pipeline)
-        }
+        attachUnseenFilter(pipeline)
     }
 
     private fun attachUnseenFilter(pipeline: NotifPipeline) {
@@ -105,6 +111,7 @@ constructor(
         pipeline.addCollectionListener(collectionListener)
         scope.launch { trackUnseenNotificationsWhileUnlocked() }
         scope.launch { invalidateWhenUnseenSettingChanges() }
+        dumpManager.registerDumpable(this)
     }
 
     private suspend fun trackUnseenNotificationsWhileUnlocked() {
@@ -124,14 +131,16 @@ constructor(
                         // If the screen is turning off, stop tracking, but if that transition is
                         // cancelled, then start again.
                         emitAll(
-                            keyguardTransitionRepository.transitions
-                                .map { step -> !step.isScreenTurningOff }
+                            keyguardTransitionRepository.transitions.map { step ->
+                                !step.isScreenTurningOff
+                            }
                         )
                     }
                 }
                 // Prevent double emit of `false` caused by transition to AOD, followed by keyguard
                 // showing
                 .distinctUntilChanged()
+                .onEach { trackingUnseen -> logger.logTrackingUnseen(trackingUnseen) }
 
         // Use collectLatest so that trackUnseenNotifications() is cancelled when the keyguard is
         // showing again
@@ -142,9 +151,11 @@ constructor(
                 // set when unlocked
                 awaitTimeSpentNotDozing(SEEN_TIMEOUT)
                 clearUnseenOnBeginTracking = true
+                logger.logSeenOnLockscreen()
             } else {
                 if (clearUnseenOnBeginTracking) {
                     clearUnseenOnBeginTracking = false
+                    logger.logAllMarkedSeenOnUnlock()
                     unseenNotifications.clear()
                 }
                 unseenNotifFilter.invalidateList("keyguard no longer showing")
@@ -168,6 +179,8 @@ constructor(
             .first()
     }
 
+    // Track "unseen" notifications, marking them as seen when either shade is expanded or the
+    // notification becomes heads up.
     private suspend fun trackUnseenNotifications() {
         coroutineScope {
             launch { clearUnseenNotificationsWhenShadeIsExpanded() }
@@ -181,6 +194,7 @@ constructor(
             // keyguard transition and not the user expanding the shade
             yield()
             if (isExpanded) {
+                logger.logShadeExpanded()
                 unseenNotifications.clear()
             }
         }
@@ -192,6 +206,7 @@ constructor(
             .forEach { unseenNotifications.remove(it) }
         headsUpManager.headsUpEvents.collect { (entry, isHun) ->
             if (isHun) {
+                logger.logUnseenHun(entry.key)
                 unseenNotifications.remove(entry)
             }
         }
@@ -233,6 +248,7 @@ constructor(
                 if (
                     keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
                 ) {
+                    logger.logUnseenAdded(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
@@ -241,12 +257,15 @@ constructor(
                 if (
                     keyguardRepository.isKeyguardShowing() || !statusBarStateController.isExpanded
                 ) {
+                    logger.logUnseenUpdated(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                unseenNotifications.remove(entry)
+                if (unseenNotifications.remove(entry)) {
+                    logger.logUnseenRemoved(entry.key)
+                }
             }
         }
 
@@ -274,6 +293,7 @@ constructor(
                 }.also { hasFiltered -> hasFilteredAnyNotifs = hasFilteredAnyNotifs || hasFiltered }
 
             override fun onCleanup() {
+                logger.logProviderHasFilteredOutSeenNotifs(hasFilteredAnyNotifs)
                 seenNotifsProvider.hasFilteredOutSeenNotifications = hasFilteredAnyNotifs
                 hasFilteredAnyNotifs = false
             }
@@ -308,11 +328,25 @@ constructor(
         sectionHeaderVisibilityProvider.sectionHeadersVisible = showSections
     }
 
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        with(pw.asIndenting()) {
+            println(
+                "seenNotifsProvider.hasFilteredOutSeenNotifications=" +
+                    seenNotifsProvider.hasFilteredOutSeenNotifications
+            )
+            println("unseen notifications:")
+            indentIfPossible {
+                for (notification in unseenNotifications) {
+                    println(notification.key)
+                }
+            }
+        }
+
     companion object {
         private const val TAG = "KeyguardCoordinator"
         private val SEEN_TIMEOUT = 5.seconds
     }
 }
 
-private val TransitionStep.isScreenTurningOff: Boolean get() =
-    transitionState == TransitionState.STARTED && to != KeyguardState.GONE
+private val TransitionStep.isScreenTurningOff: Boolean
+    get() = transitionState == TransitionState.STARTED && to != KeyguardState.GONE

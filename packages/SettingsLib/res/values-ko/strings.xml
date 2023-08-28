@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"연결 끊김"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP 설정 실패"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"저품질 네트워크로 인해 연결되지 않음"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi 연결 실패"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"인증 문제"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"연결할 수 없음"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'에 연결할 수 없음"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"자동으로 연결되지 않습니다."</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"인터넷에 연결되어 있지 않음"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 저장됨"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"데이터 전송량 제한이 있는 네트워크에 연결됨"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s을(를) 통해 자동으로 연결됨"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"네트워크 평가 제공업체를 통해 자동으로 연결됨"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s을(를) 통해 연결됨"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g>을(를) 통해 연결됨"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s을(를) 통해 사용 가능"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"탭하여 가입"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"인터넷 연결 없음"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"비공개 DNS 서버에 액세스할 수 없습니다."</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"인터넷 연결 없음"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"로그인 필요"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"액세스 포인트가 일시적으로 가득 참"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s을(를) 통해 연결됨"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s을(를) 통해 사용 가능"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> 여는 중"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"연결할 수 없음"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"가입 완료 중…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"가입을 완료할 수 없습니다. 다시 시도하려면 탭하세요."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"가입이 완료되었습니다. 연결 중…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"매우 느림"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"느림"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"보통"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"보통"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"빠름"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"매우 빠름"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"만료됨"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"페어링 중..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"연결됨(전화 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"연결됨(미디어 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"연결됨(메시지 액세스 권한 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"연결됨(전화 또는 미디어 없음)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"연결됨, 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"연결됨(전화 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"말하는 속도 재설정"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"텍스트를 읽어주는 속도를 기본값으로 재설정합니다."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"매우 느리게"</item>
-    <item msgid="1815382991399815061">"느리게"</item>
-    <item msgid="3075292553049300105">"보통"</item>
-    <item msgid="1158955023692670059">"빠르게"</item>
-    <item msgid="5664310435707146591">"더 빠르게"</item>
-    <item msgid="5491266922147715962">"매우 빠르게"</item>
-    <item msgid="7659240015901486196">"상당히 빠르게"</item>
-    <item msgid="7147051179282410945">"굉장히 빠르게"</item>
-    <item msgid="581904787661470707">"가장 빠르게"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"프로필 선택"</string>
     <string name="category_personal" msgid="6236798763159385225">"개인"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"탐색 메뉴 투명하게 하기"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"기본적으로 탐색 메뉴의 배경 색상을 투명하게 하기"</string>
     <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"확인"</string>
     <string name="done" msgid="381184316122520313">"완료"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"태블릿"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도해 주세요."</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"기기 절전 모드 해제 후 여기에서 재생"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"기기에서 재생을 승인하지 않음"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"여기에서 이 미디어를 재생할 수 없음"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>
@@ -574,6 +579,12 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"신규 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"사용자가 기기를 사용하여 자신의 공간을 설정할 수 있도록 하세요."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"지금 프로필을 설정하시겠습니까?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"현재 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"예측된 뒤로 동작 애니메이션"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"예측된 뒤로 동작에 시스템 애니메이션을 사용하도록 설정합니다."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"이 설정은 예측된 동작 애니메이션에 시스템 애니메이션을 사용하도록 합니다. 매니페스트 파일에서 앱별 enableOnBackInvokedCallback을 True로 설정해야 합니다."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"왼쪽으로 이동"</item>
+    <item msgid="5425394847942513942">"아래로 이동"</item>
+    <item msgid="7728484337962740316">"오른쪽으로 이동"</item>
+    <item msgid="324200556467459329">"위로 이동"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

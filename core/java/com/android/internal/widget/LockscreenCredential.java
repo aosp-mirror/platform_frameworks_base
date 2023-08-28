@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import libcore.util.HexEncoding;
@@ -39,8 +40,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A class representing a lockscreen credential. It can be either an empty password, a pattern
- * or a password (or PIN).
+ * A class representing a lockscreen credential, also called a Lock Screen Knowledge Factor (LSKF).
+ * It can be a PIN, pattern, password, or none (a.k.a. empty).
  *
  * <p> As required by some security certification, the framework tries its best to
  * remove copies of the lockscreen credential bytes from memory. In this regard, this class
@@ -51,10 +52,10 @@ import java.util.Objects;
  *     // Process the credential in some way
  * }
  * </pre>
- * With this construct, we can guarantee that there will be no copies of the password left in
- * memory when the credential goes out of scope. This should help mitigate certain class of
- * attacks where the attcker gains read-only access to full device memory (cold boot attack,
- * unsecured software/hardware memory dumping interfaces such as JTAG).
+ * With this construct, we can guarantee that there will be no copies of the credential left in
+ * memory when the object goes out of scope. This should help mitigate certain class of attacks
+ * where the attacker gains read-only access to full device memory (cold boot attack, unsecured
+ * software/hardware memory dumping interfaces such as JTAG).
  */
 public class LockscreenCredential implements Parcelable, AutoCloseable {
 
@@ -277,58 +278,36 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             sha256.update(hashFactor);
-            byte[] saltedPassword = Arrays.copyOf(passwordToHash, passwordToHash.length
-                    + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, passwordToHash.length, salt.length);
-            sha256.update(saltedPassword);
-            Arrays.fill(saltedPassword, (byte) 0);
-            return new String(HexEncoding.encode(sha256.digest()));
+            sha256.update(passwordToHash);
+            sha256.update(salt);
+            return HexEncoding.encodeToString(sha256.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
         }
     }
 
     /**
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
+     * Hash the given password for the password history, using the legacy algorithm.
      *
-     * @return the hash of the pattern in a byte array.
+     * @deprecated This algorithm is insecure because the password can be easily bruteforced, given
+     *             the hash and salt.  Use {@link #passwordToHistoryHash(byte[], byte[], byte[])}
+     *             instead, which incorporates an SP-derived secret into the hash.
+     *
+     * @return the legacy password hash
      */
-    public String legacyPasswordToHash(byte[] salt) {
-        return legacyPasswordToHash(mCredential, salt);
-    }
-
-    /**
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
-     *
-     * @param password the gesture pattern.
-     *
-     * @return the hash of the pattern in a byte array.
-     */
+    @Deprecated
     public static String legacyPasswordToHash(byte[] password, byte[] salt) {
         if (password == null || password.length == 0 || salt == null) {
             return null;
         }
 
         try {
-            // Previously the password was passed as a String with the following code:
-            // byte[] saltedPassword = (password + salt).getBytes();
-            // The code below creates the identical digest preimage using byte arrays:
-            byte[] saltedPassword = Arrays.copyOf(password, password.length + salt.length);
-            System.arraycopy(salt, 0, saltedPassword, password.length, salt.length);
+            byte[] saltedPassword = ArrayUtils.concat(password, salt);
             byte[] sha1 = MessageDigest.getInstance("SHA-1").digest(saltedPassword);
             byte[] md5 = MessageDigest.getInstance("MD5").digest(saltedPassword);
 
-            byte[] combined = new byte[sha1.length + md5.length];
-            System.arraycopy(sha1, 0, combined, 0, sha1.length);
-            System.arraycopy(md5, 0, combined, sha1.length, md5.length);
-
-            final char[] hexEncoded = HexEncoding.encode(combined);
             Arrays.fill(saltedPassword, (byte) 0);
-            return new String(hexEncoded);
+            return HexEncoding.encodeToString(ArrayUtils.concat(sha1, md5));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("Missing digest algorithm: ", e);
         }

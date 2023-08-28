@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="4539824758261855508">"Upravitelj poverilnic"</string>
+    <string name="string_cancel" msgid="6369133483981306063">"Prekliči"</string>
+    <string name="string_continue" msgid="1346732695941131882">"Naprej"</string>
+    <string name="string_more_options" msgid="7990658711962795124">"Več možnosti"</string>
+    <string name="string_learn_more" msgid="4541600451688392447">"Več o tem"</string>
+    <string name="content_description_show_password" msgid="3283502010388521607">"Prikaz gesla"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Skrivanje gesla"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Večja varnost s ključi za dostop"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Po zaslugi ključev za dostop vam ni treba ustvarjati ali si zapomniti zapletenih gesel."</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ključi za dostop so šifrirani digitalni ključi, ki jih ustvarite s prstnim odtisom, obrazom ali načinom zaklepanja zaslona."</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Shranjeni so v upravitelju gesel, kar pomeni, da se z njimi lahko prijavite tudi v drugih napravah."</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Več o ključih za dostop"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologija brez uporabe gesel"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Ključi za dostop vam omogočajo prijavo brez uporabe gesel. Za potrditev identitete in ustvarjanje ključa za dostop morate uporabiti le prstni odtis, prepoznavo obraza, kodo PIN ali vzorec za vlečenje s prstom."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografija javnih ključev"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"V skladu s pravili združenja FIDO Alliance (ki vključuje Google, Apple, Microsoft in druge družbe) in standardi W3C so ključi za dostop sestavljeni iz parov kriptografskih ključev. Za razliko od uporabniškega imena in niza znakov, ki ga uporabljamo za geslo, je par zasebnega in javnega ključa ustvarjen za aplikacijo ali spletno mesto. Zasebni ključ je varno shranjen v vaši napravi ali upravitelju gesel in se uporablja za potrditev vaše identitete. Javni ključ se deli s strežnikom aplikacije ali spletnega mesta. Z ustreznima ključema se lahko hitro registrirate in prijavite."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Večja varnost računov"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Vsak ključ je neločljivo povezan z aplikacijo ali spletnim mestom, za katero je bil ustvarjen, zato se nikoli ne morete pomotoma prijaviti v goljufivo aplikacijo ali spletno mesto. Poleg tega so v strežnikih shranjeni le javni ključi, zato je vdiranje v račune precej oteženo."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Prehod brez zapletov"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Na poti v prihodnost brez gesel bodo poleg ključev za dostop še vedno v uporabi tudi gesla."</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Izbira mesta za shranjevanje <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="choose_provider_body" msgid="4967074531845147434">"Izberite upravitelja gesel za shranjevanje podatkov za prijavo, da se boste naslednjič lahko hitreje prijavili."</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite ustvariti ključ za dostop do aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="7097275038523578687">"Želite shraniti geslo za aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Želite shraniti podatke za prijavo za aplikacijo <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="passkey" msgid="632353688396759522">"ključ za dostop"</string>
+    <string name="password" msgid="6738570945182936667">"geslo"</string>
+    <string name="passkeys" msgid="5733880786866559847">"ključev za dostop"</string>
+    <string name="passwords" msgid="5419394230391253816">"gesel"</string>
+    <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
+    <string name="sign_in_info" msgid="2627704710674232328">"podatkov za prijavo"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Mesto shranjevanja: <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Želite ustvariti ključ za dostop v drugi napravi?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite za vse prijave uporabiti »<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>«?"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"V tem upravitelju gesel za uporabnika <xliff:g id="USERNAME">%1$s</xliff:g> bodo shranjeni gesla in ključi za dostop, kar vam bo olajšalo prijavo."</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Nastavi kot privzeto"</string>
+    <string name="use_once" msgid="9027366575315399714">"Uporabi enkrat"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Št. gesel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Št. ključev za dostop: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords" msgid="1632047277723187813">"Št. gesel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Št. ključev za dostop: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_credentials" msgid="1785697001787193984">"Št. poverilnic: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
+    <string name="passkey_before_subtitle" msgid="2448119456208647444">"Ključ za dostop"</string>
+    <string name="another_device" msgid="5147276802037801217">"Druga naprava"</string>
+    <string name="other_password_manager" msgid="565790221427004141">"Drugi upravitelji gesel"</string>
+    <string name="close_sheet" msgid="1393792015338908262">"Zapri list"</string>
+    <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Nazaj na prejšnjo stran"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Zapri"</string>
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Opusti"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite uporabiti shranjeni ključ za dostop do aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite uporabiti shranjene podatke za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Izberite shranjene podatke za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Izberite možnost za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Želite te podatke uporabiti v aplikaciji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prijava na drug način"</string>
+    <string name="snackbar_action" msgid="37373514216505085">"Prikaz možnosti"</string>
+    <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"Naprej"</string>
+    <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Možnosti prijave"</string>
+    <string name="button_label_view_more" msgid="3429098227286495651">"Prikaži več"</string>
+    <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Za uporabnika <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Zaklenjeni upravitelji gesel"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Dotaknite se, da odklenete"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Ni nobenih podatkov za prijavo"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Ni nobenih podatkov za prijavo v »<xliff:g id="SOURCE">%1$s</xliff:g>«"</string>
+    <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Upravljanje podatkov za prijavo"</string>
+    <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Iz druge naprave"</string>
+    <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Uporaba druge naprave"</string>
+    <string name="request_cancelled_by" msgid="3735222326886267820">"Zahtevo je preklicala aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+</resources>

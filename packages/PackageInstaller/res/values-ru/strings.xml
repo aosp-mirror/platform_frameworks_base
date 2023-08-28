@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Приложение установлено."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Установить приложение?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Обновить приложение?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Обновить приложение с помощью <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nОбычно обновления для этого приложения поступают из <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Если обновить приложение с помощью другого источника, в будущем для этого могут использоваться любые источники на телефоне. Функции приложения могут измениться."</string>
     <string name="install_failed" msgid="5777824004474125469">"Приложение не установлено."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Установка пакета заблокирована."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Приложение не установлено, так как оно конфликтует с другим пакетом."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Этот пользователь не может устанавливать неизвестные приложения."</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Этому пользователю не разрешено устанавливать приложения."</string>
     <string name="ok" msgid="7871959885003339302">"ОК"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Все равно обновить"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Управление приложениями"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Недостаточно места"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Не удалось установить приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\". Освободите место на устройстве и повторите попытку."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Установить исходную версию приложения? Все его данные будут удалены."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Установить исходную версию приложения? Его данные будут удалены из всех профилей устройства, в том числе рабочих."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Сохранить данные приложения (<xliff:g id="SIZE">%1$s</xliff:g>)"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Удалить это приложение?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Удалить это приложение? Клон приложения <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> также будет удален."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Активные процессы удаления"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Ошибки удаления"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Удаление…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Удаление приложения \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Удаление завершено."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Приложение \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\" удалено."</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Клон приложения <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> удален."</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"При удалении произошла ошибка."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Не удалось удалить приложение \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Удаление клона пакета \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Невозможно удалить активное приложение для администрирования устройства."</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Невозможно удалить активное приложение для администрирования устройства в профиле <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Это приложение обязательно для некоторых пользователей или профилей."</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Неизвестное приложение"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"В целях безопасности ваш планшет блокирует установку неизвестных приложений из этого источника. Этот параметр можно изменить в настройках."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"В целях безопасности ваш телевизор блокирует установку неизвестных приложений из этого источника. Этот параметр можно изменить в настройках."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"В целях безопасности ваши часы блокируют установку неизвестных приложений из этого источника. Изменить параметры можно в настройках."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"В целях безопасности ваш телефон блокирует установку неизвестных приложений из этого источника. Этот параметр можно изменить в настройках."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Ваши персональные данные и данные телефона более уязвимы для атак приложений из неизвестных источников. Устанавливая это приложение, вы берете на себя всю ответственность за последствия, связанные с его использованием, то есть за любой ущерб, нанесенный телефону, и возможную потерю данных."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Ваши персональные данные и данные планшета более уязвимы для атак приложений из неизвестных источников. Устанавливая это приложение, вы берете на себя всю ответственность за последствия, связанные с его использованием, то есть за любой ущерб, нанесенный планшету, и возможную потерю данных."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Ваши персональные данные и данные телевизора более уязвимы для атак приложений из неизвестных источников. Устанавливая это приложение, вы берете на себя всю ответственность за последствия, связанные с его использованием, то есть за любой ущерб, нанесенный телевизору, и возможную потерю данных."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Клон приложения <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Продолжить"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Настройки"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Установка/удаление прилож. для Wear OS"</string>

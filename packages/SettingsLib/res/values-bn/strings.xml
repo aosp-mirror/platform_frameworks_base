@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"কানেকশন নেই"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"অক্ষম হয়েছে"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP কনফিগারেশনের ব্যর্থতা"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"খারাপ নেটওয়ার্কের কারণে কানেক্ট নয়"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"ওয়াই ফাই সংযোগের ব্যর্থতা"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"যাচাইকরণ সমস্যা"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"কানেক্ট স্থাপন করা যাচ্ছে না"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'এ যোগ করা যায়নি"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"অটোমেটিক কানেক্ট করবে না"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> দ্বারা সেভ করা"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"মিটার্ড নেটওয়ার্কের সঙ্গে কানেক্ট করা"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"স্বয়ংক্রিয়ভাবে %1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"নেটওয়ার্কের রেটিং প্রদানকারীর মাধ্যমে অটোমেটিক কানেক্ট"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s মাধ্যমে কানেক্ট হয়েছে"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g>-এর মাধ্যমে কানেক্ট করা আছে"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"সাইন-আপ করতে ট্যাপ করুন"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"ইন্টারনেট কানেকশন নেই"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"ব্যক্তিগত ডিএনএস সার্ভার অ্যাক্সেস করা যাবে না"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"ইন্টারনেট কানেকশন নেই"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"সাইন-ইন করা দরকার"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s এর মাধ্যমে কানেক্ট হয়েছে"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> খোলা হচ্ছে"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"কানেক্ট করা যায়নি"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"সাইন-আপ সম্পূর্ণ করা হচ্ছে…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"সাইন-আপ করা যায়নি। আবার চেষ্টা করতে ট্যাপ করুন।"</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"সাইন-আপ করা হয়ে গেছে। কানেক্ট করা হচ্ছে…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"খুব ধীরে"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"ধীরে"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"ঠিক আছে"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"মাঝারি"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"দ্রুত"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"খুব দ্রুত"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"মেয়াদ শেষ হয়ে গেছে"</string>
@@ -95,10 +86,9 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ডিসকানেক্ট হচ্ছে..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"কানেক্ট হচ্ছে..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"কানেক্ট করা আছে<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"পেয়ার করা হচ্ছে..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"যুক্ত করা হচ্ছে..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"কানেক্ট করা আছে (মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"কানেক্ট করা আছে (মেসেজে অ্যাকসেস নেই)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"কানেক্ট করা আছে (ফোনের বা মিডিয়ার অডিও ছাড়া)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"কানেক্ট করা আছে, ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"কানেক্ট করা আছে (ফোনের অডিও ছাড়া), ব্যাটারি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"ভাষ্য়ের শব্দ মাত্রাকে আবার সেট করুন"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"ডিফল্ট হিসেবে যে মাত্রায় পাঠ্য উচ্চারিত হয়, সেই শব্দ মাত্রাকে আবার সেট করুন৷"</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"অত্যন্ত ধীরে"</item>
-    <item msgid="1815382991399815061">"ধীর"</item>
-    <item msgid="3075292553049300105">"স্বাভাবিক"</item>
-    <item msgid="1158955023692670059">"দ্রুত"</item>
-    <item msgid="5664310435707146591">"আরো দ্রুত"</item>
-    <item msgid="5491266922147715962">"খুব দ্রুত"</item>
-    <item msgid="7659240015901486196">"দ্রুত"</item>
-    <item msgid="7147051179282410945">"খুব দ্রুত"</item>
-    <item msgid="581904787661470707">"দ্রুততম"</item>
+    <item msgid="4563475121751694801">"৬০%"</item>
+    <item msgid="6323184326270638754">"৮০%"</item>
+    <item msgid="2569200872125313769">"১০০%"</item>
+    <item msgid="9010794089704942570">"১৫০%"</item>
+    <item msgid="4634010129655810634">"২০০%"</item>
+    <item msgid="8929490998534497543">"২৫০%"</item>
+    <item msgid="8442352376763286772">"৩০০%"</item>
+    <item msgid="4446831566506165093">"৩৫০%"</item>
+    <item msgid="6946761421234586000">"৪০০%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"প্রোফাইল বেছে নিন"</string>
     <string name="category_personal" msgid="6236798763159385225">"ব্যক্তিগত"</string>
@@ -347,7 +337,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
     <string name="debug_app" msgid="8903350241392391766">"ডিবাগ অ্যাপ বেছে নিন"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"ডিবাগ অ্যাপ সেট করা নেই"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"ডিবাগ অ্যাপ্লিকেশান সেট করা নেই"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"ডিবাগিং অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"অ্যাপ্লিকেশান বেছে নিন"</string>
     <string name="no_application" msgid="9038334538870247690">"কিছুই না"</string>
@@ -359,7 +349,7 @@
     <string name="media_category" msgid="8122076702526144053">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"পর্যবেক্ষণে রাখা"</string>
     <string name="strict_mode" msgid="889864762140862437">"স্ট্রিক্ট মোড চালু আছে"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"মুখ্য থ্রেডে অ্যাপগুলির দীর্ঘ কার্যকলাপের ক্ষেত্রে স্ক্রিন ফ্ল্যাশ করে"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ অ্যাক্টিভিটির সময় স্ক্রিন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="7516929526199520173">"পয়েন্টারের লোকেশন"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
     <string name="show_touches" msgid="8437666942161289025">"আলতো চাপ দেখান"</string>
@@ -376,11 +366,13 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"রঙ স্থান নকল করুন"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ট্রেসগুলি সক্ষম করুন"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB অডিও রাউটিং বন্ধ করুন"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB অডিও পেরিফেরালে অটোমেটিক রাউটিং বন্ধ করুন"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB অডিও যন্ত্রানুষঙ্গে অটোমেটিক রাউটিং অক্ষম করুন"</string>
     <string name="debug_layout" msgid="1659216803043339741">"লেআউট সীমাগুলি দেখান"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"স্বচ্ছ নেভিগেশন বার"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ডিফল্ট হিসেবে, নেভিগেশন বারের ব্যাকগ্রাউন্ড কালার স্বচ্ছ রাখুন"</string>
     <string name="window_blurs" msgid="6831008984828425106">"উইন্ডো-লেভেল অস্পষ্ট করার সুবিধা চালু করুন"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
@@ -403,10 +395,10 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"বিজ্ঞপ্তির সতর্কতা দেখুন"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"অ্যাপ সঠিক চ্যানেল ছাড়া বিজ্ঞপ্তি দেখালে সতর্ক করে"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ম্যানিফেস্ট মানের নির্বিশেষে যেকোনও অ্যাপকে এক্সটারনাল স্টোরেজে ইনস্টল করার উপযুক্ত বানায়"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলির আকার পরিবর্তনযোগ্য করুন৷"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্রি-ফর্ম উইন্ডো চালু করুন"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্রি-ফর্ম উইন্ডোগুলি সক্ষম করুন"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"\'ডেস্কটপ\' মোড"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"আরও বেশি।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"আরও কম।"</string>
     <string name="cancel" msgid="5665114069455378395">"বাতিল"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"ঠিক আছে"</string>
     <string name="done" msgid="381184316122520313">"হয়ে গেছে"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"অ্যালার্ম এবং রিমাইন্ডার"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"এই ফোন"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"এই ট্যাবলেট"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইসে চালানো যাবে না"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"পরিবর্তন করতে অ্যাকাউন্ট আপগ্রেড করুন"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"এখানে ডাউনলোড করা যাবে না"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"বিজ্ঞাপনের পরে আবার চেষ্টা করুন"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"এখানে চালানোর জন্য ডিভাইসকে জাগান"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"চালানোর জন্য ডিভাইসের অনুমতি নেই"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"এখানে এই মিডিয়া চালানো যাচ্ছে না"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
     <string name="help_label" msgid="3528360748637781274">"সহায়তা ও মতামত"</string>
@@ -571,9 +576,15 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"আপনি আপনার অ্যাকাউন্ট থেকে অ্যাপ্লিকেশন এবং কন্টেন্ট অ্যাক্সেস সীমাবদ্ধ করতে পারেন"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ব্যবহারকারী"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমাবদ্ধ প্রোফাইল"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যবহারকারী যোগ করবেন?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যবহারকারী জুড়বেন?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"আপনি একাধিক ব্যবহারকারীর আইডি তৈরি করে অন্যদের সাথে এই ডিভাইসটি শেয়ার করতে পারেন। ডিভাইসের স্টোরেজে প্রত্যেক ব্যবহারকারী তার নিজস্ব জায়গা পাবেন যা তিনি অ্যাপ, ওয়ালপেপার এবং আরও অনেক কিছু দিয়ে কাস্টমাইজ করতে পারেন। ওয়াই-ফাই এর মতো ডিভাইস সেটিংস, যেগুলি সকলের ক্ষেত্রে প্রযোজ্য হয়, সেগুলি ব্যবহারকারীরা পরিবর্তন করতে পারবেন।\n\nনতুন ব্যবহারকারীর আইডি যোগ করলে সেই ব্যক্তিকে স্টোরেজে তার নিজের জায়গা সেট-আপ করতে হবে।\n\nঅন্যান্য ব্যবহারকারীদের হয়ে যে কোনও ব্যবহারকারী অ্যাপ আপডেট করতে পারবেন। তবে ব্যবহারযোগ্যতার সেটিংস এবং পরিষেবা নতুন ব্যবহারকারীর ক্ষেত্রে প্রযোজ্য নাও হতে পারে।"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনও ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ আপডেট করতে পারবেন৷"</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"এখন ব্যবহারকারী সেট-আপ করবেন?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"নিশ্চিত করুন, যে ব্যক্তিটি ডিভাইসটি নেওয়ার জন্য এবং তার জায়গা সেট-আপ করার জন্য উপলব্ধ আছেন"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এখনই প্রোফাইল সেট-আপ করবেন?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"এটি নতুন অতিথি সেশন চালু করবে এবং বর্তমান সেশন থেকে সব অ্যাপ ও ডেটা মুছে দেবে"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসবেন?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"এটি বর্তমান অতিথি সেশন থেকে অ্যাপ ও ডেটা মুছে দেবে"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"বেরিয়ে আসুন"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"অতিথি মোডের অ্যাক্টিভিটি সেভ করবেন?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"আপনি বর্তমান সেশন থেকে অ্যাক্টিভিটি সেভ করতে বা সব অ্যাপ ও ডেটা মুছতে পারবেন"</string>
@@ -612,7 +627,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"সেভ করুন"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসুন"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"অতিথি সেশন রিসেট করুন"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"\'অতিথি\' প্রোফাইল ছেড়ে বেরিয়ে আসুন"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসুন"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ছেড়ে বেরিয়ে যাওয়ার সময় সব অ্যাক্টিভিটি মুছে দেওয়া হবে"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ছেড়ে বেরিয়ে যাওয়ার সময় আপনি অ্যাক্টিভিটি সেভ করতে পারবেন বা মুছতে পারবেন"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"সেশন অ্যাক্টিভিটি মুছে দিতে এখন রিসেট করুন বা ছেড়ে বেরিয়ে আসার সময় আপনি অ্যাক্টিভিটি সেভ করতে বা মুছতে পারবেন"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ফিরে যাওয়ার পূর্বাভাস সংক্রান্ত অ্যানিমেশন"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ফিরে যাওয়া সংক্রান্ত পূর্বাভাসের জন্য সিস্টেম অ্যানিমেশন চালু করুন।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"জেসচারের পূর্বাভাস সংক্রান্ত অ্যানিমেশন দেখাতে এই সেটিং সিস্টেম অ্যানিমেশন চালু করে। এই সেটিংয়ে \'ম্যানিফেস্ট\' ফাইলে প্রত্যেক অ্যাপে enableOnBackInvokedCallback অ্যাট্রিবিউটকে \'ট্রু\' (true) হিসেবে সেট করতে হয়।"</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"বাঁদিকে সরান"</item>
+    <item msgid="5425394847942513942">"নিচে নামান"</item>
+    <item msgid="7728484337962740316">"ডানদিকে সরান"</item>
+    <item msgid="324200556467459329">"উপরে সরান"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

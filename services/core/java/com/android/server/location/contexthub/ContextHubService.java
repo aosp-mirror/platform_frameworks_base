@@ -73,6 +73,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -105,11 +106,12 @@ public class ContextHubService extends IContextHubService.Stub {
      * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CONTEXT_HUB_EVENT_" }, value = {
+    @IntDef(prefix = {"CONTEXT_HUB_EVENT_"}, value = {
             CONTEXT_HUB_EVENT_UNKNOWN,
             CONTEXT_HUB_EVENT_RESTARTED,
     })
-    public @interface Type { }
+    public @interface Type {
+    }
 
     public static final int CONTEXT_HUB_EVENT_UNKNOWN = 0;
     public static final int CONTEXT_HUB_EVENT_RESTARTED = 1;
@@ -121,9 +123,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
     private final Context mContext;
 
-    private final Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
-    private final List<String> mSupportedContextHubPerms;
-    private final List<ContextHubInfo> mContextHubInfoList;
+    private Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
+    private List<String> mSupportedContextHubPerms;
+    private List<ContextHubInfo> mContextHubInfoList;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
@@ -131,13 +133,13 @@ public class ContextHubService extends IContextHubService.Stub {
     private final IContextHubWrapper mContextHubWrapper;
 
     // The manager for transaction queue
-    private final ContextHubTransactionManager mTransactionManager;
+    private ContextHubTransactionManager mTransactionManager;
 
     // The manager for sending messages to/from clients
-    private final ContextHubClientManager mClientManager;
+    private ContextHubClientManager mClientManager;
 
     // The default client for old API clients
-    private final Map<Integer, IContextHubClient> mDefaultClientMap;
+    private Map<Integer, IContextHubClient> mDefaultClientMap;
 
     // The manager for the internal nanoapp state cache
     private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
@@ -145,7 +147,6 @@ public class ContextHubService extends IContextHubService.Stub {
     // An executor and the future object for scheduling timeout timers
     private final ScheduledThreadPoolExecutor mDailyMetricTimer =
             new ScheduledThreadPoolExecutor(1);
-
 
     // The period of the recurring time
     private static final int PERIOD_METRIC_QUERY_DAYS = 1;
@@ -166,7 +167,7 @@ public class ContextHubService extends IContextHubService.Stub {
     // Lock object for sendWifiSettingUpdate()
     private final Object mSendWifiSettingUpdateLock = new Object();
 
-    private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
+    private SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
 
     private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
 
@@ -206,158 +207,35 @@ public class ContextHubService extends IContextHubService.Stub {
             handleClientMessageCallback(mContextHubId, hostEndpointId, message, nanoappPermissions,
                     messagePermissions);
         }
+
+        @Override
+        public void handleServiceRestart() {
+            Log.i(TAG, "Starting Context Hub Service restart");
+            initExistingCallbacks();
+            resetSettings();
+            Log.i(TAG, "Finished Context Hub Service restart");
+        }
     }
 
-    public ContextHubService(Context context) {
-        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+    public ContextHubService(Context context, IContextHubWrapper contextHubWrapper) {
+        Log.i(TAG, "Starting Context Hub Service init");
         mContext = context;
-
-        mContextHubWrapper = getContextHubWrapper();
-        if (mContextHubWrapper == null) {
-            mTransactionManager = null;
-            mClientManager = null;
-            mSensorPrivacyManagerInternal = null;
-            mDefaultClientMap = Collections.emptyMap();
-            mContextHubIdToInfoMap = Collections.emptyMap();
-            mSupportedContextHubPerms = Collections.emptyList();
-            mContextHubInfoList = Collections.emptyList();
+        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+        mContextHubWrapper = contextHubWrapper;
+        if (!initContextHubServiceState(startTimeNs)) {
+            Log.e(TAG, "Failed to initialize the Context Hub Service");
             return;
         }
+        initDefaultClientMap();
 
-        Pair<List<ContextHubInfo>, List<String>> hubInfo;
-        try {
-            hubInfo = mContextHubWrapper.getHubs();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while getting Context Hub info", e);
-            hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
-        }
-        long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
-        int numContextHubs = hubInfo.first.size();
-        ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs, numContextHubs);
-
-        mContextHubIdToInfoMap = Collections.unmodifiableMap(
-                ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
-        mSupportedContextHubPerms = hubInfo.second;
-        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
-        mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
-        mTransactionManager = new ContextHubTransactionManager(
-                mContextHubWrapper, mClientManager, mNanoAppStateManager);
-        mSensorPrivacyManagerInternal =
-                LocalServices.getService(SensorPrivacyManagerInternal.class);
-
-        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
-        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
-            mLastRestartTimestampMap.put(contextHubId,
-                    new AtomicLong(SystemClock.elapsedRealtimeNanos()));
-
-            ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
-            IContextHubClient client = mClientManager.registerClient(
-                    contextHubInfo, createDefaultClientCallback(contextHubId),
-                    null /* attributionTag */, mTransactionManager, mContext.getPackageName());
-            defaultClientMap.put(contextHubId, client);
-
-            try {
-                mContextHubWrapper.registerCallback(
-                        contextHubId, new ContextHubServiceCallback(contextHubId));
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
-                        + contextHubId + ")", e);
-            }
-
-            // Do a query to initialize the service cache list of nanoapps
-            // TODO(b/69270990): Remove this when old API is deprecated
-            queryNanoAppsInternal(contextHubId);
-        }
-        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
-
-        if (mContextHubWrapper.supportsLocationSettingNotifications()) {
-            sendLocationSettingUpdate();
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendLocationSettingUpdate();
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsWifiSettingNotifications()) {
-            sendWifiSettingUpdate(true /* forceUpdate */);
-
-            BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
-                            || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
-                            intent.getAction())) {
-                        sendWifiSettingUpdate(false /* forceUpdate */);
-                    }
-                }
-            };
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-            filter.addAction(WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED);
-            mContext.registerReceiver(wifiReceiver, filter);
-
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendWifiSettingUpdate(false /* forceUpdate */);
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
-            sendAirplaneModeSettingUpdate();
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
-                    true /* notifyForDescendants */,
-                    new ContentObserver(null /* handler */) {
-                        @Override
-                        public void onChange(boolean selfChange) {
-                            sendAirplaneModeSettingUpdate();
-                        }
-                    }, UserHandle.USER_ALL);
-        }
-
-        if (mContextHubWrapper.supportsMicrophoneSettingNotifications()) {
-            sendMicrophoneDisableSettingUpdateForCurrentUser();
-
-            mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
-                    SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
-                        if (userId == getCurrentUserId()) {
-                            Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
-                            sendMicrophoneDisableSettingUpdate(enabled);
-                        }
-                    });
-
-        }
-
-        if (mContextHubWrapper.supportsBtSettingNotifications()) {
-            sendBtSettingUpdate(true /* forceUpdate */);
-
-            BroadcastReceiver btReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
-                            || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
-                                    intent.getAction())) {
-                        sendBtSettingUpdate(false /* forceUpdate */);
-                    }
-                }
-            };
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-            filter.addAction(BluetoothAdapter.ACTION_BLE_STATE_CHANGED);
-            mContext.registerReceiver(btReceiver, filter);
-        }
+        initLocationSettingNotifications();
+        initWifiSettingNotifications();
+        initAirplaneModeSettingNotifications();
+        initMicrophoneSettingNotifications();
+        initBtSettingNotifications();
 
         scheduleDailyMetricSnapshot();
+        Log.i(TAG, "Finished Context Hub Service init");
     }
 
     /**
@@ -368,64 +246,308 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     private IContextHubClientCallback createDefaultClientCallback(int contextHubId) {
         return new IContextHubClientCallback.Stub() {
+            private void finishCallback() {
+                try {
+                    IContextHubClient client = mDefaultClientMap.get(contextHubId);
+                    client.callbackFinished();
+                } catch (RemoteException e) {
+                    Log.e(
+                            TAG,
+                            "RemoteException while finishing callback for hub (ID = "
+                                    + contextHubId
+                                    + ")",
+                            e);
+                }
+            }
+
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
-                        contextHubId, message.getNanoAppId());
+                int nanoAppHandle =
+                        mNanoAppStateManager.getNanoAppHandle(contextHubId, message.getNanoAppId());
 
                 onMessageReceiptOldApi(
-                        message.getMessageType(), contextHubId, nanoAppHandle,
+                        message.getMessageType(),
+                        contextHubId,
+                        nanoAppHandle,
                         message.getMessageBody());
+
+                finishCallback();
             }
 
             @Override
             public void onHubReset() {
                 byte[] data = {android.hardware.contexthub.V1_0.TransactionResult.SUCCESS};
                 onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+                finishCallback();
             }
 
             @Override
             public void onNanoAppAborted(long nanoAppId, int abortCode) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppLoaded(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppUnloaded(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppEnabled(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
+                finishCallback();
             }
 
             @Override
             public void onClientAuthorizationChanged(long nanoAppId, int authorization) {
+                finishCallback();
             }
         };
     }
 
     /**
-     * @return the IContextHubWrapper interface
+     * Initializes the private state of the ContextHubService
+     *
+     * @param startTimeNs               the start time when init was called
+     *
+     * @return      if mContextHubWrapper is not null and a full state init was done
      */
-    private IContextHubWrapper getContextHubWrapper() {
-        IContextHubWrapper wrapper = IContextHubWrapper.maybeConnectToAidl();
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_2();
-        }
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_1();
-        }
-        if (wrapper == null) {
-            wrapper = IContextHubWrapper.maybeConnectTo1_0();
+    private boolean initContextHubServiceState(long startTimeNs) {
+        if (mContextHubWrapper == null) {
+            mTransactionManager = null;
+            mClientManager = null;
+            mSensorPrivacyManagerInternal = null;
+            mDefaultClientMap = Collections.emptyMap();
+            mContextHubIdToInfoMap = Collections.emptyMap();
+            mSupportedContextHubPerms = Collections.emptyList();
+            mContextHubInfoList = Collections.emptyList();
+            return false;
         }
 
-        return wrapper;
+        Pair<List<ContextHubInfo>, List<String>> hubInfo;
+        try {
+            hubInfo = mContextHubWrapper.getHubs();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while getting Context Hub info", e);
+            hubInfo = new Pair(Collections.emptyList(), Collections.emptyList());
+        }
+
+        long bootTimeNs = SystemClock.elapsedRealtimeNanos() - startTimeNs;
+        int numContextHubs = hubInfo.first.size();
+        ContextHubStatsLog.write(ContextHubStatsLog.CONTEXT_HUB_BOOTED, bootTimeNs,
+                numContextHubs);
+
+        mContextHubIdToInfoMap = Collections.unmodifiableMap(
+                ContextHubServiceUtil.createContextHubInfoMap(hubInfo.first));
+        mSupportedContextHubPerms = hubInfo.second;
+        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
+        mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
+        mTransactionManager = new ContextHubTransactionManager(
+                mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        mSensorPrivacyManagerInternal =
+                LocalServices.getService(SensorPrivacyManagerInternal.class);
+        return true;
+    }
+
+    /**
+     * Creates the default client map that maps context hub IDs to the associated
+     * ClientManager. The client map is unmodifiable
+     */
+    private void initDefaultClientMap() {
+        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
+        for (Map.Entry<Integer, ContextHubInfo> entry: mContextHubIdToInfoMap.entrySet()) {
+            int contextHubId = entry.getKey();
+            ContextHubInfo contextHubInfo = entry.getValue();
+
+            mLastRestartTimestampMap.put(contextHubId,
+                    new AtomicLong(SystemClock.elapsedRealtimeNanos()));
+
+            try {
+                mContextHubWrapper.registerCallback(contextHubId,
+                        new ContextHubServiceCallback(contextHubId));
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
+                        + contextHubId + ")", e);
+            }
+
+            IContextHubClient client = mClientManager.registerClient(
+                    contextHubInfo, createDefaultClientCallback(contextHubId),
+                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
+            defaultClientMap.put(contextHubId, client);
+
+            // Do a query to initialize the service cache list of nanoapps
+            // TODO(b/194289715): Remove this when old API is deprecated
+            queryNanoAppsInternal(contextHubId);
+        }
+        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+    }
+
+    /**
+     * Initializes existing callbacks with the mContextHubWrapper for every context hub
+     */
+    private void initExistingCallbacks() {
+        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            try {
+                mContextHubWrapper.registerExistingCallback(contextHubId);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while registering existing service callback for hub "
+                        + "(ID = " + contextHubId + ")", e);
+            }
+        }
+    }
+
+    /**
+     * Handles the initialization of location settings notifications
+     */
+    private void initLocationSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsLocationSettingNotifications()) {
+            return;
+        }
+
+        sendLocationSettingUpdate();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendLocationSettingUpdate();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of wifi settings notifications
+     */
+    private void initWifiSettingNotifications() {
+        if (mContextHubWrapper == null || !mContextHubWrapper.supportsWifiSettingNotifications()) {
+            return;
+        }
+
+        sendWifiSettingUpdate(/* forceUpdate= */ true);
+
+        BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())
+                        || WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED.equals(
+                        intent.getAction())) {
+                    sendWifiSettingUpdate(/* forceUpdate= */ false);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED);
+        mContext.registerReceiver(wifiReceiver, filter);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendWifiSettingUpdate(/* forceUpdate= */ false);
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of airplane mode settings notifications
+     */
+    private void initAirplaneModeSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsAirplaneModeSettingNotifications()) {
+            return;
+        }
+
+        sendAirplaneModeSettingUpdate();
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON),
+                /* notifyForDescendants= */ true,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendAirplaneModeSettingUpdate();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Handles the initialization of microphone settings notifications
+     */
+    private void initMicrophoneSettingNotifications() {
+        if (mContextHubWrapper == null
+                || !mContextHubWrapper.supportsMicrophoneSettingNotifications()) {
+            return;
+        }
+
+        sendMicrophoneDisableSettingUpdateForCurrentUser();
+        if (mSensorPrivacyManagerInternal == null) {
+            Log.e(TAG, "Unable to add a sensor privacy listener for all users");
+            return;
+        }
+
+        mSensorPrivacyManagerInternal.addSensorPrivacyListenerForAllUsers(
+                SensorPrivacyManager.Sensors.MICROPHONE, (userId, enabled) -> {
+                    if (userId == getCurrentUserId()) {
+                        Log.d(TAG, "User: " + userId + "mic privacy: " + enabled);
+                        sendMicrophoneDisableSettingUpdate(enabled);
+                    }
+                });
+    }
+
+    /**
+     * Handles the initialization of bluetooth settings notifications
+     */
+    private void initBtSettingNotifications() {
+        if (mContextHubWrapper == null || !mContextHubWrapper.supportsBtSettingNotifications()) {
+            return;
+        }
+
+        sendBtSettingUpdate(/* forceUpdate= */ true);
+
+        BroadcastReceiver btReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())) {
+                    sendBtSettingUpdate(/* forceUpdate= */ false);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+        mContext.registerReceiver(btReceiver, filter);
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE),
+                /* notifyForDescendants= */ false,
+                new ContentObserver(/* handler= */ null) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        sendBtSettingUpdate(/* forceUpdate= */ false);
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    /**
+     * Resets the settings. Called when a context hub restarts or the AIDL HAL dies
+     */
+    private void resetSettings() {
+        sendLocationSettingUpdate();
+        sendWifiSettingUpdate(/* forceUpdate= */ true);
+        sendAirplaneModeSettingUpdate();
+        sendMicrophoneDisableSettingUpdateForCurrentUser();
+        sendBtSettingUpdate(/* forceUpdate= */ true);
     }
 
     @Override
@@ -434,9 +556,11 @@ public class ContextHubService extends IContextHubService.Stub {
         new ContextHubShellCommand(mContext, this).exec(this, in, out, err, args, callback, result);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
-        checkPermissions();
+        super.registerCallback_enforcePermission();
+
         mCallbacksList.register(callback);
 
         Log.d(TAG, "Added callback, total callbacks " +
@@ -444,15 +568,19 @@ public class ContextHubService extends IContextHubService.Stub {
         return 0;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int[] getContextHubHandles() throws RemoteException {
-        checkPermissions();
+        super.getContextHubHandles_enforcePermission();
+
         return ContextHubServiceUtil.createPrimitiveIntArray(mContextHubIdToInfoMap.keySet());
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public ContextHubInfo getContextHubInfo(int contextHubHandle) throws RemoteException {
-        checkPermissions();
+        super.getContextHubInfo_enforcePermission();
+
         if (!mContextHubIdToInfoMap.containsKey(contextHubHandle)) {
             Log.e(TAG, "Invalid Context Hub handle " + contextHubHandle + " in getContextHubInfo");
             return null;
@@ -461,6 +589,7 @@ public class ContextHubService extends IContextHubService.Stub {
         return mContextHubIdToInfoMap.get(contextHubHandle);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Returns a List of ContextHubInfo object describing the available hubs.
      *
@@ -468,7 +597,8 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     @Override
     public List<ContextHubInfo> getContextHubs() throws RemoteException {
-        checkPermissions();
+        super.getContextHubs_enforcePermission();
+
         return mContextHubInfoList;
     }
 
@@ -532,9 +662,11 @@ public class ContextHubService extends IContextHubService.Stub {
         };
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int loadNanoApp(int contextHubHandle, NanoApp nanoApp) throws RemoteException {
-        checkPermissions();
+        super.loadNanoApp_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -559,9 +691,11 @@ public class ContextHubService extends IContextHubService.Stub {
         return 0;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int unloadNanoApp(int nanoAppHandle) throws RemoteException {
-        checkPermissions();
+        super.unloadNanoApp_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -584,17 +718,21 @@ public class ContextHubService extends IContextHubService.Stub {
         return 0;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) throws RemoteException {
-        checkPermissions();
+
+        super.getNanoAppInstanceInfo_enforcePermission();
 
         return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int[] findNanoAppOnHub(
             int contextHubHandle, NanoAppFilter filter) throws RemoteException {
-        checkPermissions();
+
+        super.findNanoAppOnHub_enforcePermission();
 
         ArrayList<Integer> foundInstances = new ArrayList<>();
         if (filter != null) {
@@ -636,10 +774,12 @@ public class ContextHubService extends IContextHubService.Stub {
         return true;
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @Override
     public int sendMessage(int contextHubHandle, int nanoAppHandle, ContextHubMessage msg)
             throws RemoteException {
-        checkPermissions();
+        super.sendMessage_enforcePermission();
+
         if (mContextHubWrapper == null) {
             return -1;
         }
@@ -684,13 +824,17 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * Handles a unicast or broadcast message from a nanoapp.
      *
-     * @param contextHubId   the ID of the hub the message came from
+     * @param contextHubId the ID of the hub the message came from
      * @param hostEndpointId the host endpoint ID of the client receiving this message
-     * @param message        the message contents
-     * @param reqPermissions the permissions required to consume this message
+     * @param message the message contents
+     * @param nanoappPermissions the set of permissions the nanoapp holds
+     * @param messagePermissions the set of permissions that should be used for attributing
+     *     permissions when this message is consumed by a client
      */
     private void handleClientMessageCallback(
-            int contextHubId, short hostEndpointId, NanoAppMessage message,
+            int contextHubId,
+            short hostEndpointId,
+            NanoAppMessage message,
             List<String> nanoappPermissions,
             List<String> messagePermissions) {
         mClientManager.onMessageFromNanoApp(
@@ -699,7 +843,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
     /**
      * A helper function to handle a load response from the Context Hub for the old API.
-     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     * TODO(b/194289715): Remove this once the old APIs are obsolete.
      */
     private void handleLoadResponseOldApi(
             int contextHubId, int result, NanoAppBinary nanoAppBinary) {
@@ -720,7 +864,7 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * A helper function to handle an unload response from the Context Hub for the old API.
      * <p>
-     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     * TODO(b/194289715): Remove this once the old APIs are obsolete.
      */
     private void handleUnloadResponseOldApi(int contextHubId, int result) {
         byte[] data = new byte[1];
@@ -755,11 +899,9 @@ public class ContextHubService extends IContextHubService.Stub {
                     TimeUnit.NANOSECONDS.toMillis(now - lastRestartTimeNs),
                     contextHubId);
 
-            sendLocationSettingUpdate();
-            sendWifiSettingUpdate(true /* forceUpdate */);
-            sendAirplaneModeSettingUpdate();
-            sendMicrophoneDisableSettingUpdateForCurrentUser();
-            sendBtSettingUpdate(true /* forceUpdate */);
+            ContextHubEventLogger.getInstance().logContextHubRestart(contextHubId);
+
+            resetSettings();
 
             mTransactionManager.onHubReset();
             queryNanoAppsInternal(contextHubId);
@@ -813,6 +955,7 @@ public class ContextHubService extends IContextHubService.Stub {
         return mContextHubIdToInfoMap.containsKey(contextHubId);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Creates and registers a client at the service for the specified Context Hub.
      *
@@ -829,7 +972,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public IContextHubClient createClient(
             int contextHubId, IContextHubClientCallback clientCallback,
             @Nullable String attributionTag, String packageName) throws RemoteException {
-        checkPermissions();
+        super.createClient_enforcePermission();
+
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
         }
@@ -842,6 +986,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 contextHubInfo, clientCallback, attributionTag, mTransactionManager, packageName);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Creates and registers a PendingIntent client at the service for the specified Context Hub.
      *
@@ -857,7 +1002,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public IContextHubClient createPendingIntentClient(
             int contextHubId, PendingIntent pendingIntent, long nanoAppId,
             @Nullable String attributionTag) throws RemoteException {
-        checkPermissions();
+        super.createPendingIntentClient_enforcePermission();
+
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
         }
@@ -867,6 +1013,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 contextHubInfo, pendingIntent, nanoAppId, attributionTag, mTransactionManager);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Loads a nanoapp binary at the specified Context hub.
      *
@@ -879,7 +1026,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void loadNanoAppOnHub(
             int contextHubId, IContextHubTransactionCallback transactionCallback,
             NanoAppBinary nanoAppBinary) throws RemoteException {
-        checkPermissions();
+        super.loadNanoAppOnHub_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_LOAD_NANOAPP)) {
             return;
@@ -896,6 +1044,7 @@ public class ContextHubService extends IContextHubService.Stub {
         mTransactionManager.addTransaction(transaction);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Unloads a nanoapp from the specified Context Hub.
      *
@@ -908,7 +1057,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void unloadNanoAppFromHub(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
-        checkPermissions();
+        super.unloadNanoAppFromHub_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_UNLOAD_NANOAPP)) {
             return;
@@ -919,6 +1069,7 @@ public class ContextHubService extends IContextHubService.Stub {
         mTransactionManager.addTransaction(transaction);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Enables a nanoapp at the specified Context Hub.
      *
@@ -931,7 +1082,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void enableNanoApp(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
-        checkPermissions();
+        super.enableNanoApp_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_ENABLE_NANOAPP)) {
             return;
@@ -942,6 +1094,7 @@ public class ContextHubService extends IContextHubService.Stub {
         mTransactionManager.addTransaction(transaction);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Disables a nanoapp at the specified Context Hub.
      *
@@ -954,7 +1107,8 @@ public class ContextHubService extends IContextHubService.Stub {
     public void disableNanoApp(
             int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
             throws RemoteException {
-        checkPermissions();
+        super.disableNanoApp_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_DISABLE_NANOAPP)) {
             return;
@@ -965,6 +1119,7 @@ public class ContextHubService extends IContextHubService.Stub {
         mTransactionManager.addTransaction(transaction);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     /**
      * Queries for a list of nanoapps from the specified Context hub.
      *
@@ -975,7 +1130,8 @@ public class ContextHubService extends IContextHubService.Stub {
     @Override
     public void queryNanoApps(int contextHubId, IContextHubTransactionCallback transactionCallback)
             throws RemoteException {
-        checkPermissions();
+        super.queryNanoApps_enforcePermission();
+
         if (!checkHalProxyAndContextHubId(
                 contextHubId, transactionCallback, ContextHubTransaction.TYPE_QUERY_NANOAPPS)) {
             return;
@@ -984,6 +1140,54 @@ public class ContextHubService extends IContextHubService.Stub {
         ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
                 contextHubId, transactionCallback, getCallingPackageName());
         mTransactionManager.addTransaction(transaction);
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    /**
+     * Queries for a list of preloaded nanoapp IDs from the specified Context Hub.
+     *
+     * @param hubInfo The Context Hub to query a list of nanoapps from.
+     * @return The list of 64-bit IDs of the preloaded nanoapps.
+     * @throws NullPointerException if hubInfo is null
+     */
+    @Override
+    public long[] getPreloadedNanoAppIds(ContextHubInfo hubInfo) throws RemoteException {
+        super.getPreloadedNanoAppIds_enforcePermission();
+        Objects.requireNonNull(hubInfo, "hubInfo cannot be null");
+
+        long[] nanoappIds = mContextHubWrapper.getPreloadedNanoappIds(hubInfo.getId());
+        if (nanoappIds == null) {
+            return new long[0];
+        }
+        return nanoappIds;
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    /**
+     * Puts the context hub in and out of test mode. Test mode is a clean state
+     * where tests can be executed in the same environment. If enable is true,
+     * this will enable test mode by unloading all nanoapps. If enable is false,
+     * this will disable test mode and reverse the actions of enabling test mode
+     * by loading all preloaded nanoapps. This puts CHRE in a normal state.
+     *
+     * This should only be used for a test environment, either through a
+     * @TestApi or development tools. This should not be used in a production
+     * environment.
+     *
+     * @param enable If true, put the context hub in test mode. If false, disable
+     *               test mode.
+     * @return       If true, the operation was successful; false otherwise.
+     */
+    @Override
+    public boolean setTestMode(boolean enable) {
+        super.setTestMode_enforcePermission();
+        boolean status = mContextHubWrapper.setTestMode(enable);
+
+        // Query nanoapps to update service state after test mode state change.
+        for (int contextHubId: mDefaultClientMap.keySet()) {
+            queryNanoAppsInternal(contextHubId);
+        }
+        return status;
     }
 
     @Override
@@ -1010,7 +1214,11 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
+        mNanoAppStateManager.foreachNanoAppInstanceInfo(pw::println);
+
+        pw.println("");
+        pw.println("=================== PRELOADED NANOAPPS ====================");
+        dumpPreloadedNanoapps(pw);
 
         pw.println("");
         pw.println("=================== CLIENTS ====================");
@@ -1019,6 +1227,10 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== TRANSACTIONS ====================");
         pw.println(mTransactionManager);
+
+        pw.println("");
+        pw.println("=================== EVENTS ====================");
+        pw.println(ContextHubEventLogger.getInstance());
 
         // dump eventLog
     }
@@ -1030,8 +1242,8 @@ public class ContextHubService extends IContextHubService.Stub {
         mClientManager.forEachClientOfHub(contextHubId, client -> {
             if (client.getPackageName().equals(packageName)) {
                 client.updateNanoAppAuthState(
-                        nanoAppId, Collections.emptyList() /* nanoappPermissions */,
-                        false /* gracePeriodExpired */, true /* forceDenied */);
+                        nanoAppId, /* nanoappPermissions= */ Collections.emptyList(),
+                        /* gracePeriodExpired= */ false, /* forceDenied= */ true);
             }
         });
     }
@@ -1048,6 +1260,28 @@ public class ContextHubService extends IContextHubService.Stub {
         proto.end(token);
 
         proto.flush();
+    }
+
+    /** Dumps preloaded nanoapps to the console */
+    private void dumpPreloadedNanoapps(PrintWriter pw) {
+        if (mContextHubWrapper == null) {
+            return;
+        }
+
+        for (int contextHubId: mContextHubIdToInfoMap.keySet()) {
+            long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds(contextHubId);
+            if (preloadedNanoappIds == null) {
+                return;
+            }
+
+            pw.print("Context Hub (id=");
+            pw.print(contextHubId);
+            pw.println("):");
+            for (long preloadedNanoappId : preloadedNanoappIds) {
+                pw.print("  ID: 0x");
+                pw.println(Long.toHexString(preloadedNanoappId));
+            }
+        }
     }
 
     private void checkPermissions() {
@@ -1115,7 +1349,7 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         if (!isValidContextHubId(contextHubId)) {
             Log.e(TAG, "Cannot start "
-                    + ContextHubTransaction.typeToString(transactionType, false /* upperCase */)
+                    + ContextHubTransaction.typeToString(transactionType, /* upperCase= */ false)
                     + " transaction for invalid hub ID " + contextHubId);
             try {
                 callback.onTransactionComplete(ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
@@ -1224,13 +1458,14 @@ public class ContextHubService extends IContextHubService.Stub {
      * Hub.
      */
     private void sendMicrophoneDisableSettingUpdateForCurrentUser() {
-        boolean isEnabled = mSensorPrivacyManagerInternal.isSensorPrivacyEnabled(
+        boolean isEnabled = mSensorPrivacyManagerInternal == null ? false :
+                mSensorPrivacyManagerInternal.isSensorPrivacyEnabled(
                 getCurrentUserId(), SensorPrivacyManager.Sensors.MICROPHONE);
         sendMicrophoneDisableSettingUpdate(isEnabled);
     }
 
     /**
-     *  Invokes a daily timer to query all context hubs
+     * Invokes a daily timer to query all context hubs
      */
     private void scheduleDailyMetricSnapshot() {
         Runnable queryAllContextHub = () -> {

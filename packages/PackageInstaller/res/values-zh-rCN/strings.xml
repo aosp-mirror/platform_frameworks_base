@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"已安装应用。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"要安装此应用吗？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"要更新此应用吗？"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"要通过<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>更新此应用？\n\n此应用通常通过<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>接收更新。如果通过其他来源更新，手机未来可能会收到任何来源的更新。应用功能可能会变化。"</string>
     <string name="install_failed" msgid="5777824004474125469">"未安装应用。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"系统已禁止安装该软件包。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"应用未安装：软件包与现有软件包存在冲突。"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"该用户无法安装未知应用"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"此用户无权安装应用"</string>
     <string name="ok" msgid="7871959885003339302">"确定"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"仍然更新"</string>
     <string name="manage_applications" msgid="5400164782453975580">"管理应用"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"空间不足"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"无法安装<xliff:g id="APP_NAME">%1$s</xliff:g>。请释放一些存储空间并重试。"</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"要将此应用替换为出厂版本吗？这样会移除所有数据。"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"要将此应用替换为出厂版本吗？这样会移除所有数据，并会影响此设备的所有用户（包括已设置工作资料的用户）。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留 <xliff:g id="SIZE">%1$s</xliff:g> 的应用数据。"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"要删除此应用吗？"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"要卸载此应用吗？<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用也会被删除。"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"正在进行卸载操作"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"卸载操作失败"</string>
     <string name="uninstalling" msgid="8709566347688966845">"正在卸载…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"正在卸载<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"卸载完成。"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"已卸载<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"已删除<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>克隆"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"卸载失败。"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"卸载<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>失败。"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"正在删除 <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"无法卸载正在使用中的设备管理应用"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"无法为<xliff:g id="USERNAME">%1$s</xliff:g>卸载正在使用中的设备管理应用"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"部分用户或个人资料需要此应用，故无法卸载；已为其他用户或个人资料卸载此应用"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"未知"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"出于安全考虑，目前已禁止您的平板电脑安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"出于安全考虑，目前已禁止您的电视安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"出于安全考虑，目前已禁止您的手表安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"出于安全考虑，您的手机目前不允许安装来自此来源的未知应用。您可以在“设置”中对此进行更改。"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"来历不明的应用很可能会损害您的手机和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何手机损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"来历不明的应用很可能会损害您的平板电脑和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何平板电脑损坏或数据丢失情况，您负有全部责任。"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"来历不明的应用很可能会损害您的电视和个人数据。安装该应用即表示，您同意对于因使用该应用可能导致的任何电视损坏或数据丢失情况，您负有全部责任。"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> 克隆应用"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"继续"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"设置"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"正在安装/卸载 Wear 应用"</string>

@@ -33,7 +33,9 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +61,7 @@ public class TileServiceManager {
     private final TileLifecycleManager mStateManager;
     private final Handler mHandler;
     private final UserTracker mUserTracker;
+    private final CustomTileAddedRepository mCustomTileAddedRepository;
     private boolean mBindRequested;
     private boolean mBindAllowed;
     private boolean mBound;
@@ -72,21 +75,24 @@ public class TileServiceManager {
     private boolean mStarted = false;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
-            BroadcastDispatcher broadcastDispatcher, UserTracker userTracker) {
-        this(tileServices, handler, userTracker, new TileLifecycleManager(handler,
-                tileServices.getContext(), tileServices,
-                new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
-                new Intent(TileService.ACTION_QS_TILE).setComponent(component),
-                userTracker.getUserHandle()));
+            BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
+            CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
+        this(tileServices, handler, userTracker, customTileAddedRepository,
+                new TileLifecycleManager(handler, tileServices.getContext(), tileServices,
+                        new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
+                        new Intent(TileService.ACTION_QS_TILE).setComponent(component),
+                        userTracker.getUserHandle(), executor));
     }
 
     @VisibleForTesting
     TileServiceManager(TileServices tileServices, Handler handler, UserTracker userTracker,
+            CustomTileAddedRepository customTileAddedRepository,
             TileLifecycleManager tileLifecycleManager) {
         mServices = tileServices;
         mHandler = handler;
         mStateManager = tileLifecycleManager;
         mUserTracker = userTracker;
+        mCustomTileAddedRepository = customTileAddedRepository;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -111,8 +117,8 @@ public class TileServiceManager {
         mStarted = true;
         ComponentName component = mStateManager.getComponent();
         final int userId = mStateManager.getUserId();
-        if (!mServices.getHost().isTileAdded(component, userId)) {
-            mServices.getHost().setTileAdded(component, userId, true);
+        if (!mCustomTileAddedRepository.isTileAdded(component, userId)) {
+            mCustomTileAddedRepository.setTileAdded(component, userId, true);
             mStateManager.onTileAdded();
             mStateManager.flushMessagesAndUnbind();
         }
@@ -198,7 +204,7 @@ public class TileServiceManager {
         mBound = true;
         mJustBound = true;
         mHandler.postDelayed(mJustBoundOver, MIN_BIND_TIME);
-        mStateManager.setBindService(true);
+        mStateManager.executeSetBindService(true);
     }
 
     private void unbindService() {
@@ -208,7 +214,7 @@ public class TileServiceManager {
         }
         mBound = false;
         mJustBound = false;
-        mStateManager.setBindService(false);
+        mStateManager.executeSetBindService(false);
     }
 
     public void calculateBindPriority(long currentTime) {

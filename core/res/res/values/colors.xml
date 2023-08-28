@@ -200,21 +200,18 @@
     <color name="instant_app_badge">#ff757575</color><!-- Grey -->
 
     <!-- Multi-sim sim colors -->
-    <color name="Teal_700">#ff00796b</color>
-    <color name="Teal_800">#ff00695c</color>
-    <color name="Blue_700">#ff3367d6</color>
-    <color name="Blue_800">#ff2a56c6</color>
-    <color name="Indigo_700">#ff303f9f</color>
-    <color name="Indigo_800">#ff283593</color>
-    <color name="Purple_700">#ff7b1fa2</color>
-    <color name="Purple_800">#ff6a1b9a</color>
-    <color name="Pink_700">#ffc2185b</color>
-    <color name="Pink_800">#ffad1457</color>
-    <color name="Red_700">#ffc53929</color>
-    <color name="Red_800">#ffb93221</color>
-
-    <color name="resize_shadow_start_color">#2a000000</color>
-    <color name="resize_shadow_end_color">#00000000</color>
+    <color name="SIM_color_cyan">#ff006D74</color><!-- Material Custom Cyan -->
+    <color name="SIM_dark_mode_color_cyan">#ff4DD0E1</color><!-- Material Cyan 300 -->
+    <color name="SIM_color_blue">#ff185ABC</color><!-- Material Blue 800 -->
+    <color name="SIM_dark_mode_color_blue">#ff8AB4F8</color><!-- Material Blue 300 -->
+    <color name="SIM_color_green">#ff137333</color><!-- Material Green 800 -->
+    <color name="SIM_dark_mode_color_green">#ff81C995</color><!-- Material Green 300 -->
+    <color name="SIM_color_purple">#ff7627bb</color><!-- Material Purple 800 -->
+    <color name="SIM_dark_mode_color_purple">#ffC58AF9</color><!-- Material Purple 300 -->
+    <color name="SIM_color_pink">#ffb80672</color><!-- Material Pink 800 -->
+    <color name="SIM_dark_mode_color_pink">#ffff8bcb</color><!-- Material Pink 300 -->
+    <color name="SIM_color_orange">#ff995400</color><!-- Material Custom Orange -->
+    <color name="SIM_dark_mode_color_orange">#fffcad70</color><!-- Material Orange 300 -->
 
     <color name="tooltip_background_dark">#e6616161</color>
     <color name="tooltip_background_light">#e6FFFFFF</color>
@@ -440,19 +437,142 @@
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_neutral2_1000">#000000</color>
 
+    <!-- Colors used in Android system, from Material design system.
+     These values can be overlaid at runtime by OverlayManager RROs. -->
+    <color name="system_primary_container_light">#D8E2FF</color>
+    <color name="system_on_primary_container_light">#001A41</color>
+    <color name="system_primary_light">#445E91</color>
+    <color name="system_on_primary_light">#FFFFFF</color>
+    <color name="system_secondary_container_light">#DBE2F9</color>
+    <color name="system_on_secondary_container_light">#141B2C</color>
+    <color name="system_secondary_light">#575E71</color>
+    <color name="system_on_secondary_light">#FFFFFF</color>
+    <color name="system_tertiary_container_light">#FBD7FC</color>
+    <color name="system_on_tertiary_container_light">#29132D</color>
+    <color name="system_tertiary_light">#715573</color>
+    <color name="system_on_tertiary_light">#FFFFFF</color>
+    <color name="system_background_light">#FAF9FD</color>
+    <color name="system_on_background_light">#1B1B1F</color>
+    <color name="system_surface_light">#FAF9FD</color>
+    <color name="system_on_surface_light">#1B1B1F</color>
+    <color name="system_surface_container_low_light">#F5F3F7</color>
+    <color name="system_surface_container_lowest_light">#FFFFFF</color>
+    <color name="system_surface_container_light">#EFEDF1</color>
+    <color name="system_surface_container_high_light">#E9E7EC</color>
+    <color name="system_surface_container_highest_light">#E3E2E6</color>
+    <color name="system_surface_bright_light">#FAF9FD</color>
+    <color name="system_surface_dim_light">#DBD9DD</color>
+    <color name="system_surface_variant_light">#E1E2EC</color>
+    <color name="system_on_surface_variant_light">#44474F</color>
+    <color name="system_outline_light">#72747D</color>
+    <color name="system_outline_variant_light">#C4C7C5</color>
+    <color name="system_error_light">#C00003</color>
+    <color name="system_on_error_light">#FFFFFF</color>
+    <color name="system_error_container_light">#FFDAD5</color>
+    <color name="system_on_error_container_light">#410000</color>
+    <color name="system_primary_fixed">#D8E2FF</color>
+    <color name="system_primary_fixed_dim">#ADC6FF</color>
+    <color name="system_on_primary_fixed">#001A41</color>
+    <color name="system_on_primary_fixed_variant">#2B4678</color>
+    <color name="system_secondary_fixed">#DBE2F9</color>
+    <color name="system_secondary_fixed_dim">#BFC6DC</color>
+    <color name="system_on_secondary_fixed">#141B2C</color>
+    <color name="system_on_secondary_fixed_variant">#3F4759</color>
+    <color name="system_tertiary_fixed">#FBD7FC</color>
+    <color name="system_tertiary_fixed_dim">#DEBCDF</color>
+    <color name="system_on_tertiary_fixed">#29132D</color>
+    <color name="system_on_tertiary_fixed_variant">#583E5B</color>
+    <color name="system_control_activated_light">#D8E2FF</color>
+    <color name="system_control_normal_light">#44474F</color>
+    <color name="system_control_highlight_light">#1F000000</color>
+    <color name="system_text_primary_inverse_light">#E3E2E6</color>
+    <color name="system_text_secondary_and_tertiary_inverse_light">#C4C6D0</color>
+    <color name="system_text_primary_inverse_disable_only_light">#E3E2E6</color>
+    <color name="system_text_secondary_and_tertiary_inverse_disabled_light">#E3E2E6</color>
+    <color name="system_text_hint_inverse_light">#E3E2E6</color>
+    <color name="system_palette_key_color_primary_light">#5D77AC</color>
+    <color name="system_palette_key_color_secondary_light">#6C7488</color>
+    <color name="system_palette_key_color_tertiary_light">#907292</color>
+    <color name="system_palette_key_color_neutral_light">#838387</color>
+    <color name="system_palette_key_color_neutral_variant_light">#777982</color>
+    <color name="system_primary_container_dark">#2B4678</color>
+    <color name="system_on_primary_container_dark">#D8E2FF</color>
+    <color name="system_primary_dark">#ADC6FF</color>
+    <color name="system_on_primary_dark">#102F60</color>
+    <color name="system_secondary_container_dark">#3F4759</color>
+    <color name="system_on_secondary_container_dark">#DBE2F9</color>
+    <color name="system_secondary_dark">#BFC6DC</color>
+    <color name="system_on_secondary_dark">#293041</color>
+    <color name="system_tertiary_container_dark">#583E5B</color>
+    <color name="system_on_tertiary_container_dark">#FBD7FC</color>
+    <color name="system_tertiary_dark">#DEBCDF</color>
+    <color name="system_on_tertiary_dark">#402843</color>
+    <color name="system_background_dark">#121316</color>
+    <color name="system_on_background_dark">#E3E2E6</color>
+    <color name="system_surface_dark">#121316</color>
+    <color name="system_on_surface_dark">#E3E2E6</color>
+    <color name="system_surface_container_low_dark">#1B1B1F</color>
+    <color name="system_surface_container_lowest_dark">#0D0E11</color>
+    <color name="system_surface_container_dark">#1F1F23</color>
+    <color name="system_surface_container_high_dark">#292A2D</color>
+    <color name="system_surface_container_highest_dark">#343538</color>
+    <color name="system_surface_bright_dark">#38393C</color>
+    <color name="system_surface_dim_dark">#121316</color>
+    <color name="system_surface_variant_dark">#44474F</color>
+    <color name="system_on_surface_variant_dark">#C4C6D0</color>
+    <color name="system_outline_dark">#72747D</color>
+    <color name="system_outline_variant_dark">#444746</color>
+    <color name="system_error_dark">#FFB4A8</color>
+    <color name="system_on_error_dark">#690001</color>
+    <color name="system_error_container_dark">#930001</color>
+    <color name="system_on_error_container_dark">#FFDAD5</color>
+    <color name="system_control_activated_dark">#2B4678</color>
+    <color name="system_control_normal_dark">#C4C6D0</color>
+    <color name="system_control_highlight_dark">#33FFFFFF</color>
+    <color name="system_text_primary_inverse_dark">#1B1B1F</color>
+    <color name="system_text_secondary_and_tertiary_inverse_dark">#44474F</color>
+    <color name="system_text_primary_inverse_disable_only_dark">#1B1B1F</color>
+    <color name="system_text_secondary_and_tertiary_inverse_disabled_dark">#1B1B1F</color>
+    <color name="system_text_hint_inverse_dark">#1B1B1F</color>
+    <color name="system_palette_key_color_primary_dark">#5D77AC</color>
+    <color name="system_palette_key_color_secondary_dark">#6C7488</color>
+    <color name="system_palette_key_color_tertiary_dark">#907292</color>
+    <color name="system_palette_key_color_neutral_dark">#838387</color>
+    <color name="system_palette_key_color_neutral_variant_dark">#777982</color>
+
     <!-- Accessibility shortcut icon background color -->
     <color name="accessibility_feature_background">#5F6368</color> <!-- Google grey 700 -->
     <color name="accessibility_magnification_background">#F50D60</color>
     <color name="accessibility_daltonizer_background">#00BCD4</color>
     <color name="accessibility_color_inversion_background">#546E7A</color>
 
+    <!-- Fullscreen magnification thumbnail color -->
+    <color name="accessibility_magnification_thumbnail_stroke_color">#0C0C0C</color>
+    <color name="accessibility_magnification_thumbnail_background_color">#B3FFFFFF</color>
+    <color name="accessibility_magnification_thumbnail_container_background_color">#99000000</color>
+    <color name="accessibility_magnification_thumbnail_container_stroke_color">#FFFFFF</color>
+
     <!-- Color of camera light when camera is in use -->
     <color name="camera_privacy_light_day">#FFFFFF</color>
     <color name="camera_privacy_light_night">#FFFFFF</color>
+
+    <!-- Lily Language Picker language item view colors -->
+    <color name="language_picker_item_text_color">#202124</color>
+    <color name="language_picker_item_text_color_secondary">#5F6368</color>
+    <color name="language_picker_item_text_color_selected">#202124</color>
+    <color name="language_picker_item_text_color_secondary_selected">#5F6368</color>
+    <color name="language_picker_item_selected_indicator">#4285F4</color>
+    <color name="language_picker_item_selected_bg">#E8F0FE</color>
+    <color name="language_picker_item_selected_stroke">#4C8DF6</color>
 
     <!-- Color for side fps toast light theme -->
     <color name="side_fps_toast_background">#F7F9FA</color>
     <color name="side_fps_text_color">#191C1D</color>
     <color name="side_fps_button_color">#00677E</color>
 
+    <!-- Color for system bars -->
+    <color name="navigation_bar_compatible">@android:color/black</color>
+    <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
+         color is set by the framework or not. -->
+    <color name="navigation_bar_default">#00808080</color>
 </resources>

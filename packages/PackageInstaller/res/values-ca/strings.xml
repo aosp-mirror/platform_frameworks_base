@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"S\'ha instal·lat l\'aplicació."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vols instal·lar aquesta aplicació?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vols actualitzar aquesta aplicació?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vols actualitzar l\'aplicació de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAquesta aplicació sol rebre actualitzacions de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> Si l\'actualitzes des d\'una font diferent, pot ser que en el futur rebis actualitzacions des de qualsevol font del teu telèfon. És possible que la funcionalitat de l\'aplicació canviï."</string>
     <string name="install_failed" msgid="5777824004474125469">"No s\'ha instal·lat l\'aplicació."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"El paquet s\'ha bloquejat perquè no es pugui instal·lar."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'aplicació no s\'ha instal·lat perquè el paquet entra en conflicte amb un d\'existent."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aquest usuari no pot instal·lar aplicacions desconegudes"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Aquest usuari no té permís per instal·lar aplicacions"</string>
     <string name="ok" msgid="7871959885003339302">"D\'acord"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Actualitza de tota manera"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gestiona apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Espai esgotat"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"No s\'ha pogut instal·lar <xliff:g id="APP_NAME">%1$s</xliff:g>. Allibera espai i torna-ho a provar."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Vols substituir aquesta aplicació per la versió de fàbrica? Se suprimiran totes les dades."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vols substituir aquesta aplicació per la versió de fàbrica? Se suprimiran totes les dades. Això afectarà tots els usuaris d\'aquest dispositiu, inclosos els que tinguin un perfil de treball."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Conserva <xliff:g id="SIZE">%1$s</xliff:g> de dades de l\'aplicació."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vols suprimir aquesta aplicació?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vols desinstal·lar aquesta aplicació? El clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> també se suprimirà."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstal·lacions en curs"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstal·lacions fallides"</string>
     <string name="uninstalling" msgid="8709566347688966845">"S\'està desinstal·lant…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"S\'està desinstal·lant <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"La desinstal·lació ha finalitzat."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"S\'ha desinstal·lat <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"S\'ha suprimit el clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"No s\'ha pogut desinstal·lar."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"No s\'ha pogut desinstal·lar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"S\'està suprimint el clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"No es pot desinstal·lar l\'aplicació activa de l\'administrador del dispositiu"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"No es pot desinstal·lar l\'aplicació activa de l\'administrador del dispositiu per a <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Aquesta aplicació és necessària per a alguns usuaris o perfils i s\'ha desinstal·lat per a d\'altres"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconeguda"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Per la teva seguretat, actualment la tauleta no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Per la teva seguretat, actualment la televisió no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Per a la teva seguretat, actualment el rellotge no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Per la teva seguretat, actualment el telèfon no pot instal·lar aplicacions desconegudes d\'aquesta font. Pots canviar-ho a Configuració."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"El telèfon i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi al telèfon o de la pèrdua de dades que pugui resultar del seu ús."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"La tauleta i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi a la tauleta o de la pèrdua de dades que pugui resultar del seu ús."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"El televisor i les dades personals són més vulnerables als atacs d\'aplicacions desconegudes. En instal·lar aquesta aplicació, acceptes que ets responsable de qualsevol dany que es produeixi al televisor o de la pèrdua de dades que pugui resultar del seu ús."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continua"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Configuració"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instal·lant o desinstal·lant apps de Wear"</string>

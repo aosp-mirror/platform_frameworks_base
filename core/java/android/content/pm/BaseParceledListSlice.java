@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.BadParcelableException;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -92,18 +93,20 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
             data.writeInt(i);
             try {
                 retriever.transact(IBinder.FIRST_CALL_TRANSACTION, data, reply, 0);
+                reply.readException();
+                while (i < N && reply.readInt() != 0) {
+                    listElementClass = readVerifyAndAddElement(creator, reply, loader,
+                            listElementClass);
+                    if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
+                    i++;
+                }
             } catch (RemoteException e) {
-                Log.w(TAG, "Failure retrieving array; only received " + i + " of " + N, e);
-                return;
+                throw new BadParcelableException(
+                        "Failure retrieving array; only received " + i + " of " + N, e);
+            } finally {
+                reply.recycle();
+                data.recycle();
             }
-            while (i < N && reply.readInt() != 0) {
-                listElementClass = readVerifyAndAddElement(creator, reply, loader,
-                        listElementClass);
-                if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
-                i++;
-            }
-            reply.recycle();
-            data.recycle();
         }
     }
 
@@ -201,22 +204,29 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                                     + Binder.getCallingPid() + ", sender=" + this);
                         }
 
-                        while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
-                            reply.writeInt(1);
+                        try {
+                            reply.writeNoException();
+                            while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
+                                reply.writeInt(1);
 
-                            final T parcelable = mList.get(i);
-                            verifySameType(listElementClass, parcelable.getClass());
-                            writeElement(parcelable, reply, callFlags);
+                                final T parcelable = mList.get(i);
+                                verifySameType(listElementClass, parcelable.getClass());
+                                writeElement(parcelable, reply, callFlags);
 
-                            if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
-                            i++;
-                        }
-                        if (i < N) {
-                            if (DEBUG) Log.d(TAG, "Breaking @" + i + " of " + N);
-                            reply.writeInt(0);
-                        } else {
-                            if (DEBUG) Log.d(TAG, "Transfer complete, clearing mList reference");
+                                if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
+                                i++;
+                            }
+                            if (i < N) {
+                                if (DEBUG) Log.d(TAG, "Breaking @" + i + " of " + N);
+                                reply.writeInt(0);
+                            } else {
+                                if (DEBUG) Log.d(TAG, "Transfer done, clearing mList reference");
+                                mList = null;
+                            }
+                        } catch (RuntimeException e) {
+                            if (DEBUG) Log.d(TAG, "Transfer failed, clearing mList reference");
                             mList = null;
+                            throw e;
                         }
                         return true;
                     }

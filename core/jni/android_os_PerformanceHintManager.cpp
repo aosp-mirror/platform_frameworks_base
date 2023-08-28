@@ -40,6 +40,9 @@ typedef int64_t (*APH_getPreferredUpdateRateNanos)(APerformanceHintManager* mana
 typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
+typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
+typedef void (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
+typedef void (*APH_getThreadIds)(APerformanceHintSession*, int32_t* const, size_t* const);
 
 bool gAPerformanceHintBindingInitialized = false;
 APH_getManager gAPH_getManagerFn = nullptr;
@@ -48,6 +51,9 @@ APH_getPreferredUpdateRateNanos gAPH_getPreferredUpdateRateNanosFn = nullptr;
 APH_updateTargetWorkDuration gAPH_updateTargetWorkDurationFn = nullptr;
 APH_reportActualWorkDuration gAPH_reportActualWorkDurationFn = nullptr;
 APH_closeSession gAPH_closeSessionFn = nullptr;
+APH_sendHint gAPH_sendHintFn = nullptr;
+APH_setThreads gAPH_setThreadsFn = nullptr;
+APH_getThreadIds gAPH_getThreadIdsFn = nullptr;
 
 void ensureAPerformanceHintBindingInitialized() {
     if (gAPerformanceHintBindingInitialized) return;
@@ -87,6 +93,19 @@ void ensureAPerformanceHintBindingInitialized() {
     gAPH_closeSessionFn = (APH_closeSession)dlsym(handle_, "APerformanceHint_closeSession");
     LOG_ALWAYS_FATAL_IF(gAPH_closeSessionFn == nullptr,
                         "Failed to find required symbol APerformanceHint_closeSession!");
+
+    gAPH_sendHintFn = (APH_sendHint)dlsym(handle_, "APerformanceHint_sendHint");
+    LOG_ALWAYS_FATAL_IF(gAPH_sendHintFn == nullptr,
+                        "Failed to find required symbol "
+                        "APerformanceHint_sendHint!");
+
+    gAPH_setThreadsFn = (APH_setThreads)dlsym(handle_, "APerformanceHint_setThreads");
+    LOG_ALWAYS_FATAL_IF(gAPH_setThreadsFn == nullptr,
+                        "Failed to find required symbol APerformanceHint_setThreads!");
+
+    gAPH_getThreadIdsFn = (APH_getThreadIds)dlsym(handle_, "APerformanceHint_getThreadIds");
+    LOG_ALWAYS_FATAL_IF(gAPH_getThreadIdsFn == nullptr,
+                        "Failed to find required symbol APerformanceHint_getThreadIds!");
 
     gAPerformanceHintBindingInitialized = true;
 }
@@ -138,6 +157,55 @@ static void nativeCloseSession(JNIEnv* env, jclass clazz, jlong nativeSessionPtr
     gAPH_closeSessionFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr));
 }
 
+static void nativeSendHint(JNIEnv* env, jclass clazz, jlong nativeSessionPtr, jint hint) {
+    ensureAPerformanceHintBindingInitialized();
+    gAPH_sendHintFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr), hint);
+}
+
+static void nativeSetThreads(JNIEnv* env, jclass clazz, jlong nativeSessionPtr, jintArray tids) {
+    ensureAPerformanceHintBindingInitialized();
+
+    if (tids == nullptr) {
+        return;
+    }
+    ScopedIntArrayRO tidsArray(env, tids);
+    std::vector<int32_t> tidsVector;
+    tidsVector.reserve(tidsArray.size());
+    for (size_t i = 0; i < tidsArray.size(); ++i) {
+        tidsVector.push_back(static_cast<int32_t>(tidsArray[i]));
+    }
+    gAPH_setThreadsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                      tidsVector.data(), tidsVector.size());
+}
+
+// This call should only be used for validation in tests only. This call will initiate two IPC
+// calls, the first one is used to determined the size of the thread ids list, the second one
+// is used to return the actual list.
+static jintArray nativeGetThreadIds(JNIEnv* env, jclass clazz, jlong nativeSessionPtr) {
+    ensureAPerformanceHintBindingInitialized();
+    size_t size = 0;
+    gAPH_getThreadIdsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr), nullptr,
+                        &size);
+    if (size == 0) {
+        jintArray jintArr = env->NewIntArray(0);
+        return jintArr;
+    }
+    std::vector<int32_t> tidsVector(size);
+    gAPH_getThreadIdsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                        tidsVector.data(), &size);
+    jintArray jintArr = env->NewIntArray(size);
+    if (jintArr == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", nullptr);
+        return nullptr;
+    }
+    jint* threadIds = env->GetIntArrayElements(jintArr, 0);
+    for (int i = 0; i < size; ++i) {
+        threadIds[i] = tidsVector[i];
+    }
+    env->ReleaseIntArrayElements(jintArr, threadIds, 0);
+    return jintArr;
+}
+
 static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeAcquireManager", "()J", (void*)nativeAcquireManager},
         {"nativeGetPreferredUpdateRateNanos", "(J)J", (void*)nativeGetPreferredUpdateRateNanos},
@@ -145,6 +213,9 @@ static const JNINativeMethod gPerformanceHintMethods[] = {
         {"nativeUpdateTargetWorkDuration", "(JJ)V", (void*)nativeUpdateTargetWorkDuration},
         {"nativeReportActualWorkDuration", "(JJ)V", (void*)nativeReportActualWorkDuration},
         {"nativeCloseSession", "(J)V", (void*)nativeCloseSession},
+        {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
+        {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
+        {"nativeGetThreadIds", "(J)[I", (void*)nativeGetThreadIds},
 };
 
 int register_android_os_PerformanceHintManager(JNIEnv* env) {

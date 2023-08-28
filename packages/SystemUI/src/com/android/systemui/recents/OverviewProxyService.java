@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
@@ -48,8 +49,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ResolveInfo;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -96,7 +99,7 @@ import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -108,16 +111,18 @@ import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -200,8 +205,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        centralSurfaces.getNotificationPanelViewController()
-                                        .startExpandLatencyTracking();
+                        ShadeViewController shadeViewController =
+                                centralSurfaces.getShadeViewController();
+                        if (shadeViewController != null) {
+                            shadeViewController.startExpandLatencyTracking();
+                        }
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();
@@ -271,7 +279,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     InputDevice.SOURCE_KEYBOARD);
 
             ev.setDisplayId(mContext.getDisplay().getDisplayId());
-            return InputManager.getInstance()
+            return InputManagerGlobal.getInstance()
                     .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         }
 
@@ -338,7 +346,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void expandNotificationPanel() {
             verifyCallerAndClearCallingIdentity("expandNotificationPanel",
-                    () -> mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                    () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                            KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
         }
 
         @Override
@@ -390,20 +399,29 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            StringBuilder extraComponentList = new StringBuilder(" components: ");
-            if (intent.hasExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST)) {
-                String[] comps = intent.getStringArrayExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST);
-                if (comps != null) {
-                    for (String c : comps) {
-                        extraComponentList.append(c).append(", ");
-                    }
+            // If adding, bind immediately
+            if (Objects.equals(intent.getAction(), ACTION_PACKAGE_ADDED)) {
+                updateEnabledAndBinding();
+                return;
+            }
+
+            // ACTION_PACKAGE_CHANGED
+            String[] compsList = intent.getStringArrayExtra(EXTRA_CHANGED_COMPONENT_NAME_LIST);
+            if (compsList == null) {
+                return;
+            }
+
+            // Only rebind for TouchInteractionService component from launcher
+            ResolveInfo ri = context.getPackageManager()
+                    .resolveService(new Intent(ACTION_QUICKSTEP), 0);
+            String interestingComponent = ri.serviceInfo.name;
+            for (String component : compsList) {
+                if (interestingComponent.equals(component)) {
+                    Log.i(TAG_OPS, "Rebinding for component [" + component + "] change");
+                    updateEnabledAndBinding();
+                    return;
                 }
             }
-            Log.d(TAG_OPS, "launcherStateChanged intent: " + intent + extraComponentList);
-            updateEnabledState();
-
-            // Reconnect immediately, instead of waiting for resume to arrive.
-            startConnectionToCurrentUser();
         }
     };
 
@@ -455,6 +473,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
+            if (mLatchForOnUserChanging != null) {
+                mLatchForOnUserChanging.countDown();
+                mLatchForOnUserChanging = null;
+            }
         }
 
         @Override
@@ -509,11 +531,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
+    private CountDownLatch mLatchForOnUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
-                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                public void onUserChanging(int newUser, @NonNull Context userContext,
+                        CountDownLatch latch) {
                     mConnectionBackoffAttempts = 0;
+                    mLatchForOnUserChanging = latch;
                     internalConnectToCurrentUser("User changed");
                 }
             };
@@ -611,8 +636,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         screenLifecycle.addObserver(mScreenLifecycleObserver);
         wakefulnessLifecycle.addObserver(mWakefulnessLifecycleObserver);
         // Connect to the service
-        updateEnabledState();
-        startConnectionToCurrentUser();
+        updateEnabledAndBinding();
 
         // Listen for assistant changes
         assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
@@ -634,6 +658,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private void dispatchNavigationBarSurface() {
         try {
             if (mOverviewProxy != null) {
+                // Catch all for cases where the surface is no longer valid
+                if (mNavigationBarSurface != null && !mNavigationBarSurface.isValid()) {
+                    mNavigationBarSurface = null;
+                }
                 mOverviewProxy.onNavigationBarSurface(mNavigationBarSurface);
             }
         } catch (RemoteException e) {
@@ -641,14 +669,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void updateEnabledAndBinding() {
+        updateEnabledState();
+        startConnectionToCurrentUser();
+    }
+
     private void updateSystemUiStateFlags() {
         final NavigationBar navBarFragment =
                 mNavBarControllerLazy.get().getDefaultNavigationBar();
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
-        final NotificationPanelViewController panelController =
+        final ShadeViewController panelController =
                 mCentralSurfacesOptionalLazy.get()
-                        .map(CentralSurfaces::getNotificationPanelViewController)
+                        .map(CentralSurfaces::getShadeViewController)
                         .orElse(null);
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment

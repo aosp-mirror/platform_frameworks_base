@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -108,6 +109,21 @@ public final class TelephonyPermissions {
         }
     }
 
+    /**
+     * Check whether the caller (or self, if not processing an IPC) has internet permission.
+     * @param context app context
+     * @param message detail message
+     * @return true if permission is granted, else false
+     */
+    public static boolean checkInternetPermissionNoThrow(Context context, String message) {
+        try {
+            context.enforcePermission(Manifest.permission.INTERNET,
+                    Binder.getCallingPid(), Binder.getCallingUid(), message);
+            return true;
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
 
     /**
      * Check whether the caller (or self, if not processing an IPC) has non dangerous
@@ -315,8 +331,8 @@ public final class TelephonyPermissions {
      * Same as {@link #checkCallingOrSelfReadSubscriberIdentifiers(Context, int, String, String,
      * String)} except this allows an additional parameter reportFailure. Caller may not want to
      * report a failure when this is an internal/intermediate check, for example,
-     * SubscriptionController calls this with an INVALID_SUBID to check if caller has the required
-     * permissions to bypass carrier privilege checks.
+     * SubscriptionManagerService calls this with an INVALID_SUBID to check if caller has the
+     * required permissions to bypass carrier privilege checks.
      * @param reportFailure Indicates if failure should be reported.
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
@@ -826,6 +842,37 @@ public final class TelephonyPermissions {
 
     /**
      * Check if calling user is associated with the given subscription.
+     * Subscription-user association check is skipped if destination address is an emergency number.
+     *
+     * @param context Context
+     * @param subId subscription ID
+     * @param callerUserHandle caller user handle
+     * @param destAddr destination address of the message
+     * @return  true if destAddr is an emergency number
+     * and return false if user is not associated with the subscription.
+     */
+    public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
+            @NonNull UserHandle callerUserHandle, @NonNull String destAddr) {
+        // Skip subscription-user association check for emergency numbers
+        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (tm != null && tm.isEmergencyNumber(destAddr)) {
+                Log.d(LOG_TAG, "checkSubscriptionAssociatedWithUser:"
+                        + " destAddr is emergency number");
+                return true;
+            }
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "Cannot verify if destAddr is an emergency number: " + e);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return checkSubscriptionAssociatedWithUser(context, subId, callerUserHandle);
+    }
+
+    /**
+     * Check if calling user is associated with the given subscription.
      * @param context Context
      * @param subId subscription ID
      * @param callerUserHandle caller user handle
@@ -844,7 +891,7 @@ public final class TelephonyPermissions {
             if ((subManager != null) &&
                     (!subManager.isSubscriptionAssociatedWithUser(subId, callerUserHandle))) {
                 // If subId is not associated with calling user, return false.
-                Log.e(LOG_TAG,"User[User ID:" + callerUserHandle.getIdentifier()
+                Log.e(LOG_TAG, "User[User ID:" + callerUserHandle.getIdentifier()
                         + "] is not associated with Subscription ID:" + subId);
                 return false;
 
@@ -853,5 +900,28 @@ public final class TelephonyPermissions {
             Binder.restoreCallingIdentity(token);
         }
         return true;
+    }
+
+    /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PHONE_NUMBERS}.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE
+    })
+    public static boolean checkCallingOrSelfReadPrivilegedPhoneStatePermissionOrReadPhoneNumber(
+            Context context, int subId, String callingPackage, @Nullable String callingFeatureId,
+            String message) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            return false;
+        }
+        return (context.checkCallingOrSelfPermission(
+                Manifest.permission.READ_PRIVILEGED_PHONE_STATE) == PERMISSION_GRANTED
+                || checkCallingOrSelfReadPhoneNumber(context, subId, callingPackage,
+                callingFeatureId, message));
     }
 }

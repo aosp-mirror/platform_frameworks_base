@@ -57,7 +57,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
@@ -109,16 +108,11 @@ public class ImmersiveModeConfirmation {
         mContext = display.getDisplayId() == DEFAULT_DISPLAY
                 ? uiContext : uiContext.createDisplayContext(display);
         mHandler = new H(looper);
-        mShowDelayMs = getNavBarExitDuration() * 3;
+        mShowDelayMs = context.getResources().getInteger(R.integer.dock_enter_exit_duration) * 3L;
         mPanicThresholdMs = context.getResources()
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mVrModeEnabled = vrModeEnabled;
         mCanSystemBarsBeShownByUser = canSystemBarsBeShownByUser;
-    }
-
-    private long getNavBarExitDuration() {
-        Animation exit = AnimationUtils.loadAnimation(mContext, R.anim.dock_bottom_exit);
-        return exit != null ? exit.getDuration() : 0;
     }
 
     static boolean loadSetting(int currentUserId, Context context) {

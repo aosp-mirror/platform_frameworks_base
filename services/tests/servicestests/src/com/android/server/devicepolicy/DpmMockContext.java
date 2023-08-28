@@ -171,10 +171,15 @@ public class DpmMockContext extends MockContext {
     public ApplicationInfo applicationInfo = null;
 
     public DpmMockContext(MockSystemServices mockSystemServices, Context context) {
+        this(mockSystemServices, context, new MockBinder());
+    }
+
+    public DpmMockContext(MockSystemServices mockSystemServices, Context context,
+            @NonNull MockBinder mockBinder) {
         mMockSystemServices = mockSystemServices;
         realTestContext = context;
+        binder = mockBinder;
 
-        binder = new MockBinder();
         resources = mock(Resources.class);
         spiedContext = mock(Context.class);
 
@@ -200,6 +205,11 @@ public class DpmMockContext extends MockContext {
             return packageName;
         }
         return super.getPackageName();
+    }
+
+    @Override
+    public String getOpPackageName() {
+        return getPackageName();
     }
 
     @Override
@@ -239,6 +249,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.locationManager;
             case Context.ROLE_SERVICE:
                 return mMockSystemServices.roleManager;
+            case Context.TELEPHONY_SUBSCRIPTION_SERVICE:
+                return mMockSystemServices.subscriptionManager;
         }
         throw new UnsupportedOperationException();
     }
@@ -442,7 +454,8 @@ public class DpmMockContext extends MockContext {
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         mMockSystemServices.registerReceiver(receiver, filter, null);
-        return spiedContext.registerReceiver(receiver, filter);
+        return spiedContext.registerReceiver(receiver, filter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
     }
 
     @Override

@@ -393,11 +393,11 @@ public class ConversationLayout extends FrameLayout
                 = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
 
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
+        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, android.app.Person.class));
 
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS, android.app.RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
 
         boolean showSpinner =

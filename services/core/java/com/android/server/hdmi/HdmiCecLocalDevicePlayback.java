@@ -138,10 +138,8 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         // Since we removed all devices when it starts and device discovery action
                         // does not poll local devices, we should put device info of local device
                         // manually here.
-                        for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
-                            synchronized (device.mLock) {
-                                mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
-                            }
+                        for (HdmiCecLocalDevice device : mService.getAllCecLocalDevices()) {
+                            mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
                         List<HotplugDetectionAction> hotplugActions =
@@ -180,11 +178,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     void deviceSelect(int id, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        synchronized (mLock) {
-            if (id == getDeviceInfo().getId()) {
-                mService.oneTouchPlay(callback);
-                return;
-            }
+        if (id == getDeviceInfo().getId()) {
+            mService.oneTouchPlay(callback);
+            return;
         }
         HdmiDeviceInfo targetDevice = mService.getHdmiCecNetwork().getDeviceInfo(id);
         if (targetDevice == null) {
@@ -195,7 +191,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
             return;
         }
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             setActiveSource(targetDevice, "HdmiCecLocalDevicePlayback#deviceSelect()");
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
@@ -244,7 +240,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
-        if (!mService.isControlEnabled()) {
+        if (!mService.isCecControlEnabled()) {
             return;
         }
         boolean wasActiveSource = isActiveSource();
@@ -307,16 +303,23 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Override
     @ServiceThreadOnly
     protected void onInitializeCecComplete(int initiatedBy) {
-        if (initiatedBy == HdmiControlService.INITIATED_BY_SCREEN_ON) {
-            oneTouchPlay(new IHdmiControlCallback.Stub() {
-                @Override
-                public void onComplete(int result) {
-                    if (result != HdmiControlManager.RESULT_SUCCESS) {
-                        Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
-                    }
-                }
-            });
+        if (initiatedBy != HdmiControlService.INITIATED_BY_SCREEN_ON) {
+            return;
         }
+        @HdmiControlManager.PowerControlMode
+        String powerControlMode = mService.getHdmiCecConfig().getStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_NONE)) {
+            return;
+        }
+        oneTouchPlay(new IHdmiControlCallback.Stub() {
+            @Override
+            public void onComplete(int result) {
+                if (result != HdmiControlManager.RESULT_SUCCESS) {
+                    Slog.w(TAG, "Failed to complete One Touch Play. result=" + result);
+                }
+            }
+        });
     }
 
     @Override
@@ -525,6 +528,26 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 break;
             case NONE:
                 break;
+        }
+    }
+
+    /**
+     * Called after logical address allocation is finished, allowing a local device to react to
+     * messages in the buffer before they are processed. This method may be used to cancel deferred
+     * actions.
+     */
+    @Override
+    protected void preprocessBufferedMessages(List<HdmiCecMessage> bufferedMessages) {
+        for (HdmiCecMessage message: bufferedMessages) {
+            // Prevent the device from broadcasting <Active Source> message if the active path
+            // changed during address allocation.
+            if (message.getOpcode() == Constants.MESSAGE_ROUTING_CHANGE
+                    || message.getOpcode() == Constants.MESSAGE_SET_STREAM_PATH
+                    || message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE) {
+                removeAction(ActiveSourceAction.class);
+                removeAction(OneTouchPlayAction.class);
+                return;
+            }
         }
     }
 

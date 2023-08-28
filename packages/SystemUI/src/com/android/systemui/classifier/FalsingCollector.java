@@ -26,9 +26,6 @@ public interface FalsingCollector {
     void onSuccessfulUnlock();
 
     /** */
-    void onNotificationActive();
-
-    /** */
     void setShowingAod(boolean showingAod);
 
     /** */

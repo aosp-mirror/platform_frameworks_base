@@ -19,6 +19,7 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 
 import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
+import android.hardware.camera2.extension.LatencyPair;
 import android.hardware.camera2.extension.LatencyRange;
 import android.hardware.camera2.extension.Size;
 import android.hardware.camera2.extension.SizeList;
@@ -31,6 +32,7 @@ interface IImageCaptureExtenderImpl
     @nullable CaptureStageImpl onPresetSession();
     @nullable CaptureStageImpl onEnableSession();
     @nullable CaptureStageImpl onDisableSession();
+    int getSessionType();
 
     boolean isExtensionAvailable(in String cameraId, in CameraMetadataNative chars);
     void init(in String cameraId, in CameraMetadataNative chars);
@@ -38,7 +40,11 @@ interface IImageCaptureExtenderImpl
     @nullable List<CaptureStageImpl> getCaptureStages();
     int getMaxCaptureStage();
     @nullable List<SizeList> getSupportedResolutions();
+    @nullable List<SizeList> getSupportedPostviewResolutions(in Size captureSize);
     LatencyRange getEstimatedCaptureLatencyRange(in Size outputSize);
     CameraMetadataNative getAvailableCaptureRequestKeys();
     CameraMetadataNative getAvailableCaptureResultKeys();
+    boolean isCaptureProcessProgressAvailable();
+    @nullable LatencyPair getRealtimeCaptureLatency();
+    boolean isPostviewAvailable();
 }

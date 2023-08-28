@@ -13,7 +13,6 @@ java_defaults {
     plugins: ["error_prone_android_framework"],
     errorprone: {
         javacflags: [
-            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             // "-Xep:AndroidFrameworkUid:ERROR",
             "-Xep:SelfEquals:ERROR",
@@ -66,9 +65,17 @@ system_optimized_java_defaults {
                     ":framework-res{.aapt.proguardOptionsFile}",
                 ],
             },
-            // Note: Optimizations are disabled by default if unspecified in
-            // the java_library rule.
-            conditions_default: {},
+            conditions_default: {
+                optimize: {
+                    enabled: true,
+                    optimize: false,
+                    shrink: true,
+                    ignore_warnings: false,
+                    // Note that this proguard config is very conservative, only shrinking the
+                    // permission subpackage to prune unused jarjar'ed Kotlin dependencies.
+                    proguard_flags_files: ["proguard_permission.flags"],
+                },
+            },
         },
     },
 }
@@ -94,20 +101,23 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
-        ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
         ":services.coverage-sources",
+        ":services.credentials-sources",
         ":services.devicepolicy-sources",
         ":services.midi-sources",
         ":services.musicsearch-sources",
         ":services.net-sources",
+        ":services.permission-sources",
         ":services.print-sources",
         ":services.profcollect-sources",
         ":services.restrictions-sources",
         ":services.searchui-sources",
+        ":services.selectiontoolbar-sources",
         ":services.smartspace-sources",
+        ":services.soundtrigger-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
@@ -136,6 +146,7 @@ java_library {
         app_image: true,
         profile: "art-profile",
     },
+    exclude_kotlinc_generated_files: true,
 
     srcs: [":services-main-sources"],
 
@@ -151,16 +162,20 @@ java_library {
         "services.contentcapture",
         "services.contentsuggestions",
         "services.coverage",
+        "services.credentials",
         "services.devicepolicy",
         "services.midi",
         "services.musicsearch",
         "services.net",
         "services.people",
+        "services.permission",
         "services.print",
         "services.profcollect",
         "services.restrictions",
         "services.searchui",
+        "services.selectiontoolbar",
         "services.smartspace",
+        "services.soundtrigger",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
@@ -185,6 +200,10 @@ java_library {
 
     vintf_fragments: [
         "manifest_services.xml",
+    ],
+
+    required: [
+        "libukey2_jni_shared",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

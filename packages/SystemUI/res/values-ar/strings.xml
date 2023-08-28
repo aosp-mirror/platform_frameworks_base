@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"سماح"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تفعيل تصحيح الأخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"‏لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح أخطاء الجهاز عبر USB\". لاستخدام هذه الميزة، يمكنك التبديل إلى مستخدم مشرف."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"هل تريد تغيير لغة النظام إلى <xliff:g id="LANGUAGE">%1$s</xliff:g>؟"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"طلب جهاز آخر تغيير لغة النظام."</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"تغيير اللغة"</string>
@@ -62,14 +62,14 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"السماح باستخدام هذه الميزة على هذه الشبكة دائمًا"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"سماح"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"غير مسموح باستخدام ميزة \"تصحيح الأخطاء اللاسلكي\""</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\". لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"لا يمكن للمستخدم المسجِّل دخوله حاليًا على هذا الجهاز تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\". لاستخدام هذه الميزة، يمكنك التبديل إلى مستخدم مشرف."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏تمّ إيقاف منفذ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"‏لحماية جهازك من السوائل أو الشوائب، سيتمّ إيقاف منفذ USB ولن يتم رصد أيّ ملحقات.\n\nوسيتمّ إعلامك عندما يُسمح باستخدام منفذ USB مرة أخرى."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"‏تم تفعيل منفذ USB لاكتشاف أجهزة الشحن والملحقات."</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"‏تفعيل USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"مزيد من المعلومات"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"لقطة شاشة"</string>
-    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"‏تم إيقاف Smart Lock."</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"‏تم إيقاف ميزة Extend Unlock."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"أرسَل صورة"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"جارٍ حفظ لقطة الشاشة في الملف الشخصي للعمل…"</string>
@@ -95,6 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"الملفات"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" لقطة الشاشة هذه."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" والتطبيقات المفتوحة الأخرى لقطة الشاشة هذه."</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"إضافة إلى الملاحظة"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -268,7 +269,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"جارٍ التفعيل…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"توفير البيانات مفعّل"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{جهاز واحد}zero{# جهاز}two{جهازان}few{# أجهزة}many{# جهازًا}other{# جهاز}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ضوء الفلاش"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"الفلاش"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"الكاميرا قيد الاستخدام"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"بيانات الجوّال"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"استخدام البيانات"</string>
@@ -298,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"بدء"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"إيقاف"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"وضع \"التصفح بيد واحدة\""</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"التباين"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"عادي"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"متوسط"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"مرتفع"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"هل تريد إزالة حظر ميكروفون الجهاز؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"هل تريد إزالة حظر كاميرا الجهاز؟"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"هل تريد إزالة حظر الكاميرا والميكروفون؟"</string>
@@ -313,6 +318,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"يمكنك الوصول إلى الميكروفون الآن."</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"يمكنك الوصول إلى الكاميرا الآن."</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"يمكنك الوصول إلى الميكروفون والكاميرا الآن."</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"تم تفعيل الميكروفون"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"تم إيقاف الميكروفون."</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"تم تفعيل الميكروفون لكل التطبيقات والخدمات."</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"‏تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الميكروفون. يمكنك تفعيل إمكانية الوصول إلى الميكروفون في الإعدادات &gt; الخصوصية &gt; الميكروفون."</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"‏تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الميكروفون. يمكنك تغيير ذلك في الإعدادات &gt; الخصوصية &gt; الميكروفون."</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"تم تفعيل الكاميرا"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"تم إيقاف الكاميرا"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"تم تفعيل الكاميرا لكل التطبيقات والخدمات."</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"تم إيقاف إمكانية وصول كل التطبيقات والخدمات إلى الكاميرا."</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"لاستخدام زر الميكروفون، عليك تفعيل إمكانية الوصول إلى الميكروفون في \"الإعدادات\"."</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"فتح الإعدادات"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"جهاز آخر"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تبديل \"النظرة العامة\""</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
@@ -331,12 +347,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"تم التعرّف على الوجه. اضغط على رمز فتح القفل لفتح الجهاز."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"تم فتح قفل جهازك عند تقريبه من وجهك."</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"تم التعرّف على الوجه."</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"نقل لليسار"</item>
-    <item msgid="5558598599408514296">"نقل للأسفل"</item>
-    <item msgid="4844142668312841831">"نقل لليمين"</item>
-    <item msgid="5640521437931460125">"نقل للأعلى"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
@@ -452,6 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"إيقاف"</string>
     <string name="sound_settings" msgid="8874581353127418308">"الصوت والاهتزاز"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"الإعدادات"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"تم خفض الصوت إلى المستوى الآمن"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"كان مستوى الصوت مرتفعًا لمدة أطول مما يُنصَح به."</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"تم تثبيت الشاشة على التطبيق"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"الشاشة الرئيسية\" لإزالة التثبيت."</string>
@@ -608,14 +620,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"الإشعارات"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"اختصارات لوحة المفاتيح"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"تبديل تنسيق لوحة المفاتيح"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"محو النص"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"الاختصارات"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"البحث في الاختصارات"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"لم يُعثَر على اختصارات."</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"النظام"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"إدخال"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"فتح التطبيقات"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"التطبيق الحالي"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"الوصول إلى مركز الإشعارات"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"أخذ لقطة شاشة كاملة"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"الوصول إلى قائمة اختصارات التطبيقات والنظام"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"رجوع: العودة إلى الحالة السابقة (زر الرجوع)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"الوصول إلى الشاشة الرئيسية"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"نظرة عامة على التطبيقات المفتوحة"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"التنقّل بين التطبيقات الحديثة (للأمام)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"التنقّل بين التطبيقات الحديثة (للخلف)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"قائمة الوصول لجميع التطبيقات والبحث (أي البحث/مشغّل التطبيقات)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"إظهار أو إخفاء أو إعادة إظهار شريط التطبيقات"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"الوصول إلى إعدادات النظام"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"‏الوصول إلى \"مساعد Google\""</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"شاشة القفل"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"‏سحب تطبيق Notes لإضافة مذكّرة سريعة"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"تعدُّد المهام في النظام"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"الدخول في وضع \"تقسيم الشاشة\" مع عرض التطبيق الحالي على يسار الشاشة"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"الدخول في وضع \"تقسيم الشاشة\" مع عرض التطبيق الحالي على يمين الشاشة"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"التبديل من وضع \"تقسيم الشاشة\" إلى \"ملء الشاشة\""</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"في وضع \"تقسيم الشاشة\": استبدِل التطبيقات من تطبيق إلى آخر"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"إدخال"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"تبديل لغة الإدخال (اللغة التالية)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"تبديل لغة الإدخال (اللغة السابقة)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"الوصول إلى الرموز التعبيرية"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"الوصول إلى ميزة \"الكتابة بالصوت\""</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"التطبيقات"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"التطبيق المساعد"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"المتصفح"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"‏المتصفّح (فتح Chrome تلقائيًا)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"جهات الاتصال"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"البريد الإلكتروني"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"‏البريد الإلكتروني (فتح Gmail تلقائيًا)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"‏الرسائل القصيرة SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"الموسيقى"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"التقويم"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"الآلة الحاسبة"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"‏خرائط Google"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"عدم الإزعاج"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"اختصار أزرار مستوى الصوت"</string>
     <string name="battery" msgid="769686279459897127">"البطارية"</string>
@@ -765,8 +811,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(العمل)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"المكالمات الهاتفية"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(من خلال <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -792,15 +838,38 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"مفتاح تبديل وضع التكبير"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"تكبير الشاشة كلها"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"تكبير جزء من الشاشة"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"فتح إعدادات التكبير"</string>
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"اسحب الزاوية لتغيير الحجم."</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"السماح بالتمرير القطري"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"تغيير الحجم"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"تغيير نوع التكبير"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"إيقاف تغيير الحجم"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"المقبض العلوي"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"المقبض الأيسر"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"المقبض الأيمن"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"المقبض السفلي"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"إعدادات التكبير"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"حجم مكبّر الشاشة"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"تكبير/تصغير"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"متوسط"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"صغير"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"كبير"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"ملء الشاشة"</string>
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"تم"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"تعديل"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"إعدادات نافذة مكبّر الشاشة"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"انقر لفتح ميزات تسهيل الاستخدام. يمكنك تخصيص هذا الزر أو استبداله من الإعدادات.\n\n"<annotation id="link">"عرض الإعدادات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"يمكنك نقل الزر إلى الحافة لإخفائه مؤقتًا."</string>
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"تراجع"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"تمت إزالة اختصار <xliff:g id="FEATURE_NAME">%s</xliff:g>."</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{تمت إزالة اختصار واحد.}zero{تمت إزالة # اختصار.}two{تمت إزالة اختصارَين.}few{تمت إزالة # اختصارات.}many{تمت إزالة # اختصارًا.}other{تمت إزالة # اختصار.}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"النقل إلى أعلى يمين الشاشة"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"النقل إلى أعلى يسار الشاشة"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"النقل إلى أسفل يمين الشاشة"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"النقل إلى أسفل يسار الشاشة"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"النقل إلى الحافة والإخفاء"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"إزالة"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"التحكم بالجهاز"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"اختيار تطبيق لإضافة عناصر التحكّم"</string>
@@ -816,11 +885,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"إزالة من المفضّلة"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"نقل إلى الموضع <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"عناصر التحكّم"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"اختَر عناصر التحكّم التي يتم الوصول إليها من \"الإعدادات السريعة\"."</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"اضغط مع الاستمرار واسحب لإعادة ترتيب عناصر التحكّم."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"تمت إزالة كل عناصر التحكّم."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"لم يتم حفظ التغييرات."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"عرض التطبيقات الأخرى"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"إعادة الترتيب"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"إضافة عناصر تحكّم"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"الرجوع إلى التعديل"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"تعذَّر تحميل عناصر التحكّم. تحقّق من تطبيق <xliff:g id="APP">%s</xliff:g> للتأكّد من أنه لم يتم تغيير إعدادات التطبيق."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"عناصر التحكّم المتوافقة غير متوفّرة"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
@@ -896,7 +969,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"مكبّرات الصوت والشاشات"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"الأجهزة المقترَحة"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"يجب استخدام حساب مدفوع."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
@@ -913,7 +985,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"أدوات المحادثة"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>
@@ -1003,13 +1075,14 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"التعديل"</string>
     <string name="add" msgid="81036585205287996">"إضافة"</string>
     <string name="manage_users" msgid="1823875311934643849">"إدارة المستخدمين"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"لا يتيح هذا الإشعار السحب لتقسيم الشاشة."</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"لا يتيح هذا الإشعار إمكانية السحب لتقسيم الشاشة."</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"‏شبكة Wi‑Fi غير متاحة"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"وضع الأولوية"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"تم ضبط المنبه."</string>
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"الكاميرا غير مفعّلة"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"الميكروفون غير مفعّل"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"الكاميرا والميكروفون غير مفعّلين."</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"‏يستمع \"مساعد Google\" إليك الآن."</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{إشعار واحد}zero{# إشعار}two{إشعاران}few{# إشعارات}many{# إشعارًا}other{# إشعار}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>، <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"تدوين الملاحظات"</string>
@@ -1021,6 +1094,12 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"غير معروف"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"هل تريد السماح لتطبيق \"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>\" بالوصول إلى جميع سجلّات الجهاز؟"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"عدم السماح"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلّها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"مزيد من المعلومات"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"مزيد من المعلومات على <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"فتح \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• إعداد التطبيق"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"‏• إضافة بطاقة واحدة على الأقل إلى \"محفظة Google\""</string>
@@ -1044,10 +1123,15 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"تسمح لك سياسة العمل بإجراء المكالمات الهاتفية من الملف الشخصي للعمل فقط."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"التبديل إلى الملف الشخصي للعمل"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"إغلاق"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"إعدادات شاشة القفل"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"تخصيص شاشة القفل"</string>
+    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
+    <skip />
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"‏لا يتوفّر اتصال Wi-Fi."</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"استخدام الكاميرا محظور."</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"استخدام الكاميرا والميكروفون محظور."</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"استخدام الميكروفون محظور."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"وضع الأولوية مفعّل."</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"‏ميزة لفت انتباه \"مساعد Google\" مفعّلة."</string>
+    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
+    <skip />
 </resources>

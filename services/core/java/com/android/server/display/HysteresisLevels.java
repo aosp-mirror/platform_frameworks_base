@@ -42,15 +42,17 @@ public class HysteresisLevels {
      * @param brighteningThresholdsPercentages 0-100 of thresholds
      * @param darkeningThresholdsPercentages 0-100 of thresholds
      * @param brighteningThresholdLevels float array of brightness values in the relevant units
-     * @param darkeningThresholdLevels float array of brightness values in the relevant units
      * @param minBrighteningThreshold the minimum value for which the brightening value needs to
      *                                return.
      * @param minDarkeningThreshold the minimum value for which the darkening value needs to return.
-     */
+     * @param potentialOldBrightnessRange whether or not the values used could be from the old
+     *                                    screen brightness range ie, between 1-255.
+    */
     HysteresisLevels(float[] brighteningThresholdsPercentages,
             float[] darkeningThresholdsPercentages,
             float[] brighteningThresholdLevels, float[] darkeningThresholdLevels,
-            float minDarkeningThreshold, float minBrighteningThreshold) {
+            float minDarkeningThreshold, float minBrighteningThreshold,
+            boolean potentialOldBrightnessRange) {
         if (brighteningThresholdsPercentages.length != brighteningThresholdLevels.length
                 || darkeningThresholdsPercentages.length != darkeningThresholdLevels.length) {
             throw new IllegalArgumentException("Mismatch between hysteresis array lengths.");
@@ -63,6 +65,15 @@ public class HysteresisLevels {
         mDarkeningThresholdLevels = setArrayFormat(darkeningThresholdLevels, 1.0f);
         mMinDarkening = minDarkeningThreshold;
         mMinBrightening = minBrighteningThreshold;
+    }
+
+    HysteresisLevels(float[] brighteningThresholdsPercentages,
+            float[] darkeningThresholdsPercentages,
+            float[] brighteningThresholdLevels, float[] darkeningThresholdLevels,
+            float minDarkeningThreshold, float minBrighteningThreshold) {
+        this(brighteningThresholdsPercentages, darkeningThresholdsPercentages,
+                brighteningThresholdLevels, darkeningThresholdLevels, minDarkeningThreshold,
+                minBrighteningThreshold, false);
     }
 
     /**
@@ -122,7 +133,6 @@ public class HysteresisLevels {
         }
         return levelArray;
     }
-
 
     void dump(PrintWriter pw) {
         pw.println("HysteresisLevels");

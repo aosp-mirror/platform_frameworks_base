@@ -1090,7 +1090,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 handlePeersChanged();
             } else if (action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
                 NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
-                        WifiP2pManager.EXTRA_NETWORK_INFO);
+                        WifiP2pManager.EXTRA_NETWORK_INFO, android.net.NetworkInfo.class);
                 if (DEBUG) {
                     Slog.d(TAG, "Received WIFI_P2P_CONNECTION_CHANGED_ACTION: networkInfo="
                             + networkInfo);
@@ -1099,7 +1099,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 handleConnectionChanged(networkInfo);
             } else if (action.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
                 mThisDevice = (WifiP2pDevice) intent.getParcelableExtra(
-                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE, android.net.wifi.p2p.WifiP2pDevice.class);
                 if (DEBUG) {
                     Slog.d(TAG, "Received WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: mThisDevice= "
                             + mThisDevice);

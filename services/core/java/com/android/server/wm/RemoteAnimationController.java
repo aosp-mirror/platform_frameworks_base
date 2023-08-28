@@ -362,15 +362,8 @@ class RemoteAnimationController implements DeathRecipient {
 
     private void invokeAnimationCancelled(String reason) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "cancelAnimation(): reason=%s", reason);
-        final boolean isKeyguardOccluded = mDisplayContent.isKeyguardOccluded();
-
         try {
-            EventLogTags.writeWmSetKeyguardOccluded(
-                    isKeyguardOccluded ? 1 : 0,
-                    0 /* animate */,
-                    0 /* transit */,
-                    "onAnimationCancelled");
-            mRemoteAnimationAdapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
+            mRemoteAnimationAdapter.getRunner().onAnimationCancelled();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to notify cancel", e);
         }

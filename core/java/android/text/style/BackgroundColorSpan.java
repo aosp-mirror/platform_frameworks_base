@@ -100,4 +100,9 @@ public class BackgroundColorSpan extends CharacterStyle
     public void updateDrawState(@NonNull TextPaint textPaint) {
         textPaint.bgColor = mColor;
     }
+
+    @Override
+    public String toString() {
+        return "BackgroundColorSpan{color=#" + String.format("%08X", getBackgroundColor()) + '}';
+    }
 }

@@ -190,14 +190,15 @@ public class Ringtone {
 
     /**
      * Creates a local media player for the ringtone using currently set attributes.
-     *
+     * @return true if media player creation succeeded or is deferred,
+     * false if it did not succeed and can't be tried remotely.
      * @hide
      */
-    public void createLocalMediaPlayer() {
+    public boolean createLocalMediaPlayer() {
         Trace.beginSection("createLocalMediaPlayer");
         if (mUri == null) {
             Log.e(TAG, "Could not create media player as no URI was provided.");
-            return;
+            return mAllowRemote && mRemotePlayer != null;
         }
         destroyLocalPlayer();
         // try opening uri locally before delegating to remote player
@@ -230,6 +231,30 @@ public class Ringtone {
             }
         }
         Trace.endSection();
+        return mLocalPlayer != null || (mAllowRemote && mRemotePlayer != null);
+    }
+
+    /**
+     * Same as AudioManager.hasHapticChannels except it assumes an already created ringtone.
+     * If the ringtone has not been created, it will load based on URI provided at {@link #setUri}
+     * and if not URI has been set, it will assume no haptic channels are present.
+     * @hide
+     */
+    public boolean hasHapticChannels() {
+        // FIXME: support remote player, or internalize haptic channels support and remove entirely.
+        try {
+            android.os.Trace.beginSection("Ringtone.hasHapticChannels");
+            if (mLocalPlayer != null) {
+                for(MediaPlayer.TrackInfo trackInfo : mLocalPlayer.getTrackInfo()) {
+                    if (trackInfo.hasHapticChannels()) {
+                        return true;
+                    }
+                }
+            }
+        } finally {
+            android.os.Trace.endSection();
+        }
+        return false;
     }
 
     /**
@@ -458,7 +483,6 @@ public class Ringtone {
      */
     public void setUri(Uri uri, @Nullable VolumeShaper.Configuration volumeShaperConfig) {
         mVolumeShaperConfig = volumeShaperConfig;
-
         mUri = uri;
         if (mUri == null) {
             destroyLocalPlayer();
@@ -478,10 +502,11 @@ public class Ringtone {
         if (mLocalPlayer != null) {
             // Play ringtones if stream volume is over 0 or if it is a haptic-only ringtone
             // (typically because ringer mode is vibrate).
-            boolean isHapticOnly = AudioManager.hasHapticChannels(mContext, mUri)
-                    && !mAudioAttributes.areHapticChannelsMuted() && mVolume == 0;
-            if (isHapticOnly || mAudioManager.getStreamVolume(
-                    AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
+            if (mAudioManager.getStreamVolume(AudioAttributes.toLegacyStreamType(mAudioAttributes))
+                    != 0) {
+                startLocalPlayer();
+            } else if (!mAudioAttributes.areHapticChannelsMuted() && hasHapticChannels()) {
+                // is haptic only ringtone
                 startLocalPlayer();
             }
         } else if (mAllowRemote && (mRemotePlayer != null) && (mUri != null)) {

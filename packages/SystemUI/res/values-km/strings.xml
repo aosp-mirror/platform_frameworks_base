@@ -52,7 +52,7 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"អនុញ្ញាត​ជា​និច្ច​សម្រាប់​កុំព្យូទ័រ​នេះ"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"អនុញ្ញាត"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"មិនអនុញ្ញាតការកែកំហុសតាម USB ទេ"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="1888835696965417845">"អ្នកប្រើ​ប្រាស់ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការ​ជួសជុលតាម USB បានទេ។ ដើម្បីប្រើប្រាស់មុខងារនេះ សូមប្ដូរទៅអ្នកប្រើប្រាស់​ដែលជាអ្នកគ្រប់គ្រង។"</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"តើអ្នកចង់ប្ដូរ​ភាសាប្រព័ន្ធ​ទៅភាសា​<xliff:g id="LANGUAGE">%1$s</xliff:g>​ដែរទេ?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"ការប្ដូរភាសា​ប្រព័ន្ធដែលបានស្នើសុំ​ដោយ​ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"​ប្ដូរ​ភាសា"</string>
@@ -62,14 +62,14 @@
     <string name="wifi_debugging_always" msgid="2968383799517975155">"អនុញ្ញាត​នៅលើ​បណ្ដាញ​នេះ​ជានិច្ច"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"អនុញ្ញាត"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"មិន​អនុញ្ញាត​ការជួសជុល​ដោយឥតខ្សែ​ទេ"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"អ្នក​ប្រើប្រាស់​ដែលបច្ចុប្បន្ន​បាន​ចូលគណនី​នៅលើ​ឧបករណ៍​នេះ​មិនអាច​បើក​ការជួសជុល​ដោយឥតខ្សែ​បានទេ។ ដើម្បី​ប្រើ​មុខងារ​នេះ សូម​ប្ដូរ​ទៅ​អ្នក​ប្រើប្រាស់​ចម្បង។"</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="9085779370142222881">"អ្នក​ប្រើប្រាស់​ដែលបច្ចុប្បន្ន​បាន​ចូលគណនី​នៅលើ​ឧបករណ៍​នេះ​មិនអាច​បើក​ការជួសជុល​ដោយឥតខ្សែ​បានទេ។ ដើម្បី​ប្រើប្រាស់​មុខងារ​នេះ សូម​ប្ដូរ​ទៅ​អ្នកប្រើប្រាស់​ដែលជាអ្នកគ្រប់គ្រង។"</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"បានបិទរន្ធ USB"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"ដើម្បី​ការពារ​ឧបករណ៍​របស់អ្នកកុំឱ្យ​ចូលទឹក ឬ​កម្ទេចផ្សេងៗ រន្ធ USB ត្រូវបានបិទ ហើយ​នឹង​មិនស្គាល់​គ្រឿង​បរិក្ខារ​នោះទេ។\n\nអ្នកនឹង​ទទួលបាន​ការជូនដំណឺង នៅពេល​អ្នកអាច​ប្រើប្រាស់​រន្ធ USB ម្ដងទៀត។"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"បាន​បើក​រន្ធ USB ដើម្បី​សម្គាល់​ឆ្នាំងសាក និងគ្រឿងផ្សេងៗ"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"បើក USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"ស្វែងយល់​បន្ថែម"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"រូបថតអេក្រង់"</string>
-    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"បានបិទ Smart Lock"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"បានបិទការដោះសោបន្ថែម"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"បាន​ផ្ញើរូបភាព"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"កំពុងរក្សាទុករូបថតអេក្រង់ទៅកម្រងព័ត៌មានការងារ…"</string>
@@ -95,6 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ឯកសារ"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> បានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> និងកម្មវិធីដែលបើក​ផ្សេងទៀតបានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"បញ្ចូលទៅក្នុងកំណត់ចំណាំ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
@@ -298,6 +299,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"មុខងារប្រើដៃម្ខាង"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"កម្រិត​រំលេចពណ៌"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ស្តង់ដារ"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"មធ្យម"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"ខ្ពស់"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ឈប់ទប់ស្កាត់​មីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ឈប់ទប់ស្កាត់​កាមេរ៉ា​របស់ឧបករណ៍ឬ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ឈប់ទប់ស្កាត់​កាមេរ៉ា និងមីក្រូហ្វូន​របស់ឧបករណ៍ឬ?"</string>
@@ -313,6 +318,17 @@
     <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"អាចប្រើមីក្រូហ្វូនបាន"</string>
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"អាចប្រើកាមេរ៉ាបាន"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"អាចប្រើកាមេរ៉ា និងមីក្រូហ្វូនបាន"</string>
+    <string name="sensor_privacy_mic_turned_on_dialog_title" msgid="6348853159838376513">"បានបើក​មីក្រូហ្វូន"</string>
+    <string name="sensor_privacy_mic_turned_off_dialog_title" msgid="5760464281790732849">"បានបិទ​មីក្រូហ្វូន"</string>
+    <string name="sensor_privacy_mic_unblocked_dialog_content" msgid="4889961886199270224">"មីក្រូហ្វូនត្រូវបានបើកសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_mic_blocked_no_exception_dialog_content" msgid="5864898470772965394">"សិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូនត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។ អ្នកអាចបើកសិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូននៅក្នុងការកំណត់ &gt; ឯកជនភាព &gt; មីក្រូហ្វូន។"</string>
+    <string name="sensor_privacy_mic_blocked_with_exception_dialog_content" msgid="810289713700437896">"សិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូនត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។ អ្នកអាចផ្លាស់ប្ដូរលក្ខណៈនេះនៅក្នុងការកំណត់ &gt; ឯកជនភាព &gt; មីក្រូហ្វូន។"</string>
+    <string name="sensor_privacy_camera_turned_on_dialog_title" msgid="8039095295100075952">"បាន​បើក​កាមេរ៉ា"</string>
+    <string name="sensor_privacy_camera_turned_off_dialog_title" msgid="1936603903120742696">"បានបិទ​កាមេរ៉ា"</string>
+    <string name="sensor_privacy_camera_unblocked_dialog_content" msgid="7847190103011782278">"កាមេរ៉ាត្រូវបានបើកសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_camera_blocked_dialog_content" msgid="3182428709314874616">"សិទ្ធិចូលប្រើប្រាស់កាមេរ៉ាត្រូវបានបិទសម្រាប់កម្មវិធី និងសេវាកម្មទាំងអស់។"</string>
+    <string name="sensor_privacy_htt_blocked_dialog_content" msgid="3333321592997666441">"ដើម្បីប្រើប្រាស់ប៊ូតុងមីក្រូហ្វូន សូមបើកសិទ្ធិចូលប្រើប្រាស់មីក្រូហ្វូននៅក្នុងការកំណត់។"</string>
+    <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"បើកការកំណត់"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -331,12 +347,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"បានស្គាល់មុខ។ សូមចុចរូបដោះសោ ដើម្បីបើក។"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"បានដោះសោដោយប្រើមុខ"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"បានស្គាល់មុខ"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"ផ្លាស់ទី​ទៅ​ឆ្វេង"</item>
-    <item msgid="5558598599408514296">"ផ្លាស់ទី​ចុះ​ក្រោម"</item>
-    <item msgid="4844142668312841831">"ផ្លាស់ទីទៅ​ស្តាំ"</item>
-    <item msgid="5640521437931460125">"ផ្លាស់ទី​ឡើង​លើ"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
@@ -452,6 +462,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"បិទ"</string>
     <string name="sound_settings" msgid="8874581353127418308">"សំឡេង និងការញ័រ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ការកំណត់"</string>
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"បានបន្ថយទៅកម្រិតសំឡេង​ដែលកាន់តែមានសុវត្ថិភាព"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"កម្រិតសំឡេងខ្ពស់​ក្នុងរយៈពេលយូរជាងកម្រិត​ដែលបានណែនាំ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
@@ -608,14 +620,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ការជូនដំណឹង"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ផ្លូវកាត់ក្ដារចុច"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ប្ដូរប្លង់ក្ដារចុច"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"សម្អាតអក្សរ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ផ្លូវកាត់"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ផ្លូវកាត់ម៉ាស៊ីនស្វែងរក"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"រកផ្លូវកាត់មិនឃើញទេ"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ប្រព័ន្ធ"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"បញ្ចូល"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"កម្មវិធីដែលបើក"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"កម្មវិធីបច្ចុប្បន្ន"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"ចូលប្រើប្រាស់ផ្ទាំងជូនដំណឹង"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"ថតរូបថតអេក្រង់ពេញ"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"ចូលប្រើប្រាស់បញ្ជីប្រព័ន្ធ/ផ្លូវកាត់​កម្មវិធី"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"ថយក្រោយ៖ ត្រឡប់ទៅស្ថានភាពពីមុនវិញ (ប៊ូតុងថយក្រោយ)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"ចូលប្រើប្រាស់អេក្រង់ដើម"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"ទិដ្ឋភាពរួមអំពីកម្មវិធីដែលបើក"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"រុករកកម្មវិធីថ្មីៗ (ទៅមុខ)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"រុករកកម្មវិធីថ្មីៗ (ថយក្រោយ)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"ចូលប្រើប្រាស់បញ្ជីកម្មវិធី និងម៉ាស៊ីនស្វែងរកទាំងអស់ (ឧ. ម៉ាស៊ីនស្វែងរក/កម្មវិធីចាប់ផ្ដើម)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"លាក់ រួចបង្ហាញរបារកិច្ចការ (ឡើងវិញ)"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"ចូលប្រើប្រាស់ការ​កំណត់​ប្រព័ន្ធ"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"ចូលប្រើប្រាស់ Google Assistant"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"ទាញកម្មវិធីកំណត់ចំណាំឡើងលើ ដើម្បីប្រើកំណត់ហេតុរហ័ស"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ការដំណើរការបានច្រើននៃប្រព័ន្ធ"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅចំហៀងខាងស្ដាំ"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"ចូលក្នុងមុខងារ​បំបែកអេក្រង់ដោយប្រើកម្មវិធីបច្ចុប្បន្ននៅចំហៀងខាងឆ្វេង"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"ប្ដូរពីមុខងារ​បំបែកអេក្រង់ទៅជាអេក្រង់ពេញ"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"អំឡុងពេលប្រើមុខងារ​បំបែកអេក្រង់៖ ជំនួសកម្មវិធីពីកម្មវិធីមួយទៅមួយទៀត"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"បញ្ចូល"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"ប្ដូរភាសាបញ្ចូល (ភាសាបន្ទាប់)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"ប្ដូរភាសាបញ្ចូល (ភាសាមុន)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"ចូលប្រើប្រាស់រូបអារម្មណ៍"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"ចូលប្រើប្រាស់ការវាយបញ្ចូលដោយប្រើសំឡេង"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"កម្មវិធី"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"ជំនួយ"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"កម្មវិធីរុករក"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"កម្មវិធីរុករកតាមអ៊ីនធឺណិត (Chrome តាមលំនាំដើម)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"ទំនាក់ទំនង"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"អ៊ីមែល"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"អ៊ីមែល (Gmail តាមលំនាំដើម)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"សារ SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"តន្ត្រី"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"ប្រតិទិន"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ម៉ាស៊ីនគិតលេខ"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ផែនទី"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"កុំ​រំខាន"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ផ្លូវកាត់ប៊ូតុងកម្រិតសំឡេង"</string>
     <string name="battery" msgid="769686279459897127">"ថ្ម"</string>
@@ -792,15 +838,38 @@
     <string name="magnification_mode_switch_description" msgid="2698364322069934733">"ប៊ូតុងបិទបើកការ​ពង្រីក"</string>
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"ពង្រីក​ពេញអេក្រង់"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"ពង្រីក​ផ្នែកនៃ​អេក្រង់"</string>
-    <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"ប៊ូតុងបិទបើក"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"បើកការកំណត់​ការពង្រីក"</string>
+    <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"អូសជ្រុងដើម្បីប្ដូរទំហំ"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"អនុញ្ញាត​ការរំកិលបញ្ឆិត"</string>
+    <string name="accessibility_resize" msgid="5733759136600611551">"ប្ដូរ​ទំហំ"</string>
+    <string name="accessibility_change_magnification_type" msgid="666000085077432421">"ប្ដូរ​ប្រភេទ​ការពង្រីក"</string>
+    <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"បញ្ចប់​ការប្ដូរទំហំ"</string>
+    <string name="accessibility_magnification_top_handle" msgid="2716851102182220718">"ដង​ខាងលើ"</string>
+    <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"ដង​ខាងឆ្វេង"</string>
+    <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"ដង​ខាងស្ដាំ"</string>
+    <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"ដង​ខាងក្រោម"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"ការកំណត់​ការពង្រីក"</string>
+    <string name="accessibility_magnifier_size" msgid="3038755600030422334">"ទំហំកម្មវិធីពង្រីក"</string>
+    <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"ពង្រីកបង្រួម"</string>
+    <string name="accessibility_magnification_medium" msgid="6994632616884562625">"មធ្យម"</string>
+    <string name="accessibility_magnification_small" msgid="8144502090651099970">"តូច"</string>
+    <string name="accessibility_magnification_large" msgid="6602944330021308774">"ធំ"</string>
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"អេក្រង់ពេញ"</string>
+    <string name="accessibility_magnification_done" msgid="263349129937348512">"រួចរាល់"</string>
+    <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"កែ"</string>
+    <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"ការកំណត់វិនដូ​កម្មវិធីពង្រីក"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"ចុចដើម្បីបើក​មុខងារ​ភាពងាយស្រួល។ ប្ដូរ ឬប្ដូរ​ប៊ូតុងនេះ​តាមបំណង​នៅក្នុង​ការកំណត់។\n\n"<annotation id="link">"មើល​ការកំណត់"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ផ្លាស់ទី​ប៊ូតុង​ទៅគែម ដើម្បីលាក់វា​ជាបណ្ដោះអាសន្ន"</string>
+    <string name="accessibility_floating_button_undo" msgid="511112888715708241">"ត្រឡប់វិញ"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"បានដក​ផ្លូវកាត់ <xliff:g id="FEATURE_NAME">%s</xliff:g> ចេញ"</string>
+    <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{បានដក​ផ្លូវកាត់ # ចេញ}other{បាន​ដក​ផ្លូវ​កាត់ # ចេញ}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងឆ្វេង"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ផ្លាស់ទីទៅខាងលើផ្នែកខាងស្ដាំ"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"ផ្លាស់ទីទៅខាងក្រោមផ្នែកខាងឆ្វេង​"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"ផ្លាស់ទីទៅខាងក្រោមផ្នែកខាងស្ដាំ"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"ផ្លាស់ទីទៅផ្នែកខាងចុង រួចលាក់"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"ផ្លាស់ទីចេញពីផ្នែកខាងចុង រួចបង្ហាញ"</string>
+    <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"ដកចេញ"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"បិទ/បើក"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"ជ្រើសរើស​កម្មវិធីដែលត្រូវបញ្ចូល​ផ្ទាំងគ្រប់គ្រង"</string>
@@ -816,11 +885,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ដកចេញ​ពី​សំណព្វ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ផ្លាស់ទី​ទៅតាំងទី <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ការគ្រប់គ្រង"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"ជ្រើសរើសការគ្រប់គ្រង ដើម្បីចូលប្រើពីការកំណត់រហ័ស"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ផ្ទាំងគ្រប់គ្រង​ឡើងវិញ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​ដកផ្ទាំងគ្រប់គ្រងទាំងអស់ហើយ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"មិនបាន​រក្សាទុក​ការផ្លាស់ប្ដូរទេ"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"មើល​កម្មវិធី​ផ្សេងទៀត"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"តម្រៀបឡើងវិញ"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"បញ្ចូល​ការគ្រប់គ្រង"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"ត្រឡប់​ទៅ​ការកែ​វិញ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"មិនអាចផ្ទុក​ការគ្រប់គ្រង​បានទេ។ សូមពិនិត្យមើល​កម្មវិធី <xliff:g id="APP">%s</xliff:g> ដើម្បីធ្វើឱ្យប្រាកដថា​ការកំណត់កម្មវិធី​មិនបានផ្លាស់ប្ដូរ។"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"មិនអាចប្រើ​ការគ្រប់គ្រង​ដែលត្រូវគ្នា​បានទេ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
@@ -896,7 +969,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ឧបករណ៍បំពងសំឡេង និងផ្ទាំងអេក្រង់"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ឧបករណ៍​ដែលបានណែនាំ"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ត្រូវការគណនីលំដាប់ខ្ពស់"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -1003,13 +1075,14 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"កែ"</string>
     <string name="add" msgid="81036585205287996">"បញ្ចូល"</string>
     <string name="manage_users" msgid="1823875311934643849">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
-    <string name="drag_split_not_supported" msgid="4326847447699729722">"ការជូនដំណឹងនេះមិនអាចឱ្យអូសដើម្បីបំបែកអេក្រង់បានទេ។"</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"ការជូនដំណឹងនេះមិនអាចឱ្យអូសដើម្បីបំបែកអេក្រង់បានទេ"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi ត្រូវបានបិទ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"មុខងារ​អាទិភាព"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"រូបកំណត់​ម៉ោងរោទ៍"</string>
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"កាមេរ៉ា​ត្រូវបានបិទ"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"មីក្រូហ្វូន​ត្រូវ​បាន​បិទ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"កាមេរ៉ា និង​មីក្រូហ្វូន​ត្រូវបានបិទ"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Google Assistant កំពុងស្តាប់"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{ការ​ជូន​ដំណឹង #}other{ការ​ជូនដំណឹង #}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"ការកត់ត្រា​"</string>
@@ -1021,6 +1094,12 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"មិនស្គាល់"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"អនុញ្ញាតឱ្យ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ឬ?"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"អនុញ្ញាតឱ្យចូលប្រើ​ប្រាស់តែមួយលើក"</string>
+    <string name="log_access_confirmation_deny" msgid="2389461495803585795">"មិនអនុញ្ញាត"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"កំណត់ហេតុឧបករណ៍កត់ត្រាអ្វីដែលកើតឡើងនៅលើឧបករណ៍របស់អ្នក។ កម្មវិធីអាចប្រើកំណត់ហេតុទាំងនេះ ដើម្បីស្វែងរក និងដោះស្រាយបញ្ហាបាន។\n\nកំណត់ហេតុមួយចំនួនអាចមានព័ត៌មានរសើប ដូច្នេះសូមអនុញ្ញាតឱ្យចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់សម្រាប់តែកម្មវិធីដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ \n\nប្រសិនបើអ្នកមិនអនុញ្ញាតឱ្យកម្មវិធីនេះចូលប្រើកំណត់ហេតុឧបករណ៍ទាំងអស់ទេ កម្មវិធីនេះនៅតែអាចចូលប្រើកំណត់ហេតុរបស់ខ្លួនផ្ទាល់បាន។ ក្រុមហ៊ុន​ផលិត​ឧបករណ៍របស់អ្នក​ប្រហែលជា​នៅតែអាចចូលប្រើ​កំណត់ហេតុ ឬព័ត៌មានមួយចំនួន​នៅលើឧបករណ៍​របស់អ្នក​បានដដែល។"</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ស្វែងយល់បន្ថែម"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ស្វែងយល់​បន្ថែម​តាមរយៈ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"បើក <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• កាតយ៉ាងតិចមួយត្រូវបានបញ្ចូលទៅក្នុង Wallet"</string>
@@ -1044,10 +1123,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"គោលការណ៍ការងាររបស់អ្នកអនុញ្ញាតឱ្យអ្នកធ្វើការហៅទូរសព្ទបានតែពីកម្រងព័ត៌មានការងារប៉ុណ្ណោះ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ប្ដូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"បិទ"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"ការកំណត់​អេក្រង់ចាក់សោ"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"ប្ដូរអេក្រង់ចាក់សោ​តាមបំណង"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ដោះសោ ដើម្បីប្ដូរអេក្រង់ចាក់សោតាមបំណង"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"មិនមាន Wi-Fi ទេ"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"បាន​ទប់ស្កាត់​កាមេរ៉ា"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"បានទប់ស្កាត់​កាមេរ៉ា និង​មីក្រូហ្វូន"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"បាន​ទប់ស្កាត់​មីក្រូហ្វូន"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"មុខងារ​អាទិភាពត្រូវបានបើក"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"ភាពប្រុងប្រៀប​របស់ Google Assistant ត្រូវបានបើក"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"កំណត់កម្មវិធីកំណត់ចំណាំលំនាំដើមនៅក្នុងការកំណត់"</string>
 </resources>

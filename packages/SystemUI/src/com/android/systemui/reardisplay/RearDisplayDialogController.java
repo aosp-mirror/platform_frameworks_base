@@ -16,12 +16,16 @@
 
 package com.android.systemui.reardisplay;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerGlobal;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.CoreStartable;
@@ -70,6 +74,7 @@ public class RearDisplayDialogController implements CoreStartable, CommandQueue.
 
     @VisibleForTesting
     SystemUIDialog mRearDisplayEducationDialog;
+    @Nullable LinearLayout mDialogViewContainer;
 
     @Inject
     public RearDisplayDialogController(Context context, CommandQueue commandQueue,
@@ -90,26 +95,51 @@ public class RearDisplayDialogController implements CoreStartable, CommandQueue.
         createAndShowDialog();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (mRearDisplayEducationDialog != null && mRearDisplayEducationDialog.isShowing()
+                && mDialogViewContainer != null) {
+            // Refresh the dialog view when configuration is changed.
+            Context dialogContext = mRearDisplayEducationDialog.getContext();
+            View dialogView = createDialogView(dialogContext);
+            mDialogViewContainer.removeAllViews();
+            mDialogViewContainer.addView(dialogView);
+        }
+    }
+
     private void createAndShowDialog() {
         mServiceNotified = false;
         Context dialogContext = mRearDisplayEducationDialog.getContext();
 
+        View dialogView = createDialogView(dialogContext);
+
+        mDialogViewContainer = new LinearLayout(dialogContext);
+        mDialogViewContainer.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        mDialogViewContainer.setOrientation(LinearLayout.VERTICAL);
+        mDialogViewContainer.addView(dialogView);
+
+        mRearDisplayEducationDialog.setView(mDialogViewContainer);
+
+        configureDialogButtons();
+
+        mRearDisplayEducationDialog.show();
+    }
+
+    private View createDialogView(Context context) {
         View dialogView;
         if (mStartedFolded) {
-            dialogView = View.inflate(dialogContext,
+            dialogView = View.inflate(context,
                     R.layout.activity_rear_display_education, null);
         } else {
-            dialogView = View.inflate(dialogContext,
+            dialogView = View.inflate(context,
                     R.layout.activity_rear_display_education_opened, null);
         }
         LottieAnimationView animationView = dialogView.findViewById(
                 R.id.rear_display_folded_animation);
         animationView.setRepeatCount(mAnimationRepeatCount);
-        mRearDisplayEducationDialog.setView(dialogView);
-
-        configureDialogButtons();
-
-        mRearDisplayEducationDialog.show();
+        return dialogView;
     }
 
     /**
@@ -164,6 +194,7 @@ public class RearDisplayDialogController implements CoreStartable, CommandQueue.
         mServiceNotified = true;
         mDeviceStateManagerGlobal.unregisterDeviceStateCallback(mDeviceStateManagerCallback);
         mDeviceStateManagerGlobal.onStateRequestOverlayDismissed(shouldCancelRequest);
+        mDialogViewContainer = null;
     }
 
     /**

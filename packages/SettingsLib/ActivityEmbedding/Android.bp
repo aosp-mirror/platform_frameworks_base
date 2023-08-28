@@ -26,4 +26,10 @@ android_library {
         "androidx.window.extensions",
         "androidx.window.sidecar",
     ],
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+        "com.android.healthfitness",
+    ],
 }

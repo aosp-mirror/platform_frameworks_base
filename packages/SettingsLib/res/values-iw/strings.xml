@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"מנותקת"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"מושבת"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"‏כשל בתצורת IP"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"אין חיבור לרשת, כי איכות הרשת נמוכה"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"‏כשל בחיבור Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"בעיית אימות"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"לא ניתן להתחבר"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"לא ניתן להתחבר אל <xliff:g id="AP_NAME">%1$s</xliff:g>"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"לא יתבצע חיבור באופן אוטומטי"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"אין גישה לאינטרנט"</string>
     <string name="saved_network" msgid="7143698034077223645">"נשמר על ידי <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"יש חיבור לרשת המבוססת על חיוב לפי שימוש בנתונים"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"‏מחובר אוטומטית דרך %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"מחובר אוטומטית דרך ספק של דירוג רשת"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"‏מחובר דרך %1$s"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"מחוברת באמצעות <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"‏זמינה דרך %1$s"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"יש להקיש כדי להירשם"</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"אין אינטרנט"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"‏לא ניתן לגשת לשרת DNS הפרטי"</string>
@@ -76,17 +71,13 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"אין אינטרנט"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"נדרשת כניסה"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"נקודת הגישה מלאה באופן זמני"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"‏מחובר לרשת של %1$s"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"‏זמינה דרך %1$s"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"מתבצעת פתיחה של <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"לא ניתן היה להתחבר"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"מתבצעת השלמה של ההרשמה…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"לא ניתן היה להשלים את ההרשמה. יש להקיש כדי לנסות שוב."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"תהליך ההרשמה הסתיים. בתהליך התחברות…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"איטית מאוד"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"איטית"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"אישור"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"בינונית"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"מהירה"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"מהירה מאוד"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"התוקף פג"</string>
@@ -98,7 +89,6 @@
     <string name="bluetooth_pairing" msgid="4269046942588193600">"ההתאמה מתבצעת..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"מחובר (ללא טלפון)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"מחובר (ללא מדיה)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"מחובר (ללא גישה להודעות)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"מחובר (ללא טלפון או מדיה)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"מחובר, שיעור הסוללה <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"מחובר (ללא טלפון), שיעור הסוללה <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"איפוס של גובה צליל הדיבור"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"איפוס גובה הצליל שבו מושמע הטקסט לברירת המחדל."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"איטי מאוד"</item>
-    <item msgid="1815382991399815061">"איטי"</item>
-    <item msgid="3075292553049300105">"רגיל"</item>
-    <item msgid="1158955023692670059">"מהיר"</item>
-    <item msgid="5664310435707146591">"מהיר יותר"</item>
-    <item msgid="5491266922147715962">"מהיר מאוד"</item>
-    <item msgid="7659240015901486196">"מהיר במיוחד"</item>
-    <item msgid="7147051179282410945">"יותר מהיר ממהיר במיוחד"</item>
-    <item msgid="581904787661470707">"הכי מהיר"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"בחירת פרופיל"</string>
     <string name="category_personal" msgid="6236798763159385225">"אישי"</string>
@@ -263,8 +253,8 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏כדי להתאים מכשיר דרך Wi‑Fi, יש לסרוק קוד QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"‏יש להתחבר לרשת Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb, ניפוי באגים, פיתוח"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור דרך לדוח באגים"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"הצגת לחצן ליצירת דוח על באג בתפריט ההפעלה"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"קיצור של דוח באגים"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"כדי ליצור דוח באגים, יש להציג לחצן בתפריט לניהול צריכת החשמל"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"ללא כניסה למצב שינה"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
@@ -279,14 +269,14 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"תקשורת רשתות"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"‏אישור של תצוגת Wi-Fi"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏הגבלת החיפוש של נקודות Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏ויסות סריקה לנקודות Wi-Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏רנדומיזציה של כתובות MAC משתנות ברשתות Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"השבתת עוצמת קול מוחלטת"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏הפעלת Gabeldorsche"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏גרסת Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏Bluetooth גרסה AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏בחירת Bluetooth גרסה AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏גרסת Bluetooth MAP"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"‏יש לבחור גרסה של Bluetooth MAP"</string>
@@ -359,18 +349,18 @@
     <string name="media_category" msgid="8122076702526144053">"מדיה"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"מעקב"</string>
     <string name="strict_mode" msgid="889864762140862437">"מצב קפדני מופעל"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"‏המסך יהבהב כשאפליקציות יבצעו פעולות ארוכות ב-thread הראשי"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"המסך יהבהב כאשר אפליקציות יבצעו פעולות ארוכות בשרשור הראשי"</string>
     <string name="pointer_location" msgid="7516929526199520173">"מיקום מצביע"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"שכבת-על של המסך המציגה את נתוני המגע הנוכחיים"</string>
     <string name="show_touches" msgid="8437666942161289025">"הצגת הקשות"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"הצגת משוב ויזואלי להקשות"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"הצגת עדכונים על פני השטח"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"הבהוב של כל שטחי החלון כשהם מתעדכנים"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"הצגת עדכונים של התצוגה"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"הבזקת כל שטחי החלון כשהם מתעדכנים"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"תצוגת \'הצגת עדכונים\'"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"הבזקת תצוגות בתוך חלונות בעת ציור"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"הצגת עדכונים של שכבות חומרה"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"הצגת הבהוב ירוק לשכבות חומרה כשהן מתעדכנות"</string>
-    <string name="debug_hw_overdraw" msgid="8944851091008756796">"‏ניפוי באגים של ניצול יתר של ה-GPU"</string>
+    <string name="debug_hw_overdraw" msgid="8944851091008756796">"‏חריגה בניפוי באגים ב-GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"‏השבתת שכבות-על של HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"‏תמיד להשתמש ב-GPU להרכבת מסך"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"יצירת הדמיה של מרחב צבעים"</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"הצגת גבולות אזור, שוליים וכדומה"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"אילוץ כיוון פריסה מימין לשמאל"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"אילוץ של כיוון פריסת מסך מימין לשמאל עבור כל השפות בכל המקומות"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"סרגל ניווט שקוף"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"צבע הרקע של סרגל הניווט יהיה שקוף כברירת מחדל"</string>
     <string name="window_blurs" msgid="6831008984828425106">"אישור טשטושים ברמת החלון"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏אילוץ הפעלת 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏הפעלת 4x MSAA ביישומי OpenGL ES 2.0"</string>
@@ -405,7 +397,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"אילוץ יכולת קביעת גודל של הפעילויות"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא התחשבות בערכי המניפסט."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"מאפשר יכולת קביעת גודל של כל הפעילויות לריבוי חלונות, ללא קשר לערך המניפסט."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"הפעלת האפשרות לשנות את הגודל והמיקום של החלונות"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"הפעלת תמיכה בתכונה הניסיונית של שינוי הגודל והמיקום של החלונות."</string>
     <string name="desktop_mode" msgid="2389067840550544462">"ממשק המחשב"</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"יותר זמן."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"פחות זמן."</string>
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"אישור"</string>
     <string name="done" msgid="381184316122520313">"סיום"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"שעונים מעוררים ותזכורות"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"הטלפון הזה"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"הטאבלט הזה"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"לא ניתן להפעיל במכשיר הזה"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"צריך לשדרג את החשבון כדי לעבור"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"לא ניתן להפעיל את ההורדות כאן"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"אפשר לנסות שוב לאחר המודעה"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"צריך להוציא את המכשיר ממצב השינה כדי להפעיל כאן"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"המכשיר לא קיבל אישור להפעלה"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"אי אפשר להפעיל את המדיה הזו כאן"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
     <string name="help_label" msgid="3528360748637781274">"עזרה ומשוב"</string>
@@ -572,8 +577,14 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"משתמש"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"פרופיל מוגבל"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"להוסיף משתמש חדש?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף את המכשיר הזה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כמו Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. יכול להיות שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, הוא צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏ניתן לשתף מכשיר זה עם אנשים אחרים על ידי יצירת משתמשים נוספים. לכל משתמש מרחב משלו, שאותו אפשר להתאים אישית בעזרת אפליקציות, טפט ופריטים נוספים. המשתמשים יכולים גם להתאים הגדרות של המכשיר כגון Wi‑Fi, שמשפיעות על כולם.\n\nכשמוסיפים משתמש חדש, על משתמש זה להגדיר את המרחב שלו.\n\nכל אחד מהמשתמשים יכול לעדכן אפליקציות לכל שאר המשתמשים. ייתכן שהגדרות ושירותים של נגישות לא יועברו למשתמש החדש."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"כשמוסיפים משתמש חדש, המשתמש הזה צריך להגדיר את המרחב שלו.\n\nכל משתמש יכול לעדכן אפליקציות עבור כל המשתמשים האחרים."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"האם להגדיר משתמש עכשיו?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"כדאי לוודא שהמשתמש זמין ויכול לקחת את המכשיר ולהגדיר את המרחב שלו"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"האם להגדיר פרופיל עכשיו?"</string>
@@ -605,6 +616,10 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"הפעולה הזו תתחיל גלישה חדשה כאורח ותמחק את כל האפליקציות והנתונים מהסשן הנוכחי"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"לצאת ממצב אורח?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"הפעולה הזו תמחק את האפליקציות והנתונים מהגלישה הנוכחית כאורח"</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"יציאה"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"לשמור את פעילות האורח?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"אפשר לשמור את הפעילות מהסשן הנוכחי או למחוק את כל האפליקציות והנתונים"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"חיזוי אנימציה של תנועת החזרה"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"הפעלת אנימציות מערכת עבור חיזוי של תנועת החזרה."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏ההגדרה הזו מפעילה אנימציות מערכת עבור חיזוי אנימציה של תנועת החזרה. היא מחייבת הגדרה בכל אפליקציה של ערך true בשדה enableOnBackInvokedCallback בקובץ המניפסט."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"הזזה שמאלה"</item>
+    <item msgid="5425394847942513942">"הזזה למטה"</item>
+    <item msgid="7728484337962740316">"הזזה ימינה"</item>
+    <item msgid="324200556467459329">"הזזה למעלה"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"%% <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
 </resources>

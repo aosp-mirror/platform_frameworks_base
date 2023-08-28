@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
@@ -27,8 +29,9 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.SharedUserApi;
 
 import libcore.io.IoUtils;
@@ -372,18 +375,18 @@ public final class SELinuxMMAC {
         return pkg.getTargetSdkVersion();
     }
 
-    private static String getPartition(AndroidPackage pkg) {
-        if (pkg.isSystemExt()) {
+    private static String getPartition(PackageState state) {
+        if (state.isSystemExt()) {
             return "system_ext";
-        } else if (pkg.isProduct()) {
+        } else if (state.isProduct()) {
             return "product";
-        } else if (pkg.isVendor()) {
+        } else if (state.isVendor()) {
             return "vendor";
-        } else if (pkg.isOem()) {
+        } else if (state.isOem()) {
             return "oem";
-        } else if (pkg.isOdm()) {
+        } else if (state.isOdm()) {
             return "odm";
-        } else if (pkg.isSystem()) {
+        } else if (state.isSystem()) {
             return "system";
         }
         return "";
@@ -395,20 +398,22 @@ public final class SELinuxMMAC {
      * is found, the default seinfo label of 'default' is used. The security label is attached to
      * the ApplicationInfo instance of the package.
      *
-     * @param pkg               object representing the package to be labeled.
-     * @param sharedUser if the app shares a sharedUserId, then this has the shared setting.
-     * @param compatibility     the PlatformCompat service to ask about state of compat changes.
+     * @param packageState  {@link PackageState} object representing the package to be labeled.
+     * @param pkg           {@link AndroidPackage} object representing the package to be labeled.
+     * @param sharedUser    if the app shares a sharedUserId, then this has the shared setting.
+     * @param compatibility the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, SharedUserApi sharedUser,
-            PlatformCompat compatibility) {
+    public static String getSeInfo(@NonNull PackageState packageState, @NonNull AndroidPackage pkg,
+            @Nullable SharedUserApi sharedUser, @NonNull PlatformCompat compatibility) {
         final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUser,
                 compatibility);
         // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
         // They currently can be if the sharedUser apps are signed with the platform key.
-        final boolean isPrivileged = (sharedUser != null)
-                ? sharedUser.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
-        return getSeInfo(pkg, isPrivileged, targetSdkVersion);
+        final boolean isPrivileged =
+                (sharedUser != null) ? sharedUser.isPrivileged() | packageState.isPrivileged()
+                        : packageState.isPrivileged();
+        return getSeInfo(packageState, pkg, isPrivileged, targetSdkVersion);
     }
 
     /**
@@ -417,15 +422,16 @@ public final class SELinuxMMAC {
      * is found, the default seinfo label of 'default' is used. The security label is attached to
      * the ApplicationInfo instance of the package.
      *
-     * @param pkg object representing the package to be labeled.
-     * @param isPrivileged boolean.
+     * @param packageState     {@link PackageState} object representing the package to be labeled.
+     * @param pkg              {@link AndroidPackage} object representing the package to be labeled.
+     * @param isPrivileged     boolean.
      * @param targetSdkVersion int. If this pkg runs as a sharedUser, targetSdkVersion is the
      *        greater of: lowest targetSdk for all pkgs in the sharedUser, or
      *        MINIMUM_TARGETSDKVERSION.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(AndroidPackage pkg, boolean isPrivileged,
-            int targetSdkVersion) {
+    public static String getSeInfo(PackageState packageState, AndroidPackage pkg,
+            boolean isPrivileged, int targetSdkVersion) {
         String seInfo = null;
         synchronized (sPolicies) {
             if (!sPolicyRead) {
@@ -452,13 +458,13 @@ public final class SELinuxMMAC {
 
         seInfo += TARGETSDKVERSION_STR + targetSdkVersion;
 
-        String partition = getPartition(pkg);
+        String partition = getPartition(packageState);
         if (!partition.isEmpty()) {
             seInfo += PARTITION_STR + partition;
         }
 
         if (DEBUG_POLICY_INSTALL) {
-            Slog.i(TAG, "package (" + pkg.getPackageName() + ") labeled with "
+            Slog.i(TAG, "package (" + packageState.getPackageName() + ") labeled with "
                     + "seinfo=" + seInfo);
         }
         return seInfo;

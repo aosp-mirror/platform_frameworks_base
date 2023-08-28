@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"ಸ್ಪ್ಲಿಟ್‌-ಸ್ಕ್ರೀನ್‌ಗೆ ಪ್ರವೇಶಿಸಿ"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"ಮೆನು"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರ ಮೆನು"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿ ಚಿತ್ರವಾಗಿದೆ"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ಈ ಫೀಚರ್ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಲು ಮತ್ತು ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="pip_play" msgid="3496151081459417097">"ಪ್ಲೇ"</string>
@@ -31,12 +32,13 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ಮರುಗಾತ್ರಗೊಳಿಸಿ"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ಅನ್‌ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"ವಿಭಜಿಸಿದ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="dock_forced_resizable" msgid="7429086980048964687">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಆ್ಯಪ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ಈ ಆ್ಯಪ್ ಅನ್ನು 1 ವಿಂಡೋದಲ್ಲಿ ಮಾತ್ರ ತೆರೆಯಬಹುದು."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
-    <string name="accessibility_divider" msgid="703810061635792791">"ಸ್ಪ್ಲಿಟ್-ಪರದೆ ಡಿವೈಡರ್"</string>
+    <string name="accessibility_divider" msgid="6407584574218956849">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್ ಡಿವೈಡರ್"</string>
+    <string name="divider_title" msgid="1963391955593749442">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್ ಡಿವೈಡರ್"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"ಎಡ ಪೂರ್ಣ ಪರದೆ"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"70% ಎಡಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"50% ಎಡಕ್ಕೆ"</string>
@@ -82,7 +84,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ಅದನ್ನು ಸರಿಪಡಿಸಲಿಲ್ಲವೇ?\nಹಿಂತಿರುಗಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿಲ್ಲವೇ? ವಜಾಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"ನೋಡಿ ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಿ"</string>
-    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ನಲ್ಲಿ ಎಳೆಯಿರಿ"</string>
+    <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ಗಾಗಿ ಮತ್ತೊಂದು ಆ್ಯಪ್‌ನಲ್ಲಿ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಹೊರಗೆ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ಸರಿ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿಗಾಗಿ ವಿಸ್ತೃತಗೊಳಿಸಿ."</string>
@@ -107,4 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="close_text" msgid="4986518933445178928">"ಮುಚ್ಚಿ"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"ಮೆನು ಮುಚ್ಚಿ"</string>
+    <string name="expand_menu_text" msgid="3847736164494181168">"ಮೆನು ತೆರೆಯಿರಿ"</string>
 </resources>

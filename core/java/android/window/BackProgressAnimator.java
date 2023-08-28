@@ -43,7 +43,7 @@ public class BackProgressAnimator {
     private ProgressCallback mCallback;
     private float mProgress = 0;
     private BackMotionEvent mLastBackEvent;
-    private boolean mStarted = false;
+    private boolean mBackAnimationInProgress = false;
 
     private void setProgress(float progress) {
         mProgress = progress;
@@ -87,10 +87,13 @@ public class BackProgressAnimator {
      * @param event the {@link BackMotionEvent} containing the latest target progress.
      */
     public void onBackProgressed(BackMotionEvent event) {
-        if (!mStarted) {
+        if (!mBackAnimationInProgress) {
             return;
         }
         mLastBackEvent = event;
+        if (mSpring == null) {
+            return;
+        }
         mSpring.animateToFinalPosition(event.getProgress() * SCALE_FACTOR);
     }
 
@@ -105,7 +108,7 @@ public class BackProgressAnimator {
         reset();
         mLastBackEvent = event;
         mCallback = callback;
-        mStarted = true;
+        mBackAnimationInProgress = true;
     }
 
     /**
@@ -119,7 +122,7 @@ public class BackProgressAnimator {
             // Should never happen.
             mSpring.cancel();
         }
-        mStarted = false;
+        mBackAnimationInProgress = false;
         mLastBackEvent = null;
         mCallback = null;
         mProgress = 0;
@@ -146,8 +149,13 @@ public class BackProgressAnimator {
         mSpring.animateToFinalPosition(0);
     }
 
+    /** Returns true if the back animation is in progress. */
+    boolean isBackAnimationInProgress() {
+        return mBackAnimationInProgress;
+    }
+
     private void updateProgressValue(float progress) {
-        if (mLastBackEvent == null || mCallback == null || !mStarted) {
+        if (mLastBackEvent == null || mCallback == null || !mBackAnimationInProgress) {
             return;
         }
         mCallback.onProgressUpdate(

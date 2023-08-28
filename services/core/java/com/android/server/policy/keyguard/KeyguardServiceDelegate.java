@@ -18,6 +18,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.dreams.DreamManagerInternal;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -27,6 +28,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
+import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
 import com.android.server.wm.EventLogTags;
@@ -60,12 +62,24 @@ public class KeyguardServiceDelegate {
 
     private DrawnListener mDrawnListenerWhenConnect;
 
+    private final DreamManagerInternal.DreamManagerStateListener mDreamManagerStateListener =
+            new DreamManagerInternal.DreamManagerStateListener() {
+                @Override
+                public void onDreamingStarted() {
+                    KeyguardServiceDelegate.this.onDreamingStarted();
+                }
+
+                @Override
+                public void onDreamingStopped() {
+                    KeyguardServiceDelegate.this.onDreamingStopped();
+                }
+            };
+
     private static final class KeyguardState {
         KeyguardState() {
             reset();
         }
         boolean showing;
-        boolean showingAndNotOccluded;
         boolean inputRestricted;
         volatile boolean occluded;
         boolean secure;
@@ -84,7 +98,7 @@ public class KeyguardServiceDelegate {
             // the event something checks before the service is actually started.
             // KeyguardService itself should default to this state until the real state is known.
             showing = true;
-            showingAndNotOccluded = true;
+            occluded = false;
             secure = true;
             deviceHasKeyguard = true;
             enabled = true;
@@ -149,7 +163,6 @@ public class KeyguardServiceDelegate {
                 Context.BIND_AUTO_CREATE, mHandler, UserHandle.SYSTEM)) {
             Log.v(TAG, "*** Keyguard: can't bind to " + keyguardComponent);
             mKeyguardState.showing = false;
-            mKeyguardState.showingAndNotOccluded = false;
             mKeyguardState.secure = false;
             synchronized (mKeyguardState) {
                 // TODO: Fix synchronisation model in this class. The other state in this class
@@ -160,6 +173,11 @@ public class KeyguardServiceDelegate {
         } else {
             if (DEBUG) Log.v(TAG, "*** Keyguard started");
         }
+
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+
+        dreamManager.registerDreamManagerStateListener(mDreamManagerStateListener);
     }
 
     private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
@@ -255,15 +273,15 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void setOccluded(boolean isOccluded, boolean animate, boolean notify) {
+    public void setOccluded(boolean isOccluded, boolean notify) {
         if (mKeyguardService != null && notify) {
-            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ") animate=" + animate);
+            if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
             EventLogTags.writeWmSetKeyguardOccluded(
                     isOccluded ? 1 : 0,
-                    animate ? 1 : 0,
+                    0 /* animate */,
                     0 /* transit */,
                     "setOccluded");
-            mKeyguardService.setOccluded(isOccluded, animate);
+            mKeyguardService.setOccluded(isOccluded, false /* animate */);
         }
         mKeyguardState.occluded = isOccluded;
     }
@@ -405,9 +423,9 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+    public void startKeyguardExitAnimation(long startTime) {
         if (mKeyguardService != null) {
-            mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
+            mKeyguardService.startKeyguardExitAnimation(startTime, 0);
         }
     }
 
@@ -449,7 +467,6 @@ public class KeyguardServiceDelegate {
         pw.println(prefix + TAG);
         prefix += "  ";
         pw.println(prefix + "showing=" + mKeyguardState.showing);
-        pw.println(prefix + "showingAndNotOccluded=" + mKeyguardState.showingAndNotOccluded);
         pw.println(prefix + "inputRestricted=" + mKeyguardState.inputRestricted);
         pw.println(prefix + "occluded=" + mKeyguardState.occluded);
         pw.println(prefix + "secure=" + mKeyguardState.secure);

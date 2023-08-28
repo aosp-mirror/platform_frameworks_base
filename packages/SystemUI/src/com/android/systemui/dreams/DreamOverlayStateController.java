@@ -24,9 +24,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.complication.Complication;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -58,6 +58,8 @@ public class DreamOverlayStateController implements
     public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
     public static final int STATE_DREAM_ENTRY_ANIMATIONS_FINISHED = 1 << 2;
     public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
+    public static final int STATE_HAS_ASSISTANT_ATTENTION = 1 << 4;
+    public static final int STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE = 1 << 5;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -116,14 +118,14 @@ public class DreamOverlayStateController implements
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
         mFeatureFlags = featureFlags;
-        if (DEBUG) {
-            Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
-        }
         if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
                     | Complication.COMPLICATION_TYPE_HOME_CONTROLS;
         } else {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Dream overlay enabled:" + mOverlayEnabled);
         }
     }
 
@@ -182,6 +184,10 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
+        if (isLowLightActive()) {
+            // Don't show complications on low light.
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableCollection(filterByAvailability
                 ? mComplications
                 .stream()
@@ -193,7 +199,8 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return (requiredTypes & mSupportedTypes) == requiredTypes;
+                    final int typesToAlwaysShow = mSupportedTypes & getAvailableComplicationTypes();
+                    return (requiredTypes & typesToAlwaysShow) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
@@ -265,6 +272,22 @@ public class DreamOverlayStateController implements
         return containsState(STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
+    /**
+     * Returns whether assistant currently has the user's attention.
+     * @return {@code true} if assistant has the user's attention, {@code false} otherwise.
+     */
+    public boolean hasAssistantAttention() {
+        return containsState(STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Returns whether the dream overlay status bar is currently visible.
+     * @return {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public boolean isDreamOverlayStatusBarVisible() {
+        return containsState(STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
+    }
+
     private boolean containsState(int state) {
         return (mState & state) != 0;
     }
@@ -321,6 +344,23 @@ public class DreamOverlayStateController implements
     public void setExitAnimationsRunning(boolean running) {
         modifyState(running ? OP_SET_STATE : OP_CLEAR_STATE,
                 STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
+    }
+
+    /**
+     * Sets whether assistant currently has the user's attention.
+     * @param hasAttention {@code true} if has the user's attention, {@code false} otherwise.
+     */
+    public void setHasAssistantAttention(boolean hasAttention) {
+        modifyState(hasAttention ? OP_SET_STATE : OP_CLEAR_STATE, STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Sets whether the dream overlay status bar is visible.
+     * @param visible {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public void setDreamOverlayStatusBarVisible(boolean visible) {
+        modifyState(
+                visible ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
     }
 
     /**

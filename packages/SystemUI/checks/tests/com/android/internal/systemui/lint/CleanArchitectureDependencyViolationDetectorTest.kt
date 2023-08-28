@@ -38,7 +38,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `No violations`() {
+    fun noViolations() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -51,7 +51,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - domain depends on ui`() {
+    fun violation_domainDependsOnUi() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -86,7 +86,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - ui depends on data`() {
+    fun violation_uiDependsOnData() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -121,7 +121,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - shared depends on all other layers`() {
+    fun violation_sharedDependsOnAllOtherLayers() {
         lint()
             .files(
                 *LEGITIMATE_FILES,
@@ -166,7 +166,7 @@ class CleanArchitectureDependencyViolationDetectorTest : SystemUILintDetectorTes
     }
 
     @Test
-    fun `Violation - data depends on domain`() {
+    fun violation_dataDependsOnDomain() {
         lint()
             .files(
                 *LEGITIMATE_FILES,

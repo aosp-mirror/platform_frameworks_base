@@ -22,8 +22,8 @@ import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFrag
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
@@ -144,7 +144,7 @@ public class LightsOutNotifController extends ViewController<View> {
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
+                @Behavior int behavior, @InsetsType int requestedVisibleTypes,
                 String packageName, LetterboxDetails[] letterboxDetails) {
             if (displayId != mDisplayId) {
                 return;

@@ -15,6 +15,7 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.GET_APP_METADATA;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
@@ -29,6 +30,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_FACTORY_ONLY;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -37,9 +39,11 @@ import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
+import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.Manifest;
@@ -52,6 +56,7 @@ import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
@@ -81,19 +86,15 @@ import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
 import android.content.pm.IOnChecksumsReadyListener;
-import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageLoadingProgressCallback;
-import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.ModuleInfo;
-import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -111,6 +112,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
+import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.overlay.OverlayPaths;
@@ -130,6 +132,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -165,8 +168,6 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.view.Display;
 
@@ -185,6 +186,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
@@ -196,24 +199,30 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.art.DexUseManagerLocal;
+import com.android.server.art.model.DeleteResult;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.ArtUtils;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.dex.ViewCompiler;
-import com.android.server.pm.parsing.PackageCacher;
+import com.android.server.pm.local.PackageManagerLocalImpl;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -242,6 +251,7 @@ import com.android.server.utils.Watcher;
 
 import dalvik.system.VMRuntime;
 
+import libcore.util.EmptyArray;
 import libcore.util.HexEncoding;
 
 import java.io.ByteArrayInputStream;
@@ -269,6 +279,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -342,6 +353,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final boolean DEBUG_ABI_SELECTION = false;
     public static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
 
+    static final String SHELL_PACKAGE_NAME = "com.android.shell";
+
     static final boolean HIDE_EPHEMERAL_APIS = false;
 
     static final String PRECOMPILE_LAYOUTS = "pm.precompile_layouts";
@@ -378,6 +391,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int SCAN_AS_ODM = 1 << 22;
     static final int SCAN_AS_APK_IN_APEX = 1 << 23;
     static final int SCAN_DROP_CACHE = 1 << 24;
+    static final int SCAN_AS_FACTORY = 1 << 25;
+    static final int SCAN_AS_APEX = 1 << 26;
+    static final int SCAN_AS_STOPPED_SYSTEM_APP = 1 << 27;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -394,6 +410,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             SCAN_AS_INSTANT_APP,
             SCAN_AS_FULL_APP,
             SCAN_AS_VIRTUAL_PRELOAD,
+            SCAN_AS_STOPPED_SYSTEM_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanFlags {}
@@ -495,6 +512,24 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private static final String PROPERTY_KNOWN_DIGESTERS_LIST = "known_digesters_list";
 
     /**
+     * Whether or not requesting the approval before committing sessions is available.
+     *
+     * Flag type: {@code boolean}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE =
+            "is_preapproval_available";
+
+    /**
+     * Whether or not the update ownership enforcement is available.
+     *
+     * Flag type: {@code boolean}
+     * Namespace: NAMESPACE_PACKAGE_MANAGER_SERVICE
+     */
+    private static final String PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE =
+            "is_update_ownership_enforcement_available";
+
+    /**
      * The default response for package verification timeout.
      *
      * This can be either PackageManager.VERIFICATION_ALLOW or
@@ -523,7 +558,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     private static final String COMPANION_PACKAGE_NAME = "com.android.companiondevicemanager";
 
+    // How many required verifiers can be on the system.
+    private static final int REQUIRED_VERIFIERS_MAX_COUNT = 2;
+
+    /**
+     * Specifies the minimum target SDK version an apk must specify in order to be installed
+     * on the system. This improves security and privacy by blocking low
+     * target sdk apps as malware can target older sdk versions to avoid
+     * the enforcement of new API behavior.
+     */
+    public static final int MIN_INSTALLABLE_TARGET_SDK = Build.VERSION_CODES.M;
+
     // Compilation reasons.
+    // TODO(b/260124949): Clean this up with the legacy dexopt code.
     public static final int REASON_FIRST_BOOT = 0;
     public static final int REASON_BOOT_AFTER_OTA = 1;
     public static final int REASON_POST_BOOT = 2;
@@ -537,14 +584,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public static final int REASON_AB_OTA = 10;
     public static final int REASON_INACTIVE_PACKAGE_DOWNGRADE = 11;
     public static final int REASON_CMDLINE = 12;
-    public static final int REASON_SHARED = 13;
+    public static final int REASON_BOOT_AFTER_MAINLINE_UPDATE = 13;
+    public static final int REASON_SHARED = 14;
 
     public static final int REASON_LAST = REASON_SHARED;
 
     static final String RANDOM_DIR_PREFIX = "~~";
     static final char RANDOM_CODEPATH_PREFIX = '-';
 
+    static final String APP_METADATA_FILE_NAME = "app.metadata";
+
     final Handler mHandler;
+    final Handler mBackgroundHandler;
 
     final ProcessLoggingHandler mProcessLoggingHandler;
 
@@ -553,12 +604,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private final int mSdkVersion;
     final Context mContext;
     final boolean mFactoryTest;
-    private final boolean mOnlyCore;
     final DisplayMetrics mMetrics;
     private final int mDefParseFlags;
     private final String[] mSeparateProcesses;
     private final boolean mIsUpgrade;
-    private final boolean mIsPreNUpgrade;
     private final boolean mIsPreNMR1Upgrade;
     private final boolean mIsPreQUpgrade;
 
@@ -686,15 +735,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * The list of all system partitions that may contain packages in ascending order of
      * specificity (the more generic, the earlier in the list a partition appears).
      */
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
     public static final List<ScanPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
             PackagePartitions.getOrderedPartitions(ScanPartition::new));
 
     private @NonNull final OverlayConfig mOverlayConfig;
-
-    @GuardedBy("itself")
-    final ArrayList<IPackageChangeObserver> mPackageChangeObservers =
-        new ArrayList<>();
 
     // Cached parsed flag value. Invalidated on each flag change.
     PerUidReadTimeouts[] mPerUidReadTimeoutsCache;
@@ -757,17 +802,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * List of packages waiting for rollback to be enabled.
      * Handler thread only!
      */
-    final SparseArray<VerificationParams> mPendingEnableRollback = new SparseArray<>();
+    final SparseArray<VerifyingSession> mPendingEnableRollback = new SparseArray<>();
 
     final PackageInstallerService mInstallerService;
 
     final ArtManagerService mArtManagerService;
 
+    // TODO(b/260124949): Remove these.
     final PackageDexOptimizer mPackageDexOptimizer;
-    final BackgroundDexOptService mBackgroundDexOptService;
+    @Nullable
+    final BackgroundDexOptService mBackgroundDexOptService; // null when ART Service is in use.
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
     // is used by other apps).
     private final DexManager mDexManager;
+    private final DynamicCodeLogger mDynamicCodeLogger;
 
     final ViewCompiler mViewCompiler;
 
@@ -827,10 +875,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @Watched(manual = true)
     private final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
-    private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
+    private final Map<String, InstallRequest>
             mNoKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
 
-    private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
+    private final Map<String, InstallRequest>
             mPendingKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
 
     // Internal interface for permission manager
@@ -862,10 +910,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final PendingPackageBroadcasts mPendingBroadcasts;
 
     static final int SEND_PENDING_BROADCAST = 1;
-    static final int INIT_COPY = 5;
+    // public static final int UNUSED = 5;
     static final int POST_INSTALL = 9;
     static final int WRITE_SETTINGS = 13;
-    static final int WRITE_PACKAGE_RESTRICTIONS = 14;
+    static final int WRITE_DIRTY_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
     static final int CHECK_PENDING_VERIFICATION = 16;
     // public static final int UNUSED = 17;
@@ -881,6 +929,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int DOMAIN_VERIFICATION = 27;
     static final int PRUNE_UNUSED_STATIC_SHARED_LIBRARIES = 28;
     static final int DEFERRED_PENDING_KILL_INSTALL_OBSERVER = 29;
+
+    static final int WRITE_USER_PACKAGE_RESTRICTIONS = 30;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     private static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -909,10 +959,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     // Stores a list of users whose package restrictions file needs to be updated
     final ArraySet<Integer> mDirtyUsers = new ArraySet<>();
 
-    final SparseArray<PostInstallData> mRunningInstalls = new SparseArray<>();
+    final SparseArray<InstallRequest> mRunningInstalls = new SparseArray<>();
     int mNextInstallToken = 1;  // nonzero; will be wrapped back to 1 when ++ overflows
 
-    final @Nullable String mRequiredVerifierPackage;
+    final @NonNull String[] mRequiredVerifierPackages;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
     final @NonNull String mRequiredPermissionControllerPackage;
@@ -929,6 +979,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
+    final @Nullable String mWearableSensingPackage;
+    final @NonNull Set<String> mInitialNonStoppedSystemPackages;
+    final boolean mShouldStopSystemPackagesByDefault;
     private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
@@ -1073,10 +1126,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @VisibleForTesting(visibility = Visibility.PACKAGE)
     @NonNull
     public Computer snapshotComputer() {
-        if (Thread.holdsLock(mLock)) {
-            // If the current thread holds mLock then it may have modified state but not
-            // yet invalidated the snapshot.  Always give the thread the live computer.
-            return mLiveComputer;
+        return snapshotComputer(true /*allowLiveComputer*/);
+    }
+
+    /**
+     * This method should only ever be called from {@link PackageManagerLocal#snapshot()}.
+     *
+     * @param allowLiveComputer Whether to allow a live computer instance based on caller {@link
+     *                          #mLock} hold state. In certain cases, like for {@link
+     *                          PackageManagerLocal} API, it must be enforced that the caller gets
+     *                          a snapshot at time, and never the live variant.
+     * @deprecated Use {@link #snapshotComputer()}
+     */
+    @Deprecated
+    @NonNull
+    public Computer snapshotComputer(boolean allowLiveComputer) {
+        var isHoldingPackageLock = Thread.holdsLock(mLock);
+        if (allowLiveComputer) {
+            if (isHoldingPackageLock) {
+                // If the current thread holds mLock then it may have modified state but not
+                // yet invalidated the snapshot.  Always give the thread the live computer.
+                return mLiveComputer;
+            }
         }
 
         var oldSnapshot = sSnapshot.get();
@@ -1084,6 +1155,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         if (oldSnapshot != null && oldSnapshot.getVersion() == pendingVersion) {
             return oldSnapshot.use();
+        }
+
+        if (isHoldingPackageLock) {
+            // If the current thread holds mLock then it already has exclusive write access to the
+            // two snapshot fields, and we can just go ahead and rebuild the snapshot.
+            @SuppressWarnings("GuardedBy")
+            var newSnapshot = rebuildSnapshot(oldSnapshot, pendingVersion);
+            sSnapshot.set(newSnapshot);
+            return newSnapshot.use();
         }
 
         synchronized (mSnapshotLock) {
@@ -1103,7 +1183,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Fetch version one last time to ensure that the rebuilt snapshot matches
                 // the latest invalidation, which could have come in between entering the
                 // SnapshotLock and mLock sync blocks.
+                rebuildSnapshot = sSnapshot.get();
                 rebuildVersion = sSnapshotPendingVersion.get();
+                if (rebuildSnapshot != null && rebuildSnapshot.getVersion() == rebuildVersion) {
+                    return rebuildSnapshot.use();
+                }
 
                 // Build the snapshot for this version
                 var newSnapshot = rebuildSnapshot(rebuildSnapshot, rebuildVersion);
@@ -1113,7 +1197,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    @GuardedBy({ "mLock", "mSnapshotLock"})
+    @GuardedBy("mLock")
     private Computer rebuildSnapshot(@Nullable Computer oldSnapshot, int newVersion) {
         var now = SystemClock.currentTimeMicro();
         var hits = oldSnapshot == null ? -1 : oldSnapshot.getUsed();
@@ -1122,7 +1206,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         var done = SystemClock.currentTimeMicro();
 
         if (mSnapshotStatistics != null) {
-            mSnapshotStatistics.rebuild(now, done, hits);
+            mSnapshotStatistics.rebuild(now, done, hits, newSnapshot.getPackageStates().size());
         }
         return newSnapshot;
     }
@@ -1156,32 +1240,30 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void notifyInstallObserver(String packageName, boolean killApp) {
-        final Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
+        final InstallRequest installRequest =
                 killApp ? mPendingKillInstallObservers.remove(packageName)
                         : mNoKillInstallObservers.remove(packageName);
 
-        if (pair != null) {
-            notifyInstallObserver(pair.first, pair.second);
+        if (installRequest != null) {
+            notifyInstallObserver(installRequest);
         }
     }
 
-    void notifyInstallObserver(PackageInstalledInfo info,
-            IPackageInstallObserver2 installObserver) {
-        if (installObserver != null) {
+    void notifyInstallObserver(InstallRequest request) {
+        if (request.getObserver() != null) {
             try {
-                Bundle extras = extrasForInstallResult(info);
-                installObserver.onPackageInstalled(info.mName, info.mReturnCode,
-                        info.mReturnMsg, extras);
+                Bundle extras = extrasForInstallResult(request);
+                request.getObserver().onPackageInstalled(request.getName(),
+                        request.getReturnCode(), request.getReturnMsg(), extras);
             } catch (RemoteException e) {
                 Slog.i(TAG, "Observer no longer exists.");
             }
         }
     }
 
-    void scheduleDeferredNoKillInstallObserver(PackageInstalledInfo info,
-            IPackageInstallObserver2 observer) {
-        String packageName = info.mPkg.getPackageName();
-        mNoKillInstallObservers.put(packageName, Pair.create(info, observer));
+    void scheduleDeferredNoKillInstallObserver(InstallRequest request) {
+        String packageName = request.getPkg().getPackageName();
+        mNoKillInstallObservers.put(packageName, request);
         Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_INSTALL_OBSERVER, packageName);
         mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
@@ -1197,10 +1279,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 delay ? getPruneUnusedSharedLibrariesDelay() : 0);
     }
 
-    void scheduleDeferredPendingKillInstallObserver(PackageInstalledInfo info,
-            IPackageInstallObserver2 observer) {
-        final String packageName = info.mPkg.getPackageName();
-        mPendingKillInstallObservers.put(packageName, Pair.create(info, observer));
+    void scheduleDeferredPendingKillInstallObserver(InstallRequest request) {
+        final String packageName = request.getPkg().getPackageName();
+        mPendingKillInstallObservers.put(packageName, request);
         final Message message = mHandler.obtainMessage(DEFERRED_PENDING_KILL_INSTALL_OBSERVER,
                 packageName);
         mHandler.sendMessageDelayed(message, DEFERRED_PENDING_KILL_INSTALL_OBSERVER_DELAY_MS);
@@ -1259,11 +1340,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
-        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName);
+        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
+                userId);
+        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
-            if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
-                installerPackageName = installSourceInfo.getInitiatingPackageName();
+            if (!isInstalledByAdb(initiatingPackageName)) {
+                installerPackageName = initiatingPackageName;
             } else {
                 installerPackageName = installSourceInfo.getInstallingPackageName();
             }
@@ -1313,21 +1396,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private static Bundle extrasForInstallResult(PackageInstalledInfo res) {
+    private static Bundle extrasForInstallResult(InstallRequest request) {
         Bundle extras = null;
-        switch (res.mReturnCode) {
+        switch (request.getReturnCode()) {
             case PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION: {
                 extras = new Bundle();
                 extras.putString(PackageManager.EXTRA_FAILURE_EXISTING_PERMISSION,
-                        res.mOrigPermission);
+                        request.getOrigPermission());
                 extras.putString(PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE,
-                        res.mOrigPackage);
+                        request.getOrigPackage());
                 break;
             }
             case PackageManager.INSTALL_SUCCEEDED: {
                 extras = new Bundle();
                 extras.putBoolean(Intent.EXTRA_REPLACING,
-                        res.mRemovedInfo != null && res.mRemovedInfo.mRemovedPackage != null);
+                        request.getRemovedInfo() != null
+                                && request.getRemovedInfo().mRemovedPackage != null);
                 break;
             }
         }
@@ -1374,28 +1458,33 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mDirtyUsers.add(userId);
             }
         }
-        if (!mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)) {
-            mHandler.sendEmptyMessageDelayed(WRITE_PACKAGE_RESTRICTIONS, WRITE_SETTINGS_DELAY);
+        if (!mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)) {
+            mBackgroundHandler.sendMessageDelayed(
+                    mBackgroundHandler.obtainMessage(WRITE_DIRTY_PACKAGE_RESTRICTIONS, this),
+                    WRITE_SETTINGS_DELAY);
         }
     }
 
     void writePendingRestrictions() {
+        final Integer[] dirtyUsers;
         synchronized (mLock) {
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+            mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             synchronized (mDirtyUsers) {
-                for (int userId : mDirtyUsers) {
-                    mSettings.writePackageRestrictionsLPr(userId);
+                if (mDirtyUsers.isEmpty()) {
+                    return;
                 }
+                dirtyUsers = mDirtyUsers.toArray(Integer[]::new);
                 mDirtyUsers.clear();
             }
         }
+        mSettings.writePackageRestrictions(dirtyUsers);
     }
 
-    void writeSettings() {
+    void writeSettings(boolean sync) {
         synchronized (mLock) {
             mHandler.removeMessages(WRITE_SETTINGS);
-            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            writeSettingsLPrTEMP();
+            mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
+            writeSettingsLPrTEMP(sync);
             synchronized (mDirtyUsers) {
                 mDirtyUsers.clear();
             }
@@ -1409,9 +1498,29 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    public static Pair<PackageManagerService, IPackageManager> main(Context context,
+    private static final Handler.Callback BACKGROUND_HANDLER_CALLBACK = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case WRITE_DIRTY_PACKAGE_RESTRICTIONS: {
+                    PackageManagerService pm = (PackageManagerService) msg.obj;
+                    pm.writePendingRestrictions();
+                    return true;
+                }
+                case WRITE_USER_PACKAGE_RESTRICTIONS: {
+                    final Runnable r = (Runnable) msg.obj;
+                    r.run();
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    /** Starts PackageManagerService. */
+    public static PackageManagerService main(Context context,
             Installer installer, @NonNull DomainVerificationService domainVerificationService,
-            boolean factoryTest, boolean onlyCore) {
+            boolean factoryTest) {
         // Self-check for initial settings.
         PackageManagerServiceCompilerMapping.checkProperties();
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
@@ -1423,7 +1532,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         HandlerThread backgroundThread = new ServiceThread("PackageManagerBg",
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
         backgroundThread.start();
-        Handler backgroundHandler = new Handler(backgroundThread.getLooper());
+        Handler backgroundHandler = new Handler(backgroundThread.getLooper(),
+                BACKGROUND_HANDLER_CALLBACK);
 
         PackageManagerServiceInjector injector = new PackageManagerServiceInjector(
                 context, lock, installer, installLock, new PackageAbiHelperImpl(),
@@ -1433,12 +1543,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> PermissionManagerService.create(context,
                         i.getSystemConfig().getAvailableFeatures()),
                 (i, pm) -> new UserManagerService(context, pm,
-                        new UserDataPreparer(installer, installLock, context, onlyCore),
-                        lock),
+                        new UserDataPreparer(installer, installLock, context), lock),
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        domainVerificationService, backgroundHandler, lock),
+                        domainVerificationService, backgroundHandler,
+                        lock),
                 (i, pm) -> AppsFilterImpl.create(i,
                         i.getLocalService(PackageManagerInternal.class)),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
@@ -1446,7 +1556,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new PackageDexOptimizer(i.getInstaller(), i.getInstallLock(),
                         i.getContext(), "*dexopt*"),
                 (i, pm) -> new DexManager(i.getContext(), i.getPackageDexOptimizer(),
-                        i.getInstaller(), i.getInstallLock()),
+                        i.getInstaller(), i.getInstallLock(), i.getDynamicCodeLogger()),
+                (i, pm) -> new DynamicCodeLogger(i.getInstaller()),
                 (i, pm) -> new ArtManagerService(i.getContext(), i.getInstaller(),
                         i.getInstallLock()),
                 (i, pm) -> ApexManager.getInstance(),
@@ -1456,14 +1567,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
                         () -> LocalServices.getService(UserManagerInternal.class)),
                 (i, pm) -> new DisplayMetrics(),
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
-                        i.getDisplayMetrics(), pm.mCacheDir,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(),
+                        pm.mCacheDir,
                         pm.mPackageParserCallback) /* scanningCachingPackageParserProducer */,
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
-                        i.getDisplayMetrics(), null,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
                         pm.mPackageParserCallback) /* scanningPackageParserProducer */,
-                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, false, i.getDisplayMetrics(),
-                        null, pm.mPackageParserCallback) /* preparingPackageParserProducer */,
+                (i, pm) -> new PackageParser2(pm.mSeparateProcesses, i.getDisplayMetrics(), null,
+                        pm.mPackageParserCallback) /* preparingPackageParserProducer */,
                 // Prepare a supplier of package parser for the staging manager to parse apex file
                 // during the staging installation.
                 (i, pm) -> new PackageInstallerService(
@@ -1482,16 +1592,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 new DefaultSystemWrapper(),
                 LocalServices::getService,
                 context::getSystemService,
-                (i, pm) -> new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm),
+                (i, pm) -> {
+                    if (useArtService()) {
+                        return null;
+                    }
+                    try {
+                        return new BackgroundDexOptService(i.getContext(), i.getDexManager(), pm);
+                    } catch (LegacyDexoptDisabledException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
                 (i, pm) -> IBackupManager.Stub.asInterface(ServiceManager.getService(
                         Context.BACKUP_SERVICE)),
-                (i, pm) -> new SharedLibrariesImpl(pm, i));
+                (i, pm) -> new SharedLibrariesImpl(pm, i),
+                (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
+                        i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
+                        context));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
         }
 
-        PackageManagerService m = new PackageManagerService(injector, onlyCore, factoryTest,
+        PackageManagerService m = new PackageManagerService(injector, factoryTest,
                 PackagePartitions.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG,
                 Build.VERSION.SDK_INT, Build.VERSION.INCREMENTAL);
         t.traceEnd(); // "create package manager"
@@ -1508,13 +1630,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 AndroidPackage pkg = packageState.getPkg();
                 SharedUserApi sharedUser = snapshot.getSharedUser(
                         packageState.getSharedUserAppId());
-                String oldSeInfo = AndroidPackageUtils.getSeInfo(pkg, packageState);
+                String oldSeInfo = packageState.getSeInfo();
 
                 if (pkg == null) {
                     Slog.e(TAG, "Failed to find package " + packageName);
                     return;
                 }
-                final String newSeInfo = SELinuxMMAC.getSeInfo(pkg, sharedUser,
+                final String newSeInfo = SELinuxMMAC.getSeInfo(packageState, pkg, sharedUser,
                         m.mInjector.getCompatibility());
 
                 if (!newSeInfo.equals(oldSeInfo)) {
@@ -1537,8 +1659,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         ServiceManager.addService("package", iPackageManager);
         final PackageManagerNative pmn = new PackageManagerNative(m);
         ServiceManager.addService("package_native", pmn);
-        LocalManagerRegistry.addManager(PackageManagerLocal.class, m.new PackageManagerLocalImpl());
-        return Pair.create(m, iPackageManager);
+        return m;
     }
 
     /** Install/uninstall system packages for all users based on their user-type, as applicable. */
@@ -1616,6 +1737,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mUserNeedsBadging = new UserNeedsBadgingCache(mUserManager);
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mHandler = injector.getHandler();
+        mBackgroundHandler = injector.getBackgroundHandler();
         mSharedLibraries = injector.getSharedLibrariesImpl();
 
         mApexManager = testParams.apexManager;
@@ -1626,6 +1748,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDefaultAppProvider = testParams.defaultAppProvider;
         mLegacyPermissionManager = testParams.legacyPermissionManagerInternal;
         mDexManager = testParams.dexManager;
+        mDynamicCodeLogger = testParams.dynamicCodeLogger;
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
@@ -1634,13 +1757,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
         mInstantAppResolverSettingsComponent = testParams.instantAppResolverSettingsComponent;
         mIsPreNMR1Upgrade = testParams.isPreNmr1Upgrade;
-        mIsPreNUpgrade = testParams.isPreNupgrade;
         mIsPreQUpgrade = testParams.isPreQupgrade;
         mIsUpgrade = testParams.isUpgrade;
         mMetrics = testParams.Metrics;
         mModuleInfoProvider = testParams.moduleInfoProvider;
         mMoveCallbacks = testParams.moveCallbacks;
-        mOnlyCore = testParams.onlyCore;
         mOverlayConfig = testParams.overlayConfig;
         mPackageDexOptimizer = testParams.packageDexOptimizer;
         mPackageParserCallback = testParams.packageParserCallback;
@@ -1650,7 +1771,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mProtectedPackages = testParams.protectedPackages;
         mSeparateProcesses = testParams.separateProcesses;
         mViewCompiler = testParams.viewCompiler;
-        mRequiredVerifierPackage = testParams.requiredVerifierPackage;
+        mRequiredVerifierPackages = testParams.requiredVerifierPackages;
         mRequiredInstallerPackage = testParams.requiredInstallerPackage;
         mRequiredUninstallerPackage = testParams.requiredUninstallerPackage;
         mRequiredPermissionControllerPackage = testParams.requiredPermissionControllerPackage;
@@ -1661,6 +1782,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mRetailDemoPackage = testParams.retailDemoPackage;
         mRecentsPackage = testParams.recentsPackage;
         mAmbientContextDetectionPackage = testParams.ambientContextDetectionPackage;
+        mWearableSensingPackage = testParams.wearableSensingPackage;
         mConfiguratorPackage = testParams.configuratorPackage;
         mAppPredictionServicePackage = testParams.appPredictionServicePackage;
         mIncidentReportApproverPackage = testParams.incidentReportApproverPackage;
@@ -1669,6 +1791,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
         mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
+        mInitialNonStoppedSystemPackages = testParams.initialNonStoppedSystemPackages;
+        mShouldStopSystemPackagesByDefault = testParams.shouldStopSystemPackagesByDefault;
 
         mLiveComputer = createLiveComputer();
         mSnapshotStatistics = null;
@@ -1702,8 +1826,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         invalidatePackageInfoCache();
     }
 
-    public PackageManagerService(PackageManagerServiceInjector injector, boolean onlyCore,
-            boolean factoryTest, final String buildFingerprint, final boolean isEngBuild,
+    public PackageManagerService(PackageManagerServiceInjector injector, boolean factoryTest,
+            final String partitionsFingerprint, final boolean isEngBuild,
             final boolean isUserDebugBuild, final int sdkVersion, final String incrementalVersion) {
         mIsEngBuild = isEngBuild;
         mIsUserDebugBuild = isUserDebugBuild;
@@ -1726,7 +1850,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mContext = injector.getContext();
         mFactoryTest = factoryTest;
-        mOnlyCore = onlyCore;
         mMetrics = injector.getDisplayMetrics();
         mInstaller = injector.getInstaller();
         mEnableFreeCacheV2 = SystemProperties.getBoolean("fw.free_cache_v2", true);
@@ -1736,6 +1859,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // Expose private service for system components to use.
         LocalServices.addService(PackageManagerInternal.class, new PackageManagerInternalImpl());
+        LocalManagerRegistry.addManager(PackageManagerLocal.class,
+                new PackageManagerLocalImpl(this));
         LocalServices.addService(TestUtilityService.class, this);
         mTestUtilityService = LocalServices.getService(TestUtilityService.class);
         mUserManager = injector.getUserManagerService();
@@ -1803,11 +1928,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mPackageDexOptimizer = injector.getPackageDexOptimizer();
         mDexManager = injector.getDexManager();
+        mDynamicCodeLogger = injector.getDynamicCodeLogger();
         mBackgroundDexOptService = injector.getBackgroundDexOptService();
         mArtManagerService = injector.getArtManagerService();
         mMoveCallbacks = new MovePackageHelper.MoveCallbacks(FgThread.get().getLooper());
         mViewCompiler = injector.getViewCompiler();
         mSharedLibraries = mInjector.getSharedLibrariesImpl();
+        mBackgroundHandler = injector.getBackgroundHandler();
 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getMetrics(mMetrics);
@@ -1843,14 +1970,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
                 injector.getCompatibility(), mUserManager, mDomainVerificationManager,
-                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity);
+                mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
+                injector.getBackgroundHandler());
         mDexOptHelper = new DexOptHelper(this);
-        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
-                mProtectedPackages);
-        mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
-                mRemovePackageHelper);
+        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mUserManager,
+                mBroadcastHelper, mProtectedPackages);
         mDistractingPackageHelper = new DistractingPackageHelper(this, mInjector, mBroadcastHelper,
                 mSuspendPackageHelper);
+        mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
+                mRemovePackageHelper);
 
         synchronized (mLock) {
             // Create the computer as soon as the state objects have been installed.  The
@@ -1922,7 +2050,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mPermissionManager.readLegacyPermissionsTEMP(mSettings.mPermissions);
             mPermissionManager.readLegacyPermissionStateTEMP();
 
-            if (!mOnlyCore && mFirstBoot) {
+            if (mFirstBoot) {
                 DexOptHelper.requestCopyPreoptedFiles();
             }
 
@@ -1951,22 +2079,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             final VersionInfo ver = mSettings.getInternalVersion();
             mIsUpgrade =
-                    !buildFingerprint.equals(ver.fingerprint);
+                    !partitionsFingerprint.equals(ver.fingerprint);
             if (mIsUpgrade) {
-                PackageManagerServiceUtils.logCriticalInfo(Log.INFO, "Upgrading from "
-                        + ver.fingerprint + " to " + PackagePartitions.FINGERPRINT);
+                PackageManagerServiceUtils.logCriticalInfo(Log.INFO,
+                        "Upgrading from " + ver.fingerprint + " (" + ver.buildFingerprint + ") to "
+                                + PackagePartitions.FINGERPRINT + " (" + Build.FINGERPRINT + ")");
             }
 
             mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
-                mInjector.getSystemPartitions());
+                    mInjector.getSystemPartitions());
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
-
-            // When upgrading from pre-N, we need to handle package extraction like first boot,
-            // as there is no profiling data available.
-            mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
             mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
@@ -1974,17 +2099,30 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final WatchedArrayMap<String, PackageSetting> packageSettings =
                 mSettings.getPackagesLocked();
 
-            // Save the names of pre-existing packages prior to scanning, so we can determine
-            // which system packages are completely new due to an upgrade.
             if (isDeviceUpgrading()) {
+                // Save the names of pre-existing packages prior to scanning, so we can determine
+                // which system packages are completely new due to an upgrade.
                 mExistingPackages = new ArraySet<>(packageSettings.size());
                 for (PackageSetting ps : packageSettings.values()) {
                     mExistingPackages.add(ps.getPackageName());
                 }
+
+                // Triggering {@link com.android.server.pm.crossprofile.
+                // CrossProfileIntentFilterHelper.updateDefaultCrossProfileIntentFilter} to update
+                // {@link  CrossProfileIntentFilter}s between eligible users and their parent
+                t.traceBegin("cross profile intent filter update");
+                mInjector.getCrossProfileIntentFilterHelper()
+                        .updateDefaultCrossProfileIntentFilter();
+                t.traceEnd();
             }
 
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
+
+            mInitialNonStoppedSystemPackages = mInjector.getSystemConfig()
+                    .getInitialNonStoppedSystemPackages();
+            mShouldStopSystemPackagesByDefault = mContext.getResources()
+                    .getBoolean(R.bool.config_stopSystemPackagesByDefault);
 
             final int[] userIds = mUserManager.getUserIds();
             PackageParser2 packageParser = mInjector.getScanningCachingPackageParser();
@@ -1992,6 +2130,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     startTime);
             mInitAppsHelper.initNonSystemApps(packageParser, userIds, startTime);
             packageParser.close();
+
+            mRequiredVerifierPackages = getRequiredButNotReallyRequiredVerifiersLPr(computer);
+            mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
+            mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
+
+            // PermissionController hosts default permission granting and role management, so it's a
+            // critical part of the core system.
+            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr(computer);
 
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName(computer);
@@ -2019,6 +2165,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mAmbientContextDetectionPackage = ensureSystemPackageName(computer,
                     getPackageFromComponentString(
                             R.string.config_defaultAmbientContextDetectionService));
+            mWearableSensingPackage = ensureSystemPackageName(computer,
+                    getPackageFromComponentString(
+                            R.string.config_defaultWearableSensingService));
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -2030,16 +2179,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        ScanPackageUtils.applyAdjustedAbiToSharedUser(
-                                setting, null /*scannedPackage*/,
+                        ScanPackageUtils.applyAdjustedAbiToSharedUser(setting,
+                                null /*scannedPackage*/,
                                 mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
                                         setting.getPackageStates(), null /*scannedPackage*/));
-                if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
+                if (!useArtService() && // Skip for ART Service since it has its own dex file GC.
+                        changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                         final String codePathString = changedAbiCodePath.get(i);
                         try {
                             mInstaller.rmdex(codePathString,
                                     getDexCodeInstructionSet(getPreferredInstructionSet()));
+                        } catch (LegacyDexoptDisabledException e) {
+                            throw new RuntimeException(e);
                         } catch (InstallerException ignored) {
                         }
                     }
@@ -2061,14 +2213,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     + ((SystemClock.uptimeMillis() - startTime) / 1000f)
                     + " seconds");
 
-            // If the build fingerprint has changed since the last time we booted,
+            // If the partitions fingerprint has changed since the last time we booted,
             // we need to re-grant app permission to catch any new ones that
             // appear.  This is really a hack, and means that apps can in some
             // cases get permissions that the user didn't initially explicitly
             // allow...  it would be nice to have some better way to handle
             // this situation.
             if (mIsUpgrade) {
-                Slog.i(TAG, "Build fingerprint changed from " + ver.fingerprint + " to "
+                Slog.i(TAG, "Partitions fingerprint changed from " + ver.fingerprint + " to "
                         + PackagePartitions.FINGERPRINT
                         + "; regranting permissions for internal storage");
             }
@@ -2076,21 +2228,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     StorageManager.UUID_PRIVATE_INTERNAL, mIsUpgrade);
             ver.sdkVersion = mSdkVersion;
 
-            // If this is the first boot or an update from pre-M, and it is a normal
-            // boot, then we need to initialize the default preferred apps across
-            // all defined users.
-            if (!mOnlyCore && (mPromoteSystemApps || mFirstBoot)) {
+            // If this is the first boot or an update from pre-M, then we need to initialize the
+            // default preferred apps across all defined users.
+            if (mPromoteSystemApps || mFirstBoot) {
                 for (UserInfo user : mInjector.getUserManagerInternal().getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
                 }
             }
 
-            // If this is first boot after an OTA, and a normal boot, then
-            // we need to clear code cache directories.
+            // If this is first boot after an OTA, then we need to clear code cache directories.
             // Note that we do *not* clear the application profiles. These remain valid
             // across OTAs and are used to drive profile verification (post OTA) and
             // profile compilation (without waiting to collect a fresh set of profiles).
-            if (mIsUpgrade && !mOnlyCore) {
+            if (mIsUpgrade) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < packageSettings.size(); i++) {
                     final PackageSetting ps = packageSettings.valueAt(i);
@@ -2102,6 +2252,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                                         | Installer.FLAG_CLEAR_APP_DATA_KEEP_ART_PROFILES);
                     }
                 }
+                ver.buildFingerprint = Build.FINGERPRINT;
                 ver.fingerprint = PackagePartitions.FINGERPRINT;
             }
 
@@ -2110,7 +2261,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             // Legacy existing (installed before Q) non-system apps to hide
             // their icons in launcher.
-            if (!mOnlyCore && mIsPreQUpgrade) {
+            if (mIsPreQUpgrade) {
                 Slog.i(TAG, "Allowlisting all existing apps to hide their icons");
                 int size = packageSettings.size();
                 for (int i = 0; i < size; i++) {
@@ -2136,37 +2287,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            if (!mOnlyCore) {
-                mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr(computer);
-                mRequiredInstallerPackage = getRequiredInstallerLPr(computer);
-                mRequiredUninstallerPackage = getRequiredUninstallerLPr(computer);
-                ComponentName intentFilterVerifierComponent =
-                        getIntentFilterVerifierComponentNameLPr(computer);
-                ComponentName domainVerificationAgent =
-                        getDomainVerificationAgentComponentNameLPr(computer);
+            ComponentName intentFilterVerifierComponent =
+                    getIntentFilterVerifierComponentNameLPr(computer);
+            ComponentName domainVerificationAgent =
+                    getDomainVerificationAgentComponentNameLPr(computer);
 
-                DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
-                        intentFilterVerifierComponent, domainVerificationAgent, mContext,
-                        mDomainVerificationManager, mDomainVerificationManager.getCollector(),
-                        mDomainVerificationConnection);
+            DomainVerificationProxy domainVerificationProxy = DomainVerificationProxy.makeProxy(
+                    intentFilterVerifierComponent, domainVerificationAgent, mContext,
+                    mDomainVerificationManager, mDomainVerificationManager.getCollector(),
+                    mDomainVerificationConnection);
 
-                mDomainVerificationManager.setProxy(domainVerificationProxy);
+            mDomainVerificationManager.setProxy(domainVerificationProxy);
 
-                mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr(computer);
-                mSharedSystemSharedLibraryPackageName = getRequiredSharedLibrary(computer,
-                        PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
-                        SharedLibraryInfo.VERSION_UNDEFINED);
-            } else {
-                mRequiredVerifierPackage = null;
-                mRequiredInstallerPackage = null;
-                mRequiredUninstallerPackage = null;
-                mServicesExtensionPackageName = null;
-                mSharedSystemSharedLibraryPackageName = null;
-            }
-
-            // PermissionController hosts default permission granting and role management, so it's a
-            // critical part of the core system.
-            mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr(computer);
+            mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr(computer);
+            mSharedSystemSharedLibraryPackageName = getRequiredSharedLibrary(computer,
+                    PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
+                    SharedLibraryInfo.VERSION_UNDEFINED);
 
             mSettings.setPermissionControllerVersion(
                     computer.getPackageInfo(mRequiredPermissionControllerPackage, 0,
@@ -2176,20 +2312,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mRequiredSdkSandboxPackage = getRequiredSdkSandboxPackageName(computer);
 
             // Initialize InstantAppRegistry's Instant App list for all users.
-            for (AndroidPackage pkg : mPackages.values()) {
-                if (pkg.isSystem()) {
-                    continue;
+            forEachPackageState(computer, packageState -> {
+                var pkg = packageState.getAndroidPackage();
+                if (pkg == null || packageState.isSystem()) {
+                    return;
                 }
                 for (int userId : userIds) {
-                    final PackageStateInternal ps =
-                            computer.getPackageStateInternal(pkg.getPackageName());
-                    if (ps == null || !ps.getUserStateOrDefault(userId).isInstantApp()
-                            || !ps.getUserStateOrDefault(userId).isInstalled()) {
+                    if (!packageState.getUserStateOrDefault(userId).isInstantApp()
+                            || !packageState.getUserStateOrDefault(userId).isInstalled()) {
                         continue;
                     }
-                    mInstantAppRegistry.addInstantApp(userId, ps.getAppId());
+                    mInstantAppRegistry.addInstantApp(userId, packageState.getAppId());
                 }
-            }
+            });
 
             mInstallerService = mInjector.getPackageInstallerService();
             final ComponentName instantAppResolverComponent = getInstantAppResolver(computer);
@@ -2222,11 +2357,38 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         .getList());
             }
             mDexManager.load(userPackages);
+            mDynamicCodeLogger.load(userPackages);
             if (mIsUpgrade) {
                 FrameworkStatsLog.write(
                         FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
                         BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME,
                         SystemClock.uptimeMillis() - startTime);
+            }
+
+            // If this is first boot or first boot after OTA then set the file path to the app
+            // metadata files for preloaded packages.
+            if (mFirstBoot || isDeviceUpgrading()) {
+                ArrayMap<String, String> paths = systemConfig.getAppMetadataFilePaths();
+                for (Map.Entry<String, String> entry : paths.entrySet()) {
+                    String pkgName = entry.getKey();
+                    String path = entry.getValue();
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        path = null;
+                    }
+                    PackageSetting disabledPkgSetting = mSettings.getDisabledSystemPkgLPr(pkgName);
+                    if (disabledPkgSetting == null) {
+                        PackageSetting pkgSetting = mSettings.getPackageLPr(pkgName);
+                        if (pkgSetting != null) {
+                            pkgSetting.setAppMetadataFilePath(path);
+                        } else {
+                            Slog.w(TAG, "Cannot set app metadata file for nonexistent package "
+                                    + pkgName);
+                        }
+                    } else {
+                        disabledPkgSetting.setAppMetadataFilePath(path);
+                    }
+                }
             }
 
             // Rebuild the live computer since some attributes have been rebuilt.
@@ -2276,11 +2438,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mFirstBoot;
     }
 
-    public boolean isOnlyCoreApps() {
-        // allow instant applications
-        return mOnlyCore;
-    }
-
     public boolean isDeviceUpgrading() {
         // allow instant applications
         // The system property allows testing ota flow when upgraded to the same image.
@@ -2288,8 +2445,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 "persist.pm.mock-upgrade", false /* default */);
     }
 
-    @Nullable
-    private String getRequiredButNotReallyRequiredVerifierLPr(@NonNull Computer computer) {
+    @NonNull
+    private String[] getRequiredButNotReallyRequiredVerifiersLPr(@NonNull Computer computer) {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches =
@@ -2297,13 +2454,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         PACKAGE_MIME_TYPE,
                         MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                         UserHandle.USER_SYSTEM, Binder.getCallingUid());
-        if (matches.size() == 1) {
-            return matches.get(0).getComponentInfo().packageName;
-        } else if (matches.size() == 0) {
+        final int size = matches.size();
+        if (size == 0) {
             Log.w(TAG, "There should probably be a verifier, but, none were found");
-            return null;
+            return EmptyArray.STRING;
+        } else if (size <= REQUIRED_VERIFIERS_MAX_COUNT) {
+            String[] verifiers = new String[size];
+            for (int i = 0; i < size; ++i) {
+                verifiers[i] = matches.get(i).getComponentInfo().packageName;
+                if (TextUtils.isEmpty(verifiers[i])) {
+                    throw new RuntimeException("Invalid verifier: " + matches);
+                }
+            }
+            return verifiers;
         }
-        throw new RuntimeException("There must be exactly one verifier; found " + matches);
+        throw new RuntimeException(
+                "There must be no more than " + REQUIRED_VERIFIERS_MAX_COUNT + " verifiers; found "
+                        + matches);
     }
 
     @NonNull
@@ -2442,7 +2609,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             if (best == null || cur.priority > best.priority) {
                 if (computer.isComponentEffectivelyEnabled(cur.getComponentInfo(),
-                        UserHandle.USER_SYSTEM)) {
+                        UserHandle.SYSTEM)) {
                     best = cur;
                 } else {
                     Slog.w(TAG, "Domain verification agent found but not enabled");
@@ -2808,7 +2975,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static void renameStaticSharedLibraryPackage(ParsedPackage parsedPackage) {
         // Derive the new package synthetic package name
         parsedPackage.setPackageName(toStaticSharedLibraryPackageName(
-                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibVersion()));
+                parsedPackage.getPackageName(), parsedPackage.getStaticSharedLibraryVersion()));
     }
 
     private static String toStaticSharedLibraryPackageName(
@@ -2837,16 +3004,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 }
                 if (doTrim) {
-                    if (!isFirstBoot()) {
-                        if (mDexOptHelper.isDexOptDialogShown()) {
-                            try {
-                                ActivityManager.getService().showBootMessage(
-                                        mContext.getResources().getString(
-                                                R.string.android_upgrading_fstrim), true);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                    }
                     sm.runMaintenance();
                 }
             } else {
@@ -2876,18 +3033,27 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mDexManager;
     }
 
+    /*package*/ DexOptHelper getDexOptHelper() {
+        return mDexOptHelper;
+    }
+
+    /*package*/ DynamicCodeLogger getDynamicCodeLogger() {
+        return mDynamicCodeLogger;
+    }
+
     public void shutdown() {
         mCompilerStats.writeNow();
         mDexManager.writePackageDexUsageNow();
+        mDynamicCodeLogger.writeNow();
         PackageWatchdog.getInstance(mContext).writeNow();
 
         synchronized (mLock) {
             mPackageUsage.writeNow(mSettings.getPackagesLocked());
 
             if (mHandler.hasMessages(WRITE_SETTINGS)
-                    || mHandler.hasMessages(WRITE_PACKAGE_RESTRICTIONS)
+                    || mBackgroundHandler.hasMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS)
                     || mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
-                writeSettings();
+                writeSettings(/*sync=*/true);
             }
         }
     }
@@ -2925,12 +3091,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         onChanged();
     }
 
-    void killApplication(String pkgName, @AppIdInt int appId, String reason) {
-        killApplication(pkgName, appId, UserHandle.USER_ALL, reason);
+    void killApplication(String pkgName, @AppIdInt int appId, String reason, int exitInfoReason) {
+        killApplication(pkgName, appId, UserHandle.USER_ALL, reason, exitInfoReason);
     }
 
     void killApplication(String pkgName, @AppIdInt int appId,
-            @UserIdInt int userId, String reason) {
+            @UserIdInt int userId, String reason, int exitInfoReason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
@@ -2939,7 +3105,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 try {
-                    am.killApplication(pkgName, appId, userId, reason);
+                    am.killApplication(pkgName, appId, userId, reason, exitInfoReason);
                 } catch (RemoteException e) {
                 }
             }
@@ -2956,7 +3122,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @Nullable Bundle bOptions) {
         mHandler.post(() -> mBroadcastHelper.sendPackageBroadcast(action, pkg, extras, flags,
                 targetPkg, finishedReceiver, userIds, instantUserIds, broadcastAllowList,
-                bOptions));
+                null /* filterExtrasForReceiver */, bOptions));
     }
 
     @Override
@@ -2972,6 +3138,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @Override
     public void notifyPackageRemoved(String packageName, int uid) {
         mPackageObserverHelper.notifyRemoved(packageName, uid);
+        UserPackage.removeFromCache(UserHandle.getUserId(uid), packageName);
     }
 
     void sendPackageAddedForUser(@NonNull Computer snapshot, String packageName,
@@ -3019,10 +3186,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         info.mRemovedPackage = packageName;
-        info.mInstallerPackageName = packageState.getInstallSource().installerPackageName;
+        info.mInstallerPackageName = packageState.getInstallSource().mInstallerPackageName;
         info.mRemovedUsers = new int[] {userId};
         info.mBroadcastUsers = new int[] {userId};
         info.mUid = UserHandle.getUid(userId, packageState.getAppId());
+        info.mRemovedPackageVersionCode = packageState.getVersionCode();
         info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
     }
 
@@ -3086,7 +3254,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 callingMethod);
 
-        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+        if (!PackageManagerServiceUtils.isSystemOrRoot(callingUid)
                 && UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
                     + userId);
@@ -3119,14 +3287,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // state for observers to see the FIRST_LAUNCH signal.
         mHandler.post(() -> {
             for (int i = 0; i < mRunningInstalls.size(); i++) {
-                final PostInstallData data = mRunningInstalls.valueAt(i);
-                if (data.res.mReturnCode != PackageManager.INSTALL_SUCCEEDED) {
+                final InstallRequest installRequest = mRunningInstalls.valueAt(i);
+                if (installRequest.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
                     continue;
                 }
-                if (packageName.equals(data.res.mPkg.getPackageName())) {
+                if (packageName.equals(installRequest.getPkg().getPackageName())) {
                     // right package; but is it for the right user?
-                    for (int uIndex = 0; uIndex < data.res.mNewUsers.length; uIndex++) {
-                        if (userId == data.res.mNewUsers[uIndex]) {
+                    for (int uIndex = 0; uIndex < installRequest.getNewUsers().length; uIndex++) {
+                        if (userId == installRequest.getNewUsers()[uIndex]) {
                             if (DEBUG_BACKUP) {
                                 Slog.i(TAG, "Package " + packageName
                                         + " being restored so deferring FIRST_LAUNCH");
@@ -3147,23 +3315,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mBroadcastHelper.sendFirstLaunchBroadcast(
                     packageName, installerPackage, userIds, instantUserIds);
         });
-    }
-
-    void notifyPackageChangeObservers(PackageChangeEvent event) {
-        try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "notifyPackageChangeObservers");
-            synchronized (mPackageChangeObservers) {
-                for (IPackageChangeObserver observer : mPackageChangeObservers) {
-                    try {
-                        observer.onPackageChanged(event);
-                    } catch (RemoteException e) {
-                        Log.wtf(TAG, e);
-                    }
-                }
-            }
-        } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
     }
 
     @SuppressWarnings("GuardedBy")
@@ -3193,8 +3344,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     boolean isCallerVerifier(@NonNull Computer snapshot, int callingUid) {
         final int callingUserId = UserHandle.getUserId(callingUid);
-        return mRequiredVerifierPackage != null && callingUid == snapshot.getPackageUid(
-                mRequiredVerifierPackage, 0, callingUserId);
+        for (String requiredVerifierPackage : mRequiredVerifierPackages) {
+            if (callingUid == snapshot.getPackageUid(requiredVerifierPackage, 0, callingUserId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isPackageDeviceAdminOnAnyUser(@NonNull Computer snapshot, String packageName) {
@@ -3254,7 +3409,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     @Nullable
-    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+    public String getDevicePolicyManagementRoleHolderPackageName(int userId) {
         return Binder.withCleanCallingIdentity(() -> {
             RoleManager roleManager = mContext.getSystemService(RoleManager.class);
             List<String> roleHolders =
@@ -3394,6 +3549,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
         enforceOwnerRights(snapshot, ownerPackage, callingUid);
+
+        // Verifying that current calling uid should be able to add {@link CrossProfileIntentFilter}
+        // for source and target user
+        mUserManager.enforceCrossProfileIntentFilterAccess(sourceUserId, targetUserId, callingUid,
+                /* addCrossProfileIntentFilter */ true);
+
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         if (!intentFilter.checkDataPathAndSchemeSpecificParts()) {
@@ -3407,7 +3568,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         synchronized (mLock) {
             CrossProfileIntentFilter newFilter = new CrossProfileIntentFilter(intentFilter,
-                    ownerPackage, targetUserId, flags);
+                    ownerPackage, targetUserId, flags, mUserManager
+                    .getCrossProfileIntentFilterAccessControl(sourceUserId, targetUserId));
             CrossProfileIntentResolver resolver =
                     mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
             ArrayList<CrossProfileIntentFilter> existing = resolver.findFilters(intentFilter);
@@ -3424,6 +3586,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         scheduleWritePackageRestrictions(sourceUserId);
     }
+
 
     // Enforcing that callingUid is owning pkg on userId
     private void enforceOwnerRights(@NonNull Computer snapshot, String pkg, int callingUid) {
@@ -3618,7 +3781,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         PackageStateInternal packageState = computer.getPackageStateInternal(componentPkgName);
         if (packageState == null || packageState.getPkg() == null
                 || (!packageState.isSystem()
-                && !packageState.getTransientState().isUpdatedSystemApp())) {
+                && !packageState.isUpdatedSystemApp())) {
             throw new SecurityException(
                     "Changing the label is not allowed for " + componentName);
         }
@@ -3651,7 +3814,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private void setEnabledSettings(List<ComponentEnabledSetting> settings, int userId,
-            String callingPackage) {
+            @NonNull String callingPackage) {
         final int callingUid = Binder.getCallingUid();
         // TODO: This method is not properly snapshotified beyond this call
         final Computer preLockSnapshot = snapshotComputer();
@@ -3725,26 +3888,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         snapshot.getPackagesForUid(callingUid), packageName);
                 final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
                 // Limit who can change which apps
-                if (!isCallerTargetApp) {
+                if (!isCallerTargetApp && !allowedByPermission) {
                     // Don't allow apps that don't have permission to modify other apps
-                    if (!allowedByPermission
-                            || snapshot.shouldFilterApplication(pkgSetting, callingUid, userId)) {
-                        throw new SecurityException("Attempt to change component state; "
-                                + "pid=" + Binder.getCallingPid()
-                                + ", uid=" + callingUid
-                                + (!setting.isComponent() ? ", package=" + packageName
-                                        : ", component=" + setting.getComponentName()));
-                    }
-                    // Don't allow changing protected packages.
-                    if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-                        throw new SecurityException(
-                                "Cannot disable a protected package: " + packageName);
-                    }
+                    throw new SecurityException("Attempt to change component state; "
+                            + "pid=" + Binder.getCallingPid()
+                            + ", uid=" + callingUid
+                            + (!setting.isComponent() ? ", package=" + packageName
+                            : ", component=" + setting.getComponentName()));
                 }
-                if (pkgSetting == null) {
+                if (pkgSetting == null || snapshot.shouldFilterApplicationIncludingUninstalled(
+                        pkgSetting, callingUid, userId)) {
                     throw new IllegalArgumentException(setting.isComponent()
                             ? "Unknown component: " + setting.getComponentName()
                             : "Unknown package: " + packageName);
+                }
+                // Don't allow changing protected packages.
+                if (!isCallerTargetApp
+                        && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    throw new SecurityException(
+                            "Cannot disable a protected package: " + packageName);
                 }
                 if (callingUid == Process.SHELL_UID
                         && (pkgSetting.getFlags() & ApplicationInfo.FLAG_TEST_ONLY) == 0) {
@@ -3821,7 +3983,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final AndroidPackage deletedPkg = pkgSetting.getPkg();
             final boolean isSystemStub = (deletedPkg != null)
                     && deletedPkg.isStub()
-                    && deletedPkg.isSystem();
+                    && pkgSetting.isSystem();
             if (isSystemStub
                     && (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                     || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED)) {
@@ -3924,11 +4086,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         boolean success = false;
         if (!setting.isComponent()) {
             // We're dealing with an application/package level state change
-            if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                // Don't care about who enables an app.
-                callingPackage = null;
-            }
             pkgSetting.setEnabled(newState, userId, callingPackage);
             if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                     || newState == COMPONENT_ENABLED_STATE_DISABLED)
@@ -3984,7 +4141,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         synchronized (mDirtyUsers) {
             mDirtyUsers.remove(userId);
             if (mDirtyUsers.isEmpty()) {
-                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
+                mBackgroundHandler.removeMessages(WRITE_DIRTY_PACKAGE_RESTRICTIONS);
             }
         }
     }
@@ -4001,8 +4158,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 snapshot.isInstantAppInternal(packageName, userId, Process.SYSTEM_UID);
         final int[] userIds = isInstantApp ? EMPTY_INT_ARRAY : new int[] { userId };
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
-        final SparseArray<int[]> broadcastAllowList = snapshot.getBroadcastAllowList(
-                packageName, userIds, isInstantApp);
+        final SparseArray<int[]> broadcastAllowList =
+                isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
         mHandler.post(() -> mBroadcastHelper.sendPackageChangedBroadcast(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList));
@@ -4176,10 +4333,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     }
                 });
 
-        mBackgroundDexOptService.systemReady();
+        if (!useArtService()) {
+            // The background dexopt job is scheduled in DexOptHelper.initializeArtManagerLocal when
+            // ART Service is in use.
+            try {
+                mBackgroundDexOptService.systemReady();
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         // Prune unused static shared libraries which have been cached a period of time
         schedulePruneUnusedStaticSharedLibraries(false /* delay */);
+
+        DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
+        if (dexUseManager != null) {
+            dexUseManager.systemReady();
+        }
     }
 
     //TODO: b/111402650
@@ -4204,25 +4374,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    public PackageFreezer freezePackage(String packageName, String killReason) {
-        return freezePackage(packageName, UserHandle.USER_ALL, killReason);
-    }
-
-    public PackageFreezer freezePackage(String packageName, int userId, String killReason) {
-        return new PackageFreezer(packageName, userId, killReason, this);
-    }
-
-    public PackageFreezer freezePackageForDelete(String packageName, int deleteFlags,
-            String killReason) {
-        return freezePackageForDelete(packageName, UserHandle.USER_ALL, deleteFlags, killReason);
+    public PackageFreezer freezePackage(String packageName, int userId, String killReason,
+            int exitInfoReason) {
+        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason);
     }
 
     public PackageFreezer freezePackageForDelete(String packageName, int userId, int deleteFlags,
-            String killReason) {
+            String killReason, int exitInfoReason) {
         if ((deleteFlags & PackageManager.DELETE_DONT_KILL_APP) != 0) {
             return new PackageFreezer(this);
         } else {
-            return freezePackage(packageName, userId, killReason);
+            return freezePackage(packageName, userId, killReason, exitInfoReason);
         }
     }
 
@@ -4237,7 +4399,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mSettings.removeUserLPw(userId);
             mPendingBroadcasts.remove(userId);
             mDeletePackageHelper.removeUnusedPackagesLPw(userManager, userId);
-            mAppsFilter.onUserDeleted(userId);
+            mAppsFilter.onUserDeleted(snapshotComputer(), userId);
         }
         mInstantAppRegistry.onUserRemoved(userId);
     }
@@ -4461,12 +4623,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     true /* requireFullPermission */, true /* checkShell */, "stop package");
 
             final PackageStateInternal packageState =
-                    snapshot.getPackageStateInternal(packageName);
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageName, callingUid, userId);
             final PackageUserState packageUserState = packageState == null
                     ? null : packageState.getUserStateOrDefault(userId);
-            if (packageState != null
-                    && !snapshot.shouldFilterApplication(packageState, callingUid, userId)
-                    && packageUserState.isStopped() != stopped) {
+            if (packageState != null && packageUserState.isStopped() != stopped) {
                 boolean wasNotLaunched = packageUserState.isNotLaunched();
                 commitPackageStateMutation(null, packageName, state -> {
                     PackageUserStateWrite userState = state.userState(userId);
@@ -4478,7 +4639,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
                 if (wasNotLaunched) {
                     final String installerPackageName =
-                            packageState.getInstallSource().installerPackageName;
+                            packageState.getInstallSource().mInstallerPackageName;
                     if (installerPackageName != null) {
                         notifyFirstLaunch(packageName, installerPackageName, userId);
                     }
@@ -4521,12 +4682,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void clearApplicationProfileData(String packageName) {
-            PackageManagerServiceUtils.enforceSystemOrRoot(
-                    "Only the system can clear all profile data");
+            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                    "Only the system or shell can clear all profile data");
 
             final Computer snapshot = snapshotComputer();
             final AndroidPackage pkg = snapshot.getPackage(packageName);
-            try (PackageFreezer ignored = freezePackage(packageName, "clearApplicationProfileData")) {
+            try (PackageFreezer ignored =
+                            freezePackage(packageName, UserHandle.USER_ALL,
+                                    "clearApplicationProfileData",
+                                    ApplicationExitInfo.REASON_OTHER)) {
                 synchronized (mInstallLock) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
@@ -4544,7 +4708,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                     false /* checkShell */, "clear application data");
 
-            if (snapshot.getPackageStateFiltered(packageName, callingUid, userId) == null) {
+            if (snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId) == null) {
                 if (observer != null) {
                     mHandler.post(() -> {
                         try {
@@ -4566,8 +4731,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 public void run() {
                     mHandler.removeCallbacks(this);
                     final boolean succeeded;
-                    try (PackageFreezer freezer = freezePackage(packageName,
-                            "clearApplicationUserData")) {
+                    try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
+                            "clearApplicationUserData",
+                            ApplicationExitInfo.REASON_USER_REQUESTED)) {
                         synchronized (mInstallLock) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);
@@ -4616,18 +4782,48 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceOwnerRights(snapshot, ownerPackage, callingUid);
             PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                     UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+            PackageManagerService.this.mInjector.getCrossProfileIntentFilterHelper()
+                            .clearCrossProfileIntentFilters(sourceUserId, ownerPackage,
+                                    null);
+            scheduleWritePackageRestrictions(sourceUserId);
+        }
+
+        @Override
+        public boolean removeCrossProfileIntentFilter(IntentFilter intentFilter,
+                String ownerPackage,
+                int sourceUserId,
+                int targetUserId, int flags) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+            final int callingUid = Binder.getCallingUid();
+            enforceOwnerRights(snapshotComputer(), ownerPackage, callingUid);
+            mUserManager.enforceCrossProfileIntentFilterAccess(sourceUserId, targetUserId,
+                    callingUid, /* addCrossProfileIntentFilter */ false);
+            PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+
+            boolean removedMatchingFilter = false;
             synchronized (mLock) {
                 CrossProfileIntentResolver resolver =
                         mSettings.editCrossProfileIntentResolverLPw(sourceUserId);
+
                 ArraySet<CrossProfileIntentFilter> set =
                         new ArraySet<>(resolver.filterSet());
                 for (CrossProfileIntentFilter filter : set) {
-                    if (filter.getOwnerPackage().equals(ownerPackage)) {
+                    if (IntentFilter.filterEquals(filter.mFilter, intentFilter)
+                            && filter.getOwnerPackage().equals(ownerPackage)
+                            && filter.getTargetUserId() == targetUserId
+                            && filter.getFlags() == flags) {
                         resolver.removeFilter(filter);
+                        removedMatchingFilter = true;
+                        break;
                     }
                 }
             }
-            scheduleWritePackageRestrictions(sourceUserId);
+            if (removedMatchingFilter) {
+                scheduleWritePackageRestrictions(sourceUserId);
+            }
+            return removedMatchingFilter;
         }
 
         @Override
@@ -4699,30 +4895,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void dumpProfiles(String packageName, boolean dumpClassesAndMethods) {
-            /* Only the shell, root, or the app user should be able to dump profiles. */
-            final int callingUid = Binder.getCallingUid();
-            final Computer snapshot = snapshotComputer();
-            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (callingUid != Process.SHELL_UID
-                    && callingUid != Process.ROOT_UID
-                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
-                throw new SecurityException("dumpProfiles");
-            }
-
-            AndroidPackage pkg = snapshot.getPackage(packageName);
-            if (pkg == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
-
-            synchronized (mInstallLock) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-        }
-
-        @Override
         public void enterSafeMode() {
             PackageManagerServiceUtils.enforceSystemOrRoot(
                     "Only the system can request entering safe mode");
@@ -4733,15 +4905,25 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
+        public void extendVerificationTimeout(int verificationId, int verificationCodeAtTimeout,
                 long millisecondsToDelay) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                    "Only package verification agents can extend verification timeouts");
+            // Negative ids correspond to testing verifiers and will be silently enforced in
+            // the handler thread.
+            if (verificationId >= 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                        "Only package verification agents can extend verification timeouts");
+            }
             final int callingUid = Binder.getCallingUid();
 
             mHandler.post(() -> {
+                final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
+                if (state == null || !state.extendTimeout(callingUid)) {
+                    // Invalid uid or already extended.
+                    return;
+                }
+
                 final PackageVerificationResponse response = new PackageVerificationResponse(
                         verificationCodeAtTimeout, callingUid);
 
@@ -4753,14 +4935,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     delay = 0;
                 }
 
-                if ((state != null) && !state.timeoutExtended()) {
-                    state.extendTimeout();
-
-                    final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
-                    msg.arg1 = id;
-                    msg.obj = response;
-                    mHandler.sendMessageDelayed(msg, delay);
-                }
+                final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
+                msg.arg1 = id;
+                msg.obj = response;
+                mHandler.sendMessageDelayed(msg, delay);
             });
         }
 
@@ -5003,11 +5181,35 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public String getPermissionControllerPackageName() {
+        public ParcelFileDescriptor getAppMetadataFd(String packageName, int userId) {
+            mContext.enforceCallingOrSelfPermission(GET_APP_METADATA, "getAppMetadataFd");
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
-            if (snapshot.getPackageStateFiltered(mRequiredPermissionControllerPackage,
-                    callingUid, UserHandle.getUserId(callingUid)) != null) {
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId);
+            if (ps == null) {
+                throw new ParcelableException(
+                        new PackageManager.NameNotFoundException(packageName));
+            }
+            String filePath = ps.getAppMetadataFilePath();
+            if (filePath != null) {
+                File file = new File(filePath);
+                try {
+                    return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String getPermissionControllerPackageName() {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final Computer snapshot = snapshotComputer();
+            if (snapshot.getPackageStateForInstalledAndFiltered(
+                    mRequiredPermissionControllerPackage, callingUid, callingUserId) != null) {
                 return mRequiredPermissionControllerPackage;
             }
 
@@ -5026,8 +5228,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String getSplashScreenTheme(@NonNull String packageName, int userId) {
             final Computer snapshot = snapshotComputer();
-            PackageStateInternal packageState = filterPackageStateForInstalledAndFiltered(snapshot,
-                    packageName, Binder.getCallingUid(), userId);
+            final int callingUid = Binder.getCallingUid();
+            snapshot.enforceCrossUserPermission(
+                    callingUid, userId, false /* requireFullPermission */,
+                    false /* checkShell */, "getSplashScreenTheme");
+            PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
+                    packageName, callingUid, userId);
             return packageState == null ? null
                     : packageState.getUserStateOrDefault(userId).getSplashScreenTheme();
         }
@@ -5061,14 +5267,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public @NonNull List<String> getInitialNonStoppedSystemPackages() {
+            return mInitialNonStoppedSystemPackages != null
+                    ? new ArrayList<>(mInitialNonStoppedSystemPackages) : new ArrayList<>();
+        }
+
+        @Override
         public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
             Objects.requireNonNull(packageNames, "packageNames cannot be null");
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                     "getUnsuspendablePackagesForUser");
             final int callingUid = Binder.getCallingUid();
             if (UserHandle.getUserId(callingUid) != userId) {
-                throw new SecurityException("Calling uid " + callingUid
-                        + " cannot query getUnsuspendablePackagesForUser for user " + userId);
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                        "Calling uid " + callingUid
+                                + " cannot query getUnsuspendablePackagesForUser for user "
+                                + userId);
             }
             return mSuspendPackageHelper.getUnsuspendablePackagesForUser(snapshotComputer(),
                     packageNames, userId, callingUid);
@@ -5136,7 +5351,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
                 int installReason, List<String> whiteListedPermissions) {
             return mInstallPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                    installReason, whiteListedPermissions, null);
+                    installReason, whiteListedPermissions, null).first;
         }
 
         @Override
@@ -5156,7 +5371,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     true /*checkShell*/, "isPackageStateProtected");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
                     && snapshot.checkUidPermission(MANAGE_DEVICE_ADMINS, callingUid)
                     != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
@@ -5254,32 +5469,87 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 Map<String, String> classLoaderContextMap,
                 String loaderIsa) {
             int callingUid = Binder.getCallingUid();
-            if (PackageManagerService.PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
-                    && callingUid != Process.SYSTEM_UID) {
+            Computer snapshot = snapshot();
+
+            // System server should be able to report dex load on behalf of other apps. E.g., it
+            // could potentially resend the notifications in order to migrate the existing dex load
+            // info to ART Service.
+            if (!PackageManagerServiceUtils.isSystemOrRoot()
+                    && !snapshot.isCallerSameApp(
+                            loadingPackageName, callingUid, true /* resolveIsolatedUid */)) {
                 Slog.w(PackageManagerService.TAG,
-                        "Non System Server process reporting dex loads as system server. uid="
-                                + callingUid);
-                // Do not record dex loads from processes pretending to be system server.
-                // Only the system server should be assigned the package "android", so reject calls
-                // that don't satisfy the constraint.
-                //
-                // notifyDexLoad is a PM API callable from the app process. So in theory, apps could
-                // craft calls to this API and pretend to be system server. Doing so poses no
-                // particular danger for dex load reporting or later dexopt, however it is a
-                // sensible check to do in order to verify the expectations.
+                        TextUtils.formatSimple(
+                                "Invalid dex load report. loadingPackageName=%s, uid=%d",
+                                loadingPackageName, callingUid));
                 return;
             }
 
-            int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai = snapshot().getApplicationInfo(loadingPackageName, /*flags*/ 0,
-                    userId);
-            if (ai == null) {
-                Slog.w(PackageManagerService.TAG, "Loading a package that does not exist for the calling user. package="
-                        + loadingPackageName + ", user=" + userId);
-                return;
+            UserHandle user = Binder.getCallingUserHandle();
+            int userId = user.getIdentifier();
+
+            // Proxy the call to either ART Service or the legacy implementation. If the
+            // implementation is switched with the system property, the dex usage info will be
+            // incomplete, with these effects:
+            //
+            // -  Shared dex files may temporarily get compiled for private use.
+            // -  Secondary dex files may not get compiled at all.
+            // -  Stale compiled artifacts for secondary dex files may not get cleaned up.
+            //
+            // This recovers in the first background dexopt after the depending apps have been
+            // loaded for the first time.
+
+            DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
+            if (dexUseManager != null) {
+                // TODO(chiuwinson): Retrieve filtered snapshot from Computer instance instead.
+                try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                                LocalManagerRegistry.getManager(PackageManagerLocal.class)
+                                        .withFilteredSnapshot(callingUid, user)) {
+                    if (loaderIsa != null) {
+                        // Check that loaderIsa agrees with the ISA that dexUseManager will
+                        // determine.
+                        PackageState loadingPkgState =
+                                filteredSnapshot.getPackageState(loadingPackageName);
+                        // If we don't find the loading package just pass it through and let
+                        // dexUseManager throw on it.
+                        if (loadingPkgState != null) {
+                            String loadingPkgAbi = loadingPkgState.getPrimaryCpuAbi();
+                            if (loadingPkgAbi == null) {
+                                loadingPkgAbi = Build.SUPPORTED_ABIS[0];
+                            }
+                            String loadingPkgDexCodeIsa = InstructionSets.getDexCodeInstructionSet(
+                                    VMRuntime.getInstructionSet(loadingPkgAbi));
+                            if (!loaderIsa.equals(loadingPkgDexCodeIsa)) {
+                                // TODO(b/251903639): We make this a wtf to surface any situations
+                                // where this argument doesn't correspond to our expectations. Later
+                                // it should be turned into an IllegalArgumentException, when we can
+                                // assume it's the caller that's wrong rather than us.
+                                Log.wtf(TAG,
+                                        "Invalid loaderIsa in notifyDexLoad call from "
+                                                + loadingPackageName + ", uid " + callingUid
+                                                + ": expected " + loadingPkgDexCodeIsa + ", got "
+                                                + loaderIsa);
+                                return;
+                            }
+                        }
+                    }
+
+                    // This is called from binder, so exceptions thrown here are caught and handled
+                    // by it.
+                    dexUseManager.notifyDexContainersLoaded(
+                            filteredSnapshot, loadingPackageName, classLoaderContextMap);
+                }
+            } else {
+                ApplicationInfo ai =
+                        snapshot.getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
+                if (ai == null) {
+                    Slog.w(PackageManagerService.TAG,
+                            "Loading a package that does not exist for the calling user. package="
+                                    + loadingPackageName + ", user=" + userId);
+                    return;
+                }
+                mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
+                        Process.isIsolated(callingUid));
             }
-            mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId,
-                    Process.isIsolated(callingUid));
         }
 
         @Override
@@ -5318,49 +5588,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final int callingUserId = UserHandle.getCallingUserId();
             final Computer snapshot = snapshotComputer();
             final List<PackageManager.Property> result =
-                    mPackageProperty.queryProperty(propertyName, componentType, packageName -> {
-                        final PackageStateInternal ps =
-                                snapshot.getPackageStateInternal(packageName);
-                        return snapshot.shouldFilterApplication(ps, callingUid, callingUserId);
-                    });
+                    mPackageProperty.queryProperty(propertyName, componentType,
+                            packageName -> snapshot.getPackageStateForInstalledAndFiltered(
+                                    packageName, callingUid, callingUserId) == null
+                    );
             if (result == null) {
                 return ParceledListSlice.emptyList();
             }
             return new ParceledListSlice<>(result);
         }
 
-        /**
-         * Reconcile the information we have about the secondary dex files belonging to
-         * {@code packageName} and the actual dex files. For all dex files that were
-         * deleted, update the internal records and delete the generated oat files.
-         */
-        @Override
-        public void reconcileSecondaryDexFiles(String packageName) {
-            final Computer snapshot = snapshotComputer();
-            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
-                return;
-            } else if (snapshot.isInstantAppInternal(
-                    packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
-                return;
-            }
-            mDexManager.reconcileSecondaryDexFiles(packageName);
-        }
-
         @Override
         public void registerDexModule(String packageName, String dexModulePath,
                 boolean isSharedModule,
                 IDexModuleRegisterCallback callback) {
-            int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai = snapshot().getApplicationInfo(packageName, /*flags*/ 0, userId);
-            DexManager.RegisterDexModuleResult result;
-            if (ai == null) {
-                Slog.w(PackageManagerService.TAG,
-                        "Registering a dex module for a package that does not exist for the" +
-                                " calling user. package=" + packageName + ", user=" + userId);
-                result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
-            } else {
-                result = mDexManager.registerDexModule(ai, dexModulePath, isSharedModule, userId);
-            }
+            // ART Service doesn't support this explicit dexopting and instead relies on background
+            // dexopt for secondary dex files. For compat parity between ART Service and the legacy
+            // code it's disabled for both.
+            //
+            // Also, this API is problematic anyway since it doesn't provide the correct classloader
+            // context, so it is hard to produce dexopt artifacts that the runtime can load
+            // successfully.
+            Slog.i(TAG,
+                    "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
+                            + packageName);
+            DexManager.RegisterDexModuleResult result = new DexManager.RegisterDexModuleResult(
+                    false, "registerDexModule call not supported since Android U");
 
             if (callback != null) {
                 mHandler.post(() -> {
@@ -5433,14 +5686,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mInjector.getSystemService(AppOpsManager.class)
                         .checkPackage(Binder.getCallingUid(), callerPackageName);
 
-                PackageStateInternal packageState = computer.getPackageStateFiltered(packageName,
-                        Binder.getCallingUid(), UserHandle.getCallingUserId());
+                PackageStateInternal packageState = computer.getPackageStateForInstalledAndFiltered(
+                        packageName, Binder.getCallingUid(), UserHandle.getCallingUserId());
                 if (packageState == null) {
                     throw new IllegalArgumentException("Unknown target package " + packageName);
                 }
 
                 if (!Objects.equals(callerPackageName,
-                        packageState.getInstallSource().installerPackageName)) {
+                        packageState.getInstallSource().mInstallerPackageName)) {
                     throw new IllegalArgumentException("Calling package " + callerPackageName
                             + " is not installer for " + packageName);
                 }
@@ -5502,9 +5755,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             final long callingId = Binder.clearCallingIdentity();
             try {
-                final PackageStateInternal packageState =
-                        snapshot.getPackageStateFiltered(packageName, callingUid, userId);
+                final PackageStateInternal packageState = snapshot.getPackageStateInternal(
+                        packageName);
                 if (packageState == null) {
+                    return false;
+                }
+
+                final PackageUserStateInternal userState = packageState.getUserStateOrDefault(
+                        userId);
+                if (userState.isHidden() == hidden || !userState.isInstalled()
+                        || snapshot.shouldFilterApplication(packageState, callingUid, userId)) {
                     return false;
                 }
 
@@ -5514,19 +5774,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 AndroidPackage pkg = packageState.getPkg();
                 if (pkg != null) {
                     // Cannot hide SDK libs as they are controlled by SDK manager.
-                    if (pkg.getSdkLibName() != null) {
+                    if (pkg.getSdkLibraryName() != null) {
                         Slog.w(TAG, "Cannot hide package: " + packageName
                                 + " providing SDK library: "
-                                + pkg.getSdkLibName());
+                                + pkg.getSdkLibraryName());
                         return false;
                     }
                     // Cannot hide static shared libs as they are considered
                     // a part of the using app (emulating static linking). Also
                     // static libs are installed always on internal storage.
-                    if (pkg.getStaticSharedLibName() != null) {
+                    if (pkg.getStaticSharedLibraryName() != null) {
                         Slog.w(TAG, "Cannot hide package: " + packageName
                                 + " providing static shared library: "
-                                + pkg.getStaticSharedLibName());
+                                + pkg.getStaticSharedLibraryName());
                         return false;
                     }
                 }
@@ -5534,10 +5794,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 if (hidden && !UserHandle.isSameApp(callingUid, packageState.getAppId())
                         && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
                     Slog.w(TAG, "Not hiding protected package: " + packageName);
-                    return false;
-                }
-
-                if (packageState.getUserStateOrDefault(userId).isHidden() == hidden) {
                     return false;
                 }
 
@@ -5549,7 +5805,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         newSnapshot.getPackageStateInternal(packageName);
 
                 if (hidden) {
-                    killApplication(packageName, newPackageState.getAppId(), userId, "hiding pkg");
+                    killApplication(packageName, newPackageState.getAppId(), userId, "hiding pkg",
+                            ApplicationExitInfo.REASON_OTHER);
                     sendApplicationHiddenForUser(packageName, newPackageState, userId);
                 } else {
                     sendPackageAddedForUser(newSnapshot, packageName, newPackageState, userId,
@@ -5573,17 +5830,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (packageState != null && packageState.getPkg() != null) {
                 AndroidPackage pkg = packageState.getPkg();
                 // Cannot block uninstall SDK libs as they are controlled by SDK manager.
-                if (pkg.getSdkLibName() != null) {
+                if (pkg.getSdkLibraryName() != null) {
                     Slog.w(PackageManagerService.TAG, "Cannot block uninstall of package: " + packageName
-                            + " providing SDK library: " + pkg.getSdkLibName());
+                            + " providing SDK library: " + pkg.getSdkLibraryName());
                     return false;
                 }
                 // Cannot block uninstall of static shared libs as they are
                 // considered a part of the using app (emulating static linking).
                 // Also static libs are installed always on internal storage.
-                if (pkg.getStaticSharedLibName() != null) {
+                if (pkg.getStaticSharedLibraryName() != null) {
                     Slog.w(PackageManagerService.TAG, "Cannot block uninstall of package: " + packageName
-                            + " providing static shared library: " + pkg.getStaticSharedLibName());
+                            + " providing static shared library: " + pkg.getStaticSharedLibraryName());
                     return false;
                 }
             }
@@ -5597,21 +5854,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void setComponentEnabledSetting(ComponentName componentName,
-                int newState, int flags, int userId) {
+                int newState, int flags, int userId, String callingPackage) {
             if (!mUserManager.exists(userId)) return;
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
 
             setEnabledSettings(List.of(new PackageManager.ComponentEnabledSetting(componentName, newState, flags)),
-                    userId, null /* callingPackage */);
+                    userId, callingPackage);
         }
 
         @Override
-        public void setComponentEnabledSettings(List<PackageManager.ComponentEnabledSetting> settings, int userId) {
+        public void setComponentEnabledSettings(
+                List<PackageManager.ComponentEnabledSetting> settings, int userId,
+                String callingPackage) {
             if (!mUserManager.exists(userId)) return;
             if (settings == null || settings.isEmpty()) {
                 throw new IllegalArgumentException("The list of enabled settings is empty");
             }
-
-            setEnabledSettings(settings, userId, null /* callingPackage */);
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
+            setEnabledSettings(settings, userId, callingPackage);
         }
 
         @Override
@@ -5636,8 +5900,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, true /*requireFullPermission*/,
                     true /*checkShell*/, "setHarmfulAppInfo");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
-                    snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
+                    && snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
                             != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
                         + SET_HARMFUL_APP_WARNINGS + " permission.");
@@ -5670,7 +5934,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void setInstallerPackageName(String targetPackage, String installerPackageName) {
+        public void setInstallerPackageName(String targetPackage,
+                @Nullable String installerPackageName) {
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
             final FunctionalUtils.ThrowingCheckedFunction<Computer, Boolean, RuntimeException>
@@ -5680,19 +5945,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
 
                 PackageStateInternal targetPackageState =
-                        snapshot.getPackageStateInternal(targetPackage);
-                if (targetPackageState == null
-                        || snapshot.shouldFilterApplication(targetPackageState, callingUid,
-                        callingUserId)) {
+                        snapshot.getPackageStateForInstalledAndFiltered(
+                                targetPackage, callingUid, callingUserId);
+                if (targetPackageState == null) {
                     throw new IllegalArgumentException("Unknown target package: " + targetPackage);
                 }
 
                 PackageStateInternal installerPackageState = null;
                 if (installerPackageName != null) {
-                    installerPackageState = snapshot.getPackageStateInternal(installerPackageName);
-                    if (installerPackageState == null
-                            || snapshot.shouldFilterApplication(
-                            installerPackageState, callingUid, callingUserId)) {
+                    installerPackageState = snapshot.getPackageStateForInstalledAndFiltered(
+                            installerPackageName, callingUid, callingUserId);
+                    if (installerPackageState == null) {
                         throw new IllegalArgumentException("Unknown installer package: "
                                 + installerPackageName);
                     }
@@ -5727,7 +5990,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Verify: if target already has an installer package, it must
                 // be signed with the same cert as the caller.
                 String targetInstallerPackageName =
-                        targetPackageState.getInstallSource().installerPackageName;
+                        targetPackageState.getInstallSource().mInstallerPackageName;
                 PackageStateInternal targetInstallerPkgSetting = targetInstallerPackageName == null
                         ? null : snapshot.getPackageStateInternal(targetInstallerPackageName);
 
@@ -5770,16 +6033,21 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (allowed) {
                 // TODO: Need to lock around here to handle mSettings.addInstallerPackageNames,
                 //  should find an alternative which avoids any race conditions
+                final int installerPackageUid = installerPackageName == null
+                        ? INVALID_UID : snapshotComputer().getPackageUid(installerPackageName,
+                        0 /* flags */, callingUserId);
                 PackageStateInternal targetPackageState;
                 synchronized (mLock) {
                     PackageStateMutator.Result result = commitPackageStateMutation(initialState,
-                            targetPackage, state -> state.setInstaller(installerPackageName));
+                            targetPackage, state -> state.setInstaller(installerPackageName,
+                                    installerPackageUid));
                     if (result.isPackagesChanged() || result.isStateChanged()) {
                         synchronized (mPackageStateWriteLock) {
                             allowed = implementation.apply(snapshotComputer());
                             if (allowed) {
                                 commitPackageStateMutation(null, targetPackage,
-                                        state -> state.setInstaller(installerPackageName));
+                                        state -> state.setInstaller(installerPackageName,
+                                                installerPackageUid));
                             } else {
                                 return;
                             }
@@ -5791,6 +6059,42 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mAppsFilter.addPackage(snapshotComputer(), targetPackageState);
                 scheduleWriteSettings();
             }
+        }
+
+        @Override
+        public void relinquishUpdateOwnership(String targetPackage) {
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final Computer snapshot = snapshotComputer();
+
+            final PackageStateInternal targetPackageState =
+                    snapshot.getPackageStateForInstalledAndFiltered(targetPackage, callingUid,
+                            callingUserId);
+            if (targetPackageState == null) {
+                throw new IllegalArgumentException("Unknown target package: " + targetPackage);
+            }
+
+            final String targetUpdateOwnerPackageName =
+                    targetPackageState.getInstallSource().mUpdateOwnerPackageName;
+            final PackageStateInternal targetUpdateOwnerPkgSetting =
+                    targetUpdateOwnerPackageName == null ? null
+                            : snapshot.getPackageStateInternal(targetUpdateOwnerPackageName);
+
+            if (targetUpdateOwnerPkgSetting == null) {
+                return;
+            }
+
+            final int callingAppId = UserHandle.getAppId(callingUid);
+            final int targetUpdateOwnerAppId = targetUpdateOwnerPkgSetting.getAppId();
+            if (callingAppId != Process.SYSTEM_UID
+                    && callingAppId != Process.SHELL_UID
+                    && callingAppId != targetUpdateOwnerAppId) {
+                throw new SecurityException("Caller is not the current update owner.");
+            }
+
+            commitPackageStateMutation(null /* initialState */, targetPackage,
+                    state -> state.setUpdateOwner(null /* updateOwnerPackageName */));
+            scheduleWriteSettings();
         }
 
         @Override
@@ -5878,7 +6182,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
                     "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
-                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid);
+                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
+                    false /* forQuietMode */);
         }
 
         @Override
@@ -5915,7 +6220,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     false /* checkShell */, "setSplashScreenTheme");
             enforceOwnerRights(snapshot, packageName, callingUid);
 
-            PackageStateInternal packageState = filterPackageStateForInstalledAndFiltered(snapshot,
+            PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, callingUid, userId);
             if (packageState == null) {
                 return;
@@ -5940,18 +6245,36 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                    "Only package verification agents can verify applications");
+        public void verifyPendingInstall(int verificationId, int verificationCode)
+                throws RemoteException {
+            // Negative ids correspond to testing verifiers and will be silently enforced in
+            // the handler thread.
+            if (verificationId >= 0) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                        "Only package verification agents can verify applications");
+            }
             final int callingUid = Binder.getCallingUid();
 
-            final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
-            final PackageVerificationResponse response = new PackageVerificationResponse(
-                    verificationCode, callingUid);
-            msg.arg1 = id;
-            msg.obj = response;
-            mHandler.sendMessage(msg);
+            mHandler.post(() -> {
+                final int id = verificationId >= 0 ? verificationId : -verificationId;
+                final PackageVerificationState state = mPendingVerification.get(id);
+                if (state == null) {
+                    return;
+                }
+                if (!state.checkRequiredVerifierUid(callingUid)
+                        && !state.checkSufficientVerifierUid(callingUid)) {
+                    // Only allow calls from verifiers.
+                    return;
+                }
+
+                final Message msg = mHandler.obtainMessage(PackageManagerService.PACKAGE_VERIFIED);
+                final PackageVerificationResponse response = new PackageVerificationResponse(
+                        verificationCode, callingUid);
+                msg.arg1 = id;
+                msg.obj = response;
+                mHandler.sendMessage(msg);
+            });
         }
 
         @Override
@@ -5971,6 +6294,36 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             for (int index = 0; index < packagesToNotify.size(); index++) {
                 notifyInstallObserver(packagesToNotify.valueAt(index), false /* killApp */);
             }
+        }
+
+        /**
+         * Wait for the handler to finish handling all pending messages.
+         * @param timeoutMillis Maximum time in milliseconds to wait.
+         * @param forBackgroundHandler Whether to wait for the background handler instead.
+         * @return True if all the waiting messages in the handler has been handled.
+         *         False if timeout.
+         */
+        @Override
+        public boolean waitForHandler(long timeoutMillis, boolean forBackgroundHandler) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            if (forBackgroundHandler) {
+                mBackgroundHandler.post(latch::countDown);
+            } else {
+                mHandler.post(latch::countDown);
+            }
+            final long endTimeMillis = System.currentTimeMillis() + timeoutMillis;
+            while (latch.getCount() > 0) {
+                try {
+                    final long remainingTimeMillis = endTimeMillis - System.currentTimeMillis();
+                    if (remainingTimeMillis <= 0) {
+                        return false;
+                    }
+                    return latch.await(remainingTimeMillis, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    // ignore and retry
+                }
+            }
+            return true;
         }
 
         @Override
@@ -6006,13 +6359,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mRequiredInstallerPackage,
                     mRequiredUninstallerPackage,
                     mSetupWizardPackage,
-                    mRequiredVerifierPackage,
+                    mRequiredVerifierPackages,
                     mDefaultTextClassifierPackage,
                     mSystemTextClassifierPackageName,
                     mRequiredPermissionControllerPackage,
                     mConfiguratorPackage,
                     mIncidentReportApproverPackage,
                     mAmbientContextDetectionPackage,
+                    mWearableSensingPackage,
                     mAppPredictionServicePackage,
                     COMPANION_PACKAGE_NAME,
                     mRetailDemoPackage,
@@ -6026,30 +6380,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             synchronized (mProtectedBroadcasts) {
                 protectedBroadcasts = new ArraySet<>(mProtectedBroadcasts);
             }
-            new DumpHelper(mPermissionManager, mApexManager, mStorageEventHelper,
-                    mDomainVerificationManager, mInstallerService, mRequiredVerifierPackage,
+            new DumpHelper(mPermissionManager, mStorageEventHelper,
+                    mDomainVerificationManager, mInstallerService, mRequiredVerifierPackages,
                     knownPackages, mChangedPackagesTracker, availableFeatures, protectedBroadcasts,
-                    getPerUidReadTimeouts(snapshot)
+                    getPerUidReadTimeouts(snapshot), mSnapshotStatistics
             ).doDump(snapshot, fd, pw, args);
-        }
-    }
-
-    private class PackageManagerLocalImpl implements PackageManagerLocal {
-        @Override
-        public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
-                @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
-                @NonNull String seInfo, int flags) throws IOException {
-            synchronized (mInstallLock) {
-                ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
-                        packageName, subDirNames, userId, appId, seInfo,
-                        flags);
-                args.previousAppId = previousAppId;
-                try {
-                    mInstaller.reconcileSdkData(args);
-                } catch (InstallerException e) {
-                    throw new IOException(e.getMessage());
-                }
-            }
         }
     }
 
@@ -6129,6 +6464,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         protected DexManager getDexManager() {
             return mDexManager;
+        }
+
+        @NonNull
+        @Override
+        public DynamicCodeLogger getDynamicCodeLogger() {
+            return mDynamicCodeLogger;
         }
 
         @Override
@@ -6235,6 +6576,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public String[] setPackagesSuspendedByAdmin(
+                @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
+            return mSuspendPackageHelper.setPackagesSuspendedByAdmin(
+                    snapshotComputer(), userId, packageNames, suspended);
+        }
+
+        @Override
+        public void setPackagesSuspendedForQuietMode(int userId, boolean suspended) {
+            mSuspendPackageHelper.setPackagesSuspendedForQuietMode(
+                    snapshotComputer(), userId, suspended);
+        }
+
+        @Override
         public void setDeviceAndProfileOwnerPackages(
                 int deviceOwnerUserId, String deviceOwnerPackage,
                 SparseArray<String> profileOwnerPackages) {
@@ -6248,26 +6602,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             for (int i = 0; i < sz; i++) {
                 if (profileOwnerPackages.valueAt(i) != null) {
                     removeAllNonSystemPackageSuspensions(profileOwnerPackages.keyAt(i));
-                }
-            }
-        }
-
-        @Override
-        public void pruneCachedApksInApex(@NonNull List<PackageInfo> apexPackages) {
-            if (mCacheDir == null) {
-                return;
-            }
-
-            final PackageCacher cacher = new PackageCacher(mCacheDir);
-            synchronized (mLock) {
-                final Computer snapshot = snapshot();
-                for (int i = 0, size = apexPackages.size(); i < size; i++) {
-                    final List<String> apkNames =
-                            mApexManager.getApksInApex(apexPackages.get(i).packageName);
-                    for (int j = 0, apksInApex = apkNames.size(); j < apksInApex; j++) {
-                        final AndroidPackage pkg = snapshot.getPackage(apkNames.get(j));
-                        cacher.cleanCachedResult(new File(pkg.getPath()));
-                    }
                 }
             }
         }
@@ -6288,7 +6622,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
 
             AndroidPackage pkg = packageState.getPkg();
-            return pkg != null && pkg.isSystem() && pkg.isPersistent();
+            return pkg != null && packageState.isSystem() && pkg.isPersistent();
         }
 
         @Override
@@ -6316,7 +6650,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             List<String> targetPackages = new ArrayList<>();
             PackageManagerService.this.forEachPackageState(snapshot(), packageState -> {
                 final AndroidPackage pkg = packageState.getPkg();
-                if (pkg != null && !pkg.isOverlay()) {
+                if (pkg != null && !pkg.isResourceOverlay()) {
                     targetPackages.add(pkg.getPackageName());
                 }
             });
@@ -6324,11 +6658,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public boolean setEnabledOverlayPackages(int userId, @NonNull String targetPackageName,
-                @Nullable OverlayPaths overlayPaths,
-                @NonNull Set<String> outUpdatedPackageNames) {
-            return PackageManagerService.this.setEnabledOverlayPackages(userId, targetPackageName,
-                    overlayPaths, outUpdatedPackageNames);
+        public void setEnabledOverlayPackages(int userId,
+                @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+                @NonNull Set<String> outUpdatedPackageNames,
+                @NonNull Set<String> outInvalidPackageNames) {
+            PackageManagerService.this.setEnabledOverlayPackages(userId,
+                    pendingChanges, outUpdatedPackageNames, outInvalidPackageNames);
         }
 
         @Override
@@ -6352,21 +6687,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         }
 
-        /**
-         * Ask the package manager to compile layouts in the given package.
-         */
-        @Override
-        public boolean compileLayouts(String packageName) {
-            AndroidPackage pkg;
-            synchronized (mLock) {
-                pkg = mPackages.get(packageName);
-                if (pkg == null) {
-                    return false;
-                }
-            }
-            return mArtManagerService.compileLayouts(pkg);
-        }
-
         @Nullable
         @Override
         public String removeLegacyDefaultBrowserPackageName(int userId) {
@@ -6379,7 +6699,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public void uninstallApex(String packageName, long versionCode, int userId,
                 IntentSender intentSender, int flags) {
             final int callerUid = Binder.getCallingUid();
-            if (callerUid != Process.ROOT_UID && callerUid != Process.SHELL_UID) {
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
                 throw new SecurityException("Not allowed to uninstall apexes");
             }
             PackageInstallerService.PackageDeleteObserverAdapter adapter =
@@ -6392,8 +6712,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return;
             }
             final ApexManager am = PackageManagerService.this.mApexManager;
-            PackageInfo activePackage = am.getPackageInfo(packageName,
-                    ApexManager.MATCH_ACTIVE_PACKAGE);
+            PackageInfo activePackage = snapshot().getPackageInfo(
+                    packageName, PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM);
             if (activePackage == null) {
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_ABORTED,
                         packageName + " is not an apex package");
@@ -6413,6 +6733,46 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_SUCCEEDED,
                         null);
             }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyDumpProfiles(String packageName, boolean dumpClassesAndMethods)
+                throws LegacyDexoptDisabledException {
+            final Computer snapshot = snapshotComputer();
+            AndroidPackage pkg = snapshot.getPackage(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+
+            synchronized (mInstallLock) {
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "dump profiles");
+                mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+            }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyForceDexOpt(String packageName) throws LegacyDexoptDisabledException {
+            mDexOptHelper.forceDexOpt(snapshotComputer(), packageName);
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyReconcileSecondaryDexFiles(String packageName)
+                throws LegacyDexoptDisabledException {
+            final Computer snapshot = snapshotComputer();
+            if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+                return;
+            } else if (snapshot.isInstantAppInternal(
+                               packageName, UserHandle.getCallingUserId(), Process.SYSTEM_UID)) {
+                return;
+            }
+            mDexManager.reconcileSecondaryDexFiles(packageName);
         }
 
         @Override
@@ -6466,6 +6826,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void setVisibilityLogging(String packageName, boolean enable) {
+            PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                    "Only the system or shell can set visibility logging.");
             final PackageStateInternal packageState =
                     snapshot().getPackageStateInternal(packageName);
             if (packageState == null) {
@@ -6486,7 +6848,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public boolean registerInstalledLoadingProgressCallback(String packageName,
                 PackageManagerInternal.InstalledLoadingProgressCallback callback, int userId) {
             final Computer snapshot = snapshotComputer();
-            final PackageStateInternal ps = filterPackageStateForInstalledAndFiltered(snapshot,
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, Binder.getCallingUid(), userId);
             if (ps == null) {
                 return false;
@@ -6509,16 +6871,23 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public IncrementalStatesInfo getIncrementalStatesInfo(
                 @NonNull String packageName, int filterCallingUid, int userId) {
             final Computer snapshot = snapshotComputer();
-            final PackageStateInternal ps = filterPackageStateForInstalledAndFiltered(snapshot,
+            final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
                     packageName, filterCallingUid, userId);
             if (ps == null) {
                 return null;
             }
-            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress());
+            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress(),
+                    ps.getLoadingCompletedTime());
         }
 
         @Override
         public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            return isSameApp(packageName, /*flags=*/0, callingUid, userId);
+        }
+
+        @Override
+        public boolean isSameApp(@Nullable String packageName,
+                @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId) {
             if (packageName == null) {
                 return false;
             }
@@ -6527,7 +6896,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return packageName.equals(mRequiredSdkSandboxPackage);
             }
             Computer snapshot = snapshot();
-            int uid = snapshot.getPackageUid(packageName, 0, userId);
+            int uid = snapshot.getPackageUid(packageName, flags, userId);
             return UserHandle.isSameApp(uid, callingUid);
         }
 
@@ -6538,80 +6907,116 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
-    private boolean setEnabledOverlayPackages(@UserIdInt int userId,
-            @NonNull String targetPackageName, @Nullable OverlayPaths newOverlayPaths,
-            @NonNull Set<String> outUpdatedPackageNames) {
+    private void setEnabledOverlayPackages(@UserIdInt int userId,
+            @NonNull ArrayMap<String, OverlayPaths> pendingChanges,
+            @NonNull Set<String> outUpdatedPackageNames,
+            @NonNull Set<String> outInvalidPackageNames) {
+        final ArrayMap<String, ArrayMap<String, ArraySet<String>>>
+                targetPkgToLibNameToModifiedDependents = new ArrayMap<>();
+        final int numberOfPendingChanges = pendingChanges.size();
+
         synchronized (mOverlayPathsLock) {
-            final ArrayMap<String, ArraySet<String>> libNameToModifiedDependents = new ArrayMap<>();
             Computer computer = snapshotComputer();
-            final PackageStateInternal packageState = computer.getPackageStateInternal(
-                    targetPackageName);
-            final AndroidPackage targetPkg = packageState == null ? null : packageState.getPkg();
-            if (targetPackageName == null || targetPkg == null) {
-                Slog.e(TAG, "failed to find package " + targetPackageName);
-                return false;
-            }
+            for (int i = 0; i < numberOfPendingChanges; i++) {
+                final String targetPackageName = pendingChanges.keyAt(i);
+                final OverlayPaths newOverlayPaths = pendingChanges.valueAt(i);
+                final PackageStateInternal packageState = computer.getPackageStateInternal(
+                        targetPackageName);
+                final AndroidPackage targetPkg =
+                        packageState == null ? null : packageState.getPkg();
+                if (targetPackageName == null || targetPkg == null) {
+                    Slog.e(TAG, "failed to find package " + targetPackageName);
+                    outInvalidPackageNames.add(targetPackageName);
+                    continue;
+                }
 
-            if (Objects.equals(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
-                    newOverlayPaths)) {
-                return true;
-            }
+                if (Objects.equals(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
+                        newOverlayPaths)) {
+                    continue;
+                }
 
-            if (targetPkg.getLibraryNames() != null) {
-                // Set the overlay paths for dependencies of the shared library.
-                for (final String libName : targetPkg.getLibraryNames()) {
-                    ArraySet<String> modifiedDependents = null;
+                if (targetPkg.getLibraryNames() != null) {
+                    // Set the overlay paths for dependencies of the shared library.
+                    for (final String libName : targetPkg.getLibraryNames()) {
+                        ArraySet<String> modifiedDependents = null;
 
-                    final SharedLibraryInfo info = computer.getSharedLibraryInfo(libName,
-                            SharedLibraryInfo.VERSION_UNDEFINED);
-                    if (info == null) {
-                        continue;
-                    }
-                    final List<VersionedPackage> dependents = computer
-                            .getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID, userId);
-                    if (dependents == null) {
-                        continue;
-                    }
-                    for (final VersionedPackage dependent : dependents) {
-                        final PackageStateInternal dependentState =
-                                computer.getPackageStateInternal(dependent.getPackageName());
-                        if (dependentState == null) {
+                        final SharedLibraryInfo info = computer.getSharedLibraryInfo(libName,
+                                SharedLibraryInfo.VERSION_UNDEFINED);
+                        if (info == null) {
                             continue;
                         }
-                        if (canSetOverlayPaths(dependentState.getUserStateOrDefault(userId)
-                                .getSharedLibraryOverlayPaths()
-                                .get(libName), newOverlayPaths)) {
-                            String dependentPackageName = dependent.getPackageName();
-                            modifiedDependents = ArrayUtils.add(modifiedDependents,
-                                    dependentPackageName);
-                            outUpdatedPackageNames.add(dependentPackageName);
+                        final List<VersionedPackage> dependents =
+                                computer.getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID,
+                                        userId);
+                        if (dependents == null) {
+                            continue;
+                        }
+                        for (final VersionedPackage dependent : dependents) {
+                            final PackageStateInternal dependentState =
+                                    computer.getPackageStateInternal(dependent.getPackageName());
+                            if (dependentState == null) {
+                                continue;
+                            }
+                            if (canSetOverlayPaths(dependentState.getUserStateOrDefault(userId)
+                                    .getSharedLibraryOverlayPaths()
+                                    .get(libName), newOverlayPaths)) {
+                                String dependentPackageName = dependent.getPackageName();
+                                modifiedDependents = ArrayUtils.add(modifiedDependents,
+                                        dependentPackageName);
+                                outUpdatedPackageNames.add(dependentPackageName);
+                            }
+                        }
+
+                        if (modifiedDependents != null) {
+                            ArrayMap<String, ArraySet<String>> libNameToModifiedDependents =
+                                    targetPkgToLibNameToModifiedDependents.get(
+                                            targetPackageName);
+                            if (libNameToModifiedDependents == null) {
+                                libNameToModifiedDependents = new ArrayMap<>();
+                                targetPkgToLibNameToModifiedDependents.put(targetPackageName,
+                                        libNameToModifiedDependents);
+                            }
+                            libNameToModifiedDependents.put(libName, modifiedDependents);
                         }
                     }
+                }
 
-                    if (modifiedDependents != null) {
-                        libNameToModifiedDependents.put(libName, modifiedDependents);
-                    }
+                if (canSetOverlayPaths(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
+                        newOverlayPaths)) {
+                    outUpdatedPackageNames.add(targetPackageName);
                 }
             }
 
-            if (canSetOverlayPaths(packageState.getUserStateOrDefault(userId).getOverlayPaths(),
-                    newOverlayPaths)) {
-                outUpdatedPackageNames.add(targetPackageName);
-            }
-
             commitPackageStateMutation(null, mutator -> {
-                mutator.forPackage(targetPackageName)
-                        .userState(userId)
-                        .setOverlayPaths(newOverlayPaths);
+                for (int i = 0; i < numberOfPendingChanges; i++) {
+                    final String targetPackageName = pendingChanges.keyAt(i);
+                    final OverlayPaths newOverlayPaths = pendingChanges.valueAt(i);
 
-                for (int mapIndex = 0; mapIndex < libNameToModifiedDependents.size(); mapIndex++) {
-                    String libName = libNameToModifiedDependents.keyAt(mapIndex);
-                    ArraySet<String> modifiedDependents =
-                            libNameToModifiedDependents.valueAt(mapIndex);
-                    for (int setIndex = 0; setIndex < modifiedDependents.size(); setIndex++) {
-                        mutator.forPackage(modifiedDependents.valueAt(setIndex))
-                                .userState(userId)
-                                .setOverlayPathsForLibrary(libName, newOverlayPaths);
+                    if (!outUpdatedPackageNames.contains(targetPackageName)) {
+                        continue;
+                    }
+
+                    mutator.forPackage(targetPackageName)
+                            .userState(userId)
+                            .setOverlayPaths(newOverlayPaths);
+
+                    final ArrayMap<String, ArraySet<String>> libNameToModifiedDependents =
+                            targetPkgToLibNameToModifiedDependents.get(
+                                    targetPackageName);
+                    if (libNameToModifiedDependents == null) {
+                        continue;
+                    }
+
+                    for (int mapIndex = 0; mapIndex < libNameToModifiedDependents.size();
+                            mapIndex++) {
+                        String libName = libNameToModifiedDependents.keyAt(mapIndex);
+                        ArraySet<String> modifiedDependents =
+                                libNameToModifiedDependents.valueAt(mapIndex);
+                        for (int setIndex = 0; setIndex < modifiedDependents.size(); setIndex++) {
+                            mutator.forPackage(modifiedDependents.valueAt(setIndex))
+                                    .userState(userId)
+                                    .setOverlayPathsForLibrary(libName, newOverlayPaths);
+                        }
                     }
                 }
             });
@@ -6620,12 +7025,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (userId == UserHandle.USER_SYSTEM) {
             // Keep the overlays in the system application info (and anything special cased as well)
             // up to date to make sure system ui is themed correctly.
-            maybeUpdateSystemOverlays(targetPackageName, newOverlayPaths);
+            for (int i = 0; i < numberOfPendingChanges; i++) {
+                final String targetPackageName = pendingChanges.keyAt(i);
+                final OverlayPaths newOverlayPaths = pendingChanges.valueAt(i);
+                maybeUpdateSystemOverlays(targetPackageName, newOverlayPaths);
+            }
         }
 
         invalidatePackageInfoCache();
-
-        return true;
     }
 
     private boolean canSetOverlayPaths(OverlayPaths origPaths, OverlayPaths newPaths) {
@@ -6713,21 +7120,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mSettings.getDisabledSystemPkgLPr(packageName);
     }
 
-    @Nullable
-    private PackageStateInternal filterPackageStateForInstalledAndFiltered(
-            @NonNull Computer computer, @NonNull String packageName, int callingUid,
-            @UserIdInt int userId) {
-        PackageStateInternal packageState =
-                computer.getPackageStateInternal(packageName, callingUid);
-        if (packageState == null
-                || computer.shouldFilterApplication(packageState, callingUid, userId)
-                || !packageState.getUserStateOrDefault(userId).isInstalled()) {
-            return null;
-        } else {
-            return packageState;
-        }
-    }
-
     @Deprecated
     void forEachPackageSetting(Consumer<PackageSetting> actionLocked) {
         synchronized (mLock) {
@@ -6743,6 +7135,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void forEachPackage(@NonNull Computer snapshot, Consumer<AndroidPackage> consumer) {
+        final ArrayMap<String, ? extends PackageStateInternal> packageStates =
+                snapshot.getPackageStates();
+        int size = packageStates.size();
+        for (int index = 0; index < size; index++) {
+            PackageStateInternal packageState = packageStates.valueAt(index);
+            if (packageState.getPkg() != null) {
+                consumer.accept(packageState.getPkg());
+            }
+        }
+    }
+
+    void forEachPackageInternal(@NonNull Computer snapshot,
+            @NonNull Consumer<AndroidPackageInternal> consumer) {
         final ArrayMap<String, ? extends PackageStateInternal> packageStates =
                 snapshot.getPackageStates();
         int size = packageStates.size();
@@ -6823,17 +7228,42 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         if (packageState == null || packageState.getPkg() == null) {
             return false;
         }
-        return AndroidPackageUtils.canHaveOatDir(packageState.getPkg(),
-                packageState.getTransientState().isUpdatedSystemApp());
+        return AndroidPackageUtils.canHaveOatDir(packageState, packageState.getPkg());
     }
 
     long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {
-        PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        if (packageState == null || packageState.getPkg() == null) {
-            return -1; // error code of deleteOptimizedFiles
+        PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                "Only the system or shell can delete oat artifacts");
+
+        if (DexOptHelper.useArtService()) {
+            // TODO(chiuwinson): Retrieve filtered snapshot from Computer instance instead.
+            try (PackageManagerLocal.FilteredSnapshot filteredSnapshot =
+                            PackageManagerServiceUtils.getPackageManagerLocal()
+                                    .withFilteredSnapshot()) {
+                try {
+                    DeleteResult res = DexOptHelper.getArtManagerLocal().deleteDexoptArtifacts(
+                            filteredSnapshot, packageName);
+                    return res.getFreedBytes();
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, e.toString());
+                    return -1;
+                } catch (IllegalStateException e) {
+                    Slog.wtfStack(TAG, e.toString());
+                    return -1;
+                }
+            }
+        } else {
+            PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+            if (packageState == null || packageState.getPkg() == null) {
+                return -1; // error code of deleteOptimizedFiles
+            }
+            try {
+                return mDexManager.deleteOptimizedFiles(
+                        ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
+            } catch (LegacyDexoptDisabledException e) {
+                throw new RuntimeException(e);
+            }
         }
-        return mDexManager.deleteOptimizedFiles(
-                ArtUtils.createArtPackageInfo(packageState.getPkg(), packageState));
     }
 
     List<String> getMimeGroupInternal(@NonNull Computer snapshot, String packageName,
@@ -6859,9 +7289,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * TODO: In the meantime, can this be moved to a schedule call?
      * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
-    void writeSettingsLPrTEMP() {
+    @SuppressWarnings("GuardedBy")
+    void writeSettingsLPrTEMP(boolean sync) {
+        snapshotComputer(false);
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
-        mSettings.writeLPr(mLiveComputer);
+        mSettings.writeLPr(mLiveComputer, sync);
+    }
+
+    // Default async version.
+    void writeSettingsLPrTEMP() {
+        writeSettingsLPrTEMP(/*sync=*/false);
     }
 
     @Override
@@ -6894,6 +7331,30 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         try {
             return DeviceConfig.getString(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_KNOWN_DIGESTERS_LIST, "");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    static boolean isPreapprovalRequestAvailable() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (!Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_isPreApprovalRequestAvailable)) {
+                return false;
+            }
+            return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE, true /* defaultValue */);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    static boolean isUpdateOwnershipEnforcementAvailable() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, true /* defaultValue */);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -7041,13 +7502,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mRequiredInstallerPackage,
                 mRequiredUninstallerPackage,
                 mSetupWizardPackage,
-                mRequiredVerifierPackage,
+                mRequiredVerifierPackages,
                 mDefaultTextClassifierPackage,
                 mSystemTextClassifierPackageName,
                 mRequiredPermissionControllerPackage,
                 mConfiguratorPackage,
                 mIncidentReportApproverPackage,
                 mAmbientContextDetectionPackage,
+                mWearableSensingPackage,
                 mAppPredictionServicePackage,
                 COMPANION_PACKAGE_NAME,
                 mRetailDemoPackage,
@@ -7176,10 +7638,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mPlatformPackage;
     }
 
-    boolean isPreNUpgrade() {
-        return mIsPreNUpgrade;
-    }
-
     boolean isPreNMR1Upgrade() {
         return mIsPreNMR1Upgrade;
     }
@@ -7253,6 +7711,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
 
             consumer.accept(mPackageStateMutator);
+            mPackageStateMutator.onFinished();
             onChanged();
         }
 
@@ -7304,6 +7763,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     void addInstallerPackageName(InstallSource installSource) {
         synchronized (mLock) {
             mSettings.addInstallerPackageNames(installSource);
+        }
+    }
+
+    public void reconcileSdkData(@Nullable String volumeUuid, @NonNull String packageName,
+            @NonNull List<String> subDirNames, int userId, int appId, int previousAppId,
+            @NonNull String seInfo, int flags) throws IOException {
+        synchronized (mInstallLock) {
+            ReconcileSdkDataArgs args = mInstaller.buildReconcileSdkDataArgs(volumeUuid,
+                    packageName, subDirNames, userId, appId, seInfo,
+                    flags);
+            args.previousAppId = previousAppId;
+            try {
+                mInstaller.reconcileSdkData(args);
+            } catch (InstallerException e) {
+                throw new IOException(e.getMessage());
+            }
         }
     }
 }

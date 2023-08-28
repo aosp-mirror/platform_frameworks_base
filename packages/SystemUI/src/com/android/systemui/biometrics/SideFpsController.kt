@@ -15,8 +15,6 @@
  */
 package com.android.systemui.biometrics
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.ActivityTaskManager
 import android.content.Context
 import android.content.res.Configuration
@@ -37,13 +35,13 @@ import android.os.Handler
 import android.util.Log
 import android.util.RotationUtils
 import android.view.Display
+import android.view.DisplayInfo
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.View.AccessibilityDelegate
 import android.view.ViewPropertyAnimator
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
@@ -55,14 +53,13 @@ import com.airbnb.lottie.model.KeyPath
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.util.boundsOnScreen
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
@@ -84,13 +81,12 @@ constructor(
     fingerprintManager: FingerprintManager?,
     private val windowManager: WindowManager,
     private val activityTaskManager: ActivityTaskManager,
-    overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
+    private val displayStateInteractor: DisplayStateInteractor,
     @Main private val mainExecutor: DelayableExecutor,
     @Main private val handler: Handler,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     @Application private val scope: CoroutineScope,
-    private val featureFlags: FeatureFlags,
     dumpManager: DumpManager
 ) : Dumpable {
     private val requests: HashSet<SideFpsUiRequestSource> = HashSet()
@@ -113,19 +109,6 @@ constructor(
 
     @VisibleForTesting val orientationListener = orientationReasonListener.orientationListener
 
-    @VisibleForTesting
-    val overviewProxyListener =
-        object : OverviewProxyService.OverviewProxyListener {
-            override fun onTaskbarStatusUpdated(visible: Boolean, stashed: Boolean) {
-                overlayView?.let { view ->
-                    handler.postDelayed({ updateOverlayVisibility(view) }, 500)
-                }
-            }
-        }
-
-    private val animationDuration =
-        context.resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-
     private val isReverseDefaultRotation =
         context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
 
@@ -143,18 +126,18 @@ constructor(
             field = value
             field?.let { newView ->
                 windowManager.addView(newView, overlayViewParams)
-                updateOverlayVisibility(newView)
                 orientationListener.enable()
             }
         }
-    @VisibleForTesting
-    internal var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
+    @VisibleForTesting var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT
+
+    private val displayInfo = DisplayInfo()
 
     private val overlayViewParams =
         WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS,
                 PixelFormat.TRANSLUCENT
             )
@@ -183,7 +166,6 @@ constructor(
                 override fun hide(sensorId: Int) = hide(SideFpsUiRequestSource.AUTO_SHOW)
             }
         )
-        overviewProxyService.addCallback(overviewProxyListener)
         listenForAlternateBouncerVisibility()
 
         dumpManager.registerDumpable(this)
@@ -191,14 +173,12 @@ constructor(
 
     private fun listenForAlternateBouncerVisibility() {
         alternateBouncerInteractor.setAlternateBouncerUIAvailable(true)
-        if (featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER)) {
-            scope.launch {
-                alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
-                    if (isVisible) {
-                        show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
-                    } else {
-                        hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
-                    }
+        scope.launch {
+            alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
+                if (isVisible) {
+                    show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
+                } else {
+                    hide(SideFpsUiRequestSource.ALTERNATE_BOUNCER)
                 }
             }
         }
@@ -209,14 +189,16 @@ constructor(
         request: SideFpsUiRequestSource,
         @BiometricOverlayConstants.ShowReason reason: Int = BiometricOverlayConstants.REASON_UNKNOWN
     ) {
-        requests.add(request)
-        mainExecutor.execute {
-            if (overlayView == null) {
-                traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
-                    createOverlayForDisplay(reason)
+        if (!displayStateInteractor.isInRearDisplayMode.value) {
+            requests.add(request)
+            mainExecutor.execute {
+                if (overlayView == null) {
+                    traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
+                        createOverlayForDisplay(reason)
+                    }
+                } else {
+                    Log.v(TAG, "overlay already shown")
                 }
-            } else {
-                Log.v(TAG, "overlay already shown")
             }
         }
     }
@@ -236,6 +218,23 @@ constructor(
         for (requestSource in requests) {
             pw.println("     $requestSource.name")
         }
+
+        pw.println("overlayView:")
+        pw.println("     width=${overlayView?.width}")
+        pw.println("     height=${overlayView?.height}")
+        pw.println("     boundsOnScreen=${overlayView?.boundsOnScreen}")
+
+        pw.println("displayStateInteractor:")
+        pw.println("     isInRearDisplayMode=${displayStateInteractor?.isInRearDisplayMode?.value}")
+
+        pw.println("sensorProps:")
+        pw.println("     displayId=${displayInfo.uniqueId}")
+        pw.println("     sensorType=${sensorProps?.sensorType}")
+        pw.println("     location=${sensorProps?.getLocation(displayInfo.uniqueId)}")
+
+        pw.println("overlayOffsets=$overlayOffsets")
+        pw.println("isReverseDefaultRotation=$isReverseDefaultRotation")
+        pw.println("currentRotation=${displayInfo.rotation}")
     }
 
     private fun onOrientationChanged(@BiometricOverlayConstants.ShowReason reason: Int) {
@@ -248,6 +247,8 @@ constructor(
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
         overlayView = view
         val display = context.display!!
+        // b/284098873 `context.display.rotation` may not up-to-date, we use displayInfo.rotation
+        display.getDisplayInfo(displayInfo)
         val offsets =
             sensorProps.getLocation(display.uniqueId).let { location ->
                 if (location == null) {
@@ -261,12 +262,12 @@ constructor(
         view.rotation =
             display.asSideFpsAnimationRotation(
                 offsets.isYAligned(),
-                getRotationFromDefault(display.rotation)
+                getRotationFromDefault(displayInfo.rotation)
             )
         lottie.setAnimation(
             display.asSideFpsAnimation(
                 offsets.isYAligned(),
-                getRotationFromDefault(display.rotation)
+                getRotationFromDefault(displayInfo.rotation)
             )
         )
         lottie.addLottieOnCompositionLoadedListener {
@@ -302,7 +303,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal fun updateOverlayParams(display: Display, bounds: Rect) {
+    fun updateOverlayParams(display: Display, bounds: Rect) {
         val isNaturalOrientation = display.isNaturalOrientation()
         val isDefaultOrientation =
             if (isReverseDefaultRotation) !isNaturalOrientation else isNaturalOrientation
@@ -340,45 +341,6 @@ constructor(
         overlayViewParams.y = sensorBounds.top
 
         windowManager.updateViewLayout(overlayView, overlayViewParams)
-    }
-
-    private fun updateOverlayVisibility(view: View) {
-        if (view != overlayView) {
-            return
-        }
-        // hide after a few seconds if the sensor is oriented down and there are
-        // large overlapping system bars
-        var rotation = context.display?.rotation
-
-        if (rotation != null) {
-            rotation = getRotationFromDefault(rotation)
-        }
-
-        if (
-            windowManager.currentWindowMetrics.windowInsets.hasBigNavigationBar() &&
-                ((rotation == Surface.ROTATION_270 && overlayOffsets.isYAligned()) ||
-                    (rotation == Surface.ROTATION_180 && !overlayOffsets.isYAligned()))
-        ) {
-            overlayHideAnimator =
-                view
-                    .animate()
-                    .alpha(0f)
-                    .setStartDelay(3_000)
-                    .setDuration(animationDuration)
-                    .setListener(
-                        object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator) {
-                                view.visibility = View.GONE
-                                overlayHideAnimator = null
-                            }
-                        }
-                    )
-        } else {
-            overlayHideAnimator?.cancel()
-            overlayHideAnimator = null
-            view.alpha = 1f
-            view.visibility = View.VISIBLE
-        }
     }
 
     private fun getRotationFromDefault(rotation: Int): Int =
@@ -428,9 +390,6 @@ private fun SensorLocationInternal.isYAligned(): Boolean = sensorLocationY != 0
 private fun Display.isNaturalOrientation(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
-private fun WindowInsets.hasBigNavigationBar(): Boolean =
-    getInsets(WindowInsets.Type.navigationBars()).bottom >= 70
-
 private fun LottieAnimationView.addOverlayDynamicColor(
     context: Context,
     @BiometricOverlayConstants.ShowReason reason: Int
@@ -438,25 +397,36 @@ private fun LottieAnimationView.addOverlayDynamicColor(
     fun update() {
         val isKeyguard = reason == REASON_AUTH_KEYGUARD
         if (isKeyguard) {
-            val color = context.getColor(R.color.numpad_key_color_secondary) // match bouncer color
+            val color =
+                com.android.settingslib.Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.materialColorPrimaryFixed
+                )
+            val outerRimColor =
+                com.android.settingslib.Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.materialColorPrimaryFixedDim
+                )
             val chevronFill =
                 com.android.settingslib.Utils.getColorAttrDefaultColor(
                     context,
-                    android.R.attr.textColorPrimaryInverse
+                    com.android.internal.R.attr.materialColorOnPrimaryFixed
                 )
-            for (key in listOf(".blue600", ".blue400")) {
-                addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
-                    PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-                }
+            addValueCallback(KeyPath(".blue600", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            }
+            addValueCallback(KeyPath(".blue400", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(outerRimColor, PorterDuff.Mode.SRC_ATOP)
             }
             addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
                 PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
             }
-        } else if (!isDarkMode(context)) {
-            addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+        } else {
+            if (!isDarkMode(context)) {
+                addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
+                    PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+                }
             }
-        } else if (isDarkMode(context)) {
             for (key in listOf(".blue600", ".blue400")) {
                 addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
                     PorterDuffColorFilter(

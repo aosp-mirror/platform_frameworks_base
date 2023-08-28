@@ -102,11 +102,29 @@ Changes to the whitelist during system updates can result in installing addition
 to pre-existing users, but cannot uninstall pre-existing system packages from pre-existing users.
 -->
 <config>
+    <!--  Bluetooth (com.android.btservices apex) - visible on the sharesheet -->
+    <install-in-user-type package="com.android.bluetooth">
+        <install-in user-type="SYSTEM" />
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+        <do-not-install-in user-type="android.os.usertype.profile.CLONE" />
+    </install-in-user-type>
+
+    <!--  Settings (Settings app) -->
+    <install-in-user-type package="com.android.settings">
+        <install-in user-type="SYSTEM" />
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+
+    <!-- Settings Storage (SettingsProvider)  -->
     <install-in-user-type package="com.android.providers.settings">
         <install-in user-type="SYSTEM" />
         <install-in user-type="FULL" />
         <install-in user-type="PROFILE" />
     </install-in-user-type>
+
+    <!-- WallpaperBackup (WallpaperBackup)-->
     <install-in-user-type package="com.android.wallpaperbackup">
         <install-in user-type="FULL" />
     </install-in-user-type>

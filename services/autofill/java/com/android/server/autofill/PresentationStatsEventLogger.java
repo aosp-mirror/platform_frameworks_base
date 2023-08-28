@@ -25,7 +25,16 @@ import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_CHANGED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_CLICKED;
 import static android.view.autofill.AutofillManager.COMMIT_REASON_VIEW_COMMITTED;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
@@ -38,7 +47,14 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_SESSION_COMMITTED_PREMATURELY;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUS_CHANGED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_NO_PCC;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_ONLY;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PROVIDER_DETECTION_ONLY;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_UNKNOWN;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
@@ -71,6 +87,7 @@ public final class PresentationStatsEventLogger {
     @IntDef(prefix = {"NOT_SHOWN_REASON"}, value = {
             NOT_SHOWN_REASON_ANY_SHOWN,
             NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED,
+            NOT_SHOWN_REASON_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE,
             NOT_SHOWN_REASON_VIEW_CHANGED,
             NOT_SHOWN_REASON_ACTIVITY_FINISHED,
             NOT_SHOWN_REASON_REQUEST_TIMEOUT,
@@ -82,10 +99,67 @@ public final class PresentationStatsEventLogger {
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotShownReason {}
 
+    /**
+     * Reasons why presentation was not shown. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.AuthenticationType}.
+     */
+    @IntDef(prefix = {"AUTHENTICATION_TYPE"}, value = {
+            AUTHENTICATION_TYPE_UNKNOWN,
+            AUTHENTICATION_TYPE_DATASET_AUTHENTICATION,
+            AUTHENTICATION_TYPE_FULL_AUTHENTICATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AuthenticationType {
+    }
+
+    /**
+     * Reasons why presentation was not shown. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.AuthenticationResult}.
+     */
+    @IntDef(prefix = {"AUTHENTICATION_RESULT"}, value = {
+            AUTHENTICATION_RESULT_UNKNOWN,
+            AUTHENTICATION_RESULT_SUCCESS,
+            AUTHENTICATION_RESULT_FAILURE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AuthenticationResult {
+    }
+
+    /**
+     * Reasons why the picked dataset was present. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.DatasetPickedReason}.
+     * This enum is similar to {@link android.service.autofill.Dataset.DatasetEligibleReason}
+     */
+    @IntDef(prefix = {"PICK_REASON"}, value = {
+            PICK_REASON_UNKNOWN,
+            PICK_REASON_NO_PCC,
+            PICK_REASON_PROVIDER_DETECTION_ONLY,
+            PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC,
+            PICK_REASON_PCC_DETECTION_ONLY,
+            PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DatasetPickedReason {}
+
+    /**
+     * The type of detection that was preferred. These are wrappers around
+     * {@link com.android.os.AtomsProto.AutofillPresentationEventReported.DetectionPreference}.
+     */
+    @IntDef(prefix = {"DETECTION_PREFER"}, value = {
+            DETECTION_PREFER_UNKNOWN,
+            DETECTION_PREFER_AUTOFILL_PROVIDER,
+            DETECTION_PREFER_PCC
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DetectionPreference {
+    }
+
     public static final int NOT_SHOWN_REASON_ANY_SHOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__ANY_SHOWN;
     public static final int NOT_SHOWN_REASON_VIEW_FOCUS_CHANGED =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUS_CHANGED;
+    public static final int NOT_SHOWN_REASON_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_FOCUSED_BEFORE_FILL_DIALOG_RESPONSE;
     public static final int NOT_SHOWN_REASON_VIEW_CHANGED =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_VIEW_CHANGED;
     public static final int NOT_SHOWN_REASON_ACTIVITY_FINISHED =
@@ -101,6 +175,41 @@ public final class PresentationStatsEventLogger {
     public static final int NOT_SHOWN_REASON_UNKNOWN =
             AUTOFILL_PRESENTATION_EVENT_REPORTED__PRESENTATION_EVENT_RESULT__NONE_SHOWN_UNKNOWN_REASON;
 
+    public static final int AUTHENTICATION_TYPE_UNKNOWN =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
+    public static final int AUTHENTICATION_TYPE_DATASET_AUTHENTICATION =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
+    public static final int AUTHENTICATION_TYPE_FULL_AUTHENTICATION =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
+
+    public static final int AUTHENTICATION_RESULT_UNKNOWN =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
+    public static final int AUTHENTICATION_RESULT_SUCCESS =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
+    public static final int AUTHENTICATION_RESULT_FAILURE =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
+
+    public static final int PICK_REASON_UNKNOWN =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_UNKNOWN;
+    public static final int PICK_REASON_NO_PCC =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_NO_PCC;
+     public static final int PICK_REASON_PROVIDER_DETECTION_ONLY =
+             AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PROVIDER_DETECTION_ONLY;
+    public static final int PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC;
+    public static final int PICK_REASON_PCC_DETECTION_ONLY =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_ONLY;
+    public static final int PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER =
+            AUTOFILL_PRESENTATION_EVENT_REPORTED__SELECTED_DATASET_PICKED_REASON__PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+
+
+    // Values for AutofillFillResponseReported.detection_preference
+    public static final int DETECTION_PREFER_UNKNOWN =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_UNKONWN;
+    public static final int DETECTION_PREFER_AUTOFILL_PROVIDER =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_AUTOFILL_PROVIDER;
+    public static final int DETECTION_PREFER_PCC =
+            AUTOFILL_FILL_RESPONSE_REPORTED__DETECTION_PREFERENCE__DETECTION_PREFER_PCC;
     private final int mSessionId;
     private Optional<PresentationStatsEventInternal> mEventInternal;
 
@@ -144,36 +253,61 @@ public final class PresentationStatsEventLogger {
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
-            int availableCount = getDatasetCountForAutofillId(datasetList, currentViewId);
-            event.mAvailableCount = availableCount;
-            event.mIsDatasetAvailable = availableCount > 0;
+            CountContainer container = getDatasetCountForAutofillId(datasetList, currentViewId);
+            event.mAvailableCount = container.mAvailableCount;
+            event.mAvailablePccCount = container.mAvailablePccCount;
+            event.mAvailablePccOnlyCount = container.mAvailablePccOnlyCount;
+            event.mIsDatasetAvailable = container.mAvailableCount > 0;
         });
     }
 
     public void maybeSetCountShown(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
-            int countShown = getDatasetCountForAutofillId(datasetList, currentViewId);
-            event.mCountShown = countShown;
-            if (countShown > 0) {
+            CountContainer container = getDatasetCountForAutofillId(datasetList, currentViewId);
+            event.mCountShown = container.mAvailableCount;
+            if (container.mAvailableCount > 0) {
                 event.mNoPresentationReason = NOT_SHOWN_REASON_ANY_SHOWN;
             }
         });
     }
 
-    private static int getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
+    private static CountContainer getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
-        int availableCount = 0;
+
+        CountContainer container = new CountContainer();
         if (datasetList != null) {
             for (int i = 0; i < datasetList.size(); i++) {
                 Dataset data = datasetList.get(i);
                 if (data != null && data.getFieldIds() != null
                         && data.getFieldIds().contains(currentViewId)) {
-                    availableCount += 1;
+                    container.mAvailableCount += 1;
+                    if (data.getEligibleReason() == PICK_REASON_PCC_DETECTION_ONLY) {
+                        container.mAvailablePccOnlyCount++;
+                        container.mAvailablePccCount++;
+                    } else if (data.getEligibleReason()
+                            == PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER) {
+                        container.mAvailablePccCount++;
+                    }
                 }
             }
         }
-        return availableCount;
+        return container;
+    }
+
+    private static class CountContainer{
+        int mAvailableCount = 0;
+        int mAvailablePccCount = 0;
+        int mAvailablePccOnlyCount = 0;
+
+        CountContainer() {}
+
+        CountContainer(int availableCount, int availablePccCount,
+                int availablePccOnlyCount) {
+            mAvailableCount = availableCount;
+            mAvailablePccCount = availablePccCount;
+            mAvailablePccOnlyCount = availablePccOnlyCount;
+        }
     }
 
     public void maybeSetCountFilteredUserTyping(int countFilteredUserTyping) {
@@ -225,10 +359,34 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetSelectedDatasetId(int selectedDatasetId) {
+        mEventInternal.ifPresent(event -> {
+            event.mSelectedDatasetId = selectedDatasetId;
+        });
+    }
+
+    public void maybeSetDialogDismissed(boolean dialogDismissed) {
+        mEventInternal.ifPresent(event -> {
+            event.mDialogDismissed = dialogDismissed;
+        });
+    }
+
+    public void maybeSetNegativeCtaButtonClicked(boolean negativeCtaButtonClicked) {
+        mEventInternal.ifPresent(event -> {
+            event.mNegativeCtaButtonClicked = negativeCtaButtonClicked;
+        });
+    }
+
+    public void maybeSetPositiveCtaButtonClicked(boolean positiveCtaButtonClicked) {
+        mEventInternal.ifPresent(event -> {
+            event.mPositiveCtaButtonClicked = positiveCtaButtonClicked;
+        });
+    }
+
     public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
         mEventInternal.ifPresent(event -> {
             event.mDisplayPresentationType =
-                AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
+                    AUTOFILL_PRESENTATION_EVENT_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
             String imeString = Settings.Secure.getStringForUser(context.getContentResolver(),
                     Settings.Secure.DEFAULT_INPUT_METHOD, userId);
             if (TextUtils.isEmpty(imeString)) {
@@ -265,6 +423,92 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /**
+     * Set authentication_type as long as mEventInternal presents.
+     */
+    public void maybeSetAuthenticationType(@AuthenticationType int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAuthenticationType = val;
+        });
+    }
+
+    /**
+     * Set authentication_result as long as mEventInternal presents.
+     */
+    public void maybeSetAuthenticationResult(@AuthenticationResult int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAuthenticationResult = val;
+        });
+    }
+
+    /**
+     * Set latency_authentication_ui_display_millis as long as mEventInternal presents.
+     */
+    public void maybeSetLatencyAuthenticationUiDisplayMillis(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mLatencyAuthenticationUiDisplayMillis = val;
+        });
+    }
+
+    /**
+     * Set latency_dataset_display_millis as long as mEventInternal presents.
+     */
+    public void maybeSetLatencyDatasetDisplayMillis(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mLatencyDatasetDisplayMillis = val;
+        });
+    }
+
+    /**
+     * Set available_pcc_count.
+     */
+    public void maybeSetAvailablePccCount(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAvailablePccCount = val;
+        });
+    }
+
+    /**
+     * Set available_pcc_only_count.
+     */
+    public void maybeSetAvailablePccOnlyCount(int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mAvailablePccOnlyCount = val;
+        });
+    }
+
+    /**
+     * Set selected_dataset_picked_reason.
+     */
+    public void maybeSetSelectedDatasetPickReason(@Dataset.DatasetEligibleReason int val) {
+        mEventInternal.ifPresent(event -> {
+            event.mSelectedDatasetPickedReason = convertDatasetPickReason(val);
+        });
+    }
+
+    /**
+     * Set detection_pref
+     */
+    public void maybeSetDetectionPreference(@DetectionPreference int detectionPreference) {
+        mEventInternal.ifPresent(event -> {
+            event.mDetectionPreference = detectionPreference;
+        });
+    }
+
+    private int convertDatasetPickReason(@Dataset.DatasetEligibleReason int val) {
+        switch (val) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                return val;
+        }
+        return PICK_REASON_UNKNOWN;
+    }
+
+
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -290,7 +534,20 @@ public final class PresentationStatsEventLogger {
                     + " mFillRequestSentTimestampMs=" + event.mFillRequestSentTimestampMs
                     + " mFillResponseReceivedTimestampMs=" + event.mFillResponseReceivedTimestampMs
                     + " mSuggestionSentTimestampMs=" + event.mSuggestionSentTimestampMs
-                    + " mSuggestionPresentedTimestampMs=" + event.mSuggestionPresentedTimestampMs);
+                    + " mSuggestionPresentedTimestampMs=" + event.mSuggestionPresentedTimestampMs
+                    + " mSelectedDatasetId=" + event.mSelectedDatasetId
+                    + " mDialogDismissed=" + event.mDialogDismissed
+                    + " mNegativeCtaButtonClicked=" + event.mNegativeCtaButtonClicked
+                    + " mPositiveCtaButtonClicked=" + event.mPositiveCtaButtonClicked
+                    + " mAuthenticationType=" + event.mAuthenticationType
+                    + " mAuthenticationResult=" + event.mAuthenticationResult
+                    + " mLatencyAuthenticationUiDisplayMillis="
+                    + event.mLatencyAuthenticationUiDisplayMillis
+                    + " mLatencyDatasetDisplayMillis=" + event.mLatencyDatasetDisplayMillis
+                    + " mAvailablePccCount=" + event.mAvailablePccCount
+                    + " mAvailablePccOnlyCount=" + event.mAvailablePccOnlyCount
+                    + " mSelectedDatasetPickedReason=" + event.mSelectedDatasetPickedReason
+                    + " mDetectionPreference=" + event.mDetectionPreference);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -315,11 +572,23 @@ public final class PresentationStatsEventLogger {
                 event.mFillRequestSentTimestampMs,
                 event.mFillResponseReceivedTimestampMs,
                 event.mSuggestionSentTimestampMs,
-                event.mSuggestionPresentedTimestampMs);
+                event.mSuggestionPresentedTimestampMs,
+                event.mSelectedDatasetId,
+                event.mDialogDismissed,
+                event.mNegativeCtaButtonClicked,
+                event.mPositiveCtaButtonClicked,
+                event.mAuthenticationType,
+                event.mAuthenticationResult,
+                event.mLatencyAuthenticationUiDisplayMillis,
+                event.mLatencyDatasetDisplayMillis,
+                event.mAvailablePccCount,
+                event.mAvailablePccOnlyCount,
+                event.mSelectedDatasetPickedReason,
+                event.mDetectionPreference);
         mEventInternal = Optional.empty();
     }
 
-    private final class PresentationStatsEventInternal {
+    private static final class PresentationStatsEventInternal {
         int mRequestId;
         @NotShownReason int mNoPresentationReason = NOT_SHOWN_REASON_UNKNOWN;
         boolean mIsDatasetAvailable;
@@ -336,6 +605,18 @@ public final class PresentationStatsEventLogger {
         int mFillResponseReceivedTimestampMs;
         int mSuggestionSentTimestampMs;
         int mSuggestionPresentedTimestampMs;
+        int mSelectedDatasetId = -1;
+        boolean mDialogDismissed = false;
+        boolean mNegativeCtaButtonClicked = false;
+        boolean mPositiveCtaButtonClicked = false;
+        int mAuthenticationType = AUTHENTICATION_TYPE_UNKNOWN;
+        int mAuthenticationResult = AUTHENTICATION_RESULT_UNKNOWN;
+        int mLatencyAuthenticationUiDisplayMillis = -1;
+        int mLatencyDatasetDisplayMillis = -1;
+        int mAvailablePccCount = -1;
+        int mAvailablePccOnlyCount = -1;
+        @DatasetPickedReason int mSelectedDatasetPickedReason = PICK_REASON_UNKNOWN;
+        @DetectionPreference int mDetectionPreference = DETECTION_PREFER_UNKNOWN;
 
         PresentationStatsEventInternal() {}
     }

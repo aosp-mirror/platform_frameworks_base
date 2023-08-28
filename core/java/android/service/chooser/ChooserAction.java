@@ -30,7 +30,6 @@ import java.util.Objects;
  * be shown to the user when {@link android.content.Intent#ACTION_CHOOSER} is invoked.
  *
  * @see android.content.Intent#EXTRA_CHOOSER_CUSTOM_ACTIONS
- * @hide
  */
 public final class ChooserAction implements Parcelable {
     private final Icon mIcon;

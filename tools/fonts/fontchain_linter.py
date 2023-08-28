@@ -54,6 +54,7 @@ LANG_TO_SCRIPT = {
     'or': 'Orya',
     'pa': 'Guru',
     'pt': 'Latn',
+    'pl': 'Latn',
     'ru': 'Latn',
     'sk': 'Latn',
     'sl': 'Latn',
@@ -388,7 +389,7 @@ def check_emoji_not_compat(all_emoji, equivalent_emoji):
         psname = get_psname(ttf)
 
         if "meta" in ttf:
-            assert 'Emji' not in ttf["meta"].data, 'NotoColorEmoji MUST NOT be a compat font'
+            assert 'Emji' not in ttf["meta"].data, 'NotoColorEmoji MUST be a compat font'
 
 
 def check_emoji_font_coverage(emoji_fonts, all_emoji, equivalent_emoji):

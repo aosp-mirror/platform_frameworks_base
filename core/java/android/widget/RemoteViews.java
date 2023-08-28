@@ -726,6 +726,17 @@ public class RemoteViews implements Parcelable, Filter {
                 mActions.get(i).visitUris(visitor);
             }
         }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                mSizedRemoteViews.get(i).visitUris(visitor);
+            }
+        }
+        if (mLandscape != null) {
+            mLandscape.visitUris(visitor);
+        }
+        if (mPortrait != null) {
+            mPortrait.visitUris(visitor);
+        }
     }
 
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
@@ -777,7 +788,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private class SetEmptyView extends Action {
+    private static class SetEmptyView extends Action {
         int emptyViewId;
 
         SetEmptyView(@IdRes int viewId, @IdRes int emptyViewId) {
@@ -814,7 +825,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private class SetPendingIntentTemplate extends Action {
+    private static class SetPendingIntentTemplate extends Action {
         public SetPendingIntentTemplate(@IdRes int id, PendingIntent pendingIntentTemplate) {
             this.viewId = id;
             this.pendingIntentTemplate = pendingIntentTemplate;
@@ -885,7 +896,7 @@ public class RemoteViews implements Parcelable, Filter {
         PendingIntent pendingIntentTemplate;
     }
 
-    private class SetRemoteViewsAdapterList extends Action {
+    private static class SetRemoteViewsAdapterList extends Action {
         public SetRemoteViewsAdapterList(@IdRes int id, ArrayList<RemoteViews> list,
                 int viewTypeCount) {
             this.viewId = id;
@@ -1348,7 +1359,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     @Nullable
-    private MethodHandle getMethod(View view, String methodName, Class<?> paramType,
+    private static MethodHandle getMethod(View view, String methodName, Class<?> paramType,
             boolean async) {
         MethodArgs result;
         Class<? extends View> klass = view.getClass();
@@ -1427,7 +1438,7 @@ public class RemoteViews implements Parcelable, Filter {
      * to {@link ImageView#getDrawable()}.
      * <p>
      */
-    private class SetDrawableTint extends Action {
+    private static class SetDrawableTint extends Action {
         SetDrawableTint(@IdRes int id, boolean targetBackground,
                 @ColorInt int colorFilter, @NonNull PorterDuff.Mode mode) {
             this.viewId = id;
@@ -1691,7 +1702,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Base class for the reflection actions.
      */
-    private abstract class BaseReflectionAction extends Action {
+    private abstract static class BaseReflectionAction extends Action {
         static final int BOOLEAN = 1;
         static final int BYTE = 2;
         static final int SHORT = 3;
@@ -1780,6 +1791,21 @@ public class RemoteViews implements Parcelable, Filter {
             Object value = getParameterValue(view);
             try {
                 MethodHandle method = getMethod(view, this.methodName, param, true /* async */);
+                // Upload the bitmap to GPU if the parameter is of type Bitmap or Icon.
+                // Since bitmaps in framework are seldomly modified, this is supposed to accelerate
+                // the operations.
+                if (value instanceof Bitmap bitmap) {
+                    bitmap.prepareToDraw();
+                }
+
+                if (value instanceof Icon icon
+                        && (icon.getType() == Icon.TYPE_BITMAP
+                                || icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP)) {
+                    Bitmap bitmap = icon.getBitmap();
+                    if (bitmap != null) {
+                        bitmap.prepareToDraw();
+                    }
+                }
 
                 if (method != null) {
                     Runnable endAction = (Runnable) method.invoke(view, value);
@@ -1824,7 +1850,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
             switch (this.type) {
                 case URI:
                     final Uri uri = (Uri) getParameterValue(null);
@@ -1839,7 +1865,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /** Class for the reflection actions. */
-    private final class ReflectionAction extends BaseReflectionAction {
+    private static final class ReflectionAction extends BaseReflectionAction {
         @UnsupportedAppUsage
         Object value;
 
@@ -1985,7 +2011,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private final class ResourceReflectionAction extends BaseReflectionAction {
+    private static final class ResourceReflectionAction extends BaseReflectionAction {
 
         static final int DIMEN_RESOURCE = 1;
         static final int COLOR_RESOURCE = 2;
@@ -2072,7 +2098,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private final class AttributeReflectionAction extends BaseReflectionAction {
+    private static final class AttributeReflectionAction extends BaseReflectionAction {
 
         static final int DIMEN_RESOURCE = 1;
         static final int COLOR_RESOURCE = 2;
@@ -2166,7 +2192,7 @@ public class RemoteViews implements Parcelable, Filter {
             return ATTRIBUTE_REFLECTION_ACTION_TAG;
         }
     }
-    private final class ComplexUnitDimensionReflectionAction extends BaseReflectionAction {
+    private static final class ComplexUnitDimensionReflectionAction extends BaseReflectionAction {
 
         private final float mValue;
         @ComplexDimensionUnit
@@ -2222,7 +2248,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private final class NightModeReflectionAction extends BaseReflectionAction {
+    private static final class NightModeReflectionAction extends BaseReflectionAction {
 
         private final Object mLightValue;
         private final Object mDarkValue;
@@ -2286,6 +2312,14 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return NIGHT_MODE_REFLECTION_ACTION_TAG;
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            if (this.type == ICON) {
+                visitIconUri((Icon) mDarkValue, visitor);
+                visitIconUri((Icon) mLightValue, visitor);
+            }
         }
     }
 
@@ -2577,12 +2611,17 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return VIEW_GROUP_ACTION_ADD_TAG;
         }
+
+        @Override
+        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+            mNestedViews.visitUris(visitor);
+        }
     }
 
     /**
      * ViewGroup methods related to removing child views.
      */
-    private class ViewGroupActionRemove extends Action {
+    private static class ViewGroupActionRemove extends Action {
         /**
          * Id that indicates that all child views of the affected ViewGroup should be removed.
          *
@@ -2704,7 +2743,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Action to remove a view from its parent.
      */
-    private class RemoveFromParentAction extends Action {
+    private static class RemoveFromParentAction extends Action {
 
         RemoveFromParentAction(@IdRes int viewId) {
             this.viewId = viewId;
@@ -2774,7 +2813,7 @@ public class RemoteViews implements Parcelable, Filter {
      * Helper action to set compound drawables on a TextView. Supports relative
      * (s/t/e/b) or cardinal (l/t/r/b) arrangement.
      */
-    private class TextViewDrawableAction extends Action {
+    private static class TextViewDrawableAction extends Action {
         public TextViewDrawableAction(@IdRes int viewId, boolean isRelative, @DrawableRes int d1,
                 @DrawableRes int d2, @DrawableRes int d3, @DrawableRes int d4) {
             this.viewId = viewId;
@@ -2921,7 +2960,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Helper action to set text size on a TextView in any supported units.
      */
-    private class TextViewSizeAction extends Action {
+    private static class TextViewSizeAction extends Action {
         TextViewSizeAction(@IdRes int viewId, @ComplexDimensionUnit int units, float size) {
             this.viewId = viewId;
             this.units = units;
@@ -2959,7 +2998,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Helper action to set padding on a View.
      */
-    private class ViewPaddingAction extends Action {
+    private static class ViewPaddingAction extends Action {
         public ViewPaddingAction(@IdRes int viewId, @Px int left, @Px int top,
                 @Px int right, @Px int bottom) {
             this.viewId = viewId;
@@ -3189,7 +3228,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Helper action to add a view tag with RemoteInputs.
      */
-    private class SetRemoteInputsAction extends Action {
+    private static class SetRemoteInputsAction extends Action {
 
         public SetRemoteInputsAction(@IdRes int viewId, RemoteInput[] remoteInputs) {
             this.viewId = viewId;
@@ -3225,7 +3264,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Helper action to override all textViewColors
      */
-    private class OverrideTextColorsAction extends Action {
+    private static class OverrideTextColorsAction extends Action {
 
         private final int textColor;
 
@@ -3268,7 +3307,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private class SetIntTagAction extends Action {
+    private static class SetIntTagAction extends Action {
         @IdRes private final int mViewId;
         @IdRes private final int mKey;
         private final int mTag;
@@ -6717,6 +6756,10 @@ public class RemoteViews implements Parcelable, Filter {
                 Log.w(LOG_TAG, "getLaunchOptions: view.getDisplay() is null!",
                         new Exception());
             }
+            // If the user interacts with a visible element it is safe to assume they consent that
+            // something is going to start.
+            opts.setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
             return Pair.create(intent, opts);
         }
     }

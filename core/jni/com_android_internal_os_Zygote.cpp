@@ -1184,11 +1184,6 @@ static void relabelSubdirs(const char* path, const char* context, fail_fn_t fail
   closedir(dir);
 }
 
-static bool is_sdk_sandbox_uid(uid_t uid) {
-    appid_t appId = multiuser_get_app_id(uid);
-    return appId >= AID_SDK_SANDBOX_PROCESS_START && appId <= AID_SDK_SANDBOX_PROCESS_END;
-}
-
 /**
  * Hide the CE and DE data directories of non-related apps.
  *
@@ -1288,7 +1283,10 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   // No bind mounting of app data should occur in the case of a sandbox process since SDK sandboxes
   // should not be able to read app data. Tmpfs was mounted however since a sandbox should not have
   // access to app data.
-  if (!is_sdk_sandbox_uid(uid)) {
+  appid_t appId = multiuser_get_app_id(uid);
+  bool isSdkSandboxProcess =
+          (appId >= AID_SDK_SANDBOX_PROCESS_START && appId <= AID_SDK_SANDBOX_PROCESS_END);
+  if (!isSdkSandboxProcess) {
       // Prepare default dirs for user 0 as user 0 always exists.
       int result = symlink("/data/data", "/data/user/0");
       if (result != 0) {
@@ -1624,7 +1622,8 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
 
   // Sandbox processes do not have JIT profile, so no data needs to be bind mounted. However, it
   // should still not have access to JIT profile, so tmpfs is mounted.
-  if (is_sdk_sandbox_uid(uid)) {
+  appid_t appId = multiuser_get_app_id(uid);
+  if (appId >= AID_SDK_SANDBOX_PROCESS_START && appId <= AID_SDK_SANDBOX_PROCESS_END) {
       return;
   }
 
@@ -1785,7 +1784,8 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (mount_data_dirs) {
         // Sdk sandbox data isolation does not need to occur for app processes since sepolicy
         // prevents access to sandbox data anyway.
-        if (is_sdk_sandbox_uid(uid)) {
+        appid_t appId = multiuser_get_app_id(uid);
+        if (appId >= AID_SDK_SANDBOX_PROCESS_START && appId <= AID_SDK_SANDBOX_PROCESS_END) {
             isolateSdkSandboxData(env, pkg_data_info_list, uid, process_name, managed_nice_name,
                                   fail_fn);
         }

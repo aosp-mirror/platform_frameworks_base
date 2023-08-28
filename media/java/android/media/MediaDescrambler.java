@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.hardware.cas.IDescrambler;
 import android.hardware.cas.ScramblingControl;
 import android.hardware.cas.V1_0.IDescramblerBase;
@@ -221,10 +222,11 @@ public final class MediaDescrambler implements AutoCloseable {
     }
 
     /**
-     * Check if the underlying HAL is AIDL. Used only for CTS.
+     * Check if the underlying HAL is AIDL. For CTS testing purpose.
      *
      * @hide
      */
+    @TestApi
     public boolean isAidlHal() {
         return mIsAidlHal;
     }

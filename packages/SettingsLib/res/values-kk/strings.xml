@@ -53,8 +53,6 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ажыратылған"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Өшірілген"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP конфигурациясының қатесі"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Желі байланысының сапасы төмен болғандықтан қосылмады"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi байланысының қатесі"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Растау мәселесі"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Қосылу мүмкін емес"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\"<xliff:g id="AP_NAME">%1$s</xliff:g>\" қолданбасына қосылу мүмкін емес"</string>
@@ -63,12 +61,9 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Автоматты қосылмайды"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Интернетпен байланыс жоқ"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> сақтаған"</string>
-    <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Трафик саналатын желіге қосылды."</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s арқылы автоматты қосылды"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Желі рейтингі провайдері арқылы автоматты түрде қосылған"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s арқылы қосылған"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> арқылы жалғанған"</string>
-    <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s арқылы қолжетімді"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Тіркелу үшін түртіңіз."</string>
     <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Интернетпен байланыс жоқ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Жеке DNS серверіне кіру мүмкін емес."</string>
@@ -76,29 +71,24 @@
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Интернетпен байланыс жоқ"</string>
     <string name="wifi_status_sign_in_required" msgid="2236267500459526855">"Аккаунтқа кіру керек"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5885145407184194503">"Кіру нүктесі уақытша бос емес"</string>
-    <string name="connected_via_carrier" msgid="1968057009076191514">"%1$s арқылы қосылды"</string>
-    <string name="available_via_carrier" msgid="465598683092718294">"%1$s арқылы қолжетімді"</string>
     <string name="osu_opening_provider" msgid="4318105381295178285">"<xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g> ашылуда"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Жалғанбады"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Тіркелу процесі аяқталуда…"</string>
     <string name="osu_sign_up_failed" msgid="5605453599586001793">"Тіркелу процесі аяқталмады. Әрекетті қайталау үшін түртіңіз."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Тіркелу процесі аяқталды. Жалғануда…"</string>
-    <string name="speed_label_very_slow" msgid="8526005255731597666">"Өте баяу"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Баяу"</string>
     <string name="speed_label_okay" msgid="1253594383880810424">"Жарайды"</string>
-    <string name="speed_label_medium" msgid="9078405312828606976">"Орташа"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Жылдам"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Өте жылдам"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Мерзімі өтті"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Ажыратылған"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Ажыратылуда…"</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Қосылып жатыр..."</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Жалғауда..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Жұптасып жатыр..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (телефонсыз)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (аудиосыз)"</string>
-    <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (хабарларға кіруге рұқсат жоқ)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> жалғанды (телефонсыз не аудиосыз)"</string>
     <string name="bluetooth_connected_battery_level" msgid="5410325759372259950">"Жалғанды, батарея заряды: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Жалғанды (телефонсыз), батарея заряды: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
@@ -212,15 +202,15 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Дауыс тембрін бастапқы мәніне қайтару"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Мәтінді айту тембрін әдепкі мәніне қайтару."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Өте баяу"</item>
-    <item msgid="1815382991399815061">"Баяу"</item>
-    <item msgid="3075292553049300105">"Қалыпты"</item>
-    <item msgid="1158955023692670059">"Жылдам"</item>
-    <item msgid="5664310435707146591">"Жылдамырақ"</item>
-    <item msgid="5491266922147715962">"Өте жылдам"</item>
-    <item msgid="7659240015901486196">"Тез"</item>
-    <item msgid="7147051179282410945">"Өте тез"</item>
-    <item msgid="581904787661470707">"Ең тез"</item>
+    <item msgid="4563475121751694801">"60%"</item>
+    <item msgid="6323184326270638754">"80%"</item>
+    <item msgid="2569200872125313769">"100%"</item>
+    <item msgid="9010794089704942570">"150%"</item>
+    <item msgid="4634010129655810634">"200%"</item>
+    <item msgid="8929490998534497543">"250%"</item>
+    <item msgid="8442352376763286772">"300%"</item>
+    <item msgid="4446831566506165093">"350%"</item>
+    <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Профильді таңдау"</string>
     <string name="category_personal" msgid="6236798763159385225">"Жеке"</string>
@@ -263,18 +253,18 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодын сканерлеп, құрылғыны Wi‑Fi арқылы жұптау"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi желісіне қосылыңыз."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, түзету, әзірлеуші"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Қате туралы есеп жылдам пәрмені"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Қате туралы хабарлау"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Қуат мәзірінде қате туралы хабарлауға арналған түймені көрсету"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ояу тұру"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Зарядтау кезінде экран өшпейді."</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI snoop журналын қосу"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI қадағалау журналын қосу"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth пакеттерін алу (осы параметрді өзгерткен соң, Bluetooth-ты қосыңыз немесе өшіріңіз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM құлып ашу функциясы"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Операциялық жүйені жүктеу құралының құлпыy ашуға рұқсат ету"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бекітпесін ашуға рұқсат ету керек пе?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЕСКЕРТУ: осы параметр қосулы кезде, құрылғыны қорғау мүмкіндіктері жұмыс істемейді."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Жалған локация қолданбасын таңдау"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ешқандай жалған локация қолданбасы орнатылмаған."</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ешқандай жалған локация қолданбасы орнатылмаған"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Жалған локация қолданбасы: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Желі орнату"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сымсыз дисплей сертификаты"</string>
@@ -336,8 +326,8 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жетілдіру параметрлеріне рұқсат берілсін бе?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB арқылы орнатылған қолданбаларды растау"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігі тексеріледі."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігін тексеру."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Қашықтағы құрылғыларда дыбыстың тым қатты шығуы немесе реттеуге келмеуі сияқты дыбыс деңгейіне қатысты мәселелер туындағанда, Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche функциясы стэгін қосады."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жетілдірілген байланыс функциясын қосады."</string>
@@ -381,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Қию шегін, шеттерді, т.б. көрсету"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Оңнан солға орналастыру"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Экранның орналасу бағытын барлық тілдер үшін оңнан солға қарату"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Мөлдір навигация жолағы"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Навигация жолағының фондық түсін әдепкісінше мөлдір қылу"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Терезе деңгейіндегі бұлдырлар"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA қолдану"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA функциясын OpenGL ES 2.0 қолданбаларында іске қосу"</string>
@@ -476,12 +468,12 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Құрылғы көп ұзамай өшуі мүмкін (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Толық зарядталғанға дейін <xliff:g id="TIME">%1$s</xliff:g> қалды."</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: толық зарядталуға <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g> қалды."</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Зарядталып жатыр."</string>
@@ -527,6 +519,12 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбірек уақыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азырақ уақыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Бас тарту"</string>
+    <!-- no translation found for next (2699398661093607009) -->
+    <skip />
+    <!-- no translation found for back (5554327870352703710) -->
+    <skip />
+    <!-- no translation found for save (3745809743277153149) -->
+    <skip />
     <string name="okay" msgid="949938843324579502">"Жарайды"</string>
     <string name="done" msgid="381184316122520313">"Дайын"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Оятқыш және еске салғыш"</string>
@@ -550,6 +548,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Осы телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Осы планшет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Осы телефон"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Осы құрылғыда ойнату мүмкін емес."</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Ауысу үшін аккаунтты жаңартыңыз."</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Жүктеп алынғандарды осы жерде ойнату мүмкін емес."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Жарнамадан кейін қайталап көріңіз."</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Осы жерде ойнату үшін құрылғыны оятыңыз."</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Ойнату үшін авторизация керек."</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Бұл мультимедиа файлын осы жерде ойнату мүмкін емес."</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Байланыс орнату қатесі шығуып жатыр. Құрылғыны өшіріп, қайта қосыңыз."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Сымды аудио құрылғысы"</string>
     <string name="help_label" msgid="3528360748637781274">"Анықтама және пікір"</string>
@@ -572,8 +577,14 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Пайдаланушы"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша пайдаланушылар жасай отырып, бұл құрылғыны басқалармен бөлісуге болады. Әр пайдаланушы қолданбалар, тұсқағаздар орнатып, профилін қалауынша реттей алады. Барлық пайдаланушы қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы қосылғанда, ол өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға берілмейді."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңадан қосылған пайдаланушы өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқалар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
+    <skip />
+    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
+    <skip />
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>
@@ -587,12 +598,12 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Шектелген профайл жасақтауға дейін қолданбалар мен жеке деректерді қорғау үшін экран бекітпесін тағайындау қажет."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пайдаланушыны ауыстыру: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалып жатыр…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалып жатыр…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалуда…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалуда…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңа пайдаланушы жасалмады."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Жаңа қонақ профилі жасалмады."</string>
     <string name="user_nickname" msgid="262624187455825083">"Лақап ат"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Пайда­ланушы қосу"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Пайдаланушы қосу"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Қонақ қосу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты жою"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Қонақ сеансын әдепкі күйге қайтару"</string>
@@ -605,9 +616,13 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Мұндайда жаңа қонақ сеансы басталады және ағымдағы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Қонақ режимінен шығу керек пе?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
+    <!-- no translation found for grant_admin (4323199171790522574) -->
+    <skip />
+    <!-- no translation found for not_grant_admin (3557849576157702485) -->
+    <skip />
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Шығу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Қонақ әрекетін сақтау керек пе?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанс тарихын сақтауға не барлық қолданба мен деректі жоюға болады."</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанстағы әрекетті сақтай не барлық қолданба мен деректі жоя аласыз."</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
@@ -653,7 +668,7 @@
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Дерекқор бір баған."</string>
     <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Дерекқор екі баған."</string>
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Дерекқор үш баған."</string>
-    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Дерек сигналы толы."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Дерекқор сигналы толы."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet ажыратылған."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Қоңырау шалу мүмкін емес."</string>
@@ -664,7 +679,7 @@
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Әдепкі"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Экранды қосу"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Экранды қосуға рұқсат беру"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Қолданбаға экранды қосуға рұқсат береді. Рұқсат берілсе, қолданба кез келген уақытта экранды өздігінен қосуы мүмкін."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Қолданбаның экранды қосуына рұқсат береді. Рұқсат берілсе, қолданба кез келген уақытта экранды өздігінен қосуы мүмкін."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасын таратуды тоқтатасыз ба?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> қолданбасын таратсаңыз немесе аудио шығысын өзгертсеңіз, қазіргі тарату сеансы тоқтайды."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> қолданбасын тарату"</string>
@@ -672,4 +687,11 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"\"Артқа\" қимылына арналған тұспал анимациясы"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"\"Артқа\" қимылына арналған жүйелік тұспал анимацияларын іске қосу."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Бұл параметр қимылға арналған жүйелік тұспал анимацияларын іске қосады. Ол үшін әр қолданбаның манифест файлында enableOnBackInvokedCallback үшін \"True\" мәні қойылуы керек."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Солға жылжыту"</item>
+    <item msgid="5425394847942513942">"Төмен жылжыту"</item>
+    <item msgid="7728484337962740316">"Оңға жылжыту"</item>
+    <item msgid="324200556467459329">"Жоғары жылжыту"</item>
+  </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>
