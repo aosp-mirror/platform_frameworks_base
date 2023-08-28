@@ -52,7 +52,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
@@ -64,6 +63,7 @@ import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -111,6 +111,7 @@ class SideFpsControllerTest : SysuiTestCase() {
     @Mock lateinit var displayManager: DisplayManager
     @Mock lateinit var handler: Handler
     @Mock lateinit var dumpManager: DumpManager
+    @Mock lateinit var fpsUnlockTracker: FpsUnlockTracker
     @Captor lateinit var overlayCaptor: ArgumentCaptor<View>
     @Captor lateinit var overlayViewParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
@@ -269,7 +270,8 @@ class SideFpsControllerTest : SysuiTestCase() {
                 handler,
                 alternateBouncerInteractor,
                 TestCoroutineScope(),
-                dumpManager
+                dumpManager,
+                fpsUnlockTracker
             )
         displayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 

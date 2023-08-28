@@ -24,6 +24,7 @@ import static android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_ENROLLING;
 import static android.hardware.biometrics.BiometricOverlayConstants.REASON_ENROLL_FIND_SENSOR;
 
+import static com.android.internal.util.LatencyTracker.ACTION_UDFPS_ILLUMINATE;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
@@ -167,6 +168,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
+    @NonNull private final FpsUnlockTracker mFpsUnlockTracker;
     private final boolean mIgnoreRefreshRate;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
@@ -646,7 +648,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
             @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
-            @NonNull SelectedUserInteractor selectedUserInteractor) {
+            @NonNull SelectedUserInteractor selectedUserInteractor,
+            @NonNull FpsUnlockTracker fpsUnlockTracker) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -690,6 +693,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mInputManager = inputManager;
         mUdfpsKeyguardAccessibilityDelegate = udfpsKeyguardAccessibilityDelegate;
         mSelectedUserInteractor = selectedUserInteractor;
+        mFpsUnlockTracker = fpsUnlockTracker;
+        mFpsUnlockTracker.startTracking();
 
         mTouchProcessor = singlePointerTouchProcessor;
         mSessionTracker = sessionTracker;
@@ -974,7 +979,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             return;
         }
         if (isOptical()) {
-            mLatencyTracker.onActionStart(LatencyTracker.ACTION_UDFPS_ILLUMINATE);
+            mLatencyTracker.onActionStart(ACTION_UDFPS_ILLUMINATE);
+        }
+        if (getBiometricSessionType() == SESSION_KEYGUARD) {
+            mFpsUnlockTracker.onUiReadyStage();
         }
         // Refresh screen timeout and boost process priority if possible.
         mPowerManager.userActivity(mSystemClock.uptimeMillis(),

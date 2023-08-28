@@ -235,6 +235,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private InputManager mInputManager;
     @Mock
     private ViewRootImpl mViewRootImpl;
+    @Mock
+    private FpsUnlockTracker mFpsUnlockTracker;
 
     @Before
     public void setUp() {
@@ -326,7 +328,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mock(KeyguardFaceAuthInteractor.class),
                 mUdfpsKeyguardAccessibilityDelegate,
                 mUdfpsKeyguardViewModels,
-                mSelectedUserInteractor
+                mSelectedUserInteractor,
+                mFpsUnlockTracker
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();

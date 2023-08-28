@@ -25,6 +25,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FACE_WAKE_AND_UNLOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED;
@@ -222,6 +223,11 @@ public class LatencyTracker {
      */
     public static final int ACTION_NOTIFICATION_BIG_PICTURE_LOADED = 23;
 
+    /**
+     * Time it takes to unlock the device via udfps, until the whole launcher appears.
+     */
+    public static final int ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME = 24;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -247,6 +253,7 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
         ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+        ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
     };
 
     /** @hide */
@@ -275,6 +282,7 @@ public class LatencyTracker {
         ACTION_REQUEST_IME_HIDDEN,
         ACTION_SMARTSPACE_DOORBELL,
         ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+        ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -306,6 +314,7 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME,
     };
 
     private final Object mLock = new Object();
@@ -492,6 +501,8 @@ public class LatencyTracker {
                 return "ACTION_SMARTSPACE_DOORBELL";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATION_BIG_PICTURE_LOADED:
                 return "ACTION_NOTIFICATION_BIG_PICTURE_LOADED";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME:
+                return "ACTION_KEYGUARD_FPS_UNLOCK_TO_HOME";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
