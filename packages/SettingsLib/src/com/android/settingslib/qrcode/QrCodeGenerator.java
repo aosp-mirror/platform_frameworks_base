@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class QrCodeGenerator {
+    private static final int DEFAULT_MARGIN = -1;
     /**
      * Generates a barcode image with {@code contents}.
      *
@@ -40,7 +41,20 @@ public final class QrCodeGenerator {
      */
     public static Bitmap encodeQrCode(String contents, int size)
             throws WriterException, IllegalArgumentException {
-        return encodeQrCode(contents, size, /*invert=*/false);
+        return encodeQrCode(contents, size, DEFAULT_MARGIN, /*invert=*/false);
+    }
+
+    /**
+     * Generates a barcode image with {@code contents}.
+     *
+     * @param contents The contents to encode in the barcode
+     * @param size     The preferred image size in pixels
+     * @param margin   The margin around the actual barcode
+     * @return Barcode bitmap
+     */
+    public static Bitmap encodeQrCode(String contents, int size, int margin)
+            throws WriterException, IllegalArgumentException {
+        return encodeQrCode(contents, size, margin, /*invert=*/false);
     }
 
     /**
@@ -53,9 +67,26 @@ public final class QrCodeGenerator {
      */
     public static Bitmap encodeQrCode(String contents, int size, boolean invert)
             throws WriterException, IllegalArgumentException {
+        return encodeQrCode(contents, size, DEFAULT_MARGIN, /*invert=*/invert);
+    }
+
+    /**
+     * Generates a barcode image with {@code contents}.
+     *
+     * @param contents The contents to encode in the barcode
+     * @param size     The preferred image size in pixels
+     * @param margin   The margin around the actual barcode
+     * @param invert   Whether to invert the black/white pixels (e.g. for dark mode)
+     * @return Barcode bitmap
+     */
+    public static Bitmap encodeQrCode(String contents, int size, int margin, boolean invert)
+            throws WriterException, IllegalArgumentException {
         final Map<EncodeHintType, Object> hints = new HashMap<>();
         if (!isIso88591(contents)) {
             hints.put(EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8.name());
+        }
+        if (margin != DEFAULT_MARGIN) {
+            hints.put(EncodeHintType.MARGIN, margin);
         }
 
         final BitMatrix qrBits = new MultiFormatWriter().encode(contents, BarcodeFormat.QR_CODE,
