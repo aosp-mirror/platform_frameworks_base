@@ -1,0 +1,8 @@
+package: "android.app.job"
+
+flag {
+    name: "job_debug_info_apis"
+    namespace: "backstage_power"
+    description: "Add APIs to let apps attach debug information to jobs"
+    bug: "293491637"
+}

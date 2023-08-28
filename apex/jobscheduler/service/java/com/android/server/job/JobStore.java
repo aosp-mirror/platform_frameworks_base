@@ -510,6 +510,8 @@ public final class JobStore {
     private static final String XML_TAG_ONEOFF = "one-off";
     private static final String XML_TAG_EXTRAS = "extras";
     private static final String XML_TAG_JOB_WORK_ITEM = "job-work-item";
+    private static final String XML_TAG_DEBUG_INFO = "debug-info";
+    private static final String XML_TAG_DEBUG_TAG = "debug-tag";
 
     private void migrateJobFilesAsync() {
         synchronized (mLock) {
@@ -805,6 +807,7 @@ public final class JobStore {
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
                     writeJobWorkItemsToXml(out, jobStatus);
+                    writeDebugInfoToXml(out, jobStatus);
                     out.endTag(null, XML_TAG_JOB);
 
                     numJobs++;
@@ -989,6 +992,26 @@ public final class JobStore {
             } else {
                 out.endTag(null, XML_TAG_ONEOFF);
             }
+        }
+
+        private void writeDebugInfoToXml(@NonNull TypedXmlSerializer out,
+                @NonNull JobStatus jobStatus) throws IOException, XmlPullParserException {
+            final ArraySet<String> debugTags = jobStatus.getJob().getDebugTagsArraySet();
+            final int numTags = debugTags.size();
+            final String traceTag = jobStatus.getJob().getTraceTag();
+            if (traceTag == null && numTags == 0) {
+                return;
+            }
+            out.startTag(null, XML_TAG_DEBUG_INFO);
+            if (traceTag != null) {
+                out.attribute(null, "trace-tag", traceTag);
+            }
+            for (int i = 0; i < numTags; ++i) {
+                out.startTag(null, XML_TAG_DEBUG_TAG);
+                out.attribute(null, "tag", debugTags.valueAt(i));
+                out.endTag(null, XML_TAG_DEBUG_TAG);
+            }
+            out.endTag(null, XML_TAG_DEBUG_INFO);
         }
 
         private void writeJobWorkItemsToXml(@NonNull TypedXmlSerializer out,
@@ -1449,6 +1472,18 @@ public final class JobStore {
                 jobWorkItems = readJobWorkItemsFromXml(parser);
             }
 
+            if (eventType == XmlPullParser.START_TAG
+                    && XML_TAG_DEBUG_INFO.equals(parser.getName())) {
+                try {
+                    jobBuilder.setTraceTag(parser.getAttributeValue(null, "trace-tag"));
+                } catch (Exception e) {
+                    Slog.wtf(TAG, "Invalid trace tag persisted to disk", e);
+                }
+                parser.next();
+                jobBuilder.addDebugTags(readDebugTagsFromXml(parser));
+                eventType = parser.nextTag(); // Consume </debug-info>
+            }
+
             final JobInfo builtJob;
             try {
                 // Don't perform prefetch-deadline check here. Apps targeting S- shouldn't have
@@ -1720,6 +1755,33 @@ public final class JobStore {
                 Slog.e(TAG, "Invalid JobWorkItem", e);
                 return null;
             }
+        }
+
+        @NonNull
+        private Set<String> readDebugTagsFromXml(TypedXmlPullParser parser)
+                throws IOException, XmlPullParserException {
+            Set<String> debugTags = new ArraySet<>();
+
+            for (int eventType = parser.getEventType(); eventType != XmlPullParser.END_DOCUMENT;
+                    eventType = parser.next()) {
+                final String tagName = parser.getName();
+                if (!XML_TAG_DEBUG_TAG.equals(tagName)) {
+                    // We're no longer operating with debug tags.
+                    break;
+                }
+                if (debugTags.size() < JobInfo.MAX_NUM_DEBUG_TAGS) {
+                    final String debugTag;
+                    try {
+                        debugTag = JobInfo.validateDebugTag(parser.getAttributeValue(null, "tag"));
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, "Invalid debug tag persisted to disk", e);
+                        continue;
+                    }
+                    debugTags.add(debugTag);
+                }
+            }
+
+            return debugTags;
         }
     }
 

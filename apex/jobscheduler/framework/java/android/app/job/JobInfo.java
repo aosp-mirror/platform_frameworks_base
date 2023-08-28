@@ -26,6 +26,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.util.TimeUtils.formatDuration;
 
 import android.annotation.BytesLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,13 +48,17 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.Trace;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
@@ -423,6 +428,15 @@ public class JobInfo implements Parcelable {
      */
     public static final int CONSTRAINT_FLAG_STORAGE_NOT_LOW = 1 << 3;
 
+    /** @hide */
+    public static final int MAX_NUM_DEBUG_TAGS = 32;
+
+    /** @hide */
+    public static final int MAX_DEBUG_TAG_LENGTH = 127;
+
+    /** @hide */
+    public static final int MAX_TRACE_TAG_LENGTH = Trace.MAX_SECTION_NAME_LEN;
+
     @UnsupportedAppUsage
     private final int jobId;
     private final PersistableBundle extras;
@@ -454,6 +468,9 @@ public class JobInfo implements Parcelable {
     private final int mPriority;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
+    private final ArraySet<String> mDebugTags;
+    @Nullable
+    private final String mTraceTag;
 
     /**
      * Unique job id associated with this application (uid).  This is the same job ID
@@ -724,6 +741,33 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * @see JobInfo.Builder#addDebugTag(String)
+     */
+    @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+    @NonNull
+    public Set<String> getDebugTags() {
+        return Collections.unmodifiableSet(mDebugTags);
+    }
+
+    /**
+     * @see JobInfo.Builder#addDebugTag(String)
+     * @hide
+     */
+    @NonNull
+    public ArraySet<String> getDebugTagsArraySet() {
+        return mDebugTags;
+    }
+
+    /**
+     * @see JobInfo.Builder#setTraceTag(String)
+     */
+    @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+    @Nullable
+    public String getTraceTag() {
+        return mTraceTag;
+    }
+
+    /**
      * @see JobInfo.Builder#setExpedited(boolean)
      */
     public boolean isExpedited() {
@@ -860,6 +904,12 @@ public class JobInfo implements Parcelable {
         if (flags != j.flags) {
             return false;
         }
+        if (!mDebugTags.equals(j.mDebugTags)) {
+            return false;
+        }
+        if (!Objects.equals(mTraceTag, j.mTraceTag)) {
+            return false;
+        }
         return true;
     }
 
@@ -904,6 +954,12 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + mBias;
         hashCode = 31 * hashCode + mPriority;
         hashCode = 31 * hashCode + flags;
+        if (mDebugTags.size() > 0) {
+            hashCode = 31 * hashCode + mDebugTags.hashCode();
+        }
+        if (mTraceTag != null) {
+            hashCode = 31 * hashCode + mTraceTag.hashCode();
+        }
         return hashCode;
     }
 
@@ -946,6 +1002,17 @@ public class JobInfo implements Parcelable {
         mBias = in.readInt();
         mPriority = in.readInt();
         flags = in.readInt();
+        final int numDebugTags = in.readInt();
+        mDebugTags = new ArraySet<>();
+        for (int i = 0; i < numDebugTags; ++i) {
+            final String tag = in.readString();
+            if (tag == null) {
+                throw new IllegalStateException("malformed parcel");
+            }
+            mDebugTags.add(tag.intern());
+        }
+        final String traceTag = in.readString();
+        mTraceTag = traceTag == null ? null : traceTag.intern();
     }
 
     private JobInfo(JobInfo.Builder b) {
@@ -978,6 +1045,8 @@ public class JobInfo implements Parcelable {
         mBias = b.mBias;
         mPriority = b.mPriority;
         flags = b.mFlags;
+        mDebugTags = b.mDebugTags;
+        mTraceTag = b.mTraceTag;
     }
 
     @Override
@@ -1024,6 +1093,14 @@ public class JobInfo implements Parcelable {
         out.writeInt(mBias);
         out.writeInt(mPriority);
         out.writeInt(this.flags);
+        // Explicitly write out values here to avoid double looping to intern the strings
+        // when unparcelling.
+        final int numDebugTags = mDebugTags.size();
+        out.writeInt(numDebugTags);
+        for (int i = 0; i < numDebugTags; ++i) {
+            out.writeString(mDebugTags.valueAt(i));
+        }
+        out.writeString(mTraceTag);
     }
 
     public static final @android.annotation.NonNull Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
@@ -1168,6 +1245,8 @@ public class JobInfo implements Parcelable {
         private int mBackoffPolicy = DEFAULT_BACKOFF_POLICY;
         /** Easy way to track whether the client has tried to set a back-off policy. */
         private boolean mBackoffPolicySet = false;
+        private final ArraySet<String> mDebugTags = new ArraySet<>();
+        private String mTraceTag;
 
         /**
          * Initialize a new Builder to construct a {@link JobInfo}.
@@ -1220,6 +1299,51 @@ public class JobInfo implements Parcelable {
             // job.
             mBackoffPolicy = job.getBackoffPolicy();
             mPriority = job.getPriority();
+        }
+
+        /**
+         * Add a debug tag to help track what this job is for. The tags may show in debug dumps
+         * or app metrics. Do not put personally identifiable information (PII) in the tag.
+         * <p>
+         * Tags have the following requirements:
+         * <ul>
+         *   <li>Tags cannot be more than 127 characters.</li>
+         *   <li>
+         *       Since leading and trailing whitespace can lead to hard-to-debug issues,
+         *       tags should not include leading or trailing whitespace.
+         *       All tags will be {@link String#trim() trimmed}.
+         *   </li>
+         *   <li>An empty String (after trimming) is not allowed.</li>
+         *   <li>Should not have personally identifiable information (PII).</li>
+         *   <li>A job cannot have more than 32 tags.</li>
+         * </ul>
+         *
+         * @param tag A debug tag that helps describe what the job is for.
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder addDebugTag(@NonNull String tag) {
+            mDebugTags.add(validateDebugTag(tag));
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public void addDebugTags(@NonNull Set<String> tags) {
+            mDebugTags.addAll(tags);
+        }
+
+        /**
+         * Remove a tag set via {@link #addDebugTag(String)}.
+         * @param tag The tag to remove
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder removeDebugTag(@NonNull String tag) {
+            mDebugTags.remove(tag);
+            return this;
         }
 
         /** @hide */
@@ -1997,6 +2121,24 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * Set a tag that will be used in {@link android.os.Trace traces}.
+         * Since this is a trace tag, it must follow the rules set in
+         * {@link android.os.Trace#beginSection(String)}, such as it cannot be more
+         * than 127 Unicode code units.
+         * Additionally, since leading and trailing whitespace can lead to hard-to-debug issues,
+         * they will be {@link String#trim() trimmed}.
+         * An empty String (after trimming) is not allowed.
+         * @param traceTag The tag to use in traces.
+         * @return This object for method chaining
+         */
+        @FlaggedApi(Flags.FLAG_JOB_DEBUG_INFO_APIS)
+        @NonNull
+        public Builder setTraceTag(@Nullable String traceTag) {
+            mTraceTag = validateTraceTag(traceTag);
+            return this;
+        }
+
+        /**
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
@@ -2209,6 +2351,62 @@ public class JobInfo implements Parcelable {
                         "A user-initiated data transfer job must specify a valid network type");
             }
         }
+
+        if (mDebugTags.size() > MAX_NUM_DEBUG_TAGS) {
+            throw new IllegalArgumentException(
+                    "Can't have more than " + MAX_NUM_DEBUG_TAGS + " tags");
+        }
+        final ArraySet<String> validatedDebugTags = new ArraySet<>();
+        for (int i = 0; i < mDebugTags.size(); ++i) {
+            validatedDebugTags.add(validateDebugTag(mDebugTags.valueAt(i)));
+        }
+        mDebugTags.clear();
+        mDebugTags.addAll(validatedDebugTags);
+
+        validateTraceTag(mTraceTag);
+    }
+
+    /**
+     * Returns a sanitized debug tag if valid, or throws an exception if not.
+     * @hide
+     */
+    @NonNull
+    public static String validateDebugTag(@Nullable String debugTag) {
+        if (debugTag == null) {
+            throw new NullPointerException("debug tag cannot be null");
+        }
+        debugTag = debugTag.trim();
+        if (debugTag.isEmpty()) {
+            throw new IllegalArgumentException("debug tag cannot be empty");
+        }
+        if (debugTag.length() > MAX_DEBUG_TAG_LENGTH) {
+            throw new IllegalArgumentException(
+                    "debug tag cannot be more than " + MAX_DEBUG_TAG_LENGTH + " characters");
+        }
+        return debugTag.intern();
+    }
+
+    /**
+     * Returns a sanitized trace tag if valid, or throws an exception if not.
+     * @hide
+     */
+    @Nullable
+    public static String validateTraceTag(@Nullable String traceTag) {
+        if (traceTag == null) {
+            return null;
+        }
+        traceTag = traceTag.trim();
+        if (traceTag.isEmpty()) {
+            throw new IllegalArgumentException("trace tag cannot be empty");
+        }
+        if (traceTag.length() > MAX_TRACE_TAG_LENGTH) {
+            throw new IllegalArgumentException(
+                    "traceTag tag cannot be more than " + MAX_TRACE_TAG_LENGTH + " characters");
+        }
+        if (traceTag.contains("|") || traceTag.contains("\n") || traceTag.contains("\0")) {
+            throw new IllegalArgumentException("Trace tag cannot contain |, \\n, or \\0");
+        }
+        return traceTag.intern();
     }
 
     /**

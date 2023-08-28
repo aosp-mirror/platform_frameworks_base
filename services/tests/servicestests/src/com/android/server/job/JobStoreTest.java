@@ -571,6 +571,29 @@ public class JobStoreTest {
     }
 
     @Test
+    public void testDebugTagsPersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent)
+                .setPersisted(true)
+                .addDebugTag("a")
+                .addDebugTag("b")
+                .addDebugTag("c")
+                .addDebugTag("d")
+                .removeDebugTag("d")
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        Set<String> expectedTags = Set.of("a", "b", "c");
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Debug tags not correctly persisted",
+                expectedTags, loaded.getJob().getDebugTags());
+    }
+
+    @Test
     public void testNamespacePersisted() throws Exception {
         final String namespace = "my.test.namespace";
         JobInfo.Builder b = new Builder(93, mComponent)
@@ -672,6 +695,22 @@ public class JobStoreTest {
                         .addForbiddenCapability(NET_CAPABILITY_OEM_PAID)
                         .build())
                 .build());
+    }
+
+    @Test
+    public void testTraceTagPersisted() throws Exception {
+        JobInfo ji = new Builder(53, mComponent)
+                .setPersisted(true)
+                .setTraceTag("tag")
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(ji, SOME_UID, null, -1, null, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Trace tag not correctly persisted", "tag", loaded.getJob().getTraceTag());
     }
 
     @Test
