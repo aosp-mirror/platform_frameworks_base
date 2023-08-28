@@ -297,6 +297,7 @@ class ProcessErrorStateRecord {
 
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseBooleanArray lastPids = new SparseBooleanArray(20);
+        ActivityManagerService.VolatileDropboxEntryStates volatileDropboxEntriyStates = null;
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             latencyTracker.waitingOnAMSLockStarted();
@@ -343,6 +344,9 @@ class ProcessErrorStateRecord {
             synchronized (mProcLock) {
                 latencyTracker.waitingOnProcLockEnded();
                 setNotResponding(true);
+                volatileDropboxEntriyStates =
+                        ActivityManagerService.VolatileDropboxEntryStates
+                                .withProcessFrozenState(mApp.mOptRecord.isFrozen());
             }
 
             // Log the ANR to the event log.
@@ -620,7 +624,8 @@ class ProcessErrorStateRecord {
                 ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", mApp, mApp.processName, activityShortComponentName,
                 parentShortComponentName, parentPr, null, report.toString(), tracesFile,
-                null, new Float(loadingProgress), incrementalMetrics, errorId);
+                null, new Float(loadingProgress), incrementalMetrics, errorId,
+                volatileDropboxEntriyStates);
 
         if (mApp.getWindowProcessController().appNotResponding(info.toString(),
                 () -> {
