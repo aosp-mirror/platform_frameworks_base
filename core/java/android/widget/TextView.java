@@ -27,12 +27,14 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_C
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
 
 import android.R;
 import android.annotation.CallSuper;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -238,6 +240,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastMath;
 import com.android.internal.util.Preconditions;
+import com.android.text.flags.Flags;
 
 import libcore.util.EmptyArray;
 
@@ -522,6 +525,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.P)
     public static final long STATICLAYOUT_FALLBACK_LINESPACING = 37756858; // buganizer id
+
+
+    /**
+     * This change ID enables the bounding box based layout.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long USE_BOUNDS_FOR_WIDTH = 63938206;  // buganizer id
 
     // System wide time for last cut, copy or text changed action.
     static long sLastCutCopyOrTextChangedTime;
@@ -1621,7 +1633,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mUseFallbackLineSpacing = FALLBACK_LINE_SPACING_NONE;
         }
 
-        mUseBoundsForWidth = false;  // TODO: Make enable this by default.
+        if (CompatChanges.isChangeEnabled(USE_BOUNDS_FOR_WIDTH)) {
+            mUseBoundsForWidth = Flags.useBoundsForWidth();
+        } else {
+            mUseBoundsForWidth = false;
+        }
 
         // TODO(b/179693024): Use a ChangeId instead.
         mUseTextPaddingForUiTranslation = targetSdkVersion <= Build.VERSION_CODES.R;
@@ -4848,6 +4864,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *                          width.
      * @see #getUseBoundsForWidth()
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public void setUseBoundsForWidth(boolean useBoundsForWidth) {
         if (mUseBoundsForWidth != useBoundsForWidth) {
             mUseBoundsForWidth = useBoundsForWidth;
@@ -4865,6 +4882,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setUseBoundsForWidth(boolean)
      * @return True if using bounding box for width, false if using advance for width.
      */
+    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public boolean getUseBoundsForWidth() {
         return mUseBoundsForWidth;
     }
