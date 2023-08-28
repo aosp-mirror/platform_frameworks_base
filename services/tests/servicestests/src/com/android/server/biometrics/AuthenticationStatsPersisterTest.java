@@ -217,6 +217,31 @@ public class AuthenticationStatsPersisterTest {
     }
 
     @Test
+    public void persistFrrStats_multiUser_newUser_shouldUpdateRecord() throws JSONException {
+        AuthenticationStats authenticationStats1 = new AuthenticationStats(USER_ID_1,
+                300 /* totalAttempts */, 10 /* rejectedAttempts */,
+                0 /* enrollmentNotifications */, BiometricsProtoEnums.MODALITY_FACE);
+        AuthenticationStats authenticationStats2 = new AuthenticationStats(USER_ID_2,
+                100 /* totalAttempts */, 5 /* rejectedAttempts */,
+                1 /* enrollmentNotifications */, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+
+        // Sets up the shared preference with user 1 only.
+        when(mSharedPreferences.getStringSet(eq(KEY), anySet())).thenReturn(
+                Set.of(buildFrrStats(authenticationStats1)));
+
+        // Add data for user 2.
+        mAuthenticationStatsPersister.persistFrrStats(authenticationStats2.getUserId(),
+                authenticationStats2.getTotalAttempts(),
+                authenticationStats2.getRejectedAttempts(),
+                authenticationStats2.getEnrollmentNotifications(),
+                authenticationStats2.getModality());
+
+        verify(mEditor).putStringSet(eq(KEY), mStringSetArgumentCaptor.capture());
+        assertThat(mStringSetArgumentCaptor.getValue())
+                .contains(buildFrrStats(authenticationStats2));
+    }
+
+    @Test
     public void removeFrrStats_existingUser_shouldUpdateRecord() throws JSONException {
         AuthenticationStats authenticationStats = new AuthenticationStats(USER_ID_1,
                 300 /* totalAttempts */, 10 /* rejectedAttempts */,
