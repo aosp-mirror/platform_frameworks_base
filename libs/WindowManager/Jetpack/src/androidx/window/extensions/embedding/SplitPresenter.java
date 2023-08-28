@@ -651,7 +651,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (minDimensionsPair == null) {
             return splitAttributes;
         }
-        final FoldingFeature foldingFeature = getFoldingFeature(taskProperties);
+        final FoldingFeature foldingFeature = getFoldingFeatureForHingeType(
+                taskProperties, splitAttributes);
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final Rect primaryBounds = getPrimaryBounds(taskConfiguration, splitAttributes,
                 foldingFeature);
@@ -726,7 +727,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     Rect getRelBoundsForPosition(@Position int position, @NonNull TaskProperties taskProperties,
             @NonNull SplitAttributes splitAttributes) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
-        final FoldingFeature foldingFeature = getFoldingFeature(taskProperties);
+        final FoldingFeature foldingFeature = getFoldingFeatureForHingeType(
+                taskProperties, splitAttributes);
         if (!shouldShowSplit(splitAttributes)) {
             return new Rect();
         }
@@ -930,6 +932,17 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             default:
                 throw new IllegalArgumentException("Unknown position:" + position);
         }
+    }
+
+    @Nullable
+    private FoldingFeature getFoldingFeatureForHingeType(
+            @NonNull TaskProperties taskProperties,
+            @NonNull SplitAttributes splitAttributes) {
+        SplitType splitType = splitAttributes.getSplitType();
+        if (!(splitType instanceof HingeSplitType)) {
+            return null;
+        }
+        return getFoldingFeature(taskProperties);
     }
 
     @Nullable
