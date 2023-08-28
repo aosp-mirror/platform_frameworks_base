@@ -35,8 +35,8 @@ import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
 import javax.inject.Inject
 
 /**
- * Controller that handles view of the recent apps selector in the media projection activity.
- * It is responsible for creating and updating recent apps view.
+ * Controller that handles view of the recent apps selector in the media projection activity. It is
+ * responsible for creating and updating recent apps view.
  */
 @MediaProjectionAppSelectorScope
 class MediaProjectionRecentsViewController
@@ -51,15 +51,21 @@ constructor(
     private var views: Views? = null
     private var lastBoundData: List<RecentTask>? = null
 
+    val hasRecentTasks: Boolean
+        get() = lastBoundData?.isNotEmpty() ?: false
+
     init {
         taskViewSizeProvider.addCallback(this)
     }
 
     fun createView(parent: ViewGroup): ViewGroup =
-        views?.root ?: createRecentViews(parent).also {
-            views = it
-            lastBoundData?.let { recents -> bind(recents) }
-        }.root
+        views?.root
+            ?: createRecentViews(parent)
+                .also {
+                    views = it
+                    lastBoundData?.let { recents -> bind(recents) }
+                }
+                .root
 
     fun bind(recentTasks: List<RecentTask>) {
         views?.apply {
@@ -88,7 +94,8 @@ constructor(
                 .inflate(R.layout.media_projection_recent_tasks, parent, /* attachToRoot= */ false)
                 as ViewGroup
 
-        val container = recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_container)
+        val container =
+            recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_container)
         container.setTaskHeightSize()
 
         val progress = recentsRoot.requireViewById<View>(R.id.media_projection_recent_tasks_loader)
