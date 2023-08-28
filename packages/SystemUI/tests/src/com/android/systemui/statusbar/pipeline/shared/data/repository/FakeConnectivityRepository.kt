@@ -51,4 +51,16 @@ class FakeConnectivityRepository : ConnectivityRepository {
                 isValidated = validated,
             )
     }
+
+    /** Similar convenience method for ethernet */
+    fun setEthernetConnected(
+        default: Boolean = true,
+        validated: Boolean = true,
+    ) {
+        defaultConnections.value =
+            DefaultConnectionModel(
+                ethernet = DefaultConnectionModel.Ethernet(default),
+                isValidated = validated
+            )
+    }
 }
