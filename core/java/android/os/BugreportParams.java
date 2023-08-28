@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -125,6 +126,13 @@ public final class BugreportParams {
      * Options for a lightweight bugreport intended to be taken for onboarding-related flows.
      */
     public static final int BUGREPORT_MODE_ONBOARDING = IDumpstate.BUGREPORT_MODE_ONBOARDING;
+
+    /**
+     * The maximum value of supported bugreport mode.
+     * @hide
+     */
+    @TestApi
+    public static final int BUGREPORT_MODE_MAX_VALUE = BUGREPORT_MODE_ONBOARDING;
 
     /**
      * Defines acceptable flags for customizing bugreport requests.
