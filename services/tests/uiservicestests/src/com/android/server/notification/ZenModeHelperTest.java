@@ -33,18 +33,12 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
-import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.LOG_DND_STATE_EVENTS;
-import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
-import static com.android.os.dnd.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
-import static com.android.os.dnd.DNDModeProto.ENABLED_FIELD_NUMBER;
-import static com.android.os.dnd.DNDModeProto.ID_FIELD_NUMBER;
-import static com.android.os.dnd.DNDModeProto.UID_FIELD_NUMBER;
-import static com.android.os.dnd.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
 import static com.android.os.dnd.DNDProtoEnums.PEOPLE_STARRED;
 import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
@@ -73,6 +67,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.SuppressLint;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -106,6 +101,7 @@ import android.testing.TestableLooper;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.StatsEvent;
+import android.util.StatsEventTestUtils;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -113,12 +109,15 @@ import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.os.AtomsProto;
+import com.android.os.dnd.DNDModeProto;
 import com.android.os.dnd.DNDPolicyProto;
 import com.android.os.dnd.DNDProtoEnums;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.ManagedServices.UserProfiles;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -140,13 +139,13 @@ import java.util.List;
 import java.util.Objects;
 
 @SmallTest
+@SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class ZenModeHelperTest extends UiServiceTestCase {
 
     private static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
     private static final String SCHEDULE_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
-    private static final int ZEN_MODE_FOR_TESTING = 99;
     private static final String CUSTOM_PKG_NAME = "not.android";
     private static final int CUSTOM_PKG_UID = 1;
     private static final String CUSTOM_RULE_ID = "custom_rule";
@@ -159,7 +158,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private ZenModeHelper mZenModeHelper;
     private ContentResolver mContentResolver;
     @Mock AppOpsManager mAppOps;
-    private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
     ZenModeEventLoggerFake mZenModeEventLogger;
 
@@ -178,7 +176,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
             Log.d("ZenModeHelperTest", "Couldn't mock default zen mode config xml file err=" +
                     e.toString());
         }
-        mStatsEventBuilderFactory = new WrappedSysUiStatsEvent.WrappedBuilderFactory();
 
         when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOps);
         when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
@@ -188,8 +185,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
         mZenModeEventLogger = new ZenModeEventLoggerFake(mPackageManager);
         mZenModeHelper = new ZenModeHelper(mContext, mTestableLooper.getLooper(),
-                mConditionProviders, mStatsEventBuilderFactory, mTestFlagResolver,
-                mZenModeEventLogger);
+                mConditionProviders, mTestFlagResolver, mZenModeEventLogger);
 
         ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = new ActivityInfo();
@@ -911,37 +907,35 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testProto() {
+    public void testProto() throws InvalidProtocolBufferException {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         // existence of manual rule means it should be in output
         mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
         mZenModeHelper.mConfig.manualRule.pkg = "android";  // system
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>(); // no automatic rules
 
-        int n = mZenModeHelper.mConfig.automaticRules.size();
-        List<String> ids = new ArrayList<>(n);
-        for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
-            ids.add(rule.id);
-        }
+        List<String> ids = new ArrayList<>();
         ids.add(ZenModeConfig.MANUAL_RULE_ID);
         ids.add(""); // for ROOT_CONFIG, logged with empty string as id
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelper.pullRules(events);
-        assertEquals(n + 2, events.size());  // automatic rules + manual rule + root config
-        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
-            if (builder.getAtomId() == DND_MODE_RULE) {
-                if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == ROOT_CONFIG) {
-                    assertTrue(builder.getBoolean(ENABLED_FIELD_NUMBER));
-                    assertFalse(builder.getBoolean(CHANNELS_BYPASSING_FIELD_NUMBER));
-                }
-                assertEquals(Process.SYSTEM_UID, builder.getInt(UID_FIELD_NUMBER));
-                assertTrue(builder.getBooleanAnnotation(UID_FIELD_NUMBER, ANNOTATION_ID_IS_UID));
-                String name = (String) builder.getValue(ID_FIELD_NUMBER);
-                assertTrue("unexpected rule id", ids.contains(name));
-                ids.remove(name);
-            } else {
-                fail("unexpected atom id: " + builder.getAtomId());
+        assertEquals(2, events.size());  // manual rule + root config
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            // Additional check for ID to clearly identify the root config because there's some
+            // odd behavior in the test util around enum value of 0 (the usual default, but not in
+            // this case).
+            if (cfg.getZenMode().getNumber() == ROOT_CONFIG && cfg.getId().equals("")) {
+                assertTrue(cfg.getEnabled());
+                assertFalse(cfg.getChannelsBypassing());
             }
+            assertEquals(Process.SYSTEM_UID, cfg.getUid());
+            String name = cfg.getId();
+            assertTrue("unexpected rule id", ids.contains(name));
+            ids.remove(name);
         }
         assertEquals("extra rule in output", 0, ids.size());
     }
@@ -949,25 +943,58 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testProtoWithAutoRule() throws Exception {
         setupZenConfig();
-        // one enabled automatic rule
-        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules(ZEN_MODE_FOR_TESTING);
+        // one enabled automatic rule. we use a non-usual zen mode value (though it has to be
+        // a real one in the enum because non-valid enum values are reverted to default).
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules(ZEN_MODE_ALARMS);
 
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelper.pullRules(events);
 
         boolean foundCustomEvent = false;
-        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
-            if (builder.getAtomId() == DND_MODE_RULE) {
-                if (ZEN_MODE_FOR_TESTING == builder.getInt(ZEN_MODE_FIELD_NUMBER)) {
-                    foundCustomEvent = true;
-                    assertEquals(CUSTOM_PKG_UID, builder.getInt(UID_FIELD_NUMBER));
-                    assertTrue(builder.getBoolean(ENABLED_FIELD_NUMBER));
-                }
-            } else {
-                fail("unexpected atom id: " + builder.getAtomId());
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if (cfg.getZenMode().getNumber() == ZEN_MODE_ALARMS) {
+                foundCustomEvent = true;
+                assertEquals(CUSTOM_PKG_UID, cfg.getUid());
+                assertTrue(cfg.getEnabled());
             }
         }
         assertTrue("couldn't find custom rule", foundCustomEvent);
+    }
+
+    @Test
+    public void testProtoWithDefaultAutoRules() throws Exception {
+        setupZenConfig();
+        // clear the automatic rules so we can reset to only the default rules
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>();
+
+        // read in XML to restore the default rules
+        ByteArrayOutputStream baos = writeXmlAndPurge(5);
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
+        List<StatsEvent> events = new LinkedList<>();
+        mZenModeHelper.pullRules(events);
+
+        // list for tracking which ids we've seen in the pulled atom output
+        List<String> ids = new ArrayList<>();
+        ids.addAll(ZenModeConfig.DEFAULT_RULE_IDS);
+        ids.add("");  // empty string for root config
+
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if (!ids.contains(cfg.getId())) {
+                fail("unexpected ID found: " + cfg.getId());
+            }
+            ids.remove(cfg.getId());
+        }
+        assertEquals("default ID(s) not found", 0, ids.size());
     }
 
     @Test
@@ -1019,10 +1046,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         List<StatsEvent> events = new LinkedList<>();
         mZenModeHelper.pullRules(events);
 
-        boolean foundCustomEvent = false;
-        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
-            if (builder.getAtomId() == DND_MODE_RULE
-                    && "customRule".equals(builder.getString(ID_FIELD_NUMBER))) {
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if ("customRule".equals(cfg.getId())) {
                 fail("non-default IDs should be redacted");
             }
         }
@@ -1039,14 +1067,17 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.pullRules(events);
 
         boolean foundManualRule = false;
-        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
-            if (builder.getAtomId() == DND_MODE_RULE
-                    && ZenModeConfig.MANUAL_RULE_ID.equals(builder.getString(ID_FIELD_NUMBER))) {
-                assertEquals(0, builder.getInt(UID_FIELD_NUMBER));
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if (ZenModeConfig.MANUAL_RULE_ID.equals(cfg.getId())) {
+                assertEquals(0, cfg.getUid());
                 foundManualRule = true;
             }
         }
-        assertTrue("couldn't find manual rule", foundManualRule);    }
+        assertTrue("couldn't find manual rule", foundManualRule);
+    }
 
     @Test
     public void testWriteXml_onlyBackupsTargetUser() throws Exception {

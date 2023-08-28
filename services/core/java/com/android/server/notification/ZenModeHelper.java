@@ -21,7 +21,6 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
-import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
@@ -81,6 +80,7 @@ import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -116,7 +116,6 @@ public class ZenModeHelper {
     private final SettingsObserver mSettingsObserver;
     private final AppOpsManager mAppOps;
     private final NotificationManager mNotificationManager;
-    private final SysUiStatsEvent.BuilderFactory mStatsEventBuilderFactory;
     private ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
@@ -152,7 +151,6 @@ public class ZenModeHelper {
     private String[] mPriorityOnlyDndExemptPackages;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders,
-            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory,
             SystemUiSystemPropertiesFlags.FlagResolver flagResolver,
             ZenModeEventLogger zenModeEventLogger) {
         mContext = context;
@@ -174,7 +172,6 @@ public class ZenModeHelper {
         mFiltering = new ZenModeFiltering(mContext);
         mConditions = new ZenModeConditions(this, conditionProviders);
         mServiceConfig = conditionProviders.getConfig();
-        mStatsEventBuilderFactory = statsEventBuilderFactory;
         mFlagResolver = flagResolver;
         mZenModeEventLogger = zenModeEventLogger;
     }
@@ -1314,17 +1311,14 @@ public class ZenModeHelper {
             for (int i = 0; i < numConfigs; i++) {
                 final int user = mConfigs.keyAt(i);
                 final ZenModeConfig config = mConfigs.valueAt(i);
-                SysUiStatsEvent.Builder data = mStatsEventBuilderFactory.newBuilder()
-                        .setAtomId(DND_MODE_RULE)
-                        .writeInt(user)
-                        .writeBoolean(config.manualRule != null) // enabled
-                        .writeBoolean(config.areChannelsBypassingDnd)
-                        .writeInt(ROOT_CONFIG)
-                        .writeString("") // name, empty for root config
-                        .writeInt(Process.SYSTEM_UID) // system owns root config
-                        .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
-                        .writeByteArray(config.toZenPolicy().toProto());
-                events.add(data.build());
+                events.add(FrameworkStatsLog.buildStatsEvent(DND_MODE_RULE,
+                        /* optional int32 user = 1 */ user,
+                        /* optional bool enabled = 2 */ config.manualRule != null,
+                        /* optional bool channels_bypassing = 3 */ config.areChannelsBypassingDnd,
+                        /* optional LoggedZenMode zen_mode = 4 */ ROOT_CONFIG,
+                        /* optional string id = 5 */ "", // empty for root config
+                        /* optional int32 uid = 6 */ Process.SYSTEM_UID, // system owns root config
+                        /* optional DNDPolicyProto policy = 7 */ config.toZenPolicy().toProto()));
                 if (config.manualRule != null) {
                     ruleToProtoLocked(user, config.manualRule, true, events);
                 }
@@ -1355,21 +1349,18 @@ public class ZenModeHelper {
         }
 
         SysUiStatsEvent.Builder data;
-        data = mStatsEventBuilderFactory.newBuilder()
-                .setAtomId(DND_MODE_RULE)
-                .writeInt(user)
-                .writeBoolean(rule.enabled)
-                .writeBoolean(false) // channels_bypassing unused for rules
-                .writeInt(rule.zenMode)
-                .writeString(id)
-                .writeInt(getPackageUid(pkg, user))
-                .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
         byte[] policyProto = new byte[]{};
         if (rule.zenPolicy != null) {
             policyProto = rule.zenPolicy.toProto();
         }
-        data.writeByteArray(policyProto);
-        events.add(data.build());
+        events.add(FrameworkStatsLog.buildStatsEvent(DND_MODE_RULE,
+                /* optional int32 user = 1 */ user,
+                /* optional bool enabled = 2 */ rule.enabled,
+                /* optional bool channels_bypassing = 3 */ false, // unused for rules
+                /* optional android.stats.dnd.ZenMode zen_mode = 4 */ rule.zenMode,
+                /* optional string id = 5 */ id,
+                /* optional int32 uid = 6 */ getPackageUid(pkg, user),
+                /* optional DNDPolicyProto policy = 7 */ policyProto));
     }
 
     private int getPackageUid(String pkg, int user) {
