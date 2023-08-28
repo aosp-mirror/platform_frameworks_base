@@ -127,7 +127,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             bouncerInteractor = bouncerInteractor,
         )
 
-    private val keyguardRepository = utils.keyguardRepository()
+    private val keyguardRepository = utils.keyguardRepository
     private val keyguardInteractor =
         utils.keyguardInteractor(
             repository = keyguardRepository,

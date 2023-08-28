@@ -63,6 +63,11 @@ constructor(
         interactor.setTransitionState(transitionState)
     }
 
+    /** Handles an event representing user input. */
+    fun onUserInput() {
+        interactor.onUserInput()
+    }
+
     companion object {
         private const val SCENE_TRANSITION_LOGGING_REASON = "user input"
     }
