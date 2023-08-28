@@ -41,6 +41,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doReturn
+
 import java.util.UUID
 
 class DomainVerificationUserStateOverrideTest {
@@ -155,12 +157,12 @@ class DomainVerificationUserStateOverrideTest {
             whenever(this.domainSetId) { domainSetId }
             whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
             whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
-            whenever(userStates) {
+            doReturn(
                 SparseArray<PackageUserStateInternal>().apply {
                     this[0] = PackageUserStateInternal.DEFAULT
                     this[1] = PackageUserStateInternal.DEFAULT
                 }
-            }
+            ).whenever(this).userStates
             whenever(isSystem) { false }
         }
 

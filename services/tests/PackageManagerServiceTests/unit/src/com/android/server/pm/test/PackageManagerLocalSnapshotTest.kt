@@ -31,6 +31,7 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doReturn
 import kotlin.test.assertFailsWith
 
 class PackageManagerLocalSnapshotTest {
@@ -154,7 +155,7 @@ class PackageManagerLocalSnapshotTest {
             put(packageStateUser0.packageName, packageStateUser0)
             put(packageStateUser10.packageName, packageStateUser10)
         }
-        whenever(this.packageStates) { packageStates }
+        doReturn(packageStates).whenever(this).packageStates
         whenever(getPackageStateFiltered(anyString(), anyInt(), anyInt())) {
             packageStates[arguments[0]]?.takeUnless {
                 shouldFilterApplication(it, arguments[1] as Int, arguments[2] as Int)
