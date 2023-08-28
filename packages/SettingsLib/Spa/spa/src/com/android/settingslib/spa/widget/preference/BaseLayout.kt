@@ -24,7 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -105,7 +105,7 @@ private fun BaseLayoutPreview() {
         BaseLayout(
             title = "Title",
             subTitle = {
-                Divider(thickness = 10.dp)
+                HorizontalDivider(thickness = 10.dp)
             }
         )
     }
