@@ -868,10 +868,6 @@ public final class SystemServiceRegistry {
             @Override
             public VirtualDeviceManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                if (!ctx.getPackageManager().hasSystemFeature(
-                        PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
-                    return null;
-                }
                 if (!ctx.getResources().getBoolean(R.bool.config_enableVirtualDeviceManager)) {
                     return null;
                 }
