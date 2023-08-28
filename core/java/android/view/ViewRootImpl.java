@@ -5286,6 +5286,29 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Called from DecorView when gesture interception state has changed.
+     *
+     * @param intercepted If DecorView is intercepting touch events
+     */
+    public void updateDecorViewGestureInterception(boolean intercepted) {
+        mHandler.sendMessage(
+                mHandler.obtainMessage(
+                        MSG_DECOR_VIEW_GESTURE_INTERCEPTION,
+                        /* arg1= */ intercepted ? 1 : 0,
+                        /* arg2= */ 0));
+    }
+
+    void decorViewInterceptionChanged(boolean intercepted) {
+        if (mView != null) {
+            try {
+                mWindowSession.reportDecorViewGestureInterceptionChanged(mWindow, intercepted);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Set the root-level system gesture exclusion rects. These are added to those provided by
      * the root's view hierarchy.
      */
@@ -5908,6 +5931,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
     private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
     private static final int MSG_PAUSED_FOR_SYNC_TIMEOUT = 37;
+    private static final int MSG_DECOR_VIEW_GESTURE_INTERCEPTION = 38;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6185,6 +6209,9 @@ public final class ViewRootImpl implements ViewParent,
                 } break;
                 case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED: {
                     systemGestureExclusionChanged();
+                }   break;
+                case MSG_DECOR_VIEW_GESTURE_INTERCEPTION: {
+                    decorViewInterceptionChanged(/* intercepted= */ msg.arg1 == 1);
                 }   break;
                 case MSG_KEEP_CLEAR_RECTS_CHANGED: {
                     keepClearRectsChanged(/* accessibilityFocusRectChanged= */ msg.arg1 == 1);

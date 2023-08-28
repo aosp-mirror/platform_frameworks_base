@@ -249,6 +249,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
+import android.view.IDecorViewGestureListener;
 import android.view.IDisplayChangeWindowController;
 import android.view.IDisplayFoldListener;
 import android.view.IDisplayWindowInsetsController;
@@ -4637,8 +4638,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent == null) {
-                throw new IllegalArgumentException("Trying to register visibility event "
-                        + "for invalid display: " + displayId);
+                throw new IllegalArgumentException(
+                        "Trying to register system gesture exclusion event for invalid display: "
+                                + displayId);
             }
             displayContent.registerSystemGestureExclusionListener(listener);
         }
@@ -4650,10 +4652,61 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent == null) {
-                throw new IllegalArgumentException("Trying to register visibility event "
-                        + "for invalid display: " + displayId);
+                throw new IllegalArgumentException(
+                        "Trying to unregister system gesture exclusion event for invalid display: "
+                                + displayId);
             }
             displayContent.unregisterSystemGestureExclusionListener(listener);
+        }
+    }
+
+    @Override
+    public void registerDecorViewGestureListener(
+            IDecorViewGestureListener listener, int displayId) {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "registerDecorViewGestureListener()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException(
+                        "Trying to register DecorView gesture event listener"
+                                + "for invalid display: "
+                                + displayId);
+            }
+            displayContent.registerDecorViewGestureListener(listener);
+        }
+    }
+
+    @Override
+    public void unregisterDecorViewGestureListener(
+            IDecorViewGestureListener listener, int displayId) {
+        if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
+                "unregisterSystemGestureExclusionListener()")) {
+            throw new SecurityException("Requires MONITOR_INPUT permission");
+        }
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalArgumentException(
+                        "Trying to unregister DecorView gesture event listener"
+                                + "for invalid display: "
+                                + displayId);
+            }
+            displayContent.unregisterDecorViewGestureListener(listener);
+        }
+    }
+
+    void reportDecorViewGestureChanged(Session session, IWindow window, boolean intercepted) {
+        synchronized (mGlobalLock) {
+            final WindowState win =
+                    windowForClientLocked(session, window, false /* throwOnError */);
+            if (win == null) {
+                return;
+            }
+            win.getDisplayContent()
+                    .updateDecorViewGestureIntercepted(win.mToken.token, intercepted);
         }
     }
 
