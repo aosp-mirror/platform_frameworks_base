@@ -39,6 +39,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -73,6 +74,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -110,6 +113,7 @@ public class CastTileTest extends SysuiTestCase {
     private final TileJavaAdapter mJavaAdapter = new TileJavaAdapter();
     private final FakeWifiRepository mWifiRepository = new FakeWifiRepository();
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
 
     private TestableLooper mTestableLooper;
     private CastTile mCastTile;
@@ -123,7 +127,8 @@ public class CastTileTest extends SysuiTestCase {
 
         mWifiInteractor = new WifiInteractorImpl(
                 new FakeConnectivityRepository(),
-                mWifiRepository
+                mWifiRepository,
+                mTestScope
         );
     }
 
@@ -141,7 +146,7 @@ public class CastTileTest extends SysuiTestCase {
         IconState qsIcon = new IconState(false, 0, "");
         WifiIndicators indicators = new WifiIndicators(
                 false, mock(IconState.class),
-                qsIcon, false,false, "",
+                qsIcon, false, false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();
@@ -155,7 +160,7 @@ public class CastTileTest extends SysuiTestCase {
         IconState qsIcon = new IconState(false, 0, "");
         WifiIndicators indicators = new WifiIndicators(
                 true, mock(IconState.class),
-                qsIcon, false,false, "",
+                qsIcon, false, false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();
@@ -167,7 +172,7 @@ public class CastTileTest extends SysuiTestCase {
         IconState qsIcon = new IconState(true, 0, "");
         WifiIndicators indicators = new WifiIndicators(
                 true, mock(IconState.class),
-                qsIcon, false,false, "",
+                qsIcon, false, false, "",
                 false, "");
         mSignalCallback.setWifiIndicators(indicators);
         mTestableLooper.processAllMessages();

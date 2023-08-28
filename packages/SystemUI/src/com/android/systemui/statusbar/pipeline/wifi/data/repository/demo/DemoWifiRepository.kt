@@ -22,6 +22,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActiv
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -54,6 +55,10 @@ constructor(
     private val _wifiActivity =
         MutableStateFlow(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
     override val wifiActivity: StateFlow<DataActivityModel> = _wifiActivity
+
+    private val _wifiScanResults: MutableStateFlow<List<WifiScanEntry>> =
+        MutableStateFlow(emptyList())
+    override val wifiScanResults: StateFlow<List<WifiScanEntry>> = _wifiScanResults
 
     fun startProcessingCommands() {
         demoCommandJob =
