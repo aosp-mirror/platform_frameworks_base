@@ -370,6 +370,9 @@ object Flags {
 
     // 600- status bar
 
+    // TODO(b/291315866): Tracking Bug
+    @JvmField val SIGNAL_CALLBACK_DEPRECATION = unreleasedFlag("signal_callback_deprecation")
+
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag("plug_in_status_bar_chip")
 
