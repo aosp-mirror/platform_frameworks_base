@@ -61,7 +61,6 @@ import android.app.NotificationManager;
 import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -1366,7 +1365,6 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -9575,7 +9573,7 @@ public class AudioService extends IAudioService.Stub
                 mDockState = dockState;
             } else if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)
                     || action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
-                mDeviceBroker.receiveBtEvent(intent);
+                mDeviceBroker.postReceiveBtEvent(intent);
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 if (mMonitorRotation) {
                     RotationHelper.enable();
@@ -9642,15 +9640,6 @@ public class AudioService extends IAudioService.Stub
                             UserManager.DISALLOW_RECORD_AUDIO, false, userId);
                 } catch (IllegalArgumentException e) {
                     Slog.w(TAG, "Failed to apply DISALLOW_RECORD_AUDIO restriction: " + e);
-                }
-            } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-                sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                        "BluetoothAdapter ACTION_STATE_CHANGED with state " + state));
-
-                if (state == BluetoothAdapter.STATE_OFF ||
-                        state == BluetoothAdapter.STATE_TURNING_OFF) {
-                    mDeviceBroker.disconnectAllBluetoothProfiles();
                 }
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
