@@ -366,6 +366,52 @@ constructor(
         }
     }
 
+    /**
+     * Obtains the image size from the image header, without decoding the full image.
+     *
+     * @param icon an [Icon] representing the source of the image
+     * @return the [Size] if it could be determined from the image header, or `null` otherwise
+     */
+    suspend fun loadSize(icon: Icon, context: Context): Size? =
+        withContext(backgroundDispatcher) { loadSizeSync(icon, context) }
+
+    /**
+     * Obtains the image size from the image header, without decoding the full image.
+     *
+     * @param icon an [Icon] representing the source of the image
+     * @return the [Size] if it could be determined from the image header, or `null` otherwise
+     */
+    @WorkerThread
+    fun loadSizeSync(icon: Icon, context: Context): Size? {
+        return when (icon.type) {
+            Icon.TYPE_URI,
+            Icon.TYPE_URI_ADAPTIVE_BITMAP -> {
+                val source = ImageDecoder.createSource(context.contentResolver, icon.uri)
+                loadSizeSync(source)
+            }
+            else -> null
+        }
+    }
+
+    /**
+     * Obtains the image size from the image header, without decoding the full image.
+     *
+     * @param source [ImageDecoder.Source] of the image
+     * @return the [Size] if it could be determined from the image header, or `null` otherwise
+     */
+    @WorkerThread
+    fun loadSizeSync(source: ImageDecoder.Source): Size? {
+        return try {
+            ImageDecoder.decodeHeader(source).size
+        } catch (e: IOException) {
+            Log.w(TAG, "Failed to load source $source", e)
+            return null
+        } catch (e: DecodeException) {
+            Log.w(TAG, "Failed to decode source $source", e)
+            return null
+        }
+    }
+
     companion object {
         const val TAG = "ImageLoader"
 
@@ -452,7 +498,7 @@ constructor(
          * originate from other processes so we need to make sure we load them from the right
          * package source.
          *
-         * @return [Resources] to load the icon drawble or null if icon doesn't carry a resource or
+         * @return [Resources] to load the icon drawable or null if icon doesn't carry a resource or
          *   the resource package couldn't be resolved.
          */
         @WorkerThread
