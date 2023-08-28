@@ -19,6 +19,7 @@ package com.android.wm.shell.dagger.pip;
 import android.content.Context;
 
 import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 
 import dagger.Module;
@@ -34,5 +35,12 @@ public abstract class Pip1SharedModule {
     @Provides
     static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
         return new PipSurfaceTransactionHelper(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAnimationController providePipAnimationController(PipSurfaceTransactionHelper
+            pipSurfaceTransactionHelper) {
+        return new PipAnimationController(pipSurfaceTransactionHelper);
     }
 }
