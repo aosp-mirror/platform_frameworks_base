@@ -65,17 +65,6 @@ data class PermissionUri(
     }
 }
 
-data class DevicePermissionUri(
-    val permissionName: String,
-    val deviceId: Int
-) : AccessUri(SCHEME) {
-    override fun toString(): String = "$scheme:///$permissionName/$deviceId"
-
-    companion object {
-        const val SCHEME = "device-permission"
-    }
-}
-
 data class UidUri(
     val uid: Int
 ) : AccessUri(SCHEME) {
