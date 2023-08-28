@@ -293,6 +293,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         });
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testStates_areMutuallyExclusive() {
         forEachState(state1 -> {
@@ -449,6 +450,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         });
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testTwoFingersOneTap_activatedState_dispatchMotionEvents() {
         goFromStateIdleTo(STATE_ACTIVATED);
@@ -509,6 +511,7 @@ public class FullScreenMagnificationGestureHandlerTest {
         returnToNormalFrom(STATE_ACTIVATED);
     }
 
+    @FlakyTest(bugId = 297879316)
     @Test
     public void testFirstFingerSwipe_twoPointerDownAndActivatedState_panningState() {
         goFromStateIdleTo(STATE_ACTIVATED);
