@@ -7122,15 +7122,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mVisibleRequested || nowVisible || mState == PAUSING || mState == RESUMED;
     }
 
+    /**
+     * Returns the task id of the activity token. If onlyRoot=true is specified, it will
+     * return a valid id only if the activity is root or the activity is immediately above
+     * the first non-relinquish-identity activity.
+     * TODO(b/297476786): Clarify the use cases about when should get the bottom activity
+     *                    or the first non-relinquish-identity activity from bottom.
+     */
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null || r.getParent() == null) {
             return INVALID_TASK_ID;
         }
-        return getTaskForActivityLocked(r, onlyRoot);
-    }
-
-    static int getTaskForActivityLocked(ActivityRecord r, boolean onlyRoot) {
         final Task task = r.task;
         if (onlyRoot && r.compareTo(task.getRootActivity(
                 false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/)) > 0) {

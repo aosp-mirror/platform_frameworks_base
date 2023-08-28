@@ -1093,10 +1093,16 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
         // Add an extra activity on top of the root one.
-        new ActivityBuilder(mAtm).setTask(task).build();
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setTask(task).build();
 
         assertEquals("The root activity in the task must be reported.",
                 task.getBottomMostActivity(), task.getRootActivity());
+        assertEquals("The task id of root activity must be reported.",
+                task.mTaskId, mAtm.mActivityClientController.getTaskForActivity(
+                        activity0.token, true /* onlyRoot */));
+        assertEquals("No task must be reported for non root activity if onlyRoot.",
+                INVALID_TASK_ID, mAtm.mActivityClientController.getTaskForActivity(
+                        activity1.token, true /* onlyRoot */));
     }
 
     /**
@@ -1572,8 +1578,7 @@ public class TaskTests extends WindowTestsBase {
     }
 
     private Task getTestTask() {
-        final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
-        return task.getBottomMostTask();
+        return new TaskBuilder(mSupervisor).setCreateActivity(true).build();
     }
 
     private void testRootTaskBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
