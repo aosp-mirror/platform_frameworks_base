@@ -1489,8 +1489,12 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ synchronized void onBtProfileDisconnected(int profile) {
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    /*package*/ void onBtProfileDisconnected(int profile) {
         switch (profile) {
+            case BluetoothProfile.HEADSET:
+                disconnectHeadset();
+                break;
             case BluetoothProfile.A2DP:
                 disconnectA2dp();
                 break;
@@ -1548,6 +1552,24 @@ public class AudioDeviceInventory {
 
     /*package*/ void disconnectLeAudioBroadcast() {
         disconnectLeAudio(AudioSystem.DEVICE_OUT_BLE_BROADCAST);
+    }
+
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
+    private void disconnectHeadset() {
+        boolean disconnect = false;
+        synchronized (mDevicesLock) {
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                if (AudioSystem.isBluetoothScoDevice(di.mDeviceType)) {
+                    // There is only one HFP active device and setting the active
+                    // device to null will disconnect both in and out devices
+                    disconnect = true;
+                    break;
+                }
+            }
+        }
+        if (disconnect) {
+            mDeviceBroker.onSetBtScoActiveDevice(null);
+        }
     }
 
     // must be called before removing the device from mConnectedDevices

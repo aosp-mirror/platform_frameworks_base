@@ -257,24 +257,19 @@ public class AudioDeviceBroker {
         sendMsgNoDelay(MSG_TOGGLE_HDMI, SENDMSG_QUEUE);
     }
 
-    /*package*/ void disconnectAllBluetoothProfiles() {
-        synchronized (mDeviceStateLock) {
-            mBtHelper.disconnectAllBluetoothProfiles();
-        }
-    }
-
     /**
      * Handle BluetoothHeadset intents where the action is one of
      *   {@link BluetoothHeadset#ACTION_ACTIVE_DEVICE_CHANGED} or
      *   {@link BluetoothHeadset#ACTION_AUDIO_STATE_CHANGED}.
      * @param intent
      */
-    /*package*/ void receiveBtEvent(@NonNull Intent intent) {
-        synchronized (mSetModeLock) {
-            synchronized (mDeviceStateLock) {
-                mBtHelper.receiveBtEvent(intent);
-            }
-        }
+    private void onReceiveBtEvent(@NonNull Intent intent) {
+        mBtHelper.onReceiveBtEvent(intent);
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    /*package*/ void onSetBtScoActiveDevice(BluetoothDevice btDevice) {
+        mBtHelper.onSetBtScoActiveDevice(btDevice);
     }
 
     /*package*/ void setBluetoothA2dpOn_Async(boolean on, String source) {
@@ -1404,12 +1399,12 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_L_SET_COMMUNICATION_DEVICE_FOR_CLIENT, SENDMSG_QUEUE, info);
     }
 
-    /*package*/ void postScoAudioStateChanged(int state) {
-        sendIMsgNoDelay(MSG_I_SCO_AUDIO_STATE_CHANGED, SENDMSG_QUEUE, state);
-    }
-
     /*package*/ void postNotifyPreferredAudioProfileApplied(BluetoothDevice btDevice) {
         sendLMsgNoDelay(MSG_L_NOTIFY_PREFERRED_AUDIOPROFILE_APPLIED, SENDMSG_QUEUE, btDevice);
+    }
+
+    /*package*/ void postReceiveBtEvent(Intent intent) {
+        sendLMsgNoDelay(MSG_L_RECEIVED_BT_EVENT, SENDMSG_QUEUE, intent);
     }
 
     /*package*/ static final class CommunicationDeviceInfo {
@@ -1807,10 +1802,10 @@ public class AudioDeviceBroker {
                     }
                     break;
 
-                case MSG_I_SCO_AUDIO_STATE_CHANGED:
+                case MSG_L_RECEIVED_BT_EVENT:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            mBtHelper.onScoAudioStateChanged(msg.arg1);
+                            onReceiveBtEvent((Intent) msg.obj);
                         }
                     }
                     break;
@@ -1821,29 +1816,17 @@ public class AudioDeviceBroker {
                     }
                     break;
                 case MSG_I_BT_SERVICE_DISCONNECTED_PROFILE:
-                    if (msg.arg1 != BluetoothProfile.HEADSET) {
+                    synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
                             mBtHelper.onBtProfileDisconnected(msg.arg1);
                             mDeviceInventory.onBtProfileDisconnected(msg.arg1);
                         }
-                    } else {
-                        synchronized (mSetModeLock) {
-                            synchronized (mDeviceStateLock) {
-                                mBtHelper.disconnectHeadset();
-                            }
-                        }
                     }
                     break;
                 case MSG_IL_BT_SERVICE_CONNECTED_PROFILE:
-                    if (msg.arg1 != BluetoothProfile.HEADSET) {
+                    synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
                             mBtHelper.onBtProfileConnected(msg.arg1, (BluetoothProfile) msg.obj);
-                        }
-                    } else {
-                        synchronized (mSetModeLock) {
-                            synchronized (mDeviceStateLock) {
-                                mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
-                            }
                         }
                     }
                     break;
@@ -1978,7 +1961,6 @@ public class AudioDeviceBroker {
 
     private static final int MSG_L_SET_COMMUNICATION_DEVICE_FOR_CLIENT = 42;
     private static final int MSG_IL_UPDATE_COMMUNICATION_ROUTE_CLIENT = 43;
-    private static final int MSG_I_SCO_AUDIO_STATE_CHANGED = 44;
 
     private static final int MSG_L_BT_ACTIVE_DEVICE_CHANGE_EXT = 45;
     //
@@ -1993,6 +1975,8 @@ public class AudioDeviceBroker {
     private static final int MSG_L_CHECK_COMMUNICATION_DEVICE_REMOVAL = 53;
 
     private static final int MSG_PERSIST_AUDIO_DEVICE_SETTINGS = 54;
+
+    private static final int MSG_L_RECEIVED_BT_EVENT = 55;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {

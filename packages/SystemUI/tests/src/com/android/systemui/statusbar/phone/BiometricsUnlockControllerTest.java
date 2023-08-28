@@ -135,7 +135,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
         mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
-        TestableResources res = getContext().getOrCreateTestableResources();
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
@@ -145,7 +144,16 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mAuthController.isUdfpsFingerDown()).thenReturn(false);
         when(mVibratorHelper.hasVibrator()).thenReturn(true);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
-        mBiometricUnlockController = new BiometricUnlockController(mDozeScrimController,
+        mBiometricUnlockController = createController(false);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
+        when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(mViewRootImpl);
+    }
+
+    BiometricUnlockController createController(boolean orderUnlockAndWake) {
+        TestableResources res = getContext().getOrCreateTestableResources();
+        res.addOverride(com.android.internal.R.bool.config_orderUnlockAndWake, orderUnlockAndWake);
+        BiometricUnlockController biometricUnlockController = new BiometricUnlockController(
+                mDozeScrimController,
                 mKeyguardViewMediator,
                 mNotificationShadeWindowController, mKeyguardStateController, mHandler,
                 mUpdateMonitor, res.getResources(), mKeyguardBypassController,
@@ -156,10 +164,10 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mSystemClock,
                 mFeatureFlags
         );
-        mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
-        mBiometricUnlockController.addListener(mBiometricUnlockEventsListener);
-        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
-        when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(mViewRootImpl);
+        biometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
+        biometricUnlockController.addListener(mBiometricUnlockEventsListener);
+
+        return biometricUnlockController;
     }
 
     @Test
@@ -667,6 +675,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
     @Test
     public void onSideFingerprintSuccess_dreaming_unlockNoWake() {
+        mBiometricUnlockController = createController(true);
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
         when(mWakefulnessLifecycle.getLastWakeReason())
                 .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
