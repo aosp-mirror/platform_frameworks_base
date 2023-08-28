@@ -17,13 +17,13 @@ package com.android.server.pm.split;
 
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils.ParseFlags;
 import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.os.Build;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils.ParseFlags;
 
 import libcore.io.IoUtils;
 
@@ -82,8 +82,8 @@ public class DefaultSplitAssetLoader implements SplitAssetLoader {
         }
 
         AssetManager assets = new AssetManager();
-        assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                Build.VERSION.RESOURCES_SDK_INT);
+        assets.setConfiguration(0, 0, null, new String[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, Build.VERSION.RESOURCES_SDK_INT);
         assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
 
         mCachedAssetManager = assets;
