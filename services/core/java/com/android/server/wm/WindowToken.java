@@ -519,7 +519,8 @@ class WindowToken extends WindowContainer<WindowState> {
         for (int i = mFixedRotationTransformState.mAssociatedTokens.size() - 1; i >= 0; i--) {
             final ActivityRecord r =
                     mFixedRotationTransformState.mAssociatedTokens.get(i).asActivityRecord();
-            if (r != null && r.isInTransition()) {
+            // Only care about the transition at Activity/Task level.
+            if (r != null && r.inTransitionSelfOrParent() && !r.mDisplayContent.inTransition()) {
                 return true;
             }
         }
