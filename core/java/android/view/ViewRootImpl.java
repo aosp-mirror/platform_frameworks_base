@@ -152,7 +152,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
@@ -1727,21 +1726,8 @@ public final class ViewRootImpl implements ViewParent,
         return getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
-    /** Returns true if force dark should be enabled according to various settings */
-    @VisibleForTesting
-    public boolean isForceDarkEnabled() {
-        boolean isForceInvertEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED,
-                /* def= */ 0,
-                UserHandle.myUserId()) == 1;
-        // Force invert ignores all developer opt-outs.
-        // We also ignore dark theme, since the app developer can override the user's preference
-        // for dark mode in configuration.uiMode. Instead, we assume that the force invert setting
-        // will be enabled at the same time dark theme is in the Settings app.
-        if (isForceInvertEnabled) {
-            return true;
-        }
+    private void updateForceDarkMode() {
+        if (mAttachInfo.mThreadedRenderer == null) return;
 
         boolean useAutoDark = getNightMode() == Configuration.UI_MODE_NIGHT_YES;
 
@@ -1753,12 +1739,8 @@ public final class ViewRootImpl implements ViewParent,
                     && a.getBoolean(R.styleable.Theme_forceDarkAllowed, forceDarkAllowedDefault);
             a.recycle();
         }
-        return useAutoDark;
-    }
 
-    private void updateForceDarkMode() {
-        if (mAttachInfo.mThreadedRenderer == null) return;
-        if (mAttachInfo.mThreadedRenderer.setForceDark(isForceDarkEnabled())) {
+        if (mAttachInfo.mThreadedRenderer.setForceDark(useAutoDark)) {
             // TODO: Don't require regenerating all display lists to apply this setting
             invalidateWorld(mView);
         }
