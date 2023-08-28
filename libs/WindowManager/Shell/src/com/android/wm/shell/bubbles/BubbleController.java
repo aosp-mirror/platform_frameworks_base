@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -114,7 +115,6 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
-import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -182,7 +182,6 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
     private final TaskViewTransitions mTaskViewTransitions;
-    private final Transitions mTransitions;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
@@ -283,7 +282,6 @@ public class BubbleController implements ConfigurationChangeListener,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
-            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
             BubbleProperties bubbleProperties) {
@@ -319,7 +317,6 @@ public class BubbleController implements ConfigurationChangeListener,
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
-        mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
@@ -419,9 +416,23 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         }, mMainHandler);
 
-        mTransitions.registerObserver(new BubblesTransitionObserver(this, mBubbleData));
-
         mTaskStackListener.addListener(new TaskStackListenerCallback() {
+            @Override
+            public void onTaskMovedToFront(int taskId) {
+                mMainExecutor.execute(() -> {
+                    int expandedId = INVALID_TASK_ID;
+                    if (mStackView != null && mStackView.getExpandedBubble() != null
+                            && isStackExpanded()
+                            && !mStackView.isExpansionAnimating()
+                            && !mStackView.isSwitchAnimating()) {
+                        expandedId = mStackView.getExpandedBubble().getTaskId();
+                    }
+                    if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
+                        mBubbleData.setExpanded(false);
+                    }
+                });
+            }
+
             @Override
             public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                     boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
@@ -1948,15 +1959,6 @@ public class BubbleController implements ConfigurationChangeListener,
         } else if (mLayerView != null) {
             // TODO(b/273313561): handle a11y for BubbleBarLayerView
         }
-    }
-
-    /**
-     * Returns whether the stack is animating or not.
-     */
-    public boolean isStackAnimating() {
-        return mStackView != null
-                && (mStackView.isExpansionAnimating()
-                || mStackView.isSwitchAnimating());
     }
 
     @VisibleForTesting
