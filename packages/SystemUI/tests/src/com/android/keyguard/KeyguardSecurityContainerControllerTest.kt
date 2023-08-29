@@ -622,51 +622,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         configurationListenerArgumentCaptor.value.onUiModeChanged()
         verify(view).reloadColors()
     }
-    @Test
-    fun onOrientationChanged_landscapeKeyguardFlagDisabled_blockReinflate() {
-        featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
-
-        // Run onOrientationChanged
-        val configurationListenerArgumentCaptor =
-            ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
-        underTest.onViewAttached()
-        verify(configurationController).addCallback(configurationListenerArgumentCaptor.capture())
-        clearInvocations(viewFlipperController)
-        configurationListenerArgumentCaptor.value.onOrientationChanged(
-            Configuration.ORIENTATION_LANDSCAPE
-        )
-        // Verify view is reinflated when flag is on
-        verify(viewFlipperController, never()).clearViews()
-        verify(viewFlipperController, never())
-            .asynchronouslyInflateView(
-                eq(SecurityMode.PIN),
-                any(),
-                onViewInflatedCallbackArgumentCaptor.capture()
-            )
-    }
-
-    @Test
-    fun onOrientationChanged_landscapeKeyguardFlagEnabled_doesReinflate() {
-        featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, true)
-
-        // Run onOrientationChanged
-        val configurationListenerArgumentCaptor =
-            ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
-        underTest.onViewAttached()
-        verify(configurationController).addCallback(configurationListenerArgumentCaptor.capture())
-        clearInvocations(viewFlipperController)
-        configurationListenerArgumentCaptor.value.onOrientationChanged(
-            Configuration.ORIENTATION_LANDSCAPE
-        )
-        // Verify view is reinflated when flag is on
-        verify(viewFlipperController).clearViews()
-        verify(viewFlipperController)
-            .asynchronouslyInflateView(
-                eq(SecurityMode.PIN),
-                any(),
-                onViewInflatedCallbackArgumentCaptor.capture()
-            )
-    }
 
     @Test
     fun hasDismissActions() {
