@@ -326,6 +326,17 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorImplTest.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/viewmodel/WifiViewModelTest.kt",
+
+        /* Bouncer UI tests */
+        "tests/src/com/android/keyguard/KeyguardPasswordViewControllerTest.kt",
+        "tests/src/com/android/keyguard/KeyguardPatternViewControllerTest.kt",
+        "tests/src/com/android/keyguard/KeyguardPinBasedInputViewControllerTest.java",
+        "tests/src/com/android/keyguard/KeyguardPinViewControllerTest.kt",
+        "tests/src/com/android/keyguard/KeyguardSecurityContainerTest.java",
+        "tests/src/com/android/keyguard/KeyguardSecurityContainerControllerTest.kt",
+        "tests/src/com/android/keyguard/KeyguardSecurityViewFlipperControllerTest.java",
+        "tests/src/com/android/keyguard/KeyguardSimPinViewControllerTest.kt",
+        "tests/src/com/android/keyguard/KeyguardSimPukViewControllerTest.kt",
     ],
     path: "tests/src",
 }

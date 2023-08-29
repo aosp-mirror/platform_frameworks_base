@@ -44,7 +44,6 @@ import static org.mockito.Mockito.when;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Insets;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,9 +53,11 @@ import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
@@ -75,7 +76,8 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
