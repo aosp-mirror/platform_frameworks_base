@@ -33,6 +33,12 @@ public interface PluginLifecycleManager<T extends Plugin> {
     /** Returns the currently loaded plugin instance (if plugin is loaded) */
     T getPlugin();
 
+    /** Returns true if the lifecycle manager should log debug messages */
+    boolean getIsDebug();
+
+    /** Sets whether or not hte lifecycle manager should log debug messages */
+    void setIsDebug(boolean debug);
+
     /** returns true if the plugin is currently loaded */
     default boolean isLoaded() {
         return getPlugin() != null;
