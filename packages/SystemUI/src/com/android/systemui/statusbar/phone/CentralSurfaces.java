@@ -200,10 +200,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void onKeyguardViewManagerStatesUpdated();
 
-    boolean isPulsing();
-
-    boolean isOccluded();
-
     boolean isDeviceInVrMode();
 
     NotificationPresenter getPresenter();
@@ -246,8 +242,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** @deprecated Use {@link DisplayMetricsRepository} instead. */
     @Deprecated
     float getDisplayHeight();
-
-    void readyForKeyguardDone();
 
     void showKeyguard();
 
@@ -369,8 +363,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** @deprecated Use {@link DisplayMetricsRepository} instead. */
     @Deprecated
     float getDisplayDensity();
-
-    void extendDozePulse();
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;

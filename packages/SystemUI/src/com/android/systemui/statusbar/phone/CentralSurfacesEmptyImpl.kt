@@ -41,8 +41,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
     override fun isLaunchingActivityOverLockscreen() = false
     override fun onKeyguardViewManagerStatesUpdated() {}
-    override fun isPulsing() = false
-    override fun isOccluded() = false
     override fun isDeviceInVrMode() = false
     override fun getPresenter(): NotificationPresenter? = null
     override fun onInputFocusTransfer(start: Boolean, cancel: Boolean, velocity: Float) {}
@@ -55,7 +53,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun dump(pwOriginal: PrintWriter, args: Array<String>) {}
     override fun getDisplayWidth() = 0f
     override fun getDisplayHeight() = 0f
-    override fun readyForKeyguardDone() {}
     override fun showKeyguard() {}
     override fun hideKeyguard() = false
     override fun showKeyguardImpl() {}
@@ -117,7 +114,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun setLaunchEmergencyActionOnFinishedWaking(launch: Boolean) {}
     override fun getQSPanelController(): QSPanelController? = null
     override fun getDisplayDensity() = 0f
-    override fun extendDozePulse() {}
     override fun setIsLaunchingActivityOverLockscreen(isLaunchingActivityOverLockscreen: Boolean) {}
     override fun getAnimatorControllerFromNotification(
         associatedView: ExpandableNotificationRow?,

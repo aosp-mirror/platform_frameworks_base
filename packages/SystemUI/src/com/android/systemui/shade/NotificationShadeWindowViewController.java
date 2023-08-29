@@ -65,6 +65,8 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.DozeScrimController;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
@@ -118,6 +120,8 @@ public class NotificationShadeWindowViewController {
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
+    private final DozeServiceHost mDozeServiceHost;
+    private final DozeScrimController mDozeScrimController;
     private final BackActionInteractor mBackActionInteractor;
     private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -152,6 +156,8 @@ public class NotificationShadeWindowViewController {
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
+            DozeServiceHost dozeServiceHost,
+            DozeScrimController dozeScrimController,
             BackActionInteractor backActionInteractor,
             PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
@@ -189,6 +195,8 @@ public class NotificationShadeWindowViewController {
         mShadeLogger = shadeLogger;
         mLockIconViewController.init();
         mService = centralSurfaces;
+        mDozeServiceHost = dozeServiceHost;
+        mDozeScrimController = dozeScrimController;
         mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -332,7 +340,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.extendDozePulse();
+                    mDozeScrimController.extendPulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,
@@ -391,7 +399,7 @@ public class NotificationShadeWindowViewController {
 
             @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
-                if (mStatusBarStateController.isDozing() && !mService.isPulsing()
+                if (mStatusBarStateController.isDozing() && !mDozeServiceHost.isPulsing()
                         && !mDockManager.isDocked()) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                         mShadeLogger.d("NSWVC: capture all touch events in always-on");
@@ -445,7 +453,7 @@ public class NotificationShadeWindowViewController {
             public boolean handleTouchEvent(MotionEvent ev) {
                 boolean handled = false;
                 if (mStatusBarStateController.isDozing()) {
-                    handled = !mService.isPulsing();
+                    handled = !mDozeServiceHost.isPulsing();
                 }
 
                 if (mStatusBarKeyguardViewManager.onTouch(ev)) {

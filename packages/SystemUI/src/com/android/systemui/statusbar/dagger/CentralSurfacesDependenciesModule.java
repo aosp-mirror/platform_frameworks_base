@@ -64,7 +64,6 @@ import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -135,7 +134,6 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     static NotificationMediaManager provideNotificationMediaManager(
             Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             NotificationVisibilityProvider visibilityProvider,
             MediaArtworkProcessor mediaArtworkProcessor,
@@ -152,7 +150,6 @@ public interface CentralSurfacesDependenciesModule {
             DisplayManager displayManager) {
         return new NotificationMediaManager(
                 context,
-                centralSurfacesOptionalLazy,
                 notificationShadeWindowController,
                 visibilityProvider,
                 mediaArtworkProcessor,

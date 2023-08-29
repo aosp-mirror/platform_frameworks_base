@@ -31,6 +31,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -54,6 +55,8 @@ class CameraGestureHelperTest : SysuiTestCase() {
 
     @Mock
     lateinit var centralSurfaces: CentralSurfaces
+    @Mock
+    lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock
     lateinit var keyguardStateController: KeyguardStateController
     @Mock
@@ -91,6 +94,7 @@ class CameraGestureHelperTest : SysuiTestCase() {
             context = mock(),
             centralSurfaces = centralSurfaces,
             keyguardStateController = keyguardStateController,
+            statusBarKeyguardViewManager = statusBarKeyguardViewManager,
             packageManager = packageManager,
             activityManager = activityManager,
             activityStarter = activityStarter,
