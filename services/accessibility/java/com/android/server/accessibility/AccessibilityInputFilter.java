@@ -388,11 +388,19 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     @Override
     public void onMotionEvent(MotionEvent transformedEvent, MotionEvent rawEvent,
             int policyFlags) {
+        if (!mInstalled) {
+            Slog.w(TAG, "onMotionEvent called before input filter installed!");
+            return;
+        }
         sendInputEvent(transformedEvent, policyFlags);
     }
 
     @Override
     public void onKeyEvent(KeyEvent event, int policyFlags) {
+        if (!mInstalled) {
+            Slog.w(TAG, "onKeyEvent called before input filter installed!");
+            return;
+        }
         sendInputEvent(event, policyFlags);
     }
 
