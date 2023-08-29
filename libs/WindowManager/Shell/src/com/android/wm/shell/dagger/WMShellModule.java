@@ -167,6 +167,7 @@ public abstract class WMShellModule {
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
+            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService) {
         return new BubbleController(context, shellInit, shellCommandHandler, shellController, data,
@@ -176,7 +177,8 @@ public abstract class WMShellModule {
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
                 launcherApps, logger, taskStackListener, organizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
-                taskViewTransitions, syncQueue, wmService, ProdBubbleProperties.INSTANCE);
+                taskViewTransitions, transitions, syncQueue, wmService,
+                ProdBubbleProperties.INSTANCE);
     }
 
     //
