@@ -24,6 +24,8 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,7 +78,13 @@ internal fun PinBouncer(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
+        modifier =
+            modifier.pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown()
+                    viewModel.onDown()
+                }
+            }
     ) {
         PinInputDisplay(viewModel)
         Spacer(Modifier.height(100.dp))

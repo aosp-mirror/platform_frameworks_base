@@ -78,28 +78,37 @@ constructor(
     /** Position information for the shared notification container. */
     val sharedNotificationContainerPosition =
         MutableStateFlow(SharedNotificationContainerPosition())
+
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.
      */
     val dozeAmount: Flow<Float> = repository.linearDozeAmount
+
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
+
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long> = repository.dozeTimeTick
+
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: Flow<Boolean> = repository.isAodAvailable
+
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
+
     /**
      * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
      * but not vice-versa.
      */
     val isDreaming: Flow<Boolean> = repository.isDreaming
+
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+
     /** Whether the system is dreaming and the active dream is hosted in lockscreen */
     val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
+
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> = conflatedCallbackFlow {
         val callback =
@@ -148,18 +157,25 @@ constructor(
 
     /** Whether the keyguard is showing or not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+
     /** Whether the keyguard is unlocked or not. */
     val isKeyguardUnlocked: Flow<Boolean> = repository.isKeyguardUnlocked
+
     /** Whether the keyguard is occluded (covered by an activity). */
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
+
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
+
     /** Whether the primary bouncer is showing or not. */
     val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
+
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
+
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
+
     /**
      * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
      * side, under display) is used to unlock the device.

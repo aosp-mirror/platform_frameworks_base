@@ -39,7 +39,8 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val interactor = utils.sceneInteractor()
     private val underTest =
         SceneContainerViewModel(
-            interactor = interactor,
+            sceneInteractor = interactor,
+            falsingInteractor = utils.falsingInteractor(),
         )
 
     @Test

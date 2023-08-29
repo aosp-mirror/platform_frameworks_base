@@ -33,7 +33,6 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.TestScopeProvider
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -105,7 +104,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock @Main private lateinit var executor: DelayableExecutor
     @Mock lateinit var mediaDataManager: MediaDataManager
     @Mock lateinit var configurationController: ConfigurationController
-    @Mock lateinit var falsingCollector: FalsingCollector
     @Mock lateinit var falsingManager: FalsingManager
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var logger: MediaUiEventLogger
@@ -146,7 +144,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 executor,
                 mediaDataManager,
                 configurationController,
-                falsingCollector,
                 falsingManager,
                 dumpManager,
                 logger,

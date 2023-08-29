@@ -2823,7 +2823,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onTrackingStarted() {
-        mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         endClosing();
         mTracking = true;
         mTrackingStartedListener.onTrackingStarted();
@@ -2839,7 +2838,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onTrackingStopped(boolean expand) {
-        mFalsingCollector.onTrackingStopped();
         mTracking = false;
         maybeStopTrackingExpansionFromStatusBar(expand);
 
@@ -2893,7 +2891,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @VisibleForTesting
     void onUnlockHintStarted() {
-        mFalsingCollector.onUnlockHintStarted();
         mKeyguardIndicationController.showActionToUnlock();
         mScrimController.setExpansionAffectsAlpha(false);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);

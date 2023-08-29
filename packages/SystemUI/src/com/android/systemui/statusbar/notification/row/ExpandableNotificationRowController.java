@@ -34,7 +34,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
@@ -102,7 +101,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final NotificationGutsManager mNotificationGutsManager;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
     private final FalsingManager mFalsingManager;
-    private final FalsingCollector mFalsingCollector;
     private final FeatureFlags mFeatureFlags;
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
@@ -222,7 +220,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             OnUserInteractionCallback onUserInteractionCallback,
             FalsingManager falsingManager,
-            FalsingCollector falsingCollector,
             FeatureFlags featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional,
@@ -251,7 +248,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mFalsingManager = falsingManager;
         mOnFeedbackClickListener = mNotificationGutsManager::openGuts;
         mAllowLongPress = allowLongPress;
-        mFalsingCollector = falsingCollector;
         mFeatureFlags = featureFlags;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesManagerOptional = bubblesManagerOptional;
@@ -285,7 +281,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mOnExpandClickListener,
                 mOnFeedbackClickListener,
                 mFalsingManager,
-                mFalsingCollector,
                 mStatusBarStateController,
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,

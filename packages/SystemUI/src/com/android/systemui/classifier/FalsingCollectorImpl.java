@@ -103,10 +103,6 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     private final BatteryStateChangeCallback mBatteryListener = new BatteryStateChangeCallback() {
         @Override
-        public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        }
-
-        @Override
         public void onWirelessChargingChanged(boolean isWirelessCharging) {
             if (isWirelessCharging || mDockManager.isDocked()) {
                 mProximitySensor.pause();
@@ -169,34 +165,21 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onSuccessfulUnlock() {
+        logDebug("REAL: onSuccessfulUnlock");
         mFalsingManager.onSuccessfulUnlock();
         sessionEnd();
     }
 
     @Override
     public void setShowingAod(boolean showingAod) {
+        logDebug("REAL: setShowingAod(" + showingAod + ")");
         mShowingAod = showingAod;
         updateSessionActive();
     }
 
-    @Override
-    public void onNotificationStartDraggingDown() {
-    }
-
-    @Override
-    public void onNotificationStopDraggingDown() {
-    }
-
-    @Override
-    public void setNotificationExpanded() {
-    }
-
-    @Override
-    public void onQsDown() {
-    }
-
     @VisibleForTesting
     void onQsExpansionChanged(Boolean expanded) {
+        logDebug("REAL: onQsExpansionChanged(" + expanded + ")");
         if (expanded) {
             unregisterSensors();
         } else if (mSessionStarted) {
@@ -210,39 +193,8 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     @Override
-    public void onTrackingStarted(boolean secure) {
-    }
-
-    @Override
-    public void onTrackingStopped() {
-    }
-
-    @Override
-    public void onLeftAffordanceOn() {
-    }
-
-    @Override
-    public void onCameraOn() {
-    }
-
-    @Override
-    public void onAffordanceSwipingStarted(boolean rightCorner) {
-    }
-
-    @Override
-    public void onAffordanceSwipingAborted() {
-    }
-
-    @Override
-    public void onStartExpandingFromPulse() {
-    }
-
-    @Override
-    public void onExpansionFromPulseStopped() {
-    }
-
-    @Override
     public void onScreenOnFromTouch() {
+        logDebug("REAL: onScreenOnFromTouch");
         onScreenTurningOn();
     }
 
@@ -252,52 +204,28 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     @Override
-    public void onUnlockHintStarted() {
-    }
-
-    @Override
-    public void onCameraHintStarted() {
-    }
-
-    @Override
-    public void onLeftAffordanceHintStarted() {
-    }
-
-    @Override
     public void onScreenTurningOn() {
+        logDebug("REAL: onScreenTurningOn");
         mScreenOn = true;
         updateSessionActive();
     }
 
     @Override
     public void onScreenOff() {
+        logDebug("REAL: onScreenOff");
         mScreenOn = false;
         updateSessionActive();
     }
 
     @Override
-    public void onNotificationStopDismissing() {
-    }
-
-    @Override
-    public void onNotificationDismissed() {
-    }
-
-    @Override
-    public void onNotificationStartDismissing() {
-    }
-
-    @Override
-    public void onNotificationDoubleTap(boolean accepted, float dx, float dy) {
-    }
-
-    @Override
     public void onBouncerShown() {
+        logDebug("REAL: onBouncerShown");
         unregisterSensors();
     }
 
     @Override
     public void onBouncerHidden() {
+        logDebug("REAL: onBouncerHidden");
         if (mSessionStarted) {
             registerSensors();
         }
@@ -305,6 +233,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
+        logDebug("REAL: onTouchEvent(" + ev.getActionMasked() + ")");
         if (!mKeyguardStateController.isShowing()) {
             avoidGesture();
             return;
@@ -334,6 +263,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onMotionEventComplete() {
+        logDebug("REAL: onMotionEventComplete");
         // We must delay processing the completion because of the way Android handles click events.
         // It generally delays executing them immediately, instead choosing to give the UI a chance
         // to respond to touch events before acknowledging the click. As such, we must also delay,
@@ -350,6 +280,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void avoidGesture() {
+        logDebug("REAL: avoidGesture");
         mAvoidGesture = true;
         if (mPendingDownEvent != null) {
             mPendingDownEvent.recycle();
@@ -359,6 +290,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void cleanup() {
+        logDebug("REAL: cleanup");
         unregisterSensors();
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
@@ -368,11 +300,13 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void updateFalseConfidence(FalsingClassifier.Result result) {
+        logDebug("REAL: updateFalseConfidence(" + result.isFalse() + ")");
         mHistoryTracker.addResults(Collections.singleton(result), mSystemClock.uptimeMillis());
     }
 
     @Override
     public void onA11yAction() {
+        logDebug("REAL: onA11yAction");
         if (mPendingDownEvent != null) {
             mPendingDownEvent.recycle();
             mPendingDownEvent = null;
@@ -427,17 +361,13 @@ class FalsingCollectorImpl implements FalsingCollector {
 
 
     static void logDebug(String msg) {
-        logDebug(msg, null);
-    }
-
-    static void logDebug(String msg, Throwable throwable) {
         if (DEBUG) {
-            Log.d(TAG, msg, throwable);
+            logDebug(msg);
         }
     }
 
     private static class ProximityEventImpl implements FalsingManager.ProximityEvent {
-        private ThresholdSensorEvent mThresholdSensorEvent;
+        private final ThresholdSensorEvent mThresholdSensorEvent;
 
         ProximityEventImpl(ThresholdSensorEvent thresholdSensorEvent) {
             mThresholdSensorEvent = thresholdSensorEvent;

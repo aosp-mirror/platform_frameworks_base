@@ -28,6 +28,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.model.SysUiState
 import com.android.systemui.scene.SceneTestUtils.Companion.toDataLayer
@@ -99,7 +100,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         )
     private val sceneContainerViewModel =
         SceneContainerViewModel(
-                interactor = sceneInteractor,
+                sceneInteractor = sceneInteractor,
+                falsingInteractor = utils.falsingInteractor(),
             )
             .apply { setTransitionState(transitionState) }
 
@@ -117,7 +119,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private val lockscreenSceneViewModel =
         LockscreenSceneViewModel(
             authenticationInteractor = authenticationInteractor,
-            bouncerInteractor = bouncerInteractor,
+            longPress =
+                KeyguardLongPressViewModel(
+                    interactor = mock(),
+                ),
         )
 
     private val shadeSceneViewModel =
@@ -151,6 +156,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sysUiState = sysUiState,
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),
+                falsingCollector = utils.falsingCollector(),
             )
         startable.start()
 
@@ -165,9 +171,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     @Test
     fun clickLockButtonAndEnterCorrectPin_unlocksDevice() =
         testScope.runTest {
-            lockscreenSceneViewModel.onLockButtonClicked()
-            assertCurrentScene(SceneKey.Bouncer)
-            emulateUiSceneTransition()
+            emulateUserDrivenTransition(SceneKey.Bouncer)
 
             enterPin()
             assertCurrentScene(SceneKey.Gone)
@@ -460,10 +464,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             .that(authenticationInteractor.isUnlocked.value)
             .isFalse()
 
-        lockscreenSceneViewModel.onLockButtonClicked()
-        runCurrent()
-        emulateUiSceneTransition()
-
+        emulateUserDrivenTransition(SceneKey.Bouncer)
         enterPin()
         emulateUiSceneTransition(
             expectedVisible = false,
