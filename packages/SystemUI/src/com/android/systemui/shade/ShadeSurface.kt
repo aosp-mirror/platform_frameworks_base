@@ -99,9 +99,6 @@ interface ShadeSurface : ShadeViewController {
     /** Sets the view's alpha to max. */
     fun resetAlpha()
 
-    /** Sets progress of the predictive back animation. */
-    fun onBackProgressed(progressFraction: Float)
-
     /** @see com.android.systemui.keyguard.ScreenLifecycle.Observer.onScreenTurningOn */
     fun onScreenTurningOn()
 

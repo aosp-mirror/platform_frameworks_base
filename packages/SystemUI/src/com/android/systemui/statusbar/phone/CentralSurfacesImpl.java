@@ -92,17 +92,12 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
-import android.window.BackEvent;
-import android.window.OnBackAnimationCallback;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -176,6 +171,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
@@ -221,7 +217,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -462,6 +457,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final CentralSurfacesComponent.Factory mCentralSurfacesComponentFactory;
     private final PluginManager mPluginManager;
     private final ShadeController mShadeController;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final InitController mInitController;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
@@ -489,13 +485,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private View mReportRejectedTouch;
 
     private final NotificationGutsManager mGutsManager;
-    private final NotificationLogger mNotificationLogger;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
-    private final boolean mAnimateBack;
     private final FragmentService mFragmentService;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final WallpaperController mWallpaperController;
@@ -507,13 +501,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ActivityStarter mActivityStarter;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
-
-    /**
-     * This keeps track of whether we have (or haven't) registered the predictive back callback.
-     * Since we can have visible -> visible transitions, we need to avoid
-     * double-registering (or double-unregistering) our callback.
-     */
-    private boolean mIsBackCallbackRegistered = false;
 
     /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
     private @Appearance int mAppearance;
@@ -640,31 +627,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final InteractionJankMonitor mJankMonitor;
 
-    /** Existing callback that handles back gesture invoked for the Shade. */
-    private final OnBackInvokedCallback mOnBackInvokedCallback;
-
-    /**
-     *  New callback that handles back gesture invoked, cancel, progress
-     *  and provides feedback via Shade animation.
-     *  (enabled via the WM_SHADE_ANIMATE_BACK_GESTURE flag)
-     */
-    private final OnBackAnimationCallback mOnBackAnimationCallback = new OnBackAnimationCallback() {
-        @Override
-        public void onBackInvoked() {
-            mBackActionInteractor.onBackRequested();
-        }
-
-        @Override
-        public void onBackProgressed(BackEvent event) {
-            if (mBackActionInteractor.shouldBackBeHandled()) {
-                if (mShadeSurface.canBeCollapsed()) {
-                    float fraction = event.getProgress();
-                    mShadeSurface.onBackProgressed(fraction);
-                }
-            }
-        }
-    };
-
     /**
      * Public constructor for CentralSurfaces.
      *
@@ -694,7 +656,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
             NotificationGutsManager notificationGutsManager,
-            NotificationLogger notificationLogger,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             ShadeExpansionStateManager shadeExpansionStateManager,
             KeyguardViewMediator keyguardViewMediator,
@@ -745,6 +706,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<CentralSurfacesCommandQueueCallbacks> commandQueueCallbacksLazy,
             PluginManager pluginManager,
             ShadeController shadeController,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             InitController initController,
@@ -803,7 +765,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mGutsManager = notificationGutsManager;
-        mNotificationLogger = notificationLogger;
         mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mKeyguardViewMediator = keyguardViewMediator;
@@ -856,6 +817,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
         mPluginManager = pluginManager;
         mShadeController = shadeController;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mKeyguardViewMediatorCallback = viewMediatorCallback;
         mInitController = initController;
@@ -926,14 +888,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI)) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
-        // Based on teamfood flag, enable predictive back animation for the Shade.
-        mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
-        mOnBackInvokedCallback = () -> {
-            if (DEBUG) {
-                Log.d(TAG, "mOnBackInvokedCallback() called");
-            }
-            mBackActionInteractor.onBackRequested();
-        };
     }
 
     private void initBubbles(Bubbles bubbles) {
@@ -1171,7 +1125,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 new FoldStateListener(mContext, this::onFoldedStateChanged));
     }
 
-    @VisibleForTesting
+    /**
+     * @deprecated use {@link
+     * WindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible} instead.
+     */    @VisibleForTesting
     void initShadeVisibilityListener() {
         mShadeController.setVisibilityListener(new ShadeController.ShadeVisibilityListener() {
             @Override
@@ -1563,6 +1520,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter);
+        mWindowRootViewVisibilityInteractor.setUp(mPresenter, mNotificationsController);
     }
 
     /**
@@ -2149,82 +2107,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 com.android.systemui.R.dimen.physical_power_button_center_screen_location_y));
     }
 
-    protected void handleVisibleToUserChanged(boolean visibleToUser) {
-        if (visibleToUser) {
-            onVisibleToUser();
-            mNotificationLogger.startNotificationLogging();
-
-            if (!mIsBackCallbackRegistered) {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl != null) {
-                    viewRootImpl.getOnBackInvokedDispatcher()
-                            .registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                                    mAnimateBack ? mOnBackAnimationCallback
-                                            : mOnBackInvokedCallback);
-                    mIsBackCallbackRegistered = true;
-                    if (DEBUG) Log.d(TAG, "is now VISIBLE to user AND callback registered");
-                }
-            } else {
-                if (DEBUG) Log.d(TAG, "is now VISIBLE to user, BUT callback ALREADY unregistered");
-            }
-        } else {
-            mNotificationLogger.stopNotificationLogging();
-            onInvisibleToUser();
-
-            if (mIsBackCallbackRegistered) {
-                ViewRootImpl viewRootImpl = getViewRootImpl();
-                if (viewRootImpl != null) {
-                    viewRootImpl.getOnBackInvokedDispatcher()
-                            .unregisterOnBackInvokedCallback(
-                                    mAnimateBack ? mOnBackAnimationCallback
-                                            : mOnBackInvokedCallback);
-                    mIsBackCallbackRegistered = false;
-                    if (DEBUG) Log.d(TAG, "is NOT VISIBLE to user, AND callback unregistered");
-                }
-            } else {
-                if (DEBUG) {
-                    Log.d(TAG,
-                            "is NOT VISIBLE to user, BUT NO callback (or callback ALREADY "
-                                    + "unregistered)");
-                }
-            }
-        }
-    }
-
-    void onVisibleToUser() {
-        /* The LEDs are turned off when the notification panel is shown, even just a little bit.
-         * See also CentralSurfaces.setPanelExpanded for another place where we attempt to do
-         * this.
-         */
-        boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
-        boolean clearNotificationEffects =
-                !mPresenter.isPresenterFullyCollapsed() && (mState == StatusBarState.SHADE
-                        || mState == StatusBarState.SHADE_LOCKED);
-        int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-        if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
-            notificationLoad = 1;
-        }
-        final int finalNotificationLoad = notificationLoad;
-        mUiBgExecutor.execute(() -> {
-            try {
-                mBarService.onPanelRevealed(clearNotificationEffects,
-                        finalNotificationLoad);
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
-            }
-        });
-    }
-
-    void onInvisibleToUser() {
-        mUiBgExecutor.execute(() -> {
-            try {
-                mBarService.onPanelHidden();
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
-            }
-        });
-    }
-
     private void logStateToEventlog() {
         boolean isShowing = mKeyguardStateController.isShowing();
         boolean isOccluded = mKeyguardStateController.isOccluded();
@@ -2708,11 +2590,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNavigationBarController.showPinningEscapeToast(mDisplayId);
     }
 
-    protected ViewRootImpl getViewRootImpl()  {
-        View root = mNotificationShadeWindowController.getWindowRootView();
-        if (root != null) return root.getViewRootImpl();
-        return null;
-    }
     /**
      * Propagation of the bouncer state, indicating that it's fully visible.
      */
@@ -2759,7 +2636,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             releaseGestureWakeLock();
             mLaunchCameraWhenFinishedWaking = false;
             mDeviceInteractive = false;
-            updateVisibleToUser();
 
             updateNotificationPanelTouchState();
             getNotificationShadeWindowViewController().cancelCurrentTouch();
@@ -2858,7 +2734,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                         /* wakingUp= */ true,
                         mShouldDelayWakeUpAnimation);
 
-                updateVisibleToUser();
                 updateIsKeyguard();
                 mShouldDelayLockscreenTransitionFromAod = mDozeParameters.getAlwaysOn()
                         && mFeatureFlags.isEnabled(
@@ -3187,9 +3062,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     protected boolean mVisible;
 
-    // mScreenOnFromKeyguard && mVisible.
-    private boolean mVisibleToUser;
-
     protected DevicePolicyManager mDevicePolicyManager;
     private final PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -3313,20 +3185,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             if (visible) {
                 DejankUtils.notifyRendererOfExpensiveFrame(
                         getNotificationShadeWindowView(), "onShadeVisibilityChanged");
-            } else {
-                mGutsManager.closeAndSaveGuts(true /* removeLeavebehind */, true /* force */,
-                        true /* removeControls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
             }
-        }
-        updateVisibleToUser();
-    }
-
-    protected void updateVisibleToUser() {
-        boolean oldVisibleToUser = mVisibleToUser;
-        mVisibleToUser = mVisible && mDeviceInteractive;
-
-        if (oldVisibleToUser != mVisibleToUser) {
-            handleVisibleToUserChanged(mVisibleToUser);
         }
     }
 
@@ -3503,7 +3362,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     // If we're visible and switched to SHADE_LOCKED (the user dragged
                     // down on the lockscreen), clear notification LED, vibration,
                     // ringing.
-                    // Other transitions are covered in handleVisibleToUserChanged().
+                    // Other transitions are covered in WindowRootViewVisibilityInteractor.
                     if (mVisible && (newState == StatusBarState.SHADE_LOCKED
                             || mStatusBarStateController.goingToFullShade())) {
                         clearNotificationEffects();

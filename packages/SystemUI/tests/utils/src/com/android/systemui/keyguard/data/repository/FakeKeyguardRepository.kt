@@ -81,7 +81,7 @@ class FakeKeyguardRepository : KeyguardRepository {
     override val linearDozeAmount: Flow<Float> = _dozeAmount
 
     private val _statusBarState = MutableStateFlow(StatusBarState.SHADE)
-    override val statusBarState: Flow<StatusBarState> = _statusBarState
+    override val statusBarState: StateFlow<StatusBarState> = _statusBarState
 
     private val _dozeTransitionModel = MutableStateFlow(DozeTransitionModel())
     override val dozeTransitionModel: Flow<DozeTransitionModel> = _dozeTransitionModel

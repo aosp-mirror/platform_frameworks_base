@@ -45,6 +45,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.notification.ConversationIconFactory;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -53,6 +54,7 @@ import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -69,6 +71,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.wmshell.BubblesManager;
 
 import java.util.Optional;
@@ -80,7 +83,7 @@ import javax.inject.Inject;
  * closing guts, and keeping track of the currently exposed notification guts.
  */
 @SysUISingleton
-public class NotificationGutsManager implements NotifGutsViewManager {
+public class NotificationGutsManager implements NotifGutsViewManager, CoreStartable {
     private static final String TAG = "NotificationGutsManager";
 
     // Must match constant in Settings. Used to highlight preferences when linking to Settings.
@@ -109,6 +112,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
 
     private final Handler mMainHandler;
     private final Handler mBgHandler;
+    private final JavaAdapter mJavaAdapter;
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private Runnable mOpenRunnable;
     private final INotificationManager mNotificationManager;
@@ -121,6 +125,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private final UserContextProvider mContextTracker;
     private final UiEventLogger mUiEventLogger;
     private final ShadeController mShadeController;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private NotifGutsViewListener mGutsListener;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
     private final ActivityStarter mActivityStarter;
@@ -129,6 +134,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     public NotificationGutsManager(Context context,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
+            JavaAdapter javaAdapter,
             AccessibilityManager accessibilityManager,
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
@@ -143,6 +149,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             UiEventLogger uiEventLogger,
             OnUserInteractionCallback onUserInteractionCallback,
             ShadeController shadeController,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             StatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
@@ -152,6 +159,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         mContext = context;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
+        mJavaAdapter = javaAdapter;
         mAccessibilityManager = accessibilityManager;
         mHighPriorityProvider = highPriorityProvider;
         mNotificationManager = notificationManager;
@@ -166,6 +174,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         mUiEventLogger = uiEventLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mShadeController = shadeController;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mStatusBarStateController = statusBarStateController;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -185,6 +194,25 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     public void setNotificationActivityStarter(
             NotificationActivityStarter notificationActivityStarter) {
         mNotificationActivityStarter = notificationActivityStarter;
+    }
+
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(
+                mWindowRootViewVisibilityInteractor.isLockscreenOrShadeVisible(),
+                this::onLockscreenShadeVisibilityChanged);
+    }
+
+    private void onLockscreenShadeVisibilityChanged(boolean visible) {
+        if (!visible) {
+            closeAndSaveGuts(
+                    /* removeLeavebehind= */ true ,
+                    /* force= */ true,
+                    /* removeControls= */ true,
+                    /* x= */ -1,
+                    /* y= */ -1,
+                    /* resetMenu= */ true);
+        }
     }
 
     public void onDensityOrFontScaleChanged(NotificationEntry entry) {
@@ -512,7 +540,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             mNotificationGutsExposed.removeCallbacks(mOpenRunnable);
             mNotificationGutsExposed.closeControls(removeLeavebehinds, removeControls, x, y, force);
         }
-        if (resetMenu) {
+        if (resetMenu && mListContainer != null) {
             mListContainer.resetExposedMenuView(false /* animate */, true /* force */);
         }
     }
