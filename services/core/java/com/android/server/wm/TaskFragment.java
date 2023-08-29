@@ -103,6 +103,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.HostingRecord;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -209,7 +210,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     int mMinHeight;
 
-    Dimmer mDimmer = new Dimmer(this);
+    Dimmer mDimmer = Flags.dimmerRefactor()
+            ? new SmoothDimmer(this) : new LegacyDimmer(this);
 
     /** This task fragment will be removed when the cleanup of its children are done. */
     private boolean mIsRemovalRequested;
