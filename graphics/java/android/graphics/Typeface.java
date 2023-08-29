@@ -1475,7 +1475,10 @@ public class Typeface {
         String locale = SystemProperties.get("persist.sys.locale", "en-US");
         String script = ULocale.addLikelySubtags(ULocale.forLanguageTag(locale)).getScript();
 
-        FontConfig config = SystemFonts.getSystemPreinstalledFontConfig();
+        // The feature flag cannot be referred from Zygote. Use legacy fonts.xml for preloading font
+        // files.
+        // TODO(nona): Use new XML file once the feature is fully launched.
+        FontConfig config = SystemFonts.getSystemPreinstalledFontConfigFromLegacyXml();
         for (int i = 0; i < config.getFontFamilies().size(); ++i) {
             FontConfig.FontFamily family = config.getFontFamilies().get(i);
             if (!family.getLocaleList().isEmpty()) {

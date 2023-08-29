@@ -48,6 +48,8 @@ public final class SystemFonts {
     private static final String TAG = "SystemFonts";
 
     private static final String FONTS_XML = "/system/etc/font_fallback.xml";
+    private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
+
     /** @hide */
     public static final String SYSTEM_FONT_DIR = "/system/fonts/";
     private static final String OEM_XML = "/product/etc/fonts_customization.xml";
@@ -230,7 +232,13 @@ public final class SystemFonts {
             long lastModifiedDate,
             int configVersion
     ) {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+        final String fontsXml;
+        if (com.android.text.flags.Flags.deprecateFontsXml()) {
+            fontsXml = FONTS_XML;
+        } else {
+            fontsXml = LEGACY_FONTS_XML;
+        }
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
                 updatableFontMap, lastModifiedDate, configVersion);
     }
 
@@ -255,8 +263,22 @@ public final class SystemFonts {
      * @hide
      */
     public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
+        final String fontsXml;
+        if (com.android.text.flags.Flags.deprecateFontsXml()) {
+            fontsXml = FONTS_XML;
+        } else {
+            fontsXml = LEGACY_FONTS_XML;
+        }
+        return getSystemFontConfigInternal(fontsXml, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
                 0, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public static @NonNull FontConfig getSystemPreinstalledFontConfigFromLegacyXml() {
+        return getSystemFontConfigInternal(LEGACY_FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
+                null, 0, 0);
     }
 
     /* package */ static @NonNull FontConfig getSystemFontConfigInternal(
