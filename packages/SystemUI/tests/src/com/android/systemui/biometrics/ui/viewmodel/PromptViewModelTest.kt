@@ -20,6 +20,7 @@ import android.hardware.biometrics.PromptInfo
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
@@ -500,6 +501,81 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
+    fun auto_confirm_authentication_when_finger_down() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        // No icon button when face only, can't confirm before auth
+        if (!testCase.isFaceOnly) {
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+        }
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val legacyState by collectLastValue(viewModel.legacyState)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticating).isFalse()
+        assertThat(canTryAgain).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+
+        if (testCase.isFaceOnly && expectConfirmation) {
+            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_PENDING_CONFIRMATION)
+
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            viewModel.confirmAuthenticated()
+            assertThat(message).isEqualTo(PromptMessage.Empty)
+            assertButtonsVisible()
+        } else {
+            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATED)
+        }
+    }
+
+    @Test
+    fun cannot_auto_confirm_authentication_when_finger_up() = runGenericTest {
+        val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
+
+        // No icon button when face only, can't confirm before auth
+        if (!testCase.isFaceOnly) {
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_DOWN))
+            viewModel.onOverlayTouch(obtainMotionEvent(MotionEvent.ACTION_UP))
+        }
+        viewModel.showAuthenticated(testCase.authenticatedModality, 0)
+
+        val authenticating by collectLastValue(viewModel.isAuthenticating)
+        val authenticated by collectLastValue(viewModel.isAuthenticated)
+        val message by collectLastValue(viewModel.message)
+        val size by collectLastValue(viewModel.size)
+        val legacyState by collectLastValue(viewModel.legacyState)
+        val canTryAgain by collectLastValue(viewModel.canTryAgainNow)
+
+        assertThat(authenticated?.needsUserConfirmation).isEqualTo(expectConfirmation)
+        if (expectConfirmation) {
+            assertThat(size).isEqualTo(PromptSize.MEDIUM)
+            assertButtonsVisible(
+                cancel = true,
+                confirm = true,
+            )
+
+            viewModel.confirmAuthenticated()
+            assertThat(message).isEqualTo(PromptMessage.Empty)
+            assertButtonsVisible()
+        }
+
+        assertThat(authenticating).isFalse()
+        assertThat(authenticated?.isAuthenticated).isTrue()
+        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATED)
+        assertThat(canTryAgain).isFalse()
+    }
+
+    @Test
     fun cannot_confirm_unless_authenticated() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
@@ -678,6 +754,10 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
         testScope.runTest { block() }
     }
+
+    /** Obtain a MotionEvent with the specified MotionEvent action constant */
+    private fun obtainMotionEvent(action: Int): MotionEvent =
+        MotionEvent.obtain(0, 0, action, 0f, 0f, 0)
 
     companion object {
         @JvmStatic
