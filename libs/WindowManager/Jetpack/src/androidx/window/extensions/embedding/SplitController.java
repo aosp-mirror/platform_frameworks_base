@@ -879,14 +879,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Skip resolving if the activity is on a pinned TaskFragmentContainer.
         // TODO(b/243518738): skip resolving for overlay container.
-        if (container != null) {
-            final TaskContainer taskContainer = container.getTaskContainer();
-            if (taskContainer.isTaskFragmentContainerPinned(container)) {
-                return true;
-            }
+        final TaskContainer taskContainer = container != null ? container.getTaskContainer() : null;
+        if (container != null && taskContainer != null
+                && taskContainer.isTaskFragmentContainerPinned(container)) {
+            return true;
         }
 
-        final TaskContainer taskContainer = container != null ? container.getTaskContainer() : null;
         if (!isOnReparent && taskContainer != null
                 && taskContainer.getTopNonFinishingTaskFragmentContainer(false /* includePin */)
                         != container) {
@@ -895,6 +893,28 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return true;
         }
 
+        // Ensure the top TaskFragments are updated to the right config if activity is resolved
+        // to a new TaskFragment while pin TF exists.
+        final boolean handled = resolveActivityToContainerByRule(wct, activity, container,
+                isOnReparent);
+        if (handled && taskContainer != null) {
+            final SplitPinContainer splitPinContainer = taskContainer.getSplitPinContainer();
+            if (splitPinContainer != null) {
+                final TaskFragmentContainer resolvedContainer = getContainerWithActivity(activity);
+                if (resolvedContainer != null && resolvedContainer.getRunningActivityCount() <= 1) {
+                    updateContainer(wct, splitPinContainer.getSecondaryContainer());
+                }
+            }
+        }
+        return handled;
+    }
+
+    /**
+     * Resolves the activity to a {@link TaskFragmentContainer} according to the Split-rules.
+     */
+    boolean resolveActivityToContainerByRule(@NonNull WindowContainerTransaction wct,
+            @NonNull Activity activity, @Nullable TaskFragmentContainer container,
+            boolean isOnReparent) {
         /*
          * We will check the following to see if there is any embedding rule matched:
          * 1. Whether the new launched activity should always expand.
@@ -1301,6 +1321,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             }
         }
 
+        // Ensure the top TaskFragments are updated to the right config if the intent is resolved
+        // to a new TaskFragment while pin TF exists.
+        final TaskFragmentContainer launchingContainer = resolveStartActivityIntentByRule(wct,
+                taskId, intent, launchingActivity);
+        if (launchingContainer != null && launchingContainer.getRunningActivityCount() == 0) {
+            final SplitPinContainer splitPinContainer =
+                    launchingContainer.getTaskContainer().getSplitPinContainer();
+            if (splitPinContainer != null) {
+                updateContainer(wct, splitPinContainer.getSecondaryContainer());
+            }
+        }
+        return launchingContainer;
+    }
+
+    /**
+     * Resolves the intent to a {@link TaskFragmentContainer} according to the Split-rules.
+     */
+    @Nullable
+    TaskFragmentContainer resolveStartActivityIntentByRule(@NonNull WindowContainerTransaction wct,
+            int taskId, @NonNull Intent intent, @Nullable Activity launchingActivity) {
         /*
          * We will check the following to see if there is any embedding rule matched:
          * 1. Whether the new activity intent should always expand.

@@ -1271,27 +1271,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     boolean pauseBackTasks(ActivityRecord resuming) {
         final int[] someActivityPaused = {0};
         forAllLeafTasks(leafTask -> {
-            // Check if the direct child resumed activity in the leaf task needed to be paused if
-            // the leaf task is not a leaf task fragment.
-            if (!leafTask.isLeafTaskFragment()) {
-                final ActivityRecord top = topRunningActivity();
-                final ActivityRecord resumedActivity = leafTask.getResumedActivity();
-                if (resumedActivity != null && top.getTaskFragment() != leafTask) {
-                    // Pausing the resumed activity because it is occluded by other task fragment.
-                    if (leafTask.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
-                        someActivityPaused[0]++;
-                    }
-                }
+            if (leafTask.pauseActivityIfNeeded(resuming, "pauseBackTasks")) {
+                someActivityPaused[0]++;
             }
-
-            leafTask.forAllLeafTaskFragments((taskFrag) -> {
-                final ActivityRecord resumedActivity = taskFrag.getResumedActivity();
-                if (resumedActivity != null && !taskFrag.canBeResumed(resuming)) {
-                    if (taskFrag.startPausing(false /* uiSleeping*/, resuming, "pauseBackTasks")) {
-                        someActivityPaused[0]++;
-                    }
-                }
-            }, true /* traverseTopToBottom */);
         }, true /* traverseTopToBottom */);
         return someActivityPaused[0] > 0;
     }
