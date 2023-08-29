@@ -193,7 +193,6 @@ public class NotificationShadeWindowViewController {
         mLockIconViewController = lockIconViewController;
         mBackActionInteractor = backActionInteractor;
         mShadeLogger = shadeLogger;
-        mLockIconViewController.init();
         mService = centralSurfaces;
         mDozeServiceHost = dozeServiceHost;
         mDozeScrimController = dozeScrimController;
@@ -234,6 +233,8 @@ public class NotificationShadeWindowViewController {
                     progressProvider -> progressProvider.addCallback(
                             mDisableSubpixelTextTransitionListener));
         }
+
+        lockIconViewController.setLockIconView(mView.findViewById(R.id.lock_icon_view));
     }
 
     /**
