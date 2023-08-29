@@ -1047,7 +1047,21 @@ public class PipTransition extends PipTransitionController {
     private void resetPrevPip(@NonNull TransitionInfo.Change prevPipTaskChange,
             @NonNull SurfaceControl.Transaction startTransaction) {
         final SurfaceControl leash = prevPipTaskChange.getLeash();
-        startTransaction.remove(leash);
+        final Rect bounds = prevPipTaskChange.getEndAbsBounds();
+        final Point offset = prevPipTaskChange.getEndRelOffset();
+        bounds.offset(-offset.x, -offset.y);
+
+        startTransaction.setWindowCrop(leash, null);
+        startTransaction.setMatrix(leash, 1, 0, 0, 1);
+        startTransaction.setCornerRadius(leash, 0);
+        startTransaction.setPosition(leash, bounds.left, bounds.top);
+
+        if (mHasFadeOut && prevPipTaskChange.getTaskInfo().isVisible()) {
+            if (mPipAnimationController.getCurrentAnimator() != null) {
+                mPipAnimationController.getCurrentAnimator().cancel();
+            }
+            startTransaction.setAlpha(leash, 1);
+        }
 
         mHasFadeOut = false;
         mCurrentPipTaskToken = null;
