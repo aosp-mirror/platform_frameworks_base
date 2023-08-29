@@ -35,6 +35,7 @@ import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
@@ -43,6 +44,7 @@ import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor;
@@ -83,7 +85,7 @@ import javax.inject.Inject;
  * Controller for {@link NotificationShadeWindowView}.
  */
 @SysUISingleton
-public class NotificationShadeWindowViewController {
+public class NotificationShadeWindowViewController implements Dumpable {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -166,6 +168,7 @@ public class NotificationShadeWindowViewController {
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
             ShadeLogger shadeLogger,
+            DumpManager dumpManager,
             PulsingGestureListener pulsingGestureListener,
             LockscreenHostedDreamGestureListener lockscreenHostedDreamGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
@@ -235,6 +238,7 @@ public class NotificationShadeWindowViewController {
         }
 
         lockIconViewController.setLockIconView(mView.findViewById(R.id.lock_icon_view));
+        dumpManager.registerDumpable(this);
     }
 
     /**
@@ -542,6 +546,7 @@ public class NotificationShadeWindowViewController {
         mAmbientState.setSwipingUp(false);
     }
 
+    @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);
