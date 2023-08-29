@@ -90,6 +90,11 @@ public class AuthenticationStats {
         mRejectedAttempts = 0;
     }
 
+    /** Update enrollment notification counter after sending a notification. */
+    public void updateNotificationCounter() {
+        mEnrollmentNotifications++;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

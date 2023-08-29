@@ -95,8 +95,6 @@ public class BiometricNotificationUtils {
 
         final Intent intent = new Intent(FACE_ENROLL_ACTION);
         intent.setPackage(SETTINGS_PACKAGE);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
 
         final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context,
                 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE /* flags */,
@@ -120,8 +118,6 @@ public class BiometricNotificationUtils {
 
         final Intent intent = new Intent(FINGERPRINT_ENROLL_ACTION);
         intent.setPackage(SETTINGS_PACKAGE);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
 
         final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context,
                 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE /* flags */,

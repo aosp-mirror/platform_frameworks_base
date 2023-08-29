@@ -121,10 +121,11 @@ public class AuthenticationStatsCollector {
 
         authenticationStats.authenticate(authenticated);
 
+        sendNotificationIfNeeded(userId);
+
         if (mPersisterInitialized) {
             persistDataIfNeeded(userId);
         }
-        sendNotificationIfNeeded(userId);
     }
 
     /** Check if a notification should be sent after a calculation cycle. */
@@ -164,8 +165,10 @@ public class AuthenticationStatsCollector {
         }
         if (hasEnrolledFace && !hasEnrolledFingerprint) {
             mBiometricNotification.sendFpEnrollNotification(mContext);
+            authenticationStats.updateNotificationCounter();
         } else if (!hasEnrolledFace && hasEnrolledFingerprint) {
             mBiometricNotification.sendFaceEnrollNotification(mContext);
+            authenticationStats.updateNotificationCounter();
         }
     }
 
