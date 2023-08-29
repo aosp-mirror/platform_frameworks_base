@@ -16,69 +16,81 @@ class TilesSettingConverterTest : SysuiTestCase() {
 
     @Test
     fun toTilesList_correctContentAndOrdering() {
-        val specString = listOf(
-                "c",
-                "b",
-                "custom(x/y)",
-                "d",
-        ).joinToString(DELIMITER)
+        val specString =
+            listOf(
+                    "c",
+                    "b",
+                    "custom(x/y)",
+                    "d",
+                )
+                .joinToString(DELIMITER)
 
-        val expected = listOf(
+        val expected =
+            listOf(
                 TileSpec.create("c"),
                 TileSpec.create("b"),
                 TileSpec.create("custom(x/y)"),
                 TileSpec.create("d"),
-        )
+            )
 
         assertThat(TilesSettingConverter.toTilesList(specString)).isEqualTo(expected)
     }
 
     @Test
     fun toTilesList_removesInvalid() {
-        val specString = listOf(
-                "a",
-                "",
-                "b",
-        ).joinToString(DELIMITER)
+        val specString =
+            listOf(
+                    "a",
+                    "",
+                    "b",
+                )
+                .joinToString(DELIMITER)
         assertThat(TileSpec.create("")).isEqualTo(TileSpec.Invalid)
-        val expected = listOf(
+        val expected =
+            listOf(
                 TileSpec.create("a"),
                 TileSpec.create("b"),
-        )
+            )
         assertThat(TilesSettingConverter.toTilesList(specString)).isEqualTo(expected)
     }
 
     @Test
     fun toTilesSet_correctContent() {
-        val specString = listOf(
-                "c",
-                "b",
-                "custom(x/y)",
-                "d",
-        ).joinToString(DELIMITER)
+        val specString =
+            listOf(
+                    "c",
+                    "b",
+                    "custom(x/y)",
+                    "d",
+                )
+                .joinToString(DELIMITER)
 
-        val expected = setOf(
+        val expected =
+            setOf(
                 TileSpec.create("c"),
                 TileSpec.create("b"),
                 TileSpec.create("custom(x/y)"),
                 TileSpec.create("d"),
-        )
+            )
 
         assertThat(TilesSettingConverter.toTilesSet(specString)).isEqualTo(expected)
     }
 
     @Test
     fun toTilesSet_removesInvalid() {
-        val specString = listOf(
-                "a",
-                "",
-                "b",
-        ).joinToString(DELIMITER)
+        val specString =
+            listOf(
+                    "a",
+                    "",
+                    "b",
+                )
+                .joinToString(DELIMITER)
         assertThat(TileSpec.create("")).isEqualTo(TileSpec.Invalid)
-        val expected = setOf(
+        val expected =
+            setOf(
                 TileSpec.create("a"),
                 TileSpec.create("b"),
-        )
+            )
         assertThat(TilesSettingConverter.toTilesSet(specString)).isEqualTo(expected)
     }
 

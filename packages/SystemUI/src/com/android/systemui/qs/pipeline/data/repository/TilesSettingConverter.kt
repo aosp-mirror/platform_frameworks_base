@@ -6,11 +6,12 @@ object TilesSettingConverter {
 
     const val DELIMITER = ","
 
-    fun toTilesList(commaSeparatedTiles: String) = commaSeparatedTiles.split(DELIMITER)
-            .map(TileSpec::create)
-            .filter { it != TileSpec.Invalid }
+    fun toTilesList(commaSeparatedTiles: String) =
+        commaSeparatedTiles.split(DELIMITER).map(TileSpec::create).filter { it != TileSpec.Invalid }
 
-    fun toTilesSet(commaSeparatedTiles: String) = commaSeparatedTiles.split(DELIMITER)
+    fun toTilesSet(commaSeparatedTiles: String) =
+        commaSeparatedTiles
+            .split(DELIMITER)
             .map(TileSpec::create)
             .filter { it != TileSpec.Invalid }
             .toSet()

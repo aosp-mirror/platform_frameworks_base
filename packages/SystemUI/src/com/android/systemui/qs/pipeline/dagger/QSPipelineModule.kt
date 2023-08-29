@@ -20,6 +20,8 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.qs.pipeline.data.repository.DefaultTilesQSHostRepository
+import com.android.systemui.qs.pipeline.data.repository.DefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepository
 import com.android.systemui.qs.pipeline.data.repository.InstalledTilesComponentRepositoryImpl
 import com.android.systemui.qs.pipeline.data.repository.QSSettingsRestoredBroadcastRepository
@@ -44,6 +46,11 @@ abstract class QSPipelineModule {
     abstract fun provideTileSpecRepository(impl: TileSpecSettingsRepository): TileSpecRepository
 
     @Binds
+    abstract fun provideDefaultTilesRepository(
+        impl: DefaultTilesQSHostRepository
+    ): DefaultTilesRepository
+
+    @Binds
     abstract fun bindCurrentTilesInteractor(
         impl: CurrentTilesInteractorImpl
     ): CurrentTilesInteractor
@@ -60,7 +67,7 @@ abstract class QSPipelineModule {
 
     @Binds
     abstract fun provideQSSettingsRestoredRepository(
-            impl: QSSettingsRestoredBroadcastRepository
+        impl: QSSettingsRestoredBroadcastRepository
     ): QSSettingsRestoredRepository
 
     companion object {
