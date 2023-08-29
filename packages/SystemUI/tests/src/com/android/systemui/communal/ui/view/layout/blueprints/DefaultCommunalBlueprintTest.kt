@@ -2,6 +2,7 @@ package com.android.systemui.communal.ui.view.layout.blueprints
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -28,9 +29,16 @@ class DefaultCommunalBlueprintTest : SysuiTestCase() {
     }
 
     @Test
-    fun apply() {
+    fun addView() {
+        val constraintLayout = ConstraintLayout(context, null)
+        blueprint.addViews(constraintLayout)
+        verify(widgetSection).addViews(constraintLayout)
+    }
+
+    @Test
+    fun applyConstraints() {
         val cs = ConstraintSet()
-        blueprint.apply(cs)
-        verify(widgetSection).apply(cs)
+        blueprint.applyConstraints(cs)
+        verify(widgetSection).applyConstraints(cs)
     }
 }
