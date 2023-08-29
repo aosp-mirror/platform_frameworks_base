@@ -32,6 +32,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.IInstalld.IFsveritySetupAuthToken;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.storage.OnObbStateChangeListener.ERROR_ALREADY_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_COULD_NOT_MOUNT;
@@ -4994,5 +4995,24 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
 
+        @Override
+        public IFsveritySetupAuthToken createFsveritySetupAuthToken(ParcelFileDescriptor authFd,
+                int appUid, @UserIdInt int userId) throws IOException {
+            try {
+                return mInstaller.createFsveritySetupAuthToken(authFd, appUid, userId);
+            } catch (Installer.InstallerException e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int enableFsverity(IFsveritySetupAuthToken authToken, String filePath,
+                String packageName) throws IOException {
+            try {
+                return mInstaller.enableFsverity(authToken, filePath, packageName);
+            } catch (Installer.InstallerException e) {
+                throw new IOException(e);
+            }
+        }
     }
 }
