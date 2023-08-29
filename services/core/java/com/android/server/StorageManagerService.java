@@ -4640,7 +4640,7 @@ class StorageManagerService extends IStorageManager.Stub
                 pw.print(") total size: ");
                 pw.print(pair.second);
                 pw.print(" (");
-                pw.print(DataUnit.MEBIBYTES.toBytes(pair.second));
+                pw.print(pair.second / DataUnit.MEBIBYTES.toBytes(1L));
                 pw.println(" MiB)");
             }
 
