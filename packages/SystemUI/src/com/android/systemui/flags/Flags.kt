@@ -398,7 +398,7 @@ object Flags {
 
     // TODO(b/290676905): Tracking Bug
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
-        unreleasedFlag("new_shade_carrier_group_mobile_icons")
+        unreleasedFlag("new_shade_carrier_group_mobile_icons", teamfood = true)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
