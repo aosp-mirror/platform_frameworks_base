@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service
+package com.android.wm.shell.flicker.service.common
 
 import android.app.Instrumentation
 import android.platform.test.rule.NavigationModeRule
