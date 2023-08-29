@@ -314,6 +314,8 @@ import java.util.Set;
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String GRAMMATICAL_GENDER_PROPERTY = "persist.sys.grammatical_gender";
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
+    private static final String ENABLE_PIP2_IMPLEMENTATION =
+            "persist.wm.debug.enable_pip2_implementation";
     static final String TAG_ROOT_TASK = TAG + POSTFIX_ROOT_TASK;
     static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
 
@@ -3606,6 +3608,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
         }
+    }
+
+    /**
+     * Prepare to enter PiP mode after {@link TransitionController#requestStartTransition}.
+     *
+     * @param r activity auto entering pip
+     * @return true if the activity is about to auto-enter pip or is already in pip mode.
+     */
+    boolean prepareAutoEnterPictureAndPictureMode(ActivityRecord r) {
+        // If the activity is already in picture in picture mode, then just return early
+        if (r.inPinnedWindowingMode()) {
+            return true;
+        }
+
+        if (r.canAutoEnterPip() && getTransitionController().getCollectingTransition() != null) {
+            // This will be used later to construct TransitionRequestInfo for Shell to resolve.
+            // It will also be passed into a direct moveActivityToPinnedRootTask() call via
+            // startTransition()
+            getTransitionController().getCollectingTransition().setPipActivity(r);
+            return true;
+        }
+        return false;
     }
 
     boolean enterPictureInPictureMode(@NonNull ActivityRecord r,
@@ -7163,5 +7187,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void unregisterTaskStackListener(ITaskStackListener listener) {
             ActivityTaskManagerService.this.unregisterTaskStackListener(listener);
         }
+    }
+
+    static boolean isPip2ExperimentEnabled() {
+        return SystemProperties.getBoolean(ENABLE_PIP2_IMPLEMENTATION, false);
     }
 }

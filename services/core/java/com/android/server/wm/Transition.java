@@ -174,6 +174,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final Token mToken;
     private IApplicationThread mRemoteAnimApp;
 
+    private @Nullable ActivityRecord mPipActivity;
+
     /** Only use for clean-up after binder death! */
     private SurfaceControl.Transaction mStartTransaction = null;
     private SurfaceControl.Transaction mFinishTransaction = null;
@@ -506,6 +508,21 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Override sync-method for %s "
                     + "because seamless rotating", top.getName());
         }
+    }
+
+    /**
+     * Set the pip-able activity participating in this transition.
+     * @param pipActivity activity about to enter pip
+     */
+    void setPipActivity(@Nullable ActivityRecord pipActivity) {
+        mPipActivity = pipActivity;
+    }
+
+    /**
+     * @return pip-able activity participating in this transition.
+     */
+    @Nullable ActivityRecord getPipActivity() {
+        return mPipActivity;
     }
 
     /**

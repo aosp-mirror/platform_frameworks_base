@@ -705,13 +705,21 @@ class TransitionController {
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
-            ActivityManager.RunningTaskInfo info = null;
+            ActivityManager.RunningTaskInfo startTaskInfo = null;
+            ActivityManager.RunningTaskInfo pipTaskInfo = null;
             if (startTask != null) {
-                info = new ActivityManager.RunningTaskInfo();
-                startTask.fillTaskInfo(info);
+                startTaskInfo = startTask.getTaskInfo();
             }
-            final TransitionRequestInfo request = new TransitionRequestInfo(
-                    transition.mType, info, remoteTransition, displayChange, transition.getFlags());
+
+            // set the pip task in the request if provided
+            if (mCollectingTransition.getPipActivity() != null) {
+                pipTaskInfo = mCollectingTransition.getPipActivity().getTask().getTaskInfo();
+            }
+
+            final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
+                    startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
+                    transition.getFlags());
+
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             transition.mLogger.mRequest = request;
             mTransitionPlayer.requestStartTransition(transition.getToken(), request);
