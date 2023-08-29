@@ -40,6 +40,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.window.ITaskOrganizer;
 import android.window.SplashScreenView;
 import android.window.TaskSnapshot;
 
@@ -79,12 +80,13 @@ public class StartingSurfaceController {
     }
 
     StartingSurface createSplashScreenStartingSurface(ActivityRecord activity, int theme) {
-
         synchronized (mService.mGlobalLock) {
             final Task task = activity.getTask();
-            if (task != null && mService.mAtmService.mTaskOrganizerController.addStartingWindow(
-                    task, activity, theme, null /* taskSnapshot */)) {
-                return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (task != null && controller.addStartingWindow(task, activity, theme,
+                    null /* taskSnapshot */)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
             }
         }
         return null;
@@ -166,9 +168,12 @@ public class StartingSurfaceController {
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
                         activity, false /* checkOpening */);
             }
-                mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
-                        activity, 0 /* launchTheme */, taskSnapshot);
-            return new StartingSurface(task);
+            final TaskOrganizerController controller =
+                    mService.mAtmService.mTaskOrganizerController;
+            if (controller.addStartingWindow(task, activity, 0 /* launchTheme */, taskSnapshot)) {
+                return new StartingSurface(task, controller.getTaskOrganizer());
+            }
+            return null;
         }
     }
 
@@ -256,9 +261,12 @@ public class StartingSurfaceController {
 
     final class StartingSurface {
         private final Task mTask;
+        // The task organizer which hold the client side reference of this surface.
+        final ITaskOrganizer mTaskOrganizer;
 
-        StartingSurface(Task task) {
+        StartingSurface(Task task, ITaskOrganizer taskOrganizer) {
             mTask = task;
+            mTaskOrganizer = taskOrganizer;
         }
 
         /**
@@ -268,7 +276,8 @@ public class StartingSurfaceController {
          */
         public void remove(boolean animate) {
             synchronized (mService.mGlobalLock) {
-                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask, animate);
+                mService.mAtmService.mTaskOrganizerController.removeStartingWindow(mTask,
+                        mTaskOrganizer, animate);
             }
         }
     }

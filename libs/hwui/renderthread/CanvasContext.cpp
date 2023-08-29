@@ -160,6 +160,7 @@ void CanvasContext::destroy() {
     destroyHardwareResources();
     mAnimationContext->destroy();
     mRenderThread.cacheManager().onContextStopped(this);
+    mHintSessionWrapper.destroy();
 }
 
 static void setBufferCount(ANativeWindow* window) {
@@ -193,6 +194,7 @@ void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
+    startHintSession();
     if (window) {
         mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();

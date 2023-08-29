@@ -39,6 +39,10 @@ object Flags {
     @JvmField val TEAMFOOD = unreleasedFlag("teamfood")
 
     // 100 - notification
+    // TODO(b/297792660): Tracking Bug
+    val ADD_TRANSIENT_HUN_IN_STACK_STATE_ANIMATOR =
+        unreleasedFlag("add_transient_hun_in_stack_state_animator", teamfood = false)
+
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
         unreleasedFlag("notification_pipeline_developer_logging")

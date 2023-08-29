@@ -206,6 +206,11 @@ class MediaProjectionAppSelectorActivity(
 
     override fun bind(recentTasks: List<RecentTask>) {
         recentsViewController.bind(recentTasks)
+        if (!hasWorkProfile()) {
+            // Make sure to refresh the adapter, to show/hide the recents view depending on whether
+            // there are recents or not.
+            mMultiProfilePagerAdapter.personalListAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun returnSelectedApp(launchCookie: IBinder) {
@@ -248,9 +253,20 @@ class MediaProjectionAppSelectorActivity(
 
     override fun shouldGetOnlyDefaultActivities() = false
 
-    override fun shouldShowContentPreview() = true
+    override fun shouldShowContentPreview() =
+        if (hasWorkProfile()) {
+            // When the user has a work profile, we can always set this to true, and the layout is
+            // adjusted automatically, and hide the recents view.
+            true
+        } else {
+            // When there is no work profile, we should only show the content preview if there are
+            // recents, otherwise the collapsed app selector will look empty.
+            recentsViewController.hasRecentTasks
+        }
 
-    override fun shouldShowContentPreviewWhenEmpty(): Boolean = true
+    override fun shouldShowContentPreviewWhenEmpty() = shouldShowContentPreview()
+
+    private fun hasWorkProfile() = mMultiProfilePagerAdapter.count > 1
 
     override fun createMyUserIdProvider(): MyUserIdProvider =
         object : MyUserIdProvider() {

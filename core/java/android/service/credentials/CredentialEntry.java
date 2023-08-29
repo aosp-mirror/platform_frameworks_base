@@ -69,8 +69,14 @@ public final class CredentialEntry implements Parcelable {
      *                                   receive the complete corresponding
      *                                   {@link GetCredentialRequest}.
      * @param type the type of the credential for which this credential entry is being created
-     * @param slice the slice containing the metadata to be shown on the UI. Must be
-     *              constructed through the androidx.credentials jetpack library.
+     * @param slice the slice containing the metadata to be shown on the UI, must be constructed
+     *              through the {@link androidx.credentials.provider} Jetpack library;
+     *              If constructed manually, the {@code slice} object must
+     *              contain the non-null properties of the
+     *              {@link androidx.credentials.provider.CredentialEntry} class populated as slice
+     *              items against specific hints as used in the class's {@code toSlice} method,
+     *              since the Android System uses this library to parse the {@code slice} and
+     *              extract the required attributes
      *
      * @throws IllegalArgumentException If {@code beginGetCredentialOptionId} or {@code type}
      * is null, or empty
