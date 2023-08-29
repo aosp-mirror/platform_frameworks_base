@@ -73,7 +73,7 @@ bool GnssVisibilityControlCallbackUtil::isInEmergencySession() {
 
 template <>
 jstring ToJstring(JNIEnv* env, const String16& value) {
-    const char16_t* str = value.string();
+    const char16_t* str = value.c_str();
     size_t len = value.size();
     return env->NewString(reinterpret_cast<const jchar*>(str), len);
 }

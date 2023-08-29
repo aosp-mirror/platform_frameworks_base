@@ -100,8 +100,8 @@ static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
     if (array != NULL) {
         env->SetByteArrayRegion(array, 0,
                                 sizeof(header), reinterpret_cast<jbyte*>(&header));
-        env->SetByteArrayRegion(array, sizeof(header),
-                                maps.size(), reinterpret_cast<const jbyte*>(maps.string()));
+        env->SetByteArrayRegion(array, sizeof(header), maps.size(),
+                                reinterpret_cast<const jbyte*>(maps.c_str()));
         env->SetByteArrayRegion(array, sizeof(header) + maps.size(),
                                 header.allocSize, reinterpret_cast<jbyte*>(leak_info.buffer));
     }
