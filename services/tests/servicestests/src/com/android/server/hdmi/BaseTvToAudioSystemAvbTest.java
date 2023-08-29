@@ -31,26 +31,21 @@ import static org.mockito.Mockito.verify;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
-import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
 import android.media.VolumeInfo;
-import android.platform.test.annotations.Presubmit;
-
-import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
- * Tests for absolute volume behavior where the local device is a TV and the System Audio device
- * is an Audio System. Assumes that the TV uses ARC (rather than eARC).
+ * Base class for tests for absolute volume behavior on TV panels. Contains tests that are
+ * relevant to TV panels but not to Playback devices.
+ *
+ * Subclasses test the scenarios where ARC and eARC are the audio output devices:
+ * ARC: {@link TvToAudioSystemArcAvbTest}
+ * eARC: {@link TvToAudioSystemEarcAvbTest}
  */
-@SmallTest
-@Presubmit
-@RunWith(JUnit4.class)
-public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
+public abstract class BaseTvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
 
     @Override
     protected HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService) {
@@ -65,11 +60,6 @@ public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
     @Override
     protected int getDeviceType() {
         return HdmiDeviceInfo.DEVICE_TV;
-    }
-
-    @Override
-    protected AudioDeviceAttributes getAudioOutputDevice() {
-        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
     }
 
     @Override
@@ -88,8 +78,7 @@ public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
      */
     @Test
     public void savlNotSupported_allOtherConditionsMet_giveAudioStatusSent() {
-        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
-                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        adoptFullVolumeBehaviorOnAvbCapableAudioOutputDevices();
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
         verifyGiveAudioStatusNeverSent();
@@ -100,8 +89,7 @@ public class TvToAudioSystemAvbTest extends BaseAbsoluteVolumeBehaviorTest {
 
     @Test
     public void savlNotSupported_systemAudioDeviceSendsReportAudioStatus_adjustOnlyAvbEnabled() {
-        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
-                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        adoptFullVolumeBehaviorOnAvbCapableAudioOutputDevices();
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_NOT_SUPPORTED);
