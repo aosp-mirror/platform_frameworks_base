@@ -13262,6 +13262,48 @@ package android.service.voice {
     method @NonNull public android.service.voice.HotwordRejectedResult.Builder setConfidenceLevel(int);
   }
 
+  public final class HotwordTrainingAudio implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioFormat getAudioFormat();
+    method @NonNull public int getAudioType();
+    method @NonNull public byte[] getHotwordAudio();
+    method public int getHotwordOffsetMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordTrainingAudio> CREATOR;
+    field public static final int HOTWORD_OFFSET_UNSET = -1; // 0xffffffff
+  }
+
+  public static final class HotwordTrainingAudio.Builder {
+    ctor public HotwordTrainingAudio.Builder(@NonNull byte[], @NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.HotwordTrainingAudio build();
+    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setAudioType(@NonNull int);
+    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(@NonNull byte...);
+    method @NonNull public android.service.voice.HotwordTrainingAudio.Builder setHotwordOffsetMillis(int);
+  }
+
+  public final class HotwordTrainingData implements android.os.Parcelable {
+    method public int describeContents();
+    method public static int getMaxTrainingDataSize();
+    method public int getTimeoutStage();
+    method @NonNull public java.util.List<android.service.voice.HotwordTrainingAudio> getTrainingAudios();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordTrainingData> CREATOR;
+    field public static final int TIMEOUT_STAGE_EARLY = 2; // 0x2
+    field public static final int TIMEOUT_STAGE_LATE = 4; // 0x4
+    field public static final int TIMEOUT_STAGE_MIDDLE = 3; // 0x3
+    field public static final int TIMEOUT_STAGE_UNKNOWN = 0; // 0x0
+    field public static final int TIMEOUT_STAGE_VERY_EARLY = 1; // 0x1
+  }
+
+  public static final class HotwordTrainingData.Builder {
+    ctor public HotwordTrainingData.Builder();
+    method @NonNull public android.service.voice.HotwordTrainingData.Builder addTrainingAudio(@NonNull android.service.voice.HotwordTrainingAudio);
+    method @NonNull public android.service.voice.HotwordTrainingData build();
+    method @NonNull public android.service.voice.HotwordTrainingData.Builder setTimeoutStage(int);
+    method @NonNull public android.service.voice.HotwordTrainingData.Builder setTrainingAudios(@NonNull java.util.List<android.service.voice.HotwordTrainingAudio>);
+  }
+
   public interface SandboxedDetectionInitializer {
     method public static int getMaxCustomInitializationStatus();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
