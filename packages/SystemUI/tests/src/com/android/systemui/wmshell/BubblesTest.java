@@ -341,6 +341,7 @@ public class BubblesTest extends SysuiTestCase {
                 mConfigurationController,
                 mKeyguardViewMediator,
                 mKeyguardBypassController,
+                syncExecutor,
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,

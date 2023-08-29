@@ -241,6 +241,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mConfigurationController,
                 mViewMediator,
                 mKeyguardBypassController,
+                mUiBgExecutor,
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
