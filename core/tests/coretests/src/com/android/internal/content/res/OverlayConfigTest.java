@@ -48,7 +48,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -100,6 +102,25 @@ public class OverlayConfigTest {
             }
         }
         return partitionOrder.toString();
+    }
+
+    // configIndex should come from real time partition order cause partitions could get
+    // reordered by /product/overlay/partition_order.xml
+    private Map<String, Integer> createConfigIndexes(OverlayConfig overlayConfig,
+            String... configPartitions) {
+        Map<String, Integer> configIndexes = new HashMap<>();
+        for (int i = 0; i < configPartitions.length; i++) {
+            configIndexes.put(configPartitions[i], -1);
+        }
+
+        String[] partitions = overlayConfig.getPartitionOrder().split(", ");
+        int index = 0;
+        for (int i = 0; i < partitions.length; i++) {
+            if (configIndexes.containsKey(partitions[i])) {
+                configIndexes.put(partitions[i], index++);
+            }
+        }
+        return configIndexes;
     }
 
     @Test
@@ -292,11 +313,13 @@ public class OverlayConfigTest {
         mScannerRule.addOverlay(createFile("/system_ext/overlay/five.apk"), "five");
 
         final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", true, true, 0);
-        assertConfig(overlayConfig, "two", true, true, 1);
-        assertConfig(overlayConfig, "three", true, true, 2);
-        assertConfig(overlayConfig, "four", true, true, 3);
-        assertConfig(overlayConfig, "five", true, true, 4);
+        Map<String, Integer> configIndexes = createConfigIndexes(overlayConfig,
+                "vendor", "odm", "oem", "product", "system_ext");
+        assertConfig(overlayConfig, "one", true, true, configIndexes.get("vendor"));
+        assertConfig(overlayConfig, "two", true, true, configIndexes.get("odm"));
+        assertConfig(overlayConfig, "three", true, true, configIndexes.get("oem"));
+        assertConfig(overlayConfig, "four", true, true, configIndexes.get("product"));
+        assertConfig(overlayConfig, "five", true, true, configIndexes.get("system_ext"));
     }
 
     @Test
@@ -313,9 +336,11 @@ public class OverlayConfigTest {
                 true, 0);
 
         final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", false, true, 0);
-        assertConfig(overlayConfig, "two", true, true, 1);
-        assertConfig(overlayConfig, "three", false, true, 2);
+        Map<String, Integer> configIndexes = createConfigIndexes(overlayConfig,
+                "vendor", "odm", "product");
+        assertConfig(overlayConfig, "one", false, true, configIndexes.get("vendor"));
+        assertConfig(overlayConfig, "two", true, true, configIndexes.get("odm"));
+        assertConfig(overlayConfig, "three", false, true, configIndexes.get("product"));
     }
 
     @Test
@@ -327,9 +352,11 @@ public class OverlayConfigTest {
                 true, 0);
 
         final OverlayConfig overlayConfig = createConfigImpl();
-        assertConfig(overlayConfig, "one", false, true, 0);
-        assertConfig(overlayConfig, "two", false, true, 1);
-        assertConfig(overlayConfig, "three", false, true, 2);
+        Map<String, Integer> configIndexes = createConfigIndexes(overlayConfig,
+                "vendor", "odm", "product");
+        assertConfig(overlayConfig, "one", false, true, configIndexes.get("vendor"));
+        assertConfig(overlayConfig, "two", false, true, configIndexes.get("odm"));
+        assertConfig(overlayConfig, "three", false, true, configIndexes.get("product"));
     }
 
     @Test
