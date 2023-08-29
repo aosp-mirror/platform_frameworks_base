@@ -35,6 +35,7 @@ import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -111,6 +112,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var shadeLogger: ShadeLogger
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock
     private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
@@ -188,6 +190,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 notificationInsetsController,
                 ambientState,
                 shadeLogger,
+                dumpManager,
                 pulsingGestureListener,
                 mLockscreenHostedDreamGestureListener,
                 keyguardBouncerViewModel,

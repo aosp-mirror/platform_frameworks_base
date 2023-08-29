@@ -1947,8 +1947,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
-        pw.println("  ShadeWindowView: ");
-        getNotificationShadeWindowViewController().dump(pw, args);
         CentralSurfaces.dumpBarTransitions(
                 pw, "PhoneStatusBarTransitions", mStatusBarTransitions);
 
