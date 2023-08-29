@@ -17,6 +17,7 @@
 package com.android.server.companion.virtual;
 
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -46,7 +47,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.BlockedAppStreamingActivity;
 
-import java.util.List;
 import java.util.Set;
 
 
@@ -219,28 +219,37 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     }
 
     @Override
-    public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
-            @WindowConfiguration.WindowingMode int windowingMode) {
-        if (!isWindowingModeSupported(windowingMode)) {
+    public boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
+            @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
+        if (!canContainActivity(activityInfo, windowingMode, launchingFromDisplayId, isNewTask)) {
+            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
             return false;
         }
-        // Can't display all the activities if any of them don't want to be displayed.
-        final int activityCount = activities.size();
-        for (int i = 0; i < activityCount; i++) {
-            final ActivityInfo aInfo = activities.get(i);
-            if (!canContainActivity(aInfo, /* windowFlags= */ 0, /* systemWindowFlags= */ 0)) {
-                mActivityBlockedCallback.onActivityBlocked(mDisplayId, aInfo);
-                return false;
-            }
+        if (mIntentListenerCallback != null && intent != null
+                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
+            Slog.d(TAG, "Virtual device intercepting intent");
+            return false;
         }
         return true;
     }
 
     @Override
-    public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
-            int launchingFromDisplayId, boolean isNewTask) {
+    public boolean canContainActivity(@NonNull ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
+            boolean isNewTask) {
         if (!isWindowingModeSupported(windowingMode)) {
+            Slog.d(TAG, "Virtual device doesn't support windowing mode " + windowingMode);
+            return false;
+        }
+        if ((activityInfo.flags & FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES) == 0) {
+            Slog.d(TAG, "Virtual device requires android:canDisplayOnRemoteDevices=true");
+            return false;
+        }
+        final UserHandle activityUser =
+                UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
+        if (!mAllowedUsers.contains(activityUser)) {
+            Slog.d(TAG, "Virtual device launch disallowed from user " + activityUser);
             return false;
         }
 
@@ -249,40 +258,36 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             // The error dialog alerting users that streaming is blocked is always allowed.
             return true;
         }
-
-        if (!canContainActivity(activityInfo, /* windowFlags= */  0, /* systemWindowFlags= */ 0)) {
-            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+        if (!activityMatchesDisplayCategory(activityInfo)) {
+            Slog.d(TAG, "The activity's required display category '"
+                    + activityInfo.requiredDisplayCategory
+                    + "' not found on virtual display with the following categories: "
+                    + mDisplayCategories);
             return false;
         }
-
-        if (launchingFromDisplayId == Display.DEFAULT_DISPLAY) {
-            return true;
-        }
-        if (isNewTask && !mBlockedCrossTaskNavigations.isEmpty()
-                && mBlockedCrossTaskNavigations.contains(activityComponent)) {
-            Slog.d(TAG, "Virtual device blocking cross task navigation of " + activityComponent);
-            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+        if ((mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED
+                && mBlockedActivities.contains(activityComponent))
+                || (mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_BLOCKED
+                && !mAllowedActivities.contains(activityComponent))) {
+            Slog.d(TAG, "Virtual device launch disallowed by policy: " + activityComponent);
             return false;
         }
-        if (isNewTask && !mAllowedCrossTaskNavigations.isEmpty()
-                && !mAllowedCrossTaskNavigations.contains(activityComponent)) {
-            Slog.d(TAG, "Virtual device not allowing cross task navigation of "
-                    + activityComponent);
-            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
-            return false;
-        }
-
-        if (mIntentListenerCallback != null && intent != null
-                && mIntentListenerCallback.shouldInterceptIntent(intent)) {
-            Slog.d(TAG, "Virtual device has intercepted intent");
-            return false;
+        if (isNewTask && launchingFromDisplayId != DEFAULT_DISPLAY) {
+            if ((!mBlockedCrossTaskNavigations.isEmpty()
+                    && mBlockedCrossTaskNavigations.contains(activityComponent))
+                    || ((!mAllowedCrossTaskNavigations.isEmpty()
+                    && !mAllowedCrossTaskNavigations.contains(activityComponent)))) {
+                Slog.d(TAG, "Virtual device cross task navigation disallowed by policy: "
+                        + activityComponent);
+                return false;
+            }
         }
 
         return true;
     }
 
-
     @Override
+    @SuppressWarnings("AndroidFrameworkRequiresPermission")
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
         // The callback is fired only when windowFlags are changed. To let VirtualDevice owner
@@ -293,10 +298,17 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
                     activityInfo.applicationInfo.uid));
         }
 
-        if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {
-            mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
-            return false;
+        if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
+                activityInfo.packageName,
+                UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid))) {
+            // TODO(b/201712607): Add checks for the apps that use SurfaceView#setSecure.
+            if ((windowFlags & FLAG_SECURE) != 0
+                    || (systemWindowFlags & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
+                mActivityBlockedCallback.onActivityBlocked(mDisplayId, activityInfo);
+                return false;
+            }
         }
+
         return true;
     }
 
@@ -366,53 +378,6 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         return activityInfo.requiredDisplayCategory != null
                     && mDisplayCategories.contains(activityInfo.requiredDisplayCategory);
 
-    }
-
-    private boolean canContainActivity(ActivityInfo activityInfo, int windowFlags,
-            int systemWindowFlags) {
-        if ((activityInfo.flags & FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES) == 0) {
-            return false;
-        }
-        ComponentName activityComponent = activityInfo.getComponentName();
-        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
-            // The error dialog alerting users that streaming is blocked is always allowed. Need to
-            // run before the clauses below to ensure error dialog always shows up.
-            return true;
-        }
-        if (!activityMatchesDisplayCategory(activityInfo)) {
-            Slog.d(TAG, String.format(
-                    "The activity's required display category: %s is not found on virtual display"
-                            + " with the following categories: %s",
-                    activityInfo.requiredDisplayCategory, mDisplayCategories.toString()));
-            return false;
-        }
-        final UserHandle activityUser =
-                UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
-        if (!mAllowedUsers.contains(activityUser)) {
-            Slog.d(TAG, "Virtual device activity not allowed from user " + activityUser);
-            return false;
-        }
-        if (mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED
-                && mBlockedActivities.contains(activityComponent)) {
-            Slog.d(TAG, "Virtual device blocking launch of " + activityComponent);
-            return false;
-        }
-        if (mDefaultActivityPolicy == VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_BLOCKED
-                && !mAllowedActivities.contains(activityComponent)) {
-            Slog.d(TAG, activityComponent + " is not in the allowed list.");
-            return false;
-        }
-        if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
-                activityInfo.packageName, activityUser)) {
-            // TODO(b/201712607): Add checks for the apps that use SurfaceView#setSecure.
-            if ((windowFlags & FLAG_SECURE) != 0) {
-                return false;
-            }
-            if ((systemWindowFlags & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @VisibleForTesting
