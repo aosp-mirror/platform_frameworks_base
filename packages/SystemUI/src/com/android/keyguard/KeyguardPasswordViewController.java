@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.text.Editable;
@@ -41,6 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
@@ -49,8 +52,10 @@ public class KeyguardPasswordViewController
         extends KeyguardAbsKeyInputViewController<KeyguardPasswordView> {
 
     private static final int DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON = 500;  // 500ms
-
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
+    private final DevicePostureController mPostureController;
+    private final DevicePostureController.Callback mPostureCallback = posture ->
+            mView.onDevicePostureChanged(posture);
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
     private final KeyguardViewController mKeyguardViewController;
@@ -106,14 +111,19 @@ public class KeyguardPasswordViewController
             @Main Resources resources,
             FalsingCollector falsingCollector,
             KeyguardViewController keyguardViewController,
+            DevicePostureController postureController,
             FeatureFlags featureFlags) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController, featureFlags);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
+        mPostureController = postureController;
         mMainExecutor = mainExecutor;
         mKeyguardViewController = keyguardViewController;
+        if (featureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
+            view.setIsLockScreenLandscapeEnabled();
+        }
         mShowImeAtScreenOn = resources.getBoolean(R.bool.kg_show_ime_at_screen_on);
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
         mSwitchImeButton = mView.findViewById(R.id.switch_ime_button);
@@ -126,6 +136,9 @@ public class KeyguardPasswordViewController
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+        mView.onDevicePostureChanged(mPostureController.getDevicePosture());
+        mPostureController.addCallback(mPostureCallback);
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
@@ -164,6 +177,7 @@ public class KeyguardPasswordViewController
     protected void onViewDetached() {
         super.onViewDetached();
         mPasswordEntry.setOnEditorActionListener(null);
+        mPostureController.removeCallback(mPostureCallback);
     }
 
     @Override

@@ -60,6 +60,7 @@ import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.UserSwitcherController
@@ -140,6 +141,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var userInteractor: UserInteractor
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var postureController: DevicePostureController
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -197,6 +199,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
         featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         featureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
+        featureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
 
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
@@ -213,6 +216,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mock(),
                 null,
                 keyguardViewController,
+                postureController,
                 featureFlags
             )
 
