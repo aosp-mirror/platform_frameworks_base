@@ -64,8 +64,10 @@ public abstract class KeyguardInputView extends LinearLayout {
         return false;
     }
 
-    /** Change motion layout constraint set based on orientation */
-    protected void updateConstraints(int orientation) {
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    protected void updateConstraints(boolean useSplitBouncer) {
         //Unless overridden, never update constrains (keeping default portrait constraints)
     }
 
