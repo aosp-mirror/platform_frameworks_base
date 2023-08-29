@@ -120,9 +120,6 @@ public class TrustAgentWrapper {
     private final BroadcastReceiver mTrustableDowngradeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!TrustManagerService.ENABLE_ACTIVE_UNLOCK_FLAG) {
-                return;
-            }
             // are these the broadcasts we want to listen to
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 downgradeToTrustable();
