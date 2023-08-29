@@ -796,6 +796,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     final PackageInstallerService mInstallerService;
 
+    final PackageArchiverService mArchiverService;
+
     final ArtManagerService mArtManagerService;
 
     // TODO(b/260124949): Remove these.
@@ -1624,7 +1626,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
                         i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
                         context),
-                (i, pm) -> new UpdateOwnershipHelper());
+                (i, pm) -> new UpdateOwnershipHelper(),
+                (i, pm) -> new PackageArchiverService(i.getContext(), pm));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -1769,6 +1772,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
+        mArchiverService = testParams.archiverService;
         mInstantAppRegistry = testParams.instantAppRegistry;
         mChangedPackagesTracker = testParams.changedPackagesTracker;
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
@@ -2348,6 +2352,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
 
             mInstallerService = mInjector.getPackageInstallerService();
+            mArchiverService = mInjector.getPackageArchiverService();
             final ComponentName instantAppResolverComponent = getInstantAppResolver(computer);
             if (instantAppResolverComponent != null) {
                 if (DEBUG_INSTANT) {
@@ -4608,7 +4613,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mDomainVerificationConnection, mInstallerService, mPackageProperty,
                     mResolveComponentName, mInstantAppResolverSettingsComponent,
                     mRequiredSdkSandboxPackage, mServicesExtensionPackageName,
-                    mSharedSystemSharedLibraryPackageName);
+                    mSharedSystemSharedLibraryPackageName, mArchiverService);
         }
 
         @Override
