@@ -1999,7 +1999,7 @@ public class CarrierConfigManager {
             "lte_plus_threshold_bandwidth_khz_int";
 
     /**
-     * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
+     * The combined channel bandwidth threshold (inclusive) in KHz required to display the
      * NR advanced (i.e. 5G+) data icon. It is 0 by default, meaning minimum bandwidth check is
      * not enabled. Other factors like bands or frequency can also determine whether the NR
      * advanced data icon is shown or not.
