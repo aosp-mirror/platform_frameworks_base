@@ -466,10 +466,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
-            WindowContainerTransaction wct) {
+            WindowContainerTransaction wct, int splitPosition, Rect taskBounds) {
         boolean enteredSplitSelect = false;
         for (SplitScreen.SplitSelectListener listener : mSelectListeners) {
-            enteredSplitSelect |= listener.onRequestEnterSplitSelect(taskInfo);
+            enteredSplitSelect |= listener.onRequestEnterSplitSelect(taskInfo, splitPosition,
+                    taskBounds);
         }
         if (enteredSplitSelect) mTaskOrganizer.applyTransaction(wct);
     }
