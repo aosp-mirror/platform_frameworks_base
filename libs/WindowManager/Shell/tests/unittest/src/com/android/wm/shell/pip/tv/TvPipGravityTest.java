@@ -27,9 +27,9 @@ import android.view.Gravity;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.pip.LegacySizeSpecSource;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.SizeSpecSource;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 
 import org.junit.Before;
 import org.junit.Test;

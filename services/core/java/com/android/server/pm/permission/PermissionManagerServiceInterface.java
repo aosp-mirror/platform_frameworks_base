@@ -25,6 +25,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
 
 import com.android.server.pm.pkg.AndroidPackage;
@@ -136,16 +137,14 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     void removePermission(String permName);
 
     /**
-     * Gets the permission state flags associated with a permission.
+     * Gets the state flags associated with a permission.
      *
      * @param packageName the package name for which to get the flags
      * @param permName the permission for which to get the flags
-     * @param deviceId The device for which to get the flags
      * @param userId the user for which to get permission flags
      * @return the permission flags
      */
-    int getPermissionFlags(String packageName, String permName, int deviceId,
-            @UserIdInt int userId);
+    int getPermissionFlags(String packageName, String permName, int userId);
 
     /**
      * Updates the flags associated with a permission by replacing the flags in the specified mask
@@ -155,11 +154,10 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @param permName The permission for which to update the flags
      * @param flagMask The flags which to replace
      * @param flagValues The flags with which to replace
-     * @param deviceId The device for which to update the permission flags
      * @param userId The user for which to update the permission flags
      */
-    void updatePermissionFlags(String packageName, String permName, int flagMask, int flagValues,
-            boolean checkAdjustPolicyFlagPermission, int deviceId, @UserIdInt int userId);
+    void updatePermissionFlags(String packageName, String permName, int flagMask,
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId);
 
     /**
      * Update the permission flags for all packages and runtime permissions of a user in order
@@ -293,13 +291,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName the package to which to grant the permission
      * @param permName the permission name to grant
-     * @param deviceId the device for which to grant the permission
      * @param userId the user for which to grant the permission
      *
-     * @see #revokeRuntimePermission(String, String, int, int, String)
+     * @see #revokeRuntimePermission(String, String, android.os.UserHandle, String)
      */
-    void grantRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId);
+    void grantRuntimePermission(String packageName, String permName, int userId);
 
     /**
      * Revoke a runtime permission that was previously granted by
@@ -314,14 +310,13 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName the package from which to revoke the permission
      * @param permName the permission name to revoke
-     * @param deviceId the device for which to revoke the permission
      * @param userId the user for which to revoke the permission
      * @param reason the reason for the revoke, or {@code null} for unspecified
      *
-     * @see #grantRuntimePermission(String, String, int, int)
+     * @see #grantRuntimePermission(String, String, android.os.UserHandle)
      */
-    void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId, String reason);
+    void revokeRuntimePermission(String packageName, String permName, int userId,
+            String reason);
 
     /**
      * Revoke the POST_NOTIFICATIONS permission, without killing the app. This method must ONLY BE
@@ -338,29 +333,24 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * does not clearly communicate to the user what would be the benefit from grating this
      * permission.
      *
-     * @param packageName the package name
      * @param permName a permission your app wants to request
-     * @param deviceId the device for which to check the permission
-     * @param userId the user for which to check the permission
      * @return whether you can show permission rationale UI
      */
     boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, @UserIdInt int userId);
+            @UserIdInt int userId);
 
     /**
-     * Checks whether a particular permission has been revoked for a package by policy. Typically,
+     * Checks whether a particular permissions has been revoked for a package by policy. Typically
      * the device owner or the profile owner may apply such a policy. The user cannot grant policy
      * revoked permissions, hence the only way for an app to get such a permission is by a policy
      * change.
      *
      * @param packageName the name of the package you are checking against
      * @param permName the name of the permission you are checking for
-     * @param deviceId the device for which you are checking the permission
-     * @param userId the device for which you are checking the permission
+     *
      * @return whether the permission is restricted by policy
      */
-    boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
-            @UserIdInt int userId);
+    boolean isPermissionRevokedByPolicy(String packageName, String permName, int userId);
 
     /**
      * Get set of permissions that have been split into more granular or dependent permissions.
@@ -383,25 +373,14 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     List<SplitPermissionInfoParcelable> getSplitPermissions();
 
     /**
-     * Check whether a permission is granted or not to a package.
-     *
-     * @param pkgName package name
-     * @param permName permission name
-     * @param deviceId device ID
-     * @param userId user ID
-     * @return permission result {@link PackageManager.PermissionResult}
+     * TODO:theianchen add doc describing this is the old checkPermissionImpl
      */
-    int checkPermission(String pkgName, String permName, int deviceId, @UserIdInt int userId);
+    int checkPermission(String pkgName, String permName, int userId);
 
     /**
-     * Check whether a permission is granted or not to an UID.
-     *
-     * @param uid UID
-     * @param permName permission name
-     * @param deviceId device ID
-     * @return permission result {@link PackageManager.PermissionResult}
+     * TODO:theianchen add doc describing this is the old checkUidPermissionImpl
      */
-    int checkUidPermission(int uid, String permName, int deviceId);
+    int checkUidPermission(int uid, String permName);
 
     /**
      * Get all the package names requesting app op permissions.
@@ -421,11 +400,15 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
             @UserIdInt int userId);
 
     /**
-     * Reset the runtime permission state changes for a package for all devices.
+     * Reset the runtime permission state changes for a package.
      *
      * TODO(zhanghai): Turn this into package change callback?
+     *
+     * @param pkg the package
+     * @param userId the user ID
      */
-    void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId);
+    void resetRuntimePermissions(@NonNull AndroidPackage pkg,
+            @UserIdInt int userId);
 
     /**
      * Reset the runtime permission state changes for all packages in a user.
@@ -466,8 +449,8 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     /**
      * Get all the permissions granted to a package.
      *
-     * @param packageName package name
-     * @param userId user ID
+     * @param packageName the name of the package
+     * @param userId the user ID
      * @return the names of the granted permissions
      */
     @NonNull

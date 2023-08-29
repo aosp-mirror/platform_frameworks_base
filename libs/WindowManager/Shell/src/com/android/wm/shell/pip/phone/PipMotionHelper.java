@@ -20,10 +20,10 @@ import static androidx.dynamicanimation.animation.SpringForce.DAMPING_RATIO_NO_B
 import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW;
 import static androidx.dynamicanimation.animation.SpringForce.STIFFNESS_MEDIUM;
 
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_LEFT;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_DISMISS;
 import static com.android.wm.shell.pip.phone.PipMenuView.ANIM_TYPE_NONE;
 
@@ -41,8 +41,8 @@ import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;

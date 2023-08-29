@@ -19,10 +19,14 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
 import android.graphics.Point
+import android.util.MathUtils
+import com.android.app.animation.Interpolators
+import com.android.systemui.R
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.Position
+import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
@@ -38,12 +42,14 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -51,6 +57,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
@@ -66,7 +73,11 @@ constructor(
     featureFlags: FeatureFlags,
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
+    shadeRepository: ShadeRepository,
 ) {
+    /** Position information for the shared notification container. */
+    val sharedNotificationContainerPosition =
+        MutableStateFlow(SharedNotificationContainerPosition())
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.
@@ -195,6 +206,22 @@ constructor(
     val clockPosition: Flow<Position> = repository.clockPosition
 
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
+
+    val keyguardTranslationY: Flow<Float> =
+        configurationChange.flatMapLatest {
+            val translationDistance =
+                configurationRepository.getDimensionPixelSize(
+                    R.dimen.keyguard_translate_distance_on_swipe_up
+                )
+            shadeRepository.shadeModel.map {
+                // On swipe up, translate the keyguard to reveal the bouncer
+                MathUtils.lerp(
+                    translationDistance,
+                    0,
+                    Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it.expansionAmount)
+                )
+            }
+        }
 
     /** Whether to animate the next doze mode transition. */
     val animateDozingTransitions: Flow<Boolean> = repository.animateBottomAreaDozingTransitions

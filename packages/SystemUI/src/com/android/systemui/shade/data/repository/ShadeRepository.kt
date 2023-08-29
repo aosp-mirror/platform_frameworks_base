@@ -37,11 +37,18 @@ interface ShadeRepository {
     /** Amount qs has expanded. Quick Settings can be expanded without the full shade expansion. */
     val qsExpansion: StateFlow<Float>
 
+    /** The amount the shade has expanded */
+    val shadeExpansion: StateFlow<Float>
+
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
+    /** The amount QS has expanded without notifications */
     fun setQsExpansion(qsExpansion: Float)
     fun setUdfpsTransitionToFullShadeProgress(progress: Float)
+
+    /** The amount the shade has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded */
+    fun setShadeExpansion(expansion: Float)
 }
 
 /** Business logic for shade interactions */
@@ -69,7 +76,6 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
 
                 val currentState = shadeExpansionStateManager.addExpansionListener(callback)
                 callback.onPanelExpansionChanged(currentState)
-                trySendWithFailureLogging(ShadeModel(), TAG, "initial shade expansion info")
 
                 awaitClose { shadeExpansionStateManager.removeExpansionListener(callback) }
             }
@@ -78,11 +84,18 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
+    private val _shadeExpansion = MutableStateFlow(0f)
+    override val shadeExpansion: StateFlow<Float> = _shadeExpansion.asStateFlow()
+
     private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
+    }
+
+    override fun setShadeExpansion(expansion: Float) {
+        _shadeExpansion.value = expansion
     }
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {

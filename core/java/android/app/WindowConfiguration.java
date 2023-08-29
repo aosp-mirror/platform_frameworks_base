@@ -267,11 +267,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
     };
 
+    // TODO(b/297672475): make this take @Nullable
     /**
      * Sets the bounds to the provided {@link Rect}.
      * @param rect the new bounds value.
      */
-    public void setBounds(@Nullable Rect rect) {
+    public void setBounds(Rect rect) {
         if (rect == null) {
             mBounds.setEmpty();
             return;
@@ -363,8 +364,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mAppBounds;
     }
 
+    // TODO(b/297672475): make this return @NonNull
     /** @see #setBounds(Rect) */
-    @NonNull
     public Rect getBounds() {
         return mBounds;
     }

@@ -11656,6 +11656,21 @@ public final class Settings {
                 "accessibility_floating_menu_migration_tooltip_prompt";
 
         /**
+         * For the force dark theme feature which inverts any apps that don't already support dark
+         * theme.
+         *
+         * If true, it will automatically invert any app that is mainly light.
+         *
+         * This is related to the force dark override setting, however it will always force the apps
+         * colors and will ignore any developer hints or opt-out APIs.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED =
+                "accessibility_force_invert_color_enabled";
+
+        /**
          * Whether the Adaptive connectivity option is enabled.
          *
          * @hide

@@ -31,6 +31,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
@@ -69,6 +70,7 @@ class ShadeInteractorTest : SysuiTestCase() {
     private val userRepository = FakeUserRepository()
     private val disableFlagsRepository = FakeDisableFlagsRepository()
     private val keyguardRepository = FakeKeyguardRepository()
+    private val shadeRepository = FakeShadeRepository()
 
     @Mock private lateinit var manager: UserManager
     @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
@@ -143,6 +145,7 @@ class ShadeInteractorTest : SysuiTestCase() {
                 userSetupRepository,
                 deviceProvisionedController,
                 userInteractor,
+                shadeRepository,
             )
     }
 
@@ -352,5 +355,30 @@ class ShadeInteractorTest : SysuiTestCase() {
 
             // THEN expand is enabled
             assertThat(actual).isTrue()
+        }
+
+    @Test
+    fun fullShadeExpansionWhenShadeLocked() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.shadeExpansion)
+
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+            shadeRepository.setShadeExpansion(0.5f)
+
+            assertThat(actual).isEqualTo(1f)
+        }
+
+    @Test
+    fun fullShadeExpansionWhenStatusBarStateIsNotShadeLocked() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.shadeExpansion)
+
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+
+            shadeRepository.setShadeExpansion(0.5f)
+            assertThat(actual).isEqualTo(0.5f)
+
+            shadeRepository.setShadeExpansion(0.8f)
+            assertThat(actual).isEqualTo(0.8f)
         }
 }

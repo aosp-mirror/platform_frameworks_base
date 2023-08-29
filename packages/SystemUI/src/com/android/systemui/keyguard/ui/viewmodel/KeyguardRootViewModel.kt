@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import javax.inject.Inject
@@ -57,6 +58,8 @@ constructor(
             }
         }
 
+    val translationY: Flow<Float> = keyguardInteractor.keyguardTranslationY
+
     /**
      * Puts this view-model in "preview mode", which means it's being used for UI that is rendering
      * the lock screen preview in wallpaper picker / settings and not the real experience on the
@@ -65,5 +68,10 @@ constructor(
     fun enablePreviewMode() {
         val newPreviewMode = PreviewMode(true)
         previewMode.value = newPreviewMode
+    }
+
+    fun onSharedNotificationContainerPositionChanged(top: Float, bottom: Float) {
+        keyguardInteractor.sharedNotificationContainerPosition.value =
+            SharedNotificationContainerPosition(top, bottom)
     }
 }

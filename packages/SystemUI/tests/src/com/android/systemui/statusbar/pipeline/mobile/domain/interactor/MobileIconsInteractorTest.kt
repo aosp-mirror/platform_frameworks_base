@@ -781,6 +781,16 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun iconInteractor_cachedPerSubId() =
+        testScope.runTest {
+            val interactor1 = underTest.getMobileConnectionInteractorForSubId(SUB_1_ID)
+            val interactor2 = underTest.getMobileConnectionInteractorForSubId(SUB_1_ID)
+
+            assertThat(interactor1).isNotNull()
+            assertThat(interactor1).isSameInstanceAs(interactor2)
+        }
+
     /**
      * Convenience method for creating a pair of subscriptions to test the filteredSubscriptions
      * flow.

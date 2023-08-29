@@ -424,6 +424,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
                     fractionToShade =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
+                    shadeRepository.setShadeExpansion(fractionToShade)
                     nsslController.setTransitionToFullShadeAmount(fractionToShade)
 
                     qsTransitionController.dragDownAmount = value

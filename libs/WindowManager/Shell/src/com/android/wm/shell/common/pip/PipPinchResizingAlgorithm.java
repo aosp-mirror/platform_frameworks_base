@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.pip.phone;
+package com.android.wm.shell.common.pip;
 
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -35,7 +35,7 @@ public class PipPinchResizingAlgorithm {
     private final PointF mTmpLastCentroid = new PointF();
 
     /**
-     * Updates {@param resizeBoundsOut} with the new bounds of the PIP, and returns the angle in
+     * Updates resizeBoundsOut with the new bounds of the PIP, and returns the angle in
      * degrees that the PIP should be rotated.
      */
     public float calculateBoundsAndAngle(PointF downPoint, PointF downSecondPoint,

@@ -25,7 +25,6 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -78,6 +77,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -169,7 +169,6 @@ public class PreferencesHelper implements RankingConfig {
      * fields.
      */
     private static final int DEFAULT_LOCKED_APP_FIELDS = 0;
-    private final SysUiStatsEvent.BuilderFactory mStatsEventBuilderFactory;
 
     /**
      * All user-lockable fields for a given application.
@@ -208,7 +207,6 @@ public class PreferencesHelper implements RankingConfig {
             ZenModeHelper zenHelper, PermissionHelper permHelper, PermissionManager permManager,
             NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager, ManagedServices.UserProfiles userProfiles,
-            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory,
             boolean showReviewPermissionsNotification) {
         mContext = context;
         mZenModeHelper = zenHelper;
@@ -219,7 +217,6 @@ public class PreferencesHelper implements RankingConfig {
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
         mUserProfiles = userProfiles;
-        mStatsEventBuilderFactory = statsEventBuilderFactory;
         mShowReviewPermissionsNotification = showReviewPermissionsNotification;
 
         XML_VERSION = 4;
@@ -2190,11 +2187,7 @@ public class PreferencesHelper implements RankingConfig {
                     break;
                 }
                 pulledEvents++;
-                SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
-                        .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
-                event.writeInt(r.uid);
-                event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
 
                 // collect whether this package's importance info was user-set for later, if needed
                 // before the migration is enabled, this will simply default to false in all cases.
@@ -2214,15 +2207,7 @@ public class PreferencesHelper implements RankingConfig {
 
                     pkgsWithPermissionsToHandle.remove(key);
                 }
-                event.writeInt(importance);
 
-                event.writeInt(r.visibility);
-                event.writeInt(r.lockedAppFields);
-
-                // optional bool user_set_importance = 5;
-                event.writeBoolean(importanceIsUserSet);
-
-                // optional FsiState fsi_state = 6;
                 final boolean isStickyHunFlagEnabled = SystemUiSystemPropertiesFlags.getResolver()
                         .isEnabled(NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
 
@@ -2232,20 +2217,23 @@ public class PreferencesHelper implements RankingConfig {
                 final int fsiState = getFsiState(r.pkg, r.uid, requestedFSIPermission,
                         isStickyHunFlagEnabled);
 
-                event.writeInt(fsiState);
-
-                // optional bool is_fsi_permission_user_set = 7;
                 final int currentPermissionFlags = mPm.getPermissionFlags(
                         android.Manifest.permission.USE_FULL_SCREEN_INTENT, r.pkg,
                         UserHandle.getUserHandleForUid(r.uid));
 
-                final boolean isUserSet =
+                final boolean fsiIsUserSet =
                         isFsiPermissionUserSet(r.pkg, r.uid, fsiState, currentPermissionFlags,
                                 isStickyHunFlagEnabled);
 
-                event.writeBoolean(isUserSet);
-
-                events.add(event.build());
+                events.add(FrameworkStatsLog.buildStatsEvent(
+                        PACKAGE_NOTIFICATION_PREFERENCES,
+                        /* optional int32 uid = 1 [(is_uid) = true] */ r.uid,
+                        /* optional int32 importance = 2 */ importance,
+                        /* optional int32 visibility = 3 */ r.visibility,
+                        /* optional int32 user_locked_fields = 4 */ r.lockedAppFields,
+                        /* optional bool user_set_importance = 5 */ importanceIsUserSet,
+                        /* optional FsiState fsi_state = 6 */ fsiState,
+                        /* optional bool is_fsi_permission_user_set = 7 */ fsiIsUserSet));
             }
         }
 
@@ -2256,18 +2244,18 @@ public class PreferencesHelper implements RankingConfig {
                     break;
                 }
                 pulledEvents++;
-                SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
-                        .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
-                event.writeInt(p.first);
-                event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-                event.writeInt(pkgPermissions.get(p).first ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE);
-
-                // fill out the rest of the fields with default values so as not to confuse the
-                // builder
-                event.writeInt(DEFAULT_VISIBILITY);
-                event.writeInt(DEFAULT_LOCKED_APP_FIELDS);
-                event.writeBoolean(pkgPermissions.get(p).second); // user_set_importance field
-                events.add(event.build());
+                // Because all fields are required in FrameworkStatsLog.buildStatsEvent, we have
+                // to fill in default values for all the unspecified fields.
+                events.add(FrameworkStatsLog.buildStatsEvent(
+                        PACKAGE_NOTIFICATION_PREFERENCES,
+                        /* optional int32 uid = 1 [(is_uid) = true] */ p.first,
+                        /* optional int32 importance = 2 */ pkgPermissions.get(p).first
+                                ? IMPORTANCE_DEFAULT : IMPORTANCE_NONE,
+                        /* optional int32 visibility = 3 */ DEFAULT_VISIBILITY,
+                        /* optional int32 user_locked_fields = 4 */ DEFAULT_LOCKED_APP_FIELDS,
+                        /* optional bool user_set_importance = 5 */ pkgPermissions.get(p).second,
+                        /* optional FsiState fsi_state = 6 */ 0,
+                        /* optional bool is_fsi_permission_user_set = 7 */ false));
             }
         }
     }
@@ -2288,20 +2276,21 @@ public class PreferencesHelper implements RankingConfig {
                     if (++totalChannelsPulled > NOTIFICATION_CHANNEL_PULL_LIMIT) {
                         break;
                     }
-                    SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
-                            .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
-                    event.writeInt(r.uid);
-                    event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-                    event.writeString(channel.getId());
-                    event.writeString(channel.getName().toString());
-                    event.writeString(channel.getDescription());
-                    event.writeInt(channel.getImportance());
-                    event.writeInt(channel.getUserLockedFields());
-                    event.writeBoolean(channel.isDeleted());
-                    event.writeBoolean(channel.getConversationId() != null);
-                    event.writeBoolean(channel.isDemoted());
-                    event.writeBoolean(channel.isImportantConversation());
-                    events.add(event.build());
+                    events.add(FrameworkStatsLog.buildStatsEvent(
+                            PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES,
+                            /* optional int32 uid = 1 [(is_uid) = true] */ r.uid,
+                            /* optional string channel_id = 2 */ channel.getId(),
+                            /* optional string channel_name = 3 */ channel.getName().toString(),
+                            /* optional string description = 4 */ channel.getDescription(),
+                            /* optional int32 importance = 5 */ channel.getImportance(),
+                            /* optional int32 user_locked_fields = 6 */
+                            channel.getUserLockedFields(),
+                            /* optional bool is_deleted = 7 */ channel.isDeleted(),
+                            /* optional bool is_conversation = 8 */
+                            channel.getConversationId() != null,
+                            /* optional bool is_demoted_conversation = 9 */ channel.isDemoted(),
+                            /* optional bool is_important_conversation = 10 */
+                            channel.isImportantConversation()));
                 }
             }
         }
@@ -2323,16 +2312,15 @@ public class PreferencesHelper implements RankingConfig {
                     if (++totalGroupsPulled > NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT) {
                         break;
                     }
-                    SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
-                            .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
-                    event.writeInt(r.uid);
-                    event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-                    event.writeString(groupChannel.getId());
-                    event.writeString(groupChannel.getName().toString());
-                    event.writeString(groupChannel.getDescription());
-                    event.writeBoolean(groupChannel.isBlocked());
-                    event.writeInt(groupChannel.getUserLockedFields());
-                    events.add(event.build());
+                    events.add(FrameworkStatsLog.buildStatsEvent(
+                            PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES,
+                            /* optional int32 uid = 1 [(is_uid) = true] */ r.uid,
+                            /* optional string group_id = 2 */ groupChannel.getId(),
+                            /* optional string group_name = 3 */ groupChannel.getName().toString(),
+                            /* optional string description = 4 */ groupChannel.getDescription(),
+                            /* optional bool is_blocked = 5 */ groupChannel.isBlocked(),
+                            /* optional int32 user_locked_fields = 6 */
+                            groupChannel.getUserLockedFields()));
                 }
             }
         }

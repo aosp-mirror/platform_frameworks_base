@@ -26,7 +26,6 @@ import com.android.server.permission.access.collection.* // ktlint-disable no-wi
 import com.android.server.permission.access.immutable.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.immutable.IndexedMap
 import com.android.server.permission.access.permission.AppIdPermissionPolicy
-import com.android.server.permission.access.permission.DevicePermissionPolicy
 import com.android.server.permission.access.util.attributeInt
 import com.android.server.permission.access.util.attributeInterned
 import com.android.server.permission.access.util.forEachTag
@@ -47,7 +46,6 @@ class AccessPolicy private constructor(
                 getOrPut(policy.subjectScheme) { MutableIndexedMap() }[policy.objectScheme] = policy
             }
             addPolicy(AppIdPermissionPolicy())
-            addPolicy(DevicePermissionPolicy())
             addPolicy(AppIdAppOpPolicy())
             addPolicy(PackageAppOpPolicy())
         } as IndexedMap<String, IndexedMap<String, SchemePolicy>>

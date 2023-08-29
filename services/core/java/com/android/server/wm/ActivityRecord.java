@@ -584,19 +584,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Tracking splash screen status from previous activity
     boolean mSplashScreenStyleSolidColor = false;
 
-    Drawable mEnterpriseThumbnailDrawable;
-
     boolean mPauseSchedulePendingForPip = false;
 
     // Gets set to indicate that the activity is currently being auto-pipped.
     boolean mAutoEnteringPip = false;
-
-    private void updateEnterpriseThumbnailDrawable(Context context) {
-        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
-                WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
-                () -> context.getDrawable(R.drawable.ic_corp_badge));
-    }
 
     static final int LAUNCH_SOURCE_TYPE_SYSTEM = 1;
     static final int LAUNCH_SOURCE_TYPE_HOME = 2;
@@ -2212,8 +2203,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
 
-        updateEnterpriseThumbnailDrawable(mAtmService.getUiContext());
-
         boolean appActivityEmbeddingEnabled = false;
         try {
             appActivityEmbeddingEnabled = WindowManager.hasWindowExtensionsEnabled()
@@ -3397,7 +3386,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         rootTask.moveToFront(reason, task);
         // Report top activity change to tracking services and WM
-        if (mRootWindowContainer.getTopResumedActivity() == this) {
+        if (mState == RESUMED && mRootWindowContainer.getTopResumedActivity() == this) {
             mAtmService.setLastResumedActivityUncheckLocked(this, reason);
         }
         return true;
@@ -7122,15 +7111,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mVisibleRequested || nowVisible || mState == PAUSING || mState == RESUMED;
     }
 
+    /**
+     * Returns the task id of the activity token. If onlyRoot=true is specified, it will
+     * return a valid id only if the activity is root or the activity is immediately above
+     * the first non-relinquish-identity activity.
+     * TODO(b/297476786): Clarify the use cases about when should get the bottom activity
+     *                    or the first non-relinquish-identity activity from bottom.
+     */
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forTokenLocked(token);
         if (r == null || r.getParent() == null) {
             return INVALID_TASK_ID;
         }
-        return getTaskForActivityLocked(r, onlyRoot);
-    }
-
-    static int getTaskForActivityLocked(ActivityRecord r, boolean onlyRoot) {
         final Task task = r.task;
         if (onlyRoot && r.compareTo(task.getRootActivity(
                 false /*ignoreRelinquishIdentity*/, true /*setToBottomIfNone*/)) > 0) {
@@ -7711,9 +7703,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Rect frame = win.getRelativeFrame();
-        final Drawable thumbnailDrawable = task.mUserId == mWmService.mCurrentUserId
-                ? mAtmService.getUiContext().getDrawable(R.drawable.ic_account_circle)
-                : mEnterpriseThumbnailDrawable;
+        final Context context = mAtmService.getUiContext();
+        final Drawable thumbnailDrawable;
+        if (task.mUserId == mWmService.mCurrentUserId) {
+            thumbnailDrawable = context.getDrawable(R.drawable.ic_account_circle);
+        } else {
+            final DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+            thumbnailDrawable = dpm.getResources().getDrawable(
+                    WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
+                    () -> context.getDrawable(R.drawable.ic_corp_badge));
+        }
         final HardwareBuffer thumbnail = getDisplayContent().mAppTransition
                 .createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
         if (thumbnail == null) {

@@ -2328,8 +2328,7 @@ public class NotificationManagerService extends SystemService {
         mRankingHandler = rankingHandler;
         mConditionProviders = conditionProviders;
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders,
-                new SysUiStatsEvent.BuilderFactory(), flagResolver,
-                new ZenModeEventLogger(mPackageManagerClient));
+                flagResolver, new ZenModeEventLogger(mPackageManagerClient));
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {
@@ -2390,7 +2389,6 @@ public class NotificationManagerService extends SystemService {
                 mNotificationChannelLogger,
                 mAppOps,
                 mUserProfiles,
-                new SysUiStatsEvent.BuilderFactory(),
                 mShowReviewPermissionsNotification);
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,

@@ -153,10 +153,9 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int getPermissionFlags(String packageName, String permName, int deviceId,
-            @UserIdInt int userId) {
-        int oldVal = mOldImplementation.getPermissionFlags(packageName, permName, deviceId, userId);
-        int newVal = mNewImplementation.getPermissionFlags(packageName, permName, deviceId, userId);
+    public int getPermissionFlags(String packageName, String permName, int userId) {
+        int oldVal = mOldImplementation.getPermissionFlags(packageName, permName, userId);
+        int newVal = mNewImplementation.getPermissionFlags(packageName, permName, userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("getPermissionFlags");
@@ -166,12 +165,11 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
 
     @Override
     public void updatePermissionFlags(String packageName, String permName, int flagMask,
-            int flagValues, boolean checkAdjustPolicyFlagPermission, int deviceId,
-            @UserIdInt int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
         mOldImplementation.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, deviceId, userId);
+                checkAdjustPolicyFlagPermission, userId);
         mNewImplementation.updatePermissionFlags(packageName, permName, flagMask, flagValues,
-                checkAdjustPolicyFlagPermission, deviceId, userId);
+                checkAdjustPolicyFlagPermission, userId);
     }
 
     @Override
@@ -236,17 +234,16 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public void grantRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId) {
-        mOldImplementation.grantRuntimePermission(packageName, permName, deviceId, userId);
-        mNewImplementation.grantRuntimePermission(packageName, permName, deviceId, userId);
+    public void grantRuntimePermission(String packageName, String permName, int userId) {
+        mOldImplementation.grantRuntimePermission(packageName, permName, userId);
+        mNewImplementation.grantRuntimePermission(packageName, permName, userId);
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int deviceId,
-            @UserIdInt int userId, String reason) {
-        mOldImplementation.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
-        mNewImplementation.revokeRuntimePermission(packageName, permName, deviceId, userId, reason);
+    public void revokeRuntimePermission(String packageName, String permName, int userId,
+            String reason) {
+        mOldImplementation.grantRuntimePermission(packageName, permName, userId);
+        mNewImplementation.grantRuntimePermission(packageName, permName, userId);
     }
 
     @Override
@@ -258,11 +255,11 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
 
     @Override
     public boolean shouldShowRequestPermissionRationale(String packageName, String permName,
-            int deviceId, @UserIdInt int userId) {
-        boolean oldVal = mOldImplementation.shouldShowRequestPermissionRationale(packageName,
-                permName, deviceId,  userId);
-        boolean newVal = mNewImplementation.shouldShowRequestPermissionRationale(packageName,
-                permName, deviceId, userId);
+            int userId) {
+        boolean oldVal = mOldImplementation
+                .shouldShowRequestPermissionRationale(packageName, permName, userId);
+        boolean newVal = mNewImplementation
+                .shouldShowRequestPermissionRationale(packageName, permName, userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("shouldShowRequestPermissionRationale");
@@ -271,12 +268,11 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int deviceId,
-            @UserIdInt int userId) {
-        boolean oldVal = mOldImplementation.isPermissionRevokedByPolicy(packageName, permName,
-                deviceId, userId);
+    public boolean isPermissionRevokedByPolicy(String packageName, String permName, int userId) {
+        boolean oldVal = mOldImplementation
+                .isPermissionRevokedByPolicy(packageName, permName, userId);
         boolean newVal = mNewImplementation.isPermissionRevokedByPolicy(packageName, permName,
-                deviceId, userId);
+                userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("isPermissionRevokedByPolicy");
@@ -296,9 +292,9 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int checkPermission(String pkgName, String permName, int deviceId, int userId) {
-        int oldVal = mOldImplementation.checkPermission(pkgName, permName, deviceId, userId);
-        int newVal = mNewImplementation.checkPermission(pkgName, permName, deviceId, userId);
+    public int checkPermission(String pkgName, String permName, int userId) {
+        int oldVal = mOldImplementation.checkPermission(pkgName, permName, userId);
+        int newVal = mNewImplementation.checkPermission(pkgName, permName, userId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("checkPermission");
@@ -307,9 +303,9 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public int checkUidPermission(int uid, String permName, int deviceId) {
-        int oldVal = mOldImplementation.checkUidPermission(uid, permName, deviceId);
-        int newVal = mNewImplementation.checkUidPermission(uid, permName, deviceId);
+    public int checkUidPermission(int uid, String permName) {
+        int oldVal = mOldImplementation.checkUidPermission(uid, permName);
+        int newVal = mNewImplementation.checkUidPermission(uid, permName);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("checkUidPermission");
@@ -376,7 +372,7 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
 
     @NonNull
     @Override
-    public Set<String> getGrantedPermissions(@NonNull String packageName, @UserIdInt int userId) {
+    public Set<String> getGrantedPermissions(@NonNull String packageName, int userId) {
         Set<String> oldVal = mOldImplementation.getGrantedPermissions(packageName, userId);
         Set<String> newVal = mNewImplementation.getGrantedPermissions(packageName, userId);
 

@@ -212,6 +212,8 @@
     <item type="id" name="keyguard_indication_text" />
     <item type="id" name="keyguard_indication_text_bottom" />
     <item type="id" name="nssl_guideline" />
+    <item type="id" name="nssl_top_barrier" />
+    <item type="id" name="nssl_bottom_barrier" />
     <item type="id" name="split_shade_guideline" />
     <item type="id" name="lock_icon" />
     <item type="id" name="lock_icon_bg" />

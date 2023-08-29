@@ -19,6 +19,8 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -43,12 +45,32 @@ constructor(
     userSetupRepository: UserSetupRepository,
     deviceProvisionedController: DeviceProvisionedController,
     userInteractor: UserInteractor,
+    repository: ShadeRepository,
 ) {
     /** Emits true if the shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean> =
         disableFlagsRepository.disableFlags
             .map { it.isShadeEnabled() }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
+
+    /** The amount [0-1] that the shade has been opened */
+    val shadeExpansion: Flow<Float> =
+        combine(repository.shadeExpansion, keyguardRepository.statusBarState) {
+            shadeExpansion,
+            statusBarState ->
+            // This is required, as shadeExpansion gets reset to 0f even with the shade open
+            if (statusBarState == StatusBarState.SHADE_LOCKED) {
+                1f
+            } else {
+                shadeExpansion
+            }
+        }
+
+    /**
+     * The amount [0-1] QS has been opened. Normal shade with notifications (QQS) visible will
+     * report 0f.
+     */
+    val qsExpansion: StateFlow<Float> = repository.qsExpansion
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =

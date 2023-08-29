@@ -17,10 +17,18 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.model
 
 import android.annotation.DrawableRes
+import android.content.Context
+import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_NO_CONNECTION
+import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
+import com.android.systemui.statusbar.connectivity.WifiIcons
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 
 /** Represents the various states of the wifi icon. */
 sealed interface WifiIcon : Diffable<WifiIcon> {
@@ -34,7 +42,7 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
      * description.
      */
     class Visible(
-        @DrawableRes res: Int,
+        @DrawableRes val res: Int,
         val contentDescription: ContentDescription.Loaded,
     ) : WifiIcon {
         val icon = Icon.Resource(res, contentDescription)
@@ -50,6 +58,46 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
 
     override fun logFull(row: TableRowLogger) {
         row.logChange(COL_ICON, toString())
+    }
+
+    companion object {
+        @StringRes
+        @VisibleForTesting
+        internal val NO_INTERNET = R.string.data_connection_no_internet
+
+        /** Mapping from a [WifiNetworkModel] to the appropriate [WifiIcon] */
+        fun fromModel(model: WifiNetworkModel, context: Context): WifiIcon =
+            when (model) {
+                is WifiNetworkModel.Unavailable -> Hidden
+                is WifiNetworkModel.Invalid -> Hidden
+                is WifiNetworkModel.CarrierMerged -> Hidden
+                is WifiNetworkModel.Inactive ->
+                    Visible(
+                        res = WifiIcons.WIFI_NO_NETWORK,
+                        ContentDescription.Loaded(
+                            "${context.getString(WIFI_NO_CONNECTION)},${context.getString(
+                                NO_INTERNET
+                            )}"
+                        )
+                    )
+                is WifiNetworkModel.Active -> {
+                    val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[model.level])
+                    when {
+                        model.isValidated ->
+                            Visible(
+                                WifiIcons.WIFI_FULL_ICONS[model.level],
+                                ContentDescription.Loaded(levelDesc),
+                            )
+                        else ->
+                            Visible(
+                                WifiIcons.WIFI_NO_INTERNET_ICONS[model.level],
+                                ContentDescription.Loaded(
+                                    "$levelDesc,${context.getString(NO_INTERNET)}"
+                                ),
+                            )
+                    }
+                }
+            }
     }
 }
 

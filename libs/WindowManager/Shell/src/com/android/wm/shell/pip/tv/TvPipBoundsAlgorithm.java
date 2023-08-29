@@ -36,11 +36,11 @@ import androidx.annotation.NonNull;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.SizeSpecSource;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 

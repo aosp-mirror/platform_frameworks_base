@@ -857,6 +857,8 @@
 
     <dimen name="keyguard_security_container_padding_top">20dp</dimen>
 
+    <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
+
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
     <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>

@@ -49,7 +49,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
-import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -147,6 +147,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
             new FakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
+    protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
     protected SysuiStatusBarStateController mStatusBarStateController;
     protected ShadeInteractor mShadeInteractor;
@@ -174,7 +175,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         mKeyguardRepository,
                         new FakeUserSetupRepository(),
                         mDeviceProvisionedController,
-                        mUserInteractor
+                        mUserInteractor,
+                        mShadeRepository
                 );
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
@@ -249,7 +251,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mShadeLogger,
                 mDumpManager,
                 mock(KeyguardFaceAuthInteractor.class),
-                mock(ShadeRepository.class),
+                mShadeRepository,
                 mShadeInteractor,
                 new JavaAdapter(mTestScope.getBackgroundScope()),
                 mCastController

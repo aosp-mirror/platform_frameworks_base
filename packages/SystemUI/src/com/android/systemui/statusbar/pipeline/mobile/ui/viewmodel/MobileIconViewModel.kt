@@ -17,14 +17,13 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
-import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
@@ -76,26 +75,6 @@ constructor(
     constants: ConnectivityConstants,
     scope: CoroutineScope,
 ) : MobileIconViewModelCommon {
-    /** Whether or not to show the error state of [SignalDrawable] */
-    private val showExclamationMark: StateFlow<Boolean> =
-        combine(
-                iconInteractor.isDefaultDataEnabled,
-                iconInteractor.isDefaultConnectionFailed,
-                iconInteractor.isInService,
-            ) { isDefaultDataEnabled, isDefaultConnectionFailed, isInService ->
-                !isDefaultDataEnabled || isDefaultConnectionFailed || !isInService
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), true)
-
-    private val shownLevel: StateFlow<Int> =
-        combine(
-                iconInteractor.level,
-                iconInteractor.isInService,
-            ) { level, isInService ->
-                if (isInService) level else 0
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
-
     override val isVisible: StateFlow<Boolean> =
         if (!constants.hasDataCapabilities) {
                 flowOf(false)
@@ -123,40 +102,12 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val icon: Flow<SignalIconModel> = run {
-        val initial =
-            SignalIconModel(
-                level = shownLevel.value,
-                numberOfLevels = iconInteractor.numberOfLevels.value,
-                showExclamationMark = showExclamationMark.value,
-                carrierNetworkChange = iconInteractor.carrierNetworkChangeActive.value,
-            )
-        combine(
-                shownLevel,
-                iconInteractor.numberOfLevels,
-                showExclamationMark,
-                iconInteractor.carrierNetworkChangeActive,
-            ) { shownLevel, numberOfLevels, showExclamationMark, carrierNetworkChange ->
-                SignalIconModel(
-                    shownLevel,
-                    numberOfLevels,
-                    showExclamationMark,
-                    carrierNetworkChange,
-                )
-            }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                iconInteractor.tableLogBuffer,
-                columnPrefix = "icon",
-                initialValue = initial,
-            )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
-    }
+    override val icon: Flow<SignalIconModel> = iconInteractor.signalLevelIcon
 
     override val contentDescription: Flow<ContentDescription> = run {
         val initial = ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[0])
-        shownLevel
-            .map { ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[it]) }
+        iconInteractor.signalLevelIcon
+            .map { ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[it.level]) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 

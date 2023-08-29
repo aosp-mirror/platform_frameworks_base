@@ -322,11 +322,26 @@ public class LowPowerStandbyController {
     interface Clock {
         /** Returns milliseconds since boot, including time spent in sleep. */
         long elapsedRealtime();
+
+        /** Returns milliseconds since boot, not counting time spent in deep sleep. */
+        long uptimeMillis();
+    }
+
+    private static class RealClock implements Clock {
+        @Override
+        public long elapsedRealtime() {
+            return SystemClock.elapsedRealtime();
+        }
+
+        @Override
+        public long uptimeMillis() {
+            return SystemClock.uptimeMillis();
+        }
     }
 
     public LowPowerStandbyController(Context context, Looper looper) {
-        this(context, looper, SystemClock::elapsedRealtime,
-                new DeviceConfigWrapper(), () -> ActivityManager.getService(),
+        this(context, looper, new RealClock(), new DeviceConfigWrapper(),
+                () -> ActivityManager.getService(),
                 new File(Environment.getDataSystemDirectory(), "low_power_standby_policy.xml"));
     }
 
@@ -572,9 +587,9 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void updateActiveLocked() {
-        final long now = mClock.elapsedRealtime();
+        final long nowElapsed = mClock.elapsedRealtime();
         final boolean standbyTimeoutExpired =
-                (now - mLastInteractiveTimeElapsed) >= mStandbyTimeoutConfig;
+                (nowElapsed - mLastInteractiveTimeElapsed) >= mStandbyTimeoutConfig;
         final boolean maintenanceMode = mIdleSinceNonInteractive && !mIsDeviceIdle;
         final boolean newActive =
                 mForceActive || (mIsEnabled && !mIsInteractive && standbyTimeoutExpired
@@ -600,11 +615,11 @@ public class LowPowerStandbyController {
         if (DEBUG) {
             Slog.d(TAG, "onNonInteractive");
         }
-        final long now = mClock.elapsedRealtime();
+        final long nowElapsed = mClock.elapsedRealtime();
         synchronized (mLock) {
             mIsInteractive = false;
             mIsDeviceIdle = false;
-            mLastInteractiveTimeElapsed = now;
+            mLastInteractiveTimeElapsed = nowElapsed;
 
             if (mStandbyTimeoutConfig > 0) {
                 scheduleStandbyTimeoutAlarmLocked();
@@ -630,7 +645,7 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void scheduleStandbyTimeoutAlarmLocked() {
-        final long nextAlarmTime = SystemClock.elapsedRealtime() + mStandbyTimeoutConfig;
+        final long nextAlarmTime = mClock.elapsedRealtime() + mStandbyTimeoutConfig;
         mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 nextAlarmTime, "LowPowerStandbyController.StandbyTimeout",
                 mOnStandbyTimeoutExpired, mHandler);
@@ -748,9 +763,8 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyPolicyChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_POLICY_CHANGED, getPolicy());
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyPolicyChanged(LowPowerStandbyPolicy policy) {
@@ -775,9 +789,8 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyActiveChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ACTIVE_CHANGED, mIsActive);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     /** Notify other system components about the updated Low Power Standby active state */
@@ -1308,7 +1321,6 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyAllowlistChangedLocked() {
-        final long now = mClock.elapsedRealtime();
         final int[] allowlistUids = getAllowlistUidsLocked();
 
         if (DEBUG) {
@@ -1317,7 +1329,7 @@ public class LowPowerStandbyController {
         }
 
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ALLOWLIST_CHANGED, allowlistUids);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyAllowlistChanged(int[] allowlistUids) {
@@ -1334,14 +1346,12 @@ public class LowPowerStandbyController {
 
     @GuardedBy("mLock")
     private void enqueueNotifyStandbyPortsChangedLocked() {
-        final long now = mClock.elapsedRealtime();
-
         if (DEBUG) {
             Slog.d(TAG, "enqueueNotifyStandbyPortsChangedLocked");
         }
 
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_STANDBY_PORTS_CHANGED);
-        mHandler.sendMessageAtTime(msg, now);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private void notifyStandbyPortsChanged() {
@@ -1448,12 +1458,11 @@ public class LowPowerStandbyController {
         public void onForegroundStateChanged(IBinder serviceToken, String packageName,
                 int userId, boolean isForeground) {
             try {
-                final long now = mClock.elapsedRealtime();
                 final int uid = mContext.getPackageManager()
                         .getPackageUidAsUser(packageName, userId);
                 final Message message =
                         mHandler.obtainMessage(MSG_FOREGROUND_SERVICE_STATE_CHANGED, uid, 0);
-                mHandler.sendMessageAtTime(message, now);
+                mHandler.sendMessageAtTime(message, mClock.uptimeMillis());
             } catch (PackageManager.NameNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "onForegroundStateChanged: Unknown package: " + packageName
