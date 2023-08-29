@@ -165,13 +165,78 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(value?.ids()).containsExactly(1, 2, 3, 4)
         }
 
+    @Test
+    fun onDisplayConnected_pendingDisplayReceived() =
+        testScope.runTest {
+            val pendingDisplay by latestPendingDisplayFlowValue()
+
+            displayListener.value.onDisplayConnected(1)
+
+            assertThat(pendingDisplay).isEqualTo(1)
+        }
+
+    @Test
+    fun onDisplayDisconnected_pendingDisplayNull() =
+        testScope.runTest {
+            val pendingDisplay by latestPendingDisplayFlowValue()
+            displayListener.value.onDisplayConnected(1)
+
+            assertThat(pendingDisplay).isNotNull()
+
+            displayListener.value.onDisplayDisconnected(1)
+
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun onDisplayDisconnected_unknownDisplay_doesNotSendNull() =
+        testScope.runTest {
+            val pendingDisplay by latestPendingDisplayFlowValue()
+            displayListener.value.onDisplayConnected(1)
+
+            assertThat(pendingDisplay).isNotNull()
+
+            displayListener.value.onDisplayDisconnected(2)
+
+            assertThat(pendingDisplay).isNotNull()
+        }
+
+    @Test
+    fun onDisplayConnected_multipleTimes_sendsOnlyTheLastOne() =
+        testScope.runTest {
+            val pendingDisplay by latestPendingDisplayFlowValue()
+            displayListener.value.onDisplayConnected(1)
+            displayListener.value.onDisplayConnected(2)
+
+            assertThat(pendingDisplay).isEqualTo(2)
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     // Wrapper to capture the displayListener.
     private fun TestScope.latestDisplayFlowValue(): FlowValue<Set<Display>?> {
         val flowValue = collectLastValue(displayRepository.displays)
         verify(displayManager)
-            .registerDisplayListener(displayListener.capture(), eq(testHandler), anyLong())
+            .registerDisplayListener(
+                displayListener.capture(),
+                eq(testHandler),
+                eq(
+                    DisplayManager.EVENT_FLAG_DISPLAY_ADDED or
+                        DisplayManager.EVENT_FLAG_DISPLAY_CHANGED or
+                        DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
+                )
+            )
+        return flowValue
+    }
+
+    private fun TestScope.latestPendingDisplayFlowValue(): FlowValue<Int?> {
+        val flowValue = collectLastValue(displayRepository.pendingDisplay)
+        verify(displayManager)
+            .registerDisplayListener(
+                displayListener.capture(),
+                eq(testHandler),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+            )
         return flowValue
     }
 
