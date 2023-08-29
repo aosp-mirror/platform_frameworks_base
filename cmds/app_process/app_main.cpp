@@ -66,10 +66,10 @@ public:
          * executing boot class Java code and thereby deny ourselves access to
          * non-boot classes.
          */
-        char* slashClassName = toSlashClassName(mClassName.string());
+        char* slashClassName = toSlashClassName(mClassName.c_str());
         mClass = env->FindClass(slashClassName);
         if (mClass == NULL) {
-            ALOGE("ERROR: could not find class '%s'\n", mClassName.string());
+            ALOGE("ERROR: could not find class '%s'\n", mClassName.c_str());
         }
         free(slashClassName);
 
@@ -179,7 +179,7 @@ int main(int argc, char* const argv[])
         argv_String.append(argv[i]);
         argv_String.append("\" ");
       }
-      ALOGV("app_process main with argv: %s", argv_String.string());
+      ALOGV("app_process main with argv: %s", argv_String.c_str());
     }
 
     AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
@@ -300,7 +300,7 @@ int main(int argc, char* const argv[])
             restOfArgs.append(argv_new[k]);
             restOfArgs.append("\" ");
           }
-          ALOGV("Class name = %s, args = %s", className.string(), restOfArgs.string());
+          ALOGV("Class name = %s, args = %s", className.c_str(), restOfArgs.c_str());
         }
     } else {
         // We're in zygote mode.
@@ -329,7 +329,7 @@ int main(int argc, char* const argv[])
     }
 
     if (!niceName.empty()) {
-        runtime.setArgv0(niceName.string(), true /* setProcName */);
+        runtime.setArgv0(niceName.c_str(), true /* setProcName */);
     }
 
     if (zygote) {

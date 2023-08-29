@@ -617,7 +617,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
                         "match the ImageReader's configured buffer format 0x%x.",
                         bufferFormat, ctx->getBufferFormat());
                 jniThrowException(env, "java/lang/UnsupportedOperationException",
-                        msg.string());
+                        msg.c_str());
                 return -1;
             }
         }
@@ -795,7 +795,7 @@ static jobjectArray ImageReader_createImagePlanes(JNIEnv* env, jobject /*thiz*/,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", halReaderFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 
@@ -860,7 +860,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", halReaderFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 
