@@ -333,7 +333,7 @@ public class BubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
-                mColorExtractor, mDumpManager, mKeyguardStateController,
+                syncExecutor, mColorExtractor, mDumpManager, mKeyguardStateController,
                 mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
                 mShadeWindowLogger);
         mNotificationShadeWindowController.setWindowRootView(mNotificationShadeWindowView);
