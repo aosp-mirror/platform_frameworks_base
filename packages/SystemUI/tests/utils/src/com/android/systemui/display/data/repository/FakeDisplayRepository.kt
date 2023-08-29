@@ -38,12 +38,12 @@ class FakeDisplayRepository : DisplayRepository {
     /** Emits [value] as [displays] flow value. */
     suspend fun emit(value: Set<Display>) = flow.emit(value)
 
-    /** Emits [value] as [pendingDisplay] flow value. */
+    /** Emits [value] as [pendingDisplayId] flow value. */
     suspend fun emit(value: Int?) = pendingDisplayFlow.emit(value)
 
     override val displays: Flow<Set<Display>>
         get() = flow
 
-    override val pendingDisplay: Flow<Int?>
+    override val pendingDisplayId: Flow<Int?>
         get() = pendingDisplayFlow
 }

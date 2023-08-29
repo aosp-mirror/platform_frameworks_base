@@ -35,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 
@@ -48,7 +49,7 @@ interface DisplayRepository {
      *
      * When `null`, it means there is no pending display waiting to be enabled.
      */
-    val pendingDisplay: Flow<Int?>
+    val pendingDisplayId: Flow<Int?>
 }
 
 @SysUISingleton
@@ -98,7 +99,7 @@ constructor(
             displayManager.displays?.toSet() ?: emptySet()
         }
 
-    override val pendingDisplay: Flow<Int?> =
+    override val pendingDisplayId: Flow<Int?> =
         conflatedCallbackFlow {
                 val callback =
                     object : DisplayConnectionListener {
@@ -128,6 +129,7 @@ constructor(
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
+            .distinctUntilChanged()
             .flowOn(backgroundCoroutineDispatcher)
             .stateIn(
                 applicationScope,

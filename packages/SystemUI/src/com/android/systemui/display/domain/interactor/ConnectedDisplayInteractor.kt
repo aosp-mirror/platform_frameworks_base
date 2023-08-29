@@ -22,9 +22,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -65,6 +67,7 @@ class ConnectedDisplayInteractorImpl
 @Inject
 constructor(
     private val displayManager: DisplayManager,
+    keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
 ) : ConnectedDisplayInteractor {
 
@@ -87,8 +90,17 @@ constructor(
             }
             .distinctUntilChanged()
 
+    // Provides the pending display only if the lockscreen is unlocked
     override val pendingDisplay: Flow<PendingDisplay?> =
-        displayRepository.pendingDisplay.distinctUntilChanged().map { it?.toPendingDisplay() }
+        displayRepository.pendingDisplayId.combine(keyguardRepository.isKeyguardUnlocked) {
+            pendingDisplayId,
+            keyguardUnlocked ->
+            if (pendingDisplayId != null && keyguardUnlocked) {
+                pendingDisplayId.toPendingDisplay()
+            } else {
+                null
+            }
+        }
 
     private fun Int.toPendingDisplay() =
         object : PendingDisplay {
