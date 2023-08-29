@@ -1068,7 +1068,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", writerFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 

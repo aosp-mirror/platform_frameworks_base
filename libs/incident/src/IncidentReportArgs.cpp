@@ -152,8 +152,8 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
     }
     mPrivacyPolicy = privacyPolicy;
 
-    mReceiverPkg = String8(in->readString16()).string();
-    mReceiverCls = String8(in->readString16()).string();
+    mReceiverPkg = String8(in->readString16()).c_str();
+    mReceiverCls = String8(in->readString16()).c_str();
 
     int32_t gzip;
     err = in->readInt32(&gzip);
