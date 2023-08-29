@@ -199,28 +199,18 @@ final class AttributedOp {
             @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
             @AppOpsManager.AttributionFlags
                     int attributionFlags, int attributionChainId) throws RemoteException {
-        started(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
-                uidState, flags, /*triggerCallbackIfNeeded*/ true, attributionFlags,
-                attributionChainId);
-    }
-
-    private void started(@NonNull IBinder clientId, int proxyUid,
-            @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
-            @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-            boolean triggerCallbackIfNeeded, @AppOpsManager.AttributionFlags int attributionFlags,
-            int attributionChainId) throws RemoteException {
         startedOrPaused(clientId, proxyUid, proxyPackageName,
-                proxyAttributionTag, uidState, flags, triggerCallbackIfNeeded,
-                /*triggerCallbackIfNeeded*/ true, attributionFlags, attributionChainId);
+                proxyAttributionTag, uidState, flags, /* triggeredByUidStateChange */ false,
+                /* isStarted */ true, attributionFlags, attributionChainId);
     }
 
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
     private void startedOrPaused(@NonNull IBinder clientId, int proxyUid,
             @Nullable String proxyPackageName, @Nullable String proxyAttributionTag,
             @AppOpsManager.UidState int uidState, @AppOpsManager.OpFlags int flags,
-            boolean triggerCallbackIfNeeded, boolean isStarted, @AppOpsManager.AttributionFlags
+            boolean triggeredByUidStateChange, boolean isStarted, @AppOpsManager.AttributionFlags
             int attributionFlags, int attributionChainId) throws RemoteException {
-        if (triggerCallbackIfNeeded && !parent.isRunning() && isStarted) {
+        if (!triggeredByUidStateChange && !parent.isRunning() && isStarted) {
             mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                     parent.packageName, tag, true, attributionFlags, attributionChainId);
         }
@@ -263,19 +253,27 @@ final class AttributedOp {
      * @param clientId Id of the finishOp caller
      */
     public void finished(@NonNull IBinder clientId) {
-        finished(clientId, true);
+        finished(clientId, false);
     }
 
-    private void finished(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded) {
-        finishOrPause(clientId, triggerCallbackIfNeeded, false);
+    private void finished(@NonNull IBinder clientId, boolean triggeredByUidStateChange) {
+        finishOrPause(clientId, triggeredByUidStateChange, false);
     }
 
     /**
      * Update state when paused or finished is called. If pausing, it records the op as
      * stopping in the HistoricalRegistry, but does not delete it.
+     *
+     * @param triggeredByUidStateChange If {@code true}, then this method operates as usual, except
+     * that {@link AppOpsService#mActiveWatchers} will not be notified. This is currently only
+     * used in {@link #onUidStateChanged(int)}, for the purpose of restarting (i.e.,
+     * finishing then immediately starting again in the new uid state) the AttributedOp. In this
+     * case, the caller is responsible for guaranteeing that either the AttributedOp is started
+     * again or all {@link AppOpsService#mActiveWatchers} are notified that the AttributedOp is
+     * finished.
      */
     @SuppressWarnings("GuardedBy") // Lock is held on mAppOpsService
-    private void finishOrPause(@NonNull IBinder clientId, boolean triggerCallbackIfNeeded,
+    private void finishOrPause(@NonNull IBinder clientId, boolean triggeredByUidStateChange,
             boolean isPausing) {
         int indexOfToken = isRunning() ? mInProgressEvents.indexOfKey(clientId) : -1;
         if (indexOfToken < 0) {
@@ -320,7 +318,7 @@ final class AttributedOp {
                     mInProgressEvents = null;
 
                     // TODO ntmyren: Also callback for single attribution tag activity changes
-                    if (triggerCallbackIfNeeded && !parent.isRunning()) {
+                    if (!triggeredByUidStateChange && !parent.isRunning()) {
                         mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op,
                                 parent.uid, parent.packageName, tag, false,
                                 event.getAttributionFlags(), event.getAttributionChainId());
@@ -368,7 +366,7 @@ final class AttributedOp {
             @AppOpsManager.AttributionFlags
                     int attributionFlags, int attributionChainId) throws RemoteException {
         startedOrPaused(clientId, proxyUid, proxyPackageName, proxyAttributionTag,
-                uidState, flags, true, false, attributionFlags, attributionChainId);
+                uidState, flags, false, false, attributionFlags, attributionChainId);
     }
 
     /**
@@ -386,7 +384,7 @@ final class AttributedOp {
         for (int i = 0; i < mInProgressEvents.size(); i++) {
             InProgressStartOpEvent event = mInProgressEvents.valueAt(i);
             mPausedInProgressEvents.put(event.getClientId(), event);
-            finishOrPause(event.getClientId(), true, true);
+            finishOrPause(event.getClientId(), false, true);
 
             mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op, parent.uid,
                     parent.packageName, tag, false,
@@ -475,6 +473,8 @@ final class AttributedOp {
             InProgressStartOpEvent event = events.get(binders.get(i));
 
             if (event != null && event.getUidState() != newState) {
+                int eventAttributionFlags = event.getAttributionFlags();
+                int eventAttributionChainId = event.getAttributionChainId();
                 try {
                     // Remove all but one unfinished start count and then call finished() to
                     // remove start event object
@@ -482,18 +482,18 @@ final class AttributedOp {
                     event.mNumUnfinishedStarts = 1;
                     AppOpsManager.OpEventProxyInfo proxy = event.getProxy();
 
-                    finished(event.getClientId(), false);
+                    finished(event.getClientId(), true);
 
                     // Call started() to add a new start event object and then add the
                     // previously removed unfinished start counts back
                     if (proxy != null) {
                         startedOrPaused(event.getClientId(), proxy.getUid(),
                                 proxy.getPackageName(), proxy.getAttributionTag(), newState,
-                                event.getFlags(), false, isRunning,
+                                event.getFlags(), true, isRunning,
                                 event.getAttributionFlags(), event.getAttributionChainId());
                     } else {
                         startedOrPaused(event.getClientId(), Process.INVALID_UID, null, null,
-                                newState, event.getFlags(), false, isRunning,
+                                newState, event.getFlags(), true, isRunning,
                                 event.getAttributionFlags(), event.getAttributionChainId());
                     }
 
@@ -507,6 +507,9 @@ final class AttributedOp {
                         Slog.e(AppOpsService.TAG,
                                 "Cannot switch to new uidState " + newState);
                     }
+                    mAppOpsService.scheduleOpActiveChangedIfNeededLocked(parent.op,
+                            parent.uid, parent.packageName, tag, false,
+                            eventAttributionFlags, eventAttributionChainId);
                 }
             }
         }
