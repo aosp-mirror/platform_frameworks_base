@@ -181,7 +181,8 @@ PointerControllerTest::PointerControllerTest() : mPointerSprite(new NiceMock<Moc
     EXPECT_CALL(*mSpriteController, createSprite())
             .WillOnce(Return(mPointerSprite));
 
-    mPointerController = PointerController::create(mPolicy, mLooper, *mSpriteController);
+    mPointerController =
+            PointerController::create(mPolicy, mLooper, *mSpriteController, /*enabled=*/true);
 }
 
 PointerControllerTest::~PointerControllerTest() {
@@ -321,6 +322,7 @@ public:
                           const sp<Looper>& looper, SpriteController& spriteController)
           : PointerController(
                     new MockPointerControllerPolicyInterface(), looper, spriteController,
+                    /*enabled=*/true,
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
                         // Register listener
                         registeredListener = listener;
