@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 import static com.android.wm.shell.common.pip.PipUtils.dpToPx;
 

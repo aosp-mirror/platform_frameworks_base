@@ -38,7 +38,8 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.pip.PipUtils;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -52,7 +53,6 @@ import java.util.List;
  */
 public abstract class PipTransitionController implements Transitions.TransitionHandler {
 
-    protected final PipAnimationController mPipAnimationController;
     protected final PipBoundsAlgorithm mPipBoundsAlgorithm;
     protected final PipBoundsState mPipBoundsState;
     protected final ShellTaskOrganizer mShellTaskOrganizer;
@@ -135,22 +135,18 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             @NonNull Transitions transitions,
             PipBoundsState pipBoundsState,
-            PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipAnimationController pipAnimationController) {
+            PipMenuController pipMenuController, PipBoundsAlgorithm pipBoundsAlgorithm) {
         mPipBoundsState = pipBoundsState;
         mPipMenuController = pipMenuController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
-        mPipAnimationController = pipAnimationController;
         mTransitions = transitions;
-        if (!PipUtils.isPip2ExperimentEnabled()) {
-            if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                shellInit.addInitCallback(this::onInit, this);
-            }
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            shellInit.addInitCallback(this::onInit, this);
         }
     }
 
-    private void onInit() {
+    protected void onInit() {
         mTransitions.addHandler(this);
     }
 
