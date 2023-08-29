@@ -111,7 +111,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -230,7 +229,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     /** Historical sessions kept around for debugging purposes */
     @GuardedBy("mSessions")
-    private final List<String> mHistoricalSessions = new ArrayList<>();
+    private final List<PackageInstallerHistoricalSession> mHistoricalSessions = new ArrayList<>();
 
     @GuardedBy("mSessions")
     private final SparseIntArray mHistoricalSessionsByInstaller = new SparseIntArray();
@@ -570,14 +569,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     @GuardedBy("mSessions")
     private void addHistoricalSessionLocked(PackageInstallerSession session) {
-        CharArrayWriter writer = new CharArrayWriter();
-        IndentingPrintWriter pw = new IndentingPrintWriter(writer, "    ");
-        session.dump(pw);
         if (mHistoricalSessions.size() > HISTORICAL_SESSIONS_THRESHOLD) {
             Slog.d(TAG, "Historical sessions size reaches threshold, clear the oldest");
             mHistoricalSessions.subList(0, HISTORICAL_CLEAR_SIZE).clear();
         }
-        mHistoricalSessions.add(writer.toString());
+        mHistoricalSessions.add(session.createHistoricalSession());
 
         int installerUid = session.getInstallerUid();
         // Increment the number of sessions by this installerUid.
@@ -1223,6 +1219,24 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return new ParceledListSlice<>(result);
     }
 
+    ParceledListSlice<SessionInfo> getHistoricalSessions(int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final Computer snapshot = mPm.snapshotComputer();
+        snapshot.enforceCrossUserPermission(callingUid, userId, true, false, "getAllSessions");
+
+        final List<SessionInfo> result = new ArrayList<>();
+        synchronized (mSessions) {
+            for (int i = 0; i < mHistoricalSessions.size(); i++) {
+                final PackageInstallerHistoricalSession session = mHistoricalSessions.get(i);
+                if (userId == UserHandle.USER_ALL || session.userId == userId) {
+                    result.add(session.generateInfo());
+                }
+            }
+        }
+        result.removeIf(info -> shouldFilterSession(snapshot, callingUid, info));
+        return new ParceledListSlice<>(result);
+    }
+
     @Override
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
@@ -1837,7 +1851,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.increaseIndent();
             N = mHistoricalSessions.size();
             for (int i = 0; i < N; i++) {
-                pw.print(mHistoricalSessions.get(i));
+                mHistoricalSessions.get(i).dump(pw);
                 pw.println();
             }
             pw.println();
