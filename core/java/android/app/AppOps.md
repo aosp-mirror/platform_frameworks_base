@@ -59,8 +59,8 @@ To control access the app-op can be set to:
 : Throw a `SecurityException` on access. This can be suppressed by using a `...noThrow` method to
 check the mode
 
-The initial state of an app-op is defined in `AppOpsManager.sOpDefaultMode`. Confusingly the
-initial state is often not `MODE_DEFAULT`
+The initial state of an app-op is defined in its `AppOpInfo`. Confusingly the initial state is not
+always `MODE_DEFAULT`, if `AppOpInfo.Builder.setDefaultMode()` is called with a different mode.
 
 Per-package modes can be set using `AppOpsManager.setMode` and per-uid modes can be set using
 `AppOpsManager.setUidMode`.
