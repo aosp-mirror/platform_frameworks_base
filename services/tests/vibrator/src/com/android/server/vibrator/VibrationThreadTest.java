@@ -63,7 +63,6 @@ import android.os.vibrator.VibrationEffectSegment;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.LocalServices;
@@ -1005,7 +1004,6 @@ public class VibrationThreadTest {
                 mVibratorProviders.get(3).getEffectSegments(vibrationId));
     }
 
-    @FlakyTest
     @Test
     public void vibrate_multipleSyncedCallbackTriggered_finishSteps() throws Exception {
         int[] vibratorIds = new int[]{1, 2};
