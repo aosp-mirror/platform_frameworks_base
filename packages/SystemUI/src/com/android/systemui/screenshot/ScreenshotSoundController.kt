@@ -20,7 +20,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.util.TraceUtils.Companion.tracedAsync
+import com.android.systemui.util.TraceUtils.Companion.async
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -48,7 +48,7 @@ constructor(
 ) : ScreenshotSoundController {
 
     val player: Deferred<MediaPlayer?> =
-        coroutineScope.tracedAsync("loadCameraSound", bgDispatcher) {
+        coroutineScope.async("loadCameraSound", bgDispatcher) {
             try {
                 soundProvider.getScreenshotSound()
             } catch (e: IllegalStateException) {
@@ -58,12 +58,10 @@ constructor(
         }
 
     override fun playCameraSound(): Deferred<Unit> {
-        return coroutineScope.tracedAsync("playCameraSound", bgDispatcher) {
-            player.await()?.start()
-        }
+        return coroutineScope.async("playCameraSound", bgDispatcher) { player.await()?.start() }
     }
     override fun releaseScreenshotSound(): Deferred<Unit> {
-        return coroutineScope.tracedAsync("releaseScreenshotSound", bgDispatcher) {
+        return coroutineScope.async("releaseScreenshotSound", bgDispatcher) {
             try {
                 withTimeout(1.seconds) { player.await()?.release() }
             } catch (e: TimeoutCancellationException) {

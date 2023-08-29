@@ -20,10 +20,10 @@ import android.util.Log
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.util.TraceUtils.Companion.launch
+import kotlinx.coroutines.CoroutineScope
 import java.util.function.Consumer
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /** Processes a screenshot request sent from [ScreenshotHelper]. */
 interface ScreenshotRequestProcessor {
@@ -88,7 +88,7 @@ constructor(
      *                 thread
      */
     fun processAsync(screenshot: ScreenshotData, callback: Consumer<ScreenshotData>) {
-        mainScope.launch {
+        mainScope.launch({ "$TAG#processAsync" }) {
             val result = process(screenshot)
             callback.accept(result)
         }

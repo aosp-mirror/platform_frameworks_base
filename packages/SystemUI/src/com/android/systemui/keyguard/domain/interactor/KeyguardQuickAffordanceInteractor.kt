@@ -23,7 +23,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
@@ -44,11 +43,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentati
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.TraceUtils.Companion.traceAsync
+import com.android.systemui.util.TraceUtils.Companion.withContext
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -59,7 +59,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -417,10 +416,8 @@ constructor(
     }
 
     private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
-        traceAsync(TAG, "isFeatureDisabledByDevicePolicy") {
-            withContext(backgroundDispatcher) {
-                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
-            }
+        withContext("$TAG#isFeatureDisabledByDevicePolicy", backgroundDispatcher) {
+            devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
         }
 
     companion object {
