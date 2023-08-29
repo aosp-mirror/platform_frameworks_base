@@ -86,3 +86,11 @@ java_aconfig_library {
     aconfig_declarations: "android.security.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
+
+java_aconfig_library {
+    name: "android.security.flags-aconfig-java-host",
+    aconfig_declarations: "android.security.flags-aconfig",
+    host_supported: true,
+    test: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
