@@ -30,6 +30,7 @@ import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -37,6 +38,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
@@ -49,9 +51,19 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
 
     private val displayManager = mock<DisplayManager>()
     private val fakeDisplayRepository = FakeDisplayRepository()
+    private val fakeKeyguardRepository = FakeKeyguardRepository()
     private val connectedDisplayStateProvider: ConnectedDisplayInteractor =
-        ConnectedDisplayInteractorImpl(displayManager, fakeDisplayRepository)
+        ConnectedDisplayInteractorImpl(
+            displayManager,
+            fakeKeyguardRepository,
+            fakeDisplayRepository
+        )
     private val testScope = TestScope(UnconfinedTestDispatcher())
+
+    @Before
+    fun setup() {
+        fakeKeyguardRepository.setKeyguardUnlocked(true)
+    }
 
     @Test
     fun displayState_nullDisplays_disconnected() =
@@ -163,6 +175,34 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
             pendingDisplay!!.disable()
 
             Mockito.verify(displayManager).disableConnectedDisplay(eq(1))
+        }
+
+    @Test
+    fun onPendingDisplay_keyguardUnlocked_returnsPendingDisplay() =
+        testScope.runTest {
+            fakeKeyguardRepository.setKeyguardUnlocked(false)
+            val pendingDisplay by lastPendingDisplay()
+
+            fakeDisplayRepository.emit(1)
+            assertThat(pendingDisplay).isNull()
+
+            fakeKeyguardRepository.setKeyguardUnlocked(true)
+
+            assertThat(pendingDisplay).isNotNull()
+        }
+
+    @Test
+    fun onPendingDisplay_keyguardLocked_returnsNull() =
+        testScope.runTest {
+            fakeKeyguardRepository.setKeyguardUnlocked(true)
+            val pendingDisplay by lastPendingDisplay()
+
+            fakeDisplayRepository.emit(1)
+            assertThat(pendingDisplay).isNotNull()
+
+            fakeKeyguardRepository.setKeyguardUnlocked(false)
+
+            assertThat(pendingDisplay).isNull()
         }
 
     private fun TestScope.lastValue(): FlowValue<State?> =
