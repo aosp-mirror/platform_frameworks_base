@@ -23,6 +23,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
+import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -41,7 +42,6 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepo
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiScanEntry
-import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -144,14 +144,109 @@ class InternetTileViewModelTest : SysuiTestCase() {
             wifiRepository.setIsWifiDefault(true)
             wifiRepository.setWifiNetwork(networkModel)
 
-            // Type is [Visible] since that is the only model that stores a resId
-            val expectedIcon: WifiIcon.Visible =
-                WifiIcon.fromModel(networkModel, context) as WifiIcon.Visible
-
             assertThat(latest?.secondaryTitle).isEqualTo("test ssid")
             assertThat(latest?.secondaryLabel).isNull()
-            assertThat(latest?.icon).isEqualTo(ResourceIcon.get(expectedIcon.icon.res))
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4]))
             assertThat(latest?.iconId).isNull()
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotNone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            val networkModel =
+                WifiNetworkModel.Active(
+                    networkId = 1,
+                    level = 4,
+                    ssid = "test ssid",
+                    hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
+                )
+
+            connectivityRepository.setWifiConnected()
+            wifiRepository.setIsWifiDefault(true)
+            wifiRepository.setWifiNetwork(networkModel)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4]))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotTablet() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.TABLET)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_tablet))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotLaptop() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.LAPTOP)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_laptop))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotWatch() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.WATCH)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_watch))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotAuto() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.AUTO)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_auto))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotPhone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.PHONE)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotUnknown() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.UNKNOWN)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+        }
+
+    @Test
+    fun wifiDefaultAndActive_hotspotInvalid() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.tileModel)
+
+            setWifiNetworkWithHotspot(WifiNetworkModel.HotspotDeviceType.INVALID)
+
+            assertThat(latest?.icon)
+                .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
         }
 
     @Test
@@ -236,6 +331,20 @@ class InternetTileViewModelTest : SysuiTestCase() {
             assertThat(latest?.iconId).isEqualTo(R.drawable.stat_sys_ethernet)
             assertThat(latest?.icon).isNull()
         }
+
+    private fun setWifiNetworkWithHotspot(hotspot: WifiNetworkModel.HotspotDeviceType) {
+        val networkModel =
+            WifiNetworkModel.Active(
+                networkId = 1,
+                level = 4,
+                ssid = "test ssid",
+                hotspotDeviceType = hotspot,
+            )
+
+        connectivityRepository.setWifiConnected()
+        wifiRepository.setIsWifiDefault(true)
+        wifiRepository.setWifiNetwork(networkModel)
+    }
 
     companion object {
         const val SUB_1_ID = 1
