@@ -1013,13 +1013,13 @@ std::string AssetManager2::GetLastResourceResolution() const {
     const auto& assets = GetApkAssets(step.cookie);
     log_stream << "\n\t" << prefix << ": " << (assets ? assets->GetDebugName() : "<null>")
                << " #" << step.cookie;
-    if (!step.config_name.isEmpty()) {
+    if (!step.config_name.empty()) {
       log_stream << " - " << step.config_name;
     }
   }
 
   log_stream << "\nBest matching is from "
-             << (last_resolution_.best_config_name.isEmpty() ? "default"
+             << (last_resolution_.best_config_name.empty() ? "default"
                                                    : last_resolution_.best_config_name)
              << " configuration of " << last_resolution_.best_package_name;
   return log_stream.str();
