@@ -385,13 +385,7 @@ public class StatusBarIconControllerImpl implements Tunable,
     }
 
     private void removeAllIconsForExternalSlot(String slotName) {
-        removeAllIconsForSlot(createExternalSlotName(slotName));
-    }
-
-    /** */
-    @Override
-    public void removeAllIconsForSlot(String slotName) {
-        removeAllIconsForSlot(slotName, /* fromNewPipeline */ false);
+        removeAllIconsForSlot(createExternalSlotName(slotName), /* fromNewPipeline= */ false);
     }
 
     private void removeAllIconsForSlot(String slotName, boolean fromNewPipeline) {
