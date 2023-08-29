@@ -1667,11 +1667,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public boolean isDeviceInVrMode() {
-        return mPresenter.isDeviceInVrMode();
-    }
-
-    @Override
     public NotificationPresenter getPresenter() {
         return mPresenter;
     }
