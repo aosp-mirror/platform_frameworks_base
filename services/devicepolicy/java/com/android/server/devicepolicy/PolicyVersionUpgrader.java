@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -307,6 +308,8 @@ public class PolicyVersionUpgrader {
             String versionString = Files.readAllLines(
                     file.toPath(), Charset.defaultCharset()).get(0);
             return Integer.parseInt(versionString);
+        } catch (NoSuchFileException e) {
+            return 0; // expected on first boot
         } catch (IOException | NumberFormatException | IndexOutOfBoundsException e) {
             Slog.e(LOG_TAG, "Error reading version", e);
             return 0;
