@@ -29,7 +29,7 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipBoundsState;
 
 import org.junit.Assert;
 import org.junit.Before;

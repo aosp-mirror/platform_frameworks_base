@@ -33,6 +33,11 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import org.junit.Before;

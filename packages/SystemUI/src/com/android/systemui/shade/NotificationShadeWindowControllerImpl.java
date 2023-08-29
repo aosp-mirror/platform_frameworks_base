@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 
 import android.app.IActivityManager;
@@ -52,6 +51,7 @@ import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -75,6 +75,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -102,6 +103,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final float mKeyguardMaxRefreshRate;
     private final KeyguardViewMediator mKeyguardViewMediator;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final Executor mBackgroundExecutor;
     private final AuthController mAuthController;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
@@ -135,6 +137,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             ConfigurationController configurationController,
             KeyguardViewMediator keyguardViewMediator,
             KeyguardBypassController keyguardBypassController,
+            @Background Executor backgroundExecutor,
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
@@ -152,6 +155,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardBypassController = keyguardBypassController;
+        mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
         mScreenOffAnimationController = screenOffAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
@@ -512,13 +516,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         applyWindowLayoutParams();
 
         if (mHasTopUi != mHasTopUiChanged) {
-            whitelistIpcs(() -> {
+            mHasTopUi = mHasTopUiChanged;
+            mBackgroundExecutor.execute(() -> {
                 try {
                     mActivityManager.setHasTopUi(mHasTopUiChanged);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to call setHasTopUi", e);
                 }
-                mHasTopUi = mHasTopUiChanged;
+
             });
         }
         notifyStateChangedCallbacks();

@@ -59,7 +59,7 @@ public class AuthenticationStatsPersister {
         // The package info in the context isn't initialized in the way it is for normal apps,
         // so the standard, name-based context.getSharedPreferences doesn't work. Instead, we
         // build the path manually below using the same policy that appears in ContextImpl.
-        final File prefsFile = new File(Environment.getDataSystemDeDirectory(), FILE_NAME);
+        final File prefsFile = new File(Environment.getDataSystemDirectory(), FILE_NAME);
         mSharedPreferences = context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
     }
 
@@ -137,15 +137,18 @@ public class AuthenticationStatsPersister {
                     iterator.remove();
                     break;
                 }
+                // Reset frrStatJson when user doesn't exist.
+                frrStatJson = null;
             }
 
-            // If there's existing frr stats in the file, we want to update the stats for the given
-            // modality and keep the stats for other modalities.
+            // Checks if this is a new user and there's no JSON for this user in the storage.
             if (frrStatJson == null) {
                 frrStatJson = new JSONObject().put(USER_ID, userId);
             }
             frrStatsSet.add(buildFrrStats(frrStatJson, totalAttempts, rejectedAttempts,
                     enrollmentNotifications, modality));
+
+            Slog.d(TAG, "frrStatsSet to persist: " + frrStatsSet);
 
             mSharedPreferences.edit().putStringSet(KEY, frrStatsSet).apply();
 

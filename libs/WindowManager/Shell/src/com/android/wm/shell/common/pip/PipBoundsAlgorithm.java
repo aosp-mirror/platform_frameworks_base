@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,8 +28,6 @@ import android.util.Size;
 import android.view.Gravity;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.common.pip.PipUtils;
-import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import java.io.PrintWriter;
 
@@ -202,7 +200,8 @@ public class PipBoundsAlgorithm {
      *
      * @return {@code false} if the given source is too small to use for the entering animation.
      */
-    static boolean isSourceRectHintValidForEnterPip(Rect sourceRectHint, Rect destinationBounds) {
+    public static boolean isSourceRectHintValidForEnterPip(Rect sourceRectHint,
+            Rect destinationBounds) {
         return sourceRectHint != null
                 && sourceRectHint.width() > destinationBounds.width()
                 && sourceRectHint.height() > destinationBounds.height();
@@ -224,7 +223,7 @@ public class PipBoundsAlgorithm {
     }
 
     /**
-     * @return whether the given {@param aspectRatio} is valid.
+     * @return whether the given aspectRatio is valid.
      */
     public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return Float.compare(mMinAspectRatio, aspectRatio) <= 0

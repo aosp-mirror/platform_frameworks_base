@@ -73,7 +73,14 @@ public final class RemoteEntry implements Parcelable {
     /**
      * Constructs a RemoteEntry to be displayed on the UI.
      *
-     * @param slice the display content to be displayed on the UI, along with this entry
+     * @param slice the slice containing the metadata to be shown on the UI, must be constructed
+     *              through the {@link androidx.credentials.provider} Jetpack library;
+     *              If constructed manually, the {@code slice} object must
+     *              contain the non-null properties of the
+     *              {@link androidx.credentials.provider.RemoteEntry} class populated as slice items
+     *              against specific hints as used in the class's {@code toSlice} method,
+     *              since the Android System uses this library to parse the {@code slice} and
+     *              extract the required attributes
      */
     public RemoteEntry(
             @NonNull Slice slice) {
