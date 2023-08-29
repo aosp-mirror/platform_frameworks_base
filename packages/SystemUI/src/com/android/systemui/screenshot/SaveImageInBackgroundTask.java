@@ -147,7 +147,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             // Call synchronously here since already on a background thread.
             ListenableFuture<ImageExporter.Result> future =
-                    mImageExporter.export(Runnable::run, requestId, image, mParams.owner);
+                    mImageExporter.export(Runnable::run, requestId, image, mParams.owner,
+                            mParams.displayId);
             ImageExporter.Result result = future.get();
             Log.d(TAG, "Saved screenshot: " + result);
             final Uri uri = result.uri;

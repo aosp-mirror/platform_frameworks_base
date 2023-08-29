@@ -40,6 +40,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.ResultReceiver;
 import android.testing.AndroidTestingRunner;
+import android.view.Display;
 import android.widget.ImageView;
 
 import androidx.test.rule.ActivityTestRule;
@@ -120,7 +121,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = TEST_URI;
         when(mImageExporter.export(any(Executor.class), any(UUID.class), any(Bitmap.class),
-                eq(Process.myUserHandle())))
+                eq(Process.myUserHandle()), eq(Display.DEFAULT_DISPLAY)))
                 .thenReturn(Futures.immediateFuture(result));
     }
 
