@@ -18370,24 +18370,28 @@ public final class Settings {
              * If hotword detection should be enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String HOTWORD_DETECTION_ENABLED = "hotword_detection_enabled";
 
             /**
              * Whether Smart Replies are enabled within Wear.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SMART_REPLIES_ENABLED = "smart_replies_enabled";
 
             /**
              * The default vibration pattern.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DEFAULT_VIBRATION = "default_vibration";
 
             /**
              * If FLP should obtain location data from the paired device.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String OBTAIN_PAIRED_DEVICE_LOCATION =
                     "obtain_paired_device_location";
 
@@ -18395,6 +18399,7 @@ public final class Settings {
              * The play store availability on companion phone.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PHONE_PLAY_STORE_AVAILABILITY =
                     "phone_play_store_availability";
 
@@ -18410,6 +18415,7 @@ public final class Settings {
              * Whether the bug report is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BUG_REPORT = "bug_report";
 
             // Possible bug report states
@@ -18422,12 +18428,14 @@ public final class Settings {
              * The enabled/disabled state of the SmartIlluminate.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SMART_ILLUMINATE_ENABLED = "smart_illuminate_enabled";
 
             /**
              * Whether automatic time is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_AUTO_TIME = "clockwork_auto_time";
 
             // Possible clockwork auto time states
@@ -18445,6 +18453,7 @@ public final class Settings {
              * Whether automatic time zone is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_AUTO_TIME_ZONE = "clockwork_auto_time_zone";
 
             // Possible clockwork auto time zone states
@@ -18461,12 +18470,14 @@ public final class Settings {
              * Whether 24 hour time format is enabled on the watch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_24HR_TIME = "clockwork_24hr_time";
 
             /**
              * Whether the auto wifi toggle setting is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AUTO_WIFI = "auto_wifi";
 
             // Possible force wifi on states
@@ -18486,6 +18497,7 @@ public final class Settings {
              * wifi requirement until this time). The time is in millis since epoch.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS =
                     "alt_bypass_wifi_requirement_time_millis";
 
@@ -18493,6 +18505,7 @@ public final class Settings {
              * Whether the setup was skipped.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SETUP_SKIPPED = "setup_skipped";
 
             // Possible setup_skipped states
@@ -18507,6 +18520,7 @@ public final class Settings {
              * The last requested call forwarding action.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String LAST_CALL_FORWARD_ACTION = "last_call_forward_action";
 
             // Possible call forwarding actions
@@ -18519,22 +18533,31 @@ public final class Settings {
 
             // Stem button settings.
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_TYPE = "STEM_1_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_DATA = "STEM_1_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_1_DEFAULT_DATA = "STEM_1_DEFAULT_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_TYPE = "STEM_2_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_DATA = "STEM_2_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_2_DEFAULT_DATA = "STEM_2_DEFAULT_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_TYPE = "STEM_3_TYPE";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_DATA = "STEM_3_DATA";
             /** @hide */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String STEM_3_DEFAULT_DATA = "STEM_3_DEFAULT_DATA";
 
             // Stem types
@@ -18549,12 +18572,14 @@ public final class Settings {
              * If the device should be muted when off body.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String MUTE_WHEN_OFF_BODY_ENABLED = "obtain_mute_when_off_body";
 
             /**
              * Wear OS version string.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_OS_VERSION_STRING = "wear_os_version_string";
 
             /**
@@ -18567,24 +18592,28 @@ public final class Settings {
              * The android wear system version.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ANDROID_WEAR_VERSION = "android_wear_version";
 
             /**
              * The wear system capabiltiies.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SYSTEM_CAPABILITIES = "system_capabilities";
 
             /**
              * The android wear system edition.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SYSTEM_EDITION = "android_wear_system_edition";
 
             /**
              * The Wear platform MR number.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_PLATFORM_MR_NUMBER = "wear_platform_mr_number";
 
             /**
@@ -18598,36 +18627,42 @@ public final class Settings {
              * Whether ambient is currently enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_ENABLED = "ambient_enabled";
 
             /**
              * Whether ambient tilt to wake is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TILT_TO_WAKE = "ambient_tilt_to_wake";
 
             /**
              * Whether ambient low bit mode is enabled by developer options.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_LOW_BIT_ENABLED_DEV = "ambient_low_bit_enabled_dev";
 
             /**
              * Whether ambient touch to wake is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TOUCH_TO_WAKE = "ambient_touch_to_wake";
 
             /**
              * Whether ambient tilt to bright is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_TILT_TO_BRIGHT = "ambient_tilt_to_bright";
 
             /**
              * Whether touch and hold to edit WF is enabled
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED =
                     "gesture_touch_and_hold_watchface_enabled";
 
@@ -18641,6 +18676,7 @@ public final class Settings {
              * Whether bedtime mode is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BEDTIME_MODE = "bedtime_mode";
 
             /**
@@ -18652,31 +18688,35 @@ public final class Settings {
              * Whether the current watchface is decomposable.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DECOMPOSABLE_WATCHFACE = "current_watchface_decomposable";
 
             /**
              * Whether to force ambient when docked.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_FORCE_WHEN_DOCKED = "ambient_force_when_docked";
 
             /**
              * Whether the ambient low bit mode is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_LOW_BIT_ENABLED = "ambient_low_bit_enabled";
 
             /**
              * The timeout duration in minutes of ambient mode when plugged in.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String AMBIENT_PLUGGED_TIMEOUT_MIN = "ambient_plugged_timeout_min";
 
             /**
              * What OS does paired device has.
              * @hide
              */
-            @Readable
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PAIRED_DEVICE_OS_TYPE = "paired_device_os_type";
 
             // Possible values of PAIRED_DEVICE_OS_TYPE
@@ -18709,6 +18749,7 @@ public final class Settings {
              * The user's last setting for hfp client.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String USER_HFP_CLIENT_SETTING = "user_hfp_client_setting";
 
             // Possible hfp client user setting values
@@ -18733,6 +18774,7 @@ public final class Settings {
              * The companion App name.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String COMPANION_APP_NAME = "wear_companion_app_name";
 
             /**
@@ -18740,18 +18782,21 @@ public final class Settings {
              * wear. 1 for supporting, 0 for not supporting.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String ENABLE_ALL_LANGUAGES = "enable_all_languages";
 
             /**
              * The Locale (as language tag) the user chose at startup.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String SETUP_LOCALE = "setup_locale";
 
             /**
              * The version of oem setup present.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String OEM_SETUP_VERSION = "oem_setup_version";
 
             /**
@@ -18797,6 +18842,7 @@ public final class Settings {
              * -{@link BATTERY_SAVER_MODE_CUSTOM}
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BATTERY_SAVER_MODE = "battery_saver_mode";
 
             /**
@@ -18829,6 +18875,7 @@ public final class Settings {
              * The maximum ambient mode duration when an activity is allowed to auto resume.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS =
                     "wear_activity_auto_resume_timeout_ms";
 
@@ -18844,6 +18891,7 @@ public final class Settings {
              * If burn in protection is enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String BURN_IN_PROTECTION_ENABLED = "burn_in_protection";
 
             /**
@@ -18862,6 +18910,7 @@ public final class Settings {
              *          RIGHT_WRIST_ROTATION_0 = "2", RIGHT_WRIST_ROTATION_180 = "3"
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WRIST_ORIENTATION_MODE = "wear_wrist_orientation_mode";
 
             /**
@@ -18900,6 +18949,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CLOCKWORK_SYSUI_PACKAGE = "clockwork_sysui_package";
 
             /**
@@ -18929,6 +18979,7 @@ public final class Settings {
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WET_MODE_ON = "wet_mode_on";
 
             /**
@@ -18947,6 +18998,7 @@ public final class Settings {
              * Whether charging sounds are enabled.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
 
             /**
@@ -18955,6 +19007,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String DYNAMIC_COLOR_THEME_ENABLED = "dynamic_color_theme_enabled";
 
             /**
@@ -19046,6 +19099,7 @@ public final class Settings {
              * The key to indicate the data migration status on device upgrade in Wear Services.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String UPGRADE_DATA_MIGRATION_STATUS =
                     "upgrade_data_migration_status";
 
@@ -19096,17 +19150,20 @@ public final class Settings {
              * The custom foreground color.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CUSTOM_COLOR_FOREGROUND = "custom_foreground_color";
 
             /**
              * The custom background color.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String CUSTOM_COLOR_BACKGROUND = "custom_background_color";
 
             /** The status of the phone switching process.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String PHONE_SWITCHING_STATUS = "phone_switching_status";
 
             /**
@@ -19187,6 +19244,7 @@ public final class Settings {
              * (0 = false, 1 = true)
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String REDUCE_MOTION = "reduce_motion";
 
             /**
@@ -19248,6 +19306,7 @@ public final class Settings {
              * Controls the launcher ui mode on wearable devices.
              * @hide
              */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
             public static final String WEAR_LAUNCHER_UI_MODE = "wear_launcher_ui_mode";
 
             /** Whether Wear Power Anomaly Service is enabled.
