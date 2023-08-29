@@ -83,7 +83,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
 import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
@@ -128,7 +127,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptyList;
@@ -596,9 +594,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mAcquiredWakeLocks.add(wl);
                     return wl;
                 });
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
 
         // apps allowed as convos
         mService.setStringArrayResourceValue(PKG_O);
@@ -1961,34 +1956,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(wakeLock).acquire(anyLong());
         inOrder.verify(wakeLock).release();
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void enqueueNotification_wakeLockSystemPropertyOff_noWakeLock() throws Exception {
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, false);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "true", false);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG,
-                "enqueueNotification_setsWakeLockWorkSource", 0,
-                generateNotificationRecord(null).getNotification(), 0);
-        waitForIdle();
-
-        verifyZeroInteractions(mPowerManager);
-    }
-
-    @Test
-    public void enqueueNotification_wakeLockDeviceConfigOff_noWakeLock() throws Exception {
-        mTestFlagResolver.setFlagOverride(WAKE_LOCK_FOR_POSTING_NOTIFICATION, true);
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, "false", false);
-
-        mBinderService.enqueueNotificationWithTag(PKG, PKG,
-                "enqueueNotification_setsWakeLockWorkSource", 0,
-                generateNotificationRecord(null).getNotification(), 0);
-        waitForIdle();
-
-        verifyZeroInteractions(mPowerManager);
     }
 
     @Test
