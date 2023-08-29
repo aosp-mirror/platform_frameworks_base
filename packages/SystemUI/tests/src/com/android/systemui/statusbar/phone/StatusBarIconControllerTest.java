@@ -120,34 +120,6 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         verify(manager, never()).onRemoveIcon(anyInt());
     }
 
-    @Test
-    public void testRemoveAllIconsForSlot_ignoredForNewPipeline() {
-        IconManager manager = mock(IconManager.class);
-
-        // GIVEN the new pipeline is on
-        StatusBarPipelineFlags flags = mock(StatusBarPipelineFlags.class);
-        when(flags.isIconControlledByFlags("test_icon")).thenReturn(true);
-
-        StatusBarIconController iconController = new StatusBarIconControllerImpl(
-                mContext,
-                mock(CommandQueue.class),
-                mock(DemoModeController.class),
-                mock(ConfigurationController.class),
-                mock(TunerService.class),
-                mock(DumpManager.class),
-                mock(StatusBarIconList.class),
-                flags
-        );
-
-        iconController.addIconGroup(manager);
-
-        // WHEN a request to remove a new icon is sent
-        iconController.removeAllIconsForSlot("test_icon");
-
-        // THEN it is not removed for those icons
-        verify(manager, never()).onRemoveIcon(anyInt());
-    }
-
     private <T extends IconManager & TestableIconManager> void testCallOnAdd_forManager(T manager) {
         StatusBarIconHolder holder = holderForType(TYPE_ICON);
         manager.onIconAdded(0, "test_slot", false, holder);
