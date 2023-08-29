@@ -2851,16 +2851,15 @@ public final class ViewRootImpl implements ViewParent,
         if (mLastWindowInsets == null || forceConstruct) {
             final Configuration config = getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
-                    config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
-                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
-                    mWindowAttributes.softInputMode, mWindowAttributes.flags,
-                    (mWindowAttributes.systemUiVisibility
+                    config.isScreenRound(), mWindowAttributes.type,
+                    config.windowConfiguration.getActivityType(), mWindowAttributes.softInputMode,
+                    mWindowAttributes.flags, (mWindowAttributes.systemUiVisibility
                             | mWindowAttributes.subtreeSystemUiVisibility));
 
             mAttachInfo.mContentInsets.set(mLastWindowInsets.getSystemWindowInsets().toRect());
             mAttachInfo.mStableInsets.set(mLastWindowInsets.getStableInsets().toRect());
             mAttachInfo.mVisibleInsets.set(mInsetsController.calculateVisibleInsets(
-                    mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
+                    mWindowAttributes.type, config.windowConfiguration.getActivityType(),
                     mWindowAttributes.softInputMode, mWindowAttributes.flags).toRect());
         }
         return mLastWindowInsets;
