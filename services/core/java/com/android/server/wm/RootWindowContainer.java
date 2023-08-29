@@ -2699,7 +2699,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // transition exists, so this affects only when no lock screen is set. Otherwise
             // keyguard going away animation will be played.
             // See also AppTransitionController#getTransitCompatType for more details.
-            if ((!mTaskSupervisor.getKeyguardController().isDisplayOccluded(display.mDisplayId)
+            if ((!mTaskSupervisor.getKeyguardController().isKeyguardOccluded(display.mDisplayId)
                     && token.mTag.equals(KEYGUARD_SLEEP_TOKEN_TAG))
                     || token.mTag.equals(DISPLAY_OFF_SLEEP_TOKEN_TAG)) {
                 display.mSkipAppTransitionAnimation = true;
