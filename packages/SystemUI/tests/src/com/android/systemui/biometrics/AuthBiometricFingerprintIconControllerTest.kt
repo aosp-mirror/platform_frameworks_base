@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -63,7 +64,7 @@ class AuthBiometricFingerprintIconControllerTest : SysuiTestCase() {
         setupFingerprintSensorProperties(FingerprintSensorProperties.TYPE_POWER_BUTTON)
         controller = AuthBiometricFingerprintIconController(context, iconView, iconViewOverlay)
 
-        assertThat(controller.getIconContentDescription(AuthBiometricView.STATE_AUTHENTICATING))
+        assertThat(controller.getIconContentDescription(BiometricState.STATE_AUTHENTICATING))
             .isEqualTo(
                 context.resources.getString(
                     R.string.security_settings_sfps_enroll_find_sensor_message
@@ -76,7 +77,7 @@ class AuthBiometricFingerprintIconControllerTest : SysuiTestCase() {
         setupFingerprintSensorProperties(FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
         controller = AuthBiometricFingerprintIconController(context, iconView, iconViewOverlay)
 
-        assertThat(controller.getIconContentDescription(AuthBiometricView.STATE_AUTHENTICATING))
+        assertThat(controller.getIconContentDescription(BiometricState.STATE_AUTHENTICATING))
             .isEqualTo(context.resources.getString(R.string.fingerprint_dialog_touch_sensor))
     }
 

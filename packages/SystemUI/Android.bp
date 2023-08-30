@@ -296,8 +296,6 @@ filegroup {
 
         /* Biometric converted tests */
         "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
-        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintAndFaceViewTest.kt",
-        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintViewTest.kt",
         "tests/src/com/android/systemui/biometrics/AuthControllerTest.java",
         "tests/src/com/android/systemui/biometrics/BiometricDisplayListenerTest.java",
         "tests/src/com/android/systemui/biometrics/FaceHelpMessageDeferralTest.kt",

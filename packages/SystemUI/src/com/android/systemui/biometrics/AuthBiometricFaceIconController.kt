@@ -20,14 +20,7 @@ import android.graphics.drawable.Drawable
 import android.util.Log
 import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
-import com.android.systemui.biometrics.AuthBiometricView.BiometricState
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATED
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATING
-import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN
-import com.android.systemui.biometrics.AuthBiometricView.STATE_ERROR
-import com.android.systemui.biometrics.AuthBiometricView.STATE_HELP
-import com.android.systemui.biometrics.AuthBiometricView.STATE_IDLE
-import com.android.systemui.biometrics.AuthBiometricView.STATE_PENDING_CONFIRMATION
+import com.android.systemui.biometrics.ui.binder.Spaghetti.BiometricState
 
 private const val TAG = "AuthBiometricFaceIconController"
 
@@ -40,8 +33,7 @@ class AuthBiometricFaceIconController(
     // false = dark to light, true = light to dark
     private var lastPulseLightToDark = false
 
-    @BiometricState
-    private var state = 0
+    private var state: BiometricState = BiometricState.STATE_IDLE
 
     init {
         val size = context.resources.getDimensionPixelSize(R.dimen.biometric_dialog_face_icon_size)
@@ -66,54 +58,54 @@ class AuthBiometricFaceIconController(
     }
 
     override fun handleAnimationEnd(drawable: Drawable) {
-        if (state == STATE_AUTHENTICATING || state == STATE_HELP) {
+        if (state == BiometricState.STATE_AUTHENTICATING || state == BiometricState.STATE_HELP) {
             pulseInNextDirection()
         }
     }
 
-    override fun updateIcon(@BiometricState oldState: Int, @BiometricState newState: Int) {
-        val lastStateIsErrorIcon = (oldState == STATE_ERROR || oldState == STATE_HELP)
-        if (newState == STATE_AUTHENTICATING_ANIMATING_IN) {
+    override fun updateIcon(oldState: BiometricState, newState: BiometricState) {
+        val lastStateIsErrorIcon = (oldState == BiometricState.STATE_ERROR || oldState == BiometricState.STATE_HELP)
+        if (newState == BiometricState.STATE_AUTHENTICATING_ANIMATING_IN) {
             showStaticDrawable(R.drawable.face_dialog_pulse_dark_to_light)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_authenticating
             )
-        } else if (newState == STATE_AUTHENTICATING) {
+        } else if (newState == BiometricState.STATE_AUTHENTICATING) {
             startPulsing()
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_authenticating
             )
-        } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
+        } else if (oldState == BiometricState.STATE_PENDING_CONFIRMATION && newState == BiometricState.STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_confirmed
             )
-        } else if (lastStateIsErrorIcon && newState == STATE_IDLE) {
+        } else if (lastStateIsErrorIcon && newState == BiometricState.STATE_IDLE) {
             animateIconOnce(R.drawable.face_dialog_error_to_idle)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_idle
             )
-        } else if (lastStateIsErrorIcon && newState == STATE_AUTHENTICATED) {
+        } else if (lastStateIsErrorIcon && newState == BiometricState.STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_authenticated
             )
-        } else if (newState == STATE_ERROR && oldState != STATE_ERROR) {
+        } else if (newState == BiometricState.STATE_ERROR && oldState != BiometricState.STATE_ERROR) {
             animateIconOnce(R.drawable.face_dialog_dark_to_error)
             iconView.contentDescription = context.getString(
                     R.string.keyguard_face_failed
             )
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
+        } else if (oldState == BiometricState.STATE_AUTHENTICATING && newState == BiometricState.STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_authenticated
             )
-        } else if (newState == STATE_PENDING_CONFIRMATION) {
+        } else if (newState == BiometricState.STATE_PENDING_CONFIRMATION) {
             animateIconOnce(R.drawable.face_dialog_wink_from_dark)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_authenticated
             )
-        } else if (newState == STATE_IDLE) {
+        } else if (newState == BiometricState.STATE_IDLE) {
             showStaticDrawable(R.drawable.face_dialog_idle_static)
             iconView.contentDescription = context.getString(
                     R.string.biometric_dialog_face_icon_description_idle
