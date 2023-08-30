@@ -73,7 +73,9 @@ public final class XmlBlock implements AutoCloseable {
     private void decOpenCountLocked() {
         mOpenCount--;
         if (mOpenCount == 0) {
+            mStrings.close();
             nativeDestroy(mNative);
+            mNative = 0;
             if (mAssets != null) {
                 mAssets.xmlBlockGone(hashCode());
             }
@@ -621,7 +623,7 @@ public final class XmlBlock implements AutoCloseable {
     }
 
     private @Nullable final AssetManager mAssets;
-    private final long mNative;
+    private long mNative;   // final, but gets reset on close
     /*package*/ final StringBlock mStrings;
     private boolean mOpen = true;
     private int mOpenCount = 1;
