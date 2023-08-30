@@ -69,7 +69,6 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -281,7 +280,7 @@ public final class CredentialManagerService
         }
     }
 
-    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
+    private static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,
@@ -291,9 +290,22 @@ public final class CredentialManagerService
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
         if (serviceNames == null) {
-            return new HashSet<String>();
+            return new HashSet<ComponentName>();
         }
-        return new HashSet<String>(Arrays.asList(serviceNames));
+
+        Set<ComponentName> services = new HashSet<>();
+        for (String serviceName : serviceNames) {
+            ComponentName compName = ComponentName.unflattenFromString(serviceName);
+            if (compName == null) {
+                Slog.w(
+                    TAG,
+                    "Primary provider component name unflatten from string error: "
+                            + serviceName);
+                continue;
+            }
+            services.add(compName);
+        }
+        return services;
     }
 
     @GuardedBy("mLock")
