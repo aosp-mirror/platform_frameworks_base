@@ -3457,7 +3457,8 @@
     <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
          When set true, there will create windowless starting surface for the preview target, so it
          won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
-    <bool name="config_predictShowStartingSurface">true</bool>
+    <!-- TODO(b/268563842) enable once activity snapshot is ready -->
+    <bool name="config_predictShowStartingSurface">false</bool>
 
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
