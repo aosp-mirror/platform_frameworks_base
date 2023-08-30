@@ -29,10 +29,10 @@ import android.util.Size;
 import android.view.Gravity;
 import android.view.View;
 
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.SizeSpecSource;
-import com.android.wm.shell.pip.PipBoundsAlgorithm;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

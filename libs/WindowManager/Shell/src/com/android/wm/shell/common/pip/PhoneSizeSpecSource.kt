@@ -21,7 +21,6 @@ import android.content.res.Resources
 import android.os.SystemProperties
 import android.util.Size
 import com.android.wm.shell.R
-import com.android.wm.shell.pip.PipDisplayLayoutState
 import java.io.PrintWriter
 
 class PhoneSizeSpecSource(

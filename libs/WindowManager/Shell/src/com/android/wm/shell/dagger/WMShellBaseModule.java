@@ -58,8 +58,15 @@ import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
+import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
@@ -343,6 +350,42 @@ public abstract class WMShellBaseModule {
         return new PipMediaController(context, mainHandler);
     }
 
+    @WMSingleton
+    @Provides
+    static SizeSpecSource provideSizeSpecSource(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PhoneSizeSpecSource(context, pipDisplayLayoutState);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsState providePipBoundsState(Context context,
+            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
+    }
+
+
+    @WMSingleton
+    @Provides
+    static PipSnapAlgorithm providePipSnapAlgorithm() {
+        return new PipSnapAlgorithm();
+    }
+
+    @WMSingleton
+    @Provides
+    static PhonePipKeepClearAlgorithm providePhonePipKeepClearAlgorithm(Context context) {
+        return new PhonePipKeepClearAlgorithm(context);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
+            PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
+            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
+        return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
+                pipKeepClearAlgorithm, pipDisplayLayoutState, sizeSpecSource);
+    }
 
     //
     // Bubbles (optional feature)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.pip;
+package com.android.wm.shell.common.pip;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -36,7 +36,6 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
@@ -314,8 +313,11 @@ public class PipBoundsState {
         return mPipDisplayLayoutState.getDisplayLayout();
     }
 
+    /**
+     * Clears the PiP re-entry state.
+     */
     @VisibleForTesting
-    void clearReentryState() {
+    public void clearReentryState() {
         mPipReentryState = null;
     }
 
@@ -400,11 +402,18 @@ public class PipBoundsState {
         mNamedUnrestrictedKeepClearAreas.remove(name);
     }
 
+
+    /**
+     * @return restricted keep clear areas.
+     */
     @NonNull
     public Set<Rect> getRestrictedKeepClearAreas() {
         return mRestrictedKeepClearAreas;
     }
 
+    /**
+     * @return unrestricted keep clear areas.
+     */
     @NonNull
     public Set<Rect> getUnrestrictedKeepClearAreas() {
         if (mNamedUnrestrictedKeepClearAreas.isEmpty()) return mUnrestrictedKeepClearAreas;
@@ -561,7 +570,11 @@ public class PipBoundsState {
         }
     }
 
-    static final class PipReentryState {
+    /**
+     * Represents the state of pip to potentially restore upon reentry.
+     */
+    @VisibleForTesting
+    public static final class PipReentryState {
         private static final String TAG = PipReentryState.class.getSimpleName();
 
         private final @Nullable Size mSize;
@@ -573,11 +586,11 @@ public class PipBoundsState {
         }
 
         @Nullable
-        Size getSize() {
+        public Size getSize() {
             return mSize;
         }
 
-        float getSnapFraction() {
+        public float getSnapFraction() {
             return mSnapFraction;
         }
 

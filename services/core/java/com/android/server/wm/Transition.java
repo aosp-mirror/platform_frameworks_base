@@ -1127,6 +1127,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         // though, notify the controller to prevent degenerate cases.
                         if (!r.isVisibleRequested()) {
                             mController.mValidateCommitVis.add(r);
+                        } else {
+                            // Make sure onAppTransitionFinished can be notified.
+                            mParticipants.add(r);
                         }
                         return;
                     }

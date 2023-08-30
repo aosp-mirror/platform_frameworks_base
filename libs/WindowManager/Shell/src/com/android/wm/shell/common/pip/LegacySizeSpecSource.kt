@@ -21,7 +21,6 @@ import android.content.res.Resources
 import android.graphics.PointF
 import android.util.Size
 import com.android.wm.shell.R
-import com.android.wm.shell.pip.PipDisplayLayoutState
 
 class LegacySizeSpecSource(
         private val context: Context,

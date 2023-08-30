@@ -78,17 +78,6 @@ constructor(
 
     private val _isOverlayTouched: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    /**
-     * If the API caller or the user's personal preferences require explicit confirmation after
-     * successful authentication.
-     */
-    val isConfirmationRequired: Flow<Boolean> =
-        combine(_isOverlayTouched, promptSelectorInteractor.isConfirmationRequired) {
-            isOverlayTouched,
-            isConfirmationRequired ->
-            !isOverlayTouched && isConfirmationRequired
-        }
-
     /** The kind of credential the user has. */
     val credentialKind: Flow<PromptKind> = promptSelectorInteractor.credentialKind
 
@@ -137,6 +126,15 @@ constructor(
             }
             .distinctUntilChanged()
 
+    /**
+     * If the API caller or the user's personal preferences require explicit confirmation after
+     * successful authentication. Confirmation always required when in explicit flow.
+     */
+    val isConfirmationRequired: Flow<Boolean> =
+        combine(_isOverlayTouched, size) { isOverlayTouched, size ->
+            !isOverlayTouched && size.isNotSmall
+        }
+
     /** Title for the prompt. */
     val title: Flow<String> =
         promptSelectorInteractor.prompt.map { it?.title ?: "" }.distinctUntilChanged()
@@ -170,12 +168,7 @@ constructor(
             .distinctUntilChanged()
 
     /** If the icon can be used as a confirmation button. */
-    val isIconConfirmButton: Flow<Boolean> =
-        combine(size, promptSelectorInteractor.isConfirmationRequired) {
-            size,
-            isConfirmationRequired ->
-            size.isNotSmall && isConfirmationRequired
-        }
+    val isIconConfirmButton: Flow<Boolean> = size.map { it.isNotSmall }.distinctUntilChanged()
 
     /** If the negative button should be shown. */
     val isNegativeButtonVisible: Flow<Boolean> =

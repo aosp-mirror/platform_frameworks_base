@@ -30,16 +30,15 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.pip.LegacySizeSpecSource;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMediaController;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.common.pip.PipUiEventLogger;
-import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
-import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -131,15 +130,9 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
-    static PipSnapAlgorithm providePipSnapAlgorithm() {
-        return new PipSnapAlgorithm();
-    }
-
-    @WMSingleton
-    @Provides
     static TvPipBoundsAlgorithm provideTvPipBoundsAlgorithm(Context context,
             TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
-            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
+            PipDisplayLayoutState pipDisplayLayoutState, LegacySizeSpecSource sizeSpecSource) {
         return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm,
                 pipDisplayLayoutState, sizeSpecSource);
     }
@@ -147,13 +140,13 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static TvPipBoundsState provideTvPipBoundsState(Context context,
-            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
+            LegacySizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
         return new TvPipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
     }
 
     @WMSingleton
     @Provides
-    static SizeSpecSource provideSizeSpecSource(Context context,
+    static LegacySizeSpecSource provideSizeSpecSource(Context context,
             PipDisplayLayoutState pipDisplayLayoutState) {
         return new LegacySizeSpecSource(context, pipDisplayLayoutState);
     }
@@ -196,13 +189,6 @@ public abstract class TvPipModule {
             PipParamsChangedForwarder pipParamsChangedForwarder) {
         return new TvPipNotificationController(context, pipMediaController,
                 pipParamsChangedForwarder);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipAnimationController providePipAnimationController(PipSurfaceTransactionHelper
-            pipSurfaceTransactionHelper) {
-        return new PipAnimationController(pipSurfaceTransactionHelper);
     }
 
     @WMSingleton

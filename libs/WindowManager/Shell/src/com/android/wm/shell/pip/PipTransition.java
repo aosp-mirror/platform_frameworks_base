@@ -64,6 +64,9 @@ import androidx.annotation.Nullable;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -89,6 +92,7 @@ public class PipTransition extends PipTransitionController {
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
+    private final PipAnimationController mPipAnimationController;
     private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private SurfaceControl.Transaction mFinishTransaction;
@@ -137,14 +141,22 @@ public class PipTransition extends PipTransitionController {
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
-                pipBoundsAlgorithm, pipAnimationController);
+                pipBoundsAlgorithm);
         mContext = context;
         mPipTransitionState = pipTransitionState;
         mPipDisplayLayoutState = pipDisplayLayoutState;
+        mPipAnimationController = pipAnimationController;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
         mSplitScreenOptional = splitScreenOptional;
+    }
+
+    @Override
+    protected void onInit() {
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            mTransitions.addHandler(this);
+        }
     }
 
     @Override
