@@ -52,7 +52,7 @@
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Sukurti „passkey“ kitame įrenginyje?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Išsaugoti slaptažodį kitame įrenginyje?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Išsaugoti prisijungimo duomenis kitame įrenginyje?"</string>
-    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Naudoti <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> visada prisijungiant?"</string>
+    <string name="use_provider_for_all_title" msgid="4201020195058980757">"Naudoti „<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>“ visada prisijungiant?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Šioje <xliff:g id="USERNAME">%1$s</xliff:g> Slaptažodžių tvarkyklėje bus saugomi jūsų slaptažodžiai ir prieigos raktai, kad galėtumėte lengvai prisijungti"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nustatyti kaip numatytąjį"</string>
     <string name="settings" msgid="6536394145760913145">"Nustatymai"</string>
