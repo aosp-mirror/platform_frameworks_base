@@ -73,6 +73,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetdUtils.ModifyOperation;
 import com.android.net.module.util.PermissionUtils;
@@ -782,7 +783,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public boolean getIpForwardingEnabled() throws IllegalStateException{
         PermissionUtils.enforceNetworkStackPermission(mContext);
-
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#getIpForwardingEnabled not supported in V+");
+        }
         try {
             return mNetdService.ipfwdEnabled();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -793,7 +797,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void setIpForwardingEnabled(boolean enable) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
-        try {
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#setIpForwardingEnabled not supported in V+");
+        }        try {
             if (enable) {
                 mNetdService.ipfwdEnableForwarding("tethering");
             } else {
@@ -807,6 +814,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void startTethering(String[] dhcpRange) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#startTethering not supported in V+");
+        }
         try {
             NetdUtils.tetherStart(mNetdService, true /* usingLegacyDnsProxy */, dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -817,6 +827,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void stopTethering() {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#stopTethering not supported in V+");
+        }
         try {
             mNetdService.tetherStop();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -827,6 +840,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public boolean isTetheringStarted() {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#isTetheringStarted not supported in V+");
+        }
         try {
             return mNetdService.tetherIsEnabled();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -837,6 +853,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void tetherInterface(String iface) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#tetherInterface not supported in V+");
+        }
         try {
             final LinkAddress addr = getInterfaceConfig(iface).getLinkAddress();
             final IpPrefix dest = new IpPrefix(addr.getAddress(), addr.getPrefixLength());
@@ -849,6 +868,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void untetherInterface(String iface) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#untetherInterface not supported in V+");
+        }
         try {
             NetdUtils.untetherInterface(mNetdService, iface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -859,6 +881,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public String[] listTetheredInterfaces() {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException(
+                    "NMS#listTetheredInterfaces not supported in V+");
+        }
         try {
             return mNetdService.tetherInterfaceList();
         } catch (RemoteException | ServiceSpecificException e) {
@@ -869,6 +895,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void enableNat(String internalInterface, String externalInterface) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#enableNat not supported in V+");
+        }
         try {
             mNetdService.tetherAddForward(internalInterface, externalInterface);
         } catch (RemoteException | ServiceSpecificException e) {
@@ -879,6 +908,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void disableNat(String internalInterface, String externalInterface) {
         PermissionUtils.enforceNetworkStackPermission(mContext);
+        if (SdkLevel.isAtLeastV()) {
+            throw new UnsupportedOperationException("NMS#disableNat not supported in V+");
+        }
         try {
             mNetdService.tetherRemoveForward(internalInterface, externalInterface);
         } catch (RemoteException | ServiceSpecificException e) {
