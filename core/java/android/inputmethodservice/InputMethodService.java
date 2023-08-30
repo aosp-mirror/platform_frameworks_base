@@ -890,10 +890,13 @@ public class InputMethodService extends AbstractInputMethodService {
             mSystemCallingHideSoftInput = true;
             mCurHideInputToken = hideInputToken;
             mCurStatsToken = statsToken;
-            hideSoftInput(flags, resultReceiver);
-            mCurStatsToken = null;
-            mCurHideInputToken = null;
-            mSystemCallingHideSoftInput = false;
+            try {
+                hideSoftInput(flags, resultReceiver);
+            } finally {
+                mCurStatsToken = null;
+                mCurHideInputToken = null;
+                mSystemCallingHideSoftInput = false;
+            }
         }
 
         /**
