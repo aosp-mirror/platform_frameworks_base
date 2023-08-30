@@ -78,6 +78,22 @@ object KeyguardRootViewBinder {
                     }
 
                     if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                        launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
+                    }
+
+                    if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                        launch {
+                            viewModel.translationY.collect {
+                                val statusView =
+                                    view.requireViewById<View>(R.id.keyguard_status_view)
+                                statusView.translationY = it
+                            }
+                        }
+                    }
+                }
+
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
                         launch {
                             viewModel.keyguardRootViewVisibilityState.collect { visibilityState ->
                                 view.animate().cancel()
@@ -109,18 +125,6 @@ object KeyguardRootViewBinder {
                                 } else {
                                     view.visibility = View.GONE
                                 }
-                            }
-                        }
-
-                        launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
-                    }
-
-                    if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
-                        launch {
-                            viewModel.translationY.collect {
-                                val statusView =
-                                    view.requireViewById<View>(R.id.keyguard_status_view)
-                                statusView.translationY = it
                             }
                         }
                     }
