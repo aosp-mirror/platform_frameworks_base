@@ -78,7 +78,7 @@ ErrorPos::print(FILE* to) const
         break;
     }
     
-    if (!this->file.isEmpty()) {
+    if (!this->file.empty()) {
         if (this->line >= 0) {
             fprintf(to, "%s:%d: %s%s\n", this->file.c_str(), this->line, type, this->error.c_str());
         } else {

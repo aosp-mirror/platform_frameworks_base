@@ -1285,7 +1285,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         packageType = ResourceTable::SharedLibrary;
     } else if (bundle->getExtending()) {
         packageType = ResourceTable::System;
-    } else if (!bundle->getFeatureOfPackage().isEmpty()) {
+    } else if (!bundle->getFeatureOfPackage().empty()) {
         packageType = ResourceTable::AppFeature;
     }
 
@@ -3144,7 +3144,7 @@ writeProguardForXml(ProguardKeepSet* keep, const sp<AaptFile>& layoutFile,
 
     tree.restart();
 
-    if (!startTags.isEmpty()) {
+    if (!startTags.empty()) {
         bool haveStart = false;
         while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
             if (code != ResXMLTree::START_TAG) {
