@@ -16,8 +16,11 @@
 
 package androidx.window.extensions;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.ActivityTaskManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -52,7 +55,11 @@ public class WindowExtensionsTest {
 
     @Test
     public void testGetActivityEmbeddingComponent() {
-        assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+        if (ActivityTaskManager.supportsMultiWindow(getInstrumentation().getContext())) {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+        } else {
+            assertThat(mExtensions.getActivityEmbeddingComponent()).isNull();
+        }
     }
 
     @Test
