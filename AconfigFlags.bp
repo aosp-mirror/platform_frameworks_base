@@ -23,6 +23,7 @@ java_defaults {
         ":camera_platform_flags_core_java_lib{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
+        ":telecom_flags_core_java_lib{.generated_srcjars}",
         ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
         ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
     ],
@@ -42,6 +43,13 @@ java_defaults {
 java_aconfig_library {
     name: "camera_platform_flags_core_java_lib",
     aconfig_declarations: "camera_platform_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Telecom
+java_aconfig_library {
+    name: "telecom_flags_core_java_lib",
+    aconfig_declarations: "telecom_flags",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
