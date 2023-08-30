@@ -66,12 +66,13 @@ constructor(
             splitShadeGuidelines,
         )
 
-    override fun addViews(
+    override fun replaceViews(
         previousBlueprint: KeyguardBlueprint?,
-        constraintLayout: ConstraintLayout
+        constraintLayout: ConstraintLayout,
+        bindData: Boolean
     ) {
         if (featureFlags.isEnabled(Flags.LAZY_INFLATE_KEYGUARD)) {
-            super.addViews(previousBlueprint, constraintLayout)
+            super.replaceViews(previousBlueprint, constraintLayout, bindData)
         }
     }
 
