@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Fumetto"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestisci"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Fumetto ignorato."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Tocca per riavviare quest\'app per una migliore visualizzazione."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Tocca per riavviare l\'app e migliorare la visualizzazione"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemi con la fotocamera?\nTocca per risolverli"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Il problema non si è risolto?\nTocca per ripristinare"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nessun problema con la fotocamera? Tocca per ignorare."</string>
