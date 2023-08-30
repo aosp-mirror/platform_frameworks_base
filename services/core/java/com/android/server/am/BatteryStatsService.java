@@ -27,6 +27,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
@@ -94,7 +96,6 @@ import android.util.StatsEvent;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.CpuScalingPolicyReader;
@@ -844,15 +845,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                DIRECT_EXECUTOR, pullAtomCallback);
     }
 
     /** StatsPullAtomCallback for pulling BatteryUsageStats data. */
