@@ -323,8 +323,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     boolean isBouncerShowingOverDream();
 
-    boolean isKeyguardSecure();
-
     void updateNotificationPanelTouchState();
 
     int getRotation();

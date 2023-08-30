@@ -95,7 +95,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun isBouncerShowing() = false
     override fun isBouncerShowingScrimmed() = false
     override fun isBouncerShowingOverDream() = false
-    override fun isKeyguardSecure() = false
     override fun updateNotificationPanelTouchState() {}
     override fun getRotation() = 0
     override fun setBarStateForTest(state: Int) {}
