@@ -61,8 +61,6 @@ import java.util.Objects;
  */
 public class PackageArchiverService extends IPackageArchiverService.Stub {
 
-    private static final String TAG = "PackageArchiver";
-
     /**
      * The maximum time granted for an app store to start a foreground service when unarchival
      * is requested.
@@ -99,27 +97,43 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
         verifyCaller(providedUid, binderUid);
-        PackageStateInternal ps = getPackageState(packageName, snapshot, binderUid, userId);
-        if (getResponsibleInstallerPackage(ps) == null) {
-            throw new ParcelableException(
-                    new PackageManager.NameNotFoundException(
-                            TextUtils.formatSimple("No installer found to archive app %s.",
-                                    packageName)));
+        ArchiveState archiveState;
+        try {
+            archiveState = createArchiveState(packageName, userId);
+            // TODO(b/282952870) Should be reverted if uninstall fails/cancels
+            storeArchiveState(packageName, archiveState, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new ParcelableException(e);
         }
-
-        // TODO(b/291569242) Verify that this list is not empty and return failure with
-        //  intentsender
-        List<LauncherActivityInfo> mainActivities = getLauncherApps().getActivityList(
-                ps.getPackageName(),
-                new UserHandle(userId));
-
-        // TODO(b/282952870) Bug: should happen after the uninstall completes successfully
-        storeArchiveState(ps, mainActivities, userId);
 
         // TODO(b/278553670) Add special strings for the delete dialog
         mPm.mInstallerService.uninstall(
                 new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
                 callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
+    }
+
+    private ArchiveState createArchiveState(String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
+        PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
+                Binder.getCallingUid(), userId);
+        String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
+        if (responsibleInstallerPackage == null) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("No installer found to archive app %s.",
+                            packageName));
+        }
+
+        List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps, userId);
+        List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>();
+        for (int i = 0; i < mainActivities.size(); i++) {
+            // TODO(b/278553670) Extract and store launcher icons
+            ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
+                    mainActivities.get(i).getLabel().toString(),
+                    Path.of("/TODO"), null);
+            archiveActivityInfos.add(activityInfo);
+        }
+
+        return new ArchiveState(archiveActivityInfos, responsibleInstallerPackage);
     }
 
     @Override
@@ -138,8 +152,13 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "unarchiveApp");
         verifyCaller(providedUid, binderUid);
-        PackageStateInternal ps = getPackageState(packageName, snapshot, binderUid, userId);
-        verifyArchived(ps, userId);
+        PackageStateInternal ps;
+        try {
+            ps = getPackageState(packageName, snapshot, binderUid, userId);
+            verifyArchived(ps, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new ParcelableException(e);
+        }
         String installerPackage = getResponsibleInstallerPackage(ps);
         if (installerPackage == null) {
             throw new ParcelableException(
@@ -151,14 +170,14 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         mPm.mHandler.post(() -> unarchiveInternal(packageName, userHandle, installerPackage));
     }
 
-    private void verifyArchived(PackageStateInternal ps, int userId) {
+    private void verifyArchived(PackageStateInternal ps, int userId)
+            throws PackageManager.NameNotFoundException {
         PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
         // TODO(b/288142708) Check for isInstalled false here too.
         if (userState.getArchiveState() == null) {
-            throw new ParcelableException(
-                    new PackageManager.NameNotFoundException(
-                            TextUtils.formatSimple("Package %s is not currently archived.",
-                                    ps.getPackageName())));
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("Package %s is not currently archived.",
+                            ps.getPackageName()));
         }
     }
 
@@ -196,6 +215,21 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
                 /* initialExtras= */ null);
     }
 
+    private List<LauncherActivityInfo> getLauncherActivityInfos(PackageStateInternal ps,
+            int userId) throws PackageManager.NameNotFoundException {
+        List<LauncherActivityInfo> mainActivities =
+                Binder.withCleanCallingIdentity(() -> getLauncherApps().getActivityList(
+                        ps.getPackageName(),
+                        new UserHandle(userId)));
+        if (mainActivities.isEmpty()) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("The app %s does not have a main activity.",
+                            ps.getPackageName()));
+        }
+
+        return mainActivities;
+    }
+
     @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
             android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
             android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
@@ -219,13 +253,13 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
 
     @NonNull
     private static PackageStateInternal getPackageState(String packageName,
-            Computer snapshot, int callingUid, int userId) {
+            Computer snapshot, int callingUid, int userId)
+            throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = snapshot.getPackageStateFiltered(packageName, callingUid,
                 userId);
         if (ps == null) {
-            throw new ParcelableException(
-                    new PackageManager.NameNotFoundException(
-                            TextUtils.formatSimple("Package %s not found.", packageName)));
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("Package %s not found.", packageName));
         }
         return ps;
     }
@@ -237,38 +271,25 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         return mLauncherApps;
     }
 
-    private void storeArchiveState(PackageStateInternal ps,
-            List<LauncherActivityInfo> mainActivities, int userId) {
-        List<ArchiveActivityInfo> activityInfos = new ArrayList<>();
-        for (int i = 0; i < mainActivities.size(); i++) {
-            // TODO(b/278553670) Extract and store launcher icons
-            ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
-                    mainActivities.get(i).getLabel().toString(),
-                    Path.of("/TODO"), null);
-            activityInfos.add(activityInfo);
-        }
-
-        InstallSource installSource = ps.getInstallSource();
-        String installerPackageName = installSource.mUpdateOwnerPackageName != null
-                ? installSource.mUpdateOwnerPackageName : installSource.mInstallerPackageName;
-
+    private void storeArchiveState(String packageName, ArchiveState archiveState, int userId)
+            throws PackageManager.NameNotFoundException {
         synchronized (mPm.mLock) {
-            PackageSetting packageSetting = getPackageSettingLocked(ps.getPackageName(), userId);
+            PackageSetting packageSetting = getPackageSettingLocked(packageName, userId);
             packageSetting
                     .modifyUserState(userId)
-                    .setArchiveState(new ArchiveState(activityInfos, installerPackageName));
+                    .setArchiveState(archiveState);
         }
     }
 
     @NonNull
     @GuardedBy("mPm.mLock")
-    private PackageSetting getPackageSettingLocked(String packageName, int userId) {
+    private PackageSetting getPackageSettingLocked(String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
         PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
         // Shouldn't happen, we already verify presence of the package in getPackageState()
         if (ps == null || !ps.getUserStateOrDefault(userId).isInstalled()) {
-            throw new ParcelableException(
-                    new PackageManager.NameNotFoundException(
-                            TextUtils.formatSimple("Package %s not found.", packageName)));
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("Package %s not found.", packageName));
         }
         return ps;
     }
