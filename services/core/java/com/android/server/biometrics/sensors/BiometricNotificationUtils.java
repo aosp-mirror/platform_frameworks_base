@@ -78,7 +78,8 @@ public class BiometricNotificationUtils {
                 null /* options */, UserHandle.CURRENT);
 
         showNotificationHelper(context, name, title, content, pendingIntent, FACE_RE_ENROLL_CHANNEL,
-                FACE_RE_ENROLL_NOTIFICATION_TAG, Notification.VISIBILITY_SECRET);
+                Notification.CATEGORY_SYSTEM, FACE_RE_ENROLL_NOTIFICATION_TAG,
+                Notification.VISIBILITY_SECRET);
     }
 
     /**
@@ -101,7 +102,8 @@ public class BiometricNotificationUtils {
                 null /* options */, UserHandle.CURRENT);
 
         showNotificationHelper(context, name, title, content, pendingIntent, FACE_ENROLL_CHANNEL,
-                FACE_ENROLL_NOTIFICATION_TAG, Notification.VISIBILITY_PUBLIC);
+                Notification.CATEGORY_RECOMMENDATION, FACE_ENROLL_NOTIFICATION_TAG,
+                Notification.VISIBILITY_PUBLIC);
     }
 
     /**
@@ -124,8 +126,8 @@ public class BiometricNotificationUtils {
                 null /* options */, UserHandle.CURRENT);
 
         showNotificationHelper(context, name, title, content, pendingIntent,
-                FINGERPRINT_ENROLL_CHANNEL, FINGERPRINT_ENROLL_NOTIFICATION_TAG,
-                Notification.VISIBILITY_PUBLIC);
+                Notification.CATEGORY_RECOMMENDATION, FINGERPRINT_ENROLL_CHANNEL,
+                FINGERPRINT_ENROLL_NOTIFICATION_TAG, Notification.VISIBILITY_PUBLIC);
     }
 
     /**
@@ -159,13 +161,13 @@ public class BiometricNotificationUtils {
                 null /* options */, UserHandle.CURRENT);
 
         showNotificationHelper(context, name, title, content, pendingIntent,
-                FINGERPRINT_BAD_CALIBRATION_CHANNEL, BAD_CALIBRATION_NOTIFICATION_TAG,
-                Notification.VISIBILITY_SECRET);
+                Notification.CATEGORY_SYSTEM, FINGERPRINT_BAD_CALIBRATION_CHANNEL,
+                BAD_CALIBRATION_NOTIFICATION_TAG, Notification.VISIBILITY_SECRET);
     }
 
     private static void showNotificationHelper(Context context, String name, String title,
-                String content, PendingIntent pendingIntent, String channelName,
-                String notificationTag, int visibility) {
+                String content, PendingIntent pendingIntent, String category,
+                String channelName, String notificationTag, int visibility) {
         final NotificationManager notificationManager =
                 context.getSystemService(NotificationManager.class);
         final NotificationChannel channel = new NotificationChannel(channelName, name,
@@ -178,7 +180,7 @@ public class BiometricNotificationUtils {
                 .setOnlyAlertOnce(true)
                 .setLocalOnly(true)
                 .setAutoCancel(true)
-                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setCategory(category)
                 .setContentIntent(pendingIntent)
                 .setVisibility(visibility)
                 .build();
