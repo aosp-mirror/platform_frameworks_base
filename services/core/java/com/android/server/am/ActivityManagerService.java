@@ -3852,15 +3852,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void forceStopPackage(final String packageName, int userId) {
-        forceStopPackage(packageName, userId, /*flags=*/ 0);
+        forceStopPackage(packageName, userId, /*flags=*/ 0, null);
     }
 
     @Override
     public void forceStopPackageEvenWhenStopping(final String packageName, int userId) {
-        forceStopPackage(packageName, userId, ActivityManager.FLAG_OR_STOPPED);
+        forceStopPackage(packageName, userId, ActivityManager.FLAG_OR_STOPPED, null);
     }
 
-    private void forceStopPackage(final String packageName, int userId, int userRunningFlags) {
+    private void forceStopPackage(final String packageName, int userId, int userRunningFlags,
+            String reason) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: forceStopPackage() from pid="
@@ -3905,7 +3906,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 + packageName + ": " + e);
                     }
                     if (mUserController.isUserRunning(user, userRunningFlags)) {
-                        forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
+                        forceStopPackageLocked(packageName, pkgUid,
+                                reason == null ? ("from pid " + callingPid) : reason);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
                 }
@@ -14898,8 +14900,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     Intent.EXTRA_QUARANTINED, false);
                             if (suspended && quarantined && packageNames != null) {
                                 for (int i = 0; i < packageNames.length; i++) {
-                                    forceStopPackageLocked(packageNames[i], -1, false, true, true,
-                                            false, false, userId, "suspended");
+                                    forceStopPackage(packageNames[i], userId,
+                                            ActivityManager.FLAG_OR_STOPPED, "quarantined");
                                 }
                             }
 
