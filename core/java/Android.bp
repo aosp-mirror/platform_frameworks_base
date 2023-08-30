@@ -9,6 +9,11 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+aidl_library {
+    name: "HardwareBuffer_aidl",
+    hdrs: ["android/hardware/HardwareBuffer.aidl"],
+}
+
 filegroup {
     name: "framework-core-sources",
     srcs: [
