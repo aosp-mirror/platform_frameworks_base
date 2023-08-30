@@ -1682,6 +1682,13 @@ public abstract class PackageManager {
     public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
 
     /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that this
+     * session is for archived package installation.
+     * @hide
+     */
+    public static final int INSTALL_ARCHIVED = 1 << 27;
+
+    /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
      * a development-only feature and should not be used on end user devices.
      *

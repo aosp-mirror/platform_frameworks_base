@@ -42,7 +42,8 @@ final class PrepareFailure extends PackageManagerException {
     }
 
     PrepareFailure(String message, Exception e) {
-        super(((PackageManagerException) e).error,
+        super(e instanceof PackageManagerException ? ((PackageManagerException) e).error
+                        : PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                 ExceptionUtils.getCompleteMessage(message, e));
     }
 

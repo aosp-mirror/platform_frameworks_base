@@ -474,15 +474,117 @@ public class ParsingPackageUtils {
         }
     }
 
-    private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, File apkFile,
-            String codePath, SplitAssetLoader assetLoader, int flags) {
-        final String apkPath = apkFile.getAbsolutePath();
+    /**
+     * Creates ParsingPackage using only PackageLite.
+     * Missing fields will contain reasonable defaults.
+     * Used for packageless (aka archived) package installation.
+     */
+    public ParseResult<ParsingPackage> parsePackageFromPackageLite(ParseInput input,
+            PackageLite lite, int flags) {
+        final String volumeUuid = getVolumeUuid(lite.getPath());
+        final String pkgName = lite.getPackageName();
 
+        final TypedArray manifestArray = null;
+        final ParsingPackage pkg = mCallback.startParsingPackage(pkgName,
+                lite.getBaseApkPath(), lite.getPath(), manifestArray, lite.isCoreApp());
+
+        final int targetSdk = lite.getTargetSdk();
+        final String versionName = null;
+        final int compileSdkVersion = 0;
+        final String compileSdkVersionCodeName = null;
+        final boolean isolatedSplitLoading = false;
+
+        // Normally set from manifestArray.
+        pkg.setVersionCode(lite.getVersionCode());
+        pkg.setVersionCodeMajor(lite.getVersionCodeMajor());
+        pkg.setBaseRevisionCode(lite.getBaseRevisionCode());
+        pkg.setVersionName(versionName);
+        pkg.setCompileSdkVersion(compileSdkVersion);
+        pkg.setCompileSdkVersionCodeName(compileSdkVersionCodeName);
+        pkg.setIsolatedSplitLoading(isolatedSplitLoading);
+        pkg.setTargetSdkVersion(targetSdk);
+
+        // parseBaseApkTags
+        pkg.setInstallLocation(lite.getInstallLocation())
+                .setTargetSandboxVersion(PARSE_DEFAULT_TARGET_SANDBOX)
+                /* Set the global "on SD card" flag */
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
+
+        // parseBaseAppBasicFlags
+        pkg
+                // Default true
+                .setBackupAllowed(true)
+                .setClearUserDataAllowed(true)
+                .setClearUserDataOnFailedRestoreAllowed(true)
+                .setAllowNativeHeapPointerTagging(true)
+                .setEnabled(true)
+                .setExtractNativeLibrariesRequested(true)
+                // targetSdkVersion gated
+                .setAllowAudioPlaybackCapture(targetSdk >= Build.VERSION_CODES.Q)
+                .setHardwareAccelerated(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+                .setRequestLegacyExternalStorage(targetSdk < Build.VERSION_CODES.Q)
+                .setCleartextTrafficAllowed(targetSdk < Build.VERSION_CODES.P)
+                // Ints
+                .setCategory(ApplicationInfo.CATEGORY_UNDEFINED)
+                // Floats Default 0f
+                .setMaxAspectRatio(0f)
+                .setMinAspectRatio(0f);
+
+        // No APK - no code.
+        pkg.setDeclaredHavingCode(false);
+
+        final String taskAffinity = null;
+        ParseResult<String> taskAffinityResult = ComponentParseUtils.buildTaskAffinityName(
+                pkgName, pkgName, taskAffinity, input);
+        if (taskAffinityResult.isError()) {
+            return input.error(taskAffinityResult);
+        }
+        pkg.setTaskAffinity(taskAffinityResult.getResult());
+
+        final CharSequence pname = null;
+        ParseResult<String> processNameResult = ComponentParseUtils.buildProcessName(
+                pkgName, null /*defProc*/, pname, flags, mSeparateProcesses, input);
+        if (processNameResult.isError()) {
+            return input.error(processNameResult);
+        }
+        pkg.setProcessName(processNameResult.getResult());
+
+        pkg.setGwpAsanMode(-1);
+        pkg.setMemtagMode(-1);
+
+        afterParseBaseApplication(pkg);
+
+        final ParseResult<ParsingPackage> result = validateBaseApkTags(input, pkg);
+        if (result.isError()) {
+            return result;
+        }
+
+        pkg.setVolumeUuid(volumeUuid);
+
+        if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
+            pkg.setSigningDetails(lite.getSigningDetails());
+        } else {
+            pkg.setSigningDetails(SigningDetails.UNKNOWN);
+        }
+
+        return input.success(pkg
+                .set32BitAbiPreferred(lite.isUse32bitAbi()));
+    }
+
+    private static String getVolumeUuid(final String apkPath) {
         String volumeUuid = null;
         if (apkPath.startsWith(MNT_EXPAND)) {
             final int end = apkPath.indexOf('/', MNT_EXPAND.length());
             volumeUuid = apkPath.substring(MNT_EXPAND.length(), end);
         }
+        return volumeUuid;
+    }
+
+    private ParseResult<ParsingPackage> parseBaseApk(ParseInput input, File apkFile,
+            String codePath, SplitAssetLoader assetLoader, int flags) {
+        final String apkPath = apkFile.getAbsolutePath();
+
+        final String volumeUuid = getVolumeUuid(apkPath);
 
         if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
@@ -882,7 +984,7 @@ public class ParsingPackageUtils {
         }
 
         pkg.setInstallLocation(anInteger(PARSE_DEFAULT_INSTALL_LOCATION,
-                R.styleable.AndroidManifest_installLocation, sa))
+                        R.styleable.AndroidManifest_installLocation, sa))
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
@@ -932,6 +1034,10 @@ public class ParsingPackageUtils {
             }
         }
 
+        return validateBaseApkTags(input, pkg);
+    }
+
+    private ParseResult<ParsingPackage> validateBaseApkTags(ParseInput input, ParsingPackage pkg) {
         if (!ParsedAttributionUtils.isCombinationValid(pkg.getAttributions())) {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
@@ -2199,15 +2305,19 @@ public class ParsingPackageUtils {
             pkg.sortServices();
         }
 
-        // Must be run after the entire {@link ApplicationInfo} has been fully processed and after
-        // every activity info has had a chance to set it from its attributes.
+        afterParseBaseApplication(pkg);
+
+        return input.success(pkg);
+    }
+
+    // Must be run after the entire {@link ApplicationInfo} has been fully processed and after
+    // every activity info has had a chance to set it from its attributes.
+    private void afterParseBaseApplication(ParsingPackage pkg) {
         setMaxAspectRatio(pkg);
         setMinAspectRatio(pkg);
         setSupportsSizeChanges(pkg);
 
         pkg.setHasDomainUrls(hasDomainURLs(pkg));
-
-        return input.success(pkg);
     }
 
     /**

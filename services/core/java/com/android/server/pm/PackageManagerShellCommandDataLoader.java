@@ -18,9 +18,11 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.DataLoaderParams;
 import android.content.pm.InstallationFile;
 import android.content.pm.PackageInstaller;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ShellCommand;
 import android.service.dataloader.DataLoaderService;
@@ -37,6 +39,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -136,9 +139,13 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
          * Everything streamed.
          */
         static final byte STREAMING = 3;
+        /**
+         * Archived install.
+         */
+        static final byte ARCHIVED = 4;
 
         private final byte mMode;
-        private final String mData;
+        private final byte[] mData;
         private final String mSalt;
 
         private static AtomicLong sGlobalSalt = new AtomicLong((new SecureRandom()).nextLong());
@@ -156,6 +163,21 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             return new Metadata(LOCAL_FILE, filePath, nextGlobalSalt().toString());
         }
 
+        /** @hide */
+        @VisibleForTesting
+        public static Metadata forArchived(ArchivedPackageParcel archivedPackage) {
+            Parcel parcel = Parcel.obtain();
+            byte[] bytes;
+            try {
+                parcel.writeParcelable(archivedPackage, 0);
+                bytes = parcel.marshall();
+            } finally {
+                parcel.recycle();
+            }
+
+            return new Metadata(ARCHIVED, bytes, null);
+        }
+
         static Metadata forDataOnlyStreaming(String fileId) {
             return new Metadata(DATA_ONLY_STREAMING, fileId);
         }
@@ -169,8 +191,12 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         }
 
         private Metadata(byte mode, String data, String salt) {
+            this(mode, (data != null ? data : "").getBytes(StandardCharsets.UTF_8), salt);
+        }
+
+        private Metadata(byte mode, byte[] data, String salt) {
             this.mMode = mode;
-            this.mData = (data == null) ? "" : data;
+            this.mData = data;
             this.mSalt = salt;
         }
 
@@ -181,22 +207,21 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             int offset = 0;
             final byte mode = bytes[offset];
             offset += 1;
-            final String data;
+            final byte[] data;
             final String salt;
             switch (mode) {
                 case LOCAL_FILE: {
                     int dataSize = ByteBuffer.wrap(bytes, offset, 4).order(
                             ByteOrder.LITTLE_ENDIAN).getInt();
                     offset += 4;
-                    data = new String(bytes, offset, dataSize, StandardCharsets.UTF_8);
+                    data = Arrays.copyOfRange(bytes, offset, offset + dataSize);
                     offset += dataSize;
                     salt = new String(bytes, offset, bytes.length - offset,
                             StandardCharsets.UTF_8);
                     break;
                 }
                 default:
-                    data = new String(bytes, offset, bytes.length - offset,
-                            StandardCharsets.UTF_8);
+                    data = Arrays.copyOfRange(bytes, offset, bytes.length);
                     salt = null;
                     break;
             }
@@ -207,7 +232,7 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
         @VisibleForTesting
         public byte[] toByteArray() {
             final byte[] result;
-            final byte[] dataBytes = this.mData.getBytes(StandardCharsets.UTF_8);
+            final byte[] dataBytes = this.mData;
             switch (this.mMode) {
                 case LOCAL_FILE: {
                     int dataSize = dataBytes.length;
@@ -237,8 +262,25 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
             return this.mMode;
         }
 
-        String getData() {
+        byte[] getData() {
             return this.mData;
+        }
+
+        ArchivedPackageParcel getArchivedPackage() {
+            if (getMode() != ARCHIVED) {
+                throw new IllegalStateException("Not an archived package metadata.");
+            }
+
+            Parcel parcel = Parcel.obtain();
+            ArchivedPackageParcel result;
+            try {
+                parcel.unmarshall(this.mData, 0, this.mData.length);
+                parcel.setDataPosition(0);
+                result = parcel.readParcelable(ArchivedPackageParcel.class.getClassLoader());
+            } finally {
+                parcel.recycle();
+            }
+            return result;
         }
     }
 
@@ -278,12 +320,18 @@ public class PackageManagerShellCommandDataLoader extends DataLoaderService {
                         case Metadata.LOCAL_FILE: {
                             ParcelFileDescriptor incomingFd = null;
                             try {
-                                incomingFd = getLocalFilePFD(shellCommand, metadata.getData());
+                                final String filePath = new String(metadata.getData(),
+                                        StandardCharsets.UTF_8);
+                                incomingFd = getLocalFilePFD(shellCommand, filePath);
                                 mConnector.writeData(file.getName(), 0, incomingFd.getStatSize(),
                                         incomingFd);
                             } finally {
                                 IoUtils.closeQuietly(incomingFd);
                             }
+                            break;
+                        }
+                        case Metadata.ARCHIVED: {
+                            // Do nothing, metadata already contains everything needed for install.
                             break;
                         }
                         default:

@@ -77,6 +77,7 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.AuxiliaryResolveInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.Checksum;
@@ -6296,6 +6297,39 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             for (int index = 0; index < packagesToNotify.size(); index++) {
                 notifyInstallObserver(packagesToNotify.valueAt(index), false /* killApp */);
             }
+        }
+
+        @Override
+        public ArchivedPackageParcel getArchivedPackage(String apkPath) {
+            final ParsedPackage parsedPackage;
+            try (PackageParser2 pp = mInjector.getPreparingPackageParser()) {
+                parsedPackage = pp.parsePackage(new File(apkPath),
+                        getDefParseFlags() | ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES, false);
+            } catch (PackageManagerException e) {
+                throw new IllegalArgumentException("Failed parse", e);
+            }
+
+            ArchivedPackageParcel archPkg = new ArchivedPackageParcel();
+            archPkg.packageName = parsedPackage.getPackageName();
+            archPkg.signingDetails = parsedPackage.getSigningDetails();
+
+            long longVersionCode = parsedPackage.getLongVersionCode();
+            archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
+            archPkg.versionCode = (int) longVersionCode;
+
+            archPkg.targetSdkVersion = parsedPackage.getTargetSdkVersion();
+
+            // These get translated in flags important for user data management.
+            archPkg.clearUserDataAllowed = parsedPackage.isClearUserDataAllowed();
+            archPkg.backupAllowed = parsedPackage.isBackupAllowed();
+            archPkg.defaultToDeviceProtectedStorage =
+                    parsedPackage.isDefaultToDeviceProtectedStorage();
+            archPkg.requestLegacyExternalStorage = parsedPackage.isRequestLegacyExternalStorage();
+            archPkg.userDataFragile = parsedPackage.isUserDataFragile();
+            archPkg.clearUserDataOnFailedRestoreAllowed =
+                    parsedPackage.isClearUserDataOnFailedRestoreAllowed();
+
+            return archPkg;
         }
 
         /**

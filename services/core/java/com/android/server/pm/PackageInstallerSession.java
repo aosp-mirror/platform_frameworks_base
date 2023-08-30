@@ -31,6 +31,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE;
+import static android.content.pm.PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
@@ -52,6 +53,7 @@ import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
+import static com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -838,6 +840,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 params.dataLoaderParams.getComponentName().getPackageName());
     }
 
+    static boolean isArchivedInstallation(int installFlags) {
+        return (installFlags & PackageManager.INSTALL_ARCHIVED) != 0;
+    }
+
     private final Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -894,6 +900,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private boolean isSystemDataLoaderInstallation() {
         return isSystemDataLoaderInstallation(this.params);
+    }
+
+    private boolean isArchivedInstallation() {
+        return isArchivedInstallation(this.params.installFlags);
     }
 
     /**
@@ -1145,6 +1155,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (isIncrementalInstallation() && !IncrementalManager.isAllowed()) {
             throw new IllegalArgumentException("Incremental installation not allowed.");
+        }
+
+        if (isArchivedInstallation()) {
+            if (params.mode != SessionParams.MODE_FULL_INSTALL) {
+                throw new IllegalArgumentException(
+                        "Archived installation can only be full install.");
+            }
+            if (!isStreamingInstallation() || !isSystemDataLoaderInstallation()) {
+                throw new IllegalArgumentException(
+                        "Archived installation can only use Streaming System DataLoader.");
+            }
         }
     }
 
@@ -1459,6 +1480,58 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private List<File> getAddedApksLocked() {
         String[] names = getNamesLocked();
         return filterFiles(stageDir, names, sAddedApkFilter);
+    }
+
+    @GuardedBy("mLock")
+    private List<ApkLite> getAddedApkLitesLocked() throws PackageManagerException {
+        if (!isArchivedInstallation()) {
+            List<File> files = getAddedApksLocked();
+            final List<ApkLite> result = new ArrayList<>(files.size());
+
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            for (int i = 0, size = files.size(); i < size; ++i) {
+                final ParseResult<ApkLite> parseResult = ApkLiteParseUtils.parseApkLite(
+                        input.reset(), files.get(i),
+                        ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
+                if (parseResult.isError()) {
+                    throw new PackageManagerException(parseResult.getErrorCode(),
+                            parseResult.getErrorMessage(), parseResult.getException());
+                }
+                result.add(parseResult.getResult());
+            }
+
+            return result;
+        }
+
+        InstallationFile[] files = getInstallationFilesLocked();
+        final List<ApkLite> result = new ArrayList<>(files.length);
+
+        for (int i = 0, size = files.length; i < size; ++i) {
+            File file = new File(stageDir, files[i].getName());
+            if (!sAddedApkFilter.accept(file)) {
+                continue;
+            }
+
+            final Metadata metadata;
+            try {
+                metadata = Metadata.fromByteArray(files[i].getMetadata());
+            } catch (IOException e) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Failed to ", e);
+            }
+            if (metadata.getMode() != Metadata.ARCHIVED) {
+                throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "File metadata is not for ARCHIVED package: " + file);
+            }
+
+            var archPkg = metadata.getArchivedPackage();
+            if (archPkg.packageName == null || archPkg.signingDetails == null) {
+                throw new PackageManagerException(INSTALL_FAILED_VERIFICATION_FAILURE,
+                        "ArchivedPackage does not contain required info: " + file);
+            }
+            result.add(new ApkLite(file.getAbsolutePath(), archPkg));
+        }
+        return result;
     }
 
     @GuardedBy("mLock")
@@ -3176,7 +3249,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        final List<File> addedFiles = getAddedApksLocked();
+        final List<ApkLite> addedFiles = getAddedApkLitesLocked();
         if (addedFiles.isEmpty()
                 && (removeSplitList.size() == 0 || getStagedAppMetadataFile() != null)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
@@ -3190,15 +3263,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final ArraySet<String> requiredSplitTypes = new ArraySet<>();
         final ArrayMap<String, ApkLite> splitApks = new ArrayMap<>();
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
-        for (File addedFile : addedFiles) {
-            final ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(input.reset(),
-                    addedFile, ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
-            if (result.isError()) {
-                throw new PackageManagerException(result.getErrorCode(),
-                        result.getErrorMessage(), result.getException());
-            }
-
-            final ApkLite apk = result.getResult();
+        for (ApkLite apk : addedFiles) {
             if (!stagedSplits.add(apk.getSplitName())) {
                 throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                         "Split " + apk.getSplitName() + " was defined multiple times");
@@ -3214,7 +3279,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             mHasDeviceAdminReceiver = apk.isHasDeviceAdminReceiver();
 
-            assertApkConsistentLocked(String.valueOf(addedFile), apk);
+            assertApkConsistentLocked(String.valueOf(apk), apk);
 
             // Take this opportunity to enforce uniform naming
             final String targetName = ApkLiteParseUtils.splitNameToFileName(apk);
@@ -3235,7 +3300,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             final File targetFile = new File(stageDir, targetName);
-            resolveAndStageFileLocked(addedFile, targetFile, apk.getSplitName());
+            if (!isArchivedInstallation()) {
+                final File sourceFile = new File(apk.getPath());
+                resolveAndStageFileLocked(sourceFile, targetFile, apk.getSplitName());
+            }
 
             // Base is coming from session
             if (apk.getSplitName() == null) {
@@ -4003,6 +4071,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!inherit) {
             // Start from a clean slate
             NativeLibraryHelper.removeNativeBinariesFromDirLI(libDir, true);
+        }
+
+        // Skip native libraries processing for archival installation.
+        if (isArchivedInstallation()) {
+            return;
         }
 
         NativeLibraryHelper.Handle handle = null;

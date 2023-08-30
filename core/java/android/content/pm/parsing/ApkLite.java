@@ -18,6 +18,7 @@ package android.content.pm.parsing;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
@@ -182,6 +183,42 @@ public class ApkLite {
         mRollbackDataPolicy = rollbackDataPolicy;
         mHasDeviceAdminReceiver = hasDeviceAdminReceiver;
         mIsSdkLibrary = isSdkLibrary;
+    }
+
+    public ApkLite(String path, ArchivedPackageParcel archivedPackage) {
+        mPath = path;
+        mPackageName = archivedPackage.packageName;
+        mSplitName = null; // base.apk
+        mSplitTypes = null;
+        mFeatureSplit = false;
+        mConfigForSplit = null;
+        mUsesSplitName = null;
+        mRequiredSplitTypes = null;
+        mSplitRequired = hasAnyRequiredSplitTypes();
+        mVersionCode = archivedPackage.versionCode;
+        mVersionCodeMajor = archivedPackage.versionCodeMajor;
+        mRevisionCode = 0;
+        mInstallLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+        mVerifiers = new VerifierInfo[]{};
+        mSigningDetails = archivedPackage.signingDetails;
+        mCoreApp = false;
+        mDebuggable = false;
+        mProfileableByShell = false;
+        mMultiArch = false;
+        mUse32bitAbi = false;
+        mUseEmbeddedDex = false;
+        mExtractNativeLibs = false;
+        mIsolatedSplits = false;
+        mTargetPackageName = null;
+        mOverlayIsStatic = false;
+        mOverlayPriority = 0;
+        mRequiredSystemPropertyName = null;
+        mRequiredSystemPropertyValue = null;
+        mMinSdkVersion = ApkLiteParseUtils.DEFAULT_MIN_SDK_VERSION;
+        mTargetSdkVersion = archivedPackage.targetSdkVersion;
+        mRollbackDataPolicy = 0;
+        mHasDeviceAdminReceiver = false;
+        mIsSdkLibrary = false;
     }
 
     /**
