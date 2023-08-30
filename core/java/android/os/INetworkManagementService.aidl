@@ -125,50 +125,65 @@ interface INetworkManagementService
     /**
      * Returns true if IP forwarding is enabled
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Use {@code android.net.INetd#ipfwdEnabled}")
     boolean getIpForwardingEnabled();
 
     /**
      * Enables/Disables IP Forwarding
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Avoid using this directly. Instead, enable tethering with "
+            + "{@code android.net.TetheringManager#startTethering}. See also "
+            + "{@code INetd#ipfwdEnableForwarding(String)}.")
     void setIpForwardingEnabled(boolean enabled);
 
     /**
      * Start tethering services with the specified dhcp server range
      * arg is a set of start end pairs defining the ranges.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "{@code android.net.TetheringManager#startTethering}")
     void startTethering(in String[] dhcpRanges);
 
     /**
      * Stop currently running tethering services
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "{@code android.net.TetheringManager#stopTethering(int)}")
     void stopTethering();
 
     /**
      * Returns true if tethering services are started
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Generally track your own tethering requests. "
+            + "See also {@code android.net.INetd#tetherIsEnabled()}")
     boolean isTetheringStarted();
 
     /**
      * Tethers the specified interface
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Avoid using this directly. Instead, enable tethering with "
+            + "{@code android.net.TetheringManager#startTethering}. See also "
+            + "{@code com.android.net.module.util.NetdUtils#tetherInterface}.")
     void tetherInterface(String iface);
 
     /**
      * Untethers the specified interface
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Avoid using this directly. Instead, disable "
+            + "tethering with {@code android.net.TetheringManager#stopTethering(int)}. "
+            + "See also {@code NetdUtils#untetherInterface}.")
     void untetherInterface(String iface);
 
     /**
      * Returns a list of currently tethered interfaces
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "{@code android.net.TetheringManager#getTetheredIfaces()}")
     String[] listTetheredInterfaces();
 
     /**
@@ -176,13 +191,17 @@ interface INetworkManagementService
      *  The address and netmask of the external interface is used for
      *  the NAT'ed network.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Avoid using this directly. Instead, enable tethering with "
+            + "{@code android.net.TetheringManager#startTethering}.")
     void enableNat(String internalInterface, String externalInterface);
 
     /**
      *  Disables Network Address Translation between two interfaces.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 34, trackingBug = 170729553,
+            publicAlternatives = "Avoid using this directly. Instead, disable tethering with "
+            + "{@code android.net.TetheringManager#stopTethering(int)}.")
     void disableNat(String internalInterface, String externalInterface);
 
     /**
