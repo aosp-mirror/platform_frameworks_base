@@ -2632,7 +2632,7 @@ public class NotificationManagerService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 DND_MODE_RULE,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                ConcurrentUtils.DIRECT_EXECUTOR,
                 mPullAtomCallback
         );
     }
