@@ -16,6 +16,7 @@
 
 package com.android.systemui.display.domain.interactor
 
+import android.hardware.display.DisplayManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -27,7 +28,10 @@ import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -35,6 +39,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
@@ -42,9 +47,10 @@ import org.junit.runner.RunWith
 @SmallTest
 class ConnectedDisplayInteractorTest : SysuiTestCase() {
 
+    private val displayManager = mock<DisplayManager>()
     private val fakeDisplayRepository = FakeDisplayRepository()
     private val connectedDisplayStateProvider: ConnectedDisplayInteractor =
-        ConnectedDisplayInteractorImpl(fakeDisplayRepository)
+        ConnectedDisplayInteractorImpl(displayManager, fakeDisplayRepository)
     private val testScope = TestScope(UnconfinedTestDispatcher())
 
     @Test
@@ -126,6 +132,42 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
             assertThat(value).isEqualTo(State.CONNECTED_SECURE)
         }
 
+    @Test
+    fun pendingDisplay_propagated() =
+        testScope.runTest {
+            val value by lastPendingDisplay()
+            val pendingDisplayId = 4
+
+            fakeDisplayRepository.emit(pendingDisplayId)
+
+            assertThat(value).isNotNull()
+        }
+
+    @Test
+    fun onPendingDisplay_enable_displayEnabled() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            fakeDisplayRepository.emit(1)
+            pendingDisplay!!.enable()
+
+            Mockito.verify(displayManager).enableConnectedDisplay(eq(1))
+        }
+
+    @Test
+    fun onPendingDisplay_disable_displayDisabled() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            fakeDisplayRepository.emit(1)
+            pendingDisplay!!.disable()
+
+            Mockito.verify(displayManager).disableConnectedDisplay(eq(1))
+        }
+
     private fun TestScope.lastValue(): FlowValue<State?> =
         collectLastValue(connectedDisplayStateProvider.connectedDisplayState)
+
+    private fun TestScope.lastPendingDisplay(): FlowValue<PendingDisplay?> =
+        collectLastValue(connectedDisplayStateProvider.pendingDisplay)
 }

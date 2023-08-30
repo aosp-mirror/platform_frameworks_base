@@ -68,8 +68,10 @@ public class AuthenticationStatsCollector {
         @Override
         public void onReceive(@NonNull Context context, @NonNull Intent intent) {
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+
             if (userId != UserHandle.USER_NULL
                     && intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
+                Slog.d(TAG, "Removing data for user: " + userId);
                 onUserRemoved(userId);
             }
         }
@@ -84,7 +86,9 @@ public class AuthenticationStatsCollector {
         mModality = modality;
         mBiometricNotification = biometricNotification;
 
-        context.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        context.registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     private void initializeUserAuthenticationStatsMap() {
@@ -121,10 +125,11 @@ public class AuthenticationStatsCollector {
 
         authenticationStats.authenticate(authenticated);
 
+        sendNotificationIfNeeded(userId);
+
         if (mPersisterInitialized) {
             persistDataIfNeeded(userId);
         }
-        sendNotificationIfNeeded(userId);
     }
 
     /** Check if a notification should be sent after a calculation cycle. */
@@ -164,8 +169,10 @@ public class AuthenticationStatsCollector {
         }
         if (hasEnrolledFace && !hasEnrolledFingerprint) {
             mBiometricNotification.sendFpEnrollNotification(mContext);
+            authenticationStats.updateNotificationCounter();
         } else if (!hasEnrolledFace && hasEnrolledFingerprint) {
             mBiometricNotification.sendFaceEnrollNotification(mContext);
+            authenticationStats.updateNotificationCounter();
         }
     }
 

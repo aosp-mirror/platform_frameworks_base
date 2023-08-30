@@ -158,7 +158,7 @@ interface KeyguardRepository {
     val lastDozeTapToWakePosition: StateFlow<Point?>
 
     /** Observable for the [StatusBarState] */
-    val statusBarState: Flow<StatusBarState>
+    val statusBarState: StateFlow<StatusBarState>
 
     /** Observable for device wake/sleep state */
     val wakefulness: StateFlow<WakefulnessModel>
@@ -520,23 +520,29 @@ constructor(
         return keyguardBypassController.bypassEnabled
     }
 
-    override val statusBarState: Flow<StatusBarState> = conflatedCallbackFlow {
-        val callback =
-            object : StatusBarStateController.StateListener {
-                override fun onStateChanged(state: Int) {
-                    trySendWithFailureLogging(statusBarStateIntToObject(state), TAG, "state")
-                }
+    // TODO(b/297345631): Expose this at the interactor level instead so that it can be powered by
+    // [SceneInteractor] when scenes are ready.
+    override val statusBarState: StateFlow<StatusBarState> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : StatusBarStateController.StateListener {
+                        override fun onStateChanged(state: Int) {
+                            trySendWithFailureLogging(
+                                statusBarStateIntToObject(state),
+                                TAG,
+                                "state"
+                            )
+                        }
+                    }
+
+                statusBarStateController.addCallback(callback)
+                awaitClose { statusBarStateController.removeCallback(callback) }
             }
-
-        statusBarStateController.addCallback(callback)
-        trySendWithFailureLogging(
-            statusBarStateIntToObject(statusBarStateController.getState()),
-            TAG,
-            "initial state"
-        )
-
-        awaitClose { statusBarStateController.removeCallback(callback) }
-    }
+            .stateIn(
+                scope,
+                SharingStarted.Eagerly,
+                statusBarStateIntToObject(statusBarStateController.state)
+            )
 
     override val biometricUnlockState: Flow<BiometricUnlockModel> = conflatedCallbackFlow {
         fun dispatchUpdate() {

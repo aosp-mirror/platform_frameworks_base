@@ -16,10 +16,13 @@
 
 package com.android.systemui.display.domain.interactor
 
+import android.hardware.display.DisplayManager
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.data.repository.DisplayRepository
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -37,11 +40,23 @@ interface ConnectedDisplayInteractor {
      */
     val connectedDisplayState: Flow<State>
 
+    /** Pending display that can be enabled to be used by the system. */
+    val pendingDisplay: Flow<PendingDisplay?>
+
     /** Possible connected display state. */
     enum class State {
         DISCONNECTED,
         CONNECTED,
         CONNECTED_SECURE,
+    }
+
+    /** Represents a connected display that has not been enabled yet. */
+    interface PendingDisplay {
+        /** Enables the display, making it available to the system. */
+        fun enable()
+
+        /** Disables the display, making it unavailable to the system. */
+        fun disable()
     }
 }
 
@@ -49,6 +64,7 @@ interface ConnectedDisplayInteractor {
 class ConnectedDisplayInteractorImpl
 @Inject
 constructor(
+    private val displayManager: DisplayManager,
     displayRepository: DisplayRepository,
 ) : ConnectedDisplayInteractor {
 
@@ -70,4 +86,22 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+
+    override val pendingDisplay: Flow<PendingDisplay?> =
+        displayRepository.pendingDisplay.distinctUntilChanged().map { it?.toPendingDisplay() }
+
+    private fun Int.toPendingDisplay() =
+        object : PendingDisplay {
+            val id = this@toPendingDisplay
+            override fun enable() {
+                traceSection("DisplayRepository#enable($id)") {
+                    displayManager.enableConnectedDisplay(id)
+                }
+            }
+            override fun disable() {
+                traceSection("DisplayRepository#enable($id)") {
+                    displayManager.disableConnectedDisplay(id)
+                }
+            }
+        }
 }

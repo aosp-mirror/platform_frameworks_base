@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.res.Resources
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.LEFT
@@ -25,12 +26,58 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 
-class DefaultShortcutsSection @Inject constructor(@Main private val resources: Resources) :
-    KeyguardSection {
-    override fun apply(constraintSet: ConstraintSet) {
+class DefaultShortcutsSection
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val featureFlags: FeatureFlags,
+    private val keyguardQuickAffordancesCombinedViewModel:
+        KeyguardQuickAffordancesCombinedViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
+    private val falsingManager: FalsingManager,
+    private val indicationController: KeyguardIndicationController,
+    private val vibratorHelper: VibratorHelper,
+) : BaseShortcutsSection(), KeyguardSection {
+
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            addLeftShortcut(constraintLayout)
+            addRightShortcut(constraintLayout)
+            leftShortcutHandle =
+                KeyguardQuickAffordanceViewBinder.bind(
+                    constraintLayout.requireViewById(R.id.start_button),
+                    keyguardQuickAffordancesCombinedViewModel.startButton,
+                    keyguardRootViewModel.alpha,
+                    falsingManager,
+                    vibratorHelper,
+                ) {
+                    indicationController.showTransientIndication(it)
+                }
+            rightShortcutHandle =
+                KeyguardQuickAffordanceViewBinder.bind(
+                    constraintLayout.requireViewById(R.id.end_button),
+                    keyguardQuickAffordancesCombinedViewModel.endButton,
+                    keyguardRootViewModel.alpha,
+                    falsingManager,
+                    vibratorHelper,
+                ) {
+                    indicationController.showTransientIndication(it)
+                }
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         val width = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width)
         val height = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height)
         val horizontalOffsetMargin =
@@ -48,6 +95,17 @@ class DefaultShortcutsSection @Inject constructor(@Main private val resources: R
             constrainHeight(R.id.end_button, height)
             connect(R.id.end_button, RIGHT, PARENT_ID, RIGHT, horizontalOffsetMargin)
             connect(R.id.end_button, BOTTOM, PARENT_ID, BOTTOM, verticalOffsetMargin)
+        }
+    }
+
+    /** Method to add shortcuts without applying any data binding. */
+    fun addShortcutViews(constraintLayout: ConstraintLayout) {
+        addLeftShortcut(constraintLayout)
+        addRightShortcut(constraintLayout)
+        ConstraintSet().apply {
+            clone(constraintLayout)
+            applyConstraints(this)
+            applyTo(constraintLayout)
         }
     }
 }

@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageArchiverService;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.IPackageInstaller;
@@ -99,6 +100,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     private final PackageInstallerService mInstallerService;
 
     @NonNull
+    private final PackageArchiverService mPackageArchiverService;
+
+    @NonNull
     private final PackageProperty mPackageProperty;
 
     @NonNull
@@ -127,7 +131,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @Nullable ComponentName instantAppResolverSettingsComponent,
             @NonNull String requiredSupplementalProcessPackage,
             @Nullable String servicesExtensionPackageName,
-            @Nullable String sharedSystemSharedLibraryPackageName) {
+            @Nullable String sharedSystemSharedLibraryPackageName,
+            @NonNull PackageArchiverService packageArchiverService) {
         mService = service;
         mContext = context;
         mDexOptHelper = dexOptHelper;
@@ -143,6 +148,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
         mRequiredSupplementalProcessPackage = requiredSupplementalProcessPackage;
         mServicesExtensionPackageName = servicesExtensionPackageName;
         mSharedSystemSharedLibraryPackageName = sharedSystemSharedLibraryPackageName;
+        mPackageArchiverService = packageArchiverService;
     }
 
     protected Computer snapshot() {
@@ -612,6 +618,12 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             return null;
         }
         return mInstallerService;
+    }
+
+    @Override
+    @Deprecated
+    public final IPackageArchiverService getPackageArchiverService() {
+        return mPackageArchiverService;
     }
 
     @Override

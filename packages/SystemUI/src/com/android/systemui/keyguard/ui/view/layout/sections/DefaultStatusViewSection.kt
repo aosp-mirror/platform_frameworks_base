@@ -18,23 +18,76 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.keyguard.KeyguardStatusView
+import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.KeyguardViewConfigurator
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.media.controls.ui.KeyguardMediaController
+import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.Utils
+import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class DefaultStatusViewSection @Inject constructor(private val context: Context) : KeyguardSection {
+class DefaultStatusViewSection
+@Inject
+constructor(
+    private val context: Context,
+    private val featureFlags: FeatureFlags,
+    private val notificationPanelView: NotificationPanelView,
+    private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
+    private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
+    private val notificationPanelViewController: Lazy<NotificationPanelViewController>,
+    private val keyguardMediaController: KeyguardMediaController,
+) : KeyguardSection {
     private val statusViewId = R.id.keyguard_status_view
 
-    override fun apply(constraintSet: ConstraintSet) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        // At startup, 2 views with the ID `R.id.keyguard_status_view` will be available.
+        // Disable one of them
+        if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            notificationPanelView.findViewById<View>(statusViewId)?.let {
+                notificationPanelView.removeView(it)
+            }
+            if (constraintLayout.findViewById<View>(statusViewId) == null) {
+                val keyguardStatusView =
+                    (LayoutInflater.from(context)
+                            .inflate(R.layout.keyguard_status_view, constraintLayout, false)
+                            as KeyguardStatusView)
+                        .apply { clipChildren = false }
+
+                val statusViewComponent =
+                    keyguardStatusViewComponentFactory.build(keyguardStatusView)
+                val controller = statusViewComponent.keyguardStatusViewController
+                controller.init()
+                constraintLayout.addView(keyguardStatusView)
+                keyguardMediaController.attachSplitShadeContainer(
+                    keyguardStatusView.requireViewById<ViewGroup>(R.id.status_view_media_container)
+                )
+                keyguardViewConfigurator.get().keyguardStatusViewController = controller
+                notificationPanelViewController.get().updateStatusBarViewController()
+            }
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
             constrainWidth(statusViewId, MATCH_CONSTRAINT)
             constrainHeight(statusViewId, WRAP_CONTENT)
@@ -51,5 +104,10 @@ class DefaultStatusViewSection @Inject constructor(private val context: Context)
                 }
             setMargin(statusViewId, TOP, margin)
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun onDestroy() {
+        keyguardViewConfigurator.get().keyguardStatusViewController = null
     }
 }

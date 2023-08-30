@@ -118,7 +118,6 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -532,6 +531,8 @@ public class NotificationManagerService extends SystemService {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     private static final long NOTIFICATION_LOG_ASSISTANT_CANCEL = 195579280L;
+
+    private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
 
     private IActivityManager mAm;
     private ActivityTaskManagerInternal mAtm;
@@ -6676,22 +6677,14 @@ public class NotificationManagerService extends SystemService {
     }
 
     private PostNotificationTracker acquireWakeLockForPost(String pkg, int uid) {
-        if (mFlagResolver.isEnabled(WAKE_LOCK_FOR_POSTING_NOTIFICATION)
-                && Binder.withCleanCallingIdentity(
-                    () -> DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                        SystemUiDeviceConfigFlags.NOTIFY_WAKELOCK, false))) {
-            // The package probably doesn't have WAKE_LOCK permission and should not require it.
-            return Binder.withCleanCallingIdentity(() -> {
-                WakeLock wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                        "NotificationManagerService:post:" + pkg);
-                wakeLock.setWorkSource(new WorkSource(uid, pkg));
-                // TODO(b/275044361): Adjust to a more reasonable number when we have the data.
-                wakeLock.acquire(30_000);
-                return mPostNotificationTrackerFactory.newTracker(wakeLock);
-            });
-        } else {
-            return mPostNotificationTrackerFactory.newTracker(null);
-        }
+        // The package probably doesn't have WAKE_LOCK permission and should not require it.
+        return Binder.withCleanCallingIdentity(() -> {
+            WakeLock wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "NotificationManagerService:post:" + pkg);
+            wakeLock.setWorkSource(new WorkSource(uid, pkg));
+            wakeLock.acquire(POST_WAKE_LOCK_TIMEOUT.toMillis());
+            return mPostNotificationTrackerFactory.newTracker(wakeLock);
+        });
     }
 
     /**

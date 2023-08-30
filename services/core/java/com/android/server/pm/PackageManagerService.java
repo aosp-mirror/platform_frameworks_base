@@ -796,6 +796,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     final PackageInstallerService mInstallerService;
 
+    final PackageArchiverService mArchiverService;
+
     final ArtManagerService mArtManagerService;
 
     // TODO(b/260124949): Remove these.
@@ -1624,7 +1626,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
                         i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
                         context),
-                (i, pm) -> new UpdateOwnershipHelper());
+                (i, pm) -> new UpdateOwnershipHelper(),
+                (i, pm) -> new PackageArchiverService(i.getContext(), pm));
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");
@@ -1769,6 +1772,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mFactoryTest = testParams.factoryTest;
         mIncrementalManager = testParams.incrementalManager;
         mInstallerService = testParams.installerService;
+        mArchiverService = testParams.archiverService;
         mInstantAppRegistry = testParams.instantAppRegistry;
         mChangedPackagesTracker = testParams.changedPackagesTracker;
         mInstantAppResolverConnection = testParams.instantAppResolverConnection;
@@ -1967,9 +1971,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mApexManager = injector.getApexManager();
         mAppsFilter = mInjector.getAppsFilter();
 
-        mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
-                mInjector.getUserManagerInternal(), new DeletePackageHelper(this));
-
         mChangedPackagesTracker = new ChangedPackagesTracker();
 
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
@@ -1983,8 +1984,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
-                mAppDataHelper);
+        mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper);
+
+        mInstantAppRegistry = new InstantAppRegistry(mContext, mPermissionManager,
+                mInjector.getUserManagerInternal(), mDeletePackageHelper);
+
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
         mPreferredActivityHelper = new PreferredActivityHelper(this);
         mResolveIntentHelper = new ResolveIntentHelper(mContext, mPreferredActivityHelper,
@@ -2348,6 +2352,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
 
             mInstallerService = mInjector.getPackageInstallerService();
+            mArchiverService = mInjector.getPackageArchiverService();
             final ComponentName instantAppResolverComponent = getInstantAppResolver(computer);
             if (instantAppResolverComponent != null) {
                 if (DEBUG_INSTANT) {
@@ -4608,7 +4613,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     mDomainVerificationConnection, mInstallerService, mPackageProperty,
                     mResolveComponentName, mInstantAppResolverSettingsComponent,
                     mRequiredSdkSandboxPackage, mServicesExtensionPackageName,
-                    mSharedSystemSharedLibraryPackageName);
+                    mSharedSystemSharedLibraryPackageName, mArchiverService);
         }
 
         @Override

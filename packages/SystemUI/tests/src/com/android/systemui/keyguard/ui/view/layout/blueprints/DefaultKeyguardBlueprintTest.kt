@@ -19,13 +19,17 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
@@ -34,6 +38,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -50,7 +55,9 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
+    @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
+    private val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setup() {
@@ -64,20 +71,32 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
                 defaultStatusViewSection,
+                defaultNSSLSection,
                 splitShadeGuidelines,
+                featureFlags,
             )
+        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, false)
     }
 
     @Test
-    fun apply() {
+    fun addViews() {
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        underTest.sections.forEach { verify(it, never()).addViews(constraintLayout) }
+    }
+
+    @Test
+    fun addViews_lazyInflateFlagOn() {
+        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, true)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        underTest.sections.forEach { verify(it).addViews(constraintLayout) }
+    }
+
+    @Test
+    fun applyConstraints() {
         val cs = ConstraintSet()
-        underTest.apply(cs)
-        verify(defaultIndicationAreaSection).apply(cs)
-        verify(defaultLockIconSection).apply(cs)
-        verify(defaultShortcutsSection).apply(cs)
-        verify(defaultAmbientIndicationAreaSection).apply(cs)
-        verify(defaultSettingsPopupMenuSection).apply(cs)
-        verify(defaultStatusViewSection).apply(cs)
-        verify(splitShadeGuidelines).apply(cs)
+        underTest.applyConstraints(cs)
+        underTest.sections.forEach { verify(it).applyConstraints(cs) }
     }
 }

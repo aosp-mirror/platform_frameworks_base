@@ -1226,37 +1226,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void updateViewControllers(
             FrameLayout userAvatarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
-        // Re-associate the KeyguardStatusViewController
-        if (mKeyguardStatusViewController != null) {
-            mKeyguardStatusViewController.onDestroy();
-        }
-
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
-            // Need a shared controller until mKeyguardStatusViewController can be removed from
-            // here, due to important state being set in that controller. Rebind in order to pick
-            // up config changes
-            mKeyguardViewConfigurator.bindKeyguardStatusView(mView);
-            mKeyguardStatusViewController =
-                    mKeyguardViewConfigurator.getKeyguardStatusViewController();
-        } else {
-            KeyguardStatusView keyguardStatusView = mView.getRootView().findViewById(
-                    R.id.keyguard_status_view);
-            KeyguardStatusViewComponent statusViewComponent =
-                mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
-            mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
-            mKeyguardStatusViewController.init();
-        }
-        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
-        mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
-                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    int oldHeight = oldBottom - oldTop;
-                    if (v.getHeight() != oldHeight) {
-                        mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
-                    }
-                });
-
-        updateClockAppearance();
-
+        updateStatusBarViewController();
         if (mKeyguardUserSwitcherController != null) {
             // Try to close the switcher so that callbacks are triggered if necessary.
             // Otherwise, NPV can get into a state where some of the views are still hidden
@@ -1284,6 +1254,40 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(false);
         }
+    }
+
+    /** Updates the StatusBarViewController and updates any that depend on it. */
+    public void updateStatusBarViewController() {
+        // Re-associate the KeyguardStatusViewController
+        if (mKeyguardStatusViewController != null) {
+            mKeyguardStatusViewController.onDestroy();
+        }
+
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            // Need a shared controller until mKeyguardStatusViewController can be removed from
+            // here, due to important state being set in that controller. Rebind in order to pick
+            // up config changes
+            mKeyguardStatusViewController =
+                    mKeyguardViewConfigurator.getKeyguardStatusViewController();
+        } else {
+            KeyguardStatusView keyguardStatusView = mView.getRootView().findViewById(
+                    R.id.keyguard_status_view);
+            KeyguardStatusViewComponent statusViewComponent =
+                    mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
+            mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
+            mKeyguardStatusViewController.init();
+        }
+
+        mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+        mKeyguardStatusViewController.getView().addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int oldHeight = oldBottom - oldTop;
+                    if (v.getHeight() != oldHeight) {
+                        mNotificationStackScrollLayoutController.animateNextTopPaddingChange();
+                    }
+                });
+
+        updateClockAppearance();
     }
 
     @Override
@@ -1403,7 +1407,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         updateViewControllers(userAvatarView, keyguardUserSwitcherView);
 
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW) && !mFeatureFlags.isEnabled(
+                Flags.LAZY_INFLATE_KEYGUARD)) {
             attachSplitShadeMediaPlayerContainer(
                     mKeyguardViewConfigurator.getKeyguardRootView()
                         .findViewById(R.id.status_view_media_container));
@@ -2818,7 +2823,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onTrackingStarted() {
-        mFalsingCollector.onTrackingStarted(!mKeyguardStateController.canDismissLockScreen());
         endClosing();
         mTracking = true;
         mTrackingStartedListener.onTrackingStarted();
@@ -2834,7 +2838,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void onTrackingStopped(boolean expand) {
-        mFalsingCollector.onTrackingStopped();
         mTracking = false;
         maybeStopTrackingExpansionFromStatusBar(expand);
 
@@ -2888,7 +2891,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @VisibleForTesting
     void onUnlockHintStarted() {
-        mFalsingCollector.onUnlockHintStarted();
         mKeyguardIndicationController.showActionToUnlock();
         mScrimController.setExpansionAffectsAlpha(false);
         mNotificationStackScrollLayoutController.setUnlockHintRunning(true);

@@ -110,6 +110,7 @@ object SceneWindowRootViewBinder {
     //  SysUI altogether.
     private fun createVisibilityToggleView(otherView: View): View {
         val toggleView = View(otherView.context)
+        otherView.isVisible = false
         toggleView.layoutParams = FrameLayout.LayoutParams(200, 200, Gravity.CENTER_HORIZONTAL)
         toggleView.setOnClickListener {
             val now = Instant.now()

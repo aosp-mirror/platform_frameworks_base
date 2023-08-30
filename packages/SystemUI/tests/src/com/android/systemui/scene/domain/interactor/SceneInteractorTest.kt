@@ -147,4 +147,11 @@ class SceneInteractorTest : SysuiTestCase() {
             underTest.setVisible(true, "reason")
             assertThat(isVisible).isTrue()
         }
+
+    @Test
+    fun userInput() =
+        testScope.runTest {
+            underTest.onUserInput()
+            assertThat(utils.powerRepository.userTouchRegistered).isTrue()
+        }
 }

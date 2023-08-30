@@ -49,7 +49,7 @@ public:
 
     virtual void onVmCreated(JNIEnv* env)
     {
-        if (mClassName.isEmpty()) {
+        if (mClassName.empty()) {
             return; // Zygote. Nothing to do here.
         }
 
@@ -98,7 +98,7 @@ public:
 
     virtual void onExit(int code)
     {
-        if (mClassName.isEmpty()) {
+        if (mClassName.empty()) {
             // if zygote
             IPCThreadState::self()->stopProcess();
             hardware::IPCThreadState::self()->stopProcess();
@@ -282,7 +282,7 @@ int main(int argc, char* const argv[])
     }
 
     Vector<String8> args;
-    if (!className.isEmpty()) {
+    if (!className.empty()) {
         // We're not in zygote mode, the only argument we need to pass
         // to RuntimeInit is the application argument.
         //
@@ -328,13 +328,13 @@ int main(int argc, char* const argv[])
         }
     }
 
-    if (!niceName.isEmpty()) {
+    if (!niceName.empty()) {
         runtime.setArgv0(niceName.string(), true /* setProcName */);
     }
 
     if (zygote) {
         runtime.start("com.android.internal.os.ZygoteInit", args, zygote);
-    } else if (!className.isEmpty()) {
+    } else if (!className.empty()) {
         runtime.start("com.android.internal.os.RuntimeInit", args, zygote);
     } else {
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");

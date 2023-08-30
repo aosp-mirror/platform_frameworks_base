@@ -23,15 +23,13 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class LockscreenSceneViewModelTest : SysuiTestCase() {
@@ -47,10 +45,9 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         LockscreenSceneViewModel(
             authenticationInteractor = authenticationInteractor,
-            bouncerInteractor =
-                utils.bouncerInteractor(
-                    authenticationInteractor = authenticationInteractor,
-                    sceneInteractor = sceneInteractor,
+            longPress =
+                KeyguardLongPressViewModel(
+                    interactor = mock(),
                 ),
         )
 
@@ -75,31 +72,5 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Bouncer)
-        }
-
-    @Test
-    fun onLockButtonClicked_deviceLockedSecurely_switchesToBouncer() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(false)
-            runCurrent()
-
-            underTest.onLockButtonClicked()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-        }
-
-    @Test
-    fun onLockButtonClicked_deviceUnlocked_switchesToGone() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setUnlocked(true)
-            runCurrent()
-
-            underTest.onLockButtonClicked()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 }

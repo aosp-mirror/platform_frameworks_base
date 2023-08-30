@@ -52,6 +52,12 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        when(mLockIconView.isAttachedToWindow()).thenReturn(true);
+    }
+
     @Test
     public void testUpdateFingerprintLocationOnInit() {
         // GIVEN fp sensor location is available pre-attached

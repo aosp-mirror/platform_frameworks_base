@@ -50,14 +50,28 @@ constructor(
         listenForOccludedToAodOrDozing()
         listenForOccludedToGone()
         listenForOccludedToAlternateBouncer()
+        listenForOccludedToPrimaryBouncer()
+    }
+
+    private fun listenForOccludedToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
+                    if (
+                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.OCCLUDED
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
     }
 
     private fun listenForOccludedToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
                 .sample(transitionInteractor.finishedKeyguardState, ::Pair)
-                .collect { pair ->
-                    val (isAbleToDream, keyguardState) = pair
+                .collect { (isAbleToDream, keyguardState) ->
                     if (isAbleToDream && keyguardState == KeyguardState.OCCLUDED) {
                         startTransitionTo(KeyguardState.DREAMING)
                     }

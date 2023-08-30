@@ -17,16 +17,14 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
-import androidx.constraintlayout.widget.ConstraintSet
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdfpsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import javax.inject.Inject
@@ -36,31 +34,28 @@ import javax.inject.Inject
 class ShortcutsBesideUdfpsKeyguardBlueprint
 @Inject
 constructor(
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    private val defaultIndicationAreaSection: DefaultIndicationAreaSection,
-    private val defaultLockIconSection: DefaultLockIconSection,
-    private val defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
-    private val defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
-    private val alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
-    private val defaultShortcutsSection: DefaultShortcutsSection,
-    private val defaultStatusViewSection: DefaultStatusViewSection,
-    private val splitShadeGuidelines: SplitShadeGuidelines,
+    defaultIndicationAreaSection: DefaultIndicationAreaSection,
+    defaultLockIconSection: DefaultLockIconSection,
+    defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
+    defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
+    alignShortcutsToUdfpsSection: AlignShortcutsToUdfpsSection,
+    defaultStatusViewSection: DefaultStatusViewSection,
+    splitShadeGuidelines: SplitShadeGuidelines,
+    defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
 ) : KeyguardBlueprint {
     override val id: String = SHORTCUTS_BESIDE_UDFPS
 
-    override fun apply(constraintSet: ConstraintSet) {
-        defaultIndicationAreaSection.apply(constraintSet)
-        defaultLockIconSection.apply(constraintSet)
-        defaultAmbientIndicationAreaSection.apply(constraintSet)
-        defaultSettingsPopupMenuSection.apply(constraintSet)
-        if (keyguardUpdateMonitor.isUdfpsSupported) {
-            alignShortcutsToUdfpsSection.apply(constraintSet)
-        } else {
-            defaultShortcutsSection.apply(constraintSet)
-        }
-        defaultStatusViewSection.apply(constraintSet)
-        splitShadeGuidelines.apply(constraintSet)
-    }
+    override val sections =
+        arrayOf(
+            defaultIndicationAreaSection,
+            defaultLockIconSection,
+            defaultAmbientIndicationAreaSection,
+            defaultSettingsPopupMenuSection,
+            alignShortcutsToUdfpsSection,
+            defaultStatusViewSection,
+            defaultNotificationStackScrollLayoutSection,
+            splitShadeGuidelines,
+        )
 
     companion object {
         const val SHORTCUTS_BESIDE_UDFPS = "shortcutsBesideUdfps"

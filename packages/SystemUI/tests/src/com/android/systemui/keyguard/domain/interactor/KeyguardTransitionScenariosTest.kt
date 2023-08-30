@@ -1049,7 +1049,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Test
     fun occludedToAlternateBouncer() =
         testScope.runTest {
-
             // GIVEN a prior transition has run to OCCLUDED
             runTransition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
             keyguardRepository.setKeyguardOccluded(true)
@@ -1067,6 +1066,31 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.to).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun occludedToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to OCCLUDED
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // WHEN primary bouncer shows
+            bouncerRepository.setPrimaryShow(true) // beverlyt
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to AlternateBouncer should occur
+            assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()

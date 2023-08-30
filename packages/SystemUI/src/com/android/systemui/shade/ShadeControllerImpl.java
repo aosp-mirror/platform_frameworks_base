@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.ShadeTouchLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -59,6 +60,7 @@ public final class ShadeControllerImpl implements ShadeController {
     private final CommandQueue mCommandQueue;
     private final Executor mMainExecutor;
     private final LogBuffer mTouchLog;
+    private final WindowRootViewVisibilityInteractor mWindowRootViewVisibilityInteractor;
     private final KeyguardStateController mKeyguardStateController;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarStateController mStatusBarStateController;
@@ -83,6 +85,7 @@ public final class ShadeControllerImpl implements ShadeController {
             CommandQueue commandQueue,
             @Main Executor mainExecutor,
             @ShadeTouchLog LogBuffer touchLog,
+            WindowRootViewVisibilityInteractor windowRootViewVisibilityInteractor,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
@@ -97,6 +100,7 @@ public final class ShadeControllerImpl implements ShadeController {
         mCommandQueue = commandQueue;
         mMainExecutor = mainExecutor;
         mTouchLog = touchLog;
+        mWindowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor;
         mShadeViewControllerLazy = shadeViewControllerLazy;
         mStatusBarStateController = statusBarStateController;
         mStatusBarWindowController = statusBarWindowController;
@@ -391,6 +395,7 @@ public final class ShadeControllerImpl implements ShadeController {
 
     private void notifyVisibilityChanged(boolean visible) {
         mShadeVisibilityListener.visibilityChanged(visible);
+        mWindowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(visible);
     }
 
     private void notifyExpandedVisibleChanged(boolean expandedVisible) {

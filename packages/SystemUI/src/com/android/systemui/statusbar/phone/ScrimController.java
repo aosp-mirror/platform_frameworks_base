@@ -763,7 +763,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      * Sets the amount of vertical over scroll that should be performed on the notifications scrim.
      */
     public void setNotificationsOverScrollAmount(int overScrollAmount) {
-        mNotificationsScrim.setTranslationY(overScrollAmount);
+        if (mNotificationsScrim != null) mNotificationsScrim.setTranslationY(overScrollAmount);
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.systemui.scene.domain.startable
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -29,4 +30,11 @@ interface SceneContainerStartableModule {
     @IntoMap
     @ClassKey(SceneContainerStartable::class)
     fun bind(impl: SceneContainerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(WindowRootViewVisibilityInteractor::class)
+    fun bindWindowRootViewVisibilityInteractor(
+        impl: WindowRootViewVisibilityInteractor
+    ): CoreStartable
 }

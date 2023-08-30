@@ -3455,20 +3455,20 @@ class ContextImpl extends Context {
         mOpPackageName = overrideOpPackageName != null ? overrideOpPackageName : opPackageName;
         mParams = Objects.requireNonNull(params);
         mAttributionSource = createAttributionSource(attributionTag, nextAttributionSource,
-                params.getRenouncedPermissions());
+                params.getRenouncedPermissions(), params.shouldRegisterAttributionSource());
         mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 
     private @NonNull AttributionSource createAttributionSource(@Nullable String attributionTag,
             @Nullable AttributionSource nextAttributionSource,
-            @Nullable Set<String> renouncedPermissions) {
+            @Nullable Set<String> renouncedPermissions, boolean shouldRegister) {
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
                 Process.myPid(), mOpPackageName, attributionTag,
                 (renouncedPermissions != null) ? renouncedPermissions.toArray(new String[0]) : null,
                 getDeviceId(), nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
-        if (nextAttributionSource != null) {
+        if (nextAttributionSource != null || shouldRegister) {
             attributionSource = getSystemService(PermissionManager.class)
                     .registerAttributionSource(attributionSource);
         }

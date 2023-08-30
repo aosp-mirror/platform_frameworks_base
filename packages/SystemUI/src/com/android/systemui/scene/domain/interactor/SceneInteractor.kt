@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
@@ -44,6 +45,7 @@ class SceneInteractor
 constructor(
     @Application applicationScope: CoroutineScope,
     private val repository: SceneContainerRepository,
+    private val powerRepository: PowerRepository,
     private val logger: SceneLogger,
 ) {
 
@@ -153,6 +155,11 @@ constructor(
         repository.setTransitionState(transitionState)
     }
 
+    /** Handles a user input event. */
+    fun onUserInput() {
+        powerRepository.userTouch()
+    }
+
     /**
      * Notifies that the UI has transitioned sufficiently to the given scene.
      *
@@ -161,7 +168,7 @@ constructor(
      * Once a transition between one scene and another passes a threshold, the UI invokes this
      * method to report it, updating the value in [desiredScene] to match what the UI shows.
      */
-    internal fun onSceneChanged(scene: SceneModel, loggingReason: String) {
+    fun onSceneChanged(scene: SceneModel, loggingReason: String) {
         updateDesiredScene(scene, loggingReason, logger::logSceneChangeCommitted)
     }
 

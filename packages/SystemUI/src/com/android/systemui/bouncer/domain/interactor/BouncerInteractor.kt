@@ -22,6 +22,8 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
+import com.android.systemui.classifier.FalsingClassifier
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
@@ -50,6 +52,7 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
     featureFlags: FeatureFlags,
+    private val falsingInteractor: FalsingInteractor,
 ) {
 
     /** The user-facing message to show in the bouncer. */
@@ -101,6 +104,34 @@ constructor(
                 }
             }
         }
+    }
+
+    /** Notifies that the user has places down a pointer, not necessarily dragging just yet. */
+    fun onDown() {
+        falsingInteractor.avoidGesture()
+    }
+
+    /**
+     * Notifies of "intentional" (i.e. non-false) user interaction with the UI which is very likely
+     * to be real user interaction with the bouncer and not the result of a false touch in the
+     * user's pocket or by the user's face while holding their device up to their ear.
+     */
+    fun onIntentionalUserInput() {
+        falsingInteractor.updateFalseConfidence(FalsingClassifier.Result.passed(0.6))
+    }
+
+    /**
+     * Notifies of false input which is very likely to be the result of a false touch in the user's
+     * pocket or by the user's face while holding their device up to their ear.
+     */
+    fun onFalseUserInput() {
+        falsingInteractor.updateFalseConfidence(
+            FalsingClassifier.Result.falsed(
+                /* confidence= */ 0.7,
+                /* context= */ javaClass.simpleName,
+                /* reason= */ "empty pattern input",
+            )
+        )
     }
 
     /**

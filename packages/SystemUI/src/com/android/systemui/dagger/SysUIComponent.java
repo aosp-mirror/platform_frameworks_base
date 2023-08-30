@@ -22,6 +22,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.dagger.qualifiers.PerUser;
+import com.android.systemui.display.ui.viewmodel.ConnectingDisplayViewModel;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
@@ -140,6 +141,7 @@ public interface SysUIComponent {
         getMediaMuteAwaitConnectionCli();
         getNearbyMediaDevicesManager();
         getUnfoldLatencyTracker().init();
+        getConnectingDisplayViewModel().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
         getUnfoldTransitionProgressProvider().ifPresent((progressProvider) ->
@@ -227,6 +229,11 @@ public interface SysUIComponent {
 
     /** */
     NearbyMediaDevicesManager getNearbyMediaDevicesManager();
+
+    /**
+     * Creates a ConnectingDisplayViewModel
+     */
+    ConnectingDisplayViewModel getConnectingDisplayViewModel();
 
     /**
      * Returns {@link CoreStartable}s that should be started with the application.

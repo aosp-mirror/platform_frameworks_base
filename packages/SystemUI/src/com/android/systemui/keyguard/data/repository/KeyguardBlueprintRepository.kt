@@ -17,13 +17,10 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule
 import java.io.PrintWriter
@@ -94,27 +91,4 @@ constructor(
     fun printBlueprints(pw: PrintWriter) {
         blueprintIdMap.forEach { entry -> pw.println("${entry.key}") }
     }
-}
-
-/** Determines the constraints for the ConstraintSet in the lockscreen root view. */
-interface KeyguardBlueprint {
-    val id: String
-    val shouldRemoveUnconstrainedViews: Boolean
-        get() = true
-
-    fun apply(constraintLayout: ConstraintSet)
-    fun removeUnConstrainedViews(constraintLayout: ConstraintLayout, constraintSet: ConstraintSet) {
-        constraintLayout.children
-            .map { it.id }
-            .filterNot { constraintSet.knownIds.contains(it) }
-            .forEach { constraintSet.setVisibility(it, View.GONE) }
-    }
-}
-
-/**
- * Lower level modules that determine constraints for a particular section in the lockscreen root
- * view.
- */
-interface KeyguardSection {
-    fun apply(constraintSet: ConstraintSet)
 }

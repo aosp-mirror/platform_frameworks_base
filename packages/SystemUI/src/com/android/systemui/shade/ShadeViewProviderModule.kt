@@ -22,7 +22,6 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
-import com.android.keyguard.LockIconView
 import com.android.systemui.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
@@ -96,11 +95,11 @@ abstract class ShadeViewProviderModule {
                 ?: throw IllegalStateException("Window root view could not be properly inflated")
         }
 
-        @Provides
-        @SysUISingleton
         // TODO(b/277762009): Do something similar to
         //  {@link StatusBarWindowModule.InternalWindowView} so that only
         //  {@link NotificationShadeWindowViewController} can inject this view.
+        @Provides
+        @SysUISingleton
         fun providesNotificationShadeWindowView(
             root: WindowRootView,
             featureFlags: FeatureFlags,
@@ -201,21 +200,6 @@ abstract class ShadeViewProviderModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): AuthRippleView? {
             return notificationShadeWindowView.requireViewById(R.id.auth_ripple)
-        }
-
-        // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
-        @Provides
-        @SysUISingleton
-        fun providesLockIconView(
-            keyguardRootView: KeyguardRootView,
-            notificationPanelView: NotificationPanelView,
-            featureFlags: FeatureFlags
-        ): LockIconView {
-            if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
-                return keyguardRootView.requireViewById(R.id.lock_icon_view)
-            } else {
-                return notificationPanelView.requireViewById(R.id.lock_icon_view)
-            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.

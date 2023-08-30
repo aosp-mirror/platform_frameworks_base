@@ -507,10 +507,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * Move a task to split select
      * @param taskInfo the task being moved to split select
      * @param wct transaction to apply if this is a valid request
+     * @param splitPosition the split position this task should move to
+     * @param taskBounds current freeform bounds of the task entering split
      */
     public void requestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
-            WindowContainerTransaction wct) {
-        mStageCoordinator.requestEnterSplitSelect(taskInfo, wct);
+            WindowContainerTransaction wct, int splitPosition, Rect taskBounds) {
+        mStageCoordinator.requestEnterSplitSelect(taskInfo, wct, splitPosition, taskBounds);
     }
 
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
@@ -1135,9 +1137,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 new SplitScreen.SplitSelectListener() {
                     @Override
                     public boolean onRequestEnterSplitSelect(
-                            ActivityManager.RunningTaskInfo taskInfo) {
+                            ActivityManager.RunningTaskInfo taskInfo, int splitPosition,
+                            Rect taskBounds) {
                         AtomicBoolean result = new AtomicBoolean(false);
-                        mSelectListener.call(l -> result.set(l.onRequestSplitSelect(taskInfo)));
+                        mSelectListener.call(l -> result.set(l.onRequestSplitSelect(taskInfo,
+                                splitPosition, taskBounds)));
                         return result.get();
                     }
                 };

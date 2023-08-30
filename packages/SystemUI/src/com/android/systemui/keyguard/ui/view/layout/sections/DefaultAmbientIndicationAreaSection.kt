@@ -17,7 +17,10 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
@@ -28,13 +31,44 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import javax.inject.Inject
 
 class DefaultAmbientIndicationAreaSection
 @Inject
-constructor(private val keyguardUpdateMonitor: KeyguardUpdateMonitor) : KeyguardSection {
-    override fun apply(constraintSet: ConstraintSet) {
+constructor(
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val featureFlags: FeatureFlags,
+    private val keyguardAmbientIndicationViewModel: KeyguardAmbientIndicationViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
+) : KeyguardSection {
+    private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
+
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            if (constraintLayout.findViewById<View>(R.id.ambient_indication_container) == null) {
+                val view =
+                    LayoutInflater.from(constraintLayout.context)
+                        .inflate(R.layout.ambient_indication, constraintLayout, false)
+
+                constraintLayout.addView(view)
+            }
+
+            ambientIndicationAreaHandle =
+                KeyguardAmbientIndicationAreaViewBinder.bind(
+                    constraintLayout,
+                    keyguardAmbientIndicationViewModel,
+                    keyguardRootViewModel,
+                )
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
             constrainWidth(R.id.ambient_indication_container, MATCH_PARENT)
 
@@ -58,5 +92,9 @@ constructor(private val keyguardUpdateMonitor: KeyguardUpdateMonitor) : Keyguard
                 connect(R.id.ambient_indication_container, END, PARENT_ID, END)
             }
         }
+    }
+
+    override fun onDestroy() {
+        ambientIndicationAreaHandle?.destroy()
     }
 }

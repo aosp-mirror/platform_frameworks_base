@@ -155,6 +155,9 @@ interface ShadeViewController {
     /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
     fun onBackPressed()
 
+    /** Sets progress of the predictive back animation. */
+    fun onBackProgressed(progressFraction: Float)
+
     /** Sets whether the status bar launch animation is currently running. */
     fun setIsLaunchAnimationRunning(running: Boolean)
 

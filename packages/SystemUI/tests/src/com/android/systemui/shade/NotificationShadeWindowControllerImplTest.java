@@ -63,6 +63,8 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import com.google.common.util.concurrent.MoreExecutors;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +75,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -98,6 +101,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
+    private final Executor mBackgroundExecutor = MoreExecutors.directExecutor();
 
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
     private float mPreferredRefreshRate = -1;
@@ -125,6 +129,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mConfigurationController,
                 mKeyguardViewMediator,
                 mKeyguardBypassController,
+                mBackgroundExecutor,
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,

@@ -25,17 +25,18 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.view.WindowInsetsController;
 
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FeatureFlags;
 
@@ -49,7 +50,8 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
 

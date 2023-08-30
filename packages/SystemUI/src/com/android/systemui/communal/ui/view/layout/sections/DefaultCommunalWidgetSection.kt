@@ -17,18 +17,47 @@
 package com.android.systemui.communal.ui.view.layout.sections
 
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import com.android.systemui.R
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.communal.ui.adapter.CommunalWidgetViewAdapter
+import com.android.systemui.communal.ui.binder.CommunalWidgetViewBinder
+import com.android.systemui.communal.ui.viewmodel.CommunalWidgetViewModel
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import dagger.Lazy
 import javax.inject.Inject
 
-class DefaultCommunalWidgetSection @Inject constructor() : KeyguardSection {
+class DefaultCommunalWidgetSection
+@Inject
+constructor(
+    private val featureFlags: FeatureFlags,
+    private val keyguardRootView: KeyguardRootView,
+    private val communalWidgetViewModel: CommunalWidgetViewModel,
+    private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
+    private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
+) : KeyguardSection {
     private val widgetAreaViewId = R.id.communal_widget_wrapper
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (!featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
+            return
+        }
 
-    override fun apply(constraintSet: ConstraintSet) {
+        CommunalWidgetViewBinder.bind(
+            keyguardRootView,
+            communalWidgetViewModel,
+            communalWidgetViewAdapter,
+            keyguardBlueprintInteractor.get(),
+        )
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
             constrainWidth(widgetAreaViewId, WRAP_CONTENT)
             constrainHeight(widgetAreaViewId, WRAP_CONTENT)

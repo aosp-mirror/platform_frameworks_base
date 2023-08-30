@@ -39,6 +39,10 @@ object Flags {
     @JvmField val TEAMFOOD = unreleasedFlag("teamfood")
 
     // 100 - notification
+    // TODO(b/297792660): Tracking Bug
+    val ADD_TRANSIENT_HUN_IN_STACK_STATE_ANIMATOR =
+        unreleasedFlag("add_transient_hun_in_stack_state_animator", teamfood = false)
+
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
         unreleasedFlag("notification_pipeline_developer_logging")
@@ -203,6 +207,10 @@ object Flags {
     // TODO(b/266242192): Tracking Bug
     @JvmField
     val LOCK_SCREEN_LONG_PRESS_ENABLED = releasedFlag("lock_screen_long_press_enabled")
+
+    /** Inflate and bind views upon emitting a blueprint value . */
+    // TODO(b/297365780): Tracking Bug
+    @JvmField val LAZY_INFLATE_KEYGUARD = unreleasedFlag("lazy_inflate_keyguard")
 
     /** Enables UI updates for AI wallpapers in the wallpaper picker. */
     // TODO(b/267722622): Tracking Bug
@@ -394,7 +402,7 @@ object Flags {
 
     // TODO(b/290676905): Tracking Bug
     val NEW_SHADE_CARRIER_GROUP_MOBILE_ICONS =
-        unreleasedFlag("new_shade_carrier_group_mobile_icons")
+        unreleasedFlag("new_shade_carrier_group_mobile_icons", teamfood = true)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -633,9 +641,6 @@ object Flags {
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
-
-    // 2000 - device controls
-    @JvmField val APP_PANELS_ALL_APPS_ALLOWED = releasedFlag("app_panels_all_apps_allowed")
 
     // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
     // TODO(b/259264861): Tracking Bug

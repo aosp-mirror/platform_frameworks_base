@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
@@ -322,20 +323,20 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             val captor = argumentCaptor<StatusBarStateController.StateListener>()
             runCurrent()
-            verify(statusBarStateController).addCallback(captor.capture())
+            verify(statusBarStateController, atLeastOnce()).addCallback(captor.capture())
 
-            captor.value.onDozeAmountChanged(0.433f, 0.4f)
+            captor.allValues.forEach { it.onDozeAmountChanged(0.433f, 0.4f) }
             runCurrent()
-            captor.value.onDozeAmountChanged(0.498f, 0.5f)
+            captor.allValues.forEach { it.onDozeAmountChanged(0.498f, 0.5f) }
             runCurrent()
-            captor.value.onDozeAmountChanged(0.661f, 0.65f)
+            captor.allValues.forEach { it.onDozeAmountChanged(0.661f, 0.65f) }
             runCurrent()
 
             assertThat(values).isEqualTo(listOf(0f, 0.433f, 0.498f, 0.661f))
 
             job.cancel()
             runCurrent()
-            verify(statusBarStateController).removeCallback(captor.value)
+            verify(statusBarStateController).removeCallback(any())
         }
 
     @Test

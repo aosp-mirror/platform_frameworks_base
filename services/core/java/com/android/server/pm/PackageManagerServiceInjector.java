@@ -127,6 +127,8 @@ public class PackageManagerServiceInjector {
             mPreparingPackageParserProducer;
     private final Singleton<PackageInstallerService>
             mPackageInstallerServiceProducer;
+    private final Singleton<PackageArchiverService>
+            mPackageArchiverServiceProducer;
     private final ProducerWithArgument<InstantAppResolverConnection, ComponentName>
             mInstantAppResolverConnectionProducer;
     private final Singleton<LegacyPermissionManagerInternal>
@@ -185,7 +187,8 @@ public class PackageManagerServiceInjector {
             Producer<IBackupManager> iBackupManager,
             Producer<SharedLibrariesImpl> sharedLibrariesProducer,
             Producer<CrossProfileIntentFilterHelper> crossProfileIntentFilterHelperProducer,
-            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer) {
+            Producer<UpdateOwnershipHelper> updateOwnershipHelperProducer,
+            Producer<PackageArchiverService> packageArchiverServiceProducer) {
         mContext = context;
         mLock = lock;
         mInstaller = installer;
@@ -241,6 +244,7 @@ public class PackageManagerServiceInjector {
         mCrossProfileIntentFilterHelperProducer = new Singleton<>(
                 crossProfileIntentFilterHelperProducer);
         mUpdateOwnershipHelperProducer = new Singleton<>(updateOwnershipHelperProducer);
+        mPackageArchiverServiceProducer = new Singleton<>(packageArchiverServiceProducer);
     }
 
     /**
@@ -385,6 +389,10 @@ public class PackageManagerServiceInjector {
 
     public PackageInstallerService getPackageInstallerService() {
         return mPackageInstallerServiceProducer.get(this, mPackageManager);
+    }
+
+    public PackageArchiverService getPackageArchiverService() {
+        return mPackageArchiverServiceProducer.get(this, mPackageManager);
     }
 
     public InstantAppResolverConnection getInstantAppResolverConnection(

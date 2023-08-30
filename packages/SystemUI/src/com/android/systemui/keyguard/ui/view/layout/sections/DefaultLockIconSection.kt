@@ -21,13 +21,20 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
+import android.view.View
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.LockIconView
+import com.android.keyguard.LockIconViewController
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.keyguard.data.repository.KeyguardSection
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.shade.NotificationPanelView
 import javax.inject.Inject
 
 class DefaultLockIconSection
@@ -37,16 +44,30 @@ constructor(
     private val authController: AuthController,
     private val windowManager: WindowManager,
     private val context: Context,
+    private val notificationPanelView: NotificationPanelView,
+    private val featureFlags: FeatureFlags,
+    private val lockIconViewController: LockIconViewController,
 ) : KeyguardSection {
     private val lockIconViewId = R.id.lock_icon_view
 
-    override fun apply(constraintSet: ConstraintSet) {
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
+                notificationPanelView.removeView(it)
+            }
+            if (constraintLayout.findViewById<View>(R.id.lock_icon_view) == null) {
+                val view = LockIconView(context, null).apply { id = R.id.lock_icon_view }
+                constraintLayout.addView(view)
+                lockIconViewController.setLockIconView(view)
+            }
+        }
+    }
+
+    override fun applyConstraints(constraintSet: ConstraintSet) {
         val isUdfpsSupported = keyguardUpdateMonitor.isUdfpsSupported
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
             context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
-        val mDefaultPaddingPx = context.resources.getDimensionPixelSize(R.dimen.lock_icon_padding)
-        val scaledPadding: Int = (mDefaultPaddingPx * scaleFactor).toInt()
         val bounds = windowManager.currentWindowMetrics.bounds
         val widthPixels = bounds.right.toFloat()
         val heightPixels = bounds.bottom.toFloat()
@@ -57,12 +78,7 @@ constructor(
 
         if (isUdfpsSupported) {
             authController.udfpsLocation?.let { udfpsLocation ->
-                centerLockIcon(
-                    udfpsLocation,
-                    authController.udfpsRadius,
-                    scaledPadding,
-                    constraintSet
-                )
+                centerLockIcon(udfpsLocation, authController.udfpsRadius, constraintSet)
             }
         } else {
             centerLockIcon(
@@ -71,19 +87,13 @@ constructor(
                     (heightPixels - ((mBottomPaddingPx + lockIconRadiusPx) * scaleFactor)).toInt()
                 ),
                 lockIconRadiusPx * scaleFactor,
-                scaledPadding,
                 constraintSet,
             )
         }
     }
 
     @VisibleForTesting
-    internal fun centerLockIcon(
-        center: Point,
-        radius: Float,
-        drawablePadding: Int,
-        constraintSet: ConstraintSet
-    ) {
+    internal fun centerLockIcon(center: Point, radius: Float, constraintSet: ConstraintSet) {
         val sensorRect =
             Rect().apply {
                 set(

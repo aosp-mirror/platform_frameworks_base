@@ -203,10 +203,9 @@ namespace PaintGlue {
         if (advances) {
             advancesArray.reset(new jfloat[count]);
         }
-        minikin::MinikinRect bounds;
         const float advance = MinikinUtils::measureText(
                 paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, start, count,
-                contextCount, advancesArray.get(), &bounds);
+                contextCount, advancesArray.get(), nullptr);
         if (advances) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray.get());
         }

@@ -36,6 +36,7 @@ import com.android.systemui.bouncer.domain.interactor.CountDownTimerUtil
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -56,6 +57,8 @@ import com.android.systemui.statusbar.notification.data.repository.NotificationE
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.statusbar.phone.DozeScrimController
+import com.android.systemui.statusbar.phone.DozeServiceHost
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
@@ -90,6 +93,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var view: NotificationShadeWindowView
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var dozeServiceHost: DozeServiceHost
+    @Mock private lateinit var dozeScrimController: DozeScrimController
     @Mock private lateinit var backActionInteractor: BackActionInteractor
     @Mock private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var dockManager: DockManager
@@ -98,6 +103,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
     @Mock private lateinit var shadeLogger: ShadeLogger
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var ambientState: AmbientState
     @Mock private lateinit var keyguardBouncerViewModel: KeyguardBouncerViewModel
     @Mock private lateinit var stackScrollLayoutController: NotificationStackScrollLayoutController
@@ -155,46 +161,49 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         fakeClock = FakeSystemClock()
         underTest =
             NotificationShadeWindowViewController(
-                    lockscreenShadeTransitionController,
-                    FalsingCollectorFake(),
-                    sysuiStatusBarStateController,
-                    dockManager,
-                    notificationShadeDepthController,
-                    view,
-                    notificationPanelViewController,
-                    ShadeExpansionStateManager(),
-                    stackScrollLayoutController,
-                    statusBarKeyguardViewManager,
-                    statusBarWindowStateController,
-                    lockIconViewController,
-                    centralSurfaces,
-                    backActionInteractor,
-                    powerInteractor,
-                    notificationShadeWindowController,
-                    unfoldTransitionProgressProvider,
-                    keyguardUnlockAnimationController,
-                    notificationInsetsController,
-                    ambientState,
-                    shadeLogger,
-                    pulsingGestureListener,
-                    mLockscreenHostedDreamGestureListener,
-                    keyguardBouncerViewModel,
-                    keyguardBouncerComponentFactory,
-                    mock(KeyguardMessageAreaController.Factory::class.java),
-                    keyguardTransitionInteractor,
-                    primaryBouncerToGoneTransitionViewModel,
-                    notificationExpansionRepository,
-                    featureFlags,
-                    fakeClock,
-                    BouncerMessageInteractor(
-                        FakeBouncerMessageRepository(),
-                        mock(BouncerMessageFactory::class.java),
-                        FakeUserRepository(),
-                        CountDownTimerUtil(),
-                        featureFlags
-                    ),
-                    BouncerLogger(logcatLogBuffer("BouncerLog")),
-                    keyEventInteractor,
+                lockscreenShadeTransitionController,
+                FalsingCollectorFake(),
+                sysuiStatusBarStateController,
+                dockManager,
+                notificationShadeDepthController,
+                view,
+                notificationPanelViewController,
+                ShadeExpansionStateManager(),
+                stackScrollLayoutController,
+                statusBarKeyguardViewManager,
+                statusBarWindowStateController,
+                lockIconViewController,
+                centralSurfaces,
+                dozeServiceHost,
+                dozeScrimController,
+                backActionInteractor,
+                powerInteractor,
+                notificationShadeWindowController,
+                unfoldTransitionProgressProvider,
+                keyguardUnlockAnimationController,
+                notificationInsetsController,
+                ambientState,
+                shadeLogger,
+                dumpManager,
+                pulsingGestureListener,
+                mLockscreenHostedDreamGestureListener,
+                keyguardBouncerViewModel,
+                keyguardBouncerComponentFactory,
+                mock(KeyguardMessageAreaController.Factory::class.java),
+                keyguardTransitionInteractor,
+                primaryBouncerToGoneTransitionViewModel,
+                notificationExpansionRepository,
+                featureFlags,
+                fakeClock,
+                BouncerMessageInteractor(
+                    FakeBouncerMessageRepository(),
+                    mock(BouncerMessageFactory::class.java),
+                    FakeUserRepository(),
+                    CountDownTimerUtil(),
+                    featureFlags
+                ),
+                BouncerLogger(logcatLogBuffer("BouncerLog")),
+                keyEventInteractor,
             )
         underTest.setupExpandedStatusBar()
 

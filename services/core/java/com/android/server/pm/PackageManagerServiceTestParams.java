@@ -60,6 +60,7 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String incidentReportApproverPackage;
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
+    public PackageArchiverService archiverService;
     public InstantAppRegistry instantAppRegistry;
     public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;

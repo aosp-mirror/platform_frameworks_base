@@ -18,6 +18,7 @@ java_defaults {
 
     // Add java_aconfig_libraries to here to add them to the core framework
     srcs: [
+        ":android.os.flags-aconfig-java{.generated_srcjars}",
         ":android.security.flags-aconfig-java{.generated_srcjars}",
         ":camera_platform_flags_core_java_lib{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
@@ -76,5 +77,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.security.flags-aconfig-java",
     aconfig_declarations: "android.security.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// OS
+aconfig_declarations {
+    name: "android.os.flags-aconfig",
+    package: "android.os",
+    srcs: ["core/java/android/os/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.os.flags-aconfig-java",
+    aconfig_declarations: "android.os.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

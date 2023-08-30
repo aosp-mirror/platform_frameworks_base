@@ -4048,10 +4048,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    boolean isKeyguardLocked(int displayId) {
-        return mKeyguardController.isKeyguardLocked(displayId);
-    }
-
     /**
      * Clears launch params for the given package.
      *

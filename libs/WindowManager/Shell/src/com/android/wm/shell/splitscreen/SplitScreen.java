@@ -66,7 +66,8 @@ public interface SplitScreen {
 
     /** Callback interface for listening to requests to enter split select */
     interface SplitSelectListener {
-        default boolean onRequestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo) {
+        default boolean onRequestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+                int splitPosition, Rect taskBounds) {
             return false;
         }
     }

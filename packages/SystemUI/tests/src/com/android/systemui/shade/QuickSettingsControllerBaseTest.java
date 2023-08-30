@@ -37,7 +37,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -132,7 +131,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected AmbientState mAmbientState;
     @Mock protected RecordingController mRecordingController;
     @Mock protected FalsingManager mFalsingManager;
-    @Mock protected FalsingCollector mFalsingCollector;
     @Mock protected AccessibilityManager mAccessibilityManager;
     @Mock protected LockscreenGestureLogger mLockscreenGestureLogger;
     @Mock protected MetricsLogger mMetricsLogger;
@@ -242,7 +240,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mAmbientState,
                 mRecordingController,
                 mFalsingManager,
-                mFalsingCollector,
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,

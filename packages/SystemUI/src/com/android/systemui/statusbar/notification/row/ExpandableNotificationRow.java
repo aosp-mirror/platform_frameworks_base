@@ -74,7 +74,6 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.CallLayout;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.ViewRefactorFlag;
@@ -245,7 +244,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationEntry mEntry;
     private String mAppName;
     private FalsingManager mFalsingManager;
-    private FalsingCollector mFalsingCollector;
 
     /**
      * Whether or not the notification is using the heads up view and should peek from the top.
@@ -1711,7 +1709,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             OnExpandClickListener onExpandClickListener,
             CoordinateOnClickListener onFeedbackClickListener,
             FalsingManager falsingManager,
-            FalsingCollector falsingCollector,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             OnUserInteractionCallback onUserInteractionCallback,
@@ -1743,7 +1740,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
         setOnFeedbackClickListener(onFeedbackClickListener);
         mFalsingManager = falsingManager;
-        mFalsingCollector = falsingCollector;
         mStatusBarStateController = statusBarStateController;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         for (NotificationContentView l : mLayouts) {
@@ -2471,7 +2467,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @param allowChildExpansion whether a call to this method allows expanding children
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
-        mFalsingCollector.setNotificationExpanded();
         if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupExpansionManager.isGroupExpanded(mEntry);

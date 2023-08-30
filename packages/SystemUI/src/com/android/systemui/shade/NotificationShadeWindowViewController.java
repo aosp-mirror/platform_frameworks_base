@@ -35,6 +35,7 @@ import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.back.domain.interactor.BackActionInteractor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
@@ -43,6 +44,7 @@ import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyevent.domain.interactor.KeyEventInteractor;
@@ -65,6 +67,8 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.DozeScrimController;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
@@ -81,7 +85,7 @@ import javax.inject.Inject;
  * Controller for {@link NotificationShadeWindowView}.
  */
 @SysUISingleton
-public class NotificationShadeWindowViewController {
+public class NotificationShadeWindowViewController implements Dumpable {
     private static final String TAG = "NotifShadeWindowVC";
     private final FalsingCollector mFalsingCollector;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -118,6 +122,8 @@ public class NotificationShadeWindowViewController {
     private NotificationStackScrollLayout mStackScrollLayout;
     private PhoneStatusBarViewController mStatusBarViewController;
     private final CentralSurfaces mService;
+    private final DozeServiceHost mDozeServiceHost;
+    private final DozeScrimController mDozeScrimController;
     private final BackActionInteractor mBackActionInteractor;
     private final PowerInteractor mPowerInteractor;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
@@ -152,6 +158,8 @@ public class NotificationShadeWindowViewController {
             StatusBarWindowStateController statusBarWindowStateController,
             LockIconViewController lockIconViewController,
             CentralSurfaces centralSurfaces,
+            DozeServiceHost dozeServiceHost,
+            DozeScrimController dozeScrimController,
             BackActionInteractor backActionInteractor,
             PowerInteractor powerInteractor,
             NotificationShadeWindowController controller,
@@ -160,6 +168,7 @@ public class NotificationShadeWindowViewController {
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
             ShadeLogger shadeLogger,
+            DumpManager dumpManager,
             PulsingGestureListener pulsingGestureListener,
             LockscreenHostedDreamGestureListener lockscreenHostedDreamGestureListener,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
@@ -187,8 +196,9 @@ public class NotificationShadeWindowViewController {
         mLockIconViewController = lockIconViewController;
         mBackActionInteractor = backActionInteractor;
         mShadeLogger = shadeLogger;
-        mLockIconViewController.init();
         mService = centralSurfaces;
+        mDozeServiceHost = dozeServiceHost;
+        mDozeScrimController = dozeScrimController;
         mPowerInteractor = powerInteractor;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -226,6 +236,9 @@ public class NotificationShadeWindowViewController {
                     progressProvider -> progressProvider.addCallback(
                             mDisableSubpixelTextTransitionListener));
         }
+
+        lockIconViewController.setLockIconView(mView.findViewById(R.id.lock_icon_view));
+        dumpManager.registerDumpable(this);
     }
 
     /**
@@ -332,7 +345,7 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mStatusBarStateController.isDozing()) {
-                    mService.extendDozePulse();
+                    mDozeScrimController.extendPulse();
                 }
                 mLockIconViewController.onTouchEvent(
                         ev,
@@ -391,7 +404,7 @@ public class NotificationShadeWindowViewController {
 
             @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
-                if (mStatusBarStateController.isDozing() && !mService.isPulsing()
+                if (mStatusBarStateController.isDozing() && !mDozeServiceHost.isPulsing()
                         && !mDockManager.isDocked()) {
                     if (ev.getAction() == MotionEvent.ACTION_DOWN) {
                         mShadeLogger.d("NSWVC: capture all touch events in always-on");
@@ -445,7 +458,7 @@ public class NotificationShadeWindowViewController {
             public boolean handleTouchEvent(MotionEvent ev) {
                 boolean handled = false;
                 if (mStatusBarStateController.isDozing()) {
-                    handled = !mService.isPulsing();
+                    handled = !mDozeServiceHost.isPulsing();
                 }
 
                 if (mStatusBarKeyguardViewManager.onTouch(ev)) {
@@ -533,6 +546,7 @@ public class NotificationShadeWindowViewController {
         mAmbientState.setSwipingUp(false);
     }
 
+    @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.print("  mExpandAnimationRunning=");
         pw.println(mExpandAnimationRunning);

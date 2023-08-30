@@ -17,13 +17,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import javax.inject.Inject
 
-@SysUISingleton
 class KeyguardBlueprintViewModel
 @Inject
 constructor(keyguardBlueprintInteractor: KeyguardBlueprintInteractor) {
+    var currentBluePrint: KeyguardBlueprint? = null
     val blueprint = keyguardBlueprintInteractor.blueprint
 }

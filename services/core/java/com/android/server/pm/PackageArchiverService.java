@@ -22,11 +22,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.IPackageArchiverService;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Binder;
+import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
@@ -47,7 +49,9 @@ import java.util.Objects;
  * while the data directory is kept. Archived apps are included in the list of launcher apps where
  * tapping them re-installs the full app.
  */
-final class ArchiveManager {
+public class PackageArchiverService extends IPackageArchiverService.Stub {
+
+    private static final String TAG = "PackageArchiver";
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -55,36 +59,39 @@ final class ArchiveManager {
     @Nullable
     private LauncherApps mLauncherApps;
 
-    ArchiveManager(Context context, PackageManagerService mPm) {
+    public PackageArchiverService(Context context, PackageManagerService mPm) {
         this.mContext = context;
         this.mPm = mPm;
     }
 
-    void archiveApp(
+    @Override
+    public void requestArchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
-            @NonNull UserHandle user,
-            @NonNull IntentSender intentSender) throws PackageManager.NameNotFoundException {
+            @NonNull IntentSender intentSender,
+            @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(callerPackageName);
-        Objects.requireNonNull(user);
         Objects.requireNonNull(intentSender);
+        Objects.requireNonNull(userHandle);
 
         Computer snapshot = mPm.snapshotComputer();
-        int callingUid = Binder.getCallingUid();
-        int userId = user.getIdentifier();
-        String callingPackageName = snapshot.getNameForUid(callingUid);
-        snapshot.enforceCrossUserPermission(callingUid, userId, true, true,
+        int userId = userHandle.getIdentifier();
+        int binderUid = Binder.getCallingUid();
+        int providedUid = snapshot.getPackageUid(callerPackageName, 0, userId);
+        snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
-        verifyCaller(callerPackageName, callingPackageName);
-        PackageStateInternal ps = getPackageState(packageName, snapshot, callingUid, user);
-        verifyInstaller(packageName, ps.getInstallSource());
+        verifyCaller(providedUid, binderUid);
+        PackageStateInternal ps = getPackageState(packageName, snapshot, binderUid, userId);
+        verifyInstaller(packageName, ps);
 
+        // TODO(b/291569242) Verify that this list is not empty and return failure with
+        //  intentsender
         List<LauncherActivityInfo> mainActivities = getLauncherApps().getActivityList(
                 ps.getPackageName(),
                 new UserHandle(userId));
-        // TODO(b/291569242) Verify that this list is not empty and return failure with intentsender
 
+        // TODO(b/282952870) Bug: should happen after the uninstall completes successfully
         storeArchiveState(ps, mainActivities, userId);
 
         // TODO(b/278553670) Add special strings for the delete dialog
@@ -93,15 +100,25 @@ final class ArchiveManager {
                 callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
     }
 
+    private static void verifyInstaller(String packageName, PackageStateInternal ps) {
+        if (ps.getInstallSource().mUpdateOwnerPackageName == null
+                && ps.getInstallSource().mInstallerPackageName == null) {
+            throw new ParcelableException(
+                    new PackageManager.NameNotFoundException(
+                            TextUtils.formatSimple("No installer found to archive app %s.",
+                                    packageName)));
+        }
+    }
+
     @NonNull
     private static PackageStateInternal getPackageState(String packageName,
-            Computer snapshot, int callingUid, UserHandle user)
-            throws PackageManager.NameNotFoundException {
+            Computer snapshot, int callingUid, int userId) {
         PackageStateInternal ps = snapshot.getPackageStateFiltered(packageName, callingUid,
-                user.getIdentifier());
+                userId);
         if (ps == null) {
-            throw new PackageManager.NameNotFoundException(
-                    TextUtils.formatSimple("Package %s not found.", packageName));
+            throw new ParcelableException(
+                    new PackageManager.NameNotFoundException(
+                            TextUtils.formatSimple("Package %s not found.", packageName)));
         }
         return ps;
     }
@@ -114,8 +131,7 @@ final class ArchiveManager {
     }
 
     private void storeArchiveState(PackageStateInternal ps,
-            List<LauncherActivityInfo> mainActivities, int userId)
-            throws PackageManager.NameNotFoundException {
+            List<LauncherActivityInfo> mainActivities, int userId) {
         List<ArchiveActivityInfo> activityInfos = new ArrayList<>();
         for (int i = 0; i < mainActivities.size(); i++) {
             // TODO(b/278553670) Extract and store launcher icons
@@ -130,41 +146,34 @@ final class ArchiveManager {
                 ? installSource.mUpdateOwnerPackageName : installSource.mInstallerPackageName;
 
         synchronized (mPm.mLock) {
-            getPackageSetting(ps.getPackageName(), userId).modifyUserState(userId).setArchiveState(
-                    new ArchiveState(activityInfos, installerPackageName));
+            PackageSetting packageSetting = getPackageSettingLocked(ps.getPackageName(), userId);
+            packageSetting
+                    .modifyUserState(userId)
+                    .setArchiveState(new ArchiveState(activityInfos, installerPackageName));
         }
     }
 
     @NonNull
     @GuardedBy("mPm.mLock")
-    private PackageSetting getPackageSetting(String packageName, int userId)
-            throws PackageManager.NameNotFoundException {
+    private PackageSetting getPackageSettingLocked(String packageName, int userId) {
         PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+        // Shouldn't happen, we already verify presence of the package in getPackageState()
         if (ps == null || !ps.getUserStateOrDefault(userId).isInstalled()) {
-            throw new PackageManager.NameNotFoundException(
-                    TextUtils.formatSimple("Package %s not found.", packageName));
+            throw new ParcelableException(
+                    new PackageManager.NameNotFoundException(
+                            TextUtils.formatSimple("Package %s not found.", packageName)));
         }
         return ps;
     }
 
-    private static void verifyCaller(String callerPackageName, String callingPackageName) {
-        if (!TextUtils.equals(callingPackageName, callerPackageName)) {
+    private static void verifyCaller(int providedUid, int binderUid) {
+        if (providedUid != binderUid) {
             throw new SecurityException(
                     TextUtils.formatSimple(
-                            "The callerPackageName %s set by the caller doesn't match the "
-                                    + "caller's own package name %s.",
-                            callerPackageName,
-                            callingPackageName));
-        }
-    }
-
-    private static void verifyInstaller(String packageName, InstallSource installSource) {
-        // TODO(b/291060290) Verify installer supports unarchiving
-        if (installSource.mUpdateOwnerPackageName == null
-                && installSource.mInstallerPackageName == null) {
-            throw new SecurityException(
-                    TextUtils.formatSimple("No installer found to archive app %s.",
-                            packageName));
+                            "The UID %s of callerPackageName set by the caller doesn't match the "
+                                    + "caller's actual UID %s.",
+                            providedUid,
+                            binderUid));
         }
     }
 }
