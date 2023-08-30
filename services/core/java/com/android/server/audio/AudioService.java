@@ -146,6 +146,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceDebugInfo;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemClock;
@@ -12322,12 +12323,25 @@ public class AudioService extends IAudioService.Stub
 
     private static final String AUDIO_HAL_SERVICE_PREFIX = "android.hardware.audio";
 
-    private Set<Integer> getAudioHalPids() {
+    private void getAudioAidlHalPids(HashSet<Integer> pids) {
+        try {
+            ServiceDebugInfo[] infos = ServiceManager.getServiceDebugInfo();
+            if (infos == null) return;
+            for (ServiceDebugInfo info : infos) {
+                if (info.debugPid > 0 && info.name.startsWith(AUDIO_HAL_SERVICE_PREFIX)) {
+                    pids.add(info.debugPid);
+                }
+            }
+        } catch (RuntimeException e) {
+            // ignored, pid hashset does not change
+        }
+    }
+
+    private void getAudioHalHidlPids(HashSet<Integer> pids) {
         try {
             IServiceManager serviceManager = IServiceManager.getService();
             ArrayList<IServiceManager.InstanceDebugInfo> dump =
                     serviceManager.debugDump();
-            HashSet<Integer> pids = new HashSet<>();
             for (IServiceManager.InstanceDebugInfo info : dump) {
                 if (info.pid != IServiceManager.PidConstant.NO_PID
                         && info.interfaceName != null
@@ -12335,10 +12349,16 @@ public class AudioService extends IAudioService.Stub
                     pids.add(info.pid);
                 }
             }
-            return pids;
         } catch (RemoteException | RuntimeException e) {
-            return new HashSet<Integer>();
+            // ignored, pid hashset does not change
         }
+    }
+
+    private Set<Integer> getAudioHalPids() {
+        HashSet<Integer> pids = new HashSet<>();
+        getAudioAidlHalPids(pids);
+        getAudioHalHidlPids(pids);
+        return pids;
     }
 
     private void updateAudioHalPids() {
