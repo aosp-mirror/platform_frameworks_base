@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.composable
+package com.android.systemui.scene
 
-import com.android.systemui.scene.shared.model.Scene
 import dagger.Module
-import dagger.multibindings.Multibinds
 
-@Module
-interface SceneModule {
-    @Multibinds fun scenes(): Set<Scene>
-}
+@Module interface BouncerSceneModule

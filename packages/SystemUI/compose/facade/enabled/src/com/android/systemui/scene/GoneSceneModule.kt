@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.domain.startable
+package com.android.systemui.scene
 
-import com.android.systemui.CoreStartable
-import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
+import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.ui.composable.GoneScene
 import dagger.Binds
 import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
+import dagger.multibindings.IntoSet
 
 @Module
-interface SceneContainerStartableModule {
+interface GoneSceneModule {
 
-    @Binds
-    @IntoMap
-    @ClassKey(SceneContainerStartable::class)
-    fun bind(impl: SceneContainerStartable): CoreStartable
-
-    @Binds
-    @IntoMap
-    @ClassKey(WindowRootViewVisibilityInteractor::class)
-    fun bindWindowRootViewVisibilityInteractor(
-        impl: WindowRootViewVisibilityInteractor
-    ): CoreStartable
+    @Binds @IntoSet fun goneScene(scene: GoneScene): Scene
 }

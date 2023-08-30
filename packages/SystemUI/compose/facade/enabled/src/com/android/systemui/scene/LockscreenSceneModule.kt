@@ -14,28 +14,36 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
-package com.android.systemui.keyguard.ui.view
+package com.android.systemui.scene
 
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.qualifiers.KeyguardRootView
+import com.android.systemui.keyguard.ui.composable.LockscreenScene
+import com.android.systemui.scene.shared.model.Scene
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @Module
-object LockscreenSceneModule {
+interface LockscreenSceneModule {
 
-    @Provides
-    @SysUISingleton
-    @KeyguardRootView
-    fun viewProvider(
-        configurator: Provider<KeyguardViewConfigurator>,
-    ): () -> View {
-        return { configurator.get().getKeyguardRootView() }
+    @Binds @IntoSet fun lockscreenScene(scene: LockscreenScene): Scene
+
+    companion object {
+
+        @OptIn(ExperimentalCoroutinesApi::class)
+        @Provides
+        @SysUISingleton
+        @KeyguardRootView
+        fun viewProvider(
+            configurator: Provider<KeyguardViewConfigurator>,
+        ): () -> View {
+            return { configurator.get().getKeyguardRootView() }
+        }
     }
 }

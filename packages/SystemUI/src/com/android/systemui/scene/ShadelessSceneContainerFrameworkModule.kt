@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,37 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.model
+package com.android.systemui.scene
 
+import com.android.systemui.scene.shared.model.SceneContainerConfig
+import com.android.systemui.scene.shared.model.SceneKey
 import dagger.Module
 import dagger.Provides
 
-@Module
-object SceneContainerConfigModule {
+/** Scene framework Dagger module suitable for variants that want to exclude "shade" scenes. */
+@Module(
+    includes =
+        [
+            BouncerSceneModule::class,
+            EmptySceneModule::class,
+            GoneSceneModule::class,
+            LockscreenSceneModule::class,
+        ],
+)
+object ShadelessSceneContainerFrameworkModule {
+
+    // TODO(b/298229861): provide a version of SceneContainerStartable without shade and qs.
 
     @Provides
     fun containerConfig(): SceneContainerConfig {
         return SceneContainerConfig(
             // Note that this list is in z-order. The first one is the bottom-most and the
-            // last
-            // one is top-most.
+            // last one is top-most.
             sceneKeys =
                 listOf(
                     SceneKey.Gone,
                     SceneKey.Lockscreen,
                     SceneKey.Bouncer,
-                    SceneKey.Shade,
-                    SceneKey.QuickSettings,
                 ),
             initialSceneKey = SceneKey.Lockscreen,
         )
