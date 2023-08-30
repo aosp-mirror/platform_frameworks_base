@@ -160,7 +160,6 @@ void CanvasContext::destroy() {
     destroyHardwareResources();
     mAnimationContext->destroy();
     mRenderThread.cacheManager().onContextStopped(this);
-    mHintSessionWrapper.destroy();
 }
 
 static void setBufferCount(ANativeWindow* window) {

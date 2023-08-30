@@ -1149,11 +1149,7 @@ public class CameraDeviceImpl extends CameraDevice
                             "remove holder for requestId %d, "
                             + "because lastFrame is %d.",
                             requestId, lastFrameNumber));
-                }
-            }
 
-            if (holder != null) {
-                if (DEBUG) {
                     Log.v(TAG, "immediately trigger onCaptureSequenceAborted because"
                             + " request did not reach HAL");
                 }
@@ -2180,11 +2176,9 @@ public class CameraDeviceImpl extends CameraDevice
 
                 final CaptureCallbackHolder holder =
                         CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
-                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
 
                 boolean isPartialResult =
                         (resultExtras.getPartialResultCount() < mTotalPartialCount);
-                int requestType = request.getRequestType();
 
                 // Check if we have a callback for this
                 if (holder == null) {
@@ -2194,12 +2188,11 @@ public class CameraDeviceImpl extends CameraDevice
                                         + frameNumber);
                     }
 
-                    updateTracker(requestId, frameNumber, requestType, /*result*/null,
-                            isPartialResult);
-
                     return;
                 }
 
+                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
+                int requestType = request.getRequestType();
                 if (isClosed()) {
                     if (DEBUG) {
                         Log.d(TAG,
