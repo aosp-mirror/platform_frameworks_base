@@ -51,13 +51,15 @@ final class PackageMetrics {
     public static final int STEP_RECONCILE = 3;
     public static final int STEP_COMMIT = 4;
     public static final int STEP_DEXOPT = 5;
+    public static final int STEP_FREEZE_INSTALL = 6;
 
     @IntDef(prefix = {"STEP_"}, value = {
             STEP_PREPARE,
             STEP_SCAN,
             STEP_RECONCILE,
             STEP_COMMIT,
-            STEP_DEXOPT
+            STEP_DEXOPT,
+            STEP_FREEZE_INSTALL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StepInt {
@@ -109,10 +111,17 @@ final class PackageMetrics {
 
         long versionCode = 0, apksSize = 0;
         if (success) {
-            final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
-            if (ps != null) {
-                versionCode = ps.getVersionCode();
-                apksSize = getApksSize(ps.getPath());
+            // TODO: Remove temp try-catch to avoid IllegalStateException. The reason is because
+            //  the scan result is null for installExistingPackageAsUser(). Because it's installing
+            //  a package that's already existing, there's no scanning or parsing involved
+            try {
+                final PackageSetting ps = mInstallRequest.getScannedPackageSetting();
+                if (ps != null) {
+                    versionCode = ps.getVersionCode();
+                    apksSize = getApksSize(ps.getPath());
+                }
+            } catch (IllegalStateException e) {
+                // no-op
             }
         }
 

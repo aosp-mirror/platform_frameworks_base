@@ -155,7 +155,8 @@ public final class StorageEventHelper extends StorageEventListener {
 
         for (PackageStateInternal ps : packages) {
             freezers.add(mPm.freezePackage(ps.getPackageName(), UserHandle.USER_ALL,
-                    "loadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER));
+                    "loadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER,
+                    null /* request */));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
                 try {

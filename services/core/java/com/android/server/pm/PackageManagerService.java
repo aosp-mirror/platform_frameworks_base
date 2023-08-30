@@ -4294,16 +4294,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     public PackageFreezer freezePackage(String packageName, int userId, String killReason,
-            int exitInfoReason) {
-        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason);
+            int exitInfoReason, InstallRequest request) {
+        return new PackageFreezer(packageName, userId, killReason, this, exitInfoReason, request);
     }
 
     public PackageFreezer freezePackageForDelete(String packageName, int userId, int deleteFlags,
             String killReason, int exitInfoReason) {
         if ((deleteFlags & PackageManager.DELETE_DONT_KILL_APP) != 0) {
-            return new PackageFreezer(this);
+            return new PackageFreezer(this, null /* request */);
         } else {
-            return freezePackage(packageName, userId, killReason, exitInfoReason);
+            return freezePackage(packageName, userId, killReason, exitInfoReason,
+                    null /* request */);
         }
     }
 
@@ -4632,7 +4633,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             try (PackageFreezer ignored =
                             freezePackage(packageName, UserHandle.USER_ALL,
                                     "clearApplicationProfileData",
-                                    ApplicationExitInfo.REASON_OTHER)) {
+                                    ApplicationExitInfo.REASON_OTHER, null /* request */)) {
                 synchronized (mInstallLock) {
                     mAppDataHelper.clearAppProfilesLIF(pkg);
                 }
@@ -4675,7 +4676,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     final boolean succeeded;
                     try (PackageFreezer freezer = freezePackage(packageName, UserHandle.USER_ALL,
                             "clearApplicationUserData",
-                            ApplicationExitInfo.REASON_USER_REQUESTED)) {
+                            ApplicationExitInfo.REASON_USER_REQUESTED, null /* request */)) {
                         synchronized (mInstallLock) {
                             succeeded = clearApplicationUserDataLIF(snapshotComputer(), packageName,
                                     userId);

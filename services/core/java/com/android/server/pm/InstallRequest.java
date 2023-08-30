@@ -831,4 +831,16 @@ final class InstallRequest {
             }
         }
     }
+
+    public void onFreezeStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
+        }
+    }
+
+    public void onFreezeCompleted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
+        }
+    }
 }

@@ -147,7 +147,8 @@ public final class MovePackageHelper {
         final PackageFreezer freezer;
         synchronized (mPm.mLock) {
             freezer = mPm.freezePackage(packageName, UserHandle.USER_ALL,
-                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED);
+                    "movePackageInternal", ApplicationExitInfo.REASON_USER_REQUESTED,
+                    null /* request */);
         }
 
         final Bundle extras = new Bundle();
