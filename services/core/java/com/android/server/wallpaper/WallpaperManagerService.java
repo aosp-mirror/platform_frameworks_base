@@ -2092,8 +2092,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 finalWhich = which;
             }
 
-            boolean success = withCleanCallingIdentity(() -> setWallpaperComponentInternal(
-                    component, callingPackage, finalWhich, userId, reply));
+            boolean success = withCleanCallingIdentity(() -> setWallpaperComponent(
+                    component, callingPackage, finalWhich, userId));
             if (success) return;
         } catch (IllegalArgumentException e1) {
             e = e1;
@@ -2105,13 +2105,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // wallpaper.
         Slog.e(TAG, "Default wallpaper component not found!", e);
         withCleanCallingIdentity(() -> clearWallpaperComponentLocked(wallpaper));
-        if (reply != null) {
-            try {
-                reply.sendResult(null);
-            } catch (RemoteException e1) {
-                Slog.w(TAG, "Failed to notify callback after wallpaper clear", e1);
-            }
-        }
     }
 
     private void clearWallpaperLocked(int which, int userId, IRemoteCallback reply) {
@@ -3298,6 +3291,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             setWallpaperComponentInternalLegacy(name, callingPackage, which, userId);
             return true;
         }
+    }
+
+    private boolean setWallpaperComponent(ComponentName name, @SetWallpaperFlags int which,
+            int userId) {
+        String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
+        return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
     }
 
     private boolean setWallpaperComponentInternal(ComponentName name, String callingPackage,
