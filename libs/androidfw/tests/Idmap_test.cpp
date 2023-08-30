@@ -59,15 +59,16 @@ class IdmapTest : public ::testing::Test {
 
  protected:
   std::string original_path;
-  std::unique_ptr<const ApkAssets> system_assets_;
-  std::unique_ptr<const ApkAssets> overlay_assets_;
-  std::unique_ptr<const ApkAssets> overlayable_assets_;
+  AssetManager2::ApkAssetsPtr system_assets_;
+  AssetManager2::ApkAssetsPtr overlay_assets_;
+  AssetManager2::ApkAssetsPtr overlayable_assets_;
 };
 
 std::string GetStringFromApkAssets(const AssetManager2& asset_manager,
                                    const AssetManager2::SelectedValue& value) {
   auto assets = asset_manager.GetApkAssets();
-  const ResStringPool* string_pool = assets[value.cookie]->GetLoadedArsc()->GetStringPool();
+  const ResStringPool* string_pool =
+      assets[value.cookie].promote()->GetLoadedArsc()->GetStringPool();
   return GetStringFromPool(string_pool, value.data);
 }
 
@@ -75,8 +76,7 @@ std::string GetStringFromApkAssets(const AssetManager2& asset_manager,
 
 TEST_F(IdmapTest, OverlayOverridesResourceValue) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable5);
   ASSERT_TRUE(value.has_value());
@@ -87,8 +87,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValue) {
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingDifferentPackage) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable10);
   ASSERT_TRUE(value.has_value());
@@ -99,8 +98,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValueUsingDifferentPackage) {
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInternalResource) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable8);
   ASSERT_TRUE(value.has_value());
@@ -111,8 +109,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInternalResource) {
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineInteger) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::integer::config_integer);
   ASSERT_TRUE(value.has_value());
@@ -123,8 +120,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineInteger) {
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineString) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable11);
   ASSERT_TRUE(value.has_value());
@@ -135,8 +131,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValueUsingInlineString) {
 
 TEST_F(IdmapTest, OverlayOverridesResourceValueUsingOverlayingResource) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable9);
   ASSERT_TRUE(value.has_value());
@@ -147,8 +142,7 @@ TEST_F(IdmapTest, OverlayOverridesResourceValueUsingOverlayingResource) {
 
 TEST_F(IdmapTest, OverlayOverridesXmlParser) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::layout::hello_view);
   ASSERT_TRUE(value.has_value());
@@ -186,8 +180,7 @@ TEST_F(IdmapTest, OverlayOverridesXmlParser) {
 
 TEST_F(IdmapTest, OverlaidResourceHasSameName) {
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({system_assets_.get(), overlayable_assets_.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({system_assets_, overlayable_assets_, overlay_assets_});
 
   auto name = asset_manager.GetResourceName(overlayable::R::string::overlayable9);
   ASSERT_TRUE(name.has_value());
@@ -203,8 +196,7 @@ TEST_F(IdmapTest, OverlayLoaderInterop) {
   auto loader_assets = ApkAssets::LoadTable(std::move(asset), EmptyAssetsProvider::Create(),
       PROPERTY_LOADER);
   AssetManager2 asset_manager;
-  asset_manager.SetApkAssets({overlayable_assets_.get(), loader_assets.get(),
-                              overlay_assets_.get()});
+  asset_manager.SetApkAssets({overlayable_assets_, loader_assets, overlay_assets_});
 
   auto value = asset_manager.GetResource(overlayable::R::string::overlayable11);
   ASSERT_TRUE(value.has_value());
