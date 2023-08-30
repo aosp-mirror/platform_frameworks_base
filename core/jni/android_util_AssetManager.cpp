@@ -296,7 +296,7 @@ static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   ATRACE_NAME("AssetManager::SetApkAssets");
 
   const jsize apk_assets_len = env->GetArrayLength(apk_assets_array);
-  std::vector<const ApkAssets*> apk_assets;
+  std::vector<AssetManager2::ApkAssetsPtr> apk_assets;
   apk_assets.reserve(apk_assets_len);
   for (jsize i = 0; i < apk_assets_len; i++) {
     jobject obj = env->GetObjectArrayElement(apk_assets_array, i);
@@ -310,9 +310,14 @@ static void NativeSetApkAssets(JNIEnv* env, jclass /*clazz*/, jlong ptr,
     if (env->ExceptionCheck()) {
       return;
     }
-
+    if (!apk_assets_native_ptr) {
+      ALOGW("Got a closed ApkAssets instance at index %d for AssetManager %p", i, (void*)ptr);
+      std::string msg = StringPrintf("ApkAssets at index %d is closed, native pointer is null", i);
+      jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
+      return;
+    }
     auto scoped_assets = ScopedLock(ApkAssetsFromLong(apk_assets_native_ptr));
-    apk_assets.push_back(scoped_assets->get());
+    apk_assets.emplace_back(*scoped_assets);
   }
 
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
@@ -720,31 +725,36 @@ static jobjectArray NativeGetResourceStringArray(JNIEnv* env, jclass /*clazz*/, 
     }
 
     if (attr_value.type == Res_value::TYPE_STRING) {
-      const ApkAssets* apk_assets = assetmanager->GetApkAssets()[attr_value.cookie];
-      const ResStringPool* pool = apk_assets->GetLoadedArsc()->GetStringPool();
+      auto apk_assets_weak = assetmanager->GetApkAssets()[attr_value.cookie];
+      if (auto apk_assets = apk_assets_weak.promote()) {
+          const ResStringPool* pool = apk_assets->GetLoadedArsc()->GetStringPool();
 
-      jstring java_string;
-      if (auto str_utf8 = pool->string8At(attr_value.data); str_utf8.has_value()) {
-          java_string = env->NewStringUTF(str_utf8->data());
-      } else {
-          auto str_utf16 = pool->stringAt(attr_value.data);
-          if (!str_utf16.has_value()) {
+          jstring java_string;
+          if (auto str_utf8 = pool->string8At(attr_value.data); str_utf8.has_value()) {
+              java_string = env->NewStringUTF(str_utf8->data());
+          } else {
+              auto str_utf16 = pool->stringAt(attr_value.data);
+              if (!str_utf16.has_value()) {
+                  return nullptr;
+              }
+              java_string = env->NewString(reinterpret_cast<const jchar*>(str_utf16->data()),
+                                           str_utf16->size());
+          }
+
+          // Check for errors creating the strings (if malformed or no memory).
+          if (env->ExceptionCheck()) {
               return nullptr;
           }
-          java_string = env->NewString(reinterpret_cast<const jchar*>(str_utf16->data()),
-                                       str_utf16->size());
+
+          env->SetObjectArrayElement(array, i, java_string);
+
+          // If we have a large amount of string in our array, we might overflow the
+          // local reference table of the VM.
+          env->DeleteLocalRef(java_string);
+      } else {
+          ALOGW("NativeGetResourceStringArray: an expired assets object #%d / %d", i,
+                attr_value.cookie);
       }
-
-      // Check for errors creating the strings (if malformed or no memory).
-      if (env->ExceptionCheck()) {
-        return nullptr;
-      }
-
-      env->SetObjectArrayElement(array, i, java_string);
-
-      // If we have a large amount of string in our array, we might overflow the
-      // local reference table of the VM.
-      env->DeleteLocalRef(java_string);
     }
   }
   return array;
