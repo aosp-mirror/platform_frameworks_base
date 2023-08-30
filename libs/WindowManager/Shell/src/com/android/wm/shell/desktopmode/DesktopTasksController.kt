@@ -972,17 +972,17 @@ class DesktopTasksController(
     }
 
     /**
-     * Update the corner region for a specified task
+     * Update the exclusion region for a specified task
      */
-    fun onTaskCornersChanged(taskId: Int, corner: Region) {
-        desktopModeTaskRepository.updateTaskCorners(taskId, corner)
+    fun onExclusionRegionChanged(taskId: Int, exclusionRegion: Region) {
+        desktopModeTaskRepository.updateTaskExclusionRegions(taskId, exclusionRegion)
     }
 
     /**
-     * Remove a previously tracked corner region for a specified task.
+     * Remove a previously tracked exclusion region for a specified task.
      */
-    fun removeCornersForTask(taskId: Int) {
-        desktopModeTaskRepository.removeTaskCorners(taskId)
+    fun removeExclusionRegionForTask(taskId: Int) {
+        desktopModeTaskRepository.removeExclusionRegion(taskId)
     }
 
     /**
@@ -996,16 +996,16 @@ class DesktopTasksController(
     }
 
     /**
-     * Adds a listener to track changes to desktop task corners
+     * Adds a listener to track changes to desktop task gesture exclusion regions
      *
      * @param listener the listener to add.
      * @param callbackExecutor the executor to call the listener on.
      */
-    fun setTaskCornerListener(
+    fun setTaskRegionListener(
             listener: Consumer<Region>,
             callbackExecutor: Executor
     ) {
-        desktopModeTaskRepository.setTaskCornerListener(listener, callbackExecutor)
+        desktopModeTaskRepository.setExclusionRegionListener(listener, callbackExecutor)
     }
 
     private fun dump(pw: PrintWriter, prefix: String) {
@@ -1031,7 +1031,7 @@ class DesktopTasksController(
                 callbackExecutor: Executor
         ) {
             mainExecutor.execute {
-                this@DesktopTasksController.setTaskCornerListener(listener, callbackExecutor)
+                this@DesktopTasksController.setTaskRegionListener(listener, callbackExecutor)
             }
         }
     }
