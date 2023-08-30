@@ -116,7 +116,11 @@ import android.content.pm.UserPackage;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.parsing.ApkLite;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -6301,33 +6305,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public ArchivedPackageParcel getArchivedPackage(String apkPath) {
-            final ParsedPackage parsedPackage;
-            try (PackageParser2 pp = mInjector.getPreparingPackageParser()) {
-                parsedPackage = pp.parsePackage(new File(apkPath),
-                        getDefParseFlags() | ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES, false);
-            } catch (PackageManagerException e) {
-                throw new IllegalArgumentException("Failed parse", e);
+            ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(input.reset(),
+                    new File(apkPath), ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES);
+            if (result.isError()) {
+                throw new IllegalArgumentException(result.getErrorMessage(), result.getException());
             }
+            final ApkLite apk = result.getResult();
 
             ArchivedPackageParcel archPkg = new ArchivedPackageParcel();
-            archPkg.packageName = parsedPackage.getPackageName();
-            archPkg.signingDetails = parsedPackage.getSigningDetails();
+            archPkg.packageName = apk.getPackageName();
+            archPkg.signingDetails = apk.getSigningDetails();
 
-            long longVersionCode = parsedPackage.getLongVersionCode();
-            archPkg.versionCodeMajor = (int) (longVersionCode >> 32);
-            archPkg.versionCode = (int) longVersionCode;
+            archPkg.versionCodeMajor = apk.getVersionCodeMajor();
+            archPkg.versionCode = apk.getVersionCode();
 
-            archPkg.targetSdkVersion = parsedPackage.getTargetSdkVersion();
+            archPkg.targetSdkVersion = apk.getTargetSdkVersion();
 
             // These get translated in flags important for user data management.
-            archPkg.clearUserDataAllowed = parsedPackage.isClearUserDataAllowed();
-            archPkg.backupAllowed = parsedPackage.isBackupAllowed();
+            archPkg.clearUserDataAllowed = apk.isClearUserDataAllowed();
+            archPkg.backupAllowed = apk.isBackupAllowed();
             archPkg.defaultToDeviceProtectedStorage =
-                    parsedPackage.isDefaultToDeviceProtectedStorage();
-            archPkg.requestLegacyExternalStorage = parsedPackage.isRequestLegacyExternalStorage();
-            archPkg.userDataFragile = parsedPackage.isUserDataFragile();
+                    apk.isDefaultToDeviceProtectedStorage();
+            archPkg.requestLegacyExternalStorage = apk.isRequestLegacyExternalStorage();
+            archPkg.userDataFragile = apk.isUserDataFragile();
             archPkg.clearUserDataOnFailedRestoreAllowed =
-                    parsedPackage.isClearUserDataOnFailedRestoreAllowed();
+                    apk.isClearUserDataOnFailedRestoreAllowed();
 
             return archPkg;
         }
