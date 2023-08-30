@@ -52,6 +52,7 @@ public class AuthenticationStatsPersister {
     private static final String FINGERPRINT_REJECTIONS = "fingerprint_rejections";
     private static final String ENROLLMENT_NOTIFICATIONS = "enrollment_notifications";
     private static final String KEY = "frr_stats";
+    private static final String THRESHOLD_KEY = "frr_threshold";
 
     @NonNull private final SharedPreferences mSharedPreferences;
 
@@ -155,6 +156,13 @@ public class AuthenticationStatsPersister {
         } catch (JSONException e) {
             Slog.e(TAG, "Unable to persist authentication stats");
         }
+    }
+
+    /**
+     * Persist frr threshold.
+     */
+    public void persistFrrThreshold(float frrThreshold) {
+        mSharedPreferences.edit().putFloat(THRESHOLD_KEY, frrThreshold).apply();
     }
 
     private Set<String> readFrrStats() {
