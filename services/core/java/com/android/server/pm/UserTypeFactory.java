@@ -51,6 +51,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
@@ -284,9 +285,9 @@ public final class UserTypeFactory {
                 .setBadgeLabels(
                         com.android.internal.R.string.private_profile_label_badge)
                 .setBadgeColors(
-                        com.android.internal.R.color.system_accent1_900)
+                        R.color.black)
                 .setDarkThemeBadgeColors(
-                        com.android.internal.R.color.system_accent1_900)
+                        R.color.white)
                 .setDefaultRestrictions(getDefaultProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
