@@ -30,12 +30,15 @@ import static org.mockito.Mockito.when;
 
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.test.mock.MockContext;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.mediaframeworktest.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +48,8 @@ import org.junit.runner.RunWith;
 public class MediaPlayerUnitTest {
 
     private static final int TEST_VIRTUAL_DEVICE_ID = 42;
+    private static final AudioAttributes AUDIO_ATTRIBUTES_MEDIA =
+            new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
 
     @Test
     public void testConstructionWithContext_virtualDeviceDefaultAudioPolicy() {
@@ -89,6 +94,49 @@ public class MediaPlayerUnitTest {
         assertEquals(anotherSessionId, mediaPlayer.getAudioSessionId());
     }
 
+    @Test
+    public void testCreateFromResource_virtualDeviceDefaultAudioPolicy() {
+        int vdmPlaybackSessionId = getContext().getSystemService(
+                AudioManager.class).generateAudioSessionId();
+        VirtualDeviceManager mockVdm = getMockVirtualDeviceManager(TEST_VIRTUAL_DEVICE_ID,
+                vdmPlaybackSessionId, DEVICE_POLICY_DEFAULT);
+        Context virtualDeviceContext = getVirtualDeviceMockContext(TEST_VIRTUAL_DEVICE_ID, mockVdm);
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(virtualDeviceContext, R.raw.testmp3);
+
+        assertNotEquals(vdmPlaybackSessionId, mediaPlayer.getAudioSessionId());
+        assertTrue(mediaPlayer.getAudioSessionId() > 0);
+    }
+
+    @Test
+    public void testCreateFromResource_virtualDeviceCustomAudioPolicy() {
+        int vdmPlaybackSessionId = getContext().getSystemService(
+                AudioManager.class).generateAudioSessionId();
+        VirtualDeviceManager mockVdm = getMockVirtualDeviceManager(TEST_VIRTUAL_DEVICE_ID,
+                vdmPlaybackSessionId, DEVICE_POLICY_CUSTOM);
+        Context virtualDeviceContext = getVirtualDeviceMockContext(TEST_VIRTUAL_DEVICE_ID, mockVdm);
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(virtualDeviceContext, R.raw.testmp3);
+
+        assertEquals(vdmPlaybackSessionId, mediaPlayer.getAudioSessionId());
+    }
+
+    @Test
+    public void testCreateFromResource_explicitSessionIdOverridesContext() {
+        int vdmPlaybackSessionId = getContext().getSystemService(
+                AudioManager.class).generateAudioSessionId();
+        int anotherSessionId = getContext().getSystemService(
+                AudioManager.class).generateAudioSessionId();
+        VirtualDeviceManager mockVdm = getMockVirtualDeviceManager(TEST_VIRTUAL_DEVICE_ID,
+                vdmPlaybackSessionId, DEVICE_POLICY_CUSTOM);
+        Context virtualDeviceContext = getVirtualDeviceMockContext(TEST_VIRTUAL_DEVICE_ID, mockVdm);
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(virtualDeviceContext, R.raw.testmp3,
+                AUDIO_ATTRIBUTES_MEDIA, anotherSessionId);
+
+        assertEquals(anotherSessionId, mediaPlayer.getAudioSessionId());
+    }
+
     private Context getContext() {
         return InstrumentationRegistry.getInstrumentation().getContext();
     }
@@ -98,6 +146,7 @@ public class MediaPlayerUnitTest {
         when(mockContext.getDeviceId()).thenReturn(deviceId);
         when(mockContext.getSystemService(VirtualDeviceManager.class)).thenReturn(vdm);
         when(mockContext.getAttributionSource()).thenReturn(getContext().getAttributionSource());
+        when(mockContext.getResources()).thenReturn(getContext().getResources());
         return mockContext;
     }
 
