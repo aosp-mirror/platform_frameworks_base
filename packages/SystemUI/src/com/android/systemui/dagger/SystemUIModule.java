@@ -109,7 +109,6 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LetterboxModule;
 import com.android.systemui.statusbar.phone.NotificationIconAreaControllerModule;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -219,7 +218,6 @@ import javax.inject.Named;
             WalletModule.class
         },
         subcomponents = {
-            CentralSurfacesComponent.class,
             ComplicationComponent.class,
             NavigationBarComponent.class,
             NotificationRowComponent.class,
