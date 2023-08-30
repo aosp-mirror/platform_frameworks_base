@@ -56,6 +56,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
@@ -1063,6 +1064,15 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
+    /**
+     * Show bubble bar user education relative to the reference position.
+     * @param position the reference position in Screen coordinates.
+     */
+    public void showUserEducation(Point position) {
+        if (mLayerView == null) return;
+        mLayerView.showUserEducation(position);
+    }
+
     @VisibleForTesting
     public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
         boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
@@ -1111,6 +1121,16 @@ public class BubbleController implements ConfigurationChangeListener,
             // TODO: (b/271468319) handle overflow
         } else {
             Log.w(TAG, "didn't add bubble from launcher: " + key);
+        }
+    }
+
+    /**
+     * Expands the stack if the selected bubble is present. This is currently used when user
+     * education view is clicked to expand the selected bubble.
+     */
+    public void expandStackWithSelectedBubble() {
+        if (mBubbleData.getSelectedBubble() != null) {
+            mBubbleData.setExpanded(true);
         }
     }
 
@@ -1730,7 +1750,8 @@ public class BubbleController implements ConfigurationChangeListener,
                         + " expandedChanged=" + update.expandedChanged
                         + " selectionChanged=" + update.selectionChanged
                         + " suppressed=" + (update.suppressedBubble != null)
-                        + " unsuppressed=" + (update.unsuppressedBubble != null));
+                        + " unsuppressed=" + (update.unsuppressedBubble != null)
+                        + " shouldShowEducation=" + update.shouldShowEducation);
             }
 
             ensureBubbleViewsAndWindowCreated();
@@ -2147,6 +2168,12 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
             mMainExecutor.execute(() -> mController.onBubbleDrag(bubbleKey, isBeingDragged));
+        }
+
+        @Override
+        public void showUserEducation(int positionX, int positionY) {
+            mMainExecutor.execute(() ->
+                    mController.showUserEducation(new Point(positionX, positionY)));
         }
     }
 

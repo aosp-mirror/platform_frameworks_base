@@ -44,7 +44,7 @@ public class BubbleDebugConfig {
     static final boolean DEBUG_BUBBLE_EXPANDED_VIEW = false;
     static final boolean DEBUG_EXPERIMENTS = true;
     static final boolean DEBUG_OVERFLOW = false;
-    static final boolean DEBUG_USER_EDUCATION = false;
+    public static final boolean DEBUG_USER_EDUCATION = false;
     static final boolean DEBUG_POSITIONER = false;
     public static final boolean DEBUG_COLLAPSE_ANIMATOR = false;
     public static boolean DEBUG_EXPANDED_VIEW_DRAGGING = false;
