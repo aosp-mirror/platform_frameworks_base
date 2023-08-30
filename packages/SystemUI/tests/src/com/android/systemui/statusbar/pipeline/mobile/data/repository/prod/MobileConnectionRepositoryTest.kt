@@ -19,8 +19,13 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
+import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
 import android.telephony.NetworkRegistrationInfo
+import android.telephony.NetworkRegistrationInfo.DOMAIN_PS
+import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_DENIED
+import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_HOME
 import android.telephony.ServiceState
 import android.telephony.ServiceState.STATE_IN_SERVICE
 import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
@@ -80,7 +85,6 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -801,11 +805,18 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
+            val nriInService =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WWAN)
+                    .setRegistrationState(REGISTRATION_STATE_HOME)
+                    .build()
+
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
                         it.voiceRegState = STATE_IN_SERVICE
-                        it.dataRegState = STATE_IN_SERVICE
+                        it.addNetworkRegistrationInfo(nriInService)
                     }
                 )
 
@@ -814,17 +825,23 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
-                        it.dataRegState = STATE_IN_SERVICE
                         it.voiceRegState = STATE_OUT_OF_SERVICE
+                        it.addNetworkRegistrationInfo(nriInService)
                     }
                 )
             assertThat(latest).isTrue()
 
+            val nriNotInService =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WWAN)
+                    .setRegistrationState(REGISTRATION_STATE_DENIED)
+                    .build()
             getTelephonyCallbackForType<ServiceStateListener>()
                 .onServiceStateChanged(
                     ServiceState().also {
                         it.voiceRegState = STATE_OUT_OF_SERVICE
-                        it.dataRegState = STATE_OUT_OF_SERVICE
+                        it.addNetworkRegistrationInfo(nriNotInService)
                     }
                 )
             assertThat(latest).isFalse()
@@ -838,18 +855,17 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
-            // Mock the service state here so we can make it specifically IWLAN
-            val serviceState: ServiceState = mock()
-            whenever(serviceState.state).thenReturn(STATE_OUT_OF_SERVICE)
-            whenever(serviceState.dataRegistrationState).thenReturn(STATE_IN_SERVICE)
-
-            // See [com.android.settingslib.Utils.isInService] for more info. This is one way to
-            // make the network look like IWLAN
-            val networkRegWlan: NetworkRegistrationInfo = mock()
-            whenever(serviceState.getNetworkRegistrationInfo(any(), any()))
-                .thenReturn(networkRegWlan)
-            whenever(networkRegWlan.registrationState)
-                .thenReturn(NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
+            val iwlanData =
+                NetworkRegistrationInfo.Builder()
+                    .setDomain(DOMAIN_PS)
+                    .setTransportType(TRANSPORT_TYPE_WLAN)
+                    .setRegistrationState(REGISTRATION_STATE_HOME)
+                    .build()
+            val serviceState =
+                ServiceState().also {
+                    it.voiceRegState = STATE_OUT_OF_SERVICE
+                    it.addNetworkRegistrationInfo(iwlanData)
+                }
 
             getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
             assertThat(latest).isFalse()

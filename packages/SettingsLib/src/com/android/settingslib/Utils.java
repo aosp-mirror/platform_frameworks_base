@@ -549,7 +549,12 @@ public class Utils {
 
     /**
      * Return the combined service state.
-     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI
+     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI.
+     *
+     * This method returns a single service state int if either the voice reg state is
+     * {@link ServiceState#STATE_IN_SERVICE} or if data network is registered via a
+     * WWAN transport type. We consider the combined service state of an IWLAN network
+     * to be OOS.
      *
      * @param serviceState Service state. {@link ServiceState}
      */
@@ -558,23 +563,37 @@ public class Utils {
             return ServiceState.STATE_OUT_OF_SERVICE;
         }
 
-        // Consider the device to be in service if either voice or data
-        // service is available. Some SIM cards are marketed as data-only
-        // and do not support voice service, and on these SIM cards, we
-        // want to show signal bars for data service as well as the "no
-        // service" or "emergency calls only" text that indicates that voice
-        // is not available. Note that we ignore the IWLAN service state
-        // because that state indicates the use of VoWIFI and not cell service
-        final int state = serviceState.getState();
-        final int dataState = serviceState.getDataRegistrationState();
+        final int voiceRegState = serviceState.getVoiceRegState();
 
-        if (state == ServiceState.STATE_OUT_OF_SERVICE
-                || state == ServiceState.STATE_EMERGENCY_ONLY) {
-            if (dataState == ServiceState.STATE_IN_SERVICE && isNotInIwlan(serviceState)) {
+        // Consider a mobile connection to be "in service" if either voice is IN_SERVICE
+        // or the data registration reports IN_SERVICE on a transport type of WWAN. This
+        // effectively excludes the IWLAN condition. IWLAN connections imply service via
+        // Wi-Fi rather than cellular, and so we do not consider these transports when
+        // determining if cellular is "in service".
+
+        if (voiceRegState == ServiceState.STATE_OUT_OF_SERVICE
+                || voiceRegState == ServiceState.STATE_EMERGENCY_ONLY) {
+            if (isDataRegInWwanAndInService(serviceState)) {
                 return ServiceState.STATE_IN_SERVICE;
             }
         }
-        return state;
+
+        return voiceRegState;
+    }
+
+    // ServiceState#mDataRegState can be set to IN_SERVICE if the network is registered
+    // on either a WLAN or WWAN network. Since we want to exclude the WLAN network, we can
+    // query the WWAN network directly and check for its registration state
+    private static boolean isDataRegInWwanAndInService(ServiceState serviceState) {
+        final NetworkRegistrationInfo networkRegWwan = serviceState.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (networkRegWwan == null) {
+            return false;
+        }
+
+        return networkRegWwan.isInService();
     }
 
     /** Get the corresponding adaptive icon drawable. */
@@ -596,21 +615,6 @@ public class Utils {
     public static Drawable getBadgedIcon(Context context, ApplicationInfo appInfo) {
         return getBadgedIcon(context, appInfo.loadUnbadgedIcon(context.getPackageManager()),
                 UserHandle.getUserHandleForUid(appInfo.uid));
-    }
-
-    private static boolean isNotInIwlan(ServiceState serviceState) {
-        final NetworkRegistrationInfo networkRegWlan = serviceState.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS,
-                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        if (networkRegWlan == null) {
-            return true;
-        }
-
-        final boolean isInIwlan = (networkRegWlan.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
-                || (networkRegWlan.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING);
-        return !isInIwlan;
     }
 
     /**
