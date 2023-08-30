@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"சரி"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"எப்போது வேண்டுமானாலும் குமிழ்களைக் கட்டுப்படுத்துங்கள்"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"எந்தெந்த ஆப்ஸும் உரையாடல்களும் குமிழியாகலாம் என்பதை நிர்வகிக்க இங்கே தட்டுங்கள்"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"பபிள்"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"நிர்வகி"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"குமிழ் நிராகரிக்கப்பட்டது."</string>

@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"知道了"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"最近使用和關閉的小視窗會在這裡顯示"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"隨時控制對話氣泡"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"輕按這裡即可管理哪些應用程式和對話可以使用對話氣泡"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"氣泡"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"管理"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"對話氣泡已關閉。"</string>
