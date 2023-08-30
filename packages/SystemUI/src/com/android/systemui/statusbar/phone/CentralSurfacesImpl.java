@@ -1649,11 +1649,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         logStateToEventlog();
     }
 
-    @Override
-    public NotificationPresenter getPresenter() {
-        return mPresenter;
-    }
-
     @VisibleForTesting
     @Override
     public void setBarStateForTest(int state) {
@@ -1725,11 +1720,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean getCommandQueuePanelsEnabled() {
         return mCommandQueue.panelsEnabled();
-    }
-
-    @Override
-    public BiometricUnlockController getBiometricUnlockController() {
-        return mBiometricUnlockController;
     }
 
     @Override
@@ -2824,11 +2814,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Trace.endSection();
         }
     };
-
-    @Override
-    public int getWakefulnessState() {
-        return mWakefulnessLifecycle.getWakefulness();
-    }
 
     /**
      * @return true if the screen is currently fully off, i.e. has finished turning off and has

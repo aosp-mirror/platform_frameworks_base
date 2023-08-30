@@ -23,9 +23,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.navigationbar.NavigationBarView
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.qs.QSPanelController
-import com.android.systemui.statusbar.NotificationPresenter
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import java.io.PrintWriter
 
 /**
  * Empty implementation of [CentralSurfaces] for variants only need to override portions of the
@@ -41,15 +39,12 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun getKeyguardMessageArea(): AuthKeyguardMessageArea? = null
     override fun isLaunchingActivityOverLockscreen() = false
     override fun onKeyguardViewManagerStatesUpdated() {}
-    override fun getPresenter(): NotificationPresenter? = null
     override fun onInputFocusTransfer(start: Boolean, cancel: Boolean, velocity: Float) {}
     override fun getCommandQueuePanelsEnabled() = false
-    override fun getBiometricUnlockController(): BiometricUnlockController? = null
     override fun showWirelessChargingAnimation(batteryLevel: Int) {}
     override fun checkBarModes() {}
     override fun updateBubblesVisibility() {}
     override fun setInteracting(barWindow: Int, interacting: Boolean) {}
-    override fun dump(pwOriginal: PrintWriter, args: Array<String>) {}
     override fun getDisplayWidth() = 0f
     override fun getDisplayHeight() = 0f
     override fun showKeyguard() {}
@@ -77,7 +72,6 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
     override fun showPinningEnterExitToast(entering: Boolean) {}
     override fun showPinningEscapeToast() {}
     override fun setBouncerShowing(bouncerShowing: Boolean) {}
-    override fun getWakefulnessState() = 0
     override fun isScreenFullyOff() = false
     override fun showScreenPinningRequest(taskId: Int, allowCancel: Boolean) {}
     override fun getEmergencyActionIntent(): Intent? = null
