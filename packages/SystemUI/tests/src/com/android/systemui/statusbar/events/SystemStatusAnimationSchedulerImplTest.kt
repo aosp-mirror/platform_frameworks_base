@@ -93,9 +93,6 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
                 fakeFeatureFlags
             )
 
-        // ensure that isTooEarly() check in SystemStatusAnimationScheduler does not return true
-        systemClock.advanceTime(Process.getStartUptimeMillis() + MIN_UPTIME)
-
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(android.util.Pair(10, 10))
@@ -154,6 +151,21 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
         assertEquals(0f, batteryChip.contentView.alpha)
         assertEquals(0f, batteryChip.view.alpha)
+    }
+
+    /** Regression test for b/294104969. */
+    @Test
+    fun testPrivacyStatusEvent_beforeSystemUptime_stillDisplayed() = runTest {
+        initializeSystemStatusAnimationScheduler(testScope = this, advancePastMinUptime = false)
+
+        // WHEN the uptime hasn't quite passed the minimum required uptime...
+        systemClock.setUptimeMillis(Process.getStartUptimeMillis() + MIN_UPTIME / 2)
+
+        // BUT the event is a privacy event
+        createAndScheduleFakePrivacyEvent()
+
+        // THEN the privacy event still happens
+        assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
     }
 
     @Test
@@ -568,7 +580,10 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         return batteryChip
     }
 
-    private fun initializeSystemStatusAnimationScheduler(testScope: TestScope) {
+    private fun initializeSystemStatusAnimationScheduler(
+        testScope: TestScope,
+        advancePastMinUptime: Boolean = true,
+    ) {
         systemStatusAnimationScheduler =
             SystemStatusAnimationSchedulerImpl(
                 systemEventCoordinator,
@@ -581,5 +596,10 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
             )
         // add a mock listener
         systemStatusAnimationScheduler.addCallback(listener)
+
+        if (advancePastMinUptime) {
+            // ensure that isTooEarly() check in SystemStatusAnimationScheduler does not return true
+            systemClock.advanceTime(Process.getStartUptimeMillis() + MIN_UPTIME)
+        }
     }
 }
