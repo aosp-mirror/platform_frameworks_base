@@ -54,7 +54,6 @@ import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -197,10 +196,9 @@ public abstract class WMShellModule {
             ShellController shellController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
-            Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        if (DesktopModeStatus.isAnyEnabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             return new DesktopModeWindowDecorViewModel(
                     context,
                     mainHandler,
@@ -211,7 +209,6 @@ public abstract class WMShellModule {
                     shellController,
                     syncQueue,
                     transitions,
-                    desktopModeController,
                     desktopTasksController,
                     rootTaskDisplayAreaOrganizer);
         }
@@ -353,13 +350,12 @@ public abstract class WMShellModule {
             @Nullable PipTransitionController pipTransitionController,
             Optional<RecentsTransitionHandler> recentsTransitionHandler,
             KeyguardTransitionHandler keyguardTransitionHandler,
-            Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<UnfoldTransitionHandler> unfoldHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
                 pipTransitionController, recentsTransitionHandler,
-                keyguardTransitionHandler, desktopModeController, desktopTasksController,
+                keyguardTransitionHandler, desktopTasksController,
                 unfoldHandler);
     }
 
@@ -471,24 +467,6 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeController provideDesktopModeController(Context context,
-            ShellInit shellInit,
-            ShellController shellController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Transitions transitions,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            @ShellMainThread Handler mainHandler,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
-        return new DesktopModeController(context, shellInit, shellController, shellTaskOrganizer,
-                rootTaskDisplayAreaOrganizer, transitions, desktopModeTaskRepository, mainHandler,
-                mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
-    @DynamicOverride
     static DesktopTasksController provideDesktopTasksController(
             Context context,
             ShellInit shellInit,
@@ -553,8 +531,7 @@ public abstract class WMShellModule {
     @ShellCreateTriggerOverride
     @Provides
     static Object provideIndependentShellComponentsToCreate(
-            DefaultMixedHandler defaultMixedHandler,
-            Optional<DesktopModeController> desktopModeController) {
+            DefaultMixedHandler defaultMixedHandler) {
         return new Object();
     }
 }

@@ -340,7 +340,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (DesktopModeStatus.isProto2Enabled() && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.isEnabled() && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 freeformTasks.add(taskInfo);

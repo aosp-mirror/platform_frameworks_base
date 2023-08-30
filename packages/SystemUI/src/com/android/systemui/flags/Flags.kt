@@ -500,11 +500,6 @@ object Flags {
 
     @Keep
     @JvmField
-    val WM_DESKTOP_WINDOWING =
-        sysPropBooleanFlag("persist.wm.debug.desktop_mode", default = false)
-
-    @Keep
-    @JvmField
     val WM_CAPTION_ON_SHELL =
         sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
 

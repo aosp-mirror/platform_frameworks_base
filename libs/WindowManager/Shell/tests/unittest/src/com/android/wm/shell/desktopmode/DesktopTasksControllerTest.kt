@@ -107,7 +107,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Before
     fun setUp() {
         mockitoSession = mockitoSession().mockStatic(DesktopModeStatus::class.java).startMocking()
-        whenever(DesktopModeStatus.isProto2Enabled()).thenReturn(true)
+        whenever(DesktopModeStatus.isEnabled()).thenReturn(true)
 
         shellInit = Mockito.spy(ShellInit(testExecutor))
         desktopModeTaskRepository = DesktopModeTaskRepository()
@@ -154,7 +154,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun instantiate_flagOff_doNotAddInitCallback() {
-        whenever(DesktopModeStatus.isProto2Enabled()).thenReturn(false)
+        whenever(DesktopModeStatus.isEnabled()).thenReturn(false)
         clearInvocations(shellInit)
 
         createController()
