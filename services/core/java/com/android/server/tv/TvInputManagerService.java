@@ -3472,6 +3472,10 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
+                    if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
+                        return;
+                    }
                     mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
                     addHardwareInputLocked(inputInfo);
                 }
@@ -3486,6 +3490,10 @@ public final class TvInputManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
+                    if (serviceState.hardwareInputMap.containsKey(inputInfo.getId())) {
+                        return;
+                    }
                     mTvInputHardwareManager.addHdmiInput(id, inputInfo);
                     addHardwareInputLocked(inputInfo);
                     if (mOnScreenInputId != null && mOnScreenSessionState != null) {
