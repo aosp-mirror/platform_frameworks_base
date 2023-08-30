@@ -16,7 +16,6 @@
 
 package com.android.systemui.controls.dagger
 
-import android.content.Context
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
 import com.android.systemui.controls.controller.ControlsController
@@ -44,10 +43,9 @@ class ControlsComponent
 @Inject
 constructor(
     @ControlsFeatureEnabled private val featureEnabled: Boolean,
-    private val context: Context,
-    private val lazyControlsController: Lazy<ControlsController>,
-    private val lazyControlsUiController: Lazy<ControlsUiController>,
-    private val lazyControlsListingController: Lazy<ControlsListingController>,
+    lazyControlsController: Lazy<ControlsController>,
+    lazyControlsUiController: Lazy<ControlsUiController>,
+    lazyControlsListingController: Lazy<ControlsListingController>,
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
@@ -55,27 +53,25 @@ constructor(
     optionalControlsTileResourceConfiguration: Optional<ControlsTileResourceConfiguration>
 ) {
 
+    private val controlsController: Optional<ControlsController> =
+        optionalIf(isEnabled(), lazyControlsController)
+    private val controlsUiController: Optional<ControlsUiController> =
+        optionalIf(isEnabled(), lazyControlsUiController)
+    private val controlsListingController: Optional<ControlsListingController> =
+        optionalIf(isEnabled(), lazyControlsListingController)
+
     val canShowWhileLockedSetting: StateFlow<Boolean> =
         controlsSettingsRepository.canShowControlsInLockscreen
 
     private val controlsTileResourceConfiguration: ControlsTileResourceConfiguration =
         optionalControlsTileResourceConfiguration.orElse(ControlsTileResourceConfigurationImpl())
 
-    fun getControlsController(): Optional<ControlsController> {
-        return if (featureEnabled) Optional.of(lazyControlsController.get()) else Optional.empty()
-    }
+    fun getControlsController(): Optional<ControlsController> = controlsController
 
-    fun getControlsUiController(): Optional<ControlsUiController> {
-        return if (featureEnabled) Optional.of(lazyControlsUiController.get()) else Optional.empty()
-    }
+    fun getControlsUiController(): Optional<ControlsUiController> = controlsUiController
 
-    fun getControlsListingController(): Optional<ControlsListingController> {
-        return if (featureEnabled) {
-            Optional.of(lazyControlsListingController.get())
-        } else {
-            Optional.empty()
-        }
-    }
+    fun getControlsListingController(): Optional<ControlsListingController> =
+        controlsListingController
 
     /** @return true if controls are feature-enabled and the user has the setting enabled */
     fun isEnabled() = featureEnabled
@@ -118,4 +114,11 @@ constructor(
     fun getTileImageId(): Int {
         return controlsTileResourceConfiguration.getTileImageId()
     }
+
+    private fun <T : Any> optionalIf(condition: Boolean, provider: Lazy<T>): Optional<T> =
+        if (condition) {
+            Optional.of(provider.get())
+        } else {
+            Optional.empty()
+        }
 }
