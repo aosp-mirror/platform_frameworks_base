@@ -1741,6 +1741,7 @@ public class Vpn {
                 .setBypassableVpn(bypassable)
                 .setVpnRequiresValidation(mConfig.requiresInternetValidation)
                 .setLocalRoutesExcludedForVpn(mConfig.excludeLocalRoutes)
+                .setLegacyExtraInfo("VPN:" + mPackage)
                 .build();
 
         capsBuilder.setOwnerUid(mOwnerUID);
