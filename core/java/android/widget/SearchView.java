@@ -2109,7 +2109,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 return;
             }
 
-            if (imm.isActive(this)) {
+            if (imm.hasActiveInputConnection(this)) {
                 // This means that SearchAutoComplete is already connected to the IME.
                 // InputMethodManager#showSoftInput() is guaranteed to pass client-side focus check.
                 mHasPendingShowSoftInputRequest = false;
