@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.user.domain.interactor.UserInteractor
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -45,6 +47,7 @@ constructor(
     userSetupRepository: UserSetupRepository,
     deviceProvisionedController: DeviceProvisionedController,
     userInteractor: UserInteractor,
+    sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
     repository: ShadeRepository,
 ) {
     /** Emits true if the shade is currently allowed and false otherwise. */
@@ -53,16 +56,31 @@ constructor(
             .map { it.isShadeEnabled() }
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
+    /**
+     * Whether split shade, the combined notifications and quick settings shade used for large
+     * screens, is enabled.
+     */
+    val splitShadeEnabled: Flow<Boolean> =
+        sharedNotificationContainerInteractor.configurationBasedDimensions
+            .map { dimens -> dimens.useSplitShade }
+            .distinctUntilChanged()
+
     /** The amount [0-1] that the shade has been opened */
     val shadeExpansion: Flow<Float> =
-        combine(repository.shadeExpansion, keyguardRepository.statusBarState) {
-            shadeExpansion,
-            statusBarState ->
-            // This is required, as shadeExpansion gets reset to 0f even with the shade open
-            if (statusBarState == StatusBarState.SHADE_LOCKED) {
-                1f
-            } else {
-                shadeExpansion
+        combine(
+            repository.lockscreenShadeExpansion,
+            keyguardRepository.statusBarState,
+            repository.legacyShadeExpansion,
+            repository.qsExpansion,
+            splitShadeEnabled
+        ) { dragDownAmount, statusBarState, legacyShadeExpansion, qsExpansion, splitShadeEnabled ->
+            when (statusBarState) {
+                // legacyShadeExpansion is 1 instead of 0 when QS is expanded
+                StatusBarState.SHADE ->
+                    if (!splitShadeEnabled && qsExpansion > 0f) 0f else legacyShadeExpansion
+                StatusBarState.KEYGUARD -> dragDownAmount
+                // This is required, as shadeExpansion gets reset to 0f even with the shade open
+                StatusBarState.SHADE_LOCKED -> 1f
             }
         }
 
