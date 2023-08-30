@@ -612,6 +612,9 @@ public class ScanTests {
 
         final PackageSetting pkgSetting = scanResult.mPkgSetting;
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
+        // pretend that the data dir has been set up already, so that the generated applicationInfo
+        // includes the expected data dir string
+        pkgSetting.setCeDataInode(/* ceDataInode= */100, /* userId= */0);
 
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
                 pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
