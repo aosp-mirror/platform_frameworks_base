@@ -87,9 +87,10 @@ public class PackageUserStateUtils {
         // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
         final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
         final boolean matchUninstalled = (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
+        final boolean matchArchived = (flags & PackageManager.MATCH_ARCHIVED_PACKAGES) != 0;
         return matchAnyUser
                 || (state.isInstalled()
-                && (!state.isHidden() || matchUninstalled));
+                && (!state.isHidden() || matchUninstalled || matchArchived));
     }
 
     public static boolean reportIfDebug(boolean result, long flags) {
