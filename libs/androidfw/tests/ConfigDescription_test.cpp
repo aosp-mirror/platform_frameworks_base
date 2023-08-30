@@ -159,17 +159,17 @@ TEST(ConfigDescriptionTest, TestGrammaticalGenderQualifier) {
   EXPECT_TRUE(TestParse("feminine", &config));
   EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_FEMININE, config.grammaticalInflection);
   EXPECT_EQ(SDK_U, config.sdkVersion);
-  EXPECT_EQ(std::string("feminine-v34"), config.toString().string());
+  EXPECT_EQ(std::string("feminine-v34"), config.toString().c_str());
 
   EXPECT_TRUE(TestParse("masculine", &config));
   EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_MASCULINE, config.grammaticalInflection);
   EXPECT_EQ(SDK_U, config.sdkVersion);
-  EXPECT_EQ(std::string("masculine-v34"), config.toString().string());
+  EXPECT_EQ(std::string("masculine-v34"), config.toString().c_str());
 
   EXPECT_TRUE(TestParse("neuter", &config));
   EXPECT_EQ(android::ResTable_config::GRAMMATICAL_GENDER_NEUTER, config.grammaticalInflection);
   EXPECT_EQ(SDK_U, config.sdkVersion);
-  EXPECT_EQ(std::string("neuter-v34"), config.toString().string());
+  EXPECT_EQ(std::string("neuter-v34"), config.toString().c_str());
 }
 
 }  // namespace android
