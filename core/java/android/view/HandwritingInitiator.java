@@ -81,6 +81,8 @@ public class HandwritingInitiator {
     private int mConnectionCount = 0;
     private final InputMethodManager mImm;
 
+    private final Rect mTempRect = new Rect();
+
     private final RectF mTempRectF = new RectF();
 
     private final Region mTempRegion = new Region();
@@ -406,8 +408,9 @@ public class HandwritingInitiator {
 
             final View cachedHoverTarget = getCachedHoverTarget();
             if (cachedHoverTarget != null) {
-                final Rect handwritingArea = getViewHandwritingArea(cachedHoverTarget);
-                if (isInHandwritingArea(handwritingArea, hoverX, hoverY, cachedHoverTarget,
+                final Rect handwritingArea = mTempRect;
+                if (getViewHandwritingArea(cachedHoverTarget, handwritingArea)
+                        && isInHandwritingArea(handwritingArea, hoverX, hoverY, cachedHoverTarget,
                         /* isHover */ true)
                         && shouldTriggerStylusHandwritingForView(cachedHoverTarget)) {
                     return cachedHoverTarget;
@@ -450,8 +453,9 @@ public class HandwritingInitiator {
         // directly return the connectedView.
         final View connectedView = getConnectedView();
         if (connectedView != null) {
-            Rect handwritingArea = getViewHandwritingArea(connectedView);
-            if (isInHandwritingArea(handwritingArea, x, y, connectedView, isHover)
+            Rect handwritingArea = mTempRect;
+            if (getViewHandwritingArea(connectedView, handwritingArea)
+                    && isInHandwritingArea(handwritingArea, x, y, connectedView, isHover)
                     && shouldTriggerStylusHandwritingForView(connectedView)) {
                 return connectedView;
             }
@@ -533,28 +537,30 @@ public class HandwritingInitiator {
     /**
      * Return the handwriting area of the given view, represented in the window's coordinate.
      * If the view didn't set any handwriting area, it will return the view's boundary.
-     * It will return null if the view or its handwriting area is not visible.
      *
-     * The handwriting area is clipped to its visible part.
+     * <p> The handwriting area is clipped to its visible part.
      * Notice that the returned rectangle is the view's original handwriting area without the
-     * view's handwriting area extends.
+     * view's handwriting area extends. </p>
+     *
+     * @param view the {@link View} whose handwriting area we want to compute.
+     * @param rect the {@link Rect} to receive the result.
+     *
+     * @return true if the view's handwriting area is still visible, or false if it's clipped and
+     * fully invisible. This method only consider the clip by given view's parents, but not the case
+     * where a view is covered by its sibling view.
      */
-    @Nullable
-    private static Rect getViewHandwritingArea(@NonNull View view) {
+    private static boolean getViewHandwritingArea(@NonNull View view, @NonNull Rect rect) {
         final ViewParent viewParent = view.getParent();
         if (viewParent != null && view.isAttachedToWindow() && view.isAggregatedVisible()) {
             final Rect localHandwritingArea = view.getHandwritingArea();
-            final Rect globalHandwritingArea = new Rect();
             if (localHandwritingArea != null) {
-                globalHandwritingArea.set(localHandwritingArea);
+                rect.set(localHandwritingArea);
             } else {
-                globalHandwritingArea.set(0, 0, view.getWidth(), view.getHeight());
+                rect.set(0, 0, view.getWidth(), view.getHeight());
             }
-            if (viewParent.getChildVisibleRect(view, globalHandwritingArea, null)) {
-                return globalHandwritingArea;
-            }
+            return viewParent.getChildVisibleRect(view, rect, null);
         }
-        return null;
+        return false;
     }
 
     /**
