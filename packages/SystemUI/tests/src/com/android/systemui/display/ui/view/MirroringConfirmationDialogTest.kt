@@ -68,6 +68,28 @@ class MirroringConfirmationDialogTest : SysuiTestCase() {
         verify(onStartMirroringCallback, never()).onClick(any())
     }
 
+    @Test
+    fun onCancel_afterEnablingMirroring_cancelCallbackNotCalled() {
+        dialog.show()
+        dialog.requireViewById<View>(R.id.enable_display).callOnClick()
+
+        dialog.cancel()
+
+        verify(onCancelCallback, never()).onClick(any())
+        verify(onStartMirroringCallback).onClick(any())
+    }
+
+    @Test
+    fun onDismiss_afterEnablingMirroring_cancelCallbackNotCalled() {
+        dialog.show()
+        dialog.requireViewById<View>(R.id.enable_display).callOnClick()
+
+        dialog.dismiss()
+
+        verify(onCancelCallback, never()).onClick(any())
+        verify(onStartMirroringCallback).onClick(any())
+    }
+
     @After
     fun teardown() {
         if (::dialog.isInitialized) {

@@ -16,14 +16,12 @@
 
 package com.android.systemui.display.domain.interactor
 
-import android.hardware.display.DisplayManager
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -52,13 +50,18 @@ interface ConnectedDisplayInteractor {
         CONNECTED_SECURE,
     }
 
-    /** Represents a connected display that has not been enabled yet. */
+    /** Represents a connected display that has not been enabled yet for the UI layer. */
     interface PendingDisplay {
         /** Enables the display, making it available to the system. */
-        fun enable()
+        suspend fun enable()
 
-        /** Disables the display, making it unavailable to the system. */
-        fun disable()
+        /**
+         * Ignores the pending display.
+         *
+         * When called, this specific display id doesn't appear as pending anymore until the display
+         * is disconnected and reconnected again.
+         */
+        suspend fun ignore()
     }
 }
 
@@ -66,7 +69,6 @@ interface ConnectedDisplayInteractor {
 class ConnectedDisplayInteractorImpl
 @Inject
 constructor(
-    private val displayManager: DisplayManager,
     keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
 ) : ConnectedDisplayInteractor {
@@ -92,28 +94,19 @@ constructor(
 
     // Provides the pending display only if the lockscreen is unlocked
     override val pendingDisplay: Flow<PendingDisplay?> =
-        displayRepository.pendingDisplayId.combine(keyguardRepository.isKeyguardUnlocked) {
-            pendingDisplayId,
-            keyguardUnlocked ->
-            if (pendingDisplayId != null && keyguardUnlocked) {
-                pendingDisplayId.toPendingDisplay()
+        displayRepository.pendingDisplay.combine(keyguardRepository.isKeyguardShowing) {
+            repositoryPendingDisplay,
+            keyguardShowing ->
+            if (repositoryPendingDisplay != null && !keyguardShowing) {
+                repositoryPendingDisplay.toInteractorPendingDisplay()
             } else {
                 null
             }
         }
 
-    private fun Int.toPendingDisplay() =
+    private fun DisplayRepository.PendingDisplay.toInteractorPendingDisplay(): PendingDisplay =
         object : PendingDisplay {
-            val id = this@toPendingDisplay
-            override fun enable() {
-                traceSection("DisplayRepository#enable($id)") {
-                    displayManager.enableConnectedDisplay(id)
-                }
-            }
-            override fun disable() {
-                traceSection("DisplayRepository#enable($id)") {
-                    displayManager.disableConnectedDisplay(id)
-                }
-            }
+            override suspend fun enable() = this@toInteractorPendingDisplay.enable()
+            override suspend fun ignore() = this@toInteractorPendingDisplay.ignore()
         }
 }

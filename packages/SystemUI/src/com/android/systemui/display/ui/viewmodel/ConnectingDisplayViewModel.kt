@@ -19,13 +19,16 @@ import android.app.Dialog
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.ui.view.MirroringConfirmationDialog
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 /**
  * Shows/hides a dialog to allow the user to decide whether to use the external display for
@@ -38,6 +41,7 @@ constructor(
     private val context: Context,
     private val connectedDisplayInteractor: ConnectedDisplayInteractor,
     @Application private val scope: CoroutineScope,
+    @Background private val bgDispatcher: CoroutineDispatcher
 ) {
 
     private var dialog: Dialog? = null
@@ -61,10 +65,13 @@ constructor(
             MirroringConfirmationDialog(
                     context,
                     onStartMirroringClickListener = {
-                        pendingDisplay.enable()
+                        scope.launch(bgDispatcher) { pendingDisplay.enable() }
                         hideDialog()
                     },
-                    onDismissClickListener = { hideDialog() }
+                    onCancelMirroring = {
+                        scope.launch(bgDispatcher) { pendingDisplay.ignore() }
+                        hideDialog()
+                    }
                 )
                 .apply { show() }
     }

@@ -52,6 +52,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
     private val displayManager = mock<DisplayManager>()
     private val displayListener = kotlinArgumentCaptor<DisplayManager.DisplayListener>()
+    private val connectedDisplayListener = kotlinArgumentCaptor<DisplayManager.DisplayListener>()
 
     private val testHandler = FakeHandler(Looper.getMainLooper())
     private val testScope = TestScope(UnconfinedTestDispatcher())
@@ -114,7 +115,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
             // Let's make sure it has *NOT* been unregistered, as there is still a subscriber.
             setDisplays(1)
-            displayListener.value.onDisplayAdded(1)
+            sendOnDisplayAdded(1)
             assertThat(firstSubscriber?.ids()).containsExactly(1)
         }
 
@@ -127,7 +128,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
             val value by latestDisplayFlowValue()
 
             setDisplays(1)
-            displayListener.value.onDisplayAdded(1)
+            sendOnDisplayAdded(1)
 
             assertThat(value?.ids()).containsExactly(1)
         }
@@ -138,13 +139,13 @@ class DisplayRepositoryTest : SysuiTestCase() {
             val value by latestDisplayFlowValue()
 
             setDisplays(1, 2, 3, 4)
-            displayListener.value.onDisplayAdded(1)
-            displayListener.value.onDisplayAdded(2)
-            displayListener.value.onDisplayAdded(3)
-            displayListener.value.onDisplayAdded(4)
+            sendOnDisplayAdded(1)
+            sendOnDisplayAdded(2)
+            sendOnDisplayAdded(3)
+            sendOnDisplayAdded(4)
 
             setDisplays(1, 2, 3)
-            displayListener.value.onDisplayRemoved(4)
+            sendOnDisplayRemoved(4)
 
             assertThat(value?.ids()).containsExactly(1, 2, 3)
         }
@@ -155,10 +156,10 @@ class DisplayRepositoryTest : SysuiTestCase() {
             val value by latestDisplayFlowValue()
 
             setDisplays(1, 2, 3, 4)
-            displayListener.value.onDisplayAdded(1)
-            displayListener.value.onDisplayAdded(2)
-            displayListener.value.onDisplayAdded(3)
-            displayListener.value.onDisplayAdded(4)
+            sendOnDisplayAdded(1)
+            sendOnDisplayAdded(2)
+            sendOnDisplayAdded(3)
+            sendOnDisplayAdded(4)
 
             displayListener.value.onDisplayChanged(4)
 
@@ -168,22 +169,22 @@ class DisplayRepositoryTest : SysuiTestCase() {
     @Test
     fun onDisplayConnected_pendingDisplayReceived() =
         testScope.runTest {
-            val pendingDisplay by latestPendingDisplayFlowValue()
+            val pendingDisplay by lastPendingDisplay()
 
-            displayListener.value.onDisplayConnected(1)
+            sendOnDisplayConnected(1)
 
-            assertThat(pendingDisplay).isEqualTo(1)
+            assertThat(pendingDisplay!!.id).isEqualTo(1)
         }
 
     @Test
     fun onDisplayDisconnected_pendingDisplayNull() =
         testScope.runTest {
-            val pendingDisplay by latestPendingDisplayFlowValue()
-            displayListener.value.onDisplayConnected(1)
+            val pendingDisplay by lastPendingDisplay()
+            sendOnDisplayConnected(1)
 
             assertThat(pendingDisplay).isNotNull()
 
-            displayListener.value.onDisplayDisconnected(1)
+            sendOnDisplayDisconnected(1)
 
             assertThat(pendingDisplay).isNull()
         }
@@ -191,24 +192,162 @@ class DisplayRepositoryTest : SysuiTestCase() {
     @Test
     fun onDisplayDisconnected_unknownDisplay_doesNotSendNull() =
         testScope.runTest {
-            val pendingDisplay by latestPendingDisplayFlowValue()
-            displayListener.value.onDisplayConnected(1)
+            val pendingDisplay by lastPendingDisplay()
+            sendOnDisplayConnected(1)
 
             assertThat(pendingDisplay).isNotNull()
 
-            displayListener.value.onDisplayDisconnected(2)
+            sendOnDisplayDisconnected(2)
 
             assertThat(pendingDisplay).isNotNull()
         }
 
     @Test
-    fun onDisplayConnected_multipleTimes_sendsOnlyTheLastOne() =
+    fun onDisplayConnected_multipleTimes_sendsOnlyTheMaximum() =
         testScope.runTest {
-            val pendingDisplay by latestPendingDisplayFlowValue()
-            displayListener.value.onDisplayConnected(1)
-            displayListener.value.onDisplayConnected(2)
+            val pendingDisplay by lastPendingDisplay()
 
-            assertThat(pendingDisplay).isEqualTo(2)
+            sendOnDisplayConnected(1)
+            sendOnDisplayConnected(2)
+
+            assertThat(pendingDisplay!!.id).isEqualTo(2)
+        }
+
+    @Test
+    fun onPendingDisplay_enable_displayEnabled() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            pendingDisplay!!.enable()
+
+            verify(displayManager).enableConnectedDisplay(eq(1))
+        }
+
+    @Test
+    fun onPendingDisplay_enableBySysui_disabledBySomeoneElse_pendingDisplayStillIgnored() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            pendingDisplay!!.enable()
+            // to mock the display being really enabled:
+            sendOnDisplayAdded(1)
+
+            // Simulate the display being disabled by someone else. Now, sysui will have it in the
+            // "pending displays" list again, but it should be ignored.
+            sendOnDisplayRemoved(1)
+
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun onPendingDisplay_ignoredBySysui_enabledDisabledBySomeoneElse_pendingDisplayStillIgnored() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            pendingDisplay!!.ignore()
+
+            // to mock the display being enabled and disabled by someone else:
+            sendOnDisplayAdded(1)
+            sendOnDisplayRemoved(1)
+
+            // Sysui already decided to ignore it, so the pending display should be null.
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun onPendingDisplay_disable_displayDisabled() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            pendingDisplay!!.disable()
+
+            verify(displayManager).disableConnectedDisplay(eq(1))
+        }
+
+    @Test
+    fun onPendingDisplay_ignore_pendingDisplayNull() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+            sendOnDisplayConnected(1)
+
+            pendingDisplay!!.ignore()
+
+            assertThat(pendingDisplay).isNull()
+            verify(displayManager, never()).disableConnectedDisplay(eq(1))
+            verify(displayManager, never()).enableConnectedDisplay(eq(1))
+        }
+
+    @Test
+    fun onPendingDisplay_enabled_pendingDisplayNull() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            assertThat(pendingDisplay).isNotNull()
+
+            setDisplays(1)
+            sendOnDisplayAdded(1)
+
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun onPendingDisplay_multipleConnected_oneEnabled_pendingDisplayNotNull() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1)
+            sendOnDisplayConnected(2)
+
+            assertThat(pendingDisplay).isNotNull()
+
+            setDisplays(1)
+            sendOnDisplayAdded(1)
+
+            assertThat(pendingDisplay).isNotNull()
+            assertThat(pendingDisplay!!.id).isEqualTo(2)
+
+            setDisplays(1, 2)
+            sendOnDisplayAdded(2)
+
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun pendingDisplay_connectedDisconnectedAndReconnected_expectedPendingDisplayState() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            // Plug the cable
+            sendOnDisplayConnected(1)
+
+            // Enable it
+            assertThat(pendingDisplay).isNotNull()
+            pendingDisplay!!.enable()
+
+            // Enabled
+            verify(displayManager).enableConnectedDisplay(1)
+            setDisplays(1)
+            sendOnDisplayAdded(1)
+
+            // No more pending displays
+            assertThat(pendingDisplay).isNull()
+
+            // Let's disconnect the cable
+            setDisplays()
+            sendOnDisplayRemoved(1)
+            sendOnDisplayDisconnected(1)
+
+            assertThat(pendingDisplay).isNull()
+
+            // Let's reconnect it
+            sendOnDisplayConnected(1)
+
+            assertThat(pendingDisplay).isNotNull()
         }
 
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
@@ -216,6 +355,23 @@ class DisplayRepositoryTest : SysuiTestCase() {
     // Wrapper to capture the displayListener.
     private fun TestScope.latestDisplayFlowValue(): FlowValue<Set<Display>?> {
         val flowValue = collectLastValue(displayRepository.displays)
+        captureAddedRemovedListener()
+        return flowValue
+    }
+
+    private fun TestScope.lastPendingDisplay(): FlowValue<DisplayRepository.PendingDisplay?> {
+        val flowValue = collectLastValue(displayRepository.pendingDisplay)
+        captureAddedRemovedListener()
+        verify(displayManager)
+            .registerDisplayListener(
+                connectedDisplayListener.capture(),
+                eq(testHandler),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
+            )
+        return flowValue
+    }
+
+    private fun captureAddedRemovedListener() {
         verify(displayManager)
             .registerDisplayListener(
                 displayListener.capture(),
@@ -226,18 +382,20 @@ class DisplayRepositoryTest : SysuiTestCase() {
                         DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
                 )
             )
-        return flowValue
+    }
+    private fun sendOnDisplayAdded(id: Int) {
+        displayListener.value.onDisplayAdded(id)
+    }
+    private fun sendOnDisplayRemoved(id: Int) {
+        displayListener.value.onDisplayRemoved(id)
     }
 
-    private fun TestScope.latestPendingDisplayFlowValue(): FlowValue<Int?> {
-        val flowValue = collectLastValue(displayRepository.pendingDisplayId)
-        verify(displayManager)
-            .registerDisplayListener(
-                displayListener.capture(),
-                eq(testHandler),
-                eq(DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED)
-            )
-        return flowValue
+    private fun sendOnDisplayDisconnected(id: Int) {
+        connectedDisplayListener.value.onDisplayDisconnected(id)
+    }
+
+    private fun sendOnDisplayConnected(id: Int) {
+        connectedDisplayListener.value.onDisplayConnected(id)
     }
 
     private fun setDisplays(displays: List<Display>) {
