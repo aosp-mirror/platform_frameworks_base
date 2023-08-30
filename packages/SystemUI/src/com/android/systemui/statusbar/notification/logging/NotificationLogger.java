@@ -276,14 +276,16 @@ public class NotificationLogger implements StateListener, CoreStartable {
         }
     }
 
-    @GuardedBy("mDozingLock")
     public void startNotificationLogging() {
         if (!mLogging) {
             mLogging = true;
             if (DEBUG) {
                 Log.i(TAG, "startNotificationLogging");
             }
-            boolean lockscreen = mLockscreen != null && mLockscreen;
+            boolean lockscreen;
+            synchronized (mDozingLock) {
+                lockscreen = mLockscreen != null && mLockscreen;
+            }
             mNotificationPanelLogger.logPanelShown(lockscreen, getVisibleNotifications());
             mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
             // Sometimes, the transition from lockscreenOrShadeVisible=false ->
