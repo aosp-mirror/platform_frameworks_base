@@ -251,6 +251,9 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/pipeline/airplane/data/repository/FakeAirplaneModeRepository.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
+
+        /* Log fakes */
+        "tests/src/com/android/systemui/log/core/FakeLogBuffer.kt",
     ],
     path: "tests/src",
 }
@@ -337,6 +340,11 @@ filegroup {
         "tests/src/com/android/keyguard/KeyguardSecurityViewFlipperControllerTest.java",
         "tests/src/com/android/keyguard/KeyguardSimPinViewControllerTest.kt",
         "tests/src/com/android/keyguard/KeyguardSimPukViewControllerTest.kt",
+
+        /* Communal tests */
+        "tests/src/com/android/systemui/communal/data/repository/CommunalWidgetRepositoryImplTest.kt",
+        "tests/src/com/android/systemui/communal/domain/interactor/CommunalInteractorTest.kt",
+        "tests/src/com/android/systemui/communal/ui/view/layout/blueprints/DefaultCommunalBlueprintTest.kt",
     ],
     path: "tests/src",
 }
