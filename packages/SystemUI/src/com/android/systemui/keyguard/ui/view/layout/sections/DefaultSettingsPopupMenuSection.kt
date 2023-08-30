@@ -49,23 +49,26 @@ constructor(
     private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
     private val vibratorHelper: VibratorHelper,
     private val activityStarter: ActivityStarter,
-) : KeyguardSection {
+) : KeyguardSection() {
     private var settingsPopupMenuHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-            if (constraintLayout.findViewById<View?>(R.id.keyguard_settings_button) == null) {
-                val view =
-                    LayoutInflater.from(constraintLayout.context)
-                        .inflate(R.layout.keyguard_settings_popup_menu, constraintLayout, false)
-                        .apply {
-                            id = R.id.keyguard_settings_button
-                            isVisible = false
-                            alpha = 0f
-                        } as LaunchableLinearLayout
-                constraintLayout.addView(view)
-            }
+        if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            return
+        }
+        val view =
+            LayoutInflater.from(constraintLayout.context)
+                .inflate(R.layout.keyguard_settings_popup_menu, constraintLayout, false)
+                .apply {
+                    id = R.id.keyguard_settings_button
+                    isVisible = false
+                    alpha = 0f
+                } as LaunchableLinearLayout
+        constraintLayout.addView(view)
+    }
 
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             settingsPopupMenuHandle =
                 KeyguardSettingsViewBinder.bind(
                     constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
@@ -100,7 +103,8 @@ constructor(
         }
     }
 
-    override fun onDestroy() {
+    override fun removeViews(constraintLayout: ConstraintLayout) {
         settingsPopupMenuHandle?.dispose()
+        constraintLayout.removeView(R.id.keyguard_settings_button)
     }
 }

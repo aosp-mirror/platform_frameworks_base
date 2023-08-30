@@ -55,7 +55,7 @@ constructor(
     override val id: String = DEFAULT
 
     override val sections =
-        arrayOf(
+        setOf(
             defaultIndicationAreaSection,
             defaultLockIconSection,
             defaultShortcutsSection,
@@ -66,9 +66,12 @@ constructor(
             splitShadeGuidelines,
         )
 
-    override fun addViews(constraintLayout: ConstraintLayout) {
+    override fun addViews(
+        previousBlueprint: KeyguardBlueprint?,
+        constraintLayout: ConstraintLayout
+    ) {
         if (featureFlags.isEnabled(Flags.LAZY_INFLATE_KEYGUARD)) {
-            super.addViews(constraintLayout)
+            super.addViews(previousBlueprint, constraintLayout)
         }
     }
 

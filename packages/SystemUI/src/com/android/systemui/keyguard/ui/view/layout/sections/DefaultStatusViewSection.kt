@@ -55,31 +55,34 @@ constructor(
     private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
     private val notificationPanelViewController: Lazy<NotificationPanelViewController>,
     private val keyguardMediaController: KeyguardMediaController,
-) : KeyguardSection {
+) : KeyguardSection() {
     private val statusViewId = R.id.keyguard_status_view
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun addViews(constraintLayout: ConstraintLayout) {
+        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            return
+        }
         // At startup, 2 views with the ID `R.id.keyguard_status_view` will be available.
         // Disable one of them
-        if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
-            notificationPanelView.findViewById<View>(statusViewId)?.let {
-                notificationPanelView.removeView(it)
-            }
-            if (constraintLayout.findViewById<View>(statusViewId) == null) {
-                val keyguardStatusView =
-                    (LayoutInflater.from(context)
-                            .inflate(R.layout.keyguard_status_view, constraintLayout, false)
-                            as KeyguardStatusView)
-                        .apply { clipChildren = false }
+        notificationPanelView.findViewById<View>(statusViewId)?.let {
+            notificationPanelView.removeView(it)
+        }
+        val keyguardStatusView =
+            (LayoutInflater.from(context)
+                    .inflate(R.layout.keyguard_status_view, constraintLayout, false)
+                    as KeyguardStatusView)
+                .apply { clipChildren = false }
+        constraintLayout.addView(keyguardStatusView)
+    }
 
-                val statusViewComponent =
-                    keyguardStatusViewComponentFactory.build(keyguardStatusView)
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            constraintLayout.findViewById<KeyguardStatusView?>(R.id.keyguard_status_view)?.let {
+                val statusViewComponent = keyguardStatusViewComponentFactory.build(it)
                 val controller = statusViewComponent.keyguardStatusViewController
                 controller.init()
-                constraintLayout.addView(keyguardStatusView)
                 keyguardMediaController.attachSplitShadeContainer(
-                    keyguardStatusView.requireViewById<ViewGroup>(R.id.status_view_media_container)
+                    it.requireViewById<ViewGroup>(R.id.status_view_media_container)
                 )
                 keyguardViewConfigurator.get().keyguardStatusViewController = controller
                 notificationPanelViewController.get().updateStatusBarViewController()
@@ -107,7 +110,8 @@ constructor(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun onDestroy() {
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        constraintLayout.removeView(statusViewId)
         keyguardViewConfigurator.get().keyguardStatusViewController = null
     }
 }

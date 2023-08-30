@@ -40,22 +40,30 @@ constructor(
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val controller: NotificationStackScrollLayoutController,
-) : KeyguardSection {
+) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
+        if (!featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+            return
+        }
+        // This moves the existing NSSL view to a different parent, as the controller is a
+        // singleton and recreating it has other bad side effects
+        notificationPanelView.findViewById<View?>(R.id.notification_stack_scroller)?.let {
+            (it.parent as ViewGroup).removeView(it)
+            sharedNotificationContainer.addNotificationStackScrollLayout(it)
+        }
+    }
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
         if (featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
-            // This moves the existing NSSL view to a different parent, as the controller is a
-            // singleton and recreating it has other bad side effects
-            notificationPanelView.findViewById<View?>(R.id.notification_stack_scroller)?.let {
-                (it.parent as ViewGroup).removeView(it)
-                sharedNotificationContainer.addNotificationStackScrollLayout(it)
-                SharedNotificationContainerBinder.bind(
-                    sharedNotificationContainer,
-                    sharedNotificationContainerViewModel,
-                    controller,
-                )
-            }
+            SharedNotificationContainerBinder.bind(
+                sharedNotificationContainer,
+                sharedNotificationContainerViewModel,
+                controller,
+            )
         }
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {}
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {}
 }

@@ -18,6 +18,8 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.res.Resources
+import android.view.View
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -25,7 +27,9 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import androidx.core.content.res.ResourcesCompat
 import com.android.systemui.R
+import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -49,12 +53,19 @@ constructor(
     private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
-) : BaseShortcutsSection(), KeyguardSection {
+) : KeyguardSection() {
+    private var leftShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
+    private var rightShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             addLeftShortcut(constraintLayout)
             addRightShortcut(constraintLayout)
+        }
+    }
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             leftShortcutHandle =
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),
@@ -97,5 +108,68 @@ constructor(
             connect(R.id.end_button, TOP, R.id.lock_icon_view, TOP)
             connect(R.id.end_button, BOTTOM, R.id.lock_icon_view, BOTTOM)
         }
+    }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        leftShortcutHandle?.destroy()
+        rightShortcutHandle?.destroy()
+        constraintLayout.removeView(R.id.start_button)
+        constraintLayout.removeView(R.id.end_button)
+    }
+
+    private fun addLeftShortcut(constraintLayout: ConstraintLayout) {
+        val padding =
+            constraintLayout.resources.getDimensionPixelSize(
+                R.dimen.keyguard_affordance_fixed_padding
+            )
+        val view =
+            LaunchableImageView(constraintLayout.context, null).apply {
+                id = R.id.start_button
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                background =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_bg,
+                        context.theme
+                    )
+                foreground =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_selected_border,
+                        context.theme
+                    )
+                visibility = View.INVISIBLE
+                setPadding(padding, padding, padding, padding)
+            }
+        constraintLayout.addView(view)
+    }
+
+    private fun addRightShortcut(constraintLayout: ConstraintLayout) {
+        if (constraintLayout.findViewById<View>(R.id.end_button) != null) return
+
+        val padding =
+            constraintLayout.resources.getDimensionPixelSize(
+                R.dimen.keyguard_affordance_fixed_padding
+            )
+        val view =
+            LaunchableImageView(constraintLayout.context, null).apply {
+                id = R.id.end_button
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                background =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_bg,
+                        context.theme
+                    )
+                foreground =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_selected_border,
+                        context.theme
+                    )
+                visibility = View.INVISIBLE
+                setPadding(padding, padding, padding, padding)
+            }
+        constraintLayout.addView(view)
     }
 }
