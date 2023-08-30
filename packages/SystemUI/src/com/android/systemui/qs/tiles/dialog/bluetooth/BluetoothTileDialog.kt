@@ -33,10 +33,13 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 @SysUISingleton
 internal class BluetoothTileDialog
 constructor(
-    private val deviceItem: List<DeviceItem>,
-    private val deviceItemOnClickCallback: DeviceItemOnClickCallback,
+    deviceItem: List<DeviceItem>,
+    deviceItemOnClickCallback: DeviceItemOnClickCallback,
     context: Context,
 ) : SystemUIDialog(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK) {
+
+    private val deviceItemAdapter: Adapter =
+        Adapter(deviceItem.toMutableList(), deviceItemOnClickCallback)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +50,10 @@ constructor(
         setupRecyclerView()
     }
 
+    internal fun onDeviceItemUpdated(deviceItem: DeviceItem, position: Int) {
+        deviceItemAdapter.refreshDeviceItem(deviceItem, position)
+    }
+
     private fun setupDoneButton() {
         requireViewById<View>(R.id.done_button).setOnClickListener { dismiss() }
     }
@@ -54,12 +61,12 @@ constructor(
     private fun setupRecyclerView() {
         requireViewById<RecyclerView>(R.id.device_list).apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = Adapter(deviceItem, deviceItemOnClickCallback)
+            adapter = deviceItemAdapter
         }
     }
 
     internal class Adapter(
-        private val deviceItem: List<DeviceItem>,
+        private var deviceItem: MutableList<DeviceItem>,
         private val onClickCallback: DeviceItemOnClickCallback
     ) : RecyclerView.Adapter<Adapter.DeviceItemViewHolder>() {
 
@@ -74,10 +81,15 @@ constructor(
 
         override fun onBindViewHolder(holder: DeviceItemViewHolder, position: Int) {
             val item = getItem(position)
-            holder.bind(item, onClickCallback)
+            holder.bind(item, position, onClickCallback)
         }
 
         internal fun getItem(position: Int) = deviceItem[position]
+
+        internal fun refreshDeviceItem(updated: DeviceItem, position: Int) {
+            deviceItem[position] = updated
+            notifyItemChanged(position)
+        }
 
         internal class DeviceItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             private val container = view.requireViewById<View>(R.id.bluetooth_device)
@@ -85,10 +97,18 @@ constructor(
             private val summaryView = view.requireViewById<TextView>(R.id.bluetooth_device_summary)
             private val iconView = view.requireViewById<ImageView>(R.id.bluetooth_device_icon)
 
-            internal fun bind(item: DeviceItem, onClickCallback: DeviceItemOnClickCallback) {
+            internal fun bind(
+                item: DeviceItem,
+                position: Int,
+                deviceItemOnClickCallback: DeviceItemOnClickCallback
+            ) {
                 container.apply {
-                    item.background?.let { background = context.getDrawable(it) }
-                    setOnClickListener { onClickCallback.onClicked(item) }
+                    isEnabled = item.isEnabled
+                    alpha = item.alpha
+                    background = item.background
+                    setOnClickListener {
+                        deviceItemOnClickCallback.onDeviceItemClicked(item, position)
+                    }
                 }
                 nameView.text = item.deviceName
                 summaryView.text = item.connectionSummary
@@ -100,5 +120,10 @@ constructor(
                 }
             }
         }
+    }
+
+    internal companion object {
+        const val ENABLED_ALPHA = 1.0f
+        const val DISABLED_ALPHA = 0.3f
     }
 }

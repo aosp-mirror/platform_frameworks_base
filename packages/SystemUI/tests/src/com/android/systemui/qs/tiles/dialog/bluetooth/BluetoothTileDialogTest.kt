@@ -19,12 +19,16 @@ package com.android.systemui.qs.tiles.dialog.bluetooth
 import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.LayoutInflater
+import android.view.View
 import android.view.View.VISIBLE
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.DISABLED_ALPHA
+import com.android.systemui.qs.tiles.dialog.bluetooth.BluetoothTileDialog.Companion.ENABLED_ALPHA
 import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -32,6 +36,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 
@@ -46,21 +51,30 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
-    @Mock private lateinit var deviceItemOnClickCallback: DeviceItemOnClickCallback
-
-    @Mock private lateinit var callback: DeviceItemOnClickCallback
-
     @Mock private lateinit var cachedBluetoothDevice: CachedBluetoothDevice
+
+    @Mock private lateinit var deviceItemOnClickCallback: DeviceItemOnClickCallback
 
     @Mock private lateinit var drawable: Drawable
 
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var bluetoothTileDialog: BluetoothTileDialog
+    private lateinit var deviceItem: DeviceItem
 
     @Before
     fun setUp() {
         bluetoothTileDialog = BluetoothTileDialog(emptyList(), deviceItemOnClickCallback, mContext)
         icon = Pair(drawable, DEVICE_NAME)
+        deviceItem =
+            DeviceItem(
+                type = DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
+                cachedBluetoothDevice = cachedBluetoothDevice,
+                deviceName = DEVICE_NAME,
+                connectionSummary = DEVICE_CONNECTION_SUMMARY,
+                iconWithDescription = icon,
+                background = null
+            )
+        `when`(cachedBluetoothDevice.isBusy).thenReturn(false)
     }
 
     @Test
@@ -79,20 +93,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
     @Test
     fun testShowDialog_displayBluetoothDevice() {
         bluetoothTileDialog =
-            BluetoothTileDialog(
-                listOf(
-                    DeviceItem(
-                        type = DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
-                        cachedBluetoothDevice = cachedBluetoothDevice,
-                        deviceName = DEVICE_NAME,
-                        connectionSummary = DEVICE_CONNECTION_SUMMARY,
-                        iconWithDescription = icon,
-                        background = null
-                    )
-                ),
-                callback,
-                mContext
-            )
+            BluetoothTileDialog(listOf(deviceItem), deviceItemOnClickCallback, mContext)
 
         bluetoothTileDialog.show()
 
@@ -102,5 +103,39 @@ class BluetoothTileDialogTest : SysuiTestCase() {
         assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
         assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
         assertThat(adapter.getItem(0).iconWithDescription).isEqualTo(icon)
+    }
+
+    @Test
+    fun testDeviceItemViewHolder_cachedDeviceNotBusy() {
+        deviceItem.isEnabled = true
+        deviceItem.alpha = ENABLED_ALPHA
+
+        val view =
+            LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
+        val viewHolder = BluetoothTileDialog.Adapter.DeviceItemViewHolder(view)
+        viewHolder.bind(deviceItem, 0, deviceItemOnClickCallback)
+        val container = view.findViewById<View>(R.id.bluetooth_device)
+
+        assertThat(container).isNotNull()
+        assertThat(container!!.isEnabled).isTrue()
+        assertThat(container.alpha).isEqualTo(ENABLED_ALPHA)
+        assertThat(container.hasOnClickListeners()).isTrue()
+    }
+
+    @Test
+    fun testDeviceItemViewHolder_cachedDeviceBusy() {
+        deviceItem.isEnabled = false
+        deviceItem.alpha = DISABLED_ALPHA
+
+        val view =
+            LayoutInflater.from(mContext).inflate(R.layout.bluetooth_device_item, null, false)
+        val viewHolder = BluetoothTileDialog.Adapter.DeviceItemViewHolder(view)
+        viewHolder.bind(deviceItem, 0, deviceItemOnClickCallback)
+        val container = view.findViewById<View>(R.id.bluetooth_device)
+
+        assertThat(container).isNotNull()
+        assertThat(container!!.isEnabled).isFalse()
+        assertThat(container.alpha).isEqualTo(DISABLED_ALPHA)
+        assertThat(container.hasOnClickListeners()).isTrue()
     }
 }

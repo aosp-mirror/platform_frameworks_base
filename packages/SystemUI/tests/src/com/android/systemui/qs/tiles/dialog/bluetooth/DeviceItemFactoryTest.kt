@@ -39,7 +39,10 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     @get:Rule val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var cachedDevice: CachedBluetoothDevice
+
     private val availableMediaDeviceItemFactory = AvailableMediaDeviceItemFactory()
+    private val connectedDeviceItemFactory = ConnectedDeviceItemFactory()
+    private val savedDeviceItemFactory = SavedDeviceItemFactory()
 
     @Before
     fun setup() {
@@ -51,8 +54,27 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     fun testAvailableMediaDeviceItemFactory_createFromCachedDevice() {
         val deviceItem = availableMediaDeviceItemFactory.create(context, cachedDevice)
 
+        assertDeviceItem(deviceItem, DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+    }
+
+    @Test
+    fun testConnectedDeviceItemFactory_createFromCachedDevice() {
+        val deviceItem = connectedDeviceItemFactory.create(context, cachedDevice)
+
+        assertDeviceItem(deviceItem, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+    }
+
+    @Test
+    fun testSavedDeviceItemFactory_createFromCachedDevice() {
+        val deviceItem = savedDeviceItemFactory.create(context, cachedDevice)
+
+        assertDeviceItem(deviceItem, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+        assertThat(deviceItem.background).isNull()
+    }
+
+    private fun assertDeviceItem(deviceItem: DeviceItem?, deviceItemType: DeviceItemType) {
         assertThat(deviceItem).isNotNull()
-        assertThat(deviceItem.type).isEqualTo(DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+        assertThat(deviceItem!!.type).isEqualTo(deviceItemType)
         assertThat(deviceItem.cachedBluetoothDevice).isEqualTo(cachedDevice)
         assertThat(deviceItem.deviceName).isEqualTo(DEVICE_NAME)
         assertThat(deviceItem.connectionSummary).isEqualTo(CONNECTION_SUMMARY)

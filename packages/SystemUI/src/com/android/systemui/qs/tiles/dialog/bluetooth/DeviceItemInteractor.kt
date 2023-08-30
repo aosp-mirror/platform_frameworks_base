@@ -16,7 +16,11 @@
 
 package com.android.systemui.qs.tiles.dialog.bluetooth
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.media.AudioManager
+import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 
@@ -24,32 +28,76 @@ import javax.inject.Inject
 @SysUISingleton
 internal class DeviceItemInteractor
 @Inject
-constructor(private val bluetoothTileDialogRepository: BluetoothTileDialogRepository) :
-    DeviceItemOnClickCallback {
+constructor(
+    private val bluetoothTileDialogRepository: BluetoothTileDialogRepository,
+    private val audioManager: AudioManager,
+    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+) {
     private var deviceItemFactoryList: List<DeviceItemFactory> =
-        listOf(AvailableMediaDeviceItemFactory())
+        listOf(
+            AvailableMediaDeviceItemFactory(),
+            ConnectedDeviceItemFactory(),
+            SavedDeviceItemFactory()
+        )
+
+    private var displayPriority: List<DeviceItemType> =
+        listOf(
+            DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
+            DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
+            DeviceItemType.SAVED_BLUETOOTH_DEVICE,
+        )
 
     internal fun getDeviceItems(context: Context): List<DeviceItem> {
-        return bluetoothTileDialogRepository.cachedDevices.mapNotNull { cachedDevice ->
-            deviceItemFactoryList
-                .firstOrNull { it.predicate(cachedDevice) }
-                ?.create(context, cachedDevice)
+        val mostRecentlyConnectedDevices = bluetoothAdapter?.mostRecentlyConnectedDevices
+
+        return bluetoothTileDialogRepository.cachedDevices
+            .mapNotNull { cachedDevice ->
+                deviceItemFactoryList
+                    .firstOrNull { it.isFilterMatched(cachedDevice, audioManager) }
+                    ?.create(context, cachedDevice)
+            }
+            .sort(displayPriority, mostRecentlyConnectedDevices)
+    }
+
+    private fun List<DeviceItem>.sort(
+        displayPriority: List<DeviceItemType>,
+        mostRecentlyConnectedDevices: List<BluetoothDevice>?
+    ): List<DeviceItem> {
+        return this.sortedWith(
+            compareBy<DeviceItem> { displayPriority.indexOf(it.type) }
+                .thenBy {
+                    mostRecentlyConnectedDevices?.indexOf(it.cachedBluetoothDevice.device) ?: 0
+                }
+        )
+    }
+
+    internal fun updateDeviceItemOnClick(deviceItem: DeviceItem): Boolean {
+        var isClicked = false
+        when (deviceItem.type) {
+            DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
+                if (!BluetoothUtils.isActiveMediaDevice(deviceItem.cachedBluetoothDevice)) {
+                    deviceItem.cachedBluetoothDevice.setActive()
+                    isClicked = true
+                }
+            }
+            DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {}
+            DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
+                deviceItem.cachedBluetoothDevice.connect()
+                isClicked = true
+            }
         }
+        if (isClicked) {
+            deviceItem.isEnabled = false
+            deviceItem.alpha = BluetoothTileDialog.DISABLED_ALPHA
+        }
+        return isClicked
     }
 
     internal fun setDeviceItemFactoryListForTesting(list: List<DeviceItemFactory>) {
         deviceItemFactoryList = list
     }
 
-    override fun onClicked(deviceItem: DeviceItem) {
-        when (deviceItem.type) {
-            DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
-                // TODO(b/298124674): Add actual action with cachedBluetoothDevice
-            }
-        }
+    internal fun setDisplayPriorityForTesting(list: List<DeviceItemType>) {
+        displayPriority = list
     }
-}
-
-internal interface DeviceItemOnClickCallback {
-    fun onClicked(deviceItem: DeviceItem)
 }

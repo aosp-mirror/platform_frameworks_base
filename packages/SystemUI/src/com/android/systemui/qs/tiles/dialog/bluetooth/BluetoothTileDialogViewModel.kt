@@ -33,10 +33,11 @@ constructor(
     private val deviceItemInteractor: DeviceItemInteractor,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     @Main private val uiHandler: Handler
-) {
+) : DeviceItemOnClickCallback {
     private var deviceItems: List<DeviceItem> = emptyList()
 
-    @VisibleForTesting var dialog: BluetoothTileDialog? = null
+    @VisibleForTesting
+    var dialog: BluetoothTileDialog? = null
 
     /**
      * Shows the dialog.
@@ -50,9 +51,15 @@ constructor(
         deviceItems = deviceItemInteractor.getDeviceItems(context)
 
         uiHandler.post {
-            dialog = BluetoothTileDialog(deviceItems, deviceItemInteractor, context)
+            dialog = BluetoothTileDialog(deviceItems, this, context)
 
             view?.let { dialogLaunchAnimator.showFromView(dialog!!, it) } ?: dialog!!.show()
+        }
+    }
+
+    override fun onDeviceItemClicked(deviceItem: DeviceItem, position: Int) {
+        if (deviceItemInteractor.updateDeviceItemOnClick(deviceItem)) {
+            dialog?.onDeviceItemUpdated(deviceItem, position)
         }
     }
 
@@ -60,4 +67,8 @@ constructor(
         dialog?.dismiss()
         dialog = null
     }
+}
+
+internal interface DeviceItemOnClickCallback {
+    fun onDeviceItemClicked(deviceItem: DeviceItem, position: Int)
 }
