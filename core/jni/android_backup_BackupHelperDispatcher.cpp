@@ -118,7 +118,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
     }
 
     env->SetIntField(headerObj, s_chunkSizeField, flattenedHeader.dataSize);
-    env->SetObjectField(headerObj, s_keyPrefixField, env->NewStringUTF(keyPrefix.string()));
+    env->SetObjectField(headerObj, s_keyPrefixField, env->NewStringUTF(keyPrefix.c_str()));
 
     return (jint) 0;
 }
