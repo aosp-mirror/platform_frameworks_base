@@ -28,6 +28,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,6 +54,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PropertyInvalidatedCache;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceManager;
@@ -627,7 +630,7 @@ public class DisplayManagerServiceTest {
      * Tests that the virtual display is created along-side the default display.
      */
     @Test
-    public void testStartVirtualDisplayWithDefaultDisplay_Succeeds() throws Exception {
+    public void testStartVirtualDisplayWithDefaultDisplay_Succeeds() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         registerDefaultDisplays(displayManager);
@@ -663,7 +666,7 @@ public class DisplayManagerServiceTest {
      * internal state for things like display cutout when nonOverrideDisplayInfo is changed.
      */
     @Test
-    public void testShouldNotifyChangeWhenNonOverrideDisplayInfoChanged() throws Exception {
+    public void testShouldNotifyChangeWhenNonOverrideDisplayInfoChanged() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
         registerDefaultDisplays(displayManager);
@@ -1486,7 +1489,7 @@ public class DisplayManagerServiceTest {
      * a virtual device, even if ADD_TRUSTED_DISPLAY is not granted.
      */
     @Test
-    public void testOwnDisplayGroup_allowCreationWithVirtualDevice()  throws Exception {
+    public void testOwnDisplayGroup_allowCreationWithVirtualDevice() throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -1650,7 +1653,7 @@ public class DisplayManagerServiceTest {
      */
     @Test
     @DisableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
-    public  void testDisplayInfoFrameRateOverrideModeCompat() throws Exception {
+    public  void testDisplayInfoFrameRateOverrideModeCompat() {
         testDisplayInfoFrameRateOverrideModeCompat(/*compatChangeEnabled*/ false);
     }
 
@@ -1659,7 +1662,7 @@ public class DisplayManagerServiceTest {
      */
     @Test
     @EnableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
-    public  void testDisplayInfoFrameRateOverrideMode() throws Exception {
+    public  void testDisplayInfoFrameRateOverrideMode() {
         testDisplayInfoFrameRateOverrideModeCompat(/*compatChangeEnabled*/ true);
     }
 
@@ -1742,7 +1745,7 @@ public class DisplayManagerServiceTest {
      */
     @Test
     @DisableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
-    public  void testDisplayInfoRenderFrameRateModeCompat() throws Exception {
+    public  void testDisplayInfoRenderFrameRateModeCompat() {
         testDisplayInfoRenderFrameRateModeCompat(/*compatChangeEnabled*/ false);
     }
 
@@ -1751,7 +1754,7 @@ public class DisplayManagerServiceTest {
      */
     @Test
     @EnableCompatChanges({DisplayManagerService.DISPLAY_MODE_RETURNS_PHYSICAL_REFRESH_RATE})
-    public  void testDisplayInfoRenderFrameRateMode() throws Exception {
+    public  void testDisplayInfoRenderFrameRateMode() {
         testDisplayInfoRenderFrameRateModeCompat(/*compatChangeEnabled*/ true);
     }
 
@@ -2104,10 +2107,11 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
 
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
@@ -2124,16 +2128,19 @@ public class DisplayManagerServiceTest {
         DisplayManagerInternal localService = displayManager.new LocalService();
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
-        // Create default display device
-        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
-
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
         localService.registerDisplayGroupListener(callback);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
+        // Create default display device
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        callback.waitForExpectedEvent();
+        callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
@@ -2151,8 +2158,9 @@ public class DisplayManagerServiceTest {
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
 
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_CONNECTED,
                 EVENT_DISPLAY_ADDED).inOrder();
@@ -2166,18 +2174,22 @@ public class DisplayManagerServiceTest {
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
-        bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.waitForExpectedEvent();
+        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         displayManager.enableConnectedDisplay(display.getDisplayIdLocked(), /* enabled= */ true);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(display.isEnabledLocked()).isTrue();
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_ADDED).inOrder();
@@ -2190,11 +2202,15 @@ public class DisplayManagerServiceTest {
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        callback.waitForExpectedEvent();
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        // Withouts permission, we cannot get the CONNECTED event.
         waitForIdleHandler(displayManager.getDisplayHandler());
         callback.clear();
         LogicalDisplay display =
@@ -2212,19 +2228,22 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        callback.expectsEvent(EVENT_DISPLAY_REMOVED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ false);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_ADDED);
     }
@@ -2237,16 +2256,18 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
 
+        callback.expectsEvent(EVENT_DISPLAY_REMOVED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ false);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_REMOVED);
     }
@@ -2259,23 +2280,26 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         DisplayManagerInternal localService = displayManager.new LocalService();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
-        // Create default display device
-        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
         localService.registerDisplayGroupListener(callback);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
+        // Create default display device
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        callback.waitForExpectedEvent();
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_REMOVED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ false);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(display.isEnabledLocked()).isFalse();
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_REMOVED);
@@ -2288,18 +2312,20 @@ public class DisplayManagerServiceTest {
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
+        bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
-        bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        callback.waitForExpectedEvent();
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         int displayId = display.getDisplayIdLocked();
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
         assertThrows(SecurityException.class, () -> bs.disableConnectedDisplay(displayId));
@@ -2314,23 +2340,27 @@ public class DisplayManagerServiceTest {
         DisplayManagerInternal localService = displayManager.new LocalService();
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
-        // Create default display device
-        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
         localService.registerDisplayGroupListener(callback);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
+        // Create default display device'
+        createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        callback.waitForExpectedEvent();
+        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
         LogicalDisplay display = logicalDisplayMapper.getDisplayLocked(displayDevice);
         int groupId = display.getDisplayInfoLocked().displayGroupId;
         DisplayGroup group = logicalDisplayMapper.getDisplayGroupLocked(groupId);
         assertThat(group.getSizeLocked()).isEqualTo(1);
 
+        callback.expectsEvent(DISPLAY_GROUP_EVENT_REMOVED);
         display.setPrimaryDisplayDeviceLocked(null);
         displayManager.getDisplayDeviceRepository()
                 .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(group.getSizeLocked()).isEqualTo(0);
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_DISCONNECTED,
@@ -2357,20 +2387,23 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_CONNECTED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         int displayId = display.getDisplayIdLocked();
         displayManager.enableConnectedDisplay(displayId, /* enabled= */ true);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_DISCONNECTED);
         display.setPrimaryDisplayDeviceLocked(null);
         displayManager.getDisplayDeviceRepository()
                 .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(logicalDisplayMapper.getDisplayLocked(displayId, true)).isNull();
         assertThat(callback.receivedEvents()).containsExactly(EVENT_DISPLAY_REMOVED,
@@ -2386,17 +2419,19 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_AND_CONNECTION_DISPLAY_EVENTS);
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
         callback.clear();
 
+        callback.expectsEvent(EVENT_DISPLAY_DISCONNECTED);
         display.setPrimaryDisplayDeviceLocked(null);
         displayManager.getDisplayDeviceRepository()
                 .onDisplayDeviceEvent(displayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
-        waitForIdleHandler(displayManager.getDisplayHandler());
+        callback.waitForExpectedEvent();
 
         assertThat(logicalDisplayMapper.getDisplayLocked(displayDevice,
                 /* includeDisabled= */ true)).isNull();
@@ -2675,12 +2710,42 @@ public class DisplayManagerServiceTest {
         int mDisplayId;
         List<String> mReceivedEvents = new ArrayList<>();
 
+        @Nullable
+        private String mExpectedEvent;
+
+        @NonNull
+        private volatile CountDownLatch mLatch = new CountDownLatch(0);
+
         FakeDisplayManagerCallback(int displayId) {
             mDisplayId = displayId;
         }
 
         FakeDisplayManagerCallback() {
             mDisplayId = -1;
+        }
+
+        void expectsEvent(@NonNull String event) {
+            mExpectedEvent = event;
+            mLatch = new CountDownLatch(1);
+        }
+
+        void waitForExpectedEvent() {
+            waitForExpectedEvent(Duration.ofSeconds(1));
+        }
+
+        void waitForExpectedEvent(Duration timeout) {
+            try {
+                assertWithMessage("Event '" + mExpectedEvent + "' is received.")
+                        .that(mLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
+            } catch (InterruptedException ex) {
+                throw new AssertionError("Waiting for expected event interrupted", ex);
+            }
+        }
+
+        private void eventSeen(String event) {
+            if (event.equals(mExpectedEvent)) {
+                mLatch.countDown();
+            }
         }
 
         @Override
@@ -2693,22 +2758,27 @@ public class DisplayManagerServiceTest {
             // 1 - The error produced is a lot easier to read
             // 2 - The values used for display and group events are the same, strings are used to
             // differentiate them easily.
-            mReceivedEvents.add(eventTypeToString(event));
+            String eventName = eventTypeToString(event);
+            mReceivedEvents.add(eventName);
+            eventSeen(eventName);
         }
 
         @Override
         public void onDisplayGroupAdded(int groupId) {
             mReceivedEvents.add(DISPLAY_GROUP_EVENT_ADDED);
+            eventSeen(DISPLAY_GROUP_EVENT_ADDED);
         }
 
         @Override
         public void onDisplayGroupRemoved(int groupId) {
             mReceivedEvents.add(DISPLAY_GROUP_EVENT_REMOVED);
+            eventSeen(DISPLAY_GROUP_EVENT_REMOVED);
         }
 
         @Override
         public void onDisplayGroupChanged(int groupId) {
             mReceivedEvents.add(DISPLAY_GROUP_EVENT_CHANGED);
+            eventSeen(DISPLAY_GROUP_EVENT_CHANGED);
         }
 
         public void clear() {
