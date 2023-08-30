@@ -145,7 +145,7 @@ public class RollbackPackageHealthObserverTest {
                 observer.onHealthCheckFailed(null,
                         PackageWatchdog.FAILURE_REASON_NATIVE_CRASH, 1));
         // non-native crash for the package
-        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_60,
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
                 observer.onHealthCheckFailed(testFailedPackage,
                         PackageWatchdog.FAILURE_REASON_APP_CRASH, 1));
         // non-native crash for a different package
