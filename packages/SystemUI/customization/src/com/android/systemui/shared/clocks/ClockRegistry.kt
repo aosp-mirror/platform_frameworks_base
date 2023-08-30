@@ -68,11 +68,11 @@ private val KNOWN_PLUGINS =
 private fun <TKey : Any, TVal : Any> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
     key: TKey,
     value: TVal,
-    onNew: () -> Unit
+    onNew: (TVal) -> Unit
 ): TVal {
     val result = this.putIfAbsent(key, value)
     if (result == null) {
-        onNew()
+        onNew(value)
     }
     return result ?: value
 }
@@ -148,6 +148,8 @@ open class ClockRegistry(
             override fun onPluginAttached(
                 manager: PluginLifecycleManager<ClockProviderPlugin>
             ): Boolean {
+                manager.isDebug = true
+
                 if (keepAllLoaded) {
                     // Always load new plugins if requested
                     return true
@@ -177,15 +179,22 @@ open class ClockRegistry(
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(metadata, null, manager)) {
                             isClockListChanged = true
-                            onConnected(id)
+                            onConnected(it)
                         }
 
                     if (manager != info.manager) {
                         logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
-                            { str1 = id },
-                            { "Clock Id conflict on known attach: $str1 is double registered" }
+                            {
+                                str1 = id
+                                str2 = info.manager.toString()
+                                str3 = manager.toString()
+                            },
+                            {
+                                "Clock Id conflict on attach: " +
+                                    "$str1 is double registered by $str2 and $str3"
+                            }
                         )
                         continue
                     }
@@ -217,22 +226,29 @@ open class ClockRegistry(
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(clock, plugin, manager)) {
                             isClockListChanged = true
-                            onConnected(id)
+                            onConnected(it)
                         }
 
                     if (manager != info.manager) {
                         logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
-                            { str1 = id },
-                            { "Clock Id conflict on load: $str1 is double registered" }
+                            {
+                                str1 = id
+                                str2 = info.manager.toString()
+                                str3 = manager.toString()
+                            },
+                            {
+                                "Clock Id conflict on load: " +
+                                    "$str1 is double registered by $str2 and $str3"
+                            }
                         )
                         manager.unloadPlugin()
                         continue
                     }
 
                     info.provider = plugin
-                    onLoaded(id)
+                    onLoaded(info)
                 }
 
                 if (isClockListChanged) {
@@ -252,26 +268,33 @@ open class ClockRegistry(
                         logger.tryLog(
                             TAG,
                             LogLevel.ERROR,
-                            { str1 = id },
-                            { "Clock Id conflict on unload: $str1 is double registered" }
+                            {
+                                str1 = id
+                                str2 = info?.manager.toString()
+                                str3 = manager.toString()
+                            },
+                            {
+                                "Clock Id conflict on unload: " +
+                                    "$str1 is double registered by $str2 and $str3"
+                            }
                         )
                         continue
                     }
                     info.provider = null
-                    onUnloaded(id)
+                    onUnloaded(info)
                 }
 
                 verifyLoadedProviders()
             }
 
             override fun onPluginDetached(manager: PluginLifecycleManager<ClockProviderPlugin>) {
-                val removed = mutableListOf<ClockId>()
+                val removed = mutableListOf<ClockInfo>()
                 availableClocks.entries.removeAll {
                     if (it.value.manager != manager) {
                         return@removeAll false
                     }
 
-                    removed.add(it.key)
+                    removed.add(it.value)
                     return@removeAll true
                 }
 
@@ -493,6 +516,12 @@ open class ClockRegistry(
 
         scope.launch(bgDispatcher) {
             if (keepAllLoaded) {
+                logger.tryLog(
+                    TAG,
+                    LogLevel.INFO,
+                    {},
+                    { "verifyLoadedProviders: keepAllLoaded=true" }
+                )
                 // Enforce that all plugins are loaded if requested
                 for ((_, info) in availableClocks) {
                     info.manager?.loadPlugin()
@@ -503,6 +532,12 @@ open class ClockRegistry(
 
             val currentClock = availableClocks[currentClockId]
             if (currentClock == null) {
+                logger.tryLog(
+                    TAG,
+                    LogLevel.INFO,
+                    {},
+                    { "verifyLoadedProviders: currentClock=null" }
+                )
                 // Current Clock missing, load no plugins and use default
                 for ((_, info) in availableClocks) {
                     info.manager?.unloadPlugin()
@@ -511,12 +546,13 @@ open class ClockRegistry(
                 return@launch
             }
 
+            logger.tryLog(TAG, LogLevel.INFO, {}, { "verifyLoadedProviders: load currentClock" })
             val currentManager = currentClock.manager
             currentManager?.loadPlugin()
 
             for ((_, info) in availableClocks) {
                 val manager = info.manager
-                if (manager != null && manager.isLoaded && currentManager != manager) {
+                if (manager != null && currentManager != manager) {
                     manager.unloadPlugin()
                 }
             }
@@ -524,57 +560,68 @@ open class ClockRegistry(
         }
     }
 
-    private fun onConnected(clockId: ClockId) {
-        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Connected $str1" })
-        if (currentClockId == clockId) {
-            logger.tryLog(
-                TAG,
-                LogLevel.INFO,
-                { str1 = clockId },
-                { "Current clock ($str1) was connected" }
-            )
-        }
+    private fun onConnected(info: ClockInfo) {
+        val isCurrent = currentClockId == info.metadata.clockId
+        logger.tryLog(
+            TAG,
+            if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
+            {
+                str1 = info.metadata.clockId
+                str2 = info.manager.toString()
+                bool1 = isCurrent
+            },
+            { "Connected $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+        )
     }
 
-    private fun onLoaded(clockId: ClockId) {
-        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Loaded $str1" })
+    private fun onLoaded(info: ClockInfo) {
+        val isCurrent = currentClockId == info.metadata.clockId
+        logger.tryLog(
+            TAG,
+            if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
+            {
+                str1 = info.metadata.clockId
+                str2 = info.manager.toString()
+                bool1 = isCurrent
+            },
+            { "Loaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+        )
 
-        if (currentClockId == clockId) {
-            logger.tryLog(
-                TAG,
-                LogLevel.INFO,
-                { str1 = clockId },
-                { "Current clock ($str1) was loaded" }
-            )
+        if (isCurrent) {
             triggerOnCurrentClockChanged()
         }
     }
 
-    private fun onUnloaded(clockId: ClockId) {
-        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Unloaded $str1" })
+    private fun onUnloaded(info: ClockInfo) {
+        val isCurrent = currentClockId == info.metadata.clockId
+        logger.tryLog(
+            TAG,
+            if (isCurrent) LogLevel.WARNING else LogLevel.DEBUG,
+            {
+                str1 = info.metadata.clockId
+                str2 = info.manager.toString()
+                bool1 = isCurrent
+            },
+            { "Unloaded $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+        )
 
-        if (currentClockId == clockId) {
-            logger.tryLog(
-                TAG,
-                LogLevel.WARNING,
-                { str1 = clockId },
-                { "Current clock ($str1) was unloaded" }
-            )
+        if (isCurrent) {
             triggerOnCurrentClockChanged()
         }
     }
 
-    private fun onDisconnected(clockId: ClockId) {
-        logger.tryLog(TAG, LogLevel.DEBUG, { str1 = clockId }, { "Disconnected $str1" })
-
-        if (currentClockId == clockId) {
-            logger.tryLog(
-                TAG,
-                LogLevel.WARNING,
-                { str1 = clockId },
-                { "Current clock ($str1) was disconnected" }
-            )
-        }
+    private fun onDisconnected(info: ClockInfo) {
+        val isCurrent = currentClockId == info.metadata.clockId
+        logger.tryLog(
+            TAG,
+            if (isCurrent) LogLevel.INFO else LogLevel.DEBUG,
+            {
+                str1 = info.metadata.clockId
+                str2 = info.manager.toString()
+                bool1 = isCurrent
+            },
+            { "Disconnected $str1 @$str2" + if (bool1) " (Current Clock)" else "" }
+        )
     }
 
     fun getClocks(): List<ClockMetadata> {
