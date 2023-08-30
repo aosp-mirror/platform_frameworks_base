@@ -728,6 +728,9 @@ public final class AutofillManager {
     // Indicate whether should include all view in assist structure
     private boolean mShouldIncludeAllChildrenViewInAssistStructure;
 
+    // Indicate whether WebView should always be included in the assist structure
+    private boolean mShouldAlwaysIncludeWebviewInAssistStructure;
+
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
 
@@ -946,6 +949,9 @@ public final class AutofillManager {
 
         mShouldIncludeAllChildrenViewInAssistStructure
             = AutofillFeatureFlags.shouldIncludeAllChildrenViewInAssistStructure();
+
+        mShouldAlwaysIncludeWebviewInAssistStructure =
+                AutofillFeatureFlags.shouldAlwaysIncludeWebviewInAssistStructure();
     }
 
     /**
@@ -1021,6 +1027,13 @@ public final class AutofillManager {
      */
     public boolean shouldIncludeAllChildrenViewInAssistStructure() {
         return mShouldIncludeAllChildrenViewInAssistStructure;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldAlwaysIncludeWebviewInAssistStructure() {
+        return mShouldAlwaysIncludeWebviewInAssistStructure;
     }
 
     /**
