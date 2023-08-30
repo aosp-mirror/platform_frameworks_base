@@ -1750,12 +1750,8 @@ public class UserBackupManagerService {
 
         synchronized (mClearDataLock) {
             mClearingData = true;
-            try {
-                mActivityManager.clearApplicationUserData(packageName, keepSystemState, observer,
-                        mUserId);
-            } catch (RemoteException e) {
-                // can't happen because the activity manager is in this process
-            }
+            mActivityManagerInternal.clearApplicationUserData(packageName, keepSystemState,
+                    /*isRestore=*/ true, observer, mUserId);
 
             // Only wait 30 seconds for the clear data to happen.
             long timeoutMark = System.currentTimeMillis() + CLEAR_DATA_TIMEOUT_INTERVAL;
