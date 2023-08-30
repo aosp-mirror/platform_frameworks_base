@@ -784,8 +784,10 @@ public class ActivityThreadTest {
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
+        final Configuration currentConfig = activity.getResources().getConfiguration();
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(), false /* preserveWindow */);
+                null, 0, new MergedConfiguration(currentConfig, currentConfig),
+                false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
