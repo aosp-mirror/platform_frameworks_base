@@ -1590,7 +1590,7 @@
     <string name="data_usage_limit_snoozed_body" msgid="545146591766765678">"設定した上限を <xliff:g id="SIZE">%s</xliff:g> 超えました"</string>
     <string name="data_usage_restricted_title" msgid="126711424380051268">"バックグラウンドデータに上限あり"</string>
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"タップして制限を解除します。"</string>
-    <string name="data_usage_rapid_title" msgid="2950192123248740375">"モバイルデータ使用量の増加"</string>
+    <string name="data_usage_rapid_title" msgid="2950192123248740375">"高いモバイルデータ使用量"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"アプリが通常より多くのデータを使用しています"</string>
     <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"「<xliff:g id="APP">%s</xliff:g>」が通常より多くのデータを使用しています"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"セキュリティ証明書"</string>

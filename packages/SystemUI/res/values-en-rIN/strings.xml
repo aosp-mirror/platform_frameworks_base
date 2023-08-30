@@ -586,8 +586,8 @@
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxied notification"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"All <xliff:g id="APP_NAME">%1$s</xliff:g> notifications"</string>
     <string name="see_more_title" msgid="7409317011708185729">"See more"</string>
-    <string name="feedback_alerted" msgid="5192459808484271208">"This notification was automatically &lt;b&gt;promoted to default&lt;/b&gt; by the system."</string>
-    <string name="feedback_silenced" msgid="9116540317466126457">"This notification was automatically &lt;b&gt;demoted to silent&lt;/b&gt; by the system."</string>
+    <string name="feedback_alerted" msgid="5192459808484271208">"This notification was automatically &lt;b&gt;promoted to Default&lt;/b&gt; by the system."</string>
+    <string name="feedback_silenced" msgid="9116540317466126457">"This notification was automatically &lt;b&gt;demoted to Silent&lt;/b&gt; by the system."</string>
     <string name="feedback_promoted" msgid="2125562787759780807">"This notification was automatically &lt;b&gt;ranked higher&lt;/b&gt; in your shade."</string>
     <string name="feedback_demoted" msgid="951884763467110604">"This notification was automatically &lt;b&gt;ranked lower&lt;/b&gt; in your shade."</string>
     <string name="feedback_prompt" msgid="3656728972307896379">"Let the developer know your feedback. Was this correct?"</string>
