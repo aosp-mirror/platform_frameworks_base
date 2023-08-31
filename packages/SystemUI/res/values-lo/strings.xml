@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ເປີດໃຊ້ USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ພາບໜ້າຈໍ"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ຂະຫຍາຍການປົດລັອກຖືກປິດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ຄຸນສົມບັດການປົດລັອກດົນຂຶ້ນຖືກປິດການນຳໃຊ້ແລ້ວ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ສົ່ງຮູບແລ້ວ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ກຳລັງບັນທຶກພາບໜ້າຈໍ..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ກຳລັງບັນທຶກຮູບໜ້າຈໍໃສ່ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ…"</string>
@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ແລະ ແອັບອື່ນໆທີ່ເປີດຢູ່ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ເພີ່ມໃສ່ບັນທຶກ"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ກຳລັງປະມວນຜົນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"ເລີ່ມການບັນທຶກບໍ?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ໃນລະຫວ່າງການບັນທຶກ, ລະບົບ Android ຈະສາມາດບັນທຶກຂໍ້ມູນທີ່ລະອຽດອ່ອນໃດກໍຕາມທີ່ສະແດງຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນທ່ານ. ນີ້ຮວມເຖິງລະຫັດຜ່ານ, ຂໍ້ມູນການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງນຳ."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"ບັນທຶກໝົດໜ້າຈໍ"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"ບັນທຶກແອັບດຽວ"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກ, Android ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ເບິ່ງໃຫ້ຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງເລື່ອງລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກແອັບ, Android ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງກ່ຽວກັບລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"ເລີ່ມການບັນທຶກ"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ເລີ່ມການບັນທຶກບໍ?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ເລີ່ມການບັນທຶກ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ບັນທຶກສຽງ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ສຽງອຸປະກອນ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ສຽງຈາກອຸປະກອນຂອງທ່ານ ເຊັ່ນ: ສຽງເພງ, ສຽງລົມໂທລະສັບ ແລະ ສຽງຣິງໂທນ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ໄມໂຄຣໂຟນ"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ສຽງ ແລະ ໄມໂຄຣໂຟນອຸປະກອນ"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"ເລີ່ມຕົ້ນ"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"ເລີ່ມ"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ກຳລັງບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"ກຳລັງບັນທຶກໜ້າຈໍ ແລະ ສຽງ"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"ສະແດງການສຳຜັດຢູ່ໜ້າຈໍ"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"ແບ່ງປັນ"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"ຈັດເກັບການບັນທຶກໜ້າຈໍແລ້ວ"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ແຕະເພື່ອເບິ່ງ"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"ເກີດຄວາມຜິດພາດໃນການລຶບການບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"ເກີດຂໍ້ຜິດພາດໃນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ເກີດຄວາມຜິດພາດໃນການບັນທຶກໜ້າຈໍ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ກັບຄືນ"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ໜ້າທຳອິດ"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"ຢືນຢັນແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ແຕະຢືນຢັນເພື່ອສຳເລັດ"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"ປົດລັອກດ້ວຍໃບໜ້າແລ້ວ"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"ຫາກທ່ານໃສ່ຣູບແບບຜິດໃນຄວາມພະຍາຍາມເທື່ອຕໍ່ໄປ, ໂປຣໄຟລ໌ບ່ອນເຣັດວຽກຂອງທ່ານ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກ."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"ຫາກທ່ານໃສ່ລະຫັດ PIN ຜິດໃນຄວາມພະຍາຍາມເທື່ອຕໍ່ໄປ, ໂປຣໄຟລ໌ບ່ອນເຣັດວຽກຂອງທ່ານ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກ."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"ຫາກທ່ານໃສ່ລະຫັດຜິດໃນຄວາມພະຍາຍາມເທື່ອຕໍ່ໄປ, ໂປຣໄຟລ໌ບ່ອນເຣັດວຽກຂອງທ່ານ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກ."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"ຕັ້ງຄ່າ"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"ບໍ່ຟ້າວເທື່ອ"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"ການດຳເນີນການນີ້ຈຳເປັນໃນການປັບປຸງຄວາມປອດໄພ ແລະ ປະສິດທິພາບ"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມື"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"ເພື່ອຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່, ຮູບ ແລະ ໂມເດວລາຍນິ້ວມືປັດຈຸບັນຂອງທ່ານຈະຖືກລຶບອອກ.\n\nຫຼັງຈາກຖືກລຶບອອກແລ້ວ, ທ່ານຈະຕ້ອງຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່ເພື່ອໃຊ້ລາຍນິ້ວມືຂອງທ່ານໃນການປົດລັອກໂທລະສັບຂອງທ່ານ ຫຼື ຢັ້ງຢືນວ່າແມ່ນທ່ານ."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"ເພື່ອຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່, ຮູບ ແລະ ໂມເດວລາຍນິ້ວມືປັດຈຸບັນຂອງທ່ານຈະຖືກລຶບອອກ.\n\nຫຼັງຈາກຖືກລຶບອອກແລ້ວ, ທ່ານຈະຕ້ອງຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່ເພື່ອໃຊ້ລາຍນິ້ວມືຂອງທ່ານໃນການປົດລັອກໂທລະສັບຂອງທ່ານ ຫຼື ຢັ້ງຢືນວ່າແມ່ນທ່ານ."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"ບໍ່ສາມາດຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືໄດ້. ກະລຸນາເຂົ້າໄປການຕັ້ງຄ່າເພື່ອລອງໃໝ່."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າຄືນໃໝ່"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"ປົດລັອກດ້ວຍໜ້າ"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າ"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ເພື່ອຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າຄືນໃໝ່, ຮູບແບບໃບໜ້າປັດຈຸບັນຂອງທ່ານຈະຖືກລຶບອອກ.\n\nທ່ານຈະຕ້ອງຕັ້ງຄ່າຄຸນສົມບັດນີ້ຄືນໃໝ່ເພື່ອໃຊ້ໃບໜ້າຂອງທ່ານໃນການປົດລັອກໂທລະສັບຂອງທ່ານ."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ບໍ່ສາມາດຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າໄດ້. ກະລຸນາເຂົ້າໄປການຕັ້ງຄ່າເພື່ອລອງໃໝ່."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ແຕະໃສ່ເຊັນເຊີລາຍນິ້ວມື"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ບໍ່ສາມາດຈຳແນກໜ້າໄດ້. ກະລຸນາໃຊ້ລາຍນິ້ວມືແທນ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -303,11 +314,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ມາດຕະຖານ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ປານກາງ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ສູງ"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ຍົກເລີກການບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ຍົກເລີກການບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ປົດບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ປົດບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ຍົກເລີກການບລັອກກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນອຸ​ປະ​ກອນບໍ?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ນີ້ຈະຍົກເລີກການບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ນີ້ຈະປົດບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ນີ້ຈະປົດບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບຂອງທ່ານ."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ນີ້ຈະປົດບລັອກການເຂົ້າເຖິງແອັບ ແລະ ບໍລິການທັງໝົດທີ່ອະນຸຍາດໃຫ້ໃຊ້ກ້ອງຖ່າຍຮູບ ຫຼື ໄມໂຄຣໂຟນຂອງທ່ານ."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"ກ້ອງຖືກບລັອກໄວ້"</string>
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ລຶບຜູ້ໃຊ້ອອກບໍ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"ເອົາ​ອອກ"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນເວລາບັນທຶກ ຫຼື ສົ່ງສັນຍານໜ້າຈໍ. ນີ້ຮວມເຖິງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"ບໍລິການທີ່ສະໜອງຄວາມສາມາດນີ້ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນເວລາບັນທຶກ ຫຼື ສົ່ງສັນຍານໜ້າຈໍ. ນີ້ຮວມເຖິງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານໜ້າຈໍບໍ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານໜ້າຈໍກັບ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ບໍ?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"ອະນຸຍາດໃຫ້ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ແບ່ງປັນ ຫຼື ບັນທຶກບໍ?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"ທົງໝົດໜ້າຈໍ"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"ແອັບດຽວ"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ມີສິດເຂົ້າເຖິງສິ່ງທີ່ເຫັນໄດ້ໃນໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງເລື່ອງລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ໃນຕອນທີ່ທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ມີສິດເຂົ້າເຖິງສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງກ່ຽວກັບລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ສືບຕໍ່"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ແບ່ງປັນ ຫຼື ບັນທຶກແອັບ"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"ອະນຸຍາດໃຫ້ແອັບນີ້ແບ່ງປັນ ຫຼື ບັນທຶກບໍ?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, ແອັບນີ້ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ເຫັນໄດ້ໃນໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງເລື່ອງລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"ໃນຕອນທີ່ທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, ແອັບນີ້ຈະມີສິດເຂົ້າເຖິງສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ໃນແອັບນັ້ນ. ດັ່ງນັ້ນໃຫ້ລະມັດລະວັງກ່ຽວກັບລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ ຫຼື ຂໍ້ມູນທີ່ລະອຽດອ່ອນອື່ນໆ."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານບໍ?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ບໍລິການທີ່ມີຟັງຊັນນີ້ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ທັງໝົດໜ້າຈໍ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"ແອັບດຽວ"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ແບ່ງປັນ ຫຼື ບັນທຶກແອັບ"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານດ້ວຍ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ເລີຍບໍ?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ເລີ່ມ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ເລີ່ມການສົ່ງສັນຍານບໍ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ເມື່ອທ່ານກຳລັງສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ເມື່ອທ່ານກຳລັງສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ເລີ່ມການສົ່ງສັນຍານ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ເລີ່ມການແບ່ງປັນບໍ?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ເລີ່ມ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ຖືກບລັອກໄວ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ການຖ່າຍຮູບໜ້າຈໍຖືກປິດການນຳໃຊ້ໄວ້ໂດຍນະໂຍບາຍອຸປະກອນ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ລຶບລ້າງທັງໝົດ"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນອຸປະກອນຂອງທ່ານ."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ ແຕ່ຈະບໍ່ຕິດຕາມໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີເຫັນໄດ້."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ຜູ້ໃຫ້ບໍລິການ VPN ສາມາດເບິ່ງການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການທ່ອງເວັບໄດ້."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເບິ່ງການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການທ່ອງເວັບໄດ້."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ແລະ <xliff:g id="VPN_APP_1">%2$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີເຫັນໄດ້."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ແອັບບ່ອນເຮັດວຽກຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານໃນແອັບບ່ອນເຮັດວຽກ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີ ແລະ ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"ແອັບສ່ວນຕົວຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ປິດນຳໃຊ້"</string>
     <string name="sound_settings" msgid="8874581353127418308">"ສຽງ ແລະ ການສັ່ນເຕືອນ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ການຕັ້ງຄ່າ"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"ໄດ້ຫຼຸດລົງຫາລະດັບສຽງທີ່ປອດໄພຍິ່ງຂຶ້ນ"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"ລະດັບສຽງສູງເປັນເວລາດົນກວ່າທີ່ແນະນໍາໃຫ້"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ຫຼຸດລະດັບສຽງໃຫ້ຢູ່ໃນລະດັບທີ່ປອດໄພຂຶ້ນແລ້ວ"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ຫູຟັງຢູ່ໃນລະດັບສຽງທີ່ດັງເປັນໄລຍະເວລາດົນກວ່າທີ່ແນະນຳ"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ລະດັບສຽງຂອງຫູຟັງໄດ້ເກີນຂີດຈຳກັດທີ່ປອດໄພສຳລັບອາທິດນີ້"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ສືບຕໍ່ຟັງ"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"ຫຼຸດລະດັບສຽງ"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ແອັບຖືກປັກໝຸດແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
@@ -885,8 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ຍົກເລີກລາຍການທີ່ມັກ"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ຍ້າຍໄປຕຳແໜ່ງ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ການຄວບຄຸມ"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"ເລືອກການຄວບຄຸມອຸປະກອນເພື່ອເຂົ້າເຖິງໄດ້ຢ່າງວ່ອງໄວ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
@@ -924,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ການຕັ້ງຄ່າ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ໂດຍ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ກຳລັງຫຼິ້ນຈາກ <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> ຈາກ <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງເຮັດວຽກຢູ່"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ຫຼິ້ນ"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ຢຸດຊົ່ວຄາວ"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ເພງກ່ອນໜ້າ"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ລຳໂພງ ແລະ ຈໍສະແດງຜົນ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ອຸປະກອນທີ່ແນະນຳ"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ຢຸດເຊດຊັນທີ່ແບ່ງປັນຂອງທ່ານເພື່ອຍ້າຍມີເດຍໄປຫາອຸປະກອນອື່ນ"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ຢຸດ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ການອອກອາກາດເຮັດວຽກແນວໃດ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ອອກອາກາດ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ຄົນທີ່ຢູ່ໃກ້ທ່ານທີ່ມີອຸປະກອນ Bluetooth ທີ່ເຂົ້າກັນໄດ້ຈະສາມາດຟັງມີເດຍທີ່ທ່ານກຳລັງອອກອາກາດຢູ່ໄດ້"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ບໍ່ສາມາດບັນທຶກໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ບໍ່ສາມາດບັນທຶກໄດ້."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ໃຊ້ຢ່າງໜ້ອຍ 4 ຕົວອັກສອນ"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"ໃຊ້ໜ້ອຍກວ່າ 16 ຕົວອັກສອນ"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"ໃຊ້ໜ້ອຍກວ່າ <xliff:g id="LENGTH">%1$d</xliff:g> ຕົວອັກສອນ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ໝາຍເລກສ້າງ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ສຳເນົາໝາຍເລກສ້າງໄປໃສ່ຄລິບບອດແລ້ວ."</string>
     <string name="basic_status" msgid="2315371112182658176">"ເປີດການສົນທະນາ"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ສຶກສາເພີ່ມເຕີມຢູ່ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"ເປີດ <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ມີການເພີ່ມຢ່າງໜ້ອຍ 1 ບັດໃສ່ໃນ Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ເພື່ອເພີ່ມແອັບ Wallet ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບແລ້ວ"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ເພື່ອເພີ່ມແອັ Wallet ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ເພີ່ມຢ່າງໜ້ອຍ 1 ບັດແລ້ວ"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"ເພື່ອເພີ່ມຕົວສະແກນລະຫັດ QR ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບແລ້ວ"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"ເພື່ອເພີ່ມແອັບ Home ເປັນທາງລັດ, ກະລຸນາກວດສອບໃຫ້ແນ່ໃຈວ່າໄດ້ຕິດຕັ້ງແອັບແລ້ວ"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"ເລືອກແອັບບັນທຶກເລີ່ມຕົ້ນເພື່ອໃຊ້ທາງລັດການຈົດບັນທຶກ"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ເລືອກແອັບ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ແຕະທາງລັດຄ້າງໄວ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ສະຫຼັບໜ້າຈໍດຽວນີ້"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"ເຊື່ອມຕໍ່ປາກກາຂອງທ່ານກັບສາຍສາກ"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"ແບັດເຕີຣີປາກກາເຫຼືອໜ້ອຍ"</string>
     <string name="video_camera" msgid="7654002575156149298">"ກ້ອງວິ​ດີ​ໂອ"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"ບໍ່ສາມາດໂທຈາກໂປຣໄຟລ໌ນີ້ໄດ້"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"ນະໂຍບາຍບ່ອນເຮັດວຽກຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທລະສັບໄດ້ຈາກໂປຣໄຟລ໌ບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"ບໍ່ສາມາດໂທຈາກແອັບສ່ວນຕົວໄດ້"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ສະຫຼັບໄປໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"ປິດ"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"ຕິດຕັ້ງແອັບໂທລະສັບບ່ອນເຮັດວຽກ"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"ຍົກເລີກ"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"ປັບແຕ່ງໜ້າຈໍລັອກ"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ປົດລັອກເພື່ອປັບແຕ່ງໜ້າຈໍລັອກ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ບໍ່ພ້ອມໃຫ້ນຳໃຊ້"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ກ້ອງຖ່າຍຮູບຖືກບລັອກຢູ່"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ກ້ອງຖ່າຍຮູບ ແລະ ໄມໂຄຣໂຟນຖືກບລັອກຢູ່"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ໄມໂຄຣໂຟນຖືກບລັອກຢູ່"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ໂໝດຄວາມສຳຄັນເປີດຢູ່"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ການເອີ້ນໃຊ້ຜູ້ຊ່ວຍເປີດຢູ່"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ຕັ້ງຄ່າແອັບຈົດບັນທຶກເລີ່ມຕົ້ນໃນການຕັ້ງຄ່າ"</string>
+    <string name="install_app" msgid="5066668100199613936">"ຕິດຕັ້ງແອັບ"</string>
 </resources>

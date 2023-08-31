@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Апликација <xliff:g id="APPNAME">%1$s</xliff:g> је открила овај снимак екрана."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> и друге отворене апликације су откриле овај снимак екрана."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Додај у белешку"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Снимач екрана"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Снимач екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Обрађујемо видео снимка екрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Обавештење о сесији снимања екрана је активно"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Желите да започнете снимање?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Током снимања Android систем може да сними осетљиве информације које су видљиве на екрану или које се пуштају на уређају. То обухвата лозинке, информације о плаћању, слике, поруке и звук."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Снимај цео екран"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Снимај једну апликацију"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Android има приступ комплетном садржају који је видљив на екрану или се пушта на уређају док снимате. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Када снимате апликацију, Android има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Започни снимање"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Желите да започнете снимање?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Android има приступ комплетном садржају који је видљив на екрану или се пушта на уређају док снимате. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Када снимате апликацију, Android има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Започни снимање"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Снимај звук"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Звук уређаја"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук са уређаја, на пример, музика, позиви и мелодије звона"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Звук уређаја и микрофон"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Покрени"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Покрени"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Снима се екран"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Снимају се екран и звук"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Приказуј додире на екрану"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Дели"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Снимак екрана је сачуван"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Додирните да бисте прегледали"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Дошло је до проблема при брисању снимка екрана"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Грешка при чувању снимка екрана"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Грешка при покретању снимања екрана"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Почетна"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лице је потврђено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврђено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Додирните Потврди да бисте завршили"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Откључано је лицем. Притисните икону откључавања за наставак"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Откључано је лицем"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Откључано је лицем. Притисните да бисте наставили."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лице је препознато. Притисните да бисте наставили."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лице препознато. Притисните икону откључавања за наставак."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ако унесете нетачан шаблон при следећем покушају, избрисаћемо пословни профил и његове податке."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ако унесете нетачан PIN при следећем покушају, избрисаћемо пословни профил и његове податке."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ако унесете нетачну лозинку при следећем покушају, избрисаћемо пословни профил и његове податке."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Подеси"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Не сада"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Ово је неопходно за побољшање безбедности и перформанси"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Поново подесите откључавање отиском прста"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Откључавање отиском прста"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Подесите откључавање отиском прста"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Да бисте поново подесили откључавање отиском прста, актуелне слике и модели отиска прста биће избрисани.\n\nПосле брисања, морате поново да подесите откључавање отиском прста да бисте користили отисак за откључавање телефона или верификовали да сте то ви."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Да бисте поново подесили откључавање отиском прста, актуелне слике и модел отиска прста биће избрисани.\n\nПосле брисања, морате поново да подесите откључавање отиском прста да бисте користили отисак за откључавање телефона или верификовали да сте то ви."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Подешавање откључавања отиском прста није успело. Идите у Подешавања да бисте пробали поново."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Поново подесите откључавање лицем"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Откључавање лицем"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Подесите откључавање лицем"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Да бисте поново подесили откључавање лицем, актуелни модел лица се брише.\n\nМораћете поново да подесите ову функцију да бисте користили лице за откључавање телефона."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Подешавање откључавања лицем није успело. Идите у Подешавања да бисте пробали поново."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Додирните сензор за отисак прста"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лице није препознато. Користите отисак прста."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -198,7 +209,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Прозор са обавештењима."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брза подешавања."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Брза подешавања и трака са обавештењима."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Закључан екран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Закључан екран"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Закључан екран за посао"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"потпуна тишина"</string>
@@ -382,24 +393,29 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Желите ли да уклоните корисника?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Све апликације и подаци овог корисника ће бити избрисани."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Уклони"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услуга која пружа ову функцију ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Желите да почнете снимање или пребацивање?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Желите да почнете снимање или пребацивање помоћу апликације <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Желите да дозволите дељење и снимање за <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Цео екран"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Једна апликација"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Када делите, снимате или пребацујете, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Када делите, снимате или пребацујете апликацију, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Настави"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Делите или снимите апликацију"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Желите да дозволите овој апликацији да дели или снима?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Када делите, снимате или пребацујете, ова апликација има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Када делите, снимате или пребацујете апликацију, ова апликација има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Будите пажљиви са лозинкама, информацијама о плаћању, порукама или другим осетљивим информацијама."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Желите да почнете снимање или пребацивање?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Услуга која пружа ову функцију ће имати приступ свим информацијама које се приказују на екрану или репродукују са уређаја током снимања или пребацивања. То обухвата информације попут лозинки, информација о плаћању, слика, порука и звука који пуштате."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Цео екран"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Једна апликација"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Делите или снимите апликацију"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Желите да почнете снимање или пребацивање помоћу апликације <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Када делите, снимате или пребацујете, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Када делите, снимате или пребацујете апликацију, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Покрени"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Желите да започнете пребацивање?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Када пребацујете, Android има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Када пребацујете апликацију, Android има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Започни пребацивање"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Желите да почнете да делите?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Када делите, снимате или пребацујете, Android има приступ комплетном садржају који је видљив на екрану или се пушта на уређају. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Када делите, снимате или пребацујете апликацију, Android има приступ комплетном садржају који је видљив или се пушта у тој апликацији. Зато будите пажљиви са лозинкама, информацијама о плаћању, порукама, сликама и аудио и видео снимцима."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Покрени"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Блокира ИТ администратор"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Снимање екрана је онемогућено смерницама за уређај"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
-    <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
+    <string name="manage_notifications_text" msgid="6885645344647733116">"Управљај"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Ново"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Нечујно"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На овом уређају је инсталиран ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор је укључио евидентирање мреже, које прати саобраћај на уређају."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администратор је укључио евидентирање мреже, које прати саобраћај на пословном профилу, али не и на личном профилу."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Овај уређај је повезан на интернет преко: <xliff:g id="VPN_APP">%1$s</xliff:g>. Ваша активност на мрежи, укључујући имејлове и податке прегледања, видљива је ИТ администратору."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Овај уређај је повезан на интернет преко: <xliff:g id="VPN_APP">%1$s</xliff:g>. Ваша активност на мрежи, укључујући имејлове и податке прегледања, видљива је добављачу VPN-а."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Овај уређај је повезан на интернет преко: <xliff:g id="VPN_APP">%1$s</xliff:g>. Ваша активност на мрежи, укључујући имејлове и податке прегледања, видљива је ИТ администратору."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Овај уређај је повезан на интернет преко: <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Ваша активност на мрежи, укључујући имејлове и податке прегледања, видљива је ИТ администратору."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ваше пословне апликације су повезане на интернет преко: <xliff:g id="VPN_APP">%1$s</xliff:g>. Ваша активност на мрежи у пословним апликацијама, укључујући имејлове и податке прегледања, видљива је ИТ администратору и добављачу VPN-а."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Ваше личне апликације су повезане на интернет преко: <xliff:g id="VPN_APP">%1$s</xliff:g>. Ваша активност на мрежи, укључујући имејлове и податке прегледања, видљива је добављачу VPN-а."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"онемогућите"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибрирање"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Подешавања"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Звук је смањен на безбедну јачину"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Звук је био гласан дуже него што се препоручује"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Звук је смањен на безбедну јачину"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Звук у слушалицама је био гласан дуже него што се препоручује"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Јачина звука у слушалицама је премашила безбедносно ограничење за ову недељу"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Наставите да слушате"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Смањите јачину звука"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликација је закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
@@ -764,7 +784,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Стрелица удесно"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Мени"</string>
     <string name="tuner_app" msgid="6949280415826686972">"Апликација <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Обавештења"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Упозорења"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батерија"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Снимци екрана"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Инстант апликације"</string>
@@ -861,7 +881,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Додирните за функције приступачности. Прилагодите или замените ово дугме у Подешавањима.\n\n"<annotation id="link">"Подешавања"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Померите дугме до ивице да бисте га привремено сакрили"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Опозови"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Пречица функције<xliff:g id="FEATURE_NAME">%s</xliff:g> је уклоњена"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Пречица функције <xliff:g id="FEATURE_NAME">%s</xliff:g> је уклоњена"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# пречица је уклоњена}one{# пречица је уклоњена}few{# пречице су уклоњене}other{# пречица је уклоњено}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
@@ -885,8 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"уклонили из омиљених"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместите на <xliff:g id="NUMBER">%d</xliff:g>. позицију"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроле"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Одаберите контроле уређаја за брз приступ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
@@ -917,13 +936,14 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Превуците да бисте видели још"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Учитавају се препоруке"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медији"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Желите ли да сакријете ову контролу за медије за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Желите да сакријете ову контролу за медије за: <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Актуелна сесија медија не може да буде сакривена."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Сакриј"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Подешавања"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> извођача <xliff:g id="ARTIST_NAME">%2$s</xliff:g> се пушта из апликације <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> од <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је покренута"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Пусти"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Паузирај"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Претходна песма"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Предложени уређаји"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Зауставите дељену сесију да бисте преместили медијски садржај на други уређај"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Заустави"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционише емитовање"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитовање"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Људи у близини са компатибилним Bluetooth уређајима могу да слушају медијски садржај који емитујете"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Чување није успело. Пробајте поново."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Чување није успело."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Користите бар 4 знака"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Користите мање од 16 знакова"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Користите мањи број знакова од <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Број верзије"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Број верзије је копиран у привремену меморију."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворите конверзацију"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Сазнајте више"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Сазнајте више на <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворите: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• да је апликација подешена"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• да је у Новчаник додата барем једна картица"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• да сте инсталирали апликацију за камеру"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• да је апликација подешена"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• да је доступан барем један уређај"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Да бисте додали апликацију Новчаник као пречицу, уверите се да је апликација инсталирана"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Да бисте додали апликацију Новчаник као пречицу, уверите се да је додата бар једна картица"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Да бисте додали Скенер QR кода као пречицу, уверите се да је апликација за камеру инсталирана"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Да бисте додали апликацију Home као пречицу, уверите се да је апликација инсталирана"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Доступан је бар један уређај"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Изаберите подразумевану апликацију за белешке да бисте користили пречицу за прављење белешки"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Изабери апликацију"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Додирните и задржите пречицу"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Замени екране"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Повежите писаљку са пуњачем"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Низак ниво батерије писаљке"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видео камера"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Не можете да упућујете позиве са овог профила"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Смернице за посао вам омогућавају да телефонирате само са пословног профила"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Не можете да упућујете позиве из личне апликације"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Ваша организација дозвољава позивање само из пословних апликација"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Пређи на пословни профил"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Инсталирајте пословну апликацију за телефон"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Откажи"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Прилагоди закључани екран"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Откључајте да бисте прилагодили закључани екран"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi није доступан"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера је блокирана"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера и микрофон су блокирани"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон је блокиран"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетни режим је укључен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Помоћник је у активном стању"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Подесите подразумевану апликацију за белешке у Подешавањима"</string>
+    <string name="install_app" msgid="5066668100199613936">"Инсталирај апликацију"</string>
 </resources>

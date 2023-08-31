@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Bật USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Tìm hiểu thêm"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Chụp ảnh màn hình"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Đã tắt tính năng Luôn mở khoá"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Đã tắt tính năng Kéo dài trạng thái mở khoá"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"đã gửi hình ảnh"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Đang lưu ảnh chụp màn hình..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Đang lưu ảnh chụp màn hình vào hồ sơ công việc…"</string>
@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> đã phát hiện thấy ảnh chụp màn hình này."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> và các ứng dụng đang mở khác đã phát hiện thấy ảnh chụp màn hình này."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Thêm vào ghi chú"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Trình ghi màn hình"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Trình ghi màn hình"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Đang xử lý video ghi màn hình"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Bắt đầu ghi?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Trong khi ghi, Hệ thống Android có thể ghi lại mọi thông tin nhạy cảm xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Những thông tin này bao gồm mật khẩu, thông tin thanh toán, ảnh, thông báo và âm thanh."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Ghi toàn màn hình"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Ghi một ứng dụng"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Khi bạn ghi, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Khi bạn ghi một ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên thiết bị đó. Vì vậy, hãy thận trọng để không làm lộ mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Bắt đầu ghi"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Bắt đầu ghi?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Khi bạn ghi, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Khi bạn ghi một ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Bắt đầu ghi"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ghi âm"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Âm thanh trên thiết bị"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Âm thanh trên thiết bị, chẳng hạn như nhạc, cuộc gọi và nhạc chuông"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrô"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Âm thanh trên thiết bị và micrô"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Bắt đầu"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Bắt đầu"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Đang ghi màn hình"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Đang ghi màn hình và âm thanh"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Hiện vị trí của các thao tác chạm trên màn hình"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Chia sẻ"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Đã lưu bản ghi màn hình"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Nhấn để xem"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Lỗi khi xóa bản ghi màn hình"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Có lỗi xảy ra khi lưu video ghi màn hình"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Lỗi khi bắt đầu ghi màn hình"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Quay lại"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Trang chủ"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Nhấn vào Xác nhận để hoàn tất"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Đã mở khoá bằng khuôn mặt. Nhấn vào biểu tượng mở khoá để tiếp tục."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Đã mở khoá bằng khuôn mặt"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Đã mở khoá bằng khuôn mặt. Hãy nhấn để tiếp tục."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Đã nhận diện khuôn mặt. Hãy nhấn để tiếp tục."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Đã nhận diện khuôn mặt. Nhấn biểu tượng mở khoá để tiếp tục."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Nếu bạn nhập hình mở khóa không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Nếu bạn nhập mã PIN không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Nếu bạn nhập mật khẩu không chính xác vào lần thử tiếp theo, thì hồ sơ công việc của bạn và dữ liệu của hồ sơ công việc sẽ bị xóa."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Thiết lập"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Để sau"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Đây là thao tác bắt buộc giúp cải thiện hiệu suất và độ bảo mật của thiết bị"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Mở khoá bằng vân tay"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Thiết lập tính năng Mở khoá bằng vân tay"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Để bạn có thể thiết lập lại tính năng Mở khoá bằng vân tay, hệ thống sẽ xoá các hình ảnh và mẫu vân tay bạn đang dùng.\n\nSau khi chúng bị xoá, bạn sẽ cần thiết lập lại tính năng Mở khoá bằng vân tay để mở khoá điện thoại hoặc để xác minh danh tính của mình bằng vân tay."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Để bạn có thể thiết lập lại tính năng Mở khoá bằng vân tay, hệ thống sẽ xoá các hình ảnh và mẫu vân tay bạn đang dùng.\n\nSau khi chúng bị xoá, bạn sẽ cần thiết lập lại tính năng Mở khoá bằng vân tay để mở khoá điện thoại hoặc để xác minh danh tính của mình bằng vân tay."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Không thiết lập được tính năng Mở khoá bằng vân tay. Hãy chuyển đến phần Cài đặt để thử lại."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Thiết lập lại tính năng Mở khoá bằng khuôn mặt"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Mở khoá bằng khuôn mặt"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Thiết lập tính năng Mở khoá bằng khuôn mặt"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Để thiết lập lại tính năng Mở khoá bằng khuôn mặt, hệ thống sẽ xoá mẫu khuôn mặt bạn đang dùng.\n\nBạn sẽ cần thiết lập lại tính năng này để mở khoá điện thoại bằng khuôn mặt."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Không thiết lập được tính năng Mở khoá bằng khuôn mặt. Hãy chuyển đến phần Cài đặt để thử lại."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Chạm vào cảm biến vân tay"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -239,7 +250,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Vị trí"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Trình bảo vệ màn hình"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Truy cập máy ảnh"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Truy cập micrô"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Quyền truy cập micrô"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Được phép"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bị chặn"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Thiết bị phương tiện"</string>
@@ -306,8 +317,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn máy ảnh của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng micrô của bạn."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh của bạn."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng micrô của bạn."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng máy ảnh của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Micrô bị chặn"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Máy ảnh bị chặn"</string>
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Xóa người dùng?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Tất cả các ứng dụng và dữ liệu của người dùng này sẽ bị xóa."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Xóa"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào tất cả các thông tin hiển thị trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi âm/ghi hình hoặc truyền, bao gồm cả thông tin như mật khẩu, chi tiết thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Dịch vụ cung cấp chức năng này có quyền truy cập vào tất cả các thông tin hiển thị trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi âm/ghi hình hoặc truyền, bao gồm cả thông tin như mật khẩu, chi tiết thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Bắt đầu ghi âm/ghi hình hoặc truyền?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Bắt đầu ghi âm/ghi hình hoặc truyền bằng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Cho phép <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> chia sẻ hoặc ghi?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Toàn màn hình"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Một ứng dụng"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Khi bạn chia sẻ, ghi hoặc truyền, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Tiếp tục"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Chia sẻ hoặc ghi ứng dụng"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Cho phép ứng dụng này chia sẻ hoặc ghi?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Khi bạn chia sẻ, ghi hoặc truyền, ứng dụng này sẽ truy cập được vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy để ý đến mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, ứng dụng này sẽ truy cập được vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy để ý đến mật khẩu, thông tin thanh toán, tin nhắn hoặc thông tin nhạy cảm khác."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào tất cả thông tin xuất hiện trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi âm/ghi hình hoặc truyền, bao gồm cả thông tin như mật khẩu, thông tin thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Bắt đầu ghi hoặc truyền?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Dịch vụ cung cấp chức năng này có quyền truy cập vào tất cả thông tin xuất hiện trên màn hình của bạn hoặc phát trên thiết bị của bạn trong khi ghi hoặc truyền, bao gồm cả thông tin như mật khẩu, thông tin thanh toán, ảnh, tin nhắn và âm thanh mà bạn phát."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Toàn màn hình"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Một ứng dụng"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Chia sẻ hoặc ghi màn hình ứng dụng"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Bắt đầu ghi hoặc truyền bằng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Khi bạn chia sẻ, ghi hoặc truyền, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Bắt đầu"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Bắt đầu truyền?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Khi bạn truyền, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Khi bạn truyền một ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Bắt đầu truyền"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Bắt đầu chia sẻ?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Khi bạn chia sẻ, ghi hoặc truyền, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện trên màn hình hoặc phát trên thiết bị của bạn. Vì vậy, hãy thận trọng để không làm lộ thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Khi bạn chia sẻ, ghi hoặc truyền ứng dụng, Android sẽ có quyền truy cập vào mọi nội dung xuất hiện hoặc phát trên ứng dụng đó. Vì vậy, hãy thận trọng để không làm lộ các thông tin như mật khẩu, thông tin thanh toán, tin nhắn, ảnh, âm thanh và video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Bắt đầu"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bị quản trị viên CNTT chặn"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Tính năng chụp ảnh màn hình đã bị tắt theo chính sách thiết bị"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Xóa tất cả"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Một tổ chức phát hành chứng chỉ được cài đặt trên thiết bị này. Lưu lượng truy cập mạng bảo mật của bạn có thể được giám sát hoặc sửa đổi."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Quản trị viên của bạn đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trên thiết bị của bạn."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Quản trị viên của bạn đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trong hồ sơ công việc chứ không giám sát lưu lượng truy cập trong hồ sơ cá nhân của bạn."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Thiết bị này được kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Hoạt động mạng bao gồm email và dữ liệu duyệt web sẽ được hiển thị cho quản trị viên CNTT."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Thiết bị này kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Nhà cung cấp VPN có thể nhìn thấy hoạt động của bạn trên mạng, bao gồm cả email và dữ liệu duyệt web."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Thiết bị này kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Quản trị viên CNTT của bạn có thể nhìn thấy hoạt động của bạn trên mạng, bao gồm cả email và dữ liệu duyệt web."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Thiết bị này được kết nối với Internet thông qua <xliff:g id="VPN_APP_0">%1$s</xliff:g> và <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Hoạt động mạng bao gồm email và dữ liệu duyệt web sẽ được hiển thị cho quản trị viên CNTT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ứng dụng công việc của bạn được kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Hoạt động mạng trong các ứng dụng công việc, bao gồm cả email và dữ liệu duyệt web, sẽ được hiển thị cho quản trị viên CNTT và nhà cung cấp VPN của bạn."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Ứng dụng cá nhân được kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Hoạt động mạng của bạn, bao gồm email và dữ liệu duyệt web, được hiển thị cho nhà cung cấp VPN."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"tắt"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Âm thanh và chế độ rung"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Cài đặt"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Đã giảm âm lượng xuống mức an toàn hơn"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Âm lượng ở mức cao trong khoảng thời gian lâu hơn khuyến nghị"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Âm lượng đã giảm xuống mức an toàn hơn"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Bạn đã dùng tai nghe ở mức âm lượng cao lâu hơn khoảng thời gian khuyến nghị, điều này có thể gây tổn hại đến thính giác của bạn"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Âm lượng tai nghe đã vượt quá giới hạn an toàn của tuần này"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Tiếp tục nghe"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Giảm âm lượng"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Đã ghim ứng dụng"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Quay lại và Tổng quan để bỏ ghim."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Quay lại và nút Màn hình chính để bỏ ghim."</string>
@@ -861,7 +881,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Nhấn để mở bộ tính năng hỗ trợ tiếp cận. Tuỳ chỉnh/thay thế nút này trong phần Cài đặt.\n\n"<annotation id="link">"Xem chế độ cài đặt"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Di chuyển nút sang cạnh để ẩn nút tạm thời"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Huỷ"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá lối tắt <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Đã xoá phím tắt dành cho <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Đã xoá # lối tắt}other{Đã xoá # lối tắt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Chuyển lên trên cùng bên trái"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Chuyển lên trên cùng bên phải"</string>
@@ -885,10 +905,9 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Chọn các chế độ điều khiển thiết bị để truy cập nhanh"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các chế độ điều khiển"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả chế độ điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Xem ứng dụng khác"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Sắp xếp lại"</string>
@@ -917,13 +936,14 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Vuốt để xem thêm"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Đang tải các đề xuất"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Nội dung nghe nhìn"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Ẩn chế độ điều khiển nội dung nghe nhìn này cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Ẩn tính năng điều khiển này cho <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Không thể ẩn phiên phát nội dung nghe nhìn hiện tại."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ẩn"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Tiếp tục"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Cài đặt"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Đang phát <xliff:g id="SONG_NAME">%1$s</xliff:g> của <xliff:g id="ARTIST_NAME">%2$s</xliff:g> trên <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang chạy"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Phát"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Tạm dừng"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Bản nhạc trước"</string>
@@ -950,7 +970,7 @@
     <string name="controls_open_app" msgid="483650971094300141">"Mở ứng dụng"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Không tải được trạng thái"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Lỗi, hãy thử lại"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm các tùy chọn điều khiển"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm tuỳ chọn điều khiển"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa chế độ điều khiển"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Thêm ứng dụng"</string>
     <string name="controls_menu_remove" msgid="3006525275966023468">"Xoá ứng dụng"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Loa và màn hình"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Thiết bị được đề xuất"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Dừng phiên chia sẻ của bạn để chuyển nội dung nghe nhìn sang thiết bị khác"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Dừng"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cách tính năng truyền hoạt động"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Truyền"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Những người ở gần có thiết bị Bluetooth tương thích có thể nghe nội dung nghe nhìn bạn đang truyền"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Không lưu được. Hãy thử lại."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Không lưu được."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Sử dụng ít nhất 4 ký tự"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Sử dụng ít hơn 16 ký tự"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Hãy dùng ít hơn <xliff:g id="LENGTH">%1$d</xliff:g> ký tự"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Số bản dựng"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Đã sao chép số bản dựng vào bảng nhớ tạm."</string>
     <string name="basic_status" msgid="2315371112182658176">"Mở cuộc trò chuyện"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Tìm hiểu thêm"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Tìm hiểu thêm tại <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Mở <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Ứng dụng được thiết lập"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Thêm ít nhất một thẻ vào Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Cài đặt một ứng dụng máy ảnh"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Ứng dụng được thiết lập"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Có ít nhất một thiết bị đang hoạt động"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Để tạo lối tắt cho ứng dụng Wallet, hãy đảm bảo bạn đã cài đặt ứng dụng đó"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Để tạo lối tắt cho ứng dụng Wallet, hãy đảm bảo bạn đã thêm ít nhất một thẻ"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Để tạo lối tắt cho Trình quét mã QR, hãy đảm bảo rằng bạn đã cài đặt một ứng dụng máy ảnh"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Để tạo lối tắt cho ứng dụng Home, hãy đảm bảo bạn đã cài đặt ứng dụng đó"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Có ít nhất một thiết bị đang hoạt động"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Chọn một ứng dụng ghi chú mặc định để dùng lối tắt ghi chú"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Chọn ứng dụng"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Chạm và giữ phím tắt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Huỷ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Chuyển đổi màn hình ngay"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Hãy kết nối bút cảm ứng với bộ sạc"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bút cảm ứng bị yếu pin"</string>
     <string name="video_camera" msgid="7654002575156149298">"Máy quay video"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Không thể gọi điện từ hồ sơ này"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Chính sách của nơi làm việc chỉ cho phép bạn gọi điện thoại từ hồ sơ công việc"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Không thể gọi điện bằng ứng dụng cá nhân"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Tổ chức của bạn chỉ cho phép bạn gọi điện bằng ứng dụng công việc"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Chuyển sang hồ sơ công việc"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Đóng"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Cài đặt ứng dụng điện thoại cho công việc"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Huỷ"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Tuỳ chỉnh màn hình khoá"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Mở khoá để tuỳ chỉnh màn hình khoá"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Không có Wi-Fi"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Máy ảnh bị chặn"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Máy ảnh và micrô bị chặn"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micrô bị chặn"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Chế độ ưu tiên đang bật"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Trợ lý đang bật"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Đặt ứng dụng ghi chú mặc định trong phần Cài đặt"</string>
+    <string name="install_app" msgid="5066668100199613936">"Cài đặt ứng dụng"</string>
 </resources>

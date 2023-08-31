@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB xususiyatini yoqish"</string>
     <string name="learn_more" msgid="4690632085667273811">"Batafsil"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Kengaytirilgan ochish yoniq emas"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock yoniq emas"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Skrinshot ish profiliga saqlanmoqda…"</string>
@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> skrinshot olinganini aniqladi."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> va boshqa ochiq ilovalar skrinshot olinganini aniqladi."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Qaydga qoʻshish"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Ekranni yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Yozib olish boshlansinmi?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Yozib olishda Android tizimi ekraningizda koʻringan yoki qurilmangizda ijro etilgan maxfiy axborotni ham yozib olishi mumkin. Bunga parollar, toʻlovga oid axborot, suratlar, xabarlar va audio kiradi."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Butun ekranni yozib olish"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Bitta ilovani yozib olish"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Yozib olish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Yozib olish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Yozib olish"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Yozib olish boshlansinmi?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Yozib olish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Ilovani yozib olayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Yozib olish"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yozib olish"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Qurilmadagi audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Qurilmangizdagi musiqa, chaqiruvlar va ringtonlar kabi ovozlar"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Qurilmadagi audio va mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Boshlash"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Boshlash"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran va audioni yozib olish"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekranga sensorlarni chiqarish"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ulashish"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Ekran lavhasi saqlandi"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Koʻrish uchun bosing"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Ekrandan yozib olingan vi olib tashlanmadi"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Ekran yozuvi saqlanmadi"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Ekranni yozib olish boshlanmadi"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Orqaga"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Uyga"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Yuzingiz aniqlandi"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Tasdiqlangan"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Tasdiqlash uchun tegining"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Yuz orqali ochilgan. Davom etish uchun ochish belgisini bosing."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Yuz bilan ochildi"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Yuz orqali ochildi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Yuz aniqlandi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Yuz aniqlandi. Davom etish uchun ochish belgisini bosing."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Agar grafik kalitni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Agar PIN kodni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Agar parolni xato kiritsangiz, ish profili va undagi maʼlumotlar oʻchirib tashlanadi."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Sozlash"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Hozir emas"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Xavfsizlik va unumdorlikni oshirish uchun bu talab qilinadi"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Barmoq izi bilan ochish funksiyasini qayta sozlang"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Barmoq izi bilan ochish"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Barmoq izi bilan ochishni sozlang"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Barmoq izi bilan ochish funksiyasini qayta sozlash uchun joriy barmoq izi rasmlari va modellari oʻchirib tashlanadi.\n\nUlar oʻchirilgandan keyin, barmoq izi orqali telefonni qulfdan chiqarish yoki shaxsni tasdiqlash uchun Barmoq izi bilan ochish funksiyasini qayta sozlashingiz kerak."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Barmoq izi bilan ochish funksiyasini qayta sozlash uchun joriy barmoq izi rasmlari va modeli oʻchirib tashlanadi.\n\nUlar oʻchirilgandan keyin, barmoq izi orqali telefonni qulfdan chiqarish yoki shaxsni tasdiqlash uchun Barmoq izi bilan ochish funksiyasini qayta sozlashingiz kerak."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Barmoq izi bilan ochish sozlanmadi. Sozlamalarni ochib, qaytadan urining."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Yuz bilan ochishni qayta sozlash"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Yuz bilan ochish"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Yuz bilan ochishni sozlash"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Yuz bilan ochish funksiyasini qayta sozlash uchun joriy yuz modelingiz oʻchirib tashlanadi.\n\nTelefonni qulfdan chiqarish maqsadida yuzingizdan foydalanish uchun bu funksiyani qayta sozlashingiz kerak."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Yuz bilan ochish sozlanmadimi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmoq izi skaneriga tegining"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Bu yuz notanish. Barmoq izi orqali urining."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Foydalanuvchi olib tashlansinmi?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Ushbu foydalanuvchining barcha ilovalari va ma’lumotlari o‘chirib tashlanadi."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Olib tashlash"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu funksiyani taʼminlovchi xizmat ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Yozib olish yoki translatsiya boshlansinmi?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> orqali yozib olish yoki translatsiya boshlansinmi?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasida ulashish yoki yozib olish uchun ruxsat berilsinmi?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Butun ekran"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Bitta ilova"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Davom etish"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Ilovada ulashish yoki yozib olish"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Bu ilovaga ulashish yoki yozib olish uchun ruxsat berilsinmi?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Ulashish, yozib olish va translatsiya qilish vaqtida bu ilova ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Ulashish, yozib olish va translatsiya qilish vaqtida bu ilova ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar yoki boshqa maxfiy axborot chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Yozib olish yoki translatsiya boshlansinmi?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Bu funksiyani taʼminlovchi xizmat ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Butun ekran"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Bitta ilova"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ilovada ulashish yoki yozib olish"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> orqali yozib olish yoki translatsiya boshlansinmi?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Ulashish, yozib olish va translatsiya qilish vaqtida <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Boshlash"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Translatsiya boshlansinmi?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Translatsiyani boshlang"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Ulashuv boshlansinmi?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Ulashish, yozib olish va translatsiya qilish vaqtida Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Ilovani ulashish, yozib olish yoki translatsiya qilayotganingizda Android ekranda chiqadigan yoki qurilmada ijro qilinadigan kontentni koʻra oladi. Shu sababli parollar, toʻlov tafsilotlari, xabarlar, suratlar, audio va video chiqmasligi uchun ehtiyot boʻling."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Boshlash"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"AT administratoringiz tomonidan bloklangan"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Ekranni tasvirga olish qurilmadan foydalanish tartibi tomonidan faolsizlantirilgan"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hammasini tozalash"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Qurilmada CA sertifikati o‘rnatilgan. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator ish profilingizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan (shaxsiy profildan maʼlumotlar olinmaydi)."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Bu qurilma Internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoqdagi xatti-harakatlaringiz AT administratoriga koʻrinadi."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Bu qurilma internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoq harakatlaringiz VPN provayderiga koʻrinadi."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Bu qurilma Internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoqdagi xatti-harakatlaringiz AT administratoriga koʻrinadi."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Bu qurilma internet <xliff:g id="VPN_APP_0">%1$s</xliff:g> va <xliff:g id="VPN_APP_1">%2$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoq harakatlaringiz AT administratoriga koʻrinadi."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ishga oid ilovalar internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Ishga oid ilovalarda emaillar va brauzer tarixi kabi tarmoq harakatlaringiz AT administratori va VPN provayderiga koʻrinadi."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Shaxsiy ilovalaringiz Internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoqdagi xatti-harakatlaringiz VPN provayderiga koʻrinadi."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"faolsizlantirish"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Tovush va tebranish"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Sozlamalar"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Tovush balandligi xavfsiz darajaga tushirildi"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Tovush tavsiya qilinganidan koʻra uzoqroq vaqt baland boʻldi"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Tovush xavfsiz darajaga pasaytirildi"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Quloqlik tavsiya etilganidan uzoqroq vaqt baland tovushda ishladi"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Quloqlik tovushi bu hafta xavfsiz balandlik limitidan oshib ketdi"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Davom etish"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Pasaytirish"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Ilova mahkamlandi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmalarni birga bosib turing."</string>
@@ -885,8 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"saralanganlardan olib tashlash"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>-joyga olish"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Boshqaruv elementlari"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Tezkor kirish uchun qurilma boshqaruvini tanlang"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Boshqaruv elementlarini qayta tartiblash uchun ushlab torting"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Barcha boshqaruv elementlari olib tashlandi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Oʻzgarishlar saqlanmadi"</string>
@@ -924,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Sozlamalar"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="APP_LABEL">%3$s</xliff:g> ilovasida ijro etilmoqda: <xliff:g id="SONG_NAME">%1$s</xliff:g> – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> / <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ishlamoqda"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Ijro"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pauza"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Avvalgi trek"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Karnaylar va displeylar"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Taklif qilingan qurilmalar"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Mediani boshqa qurilmaga koʻchirish uchun umumiy seansingizni toʻxtating"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Toʻxtatish"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Translatsiya qanday ishlaydi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Translatsiya"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Atrofingizdagi mos Bluetooth qurilmasiga ega foydalanuvchilar siz translatsiya qilayotgan mediani tinglay olishadi"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Saqlanmadi. Qayta urining."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Saqlanmadi."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Parolga kamida 4 ta belgi kiriting."</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Kiritiladigan belgilar 16 tadan oshmasin"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Kiritiladigan belgilar <xliff:g id="LENGTH">%1$d</xliff:g> tadan oshmasin"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nashr raqami"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nashr raqami vaqtinchalik xotiraga nusxalandi."</string>
     <string name="basic_status" msgid="2315371112182658176">"Suhbatni ochish"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Batafsil"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Batafsil: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ochish: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Ilova sozlangan"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Kamida bitta kartochka Wallet xizmatiga qoʻshilgan"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera ilovasini oʻrnating"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Ilova sozlangan"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet ilovasini yorliq sifatida qoʻshish uchun ilova oʻrnatilganiga ishonch hosil qiling"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet ilovasini yorliq sifatida qoʻshish uchun kamida bitta karta kiritilganiga ishonch hosil qiling"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR kod skanerini yorliq sifatida qoʻshish uchun kamera ilovasi oʻrnatilganiga ishonch hosil qiling"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home ilovasini yorliq sifatida qoʻshish uchun ilova oʻrnatilganiga ishonch hosil qiling"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Kamida bitta qurilma mavjud"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Qayd yozish yorligʻidan foydalanish uchun birlamchi qayd ilovasini tanlang"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ilovani tanlang"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Ekranlarni hozir almashtirish"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Stilusni quvvat manbaiga ulang"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stilus batareyasi kam"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Bu profildan chaqiruv qilish imkonsiz"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Ishga oid siyosatingiz faqat ish profilidan telefon chaqiruvlarini amalga oshirish imkonini beradi"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Shaxsiy ilova orqali chaqiruv imkonsiz"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Tashkilotingiz faqat ishga oid ilovalar orqali chaqiruvga ruxsat beradi"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ish profiliga almashish"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Yopish"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Ishga oid telefon ilovasini oʻrnatish"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Bekor qilish"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Ekran qulfini moslash"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Ekran qulfini sozlash uchun qulfni oching"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi mavjud emas"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera bloklangan"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera va mikrofon bloklangan"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon bloklangan"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imtiyozli rejim yoniq"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent diqqati yoniq"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standart qaydlar ilovasini Sozlamalar orqali tanlang"</string>
+    <string name="install_app" msgid="5066668100199613936">"Ilovani oʻrnatish"</string>
 </resources>

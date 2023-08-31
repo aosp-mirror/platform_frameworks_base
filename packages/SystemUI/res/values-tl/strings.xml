@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Na-detect ng <xliff:g id="APPNAME">%1$s</xliff:g> ang screenshot. na ito"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Na-detect ng <xliff:g id="APPNAME">%1$s</xliff:g> at ng iba pang bukas na app ang screenshot na ito."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Idagdag sa tala"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Recorder ng Screen"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Simulang Mag-record?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Habang nagre-record, puwedeng ma-capture ng Android System ang anumang sensitibong impormasyong nakikita sa iyong screen o nagpe-play sa device mo. Kasama dito ang mga password, impormasyon sa pagbabayad, mga larawan, mensahe, at audio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"I-record ang buong screen"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Mag-record ng isang app"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Habang nagre-record ka, may access ang Android sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang sensitibong impormasyon."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Habang nagre-record ka ng app, may access ang Android sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang sensitibong impormasyon."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Simulang mag-record"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Simulan ang Pag-record?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Habang nagre-record ka, may access ang Android sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Habang nagre-record ka ng app, may access ang Android sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Simulang mag-record"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Mag-record ng audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio ng device"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Tunog mula sa iyong device, gaya ng musika, mga tawag, at ringtone"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikropono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio at mikropono ng device"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Simulan"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Simulan"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nire-record ang screen"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nire-record ang screen at audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ipakita ang mga pagpindot sa screen"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Ibahagi"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Na-save ang pag-record ng screen"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"I-tap para tingnan"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error sa pag-delete sa pag-record ng screen"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Nagka-error sa pag-save ng recording ng screen"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Nagkaroon ng error sa pagsisimula ng pag-record ng screen"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Bumalik"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"I-tap ang Kumpirmahin para kumpletuhin"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Na-unlock gamit ang mukha. Pindutin ang icon ng unlock para magpatuloy."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Na-unlock gamit ang mukha"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Na-unlock gamit ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nakilala ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nakilala ang mukha. Pindutin ang unlock para magpatuloy."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Kung maling pattern ang mailalagay mo sa susunod na pagsubok, made-delete ang iyong profile sa trabaho at ang data nito."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Kung maling PIN ang mailalagay mo sa susunod na pagsubok, made-delete ang iyong profile sa trabaho at ang data nito."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Kung maling password ang mailalagay mo sa susunod na pagsubok, made-delete ang iyong profile sa trabaho at ang data nito."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"I-set up"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Huwag muna"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Kinakailangan ito para mapahusay ang seguridad at performance"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"I-set up ulit ang Pag-unlock Gamit ang Fingerprint"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Pag-unlock Gamit ang Fingerprint"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"I-set up ang Pag-unlock Gamit ang Fingerprint"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Para ma-set up ulit ang Pag-unlock Gamit ang Fingerprint, made-delete ang mga kasalukuyang larawan at modelo ng iyong fingerprint.\n\nPagkatapos ma-delete ang mga ito, kakailanganin mong i-set up ulit ang Pag-unlock Gamit ang Fingerprint para magamit ang iyong fingerprint para i-unlock ang telepono mo o i-verify na ikaw ito."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Para ma-set up ulit ang Pag-unlock Gamit ang Fingerprint, made-delete ang mga kasalukuyang larawan at modelo ng iyong fingerprint.\n\nPagkatapos ma-delete ang mga ito, kakailanganin mong i-set up ulit ang Pag-unlock Gamit ang Fingerprint para magamit ang iyong fingerprint para i-unlock ang telepono mo o i-verify na ikaw ito."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Hindi na-set up ang pag-unlock gamit ang fingerprint. Pumunta sa Mga Setting para subukan ulit."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"I-set up ulit ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"I-set up ang Pag-unlock Gamit ang Mukha"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Para ma-set up ulit ang Pag-unlock Gamit ang Mukha, made-delete ang iyong kasalukuyang face model.\n\nKakailanganin mong i-set up ulit ang feature na ito para magamit ang iyong mukha para i-unlock ang telepono mo."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Hindi na-set up ang pag-unlock gamit ang mukha. Pumunta sa Mga Setting para subukan ulit."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pindutin ang fingerprint sensor"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Hindi makilala ang mukha. Gumamit ng fingerprint."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Gusto mo bang alisin ang user?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Made-delete ang lahat ng app at data ng user na ito."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Alisin"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Magkakaroon ng access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Magsimulang mag-record o mag-cast?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Simulang mag-record o mag-cast gamit ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Payagan ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> na magbahagi o mag-record?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Buong screen"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Isang app"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang sensitibong impormasyon."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang impormasyon."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Magpatuloy"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Ibahagi o i-record ang isang app"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Payagan ang app na ito na magbahagi o mag-record?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang app na ito sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang sensitibong impormasyon."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang app na ito sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga password, detalye ng pagbabayad, mensahe, o iba pang impormasyon."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Magkakaroon ng access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Magsimulang mag-record o mag-cast?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Buong screen"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Isang app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ibahagi o i-record ang isang app"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Simulang mag-record o mag-cast gamit ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Simulan"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Simulan ang pag-cast?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kapag nagka-cast ka, may access ang Android sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kapag nagka-cast ka ng app, may access ang Android sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Simulan ang pag-cast"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Simulan ang pagbabahagi?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang Android sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang Android sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Simulan"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Na-block ng iyong IT admin"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Naka-disable ang pag-screen capture ayon sa patakaran ng device"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"I-clear lahat"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"May naka-install sa device na ito na isang awtoridad sa certificate. Maaaring subaybayan o baguhin ang iyong ligtas na trapiko sa network."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa device mo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Na-on ng iyong admin ang pag-log sa network, na sumusubaybay sa trapiko sa profile mo sa trabaho pero hindi sa iyong personal na profile."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong IT admin ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng VPN provider ang iyong aktibidad ng network, kasama ang mga email at data mula sa pagba-browse."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong IT admin ang aktibidad ng network mo, kasama ang mga email at data mula sa pagba-browse."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Nakakonekta ang device na ito sa internet sa pamamagitan ng <xliff:g id="VPN_APP_0">%1$s</xliff:g> at <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Nakikita ng iyong IT admin ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Nakakonekta sa internet ang iyong mga app para sa trabaho sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong IT admin at VPN provider ang aktibidad ng network sa app para sa trabaho, kasama ang mga email at data mula sa pag-browse."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Nakakonekta ang iyong mga personal na app sa internet sa pamamagitan ng <xliff:g id="VPN_APP">%1$s</xliff:g>. Nakikita ng iyong VPN provider ang aktibidad ng network, kasama ang mga email at data mula sa pag-browse."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"i-disable"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Tunog at pag-vibrate"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Mga Setting"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Hininaan sa mas ligtas na volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Naging malakas ang volume nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ibinaba sa mas ligtas na level ang volume"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Naging malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Lampas na sa ligtas na limitasyon para sa linggong ito ang volume ng headphone"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Magpatuloy sa pakikinig"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Hinaan"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Naka-pin ang app"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>
@@ -885,8 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"alisin sa paborito"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Ilipat sa posisyong <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Mga Kontrol"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Pumili ng mga kontrol ng device para mabilisang mag-access"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"I-hold at i-drag para baguhin ang pagkakaayos ng mga kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Inalis ang lahat ng kontrol"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Hindi na-save ang mga pagbabago"</string>
@@ -924,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Mga Setting"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"Nagpe-play ang <xliff:g id="SONG_NAME">%1$s</xliff:g> ni/ng <xliff:g id="ARTIST_NAME">%2$s</xliff:g> mula sa <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> sa <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"Tumatakbo ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"I-play"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"I-pause"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Nakaraang track"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Mga Speaker at Display"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Mga Iminumungkahing Device"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Ihinto ang iyong nakabahaging session para maglipat ng media sa ibang device"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Ihinto"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Hindi ma-save. Subukan ulit."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Hindi ma-save."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gumamit ng hindi bababa sa 4 na character"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Gumamit ng mas kaunti sa 16 na character"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Gumamit ng mas kaunti sa <xliff:g id="LENGTH">%1$d</xliff:g> (na) character"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numero ng build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nakopya sa clipboard ang numero ng build."</string>
     <string name="basic_status" msgid="2315371112182658176">"Buksan ang pag-uusap"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Matuto pa"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Matuto pa sa <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Buksan ang <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Na-set up ang app"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• May kahit isang card na idinagdag sa Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Mag-install ng camera app"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Na-set up ang app"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• May kahit isang device na available"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Para maidagdag ang Wallet app bilang shortcut, siguraduhing naka-install ang app"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Para maidagdag ang Wallet app bilang shortcut, siguraduhing may naidagdag na kahit isang card man lang"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Para maidagdag ang scanner ng QR code bilang shortcut, siguraduhing may naka-install na camera app"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Para maidagdag ang Home app bilang shortcut, siguraduhing naka-install ang app"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• May kahit isang device na available"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Pumili ng default na app ng mga tala para magamit ang shortcut sa paggawa ng tala"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Pumili ng app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pindutin nang matagal: shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Kanselahin"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Lumipat na ng screen"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Ikonekta sa charger ang iyong stylus"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Paubos na ang baterya ng stylus"</string>
     <string name="video_camera" msgid="7654002575156149298">"Video camera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Hindi puwedeng tumawag mula sa profile na ito"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Pinapayagan ka ng iyong patakaran sa trabaho na tumawag lang mula sa profile sa trabaho"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Hindi puwedeng tumawag mula sa personal na app"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Pinapayagan ka lang ng iyong organisasyon na tumawag mula sa mga app para sa trabaho"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Lumipat sa profile sa trabaho"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Isara"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Mag-install ng phone app para sa trabaho"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Kanselahin"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"I-customize ang lock screen"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"I-unlock para i-customize ang lock screen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Hindi available ang Wi-Fi"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Naka-block ang camera"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Naka-block ang camera at mikropono"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Naka-block ang mikropono"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Naka-on ang Priority mode"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Naka-on ang atensyon ng Assistant"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Magtakda ng default na app sa pagtatala sa Mga Setting"</string>
+    <string name="install_app" msgid="5066668100199613936">"I-install ang app"</string>
 </resources>

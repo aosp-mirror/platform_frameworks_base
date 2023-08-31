@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Activa l\'USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Més informació"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock desactivat"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Desbloqueig ampliat desactivat"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviat una imatge"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"S\'està desant la captura de pantalla..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"S\'està desant la captura al perfil de treball…"</string>
@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ha detectat aquesta captura de pantalla."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> i altres aplicacions obertes han detectat aquesta captura de pantalla."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Afegeix a una nota"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Gravació de pantalla"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Gravació de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Grava la pantalla completa"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Grava una sola aplicació"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves contingut, Android pot accedir a tot el que es veu a la pantalla o que es reprodueix al dispositiu. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Inicia la gravació"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Vols iniciar una gravació?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Mentre graves, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Inicia una gravació"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Àudio del dispositiu"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"So del dispositiu, com ara música, trucades i sons de trucada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micròfon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Àudio del dispositiu i micròfon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Inicia"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Inicia"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"S\'està gravant la pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"S\'estan gravant la pantalla i l\'àudio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostra els tocs a la pantalla"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Comparteix"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"S\'ha desat la gravació de pantalla"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca per veure-la"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"S\'ha produït un error en suprimir la gravació de la pantalla"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"S\'ha produït un error en desar la gravació de la pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"S\'ha produït un error en iniciar la gravació de pantalla"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Enrere"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inici"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Cara autenticada"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toca Confirma per completar"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"S\'ha desbloquejat amb la cara. Prem la icona per continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"S\'ha desbloquejat amb la cara"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"S\'ha desbloquejat amb la cara. Prem per continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"S\'ha reconegut la cara. Prem per continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"S\'ha reconegut la cara. Prem la icona per continuar."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si tornes a introduir un patró incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si tornes a introduir un PIN incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si tornes a introduir una contrasenya incorrecta, se suprimirà el perfil de treball i les dades que contingui."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configura"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ara no"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Aquesta acció és necessària per millorar la seguretat i el rendiment"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Torna a configurar Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configura Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Per tornar a configurar Desbloqueig amb empremta digital, les imatges i els models actuals de la teva empremta digital se suprimiran.\n\nDesprés de suprimir-los, hauràs de tornar a configurar Desbloqueig amb empremta digital per utilitzar la teva empremta digital i desbloquejar el telèfon o verificar la teva identitat."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Per tornar a configurar Desbloqueig amb empremta digital, les imatges i el model actuals de la teva empremta digital se suprimiran.\n\nDesprés de suprimir-los, hauràs de tornar a configurar Desbloqueig amb empremta digital per utilitzar la teva empremta digital i desbloquejar el telèfon o verificar la teva identitat."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"No s\'ha pogut configurar el desbloqueig amb empremta digital. Ves a Configuració per tornar-ho a provar."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Torna a configurar Desbloqueig facial"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Desbloqueig facial"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura Desbloqueig facial"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per tornar a configurar Desbloqueig facial, el model facial actual se suprimirà.\n\nHauràs de tornar configurar aquesta funció per desbloquejar el telèfon utilitzant la cara."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"No s\'ha pogut configurar el desbloqueig facial. Ves a Configuració per tornar-ho a provar."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor d\'empremtes digitals"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No podem detectar la cara. Usa l\'empremta digital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Suprimeix"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Vols permetre que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparteixi o gravi contingut?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Tota la pantalla"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Una sola aplicació"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Quan estàs compartint, gravant o emetent, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Mentre comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot accedir a tot el que es veu a la pantalla o que es reprodueix a l\'aplicació. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continua"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Comparteix o grava una aplicació"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vols permetre que aquesta aplicació comparteixi o gravi contingut?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Vols començar a gravar o emetre contingut?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara les contrasenyes, les dades de pagament, les fotos, els missatges i àudio que reprodueixis."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tota la pantalla"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Una sola aplicació"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Comparteix o grava una aplicació"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Inicia"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Vols iniciar una emissió?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Quan emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Quan emets una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Inicia una emissió"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Vols començar a compartir?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Inicia"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquejat per l\'administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Les captures de pantalla estan desactivades per la política de dispositius"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Esborra-ho tot"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"S\'ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure la teva activitat de xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure la teva activitat de xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactivar"</string>
     <string name="sound_settings" msgid="8874581353127418308">"So i vibració"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Configuració"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"El volum s\'ha abaixat a un nivell més segur"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"El volum ha estat elevat durant més temps del recomanat"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"El volum s\'ha abaixat a un nivell més segur"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"El volum dels auriculars ha estat elevat durant més temps del recomanat"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"El volum dels auriculars ha superat el límit de seguretat d\'aquesta setmana"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Continua escoltant"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Abaixa el volum"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'aplicació està fixada"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, toca i mantén premudes els botons Enrere i Aplicacions recents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, mantén premuts els botons Enrere i Inici."</string>
@@ -861,7 +881,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toca per obrir funcions d\'accessibilitat. Personalitza o substitueix el botó a Configuració.\n\n"<annotation id="link">"Mostra"</annotation>"."</string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mou el botó a l\'extrem per amagar-lo temporalment"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desfés"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"S\'ha suprimit la drecera <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"S\'ha suprimit la drecera a <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{S\'ha suprimit # drecera}many{S\'han suprimit # dreceres}other{S\'han suprimit # dreceres}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mou a dalt a l\'esquerra"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mou a dalt a la dreta"</string>
@@ -885,9 +905,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"suprimir dels preferits"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mou a la posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Tria a quins controls del dispositiu vols accedir ràpidament"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premuts els controls i arrossega\'ls per reordenar-los"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altres aplicacions"</string>
@@ -917,13 +936,14 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Llisca per veure\'n més"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregant les recomanacions"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimèdia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Vols amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"La sessió multimèdia actual no es pot amagar."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Amaga"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprèn"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configuració"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> (<xliff:g id="ARTIST_NAME">%2$s</xliff:g>) s\'està reproduint des de l\'aplicació <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> de <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> s\'està executant"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Reprodueix"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Posa en pausa"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Pista anterior"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altaveus i pantalles"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositius suggerits"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Atura la sessió compartida per moure contingut multimèdia a un altre dispositiu"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Atura"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Com funciona l\'emissió"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emet"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les persones properes amb dispositius Bluetooth compatibles poden escoltar el contingut multimèdia que emets"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"No es pot desar. Torna-ho a provar."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"No es pot desar."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Utilitza 4 caràcters com a mínim"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Utilitza menys de 16 caràcters"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Utilitza menys de <xliff:g id="LENGTH">%1$d</xliff:g> caràcters"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilació"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"El número de compilació s\'ha copiat al porta-retalls."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa oberta"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Més informació"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Més informació a <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Obre <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• L\'aplicació està configurada."</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Almenys s\'ha afegit una targeta a Wallet."</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Tens una aplicació de càmera."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'aplicació està configurada."</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Almenys un dispositiu està disponible."</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Per afegir l\'aplicació Wallet com a drecera, assegura\'t que estigui instal·lada"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Per afegir l\'aplicació Wallet com a drecera, assegura\'t que s\'hagi afegit almenys una targeta"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Per afegir l\'escàner de codis QR com a drecera, assegura\'t que hi hagi una aplicació de càmera instal·lada"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Per afegir l\'aplicació Home com a drecera, assegura\'t que estigui instal·lada"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Almenys un dispositiu està disponible."</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Selecciona una aplicació de notes predeterminada per utilitzar la drecera de presa de notes"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Selecciona una aplicació"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén premuda la drecera"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel·la"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Canvia de pantalla ara"</string>
@@ -1119,19 +1143,19 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connecta el llapis òptic a un carregador"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Bateria del llapis òptic baixa"</string>
     <string name="video_camera" msgid="7654002575156149298">"Càmera de vídeo"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"No es pot trucar des d\'aquest perfil"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"La teva política de treball et permet fer trucades només des del perfil de treball"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"No pots trucar des d\'una aplicació personal"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"La teva organització només et permet fer trucades des d\'aplicacions de treball"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Canvia al perfil de treball"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Tanca"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instal·la una aplicació de treball per a telèfons"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Cancel·la"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Personalitza pantalla de bloqueig"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desbloqueja per personalitzar la pantalla de bloqueig"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"No hi ha cap Wi‑Fi disponible"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"La càmera està bloquejada"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"La càmera i el micròfon estan bloquejats"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"El micròfon està bloquejat"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"El mode Prioritat està activat"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"L\'Assistent està activat"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Defineix l\'aplicació de notes predeterminada a Configuració"</string>
+    <string name="install_app" msgid="5066668100199613936">"Instal·la l\'aplicació"</string>
 </resources>
