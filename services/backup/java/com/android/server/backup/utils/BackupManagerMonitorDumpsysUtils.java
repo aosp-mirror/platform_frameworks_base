@@ -272,6 +272,32 @@ public class BackupManagerMonitorDumpsysUtils {
             case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED ->
                     "Transport non-incremental backup required";
             case BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS -> "Agent logging results";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_SYSTEM_RESTORE -> "Start system restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_RESTORE_AT_INSTALL ->
+                    "Start restore at install";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_DURING_START_RESTORE ->
+                    "Transport error during start restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_CANNOT_GET_NEXT_PKG_NAME ->
+                    "Cannot get next package name";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNKNOWN_RESTORE_TYPE -> "Unknown restore type";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_RESTORE -> "KV restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE -> "Full restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_NEXT_RESTORE_TARGET ->
+                    "No next restore target";
+            case BackupManagerMonitor.LOG_EVENT_ID_KV_AGENT_ERROR -> "KV agent error";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_RESTORE_FINISHED ->
+                    "Package restore finished";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_KV_RESTORE ->
+                    "Transport error KV restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_NO_FEEDER_THREAD -> "No feeder thread";
+            case BackupManagerMonitor.LOG_EVENT_ID_FULL_AGENT_ERROR -> "Full agent error";
+            case BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_ERROR_FULL_RESTORE ->
+                    "Transport error full restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_COMPLETE -> "Restore complete";
+            case BackupManagerMonitor.LOG_EVENT_ID_START_PACKAGE_RESTORE ->
+                    "Start package restore";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE ->
+                    "Agent failure";
             default -> "Unknown log event ID: " + code;
         };
         return id;
