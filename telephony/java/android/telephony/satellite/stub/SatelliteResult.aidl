@@ -20,91 +20,87 @@ package android.telephony.satellite.stub;
  * {@hide}
  */
 @Backing(type="int")
-enum SatelliteError {
+enum SatelliteResult {
     /**
      * The request was successfully processed.
      */
-    ERROR_NONE = 0,
+    SATELLITE_RESULT_SUCCESS = 0,
     /**
      * A generic error which should be used only when other specific errors cannot be used.
      */
-    SATELLITE_ERROR = 1,
+    SATELLITE_RESULT_ERROR = 1,
     /**
      * Error received from the satellite server.
      */
-    SERVER_ERROR = 2,
+    SATELLITE_RESULT_SERVER_ERROR = 2,
     /**
      * Error received from the vendor service. This generic error code should be used
      * only when the error cannot be mapped to other specific service error codes.
      */
-    SERVICE_ERROR = 3,
+    SATELLITE_RESULT_SERVICE_ERROR = 3,
     /**
      * Error received from satellite modem. This generic error code should be used only when
      * the error cannot be mapped to other specific modem error codes.
      */
-    MODEM_ERROR = 4,
+    SATELLITE_RESULT_MODEM_ERROR = 4,
     /**
      * Error received from the satellite network. This generic error code should be used only when
      * the error cannot be mapped to other specific network error codes.
      */
-    NETWORK_ERROR = 5,
-    /**
-     * Telephony is not in a valid state to receive requests from clients.
-     */
-    INVALID_TELEPHONY_STATE = 6,
+    SATELLITE_RESULT_NETWORK_ERROR = 5,
     /**
      * Satellite modem is not in a valid state to receive requests from clients.
      */
-    INVALID_MODEM_STATE = 7,
+    SATELLITE_RESULT_INVALID_MODEM_STATE = 6,
     /**
      * Either vendor service, or modem, or Telephony framework has received a request with
      * invalid arguments from its clients.
      */
-    INVALID_ARGUMENTS = 8,
+    SATELLITE_RESULT_INVALID_ARGUMENTS = 7,
     /**
      * Telephony framework failed to send a request or receive a response from the vendor service
      * or satellite modem due to internal error.
      */
-    REQUEST_FAILED = 9,
+    SATELLITE_RESULT_REQUEST_FAILED = 8,
     /**
      * Radio did not start or is resetting.
      */
-    RADIO_NOT_AVAILABLE = 10,
+    SATELLITE_RESULT_RADIO_NOT_AVAILABLE = 9,
     /**
      * The request is not supported by either the satellite modem or the network.
      */
-    REQUEST_NOT_SUPPORTED = 11,
+    SATELLITE_RESULT_REQUEST_NOT_SUPPORTED = 10,
     /**
      * Satellite modem or network has no resources available to handle requests from clients.
      */
-    NO_RESOURCES = 12,
+    SATELLITE_RESULT_NO_RESOURCES = 11,
     /**
      * Satellite service is not provisioned yet.
      */
-    SERVICE_NOT_PROVISIONED = 13,
+    SATELLITE_RESULT_SERVICE_NOT_PROVISIONED = 12,
     /**
      * Satellite service provision is already in progress.
      */
-    SERVICE_PROVISION_IN_PROGRESS = 14,
+    SATELLITE_RESULT_SERVICE_PROVISION_IN_PROGRESS = 13,
     /**
      * The ongoing request was aborted by either the satellite modem or the network.
      */
-    REQUEST_ABORTED = 15,
+    SATELLITE_RESULT_REQUEST_ABORTED = 14,
     /**
      * The device/subscriber is barred from accessing the satellite service.
      */
-    SATELLITE_ACCESS_BARRED = 16,
+    SATELLITE_RESULT_ACCESS_BARRED = 15,
     /**
      * Satellite modem timeout to receive ACK or response from the satellite network after
      * sending a request to the network.
      */
-    NETWORK_TIMEOUT = 17,
+    SATELLITE_RESULT_NETWORK_TIMEOUT = 16,
     /**
      * Satellite network is not reachable from the modem.
      */
-    SATELLITE_NOT_REACHABLE = 18,
+    SATELLITE_RESULT_NOT_REACHABLE = 17,
     /**
      * The device/subscriber is not authorized to register with the satellite service provider.
      */
-    NOT_AUTHORIZED = 19
+    SATELLITE_RESULT_NOT_AUTHORIZED = 18
 }
