@@ -2065,8 +2065,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         ATTR_ARCHIVE_ACTIVITY_TITLE);
                 Path iconPath = Path.of(parser.getAttributeValue(null,
                         ATTR_ARCHIVE_ICON_PATH));
-                Path monochromeIconPath = Path.of(parser.getAttributeValue(null,
-                        ATTR_ARCHIVE_MONOCHROME_ICON_PATH));
+                String monochromeAttribute = parser.getAttributeValue(null,
+                        ATTR_ARCHIVE_MONOCHROME_ICON_PATH);
+                Path monochromeIconPath = monochromeAttribute == null ? null : Path.of(
+                        monochromeAttribute);
 
                 if (title == null || iconPath == null) {
                     Slog.wtf(TAG,
