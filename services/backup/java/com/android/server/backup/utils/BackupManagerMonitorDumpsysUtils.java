@@ -84,15 +84,15 @@ public class BackupManagerMonitorDumpsysUtils {
      * - Agent logs (if available)
      *
      * Example of formatting:
-     * RESTORE Event: [2023-08-18 17:16:00.735] Agent - Agent logging results
-     * Package name: com.android.wallpaperbackup
-     * Agent Logs:
-     * Data Type: wlp_img_system
-     * Item restored: 0/1
-     * Agent Error - Category: no_wallpaper, Count: 1
-     * Data Type: wlp_img_lock
-     * Item restored: 0/1
-     * Agent Error - Category: no_wallpaper, Count: 1
+     * [2023-09-21 14:43:33.824] - Agent logging results
+     *   Package: com.android.wallpaperbackup
+     *   Agent Logs:
+     *           Data Type: wlp_img_system
+     *                   Item restored: 0/1
+     *                   Agent Error - Category: no_wallpaper, Count: 1
+     *           Data Type: wlp_img_lock
+     *                   Item restored: 0/1
+     *                   Agent Error - Category: no_wallpaper, Count: 1
      */
     public void parseBackupManagerMonitorRestoreEventForDumpsys(Bundle eventBundle) {
         if (isAfterRetentionPeriod()) {
@@ -139,17 +139,16 @@ public class BackupManagerMonitorDumpsysUtils {
                 return;
             }
 
-            pw.println("RESTORE Event: [" + timestamp() + "] " +
-                    getCategory(eventCategory) + " - " +
-                    getId(eventId));
+            pw.println("[" + timestamp() + "] - " + getId(eventId));
 
             if (eventBundle.containsKey(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME)) {
-                pw.println("\tPackage name: "
+                pw.println("\tPackage: "
                         + eventBundle.getString(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME));
             }
 
             // TODO(b/296818666): add extras to the events
             addAgentLogsIfAvailable(eventBundle, pw);
+            addExtrasIfAvailable(eventBundle, pw);
         } catch (java.io.IOException e) {
             Slog.e(TAG, "IO Exception when writing BMM events to file: " + e);
         }
@@ -190,6 +189,37 @@ public class BackupManagerMonitorDumpsysUtils {
                     pw.println("\t\t\tAgent Error - Category: " +
                             entry.getKey() + ", Count: " + entry.getValue());
                 }
+            }
+        }
+    }
+
+    /**
+     * Extracts some extras (defined in BackupManagerMonitor as EXTRA_LOG_<description>)
+     * from the BackupManagerMonitor event. Not all extras have the same importance. For now only
+     * focus on extras relating to version mismatches between packages on the source and target.
+     *
+     * When an event with ID LOG_EVENT_ID_RESTORE_VERSION_HIGHER (trying to restore from higher to
+     * lower version of a package) parse:
+     * EXTRA_LOG_RESTORE_VERSION [int]: the version of the package on the source
+     * EXTRA_LOG_RESTORE_ANYWAY [bool]: if the package allows restore any version
+     * EXTRA_LOG_RESTORE_VERSION_TARGET [int]: an extra to record the package version on the target
+     */
+    private void addExtrasIfAvailable(Bundle eventBundle, PrintWriter pw) {
+        if (eventBundle.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID) ==
+                BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER) {
+            if (eventBundle.containsKey(BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY)) {
+                pw.println("\t\tPackage supports RestoreAnyVersion: "
+                        + eventBundle.getBoolean(BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY));
+            }
+            if (eventBundle.containsKey(BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION)) {
+                pw.println("\t\tPackage version on source: "
+                        + eventBundle.getLong(BackupManagerMonitor.EXTRA_LOG_RESTORE_VERSION));
+            }
+            if (eventBundle.containsKey(
+                      BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)) {
+                pw.println("\t\tPackage version on target: "
+                        + eventBundle.getLong(
+                        BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION));
             }
         }
     }
