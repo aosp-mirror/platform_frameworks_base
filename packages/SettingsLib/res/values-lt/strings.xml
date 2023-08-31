@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD garsas: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD garsas"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Klausos aparatai"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Prisijungta prie klausos aparatų"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Prisijungta prie „LE Audio“"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Prijungta prie medijos garso įrašo"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profilio pasirinkimas"</string>
     <string name="category_personal" msgid="6236798763159385225">"Asmeninės"</string>
     <string name="category_work" msgid="4014193632325996115">"Darbo"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Identiška kopija"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Kūrėjo parinktys"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Įgalinti kūrėjo parinktis"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Nustatyti programos kūrimo parinktis"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daugiau laiko."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mažiau laiko."</string>
     <string name="cancel" msgid="5665114069455378395">"Atšaukti"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Kitas"</string>
+    <string name="back" msgid="5554327870352703710">"Atgal"</string>
+    <string name="save" msgid="3745809743277153149">"Išsaugoti"</string>
     <string name="okay" msgid="949938843324579502">"Gerai"</string>
     <string name="done" msgid="381184316122520313">"Atlikta"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signalai ir priminimai"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ką tik"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Šis telefonas"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Šis planšetinis kompiuteris"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doko garsiakalbis"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Išorinis įrenginys"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Prijungtas įrenginys"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis telefonas"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Negalima leisti šiame įrenginyje"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Jei norite perjungti, naujovinkite paskyrą"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Pridėti naują naudotoją?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Galite bendrinti šį įrenginį su kitais žmonėmis sukūrę papildomų naudotojų. Kiekvienam naudotojui suteikiama atskira erdvė, kurią jie gali tinkinti naudodami programas, ekrano foną ir kt. Be to, naudotojai gali koreguoti įrenginio nustatymus, pvz., „Wi‑Fi“, kurie taikomi visiems.\n\nKai pridedate naują naudotoją, šis asmuo turi nusistatyti savo erdvę.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas. Pasiekiamumo nustatymai ir paslaugos gali nebūti perkeltos naujam naudotojui."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kai pridedate naują naudotoją, šis asmuo turi nustatyti savo vietą.\n\nBet kuris naudotojas gali atnaujinti visų kitų naudotojų programas."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Nustatyti šį naudotoją kaip administratorių?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratoriai turi specialių privilegijų, kurių kiti naudotojai neturi. Administratorius gali tvarkyti visus naudotojus, atnaujinti ar iš naujo nustatyti šį įrenginį, keisti nustatymus, peržiūrėti visas įdiegtas programas ir suteikti administratoriaus privilegijas kitiems naudotojams arba jas panaikinti."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Nustatyti kaip administratorių"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Nustatyti naudotoją dabar?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Įsitikinkite, kad asmuo gali paimti įrenginį ir nustatyti savo vietą"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Nustatyti profilį dabar?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Bus pradėta nauja svečio sesija ir iš esamos sesijos bus ištrintos visos programos ir duomenys"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Išeiti iš svečio režimo?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bus ištrintos esamos svečio sesijos programos ir duomenys"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Taip, nustatyti kaip administratorių"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nenustatyti kaip administratoriaus"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Išeiti"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Išsaugoti svečio veiklą?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Galite išsaugoti esamos sesijos veiklą arba ištrinti visas programas ir duomenis"</string>

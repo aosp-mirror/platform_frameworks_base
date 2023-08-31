@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Висококачествено аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Висококачествено аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слухови апарати"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Установена е връзка със слухов апарат"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Свързано с LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Установена е връзка с медийно аудио"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отказ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"При свързване сдвояването предоставя достъп до вашите контакти и история на обажданията."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Неуспешно сдвояване с(ъс) <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Неуспешно сдвояване с(ъс) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради неправилен ПИН или код за достъп."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Неуспешно сдвояване с(ъс) <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: неправилен ПИН или ключ за достъп."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не може да се свърже с/ъс <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Сдвояването е отхвърлено от <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компютър"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Избор на потребителски профил"</string>
     <string name="category_personal" msgid="6236798763159385225">"Лични"</string>
     <string name="category_work" msgid="4014193632325996115">"Служебни"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Клониране"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Опции за програмисти"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Активиране на опциите за програмисти"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Задаване на опции за програмиране на приложения"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Повече време."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"По-малко време."</string>
     <string name="cancel" msgid="5665114069455378395">"Отказ"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Напред"</string>
+    <string name="back" msgid="5554327870352703710">"Назад"</string>
+    <string name="save" msgid="3745809743277153149">"Запазване"</string>
     <string name="okay" msgid="949938843324579502">"ОK"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будилници и напомняния"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Току-що"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Този телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Този таблет"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Високоговорител докинг станция"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Външно устройство"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Свързано устройство"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Този телефон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Възпроизвеждането не е възможно на това устройство"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надстройте профила, за да превключите"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавяне на нов потребител?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Можете да споделите това устройство с други хора, като създадете допълнителни потребители. Всеки от тях има собствено работно пространство, което може да персонализира с приложения, тапет и др. Потребителите могат също да коригират настройки на устройството, които засягат всички – например за Wi‑Fi.\n\nКогато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители. Настройките и услугите за достъпност може да не се прехвърлят за новия потребител."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Когато добавите нов потребител, той трябва да настрои работното си пространство.\n\nВсеки потребител може да актуализира приложенията за всички останали потребители."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Искате ли да зададете този потребител като администратор?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Администраторите имат специални права, с които другите потребители не разполагат. Администраторите могат да управляват всички потребители, да актуализират или нулират това устройство, да променят настройките, да преглеждат всички инсталирани приложения, да предоставят или отменят администраторски права на други хора."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Задаване като администратор"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настройване на потребителя?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Уверете се, че човекът има възможност да вземе устройството и да настрои работното си пространство."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ще настроите ли потребителския профил сега?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Така ще стартирате нова сесия като гост и ще изтриете всички приложения и данни от текущата сесия"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Изход от режима на гост?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Така ще изтриете приложенията и данните от текущата сесия като гост"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Да, задаване като администратор"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Не, без задаване като администратор"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изход"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Запазване на активността като гост?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Можете да запазите активността от сесията или да изтриете всички прил. и данни"</string>

@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"ડિસ્કનેક્ટ થઈ રહ્યું છે..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"કનેક્ટ થઈ રહ્યું છે…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"જોડી કરી રહ્યું છે…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"જોડાણ કરી રહ્યાં છીએ…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ ફોન નથી)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ મીડિયા નથી)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> સાથે કનેક્ટ થયેલ (ફોન કે મીડિયા નથી)"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"શ્રવણ યંત્રો"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ઑડિયો"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ઑડિયો"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"શ્રવણ યંત્રો સાથે કનેક્ટ કરેલું છે"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ઑડિયોથી કનેક્ટેડ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"મીડિયા ઑડિઓ સાથે કનેક્ટ કર્યુ"</string>
@@ -174,7 +174,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"કેટલાંક ડિફોલ્ટ્સ સેટ કરેલ છે"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"કોઈ ડિફૉલ્ટ સેટ કરેલા નથી"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ટેક્સ્ટ ટૂ સ્પીચ સેટિંગ"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"ટેક્સ્ટ ટૂ સ્પીચ આઉટપુટ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"સ્પીચ રેટ"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ટેક્સ્ટ બોલાયેલ છે તે ઝડપ"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"પિચ"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"પ્રોફાઇલ પસંદ કરો"</string>
     <string name="category_personal" msgid="6236798763159385225">"વ્યક્તિગત"</string>
     <string name="category_work" msgid="4014193632325996115">"ઑફિસ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ક્લોન કરો"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ડેવલપરના વિકલ્પો"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"વિકાસકર્તાનાં વિકલ્પો સક્ષમ કરો"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ઍપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
@@ -263,8 +264,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"બુટલોડર અનલૉક કરવાની મંજૂરી આપો"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ને અનલૉક કરવાની મંજૂરી આપીએ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ચેતવણી: જ્યારે આ સેટિંગ ચાલુ હોય ત્યારે આ ઉપકરણ પર ઉપકરણ સંરક્ષણ સુવિધાઓ કાર્ય કરશે નહીં."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"મોક સ્થાન ઍપ પસંદ કરો"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"કોઈ મોક સ્થાન ઍપ સેટ કરાયેલું નથી"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"મોક લોકેશન ઍપ પસંદ કરો"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"કોઈ મોક લોકેશન ઍપ સેટ કરાયેલું નથી"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"મોક સ્થાન ઍપ્લિકેશન: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"નેટવર્કિંગ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
@@ -348,9 +349,9 @@
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"હાર્ડવેર પ્રવેગક રેન્ડરિંગ"</string>
     <string name="media_category" msgid="8122076702526144053">"મીડિયા"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"નિરિક્ષણ કરી રહ્યું છે"</string>
-    <string name="strict_mode" msgid="889864762140862437">"સ્ટ્રિક્ટ મોડ ચાલુ કરેલ છે"</string>
+    <string name="strict_mode" msgid="889864762140862437">"સ્ટ્રિક્ટ મોડ ચાલુ કરેલો છે"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"જ્યારે મુખ્ય થ્રેડ પર ઍપ લાંબી કામગીરીઓ કરે ત્યારે સ્ક્રીનને ફ્લેશ કરો"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"પૉઇન્ટર સ્થાન"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"પૉઇન્ટર લોકેશન"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"વર્તમાન ટચ ડેટા દર્શાવતું સ્ક્રીન ઓવરલે"</string>
     <string name="show_touches" msgid="8437666942161289025">"ટૅપ બતાવો"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"ટૅપ માટે વિઝ્યુઅલ પ્રતિસાદ બતાવો"</string>
@@ -383,9 +384,9 @@
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"વર્બોઝ વેન્ડર લૉગિંગ ચાલુ કરો"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ખામીની જાણકારીમાં ડિવાઇસથી જોડાયેલા ચોક્કસ વેન્ડર લૉગ શામેલ કરો, જેમાં ખાનગી માહિતી શામેલ હોઈ શકે છે, તે વધુ બૅટરીનો ઉપયોગ કરી શકે છે અને/અથવા વધુ સ્ટોરેજનો ઉપયોગ કરી શકે છે."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"વિન્ડો ઍનિમેશન સ્કેલ"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"સંક્રમણ ઍનિમેશન સ્કેલ"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"ટ્રાન્ઝિશન ઍનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ઍનિમેટર અવધિ સ્કેલ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ગૌણ ડિસ્પ્લેનું અનુકરણ કરો"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"સેકન્ડરી ડિસ્પ્લેનું અનુકરણ કરો"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ઍપ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"પ્રવૃત્તિઓ રાખશો નહીં"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"જેવો વપરાશકર્તા તેને છોડે, તરત જ દરેક પ્રવૃત્તિ નષ્ટ કરો"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"વધુ સમય."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ઓછો સમય."</string>
     <string name="cancel" msgid="5665114069455378395">"રદ કરો"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"આગળ"</string>
+    <string name="back" msgid="5554327870352703710">"પાછળ"</string>
+    <string name="save" msgid="3745809743277153149">"સાચવો"</string>
     <string name="okay" msgid="949938843324579502">"ઓકે"</string>
     <string name="done" msgid="381184316122520313">"થઈ ગયું"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"અલાર્મ અને રિમાઇન્ડર"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"આ ટૅબ્લેટ"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ડૉક સ્પીકર"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"બહારનું ડિવાઇસ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"કનેક્ટ કરેલું ડિવાઇસ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"આ ડિવાઇસ પર ચલાવી શકતા નથી"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"સ્વિચ કરવા માટે એકાઉન્ટ અપગ્રેડ કરો"</string>
@@ -578,13 +579,10 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"પ્રતિબંધિત પ્રોફાઇલ"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ડિવાઇસને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ડિવાઇસ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"આ વપરાશકર્તાને ઍડમિન બનાવવા છે?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ઍડમિન પાસે વિશિષ્ટ વિશેષાધિકારો હોય છે જે અન્ય વપરાશકર્તાઓ પાસે હોતા નથી. ઍડમિન બધા વપરાશકર્તાઓને મેનેજ કરી શકે, આ ડિવાઇસને અપડેટ અથવા રીસેટ કરી શકે, સેટિંગમાં ફેરફાર કરી શકે, ઇન્સ્ટૉલ કરેલી બધી ઍપ જોઈ શકે અને અન્ય લોકોને ઍડમિનના અધિકારો આપી શકે અથવા તેમને રદબાતલ કરી શકે."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ઍડમિન બનાવો"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"અત્યારે જ વપરાશકર્તાને સેટ અપ કરીએ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ડિવાઇસ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"હવે પ્રોફાઇલ સેટ કરીએ?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"આમ કરવાથી કોઈ નવું અતિથિ સત્ર ચાલુ થશે તેમજ હાલના સત્રમાંની તમામ ઍપ અને ડેટા ડિલીટ થશે"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"શું અતિથિ મોડમાંથી બહાર નીકળીએ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"આમ કરવાથી હાલના અતિથિ સત્રની તમામ ઍપ અને ડેટા ડિલીટ કરવામાં આવશે"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"હા, તેમને ઍડમિન બનાવો"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ના, તેમને ઍડમિન બનાવશો નહીં"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"બહાર નીકળો"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"શું અતિથિ પ્રવૃત્તિ સાચવીએ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"તમે હાલના સત્રની પ્રવૃત્તિ સાચવી શકો છો અથવા તમામ ઍપ અને ડેટા ડિલીટ કરી શકો છો"</string>

@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"در حال قطع اتصال..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"در حال اتصال…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"متصل<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"در حال مرتبط‌سازی..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"درحال جفت کردن..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"متصل (بدون تلفن)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"متصل (بدون رسانه)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"متصل (بدون تلفن یا رسانه)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"‏صدای HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"‏صدای HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سمعک"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"صدای کم‌مصرف"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"صدای کم‌مصرف"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"به سمعک متصل شد"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"به «صدای کم‌مصرف» وصل است"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"به رسانه صوتی متصل شد"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"انتخاب نمایه"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصی"</string>
     <string name="category_work" msgid="4014193632325996115">"کاری"</string>
+    <string name="category_clone" msgid="1554511758987195974">"مشابه‌سازی"</string>
     <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
@@ -230,9 +231,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"خطا"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"اشکال‌زدایی بی‌سیم"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"برای مشاهده و استفاده از دستگاه‌های در دسترس، اشکال‌زدایی بی‌سیم را روشن کنید"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"مرتبط کردن دستگاه با رمزینه پاسخ‌سریع"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"جفت کردن دستگاه با رمزینه پاسخ‌سریع"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"دستگاه‌های جدید را بااستفاده از اسکنر رمزینه پاسخ‌سریع مرتبط کنید"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"مرتبط کردن دستگاه با کد مرتبط‌سازی"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"جفت کردن دستگاه با کد مرتبط‌سازی"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"دستگاه‌های جدید را با استفاده از کد شش رقمی مرتبط کنید"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"دستگاه‌های مرتبط‌شده"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"درحال‌حاضر متصل"</string>
@@ -241,13 +242,13 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"اثرانگشت دستگاه: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"اتصال ناموفق"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"مطمئن شوید که <xliff:g id="DEVICE_NAME">%1$s</xliff:g> به شبکه درستی متصل شده باشد"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"مرتبط کردن با دستگاه"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"جفت کردن با دستگاه"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"‏کد مرتبط‌سازی Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"مرتبط‌سازی ناموفق"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"مطمئن شوید که دستگاه به همان شبکه متصل باشد."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن رمزینه پاسخ‌سریع مرتبط کنید"</string>
-    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"مرتبط‌سازی دستگاه…"</string>
-    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"مرتبط کردن دستگاه انجام نشد. یا رمزینه پاسخ‌سریع اشتباه بوده است، یا دستگاه به همان شبکه متصل نیست."</string>
+    <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"جفت کردن دستگاه…"</string>
+    <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"جفت کردن دستگاه انجام نشد. یا رمزینه پاسخ‌سریع اشتباه بوده است، یا دستگاه به همان شبکه متصل نیست."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏نشانی IP و درگاه"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"اسکن رمزینه پاسخ‌سریع"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"‏دستگاه را ازطریق Wi‑Fi و با اسکن کردن رمزینه پاسخ‌سریع مرتبط کنید"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"زمان بیشتر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"زمان کمتر."</string>
     <string name="cancel" msgid="5665114069455378395">"لغو"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"بعدی"</string>
+    <string name="back" msgid="5554327870352703710">"برگشتن"</string>
+    <string name="save" msgid="3745809743277153149">"ذخیره"</string>
     <string name="okay" msgid="949938843324579502">"تأیید"</string>
     <string name="done" msgid="381184316122520313">"تمام"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"زنگ‌های هشدار و یادآوری‌ها"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"هم‌اکنون"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"این تلفن"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"این رایانه لوحی"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"بلندگوی پایه اتصال"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"دستگاه خارجی"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"دستگاه متصل"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"این تلفن"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"نمی‌توان در این دستگاه پخش کرد"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"برای تغییر، حساب را ارتقا دهید"</string>
@@ -577,14 +578,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"کاربر"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"نمایه محدود شده"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"کاربر جدیدی اضافه می‌کنید؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید این دستگاه را با دیگران به‌اشتراک بگذارید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. همچنین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید از این دستگاه مشترکاً استفاده کنید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. علاوه‌براین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"این کاربر سرپرست شود؟"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"سرپرستان امتیازهای ویژه‌ای دارند که کاربران دیگر ندارند. سرپرست می‌تواند همه کاربران را مدیریت کند، این دستگاه را به‌روز یا بازنشانی کند، تنظیمات را تغییر دهد، همه برنامه‌های نصب‌شده را ببیند، و امتیازهای سرپرست را به دیگران اعطا کند یا از آن‌ها بگیرد."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"انتخاب به‌عنوان سرپرست"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هم اکنون کاربر تنظیم شود؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"با این کار، جلسه مهمان جدیدی شروع خواهد شد و همه برنامه‌ها و داده‌ها از جلسه کنونی حذف خواهند شد"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"از حالت مهمان خارج می‌شوید؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"با این کار، برنامه‌ها و داده‌ها از جلسه مهمان کنونی حذف خواهند شد."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"بله، سرپرست شود"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"نه، سرپرست نشود"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"فعالیت مهمان ذخیره شود؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"می‌توانید فعالیت جلسه کنونی را ذخیره کنید یا همه برنامه و داده‌ها را حذف کنید"</string>

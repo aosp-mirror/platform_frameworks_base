@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-ljud: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-ljud"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hörapparater"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ansluten till hörapparater"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ansluten till LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ansluten till medialjud"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Avbryt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Om du kopplar enheten får du tillgång till dina kontakter och din samtalshistorik när du är ansluten."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Det gick inte att koppla till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Det gick inte att koppla till <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grund av en felaktig PIN-kod eller nyckel."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Parkoppling med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> misslyckades på grund av fel PIN-kod eller nyckel."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Det går inte att kommunicera med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Parkoppling avvisad av <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Dator"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
     <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Utvecklaralternativ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivera utvecklaralternativ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ange alternativ för apputveckling"</string>
@@ -254,7 +255,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett wifi-nätverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev, felsöka, felsökning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genväg till felrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i extramenyn"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i startmenyn"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Håll aktiverad"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skärmen vilar aldrig när laddning pågår"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktivera HCI snoop-logg för Bluetooth"</string>
@@ -380,7 +381,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profilens HWUI-rendering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktivera GPU-felsökningslager"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillåt att felsökningsappar läser in GPU-felsökningslager"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivera verbose-loggning"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivera utförlig loggning för leverantörer"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Ta med ytterligare enhetsspecifika leverantörsloggar i felrapporter. Dessa kan innehålla privata uppgifter samt använda mer batteri och/eller mer lagringsutrymme."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala – fönsteranimering"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala – övergångsanimering"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Längre tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kortare tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Nästa"</string>
+    <string name="back" msgid="5554327870352703710">"Tillbaka"</string>
+    <string name="save" msgid="3745809743277153149">"Spara"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarm och påminnelser"</string>
@@ -547,13 +545,16 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Nyss"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Den här telefonen"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Den här surfplattan"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dockningsstationens högtalare"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Extern enhet"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Ansluten enhet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Det går inte att spela upp denna enhet"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan inte spelas på denna enhet"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Uppgradera kontot för att byta"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Det går inte att spela upp nedladdningar här"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Försök igen efter annonsen"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Väck enheten för att spela upp här"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheten har inte godkänts för uppspelning"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheten är inte godkänd"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Det går inte att spela upp detta här"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Det gick inte att ansluta. Stäng av enheten och slå på den igen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ljudenhet med kabelanslutning"</string>
@@ -578,13 +579,10 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begränsad profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Lägga till ny användare?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dela enheten med andra om du skapar flera användare. Alla användare får sitt eget utrymme som de kan anpassa som de vill med appar, bakgrund och så vidare. Användarna kan även ändra enhetsinställningar som påverkar alla, till exempel wifi.\n\nNär du lägger till en ny användare måste han eller hon konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning. Tillgänglighetsinställningar och tjänster kanske inte överförs till den nya användaren."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användares räkning."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"När du lägger till en ny användare måste den personen konfigurera sitt utrymme.\n\nAlla användare kan uppdatera appar för samtliga användare."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vill du göra denna användare till administratör?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratörer har särskilda behörigheter som andra användare inte har. En administratör kan hantera alla användare, uppdatera eller återställa den här enheten, ändra inställningar, se alla installerade appar och bevilja eller återkalla administratörsbehörigheter för andra."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Gör till administratör"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurera användare nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Kontrollera att personen finns tillgänglig för att konfigurera sitt utrymme på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vill du konfigurera en profil nu?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"En ny gästsession startas och alla appar och all data från den pågående sessionen raderas"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vill du avsluta gästläget?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Appar och data från den pågående gästsessionen raderas"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ja, gör till administratör"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nej, gör inte till administratör"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avsluta"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vill du spara gästaktivitet?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan spara aktivitet från den pågående sessionen eller radera appar och data"</string>

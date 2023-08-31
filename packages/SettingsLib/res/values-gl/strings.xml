@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio en HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio en HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audiófonos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Audio de baixo consumo"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"Audio de baixo consumo"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectado a audiófonos"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Estableceuse conexión co audio de baixo consumo"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectado ao audio multimedia"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A vinculación garante acceso aos teus contactos e ao historial de chamadas ao estar conectado"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque a clave de acceso ou o PIN son incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, clave de acceso ou PIN incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Non se pode comunicar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculación rexeitada por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenador"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Escoller perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Persoal"</string>
     <string name="category_work" msgid="4014193632325996115">"Traballo"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clonar"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcións para programadores"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activar opcións para programadores"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Definir as opcións de desenvolvemento de aplicacións"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Máis tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Seguinte"</string>
+    <string name="back" msgid="5554327870352703710">"Atrás"</string>
+    <string name="save" msgid="3745809743277153149">"Gardar"</string>
     <string name="okay" msgid="949938843324579502">"Aceptar"</string>
     <string name="done" msgid="381184316122520313">"Feito"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmas e recordatorios"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Esta tableta"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altofalante da base"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Non se pode reproducir contido neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Cambia a conta a un plan superior para facer a modificación"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Engadir un usuario novo?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Podes compartir este dispositivo con outras persoas a través da creación de usuarios adicionais. Cada usuario ten o seu propio espazo que pode personalizar coas súas propias aplicacións, fondos de pantalla etc. Os usuarios tamén poden modificar as opcións de configuración do dispositivo, como a rede wifi, que afectan a todo o mundo.\n\nCando engadas un usuario novo, este deberá configurar o seu espazo.\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios. Non se poden transferir ao novo usuario os servizos nin a configuración de accesibilidade."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Cando engadas un usuario novo, este deberá configurar o seu espazo.\n\nCalquera usuario pode actualizar as aplicacións para todos os demais usuarios."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Queres converter este usuario en administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Os administradores teñen privilexios especiais cos que non contan outros usuarios. Un administrador pode xestionar todos os usuarios, actualizar ou restablecer este dispositivo, modificar a configuración, ver todas as aplicacións instaladas, e concederlles ou quitarlles os privilexios de administrador a outras persoas."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Converter en administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o usuario agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que a persoa está dispoñible para acceder ao dispositivo e configurar o seu espazo"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar o perfil agora?"</string>
@@ -593,7 +591,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Engadir"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo usuario"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Información usuario"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Información do usuario"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Información do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restrinxido, precisarás configurar un bloqueo da pantalla para protexer as túas aplicacións e datos persoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Iniciarase unha nova sesión de convidado e eliminaranse todas as aplicacións e datos desta sesión"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Saír do modo de convidado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Eliminaranse as aplicacións e os datos da sesión de convidado actual"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Si, convertelo en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Non, non convertelo en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Saír"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gardar actividade do convidado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Podes gardar a actividade da sesión ou eliminar todas as aplicacións e datos"</string>

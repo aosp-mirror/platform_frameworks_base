@@ -107,7 +107,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Vstupné zariadenie"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Prístup na internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Zdieľanie kontaktov a histórie hovorov"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Zdieľať kontakty a históriu hovorov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Používané pri zdieľaní kontaktov a histórie hovorov"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Zdieľanie pripojenia na Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Textové správy"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD zvuk: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD zvuk"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Načúvadlá"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Pripojené k načúvadlám"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Pripojené k systému LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Pripojené ku zvukovému médiu"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nepodarilo sa spárovať so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> sa nespárovalo pre nesprávny kód PIN alebo prístupový kľúč."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nespárované so zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: nesprávny PIN či prístupový kľúč."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"So zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nie je možné komunikovať."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Párovanie odmietnuté zariadením <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Počítač"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Výber profilu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobné"</string>
     <string name="category_work" msgid="4014193632325996115">"Pracovné"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klonovanie"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pre vývojárov"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Povolenie možností vývojára"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Možnosti nastavenia vývoja aplikácií"</string>
@@ -305,7 +306,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Keď je tento režim aktivovaný, adresa MAC tohto zariadenia sa môže pri každom pripojení k sieti s aktivovanou randomizáciou adries MAC zmeniť."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť zapisovača do denníkov"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vymazať trvalé úložisko zapisovača do denníka?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Keď prestaneme monitorovať pomocou trvalého zapisovača do denníka, musíme vymazať jeho dáta, ktoré sa nachádzajú vo vašom zariadení."</string>
@@ -327,7 +328,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Tieto nastavenia sú určené len pre vývojárov. Môžu spôsobiť poruchu alebo nesprávne fungovanie zariadenia a nainštalovaných aplikácií."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Overovať aplikácie z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zobraziť zariadenia Bluetooth zobrazovať bez názvov (iba adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth pri problémoch s hlasitosťou vo vzdialených zariadeniach (napr. príliš vysoká hlasitosť alebo absencia ovládacích prvkov)"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Povoliť skupinu funkcií Bluetooth Gabeldorche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Povoľuje funkciu Zlepšené možnosti pripojenia."</string>
@@ -363,16 +364,16 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Ladiť prekresľovanie grafickým procesorom"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Zakázať hardvérové prekrytia"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy skladať obrazovku grafickým procesorom"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulácia far. priestoru"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulácia farebného priestoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Trasovanie OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Vyp. smer. zvuku do USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Vypnúť smerovanie zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnúť automatické smerovanie do audio periférií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazovať ohraničenia"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vynútiť rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Priehľadný navigačný panel"</string>
-    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Nastaviť farbu pozadia navigačné panela predvolene priehľadnú"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Nastaviť farbu pozadia navigačného panela predvolene priehľadnú"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Povoliť rozmazanie na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
@@ -380,7 +381,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Vykresľovanie HWUI profilu"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podr. zapis. dodáv. do denníka"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podrobný zápis dodávateľov do denníka"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mierka animácie premeny"</string>
@@ -392,7 +393,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Limit procesov na pozadí"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Zobrazovať nereagovania aplikácií na pozadí"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Zobrazovať dialógové okno „Aplikácia nereaguje“ pre aplikácie na pozadí"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť varovania kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
@@ -544,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefón"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Reproduktor doku"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externé zariadenie"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pripojené zariadenie"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefón"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"V tomto zariadení sa nedá prehrávať obsah"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Inovujte účet a prejdite naň"</string>
@@ -551,7 +555,7 @@
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Skúste to znova po reklame"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Ak chcete prehrávať obsah tu, prebuďte zariadenie"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Prehrávanie v tomto zariadení nie je schválené"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tu sa toto médium nedá prehrať"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Médium sa tu nedá prehrať"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio zariadenie s káblom"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomocník a spätná väzba"</string>
@@ -574,8 +578,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Používateľ"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Obmedzený profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Pridať nového používateľa?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvorením ďalších používateľov môžete toto zariadenie zdieľať s inými ľuďmi. Každý používateľ má svoje prostredie, ktoré si môže prispôsobiť vlastnými aplikáciami, tapetou atď. Používatelia tiež môžu upraviť nastavenia zariadenia (napr. Wi-Fi), ktoré ovplyvnia všetkých používateľov.\n\nKeď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nAkýkoľvek používateľ môže aktualizovať aplikácie všetkých používateľov. Nastavenia dostupnosti a služby sa nemusia preniesť novému používateľovi."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nAkýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Vytvorením ďalších používateľov môžete toto zariadenie zdieľať s inými ľuďmi. Každý používateľ má svoje prostredie, ktoré si môže prispôsobiť vlastnými aplikáciami, tapetou atď. Používatelia tiež môžu upraviť nastavenia zariadenia (napr. Wi-Fi), ktoré ovplyvnia všetkých používateľov.\n\nKeď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKaždý používateľ môže aktualizovať aplikácie všetkých používateľov. Nastavenia dostupnosti a služby sa nemusia preniesť novému používateľovi."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKaždý používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Chcete tohto používateľa nastaviť ako správcu?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Správcovia majú oproti iným používateľom špeciálne oprávnenia. Správca môže ovládať všetkých používateľov, aktualizovať alebo resetovať toto zariadenie, upravovať nastavenia, prezerať všetky nainštalované aplikácie a udeľovať či odoberať správcovské oprávnenia iným používateľom."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Nastaviť ako správcu"</string>
@@ -670,14 +674,14 @@
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Vyberte rozloženie klávesnice"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predvolené"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínanie obrazovky"</string>
-    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolenie zapínania obrazovky"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povoliť zapínanie obrazovky"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povoľte aplikácii zapínať obrazovku. Ak to urobíte, aplikácia bude môcť kedykoľvek zapínať obrazovku, a to aj vtedy, keď to nebudete mať v úmysle."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Chcete zastaviť vysielanie aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ak vysielate aplikáciu <xliff:g id="SWITCHAPP">%1$s</xliff:g> alebo zmeníte výstup, aktuálne vysielanie bude zastavené"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmena výstupu"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktívne animácie gesta Späť"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoľte animácie v systéme pre prediktívne gesto Späť"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoliť animácie v systéme pre prediktívne gesto Späť"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavenie povoľuje animácie v systéme na účely prediktívnej animácie gest. Vyžaduje nastavenie povolenia enableOnBackInvokedCallback na pravdu v súbore manifestu konkrétnej aplikácie."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Posuňte doľava"</item>

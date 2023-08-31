@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"ສຽງ HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"ສຽງ HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ອຸປະກອນຊ່ວຍຟັງ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"ສຽງ LE"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"ສຽງ LE"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ເຊື່ອມຕໍ່ຫາອຸປະກອນຊ່ວຍຟັງແລ້ວ"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"ເຊື່ອມຕໍ່ຫາສຽງ LE ແລ້ວ"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ເຊື່ອມຕໍ່ກັບສື່ດ້ານສຽງແລ້ວ"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"ເລືອກໂປຣໄຟລ໌"</string>
     <string name="category_personal" msgid="6236798763159385225">"​ສ່ວນ​ໂຕ"</string>
     <string name="category_work" msgid="4014193632325996115">"​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ໂຄລນ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ເປີດໃຊ້ຕົວເລືອກນັກພັດທະນາ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ຕັ້ງຄ່າໂຕເລືອກສຳລັບການພັດທະນາແອັບຯ"</string>
@@ -363,7 +364,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"ແກ້ບັນຫາການແຕ້ມທັບຂອງ GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"ປິດການເຮັດວຽກ HW overlays"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ໃຊ້ GPU ໃນການວາງອົງປະກອບໜ້າຈໍສະເໝີ"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງ color space"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງຂອບເຂດສີ"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"ເປີດການໃຊ້ຮ່ອງຮອຍໃນ OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"ປິດ​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​ສຽງ USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"ປິດ​​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໄປ​ຫາອຸ​ປະ​ກອ​ນ​ຕໍ່​ພ່ວງ​ສຽງ​ USB"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ເພີ່ມເວລາ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ຫຼຸດເວລາ."</string>
     <string name="cancel" msgid="5665114069455378395">"ຍົກເລີກ"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ຕໍ່ໄປ"</string>
+    <string name="back" msgid="5554327870352703710">"ກັບຄືນ"</string>
+    <string name="save" msgid="3745809743277153149">"ບັນທຶກ"</string>
     <string name="okay" msgid="949938843324579502">"ຕົກລົງ"</string>
     <string name="done" msgid="381184316122520313">"ແລ້ວໆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ຕອນນີ້"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ໂທລະສັບນີ້"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ແທັບເລັດນີ້"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ແທ່ນວາງລຳໂພງ"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ອຸປະກອນພາຍນອກ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ອຸປະກອນທີ່ເຊື່ອມຕໍ່"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ໂທລະສັບນີ້"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ຫຼິ້ນຢູ່ອຸປະກອນນີ້ບໍ່ໄດ້"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ອັບເກຣດບັນຊີເພື່ອສະຫຼັບ"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ຕັ້ງໃຫ້ຜູ້ໃຊ້ຄົນນີ້ເປັນຜູ້ເບິ່ງແຍງລະບົບບໍ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ຜູ້ເບິ່ງແຍງລະບົບຈະມີສິດທິພິເສດທີ່ຜູ້ໃຊ້ຄົນອື່ນບໍ່ມີ. ຜູ້ເບິ່ງແຍງລະບົບສາມາດຈັດການຜູ້ໃຊ້ທັງໝົດ, ການອັບເດດ ຫຼື ການຣີເຊັດອຸປະກອນນີ້, ການແກ້ໄຂການຕັ້ງຄ່າ, ການເບິ່ງແອັບທີ່ຕິດຕັ້ງທັງໝົດ ແລະ ໃຊ້ ຫຼື ຖອດຖອນສິດທິຜູ້ເບິ່ງແຍງລະບົບສຳລັບຄົນອື່ນໆໄດ້."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ຕັ້ງໃຫ້ເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກເຊດຊັນແຂກປັດຈຸບັນ"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"ແມ່ນ, ຕັ້ງໃຫ້ເຂົາເຈົ້າເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ບໍ່, ບໍ່ຕັ້ງໃຫ້ເຂົາເຈົ້າເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ອອກ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ບັນທຶກການເຄື່ອນໄຫວແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ທ່ານສາມາດບັນທຶກການເຄື່ອນໄຫວຈາກເຊດຊັນປັດຈຸບັນ ຫຼື ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດໄດ້"</string>

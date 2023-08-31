@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD აუდიო: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD აუდიო"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"სმენის მოწყობილობები"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE აუდიო"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE-აუდიო"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"დაკავშირებულია სმენის მოწყობილობებთან"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"დაკავშირებულია LE აუდიოსთან"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"დაკავშირებულია აუდიო მულტიმედიურ სისტემასთან"</string>
@@ -174,7 +174,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"ზოგიერთი ნაგულისხმევი პარამეტრი დაყენებულია"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"ნაგულისხმევი პარამეტრები არ არის დაყენებული."</string>
     <string name="tts_settings" msgid="8130616705989351312">"ტექსტის გახმოვანების პარამეტრები"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"მეტყველების სინთეზი"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"გახმოვანებული ტექსტის გამოტანა"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"მეტყველების ტემპი"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"ტექსტის თხრობის სიჩქარე"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"სიმაღლე"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"აირჩიეთ პროფილი"</string>
     <string name="category_personal" msgid="6236798763159385225">"პირადი"</string>
     <string name="category_work" msgid="4014193632325996115">"სამსახური"</string>
+    <string name="category_clone" msgid="1554511758987195974">"კლონის შექმნა"</string>
     <string name="development_settings_title" msgid="140296922921597393">"პარამეტრები დეველოპერებისთვის"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"დეველოპერთა პარამეტრების ჩართვა"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"პარამეტრების დაყენება აპების დეველოპერებისთვის"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"მეტი დრო."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ნაკლები დრო."</string>
     <string name="cancel" msgid="5665114069455378395">"გაუქმება"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"შემდეგ"</string>
+    <string name="back" msgid="5554327870352703710">"უკან"</string>
+    <string name="save" msgid="3745809743277153149">"შენახვა"</string>
     <string name="okay" msgid="949938843324579502">"კარგი"</string>
     <string name="done" msgid="381184316122520313">"მზადაა"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"მაღვიძარები და შეხსენებები"</string>
@@ -547,10 +545,13 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ახლახან"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ეს ტელეფონი"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ეს ტაბლეტი"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"დინამიკის სამაგრი"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"გარე მოწყობილობა"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"დაკავშირებული მოწყობილობა"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ეს ტელეფონი"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ამ მოწყობილობაზე დაკვრა შეუძლებელია"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"გადასართავად განაახლეთ ანგარიში"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"აქ ჩამოტვირთვების თამაში შეუძლებელია"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"შეუძლებელია აქ ჩამოტვირ. თამაში"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"სცადეთ ხელახლა რეკლამის შემდეგ"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"დასაკრავად გამოაღვიძეთ ტელეფონი"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"მოწყობილობა არ არის ავტორიზებული დასაკრავად"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"დაემატოს ახალი მომხმარებელი?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"დამატებითი მომხმარებლების შექმნით, შეგიძლიათ ეს მოწყობილობა სხვებს გაუზიაროთ. ყოველ მომხმარებელს თავისი სივრცე აქვს, რომლის პერსონალიზება შეუძლია საკუთარი აპებით, ფონით და ა.შ. მომხმარებლებს აგრეთვე შეუძლიათ ისეთი პარამეტრების მორგება, როგორიცაა Wi‑Fi, რაც ყველაზე გავრცელდება.\n\nახალი მომხმარებლის დამატების შემდეგ, მომხმარებელმა საკუთარი სივრცე უნდა დააყენოს.\n\nყველა მომხმარებელი შეძლებს აპების ყველა სხვა მომხმარებლისთვის განახლებას. მარტივი წვდომის პარამეტრები/სერვისები შესაძლოა ახალ მომხმარებლებზე არ გავრცელდეს."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ახალი მომხმარებლის დამატებისას, ამ მომხმარებელს საკუთარი სივრცის შექმნა მოუწევს.\n\nნებისმიერ მომხმარებელს შეუძლია აპები ყველა სხვა მომხმარებლისათვის განაახლოს."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"გსურთ ამ მომხმარებლის ადმინისტრატორად დანიშვნა?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ადმინისტრატორებს აქვთ სპეციალური პრივილეგიები, დანარჩენი მომხმარებლებისგან განსხვავებით. ადმინისტრატორს შეუძლია მართოს ყველა მომხმარებელი, განაახლოს ან გადააყენოს ეს მოწყობილობა, შეცვალოს პარამეტრები, ნახოს ყველა დაინსტალირებული აპი და მიანიჭოს ან ჩამოართვას ადმინისტრატორის პრივილეგიები სხვებს."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ადმინისტრატორად დანიშვნა"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"გსურთ მომხმარებლის პარამეტრების დაყენება?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"დარწმუნდით, რომ პირს შეუძლია მოწყობილობის აღება და საკუთარი სივრცის დაყენება"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"გსურთ დავაყენო პროფილი ახლა?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ამ ქმედებით დაიწყება სტუმრის ახალი სესია და წაიშლება ყველა აპი და მონაცემი მიმდინარე სესიიდან"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"გსურთ სტუმრის რეჟიმიდან გასვლა?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ეს ქმედება წაშლის აპებსა და მონაცემებს სტუმრის რეჟიმის მიმდინარე სესიიდან"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"დიახ, გახდეს ის ადმინისტრატორი"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"არა, არ გახდეს ის ადმინისტრატორი"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"გასვლა"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"გსურთ სტუმრის აქტივობის შენახვა?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"შეგიძლიათ შეინახოთ აქტივობა მიმდინარე სესიიდან ან წაშალოთ ყველა აპი და მონაცემი"</string>

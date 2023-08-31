@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Ligado a aparelhos auditivos"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ligado a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ligado ao áudio de multimédia"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou token de acesso incorreto."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: PIN ou chave de acesso errado."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Emparelhamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Escolher perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pessoal"</string>
     <string name="category_work" msgid="4014193632325996115">"Trabalho"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opções de programador"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ativar as opções de programador"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Definir opções de desenvolvimento da aplicação"</string>
@@ -307,7 +308,7 @@
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Acesso ilimitado"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos da memória intermédia do registo"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selec. tam. reg. p/ mem. int. reg."</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Pretende limpar o armazenamento persistente do registo?"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Quer limpar o armazenamento persistente do registo?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quando deixamos de monitorizar com o registo persistente, é necessário apagar os dados de registo que se encontram no seu dispositivo."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Guardar dados de registo consistentemente"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Selecionar buffers de registo para armazenamento persistente no dispositivo"</string>
@@ -515,16 +516,13 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Não registado"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Indisponível"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"O MAC é aleatório."</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligados}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 dispositivo ligado}=1{1 dispositivo ligado}other{# dispositivos ligados}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mais tempo."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menos tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Cancelar"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Seguinte"</string>
+    <string name="back" msgid="5554327870352703710">"Anterior"</string>
+    <string name="save" msgid="3745809743277153149">"Guardar"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Concluir"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telemóvel"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altifalante estação carregam."</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo associado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telemóvel"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Atualize a conta para mudar"</string>
@@ -566,25 +567,22 @@
     <string name="blob_id_text" msgid="8680078988996308061">"ID de dados partilhados: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Expira a <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Ocorreu um erro ao eliminar os dados partilhados."</string>
-    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Não existem alocações adquiridas para estes dados partilhados. Pretende eliminá-los?"</string>
+    <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Não existem alocações adquiridas para estes dados partilhados. Quer eliminá-los?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Apps a partilhar dados"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"Nenhuma descrição fornecida pela app."</string>
     <string name="accessor_expires_text" msgid="4625619273236786252">"A alocação expira a <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Eliminar dados partilhados"</string>
-    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Tem a certeza de que pretende eliminar estes dados partilhados?"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Tem a certeza de que quer eliminar estes dados partilhados?"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"Os utilizadores têm as suas próprias aplicações e conteúdos"</string>
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Pode restringir o acesso às aplicações e conteúdos da sua conta"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Definir este utilizador como um administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Os administradores têm privilégios especiais que outros utilizadores não têm. Um administrador pode gerir todos os utilizadores, atualizar ou repor este dispositivo, modificar definições, ver todas as apps instaladas e revogar ou conceder privilégios de administrador a outras pessoas."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Definir como administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar perfil agora?"</string>
@@ -593,7 +591,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Adicionar"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo utilizador"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizador"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Dados do utilizador"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Informação do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Antes de poder criar um perfil restrito, tem de configurar um bloqueio de ecrã para proteger as suas aplicações e dados pessoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Definir bloqueio"</string>
@@ -607,7 +605,7 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Repor convidado"</string>
-    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Pretende repor o convidado?"</string>
+    <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Quer repor o convidado?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover o convidado?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Repor"</string>
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Remover"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta ação inicia uma nova sessão de convidado e elimina todas as apps e dados da sessão atual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo convidado?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta ação elimina as apps e os dados da sessão de convidado atual"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Sim, definir como administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Não, não definir como administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Guardar atividade de convidado?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pode guardar a atividade da sessão atual ou eliminar todas as apps e dados"</string>

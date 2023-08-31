@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (sikker)"</item>
     <item msgid="7322156123728520872">"4K (opskaleret)"</item>
     <item msgid="7735692090314849188">"4K (opskaleret, sikker)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (dobbelt skærm)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Ingen"</item>
@@ -281,7 +281,5 @@
     <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
     <item msgid="8828567335701536560">"Lydkilde"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
-  </string-array>
-  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

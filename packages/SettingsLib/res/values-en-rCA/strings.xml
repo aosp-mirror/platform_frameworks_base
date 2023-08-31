@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Hearing Aids"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connected to Hearing Aids"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connected to LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connected to media audio"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Choose profile"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personal"</string>
     <string name="category_work" msgid="4014193632325996115">"Work"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Developer options"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Enable developer options"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Set options for app development"</string>
@@ -544,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Just now"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"This phone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"This tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dock speaker"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"External Device"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Connected device"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"This phone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Cant play on this device"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade account to switch"</string>
@@ -574,10 +578,10 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"User"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Restricted profile"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Make this user an admin?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins have special privileges that other users dont. An admin can manage all users, update or reset this device, modify settings, see all installed apps, and grant or revoke admin privileges for others."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins have special privileges that other users don\'t. An admin can manage all users, update or reset this device, modify settings, see all installed apps and grant or revoke admin privileges for others."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Make admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure the person is available to take the device and set up their space"</string>

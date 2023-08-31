@@ -95,7 +95,7 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktivt, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivt – venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktivt, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
@@ -115,9 +115,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-lyd"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Høreapparater"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE-lyd"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Forbundet til høreapparater"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Forbundet med LE Audio"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Forbundet med LE-lyd"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Forbundet til medielyd"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Forbundet til telefonlyd"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Forbundet til filoverførselsserver"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annuller"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Parring giver adgang til dine kontakter og din opkaldshistorik, når enhederne er forbundet."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Parring med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> mislykkedes på grund af en forkert pinkode eller adgangsnøgle."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Kunne ikke parre med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> pga. forkert pinkode eller adgangsnøgle."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Der kan ikke kommunikeres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Parring afvist af <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Vælg profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personlig"</string>
     <string name="category_work" msgid="4014193632325996115">"Arbejde"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Indstillinger for udviklere"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivér indstillinger for udviklere"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Konfigurer valgmuligheder for appudvikling"</string>
@@ -438,7 +439,7 @@
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Deaktiveret"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monokromasi"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranopi (rød-grøn)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Farvekorrigering kan være en nyttig funktion, når du vil:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fjerne farver, så du nemmere kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Mere tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mindre tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuller"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Næste"</string>
+    <string name="back" msgid="5554327870352703710">"Tilbage"</string>
+    <string name="save" msgid="3745809743277153149">"Gem"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Udfør"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmer og påmindelser"</string>
@@ -547,13 +545,16 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Lige nu"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Denne tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dockhøjttaler"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ekstern enhed"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Forbundet enhed"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefon"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Indholdet kan ikke afspilles på denne enhed"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan ikke afspilles på denne enhed"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Opgrader kontoen for at skifte"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Downloads kan ikke afspilles her"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prøv igen efter annoncen"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Væk enheden for at afspille her"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheden er ikke godkendt til afspilning"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheden er ikke godkendt"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Mediet kan ikke afspilles her"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhed med ledning"</string>
@@ -578,13 +579,10 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrænset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du tilføje en ny bruger?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enhed med andre ved at oprette ekstra brugere. Hver bruger har sit personlige område, som kan tilpasses med apps, baggrund osv. Brugerne kan også justere enhedsindstillinger, som for eksempel Wi-Fi, som påvirker alle.\n\nNår du tilføjer en ny bruger, skal vedkommende konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle andre brugere. Indstillinger og tjenester for hjælpefunktioner overføres muligvis ikke til den nye bruger."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit rum.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du tilføjer en ny bruger, skal personen konfigurere sit område.\n\nAlle brugere kan opdatere apps for alle de andre brugere."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vil du tildele denne bruger administratorrettigheder?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorer har særlige rettigheder, som andre brugere ikke har. En administrator kan administrere alle brugere, opdatere eller gendanne denne enhed, skifte indstillinger, se alle installerede apps og tildele eller tilbagekalde andres administratorrettigheder."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Tildel administratorrettigheder"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brugeren nu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for, at brugeren har mulighed for at tage enheden og konfigurere sit eget rum"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du oprette en profil nu?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Denne handling starter en ny gæstesession og sletter alle apps og data fra den aktuelle session"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du afslutte gæstetilstanden?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Denne handling sletter apps og data fra den aktuelle gæstesession."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ja, tildel vedkommende administratorrettigheder"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nej, tildel ikke vedkommende administratorrettigheder"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Luk"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vil du gemme gæsteaktiviteten?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Du kan gemme aktivitet fra den aktuelle session eller slette alle apps og data"</string>

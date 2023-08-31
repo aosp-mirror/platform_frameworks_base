@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"صوت عالي الدقة: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"صوت عالي الدقة"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"سماعات الأذن الطبية"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"تمّ التوصيل بسماعات الأذن الطبية"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"‏متصل بـ LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"متصل بالإعدادات الصوتية للوسائط"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"اختيار ملف شخصي"</string>
     <string name="category_personal" msgid="6236798763159385225">"التطبيقات الشخصية"</string>
     <string name="category_work" msgid="4014193632325996115">"تطبيقات العمل"</string>
+    <string name="category_clone" msgid="1554511758987195974">"استنساخ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"خيارات المطورين"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تعيين خيارات تطوير التطبيق"</string>
@@ -256,7 +257,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة زر التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"البقاء في الوضع النشط"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن."</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"عدم دخول الشاشة في وضع السكون مطلقًا أثناء الشحن"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"تفعيل سجلّ تطفل بواجهة وحدة تحكم المضيف في بلوتوث"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"رَقمِن محتوى حزم بيانات البلوتوث. (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"فتح قفل المصنّع الأصلي للجهاز"</string>
@@ -316,7 +317,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"تفعيل فحص سمة العرض"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏جعل بيانات الجوّال نشطة دائمًا حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
@@ -328,7 +329,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)."</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"إيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏تفعيل حِزم ميزة Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"لتفعيل الميزة \"إمكانية اتصال محسّن\""</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"تطبيق طرفي محلي"</string>
@@ -381,7 +382,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏تفعيل طبقات تصحيح أخطاء GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏السماح بتحميل طبقات تصحيح أخطاء GPU لتطبيقات تصحيح الأخطاء"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"تفعيل التسجيل المطوَّل للمورّد"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"يمكنك تضمين سجلات المورّدين الإضافية الخاصة بالجهاز في تقارير الخطأ، وقد تحتوي على معلومات شخصية و/أو تستهلك المزيد من شحن البطارية و/أو تستهلك المزيد من مساحة التخزين."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"تضمين سجلات المورّدين الإضافية الخاصة بالجهاز في تقارير الخطأ، والتي قد تحتوي على معلومات شخصية و/أو تستهلك المزيد من شحن البطارية و/أو تستهلك المزيد من مساحة التخزين"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"حجم الرسوم المتحركة للنافذة"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"حجم الرسوم المتحركة للنقل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"طول مدة الرسوم المتحركة"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"وقت أكثر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"وقت أقل."</string>
     <string name="cancel" msgid="5665114069455378395">"إلغاء"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"التالي"</string>
+    <string name="back" msgid="5554327870352703710">"رجوع"</string>
+    <string name="save" msgid="3745809743277153149">"حفظ"</string>
     <string name="okay" msgid="949938843324579502">"حسنًا"</string>
     <string name="done" msgid="381184316122520313">"تم"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
@@ -547,14 +545,17 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"للتو"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"هذا الهاتف"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"هذا الجهاز اللوحي"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"مكبّر صوت بقاعدة إرساء"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"جهاز خارجي"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"جهاز متّصل"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"هذا الهاتف"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"لا يمكن تشغيل الوسائط على هذا الجهاز."</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"يجب ترقية الحساب للتبديل."</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"لا يمكن تشغيل المحتوى الذي تم تنزيله هنا."</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"يمكنك إعادة المحاولة بعد الإعلان."</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"يجب تنشيط الجهاز لتشغيل الوسائط هنا."</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"غير مسموح لهذا الجهاز بتشغيل الوسائط."</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"لا يمكن تشغيل هذه الوسائط هنا."</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"لا يمكن تشغيل الوسائط هنا"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"يجب ترقية الحساب للتبديل"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"المحتوى المنزَّل غير متوافق"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"أعِد المحاولة بعد الإعلان"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"نشِّط الجهاز للتشغيل هنا"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"غير مسموح له بتشغيل وسائط"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"هذه الوسائط غير متوافقة"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
     <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات"</string>
@@ -577,14 +578,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"المستخدم"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ملف شخصي محظور"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"تسهيل الاستخدام\" إلى المستخدم الجديد."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"هل تريد منح هذا المستخدم امتيازات المشرف؟"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"تتوفّر للمشرفين امتيازات خاصة لا يتم منحها للمستخدمين الآخرين. يمكن للمشرف إدارة حسابات جميع المستخدمين، وتحديث الجهاز أو إعادة ضبطه، وتعديل الإعدادات، والاطّلاع على جميع التطبيقات المثبّتة، ومنح امتيازات المشرف للمستخدمين الآخرين أو إبطالها."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"منح المستخدم امتيازات المشرف"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هل تريد إعداد المستخدم الآن؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"يُرجى التأكّد من أن الشخص يمكنه استخدام الجهاز الآن وإعداد مساحته."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"هل ترغب في إعداد ملف شخصي الآن؟"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ستؤدي إعادة الضبط إلى بدء جلسة ضيف جديدة وحذف جميع التطبيقات والبيانات من الجلسة الحالية."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"هل تريد الخروج من وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"سيؤدي الخروج من وضع الضيف إلى حذف التطبيقات والبيانات من جلسة الضيف الحالية."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"نعم، أريد منح هذا المستخدم امتيازات المشرف."</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"لا أريد منح هذا المستخدم امتيازات المشرف."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"هل تريد حفظ النشاط في وضع الضيف؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"يمكنك حفظ نشاط من الجلسة الحالية أو حذف كلّ التطبيقات والبيانات."</string>
@@ -674,7 +670,7 @@
     <string name="accessibility_no_calling" msgid="3540827068323895748">"لا يتم الاتصال."</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"اختيار صورة الملف الشخصي"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"رمز المستخدم التلقائي"</string>
-    <string name="physical_keyboard_title" msgid="4811935435315835220">"لوحة مفاتيح خارجية"</string>
+    <string name="physical_keyboard_title" msgid="4811935435315835220">"لوحة المفاتيح الخارجية"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"اختيار تنسيق لوحة مفاتيح"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"التنسيق التلقائي"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"تشغيل الشاشة"</string>
@@ -685,7 +681,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"بث تطبيق <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"تغيير جهاز الإخراج"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"صور متحركة تعرض إيماءة الرجوع إلى الخلف التنبؤية"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"فعِّل الصور المتحركة في النظام لإيماءة الرجوع إلى الخلف التنبؤية."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"تفعيل الصور المتحركة في النظام لإيماءة الرجوع إلى الخلف التنبؤية"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏يفعّل هذا الإعداد الصور المتحركة في النظام للصور المتحركة التي تعرض إيماءة الرجوع إلى الخلف التنبؤية. يتطلب الإعداد ضبط enableOnBackInvokedCallback إلى true لكل تطبيق في ملف البيان."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"نقل لليسار"</item>

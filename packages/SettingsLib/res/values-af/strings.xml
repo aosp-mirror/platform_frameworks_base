@@ -84,7 +84,7 @@
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Ontkoppel"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Ontkoppel tans…"</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Verbind tans…"</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Verbind tans …"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Gekoppel<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Verbind tans…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Gekoppel (geen foon nie)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-oudio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD oudio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Gehoortoestelle"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-oudio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE-oudio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Gekoppel aan gehoortoestelle"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Gekoppel aan LE-oudio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Gekoppel aan media-oudio"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Kies profiel"</string>
     <string name="category_personal" msgid="6236798763159385225">"Persoonlik"</string>
     <string name="category_work" msgid="4014193632325996115">"Werk"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Kloon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Ontwikkelaaropsies"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktiveer ontwikkelaaropsies"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Stel opsies vir programontwikkeling"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Meer tyd."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Minder tyd."</string>
     <string name="cancel" msgid="5665114069455378395">"Kanselleer"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Volgende"</string>
+    <string name="back" msgid="5554327870352703710">"Terug"</string>
+    <string name="save" msgid="3745809743277153149">"Stoor"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klaar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en onthounotas"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sopas"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Hierdie foon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Hierdie tablet"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokluidspreker"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Eksterne toestel"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Gekoppelde toestel"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Hierdie foon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan nie op hierdie toestel speel nie"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Gradeer rekening op om oor te skakel"</string>
@@ -577,14 +578,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Gebruiker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkte profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het sy eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos Wi-Fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het hulle eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos wi-fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Maak hierdie gebruiker ’n admin?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins het spesiale voorregte wat ander gebruikers nie het nie. ’n Admin kan alle gebruikers bestuur, hierdie toestel opdateer of terugstel, instellings wysig, alle geïnstalleerde apps sien, en adminvoorregte vir ander mense gee of herroep."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Maak admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Moet die gebruiker nou opgestel word?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Maak seker die persoon is beskikbaar om die toestel te vat en hul spasie op te stel"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Stel profiel nou op?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle programme en data van die huidige sessie uitvee"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Verlaat gasmodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dit sal programme en data in die huidige gastesessie uitvee"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ja, maak hulle ’n admin"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nee, moet hulle nie ’n admin maak nie"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Gaan uit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Stoor gasaktiwiteit?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Jy kan aktiwiteit in die huidige sessie stoor of alle programme en data uitvee"</string>

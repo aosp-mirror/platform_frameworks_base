@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento in corso…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono o media esclusi)"</string>
@@ -99,8 +99,8 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attivo, solo sinistra"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attivo, solo destra"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attiva, solo sinistra"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attiva, solo destra"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Apparecchi acustici"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connessione con gli apparecchi acustici stabilita"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connesso a LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Collegato ad audio media"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
     <string name="category_work" msgid="4014193632325996115">"Lavoro"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opzioni sviluppatore"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Attiva Opzioni sviluppatore"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Imposta opzioni per lo sviluppo di applicazioni"</string>
@@ -542,9 +543,12 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo telefono"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo smartphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo telefono"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Base con altoparlante"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo esterno"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo connesso"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo smartphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossibile riprodurre su questo dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Esegui l\'upgrade dell\'account per cambiare"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Qui non è possibile riprodurre i download"</string>
@@ -574,7 +578,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. È possibile che i servizi e le impostazioni di accessibilità non vengano trasferiti al nuovo utente."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Vuoi impostare questo utente come amministratore?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Gli amministratori hanno privilegi speciali che altri utenti non hanno. Un amministratore può gestire tutti gli utenti, aggiornare o resettare questo dispositivo, modificare le impostazioni, vedere tutte le app installate e concedere o revocare privilegi amministrativi per altri utenti."</string>
