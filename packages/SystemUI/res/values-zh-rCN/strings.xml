@@ -57,8 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"另一台设备请求更改系统语言"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"更改语言"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"保持当前语言"</string>
-    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
-    <skip />
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"分享 WLAN"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许通过此网络进行无线调试吗？"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"网络名称 (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN 地址 (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"始终允许通过此网络进行调试"</string>
@@ -160,8 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"图案错误"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"密码错误"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"输错次数过多。\n请在 <xliff:g id="NUMBER">%d</xliff:g> 秒后重试。"</string>
-    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
-    <skip />
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"紧急呼叫"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"请重试。您目前已尝试 <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> 次，最多可尝试 <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 次。"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"您的数据将会被删除"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"如果您下次绘制的解锁图案仍然有误，此设备上的数据将会被删除。"</string>
@@ -415,8 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"在分享、录制或投放内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>可以访问屏幕上显示或设备中播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"在分享、录制或投放内容时，<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>可以访问通过此应用显示或播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"开始"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
-    <skip />
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已停用此选项"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"开始投放？"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"在投放内容时，Android 可以访问屏幕上显示或设备中播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"在投放某个应用时，Android 可以访问此应用显示或播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
@@ -1173,6 +1170,10 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"已开启 Google 助理感知功能"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"在设置中设置默认记事应用"</string>
     <string name="install_app" msgid="5066668100199613936">"安装应用"</string>
+    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
+    <skip />
+    <!-- no translation found for enable_display (8308309634883321977) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"麦克风和摄像头"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"近期应用对手机传感器的使用情况"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"查看近期使用情况"</string>
