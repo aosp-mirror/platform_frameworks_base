@@ -25,6 +25,7 @@
 #include <android/sync.h>
 #include <gui/TraceUtils.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/gpu/ganesh/vk/GrVkBackendSurface.h>
 #include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
 #include <vk/GrVkTypes.h>
@@ -599,7 +600,7 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
                             surface, SkSurfaces::BackendHandleAccess::kFlushRead);
                 if (backendRenderTarget.isValid()) {
                     GrVkImageInfo info;
-                    if (backendRenderTarget.getVkImageInfo(&info)) {
+                    if (GrBackendRenderTargets::GetVkImageInfo(backendRenderTarget, &info)) {
                         image = info.fImage;
                     } else {
                         ALOGE("Frame boundary: backend is not vulkan");
