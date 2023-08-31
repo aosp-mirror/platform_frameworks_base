@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="settingslib_learn_more_text" msgid="7385478101223578464">"Толығырақ"</string>
+    <string name="settingslib_learn_more_text" msgid="7385478101223578464">"Толық ақпарат"</string>
 </resources>
