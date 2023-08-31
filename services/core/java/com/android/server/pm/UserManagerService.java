@@ -23,6 +23,7 @@ import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_ABORTED;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_UNSPECIFIED;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_USER_ALREADY_AN_ADMIN;
@@ -5334,12 +5335,12 @@ public class UserManagerService extends IUserManager.Stub {
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.USER_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.MULTI_USER_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
     }
 
