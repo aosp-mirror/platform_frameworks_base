@@ -76,18 +76,18 @@
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ڈیٹا <xliff:g id="CARRIERDISPLAY">%s</xliff:g> پر سوئچ کیا گیا"</string>
     <string name="auto_data_switch_content" msgid="803557715007110959">"آپ اسے ترتیبات میں کسی بھی وقت تبدیل کر سکتے ہیں"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"کوئی موبائل ڈیٹا سروس دستیاب نہیں ہے"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"کوئی صوتی سروس نہیں"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ہنگامی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کے لئے آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ہنگامی کالز نہیں کر سکتے"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ایمرجنسی کالز نہیں کر سکتے"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ہنگامی کال بیک وضع"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ایمرجنسی کال بیک وضع"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"موبائل ڈیٹا کی صورت حال"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"‏SMS پیغامات"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"صوتی میل پیغامات"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"‏Android سسٹم"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ذاتی پروفائل پر سوئچ کریں"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"دفتری پروفائل پر سوئچ کریں"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ذاتی <xliff:g id="APP_NAME">%1$s</xliff:g> پر سوئچ کریں"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"دفتری <xliff:g id="APP_NAME">%1$s</xliff:g> پر سوئچ کریں"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"رابطے"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"اپنے رابطوں تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مقام"</string>
@@ -364,11 +366,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"‏متنی پیغامات (MMS) حاصل کریں"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"سیل کے نشریاتی پیغامات فارورڈ کریں"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"جاری کالز کا نظم کریں"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"اس سے ایپ کو آپ کے آلے پر جاری کالز کے بارے میں تفصیلات دیکھنے اور ان کالز کو کنٹرول کرنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"سیل کے نشریاتی پیغامات پڑھیں"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"سبسکرائب کردہ فیڈز پڑھیں"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"براہ راست فون نمبرز پر کال کریں"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ہنگامی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ایپ کو آپ کی مداخلت کے بغیر فون نمبرز پر کال کرنے کی سہولت حاصل ہوتی ہے۔ اس کی وجہ سے غیر متوقع چارجز وصول کئے جا سکتے ہیں یا غیر متوقع کالز موصول ہو سکتی ہیں۔ یاد رکھیں کہ اس سے ایپ کو ایمرجنسی نمبرز پر کال کرنے کی سہولت حاصل نہیں ہوتی ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالز کر کے آپ کی رقم خرچ کروا سکتی ہیں یا کیریئر کوڈز ڈائل کر سکتی ہیں جس سے اِن کمنگ کالز خودکار طور پر دوسرے نمبر پر فارورڈ ہو جاتی ہیں۔"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏IMS کال سروس تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"محفوظ عنصر کے ٹرانزیکشن کا ایونٹ"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ایپ کو ایک محفوظ عنصر پر ہونے والے ٹرانزیکشنز کے بارے میں معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"اسکرین لاک کی پیچیدگی کی درخواست کریں"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"صارف نے فیس اَنلاک کو منسوخ کر دیا"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"کافی زیادہ کوششیں۔ فیس اَنلاک دستیاب نہیں ہے۔"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"کافی زیادہ کوششیں۔ اس کے بجائے اسکرین لاک درج کریں۔"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"چہرے کی توثیق نہیں کی جا سکی۔ پھر آزمائيں۔"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"آپ نے فیس اَنلاک کو سیٹ نہیں کیا ہے"</string>
@@ -958,13 +961,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینیو پھر 0 دبائیں۔"</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ہنگامی نمبر"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ایمرجنسی نمبر"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"کوئی سروس نہیں ہے"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"اسکرین مقفل ہے۔"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ہنگامی کال کریں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ایمرجنسی کال کریں۔"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ہنگامی"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ایمرجنسی"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"کال پر واپس جائیں"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوبارہ کوشش کریں"</string>
@@ -986,7 +989,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"روکیں"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ریوائینڈ کریں"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"تیزی سے فارورڈ کریں"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ہنگامی کالز"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ایمرجنسی کالز"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"‏آپ کا SIM ‏PUK مقفل ہے۔"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"رہنمائے صارف دیکھیں یا کسٹمر کیئر سے رابطہ کریں۔"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ہٹائیں"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"وارننگ،\nآپ بلند آواز کے سگنلز کی حد سے تجاوز کر چکے ہیں جنہیں ایک ہفتے میں کوئی ہیڈ فونز پر محفوظ طریقے سے سن سکتا ہے۔\n\nاس حد سے تجاوز کرنے سے آپ کی سماعت کو مستقل طور پر نقصان پہنچے گا۔"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"وارننگ،\nآپ بلند آواز کے سگنلز کی حد سے 5 گنا تجاوز کر چکے ہیں جنہیں ایک ہفتے میں کوئی ہیڈ فونز پر محفوظ طریقے سے سن سکتا ہے۔\n\nآپ کی سماعت کی حفاظت کے لیے والیوم کو کم کر دیا گیا ہے۔"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"جس سطح پر آپ میڈیا کو سن رہے ہیں اس پر طویل عرصے تک برقرار رہنے کے نتیجے میں سماعت کو نقصان پہنچ سکتا ہے۔\n\nاس سطح پر طویل عرصے تک چلانے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"وارننگ،\nآپ فی الحال غیر محفوظ سطح پر چلائے گئے مواد کو بلند آواز میں سن رہے ہیں۔\n\nاس بلند آواز کو مسلسل سننے سے آپ کی سماعت کو مستقل طور پر نقصان پہنچے گا۔"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"اونچی آواز میں سننا جاری رکھیں؟\n\nہیڈ فون کا والیوم تجویز کردہ وقت سے زیادہ دیر تک بلند رہا ہے، جو آپ کی سماعت کو نقصان پہنچا سکتا ہے"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تیز آواز کا پتہ چلا\n\nہیڈ فون کا والیوم تجویز کردہ سے زیادہ بلند رہا ہے، جو آپ کی سماعت کو نقصان پہنچا سکتا ہے"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ایکسیسبیلٹی شارٹ کٹ استعمال کریں؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ایکسیسبیلٹی خصوصیات کے لیے شارٹ کٹ آن کریں؟"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"خارج ہونے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"سمجھ آ گئی"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"بہتر منظر کے لیے گھمائیں"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"بہتر منظر کے لیے اسپلٹ اسکرین سے باہر نکلیں"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"بہتر منظر کے لیے <xliff:g id="NAME">%s</xliff:g> کو فُل اسکرین میں کھولیں"</string>
     <string name="done_label" msgid="7283767013231718521">"ہو گیا"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"گھنٹوں کا سرکلر سلائیڈر"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"منٹس سرکلر سلائیڈر"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> پر اس تک رسائی حاصل نہیں ہو سکتی۔ اس کے بجائے اپنے فون پر کوشش کریں۔"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"‏یہ ایپ Android کے پرانے ورژن کے لیے بنائی گئی تھی۔ ہو سکتا ہے یہ ٹھیک سے کام نہ کرے اور اس میں تازہ ترین سیکیورٹی اور رازداری کے تحفظات شامل نہ ہوں۔ اپ ڈیٹ کے لیے چیک کریں یا ایپ کے ڈویلپر سے رابطہ کریں۔"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"اپ ڈیٹ چیک کریں"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"‏یہ ایپ Android کے تازہ ترین ورژن کے ساتھ مطابقت پذیر نہیں ہے۔ اپ ڈیٹ کے لیے چیک کریں یا ایپ کے ڈویلپر سے رابطہ کریں۔"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"آپ کے پاس نئے پیغامات ہیں"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏دیکھنے کیلئے SMS ایپ کھولیں"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"کچھ فعالیت محدود ہو سکتی ہے"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"اس مواد کو ورک ایپس کے ساتھ نہیں کھولا جا سکتا"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"اس مواد کا اشتراک ذاتی ایپس کے ساتھ نہیں کیا جا سکتا"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"اس مواد کو ذاتی ایپس کے ساتھ نہیں کھولا جا سکتا"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"دفتری پروفائل روک دی گئی ہے"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"آن کرنے کیلئے تھپتھپائیں"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ورک ایپس موقوف ہیں"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"غیر موقوف کریں"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"کوئی ورک ایپ نہیں"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"کوئی ذاتی ایپ نہیں"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"دفتری <xliff:g id="APP">%s</xliff:g> کھولیں؟"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ذاتی <xliff:g id="APP">%s</xliff:g> میں کھولیں؟"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"دفتری <xliff:g id="APP">%s</xliff:g> میں کھولیں؟"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ورک ایپ سے کال کریں؟"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ورک ایپ پر سوئچ کریں؟"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"آپ کی تنظیم آپ کو صرف ورک ایپس سے کالز کرنے کی اجازت دیتی ہے"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"آپ کی تنظیم آپ کو صرف ورک ایپس سے پیغامات بھیجنے کی اجازت دیتی ہے"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ذاتی براؤزر استعمال کریں"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ورک براؤزر استعمال کریں"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"کال کریں"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"سوئچ کریں"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏SIM نیٹ ورک غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"‏SIM نیٹ ورک سب سیٹ کو غیر مقفل کرنے کا PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"‏SIM کارپوریٹ کو غیر مقفل کرنے کا PIN"</string>
@@ -2320,14 +2327,14 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"مائیکروفون مسدود ہے"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"دوہری اسکرین"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"دوہری اسکرین آن ہے"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> مواد دکھانے کیلئے دونوں ڈسپلیز استعمال کر رہی ہے"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"مواد دکھانے کیلئے <xliff:g id="APP_NAME">%1$s</xliff:g> دونوں ڈسپلیز استعمال کر رہی ہے"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"آلہ بہت زیادہ گرم ہے"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"دوہری اسکرین دستیاب نہیں ہے کیونکہ آپ کا فون بہت زیادہ گرم ہو رہا ہے"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دستیاب نہیں ہے"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‏Dual Screen دستیاب نہیں ہے کیونکہ بیٹری سیور آن ہے۔ آپ اسے ترتیبات میں آف کر سکتے ہیں۔"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ترتیبات پر جائیں"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"آف کریں"</string>
-    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> میں کنفیگر کیا گیا"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> کنفیگر کیا گیا"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"کی بورڈ لے آؤٹ <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> پر سیٹ ہے۔ تبدیل کرنے کیلئے تھپتھپائیں۔"</string>

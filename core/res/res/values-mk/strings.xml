@@ -91,7 +91,7 @@
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус на мобилна мрежа"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-пораки"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Пораки од говорна пошта"</string>
-    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повикување преку Wi-Fi"</string>
+    <string name="notification_channel_wfc" msgid="9048240466765169038">"Повици преку Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"Статус на SIM-картичка"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"Статус на SIM-известувања со висок приоритет"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
@@ -122,7 +122,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"Пребарување за услуга"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Не може да се постави функцијата „Повици преку Wi-Fi“"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повикување преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повици преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"Проблем при регистрирањето на функцијата „Повици преку Wi‑Fi“ со операторот: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -130,15 +130,15 @@
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="3165949348000906194">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повикување преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="3836827895369365298">"Повици преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="4895315549916165700">"Повик преку WLAN"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="255919245825481510">"Повик преку WLAN на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="7232899594327126970">"Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="8383917598312067365">"Повици преку Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="6865214948822061486">"Глас преку Wi-Fi на <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling" msgid="6178935388378661755">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повикување преку Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Повици преку Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"Глас преку Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Повик преку WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Исклучено"</string>
@@ -296,8 +296,10 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Безбеден режим"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Систем Android"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Префрли на личен профил"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Префрлете се на личен профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Префрли се на работен профил"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Префрлете се на личната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Префрлете се на работната апликација <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"пристапува до контактите"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Локација"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ѝ дозволува на апликацијата да пристапи до состојбата на вибрации."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дозволува апликацијата да повика кој било телефонски број без ваша интервенција. Поради тоа може да дојде до неочекувани плаќања или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви за итни случаи. Злонамерните апликации може да ве чинат пари со упатување повици без ваша потврда или бирање шифри на оператор што предизвикуваат дојдовните повици автоматски да се проследуваат до друг број."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"пристапи до услугата за повици IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дозволува апликацијата да ја користи услугата IMS за повици без ваша интервенција."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"прочитај ги статусот и идентитетот  на телефонот"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволува апликацијата да комуницира со ознаки, картички и читачи за Комуникација при непосредна близина (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трансакциски настан на безбедносен елемент"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Овозможува апликацијата да прима податоци за трансакциите што се случуваат на безбедносен елемент."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"оневозможи заклучување на екран"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Овозможува апликацијата да го оневозможи заклучувањето и каква било безбедност поврзана со лозинка. На пример, телефонот го оневозможува заклучувањето при прием на телефонски повик, а потоа повторно го овозможува заклучувањето кога повикот ќе заврши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"побарува сложеност за заклучувањето на екранот"</string>
@@ -633,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Премногу светло"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Откриено е притискање на копчето за вклучување"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Пробајте да го приспособите прстот"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот по малку секој пат"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот секојпат по малку"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
@@ -665,7 +669,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лице, а потоа повторно додајте го лицето"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лик, а потоа повторно додајте го ликот"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
@@ -679,12 +683,12 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Нема доволно светлина"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Оддалечете го телефонот"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Доближете го телефонот"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Кренете го телефонот погоре"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Спуштете го телефонот подолу"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Поткренете го телефонот"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Снижете го телефонот"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
@@ -692,7 +696,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте подиректно во телефонот"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат лицето."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не може да создаде модел на лик. Обидете се пак."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Носите темни очила. Лицето мора да ви се гледа целосно."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лицето е покриено. Лицето мора да ви се гледа целосно."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ликот е покриен. Ликот мора да ви се гледа целосно."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ликот не може да се потврди. Хардвер - недостапен."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцијата со лице се откажа."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисникот го откажа „Отклучувањето со лик“"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Премногу обиди. Обидете се повторно подоцна."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Премногу обиди. „Отклучување со лик“ е недостапна."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Премногу обиди. Наместо тоа, користете го заклучувањето на екранот."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ликот не може да се потврди. Обидете се повторно."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте поставиле „Отклучување со лик“"</string>
@@ -1255,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Подигањето завршува."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно додека го поставувате отпечатокот."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За излез, исклучете го екранот"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Исклучи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Да продолжи потврдувањето на отпечаток?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно за да го потврдите отпечатокот."</string>
@@ -1283,13 +1286,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Јачина на звук на дојдовен повик преку Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук за аларм"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук на известување"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук за известување"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Јачина на звук"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук на известување"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Ниедна"</string>
@@ -1555,7 +1558,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Претходниот месец"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Следниот месец"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Копче „Alt“"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Копче „Откажи“"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Откажи"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Копче „Избриши“"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Копче „Готово“"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Копче „Промени режим“"</string>
@@ -1618,7 +1621,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Приклучи звучници"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Звучници на док"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Надворешен уред"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Отстрани"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Опомена,\nго надминавте ограничувањето за гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nАко го надминете ограничувањево, може да го оштетите слухот."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Опомена,\nго надминавте ограничувањето од 5 гласни звучни сигнали кои може безбедно да се слушаат во една седмица на слушалки.\n\nГласноста е намалена за да ви се заштити слухот."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Гласноста со која слушате аудиовизуелни содржини може да предизвика оштетување на слухот ако трае подолг временски период.\n\nАко продолжите да слушате со оваа гласност подолг временски период, може да го оштетите слухот."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Опомена,\nтековно слушате гласни содржини што се репродуцираат со небезбедна гласност.\n\nАко продолжите да слушате волку гласно, може трајно да го оштетите слухот."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Сакате да продолжите да слушате со висока јачина на звукот?\n\nЈачината на звукот на слушалките беше висока подолго од препорачаното, што може да доведе до оштетување на слухот"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Откриен е гласен звук\n\nЈачината на звукот на слушалките беше повисока од препорачаната, што може да доведе до оштетување на слухот"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Да се вклучи кратенка за функциите за пристапност?"</string>
@@ -1696,12 +1697,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вклучувај"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Да се дозволи <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Преглед и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или со хардверските сензори и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Допрете на функција за да почнете да ја користите:"</string>
@@ -1724,7 +1725,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со два прста):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Изберете ја функцијата што ќе ја користите со движењето за пристапност (повлекување нагоре од дното на екранот со три прста):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"За префрлање помеѓу функциите, допрете и задржете го копчето за пристапност."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За префрлање помеѓу функциите, повлечете нагоре со два прста и задржете."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"За да се префрлите на друга функција, повлечете нагоре со два прста и задржете."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"За префрлање помеѓу функциите, повлечете нагоре со три прста и задржете."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Зголемување"</string>
     <string name="user_switched" msgid="7249833311585228097">"Тековен корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"За да излезете, повлечете одозгора надолу."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Сфатив"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте за подобар приказ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"За подобар приказ, излезете од поделениот екран"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"За подобар приказ, отворете ја апликацијата <xliff:g id="NAME">%s</xliff:g> на цел екран"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Приказ на часови во кружно движење"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Приказ на минути во кружно движење"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ова не може да се отвори на <xliff:g id="DEVICE">%1$s</xliff:g>. Пробајте на вашиот телефон како алтернатива."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Оваа апликација е создадена за постара верзија на Android. Можеби нема да работи правилно и не ги вклучува најновите мерки за заштита на безбедноста и приватноста. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за ажурирање"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Апликацијава не е компатибилна со најновата верзија на Android. Проверете дали има ажурирање или контактирајте со програмерот на апликацијата."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Отворете ја апликацијата за SMS за приказ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Некои функции се ограничени"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Овие содржини не може да се отвораат со лични апликации"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Работниот профил е паузиран"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Допрете за да вклучите"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Работните апликации се паузирани"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Прекини ја паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Да се отвори работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Да се отвори во личната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Да се отвори во работната апликација <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Да се повика од работна апликација?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Да се префрли на работна апликација?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Вашата организација ви дозволува да упатувате повици само од работни апликации"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Вашата организација ви дозволува да испраќате пораки само од работни апликации"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Повикај"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Префрли"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN за отклучување на подмножество на мрежата на SIM-картичката"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN за отклучување на корпоративната SIM-картичка"</string>
@@ -2306,7 +2313,7 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"До ова не може да се пристапи при стриминг. Наместо тоа, пробајте на вашиот телефон."</string>
     <string name="vdm_pip_blocked" msgid="4036107522497281397">"Не може да се прикажува слика во слика при стримување"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандарден за системот"</string>
     <string name="default_card_name" msgid="9198284935962911468">"КАРТИЧКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Дозвола за профилот на придружен часовник за управување со часовници"</string>
     <string name="permdesc_companionProfileWatch" msgid="5655698581110449397">"Дозволува придружна апликација да управува со часовници."</string>
@@ -2318,14 +2325,14 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволува придружна апликација да започне услуги во преден план од заднината."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофонот е достапен"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофонот е блокиран"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Двоен екран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Вклучен е двоен екран"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Вклучен е Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ги користи двата екрани за да прикажува содржини"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Уредот е претопол"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двојниот екран е недостапен бидејќи вашиот телефон станува претопол"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"„Двојниот екран“ е недостапен"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Двојниот екран е недостапен бидејќи е вклучен „Штедач на батерија“. Ова може да се исклучи во „Поставки“."</string>
-    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Одете во „Поставките“"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen е недостапен бидејќи вашиот телефон станува претопол"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen е недостапен"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen е недостапен бидејќи е вклучен „Штедач на батерија“. Ова може да се исклучи во „Поставки“."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Отворете „Поставки“"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Исклучи"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> е конфигуриран"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Распоредот на тастатурата е поставен на <xliff:g id="LAYOUT_1">%s</xliff:g>. Допрете за да промените."</string>

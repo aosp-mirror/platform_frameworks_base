@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android System"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Switch to personal profile"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Switch to work profile"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Switch to personal <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Switch to work <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"access your contacts"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Location"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Allows the app to control the vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Allows the app to access the vibrator state."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"directly call phone numbers"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Allows the app to call phone numbers without your intervention. This may result in unexpected charges or calls. Note that this doesn\'t allow the app to call emergency numbers. Malicious apps may cost you money by making calls without your confirmation."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Allows the app to call phone numbers without your intervention. This may result in unexpected charges or calls. Note that this doesn\'t allow the app to call emergency numbers. Malicious apps may cost you money by making calls without your confirmation, or dial carrier codes which cause incoming calls to be automatically forwarded to another number."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"access IMS call service"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Allows the app to use the IMS service to make calls without your intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"read phone status and identity"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred nfc payment service information like registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Allows the app to communicate with Near Field Communication (NFC) tags, cards, and readers."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element transaction event"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Allows the app to receive information about transactions happening on a Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disable your screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"request screen lock complexity"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Face operation canceled."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Face Unlock canceled by user"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Too many attempts. Try again later."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Too many attempts. Face Unlock unavailable."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Too many attempts. Enter screen lock instead."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Can’t verify face. Try again."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"You haven’t set up Face Unlock"</string>
@@ -1538,7 +1541,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Add account"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Increase"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Decrease"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch &amp; hold."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch and hold."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Slide up to increase and down to decrease."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Increase minute"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Decrease minute"</string>
@@ -1565,7 +1568,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Couldn\'t launch <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Share with"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Share with <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch &amp; hold."</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch and hold."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Swipe to unlock."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigate home"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Navigate up"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remove"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Warning,\nYou have exceeded the amount of loud sound signals one can safely listen to in a week over headphones.\n\nGoing over this limit will permanently damage your hearing."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Warning,\nYou have exceeded 5 times the amount of loud sound signals one can safely listen to in a week over headphones.\n\nVolume has been lowered to protect your hearing."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"The level at which you are listening to media can result in hearing damage when sustained over long periods of time.\n\nContinuing to play at this level for long periods of time could damage your hearing."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Warning,\nYou are currently listening to loud content played at an unsafe level.\n\nContinuing to listen this loud will permanently damage your hearing."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Keep listening at a high volume?\n\nHeadphone volume has been high for longer than recommended, which can damage your hearing"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Loud sound detected\n\nHeadphone volume has been higher than recommended, which can damage your hearing"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Use Accessibility Shortcut?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"When the shortcut is on, pressing both volume buttons for 3 seconds will start an accessibility feature."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Turn on shortcut for accessibility features?"</string>
@@ -1723,7 +1724,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choose a feature to use when you tap the accessibility button:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch &amp; hold the accessibility button."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch and hold the accessibility button."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"To switch between features, swipe up with two fingers and hold."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"To switch between features, swipe up with three fingers and hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Magnification"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"To exit, swipe down from the top."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Got it"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotate for a better view"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Exit split screen for a better view"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Open <xliff:g id="NAME">%s</xliff:g> in full screen for a better view"</string>
     <string name="done_label" msgid="7283767013231718521">"Done"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Hours circular slider"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minutes circular slider"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"This can’t be accessed on your <xliff:g id="DEVICE">%1$s</xliff:g>. Try on your phone instead."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"This app was built for an older version of Android. It might not work properly and doesn\'t include the latest security and privacy protections. Check for an update, or contact the app\'s developer."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Check for update"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"This app isn\'t compatible with the latest version of Android. Check for an update or contact the app\'s developer."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"You have new messages"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Open SMS app to view"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Some functionality may be limited"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"This content can’t be opened with work apps"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"This content can’t be shared with personal apps"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"This content can’t be opened with personal apps"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Work profile is paused"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tap to turn on"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Work apps are paused"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"No work apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"No personal apps"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Open work <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Open in personal <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Open in work <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Call from work app?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Switch to work app?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Your organization only allows you to make calls from work apps"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Your organization only allows you to send messages from work apps"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Use personal browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Use work browser"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Call"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Switch"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM network unlock PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM network subset unlock PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM corporate unlock PIN"</string>

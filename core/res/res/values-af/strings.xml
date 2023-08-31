@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skakel oor na persoonlike profiel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skakel oor na werkprofiel"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skakel oor na persoonlike <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skakel oor na werk-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"in te gaan by jou kontakte"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ligging"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Laat die app toe om foonnommers sonder jou insae te bel. Dit kan onvoorsiene heffings of oproepe tot gevolg hê. Neem kennis dat dit nie die app toelaat om noodnommers te bel nie. Kwaadwillige apps kan jou geld kos deur oproepe te maak sonder jou bevestiging of diensverskafferkodes te bel wat veroorsaak dat inkomende oproepe outomaties na ’n ander nommer aangestuur word."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot kitsboodskapoproepdiens"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lees foonstatus en identiteit"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Laat die program toe om voorkeur-NFC-betalingdiensinligting soos geregistreerde hulpmiddels en roetebestemming te kry."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"beheer kortveldkommunikasie"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Laat die program toe om met kortveldkommunikasie- (NFC) merkers, kaarte en lesers te kommunikeer."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Veilige Element-transaksiegeval"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Laat die app toe om inligting te ontvang oor transaksies wat op ’n Veilige Element plaasvind."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktiveer jou skermslot"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Laat die program toe om die sleutelslot en enige verwante wagwoordsekuriteit te deaktiveer. Byvoorbeeld, die foon deaktiveer die sleutelslot wanneer ’n oproep inkom, en atkiveer dit dan weer wanneer die oproep eindig."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"versoek skermslot-kompleksiteit"</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkerbril bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Gesig moet heel sigbaar wees."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan nie gesig verifieer nie. Hardeware nie beskikbaar nie."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesighandeling is gekanselleer."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Gebruiker het Gesigslot gekanselleer"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Te veel pogings. Probeer later weer."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Te veel pogings. Gesigslot is onbeskikbaar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Te veel pogings. Gebruik eerder skermslot."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan nie gesig verifieer nie. Probeer weer."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Jy het nie Gesigslot opgestel nie"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Verwyder"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Verhoog volume bo aanbevole vlak?\n\nOm lang tydperke teen hoë volume te luister, kan jou gehoor beskadig."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Waarskuwing:\nJy het in ’n week meer kere na harde klankseine deur oorfone geluister as wat veilig is vir jou gehoor.\n\nAs jy oor hierdie limiet gaan, sal dit jou gehoor vir altyd beskadig."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Waarskuwing:\nJy het in ’n week 5 keer meer na harde klankseine deur oorfone geluister as wat veilig is vir jou gehoor.\n\nVolume is verlaag om jou gehoor te beskerm."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Die vlak waarteen jy na media luister, kan tot gehoorskade lei wanneer dit vir lang tydperke volgehou word.\n\nAs jy aanhou om vir lang tydperke so hard te luister, kan jy jou gehoor beskadig."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Waarskuwing:\nJy luister tans na inhoud wat teen ’n onveilige vlak speel.\n\nAs jy aanhou om so hard te luister, sal dit jou gehoor vir altyd beskadig."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Hou aan om teen hoë volume te luister?\n\nOorfoonvolume was langer as wat aanbeveel word hoog, wat jou gehoor kan beskadig"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Harde klank bespeur\n\nOorfoonvolume was hoër as aanbeveel, wat jou gehoor kan beskadig"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gebruik toeganklikheidkortpad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wanneer die kortpad aan is, sal \'n toeganklikheidkenmerk begin word as albei volumeknoppies 3 sekondes lank gedruk word."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Skakel kortpad vir toeganklikheidskenmerke aan?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swiep van bo na onder as jy wil uitgaan."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Het dit"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai vir ’n beter aansig"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Verlaat gedeelde skerm vir ’n beter aansig"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Maak <xliff:g id="NAME">%s</xliff:g> in volskerm oop vir ’n beter aansig"</string>
     <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ure se sirkelglyer"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minute se sirkelglyer"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Jy kan nie op jou <xliff:g id="DEVICE">%1$s</xliff:g> toegang hiertoe kry nie. Probeer eerder op jou foon."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Hierdie program is vir ’n ouer weergawe van Android gebou. Dit sal dalk nie behoorlik werk nie en dit sluit nie die jongste sekuriteit en privaatheidbeskermings in nie. Kyk of daar ’n opdatering is of kontak die program se ontwikkelaar."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Kyk vir opdatering"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Hierdie app is nie met die jongste weergawe van Android versoenbaar nie. Kyk of daar ’n opdatering is, of kontak die app se ontwikkelaar."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jy het nuwe boodskappe"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Maak SMS-program oop om te bekyk"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Sommige funksies kan beperk wees"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Hierdie inhoud kan nie met werkprogramme oopgemaak word nie"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Hierdie inhoud kan nie met persoonlike programme gedeel word nie"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Hierdie inhoud kan nie met persoonlike programme oopgemaak word nie"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Werkprofiel is onderbreek"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tik om aan te skakel"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Werkapps is onderbreek"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hervat"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werkprogramme nie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlike programme nie"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Maak werk-<xliff:g id="APP">%s</xliff:g> oop?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Maak in persoonlike <xliff:g id="APP">%s</xliff:g> oop?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Maak in werk-<xliff:g id="APP">%s</xliff:g> oop?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Bel van werkapp af?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Skakel oor na werkapp?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Jou organisasie laat jou net toe om oproepe van werkapps af te maak"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Jou organisasie laat jou net toe om boodskappe van werkapps af te stuur"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gebruik persoonlike blaaier"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gebruik werkblaaier"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Bel"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Skakel oor"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM se netwerkontsluiting-PIN"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM se netwerksubstelontsluiting-PIN"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM se korporatiewe ontsluiting-PIN"</string>
@@ -2318,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Laat ’n metgeselapp toe om voorgronddienste van agtergrond af te begin"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofoon is beskikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoon is geblokkeer"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dubbelskerm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dubbelskerm is aan"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen is aan"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruik tans albei skerms om inhoud te wys"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Toestel is te warm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbelskerm is nie beskikbaar nie omdat jou foon tans te warm word"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen is nie beskikbaar nie omdat jou foon tans te warm word"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen is nie beskikbaar nie"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen is nie beskikbaar nie omdat Batterybespaarder aan is. Jy kan dit in Instellings afskakel."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gaan na Instellings"</string>

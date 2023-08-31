@@ -191,7 +191,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ਐਪਾਂ ਤੁਹਾਡੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"ਹੋਰ ਜਾਣਨ ਲਈ ਆਪਣੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"ਭੂਗੋਲਿਕ-ਘੇਰੇ ਸੰਬੰਧੀ ਸੇਵਾ"</string>
     <string name="country_detector" msgid="7023275114706088854">"ਦੇਸ਼ ਦਾ ਪਤਾ ਲਗਾਉਣ ਦੀ ਸੁਵਿਧਾ"</string>
     <string name="location_service" msgid="2439187616018455546">"ਟਿਕਾਣਾ ਸੇਵਾ"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ਸਿਸਟਮ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ਸੰਪਰਕ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣਾ"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ਐਪ ਨੂੰ ਵਾਈਬ੍ਰੇਟਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ਐਪ ਨੂੰ ਥਰਥਰਾਹਟ ਸਥਿਤੀ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ਫ਼ੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖਲ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖਰਚੇ ਜਾਂ ਕਾਲਾਂ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਧਿਆਨ ਦਿਓ ਕਿ ਇਹ ਐਪ ਨੂੰ ਸੰਕਟਕਾਲੀਨ ਨੰਬਰਾਂ ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦਾ। ਖਰਾਬ ਐਪਾਂ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਕੇ ਤੁਹਾਨੂੰ ਖਰਚੇ ਪਾ ਸਕਦੀਆਂ ਹਨ।"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖਲ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਨੰਬਰਾਂ \'ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ। ਇਸਦੇ ਨਤੀਜੇ ਵਜੋਂ ਅਣਕਿਆਸੇ ਖਰਚੇ ਜਾਂ ਕਾਲਾਂ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਇਹ ਐਪ ਨੂੰ ਐਮਰਜੈਂਸੀ ਨੰਬਰਾਂ \'ਤੇ ਕਾਲ ਕਰਨ ਦੀ ਆਗਿਆ ਨਹੀਂ ਦਿੰਦੀ। ਨੁਕਸਾਨਦੇਹ ਐਪਾਂ ਤੁਹਾਡੀ ਤਸਦੀਕ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰ ਕੇ, ਜਾਂ ਕੈਰੀਅਰ ਕੋਡ ਡਾਇਲ ਕਰ ਕੇ ਤੁਹਾਨੂੰ ਖਰਚੇ ਪਾ ਸਕਦੀਆਂ ਹਨ ਜਿਸ ਕਾਰਨ ਇਨਕਮਿੰਗ ਕਾਲਾਂ ਆਪਣੇ ਆਪ ਕਿਸੇ ਹੋਰ ਨੰਬਰ \'ਤੇ ਭੇਜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ਕਾਲ ਸੇਵਾ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ਐਪ ਨੂੰ ਤੁਹਾਡੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਕਾਲਾਂ ਕਰਨ ਲਈ IMS ਸੇਵਾ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ਫ਼ੋਨ ਸਥਿਤੀ ਅਤੇ ਪਛਾਣ ਪੜ੍ਹੋ"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"ਸੁਰੱਖਿਅਤ ਅੰਸ਼ ਦੇ ਲੈਣ-ਦੇਣ ਸੰਬੰਧੀ ਇਵੈਂਟ"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ਐਪ ਨੂੰ ਸੁਰੱਖਿਅਤ ਅੰਸ਼ \'ਤੇ ਹੋਣ ਵਾਲੇ ਲੈਣ-ਦੇਣ ਬਾਰੇ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
@@ -633,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ਪਾਵਰ ਬਟਨ ਦਬਾਏ ਜਾਣ ਦਾ ਪਤਾ ਲੱਗਿਆ ਹੈ"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ਵਿਵਸਥਿਤ ਕਰਕੇ ਦੇਖੋ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ਹਰ ਵਾਰ ਆਪਣੀ ਉਂਗਲ ਨੂੰ ਥੋੜ੍ਹਾ ਹਿਲਾਓ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ਹਰ ਵਾਰ ਆਪਣੀ ਉਂਗਲ ਦੀ ਸਥਿਤੀ ਨੂੰ ਥੋੜਾ ਜਿਹਾ ਬਦਲੋ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ਤੁਹਾਡੇ ਚਿਹਰੇ ਦਾ ਮਾਡਲ ਨਹੀਂ ਬਣਿਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ਧੁੱਪ ਦੀਆਂ ਐਨਕਾਂ ਦਾ ਪਤਾ ਲੱਗਾ। ਤੁਹਾਡਾ ਪੂਰਾ ਚਿਹਰਾ ਦਿਸਣਾ ਲਾਜ਼ਮੀ ਹੈ।"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ਚਿਹਰਾ ਢੱਕਿਆ ਹੋਣ ਦਾ ਪਤਾ ਲੱਗਾ। ਤੁਹਾਡਾ ਪੂਰਾ ਚਿਹਰਾ ਦਿਸਣਾ ਲਾਜ਼ਮੀ ਹੈ।"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ਚਿਹਰਾ ਢੱਕਿਆ ਹੋਇਆ ਹੈ। ਤੁਹਾਡਾ ਪੂਰਾ ਚਿਹਰਾ ਦਿਸਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ਵਰਤੋਂਕਾਰ ਨੇ ਫ਼ੇਸ ਅਣਲਾਕ ਰੱਦ ਕੀਤਾ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਫ਼ੇਸ ਅਣਲਾਕ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਇਸਦੀ ਬਜਾਏ ਸਕ੍ਰੀਨ ਲਾਕ ਦਾਖਲ ਕਰੋ।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ਤੁਸੀਂ ਫ਼ੇਸ ਅਣਲਾਕ ਦਾ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ।"</string>
@@ -1618,7 +1621,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ਫ਼ੋਨ ਕਰੋ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰਸ"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰ"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"ਬਾਹਰੀ ਡੀਵਾਈਸ"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ਹੈੱਡਫ਼ੋਨ"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1632,7 +1635,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"ਉਪਲਬਧ"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"ਵਰਤੋਂ ਵਿੱਚ"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਉੱਚੀ ਧੁਨੀ ਦੇ ਸਿਗਨਲਾਂ ਦੀ ਮਾਤਰਾ ਨੂੰ ਪਾਰ ਕਰ ਚੁੱਕੇ ਹੋ ਜਿਸਨੂੰ ਕੋਈ ਵਿਅਕਤੀ ਹਫ਼ਤੇ ਵਿੱਚ ਹੈੱਡਫ਼ੋਨਾਂ \'ਤੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਸੁਣ ਸਕਦਾ ਹੈ।\n\nਇਸ ਸੀਮਾ ਨੂੰ ਪਾਰ ਕਰਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਨੁਕਸਾਨ ਹੋ ਜਾਵੇਗਾ।"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਉੱਚੀ ਧੁਨੀ ਦੇ ਸਿਗਨਲਾਂ ਦੀ ਮਾਤਰਾ ਤੋਂ 5 ਗੁਣਾ ਪਾਰ ਕਰ ਚੁੱਕੇ ਹੋ ਜਿਸਨੂੰ ਕੋਈ ਵਿਅਕਤੀ ਹਫ਼ਤੇ ਵਿੱਚ ਹੈੱਡਫ਼ੋਨਾਂ \'ਤੇ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਸੁਣ ਸਕਦਾ ਹੈ।\n\nਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਦੀ ਸੁਰੱਖਿਆ ਕਰਨ ਲਈ ਆਵਾਜ਼ ਨੂੰ ਘਟਾ ਦਿੱਤਾ ਗਿਆ ਹੈ।"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ਜਿਸ ਪੱਧਰ \'ਤੇ ਤੁਸੀਂ ਮੀਡੀਆ ਨੂੰ ਸੁਣ ਰਹੇ ਹੋ, ਤਾਂ ਉਸ ਨੂੰ ਲੰਬੇ ਸਮੇਂ ਤੱਕ ਸੁਣਨ ਦੇ ਨਤੀਜੇ ਵਜੋਂ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।\n\nਲੰਬੇ ਸਮੇਂ ਤੱਕ ਇਸ ਪੱਧਰ \'ਤੇ ਚਲਾਉਣਾ ਜਾਰੀ ਰੱਖਣ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"ਚਿਤਾਵਨੀ,\nਤੁਸੀਂ ਫ਼ਿਲਹਾਲ ਅਸੁਰੱਖਿਅਤ ਪੱਧਰ \'ਤੇ ਚੱਲ ਰਹੀ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਸਮੱਗਰੀ ਨੂੰ ਸੁਣ ਰਹੇ ਹੋ।\n\nਇਸ ਉੱਚੀ ਆਵਾਜ਼ ਨੂੰ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣ ਨਾਲ ਤੁਹਾਡੇ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਪੱਕੇ ਤੌਰ \'ਤੇ ਨੁਕਸਾਨ ਹੋ ਸਕਦਾ ਹੈ।"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਗਈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਧੁਨੀ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਨੂੰ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖਿਆ ਗਿਆ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
@@ -1728,7 +1729,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="guest_name" msgid="8502103277839834324">"ਮਹਿਮਾਨ"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ਬਾਹਰ ਜਾਣ ਲਈ, ਉਪਰੋਂ ਹੇਠਾਂ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ਸਮਝ ਲਿਆ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਘੁਮਾਓ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ ਸਪਲਿਟ ਸਕ੍ਰੀਨ ਤੋਂ ਬਾਹਰ ਆਓ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਅਨੁਭਵ ਲਈ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਪੂਰੀ-ਸਕ੍ਰੀਨ ਵਿੱਚ ਖੋਲ੍ਹੋ"</string>
     <string name="done_label" msgid="7283767013231718521">"ਹੋ ਗਿਆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ਘੰਟੇ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ਮਿੰਟ ਸਰਕੁਲਰ ਸਲਾਈਡਰ"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ਤੁਹਾਡੇ <xliff:g id="DEVICE">%1$s</xliff:g> \'ਤੇ ਇਸ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ। ਇਸਦੀ ਬਜਾਏ ਆਪਣੇ ਫ਼ੋਨ \'ਤੇ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ਇਹ ਐਪ Android ਦੇ ਕਿਸੇ ਪੁਰਾਣੇ ਵਰਜਨ ਲਈ ਬਣਾਈ ਗਿਆ ਸੀ। ਸ਼ਾਇਦ ਇਹ ਠੀਕ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ ਅਤੇ ਨਵੀਨਤਮ ਸੁਰੱਖਿਆ ਅਤੇ ਪਰਦੇਦਾਰੀ ਸੰਬੰਧੀ ਸੁਰੱਖਿਆਵਾਂ ਸ਼ਾਮਲ ਨਾ ਹੋਣ। ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਐਪ ਦੇ ਵਿਕਾਸਕਾਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ਇਹ ਐਪ Android ਦੇ ਨਵੀਨਤਮ ਵਰਜਨ ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। ਅੱਪਡੇਟ ਲਈ ਜਾਂਚ ਕਰੋ ਜਾਂ ਐਪ ਦੇ ਵਿਕਾਸਕਾਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ਦੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਤ ਹੋ ਸਕਦੀ ਹੈ"</string>
@@ -2092,7 +2094,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ਠੀਕ ਹੈ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ਬੰਦ ਕਰੋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ਹੋਰ ਜਾਣੋ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹੇ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹਿਆਂ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਵਰਤੋਂ ਨੂੰ ਘਟਾਉਣਾ"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਨਾਲ ਨਹੀਂ ਖੋਲ੍ਹਿਆ ਜਾ ਸਕਦਾ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਨਿੱਜੀ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ਇਸ ਸਮੱਗਰੀ ਨੂੰ ਨਿੱਜੀ ਐਪਾਂ ਨਾਲ ਨਹੀਂ ਖੋਲ੍ਹਿਆ ਜਾ ਸਕਦਾ"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਰੋਕਿਆ ਗਿਆ ਹੈ"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ਚਾਲੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ ਹੈ"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਨਹੀਂ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਨਹੀਂ"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ਕੰਮ ਸੰਬੰਧੀ <xliff:g id="APP">%s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"ਕੀ ਨਿੱਜੀ <xliff:g id="APP">%s</xliff:g> ਵਿੱਚ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ਕੀ ਕੰਮ ਸੰਬੰਧੀ <xliff:g id="APP">%s</xliff:g> ਵਿੱਚ ਖੋਲ੍ਹਣਾ ਹੈ?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"ਕੀ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਤੋਂ ਕਾਲ ਕਰਨੀ ਹੈ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ਕੀ ਕੰਮ ਸੰਬੰਧੀ ਐਪ \'ਤੇ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਤੁਹਾਨੂੰ ਸਿਰਫ਼ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਤੋਂ ਕਾਲਾਂ ਕਰਨ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ਤੁਹਾਡੀ ਸੰਸਥਾ ਤੁਹਾਨੂੰ ਸਿਰਫ਼ ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਤੋਂ ਹੀ ਸੁਨੇਹੇ ਭੇਜਣ ਦਿੰਦੀ ਹੈ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ਨਿੱਜੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ਕੰਮ ਸੰਬੰਧੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"ਕਾਲ ਕਰੋ"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ਸਿਮ ਨੈੱਟਵਰਕ ਅਣਲਾਕ ਪਿੰਨ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ਸਿਮ ਨੈੱਟਵਰਕ ਸਬਸੈੱਟ ਅਣਲਾਕ ਪਿੰਨ"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ਸਿਮ ਕਾਰਪੋਰੇਟ ਅਣਲਾਕ ਪਿੰਨ"</string>
@@ -2318,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ਸੰਬੰਧੀ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਤੋਂ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਉਪਲਬਧ ਹੈ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ ਚਾਲੂ ਹੈ"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen ਚਾਲੂ ਹੈ"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਸਮੱਗਰੀ ਨੂੰ ਦਿਖਾਉਣ ਲਈ ਦੋਵੇਂ ਡਿਸਪਲੇਆਂ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ਡੀਵਾਈਸ ਬਹੁਤ ਗਰਮ ਹੈ"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ। ਤੁਸੀਂ ਇਸਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬੰਦ ਕਰ ਸਕਦੇ ਹੋ।"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
@@ -2330,7 +2337,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ਦਾ ਸੰਰੂਪਣ ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>\'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ਕੀ-ਬੋਰਡ ਦਾ ਖਾਕਾ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> \'ਤੇ ਸੈੱਟ ਹੈ… ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡਾਂ ਦਾ ਸੰਰੂਪਣ ਕੀਤਾ ਗਿਆ"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ਕੀ-ਬੋਰਡਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>

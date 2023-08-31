@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistemi"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Şəxsi profilə keçin"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"İş profilinə keçin"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> üzrə şəxsi profilə keçin"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> üzrə iş profilinə keçin"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kontaktlarınıza daxil olun"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Məkan"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tətbiqə vibrasiya vəziyyətinə daxil olmaq imkanı verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon nömrələrinə birbaşa zəng edir"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Tətbiqə Sizin müdaxiləniz olmadan telefon zəngləri etməyə imkan verir. Zərərli tətbiqlər Sizdən xəbərsiz şəkildə müxtəlif zənglər edərək, Sizə maddi ziyan vura bilər. Qeyd: Bu, tətbiqlərə təcili nömrələrə zəng etməyə icazə vermir."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tətbiqə telefon nömrələrinə müdaxiləsiz zəng etmək icazəsi verir. Gözlənilməz ödəmə və ya zənglə nəticələnə bilər. Bununla tətbiq təcili nömrələrə zəng edə bilmir. Zərərli tətbiqlər təsdiq olmadan zəng etməklə və ya gələn zənglərin başqa nömrəyə avtomatik yönləndirilməsinə səbəb olan operator kodları yığmaqla xərc yarada bilər."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS zəng xidmətinə giriş"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tətbiqə müdaxilə olmadan zəng etmək üçün IMS xidmətindən istifadə etməyə imkan verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon statusunu və identifikasiyanı oxuyur"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tətbiqə qeydiyyatdan keçmiş yardım və marşrut təyinatı kimi tərcih edilən nfc ödəniş xidməti məlumatını əldə etmək icazəsi verir."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication\'ı kontrol et"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tətbiqə Yaxın Məsafə Kommunikasiyası (NFC) teqləri, kartları və oxuyucuları ilə əlaqə qurmağa icazə verir."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Təhlükəsiz Element əməliyyatı"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tətbiqə Təhlükəsiz Elementdəki əməliyyatlar haqqında məlumat almaq imkanı verir."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Ekran kilidini deaktiv edir"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tətbiqə kilid açarını və təhlükəsizlik parolunu deaktiv etməyə imkan verir. Qanuni misal budur ki, telefon zəng qəbul edən zaman kilidi açır və zəng qurtarandan sonra kilidi bağlayır."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran kilidi mürəkkəbliyi tələb edin"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Üz əməliyyatı ləğv edildi."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"İstifadəçi üz ilə kiliddən çıxarmanı ləğv edib"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Həddindən çox cəhd. Sonraya saxlayın."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Çox cəhd edilib. Üz ilə Kiliddən Açma əlçatan deyil."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Həddindən çox cəhd. Əvəzində ekran kilidi daxil edin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Üz doğrulanmadı. Yenidən cəhd edin."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Üz ilə kiliddən çıxarma ayarlamamısınız"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Yığışdır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Səsin həcmi tövsiyə olunan səviyyədən artıq olsun?\n\nYüksək səsi uzun zaman dinləmək eşitmə qabiliyyətinizə zərər vura bilər."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Xəbərdarlıq,\nQulaqlıqlar vasitəsilə bir həftə ərzində güvənli şəkildə dinləyə biləcəyiniz yüksək səs siqnallarının miqdarını keçmisiniz.\n\nBu həddi aşmaq eşitmə qabiliyyətini həmişəlik zədələyəcək."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Xəbərdarlıq,\nQulaqlıqlar vasitəsilə bir həftə ərzində güvənli şəkildə dinləyə biləcəyiniz yüksək səs siqnallarının miqdarını 5 dəfə keçmisiniz.\n\nEşitmə qabiliyyətinizi qorumaq üçün səs səviyyəsi azaldılıb."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Mediaya qulaq asdığınız səviyyə uzun müddət davam etdikdə eşitmə qabuliyyətinin zədələnməsi ilə nəticələnə bilər.\n\nBu səviyyədə uzun müddət oxutmağa davam etmək eşitmə qabiliyyətinizə zərər verə bilər."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Xəbərdarlıq,\nHazırda təhlükəli səviyyədə oxudulan yüksək səsli məzmunu dinləyirsiniz.\n\nBu yüksək səslə dinləməyə davam etmək eşitmə qabiliyyətinizi həmişəlik zədələyəcək."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksək səsdə davam edilsin?\n\nQulaqlığın səsi tövsiyə ediləndən uzun müddət yüksək olub. Eşitmə zədələnə bilər"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksək səs aşkarlandı\n\nQulaqlığın səsi tövsiyə ediləndən yüksək olub. Eşitmə zədələnə bilər"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Əlçatımlılıq Qısayolu istifadə edilsin?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qısayol aktiv olduqda, hər iki səs düyməsinə 3 saniyə basıb saxlamaqla əlçatımlılıq funksiyası başladılacaq."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Əlçatımlılıq funksiyaları üçün qısayol aktiv edilsin?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Çıxmaq üçün yuxarıdan aşağı sürüşdürün."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Anladım"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Daha yaxşı görünüş üçün fırladın"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Daha yaxşı görünüş üçün bölünmüş ekrandan çıxın"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Yaxşı görmək üçün <xliff:g id="NAME">%s</xliff:g> tətbiqini tam ekranda açın"</string>
     <string name="done_label" msgid="7283767013231718521">"Hazırdır"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Dairəvi saat slayderi"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dairəvi dəqiqə slayderi"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızda buna giriş mümkün deyil. Telefonunuzda sınayın."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Bu tətbiq köhnə Android versiyası üçün nəzərdə tutulub. O, düzgün işləməyə bilər və ən son təhlükəsizlik və məxfilik qorumalarını ehtiva etmir. Güncəlləməni yoxlayın və ya tətbiq tərtibatçısı ilə əlaqə saxlayın."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Güncəllənmə olmasını yoxlayın"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Bu tətbiq son Android versiyası ilə uyğun deyil. Güncəllənməni yoxlayın və ya tətbiq tərtibatçısı ilə əlaqə saxlayın."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Baxmaq üçün SMS tətbiqini açın"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Bəzi funksiyalar məhdudlaşdırıla bilər"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontenti iş tətbiqləri ilə açmaq mümkün deyil"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontenti şəxsi tətbiqlər ilə paylaşmaq mümkün deyil"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu kontenti şəxsi tətbiqlər ilə açmaq mümkün deyil"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"İş profilinə fasilə verilib"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Aktiv etmək üçün toxunun"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"İş tətbiqlərinə pauza verilib"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Pauzanı bitirin"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş tətbiqi yoxdur"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Şəxsi tətbiq yoxdur"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> iş profili açılsın?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"<xliff:g id="APP">%s</xliff:g> şəxsi profilində açılsın?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"<xliff:g id="APP">%s</xliff:g> iş profilində açılsın?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"İş tətbiqindən zəng edilsin?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"İş tətbiqinə dəyişilsin?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Təşkilat yalnız iş tətbiqindən zəng etməyə icazə verir"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Təşkilat yalnız iş tətbiqindən mesaj göndərməyə icazə verir"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Şəxsi brauzerdən istifadə edin"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş brauzerindən istifadə edin"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Zəng edin"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Dəyişin"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM şəbəkəsi kilidaçma PİN\'i"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM Şəbəkəsi Alt Dəstinin kilidaçma PIN\'i"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM korporativ kilidaçma PIN\'i"</string>

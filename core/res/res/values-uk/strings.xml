@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Перейти в особистий профіль"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в робочий профіль"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Перейти в особистий профіль у додатку <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Перейти в робочий профіль у додатку <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"отримувати доступ до контактів"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Геодані"</string>
@@ -505,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"прямо набирати номери тел."</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Дозволяє програмі набирати номери телефону без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення дзвінків. Зауважте, що це не дозволяє програмі набирати екстрені номери. Шкідливі програми можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дозволяє додатку набирати номери телефонів без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення викликів. Зверніть увагу, що додаток не зможе набирати екстрені номери. Шкідливі додатки можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти, або набирати коди оператора, після чого вхідні виклики переадресовуватимуться на інший номер."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"отримувати доступ до телефонної служби IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Додаток зможе телефонувати за допомогою служби IMS без вашого відома."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"читати статус та ідентифікаційну інформацію телефону"</string>
@@ -590,6 +592,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Подія, пов’язана з транcакцією в Компоненті захисту"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Надає додатку доступ до інформації про транcакції, що відбуваються в Компоненті захисту."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
@@ -668,9 +672,9 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейс-контроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Натисніть, щоб видалити свою модель обличчя, а потім знову додайте її"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейсконтролю"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейс-контролю"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Щоб використовувати фейс-контроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Натисніть, щоб додати відбиток пальця"</string>
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Розблокування відбитком пальця"</string>
@@ -694,7 +698,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Дивіться на телефон прямо"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Дивіться на телефон прямо"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Дивіться на телефон прямо"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Приберіть об’єкти, які затуляють ваше обличчя."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Приберіть об’єкти, які затуляють ваше обличчя"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Очистьте верхню частину екрана, зокрема чорну панель"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -702,7 +706,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Обличчя не видно повністю, бо його закриває аксесуар"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
@@ -711,16 +715,15 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Користувач скасував операцію фейсконтролю"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Забагато спроб. Фейс-контроль недоступний."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Забагато спроб. Розблокуйте екран іншим способом."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ви не налаштували фейсконтроль"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Фейсконтроль не підтримується на цьому пристрої"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ви не налаштували фейс-контроль"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Фейс-контроль не підтримується на цьому пристрої"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Датчик тимчасово вимкнено."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Доступ через фейсконтроль"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Використовувати фейсконтроль або дані для розблокування екрана"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Доступ через фейс-контроль"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Використовувати фейс-контроль або дані для розблокування екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Щоб продовжити, скористайтеся фейсконтролем"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Щоб продовжити, скористайтеся фейсконтролем або даними для розблокування екрана"</string>
   <string-array name="face_error_vendor">
@@ -972,7 +975,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Повторіть спробу"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Повторіть спробу"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Розблокуйте, щоб бачити всі функції й дані"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейсконтроль\""</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейс-контроль\""</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Немає SIM-карти"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"У планшеті немає SIM-карти."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"У пристрої Android TV немає SIM-карти."</string>
@@ -1683,10 +1686,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Вилучити"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Попередження.\nВи перевищили кількість гучних звукових сигналів, які протягом тижня можна безпечно слухати через навушники.\n\nПеревищення цього ліміту може назавжди пошкодити ваш слух."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Попередження.\nВи вп’ятеро перевищили кількість гучних звукових сигналів, які протягом тижня можна безпечно слухати через навушники.\n\nГучність знижено, щоб уберегти ваш слух."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Якщо довго слухати медіаконтент на цьому рівні гучності, можливі пошкодження слуху.\n\nЯкщо ви не знизите гучність, через деякий час ваш слух може погіршитись."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Попередження.\nНаразі ви слухаєте контент із небезпечним рівнем гучності.\n\nЯкщо надалі слухати так гучно, це може назавжди пошкодити ваш слух."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Слухати далі на високій гучності?\n\nАудіо в навушниках відтворювалося з високою гучністю довше, ніж рекомендується. Через це ваш слух може погіршитись."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Виявлено гучний звук\n\nРівень гучності навушників вищий за рекомендований. Через це ваш слух може погіршитись."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Якщо цей засіб увімкнено, ви можете активувати спеціальні можливості, утримуючи обидві кнопки гучності протягом трьох секунд."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Увімкнути засіб спеціальних можливостей?"</string>
@@ -1853,7 +1854,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Щоб вийти, проведіть пальцем зверху вниз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Оберніть для кращого огляду"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Для кращого огляду вийдіть із режиму розділення екрана"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Для кращого огляду відкрийте додаток <xliff:g id="NAME">%s</xliff:g> на весь екран"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Вибір годин на циферблаті"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Вибір хвилин на циферблаті"</string>
@@ -1978,6 +1979,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Немає доступу на вашому пристрої (<xliff:g id="DEVICE">%1$s</xliff:g>). Спробуйте натомість скористатися телефоном."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Цей додаток створено для старішої версії ОС Android. Він може не працювати належним чином і не містить найновіших засобів захисту конфіденційності та безпеки. Перевірте наявність оновлень або зв’яжіться з розробником додатка."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шукати оновлення"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Цей додаток несумісний з останньою версією ОС Android. Перевірте наявність оновлень або зв’яжіться з розробником додатка."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Щоб переглянути, відкрийте додаток для SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Деякі функції може бути обмежено"</string>
@@ -2161,16 +2163,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Цей контент не можна відкривати в робочих додатках"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Цим контентом не можна ділитися в особистих додатках"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Цей контент не можна відкривати в особистих додатках"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Робочий профіль призупинено"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Торкніться, щоб увімкнути"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Робочі додатки призупинено"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Увімкнути знову"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Відкрити робочий додаток <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Відкрити в особистому додатку <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Відкрити в робочому додатку <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Телефонувати з робочого додатка?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Перейти в робочий додаток?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Ваша організація дозволяє телефонувати лише з робочих додатків"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Ваша організація дозволяє надсилати повідомлення лише з робочих додатків"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Телефонувати"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Перейти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-код розблокування підгрупи мереж SIM-карти"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-код розблокування корпоративної SIM-карти"</string>
@@ -2290,7 +2297,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Надати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
@@ -2320,11 +2327,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволяє супутньому додатку запускати активні сервіси у фоновому режимі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Мікрофон доступний"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Мікрофон заблоковано"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Подвійний екран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Подвійний екран увімкнено"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen увімкнено"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує обидва екрани для показу контенту"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Пристрій сильно нагрівається"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Подвійний екран недоступний, оскільки телефон сильно нагрівається"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функція Dual Screen недоступна, оскільки телефон сильно нагрівається"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функція Dual Screen недоступна"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функція Dual Screen недоступна, оскільки ввімкнено режим енергозбереження. Її можна вимкнути в налаштуваннях."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Перейти до налаштувань"</string>
