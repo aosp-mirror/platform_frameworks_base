@@ -10185,6 +10185,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_RTT_AUTO_UPGRADE_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_FOR_VT_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_DOWNGRADE_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_RTT_UPGRADE_SUPPORTED_FOR_DOWNGRADED_VT_CALL_BOOL, true);
