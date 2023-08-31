@@ -154,12 +154,12 @@ public class AssistManager {
             new IVisualQueryDetectionAttentionListener.Stub() {
         @Override
         public void onAttentionGained() {
-            mVisualQueryAttentionListeners.forEach(VisualQueryAttentionListener::onAttentionGained);
+            handleVisualAttentionChanged(true);
         }
 
         @Override
         public void onAttentionLost() {
-            mVisualQueryAttentionListeners.forEach(VisualQueryAttentionListener::onAttentionLost);
+            handleVisualAttentionChanged(false);
         }
     };
 
@@ -433,9 +433,19 @@ public class AssistManager {
 
                     @Override
                     public void onStopPerceiving() {
+                        // Treat this as a signal that attention has been lost (and inform listeners
+                        // accordingly).
+                        handleVisualAttentionChanged(false);
                         mAssistUtils.disableVisualQueryDetection();
                     }
                 });
+    }
+
+    private void handleVisualAttentionChanged(boolean attentionGained) {
+        mVisualQueryAttentionListeners.forEach(
+                attentionGained
+                        ? VisualQueryAttentionListener::onAttentionGained
+                        : VisualQueryAttentionListener::onAttentionLost);
     }
 
     public void launchVoiceAssistFromKeyguard() {
