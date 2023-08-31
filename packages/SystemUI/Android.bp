@@ -345,6 +345,23 @@ filegroup {
         "tests/src/com/android/systemui/communal/data/repository/CommunalWidgetRepositoryImplTest.kt",
         "tests/src/com/android/systemui/communal/domain/interactor/CommunalInteractorTest.kt",
         "tests/src/com/android/systemui/communal/ui/view/layout/blueprints/DefaultCommunalBlueprintTest.kt",
+
+        /* Dream tests */
+        "tests/src/com/android/systemui/dreams/complication/HideComplicationTouchHandlerTest.java",
+        "tests/src/com/android/systemui/dreams/conditions/AssistantAttentionConditionTest.java",
+        "tests/src/com/android/systemui/dreams/conditions/DreamConditionTest.java",
+        "tests/src/com/android/systemui/dreams/touch/scrim/BouncerlessScrimControllerTest.java",
+        "tests/src/com/android/systemui/dreams/touch/scrim/ScrimManagerTest.java",
+        "tests/src/com/android/systemui/dreams/touch/BouncerSwipeTouchHandlerTest.java",
+        "tests/src/com/android/systemui/dreams/touch/ShadeTouchHandlerTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayAnimationsControllerTest.kt",
+        "tests/src/com/android/systemui/dreams/DreamOverlayCallbackControllerTest.kt",
+        "tests/src/com/android/systemui/dreams/DreamOverlayContainerViewControllerTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayNotificationCountProviderTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayServiceTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayStateControllerTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarItemsProviderTest.java",
+        "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarViewControllerTest.java",
     ],
     path: "tests/src",
 }

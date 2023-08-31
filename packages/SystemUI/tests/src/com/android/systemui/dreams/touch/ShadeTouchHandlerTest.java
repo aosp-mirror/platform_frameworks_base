@@ -21,12 +21,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.system.InputChannelCompat;
@@ -42,8 +43,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ShadeTouchHandlerTest extends SysuiTestCase {
     @Mock
     CentralSurfaces mCentralSurfaces;

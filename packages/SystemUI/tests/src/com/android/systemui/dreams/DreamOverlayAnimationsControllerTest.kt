@@ -3,9 +3,10 @@ package com.android.systemui.dreams
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.testing.AndroidTestingRunner
 import android.view.View
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
@@ -29,8 +30,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
 
     companion object {
