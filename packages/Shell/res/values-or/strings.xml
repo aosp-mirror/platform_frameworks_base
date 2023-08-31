@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="3701846017049540910">"ଶେଲ୍‍"</string>
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"ବଗ୍ ରିପୋର୍ଟ"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g> ତିଆରି କରାଯାଉଛି"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g> କ୍ୟାପଚର୍‍ କରାଗଲା"</string>
@@ -42,6 +42,6 @@
     <string name="bugreport_info_name" msgid="4414036021935139527">"ଫାଇଲ୍ ନାମ"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"ବଗ୍‍ର ନାମ"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"ବଗ୍‍ର ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
-    <string name="save" msgid="4781509040564835759">"ସେଭ୍‌ କରନ୍ତୁ"</string>
+    <string name="save" msgid="4781509040564835759">"ସେଭ କରନ୍ତୁ"</string>
     <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"ବଗ୍‍ ରିପୋର୍ଟ ସେୟାର୍‍ କରନ୍ତୁ"</string>
 </resources>
