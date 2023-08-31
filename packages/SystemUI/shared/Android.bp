@@ -46,6 +46,7 @@ android_library {
         ":wm_shell_util-sources",
     ],
     static_libs: [
+        "BiometricsSharedLib",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",

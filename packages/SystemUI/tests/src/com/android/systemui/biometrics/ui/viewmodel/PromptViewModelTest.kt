@@ -31,10 +31,10 @@ import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepos
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
-import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues

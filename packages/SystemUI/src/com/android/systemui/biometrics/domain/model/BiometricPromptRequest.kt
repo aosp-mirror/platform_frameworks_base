@@ -1,6 +1,7 @@
 package com.android.systemui.biometrics.domain.model
 
 import android.hardware.biometrics.PromptInfo
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 
 /**

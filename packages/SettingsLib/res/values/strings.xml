@@ -1665,14 +1665,6 @@
     <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
     <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
 
-    <!-- [CHAR LIMIT=NONE] Messages shown when users press outside of udfps region during -->
-    <string-array name="udfps_accessibility_touch_hints">
-        <item>Move left</item>
-        <item>Move down</item>
-        <item>Move right</item>
-        <item>Move up</item>
-    </string-array>
-
     <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
     <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
 

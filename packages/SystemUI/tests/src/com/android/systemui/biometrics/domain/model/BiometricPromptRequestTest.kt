@@ -4,6 +4,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.promptInfo
+import com.android.systemui.biometrics.shared.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

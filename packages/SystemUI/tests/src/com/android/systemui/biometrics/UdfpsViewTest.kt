@@ -19,16 +19,16 @@ package com.android.systemui.biometrics
 import android.graphics.PointF
 import android.graphics.RectF
 import android.hardware.biometrics.SensorLocationInternal
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.LayoutInflater
 import android.view.Surface
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
@@ -42,8 +42,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val SENSOR_X = 50
 private const val SENSOR_Y = 250

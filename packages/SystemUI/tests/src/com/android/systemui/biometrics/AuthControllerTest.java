@@ -18,15 +18,12 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -86,7 +83,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
