@@ -42,8 +42,8 @@
         android:id="@+id/view_translate"
         android:layout_width="20dp"
         android:layout_height="10dp"
-        android:translationX="10dp"
-        android:translationY="20dp"
+        android:translationX="10px"
+        android:translationY="20px"
         android:text="Hello World!"
         android:background="#2F00FF00" />
     <FrameLayout

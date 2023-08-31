@@ -98,6 +98,8 @@ public class AuthenticationStatsCollector {
                     mAuthenticationStatsPersister.getAllFrrStats(mModality)) {
                 mUserAuthenticationStatsMap.put(stats.getUserId(), stats);
             }
+            mAuthenticationStatsPersister.persistFrrThreshold(mThreshold);
+
             mPersisterInitialized = true;
         } catch (IllegalStateException e) {
             Slog.w(TAG, "Failed to initialize AuthenticationStatsPersister.", e);

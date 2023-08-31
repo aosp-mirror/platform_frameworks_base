@@ -132,7 +132,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
                 mSmartReplyStateInflater,
-                mNotifLayoutInflaterFactory);
+                mNotifLayoutInflaterFactory,
+                mock(NotificationContentInflaterLogger.class));
     }
 
     @Test
@@ -255,7 +256,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                         return new AsyncFailRemoteView(mContext.getPackageName(),
                                 R.layout.custom_view_dark);
                     }
-                });
+                },
+                mock(NotificationContentInflaterLogger.class));
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
