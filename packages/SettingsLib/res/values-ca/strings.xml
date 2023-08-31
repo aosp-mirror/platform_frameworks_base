@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors del manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres amb format lliure"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres experimentals amb format lliure"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Mode d\'escriptori"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contrasenya per a còpies d\'ordinador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les còpies de seguretat completes d\'ordinador no estan protegides"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toca per canviar o suprimir la contrasenya per a les còpies de seguretat completes de l\'ordinador"</string>

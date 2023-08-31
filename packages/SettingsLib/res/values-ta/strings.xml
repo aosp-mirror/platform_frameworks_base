@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமை."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"சாளரங்களை அளவுமாற்ற மற்றும் எங்கும் நகர்த்த அனுமதிக்கும் பரிசோதனைக்குரிய அம்சத்திற்கான ஆதரவை இயக்கு."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"டெஸ்க்டாப் பயன்முறை"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"டெஸ்க்டாப் காப்புப்பிரதி கடவுச்சொல்"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"டெஸ்க்டாப்பின் முழு காப்புப்பிரதிகள் தற்போது பாதுகாக்கப்படவில்லை"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"டெஸ்க்டாப்பின் முழுக் காப்புப் பிரதிகளுக்கான கடவுச்சொல்லை மாற்ற அல்லது அகற்ற, தட்டவும்"</string>

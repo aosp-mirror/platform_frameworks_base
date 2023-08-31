@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"모든 활동을 매니페스트 값에 관계없이 멀티 윈도우용으로 크기 조정 가능하도록 설정"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"자유 형식 창 사용"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"자유 형식 창 지원 사용"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"데스크톱 모드"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"데스크톱 백업 비밀번호"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"데스크톱 전체 백업에 비밀번호가 설정되어 있지 않음"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"데스크톱 전체 백업에 대한 비밀번호를 변경하거나 삭제하려면 탭하세요."</string>

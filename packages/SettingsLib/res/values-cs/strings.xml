@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Umožní změnu velikosti všech aktivit na několik oken (bez ohledu na hodnoty manifestu)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivovat okna s volným tvarem"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivuje podporu experimentálních oken s volným tvarem"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Režim počítače"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Heslo pro zálohy v počítači"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Úplné zálohy v počítači nejsou v současné době chráněny"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tuto možnost vyberte, chcete-li změnit nebo odebrat heslo pro úplné zálohy do počítače"</string>

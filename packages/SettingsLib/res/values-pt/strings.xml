@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Ativar janelas de forma livre"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ativar a compatibilidade com janelas experimentais de forma livre"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Modo área de trabalho"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Senha de backup local"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Os backups completos não estão protegidos no momento"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Toque para alterar ou remover a senha de backups completos do desktop"</string>

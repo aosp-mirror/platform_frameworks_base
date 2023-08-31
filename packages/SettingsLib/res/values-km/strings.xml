@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ធ្វើឲ្យសកម្មភាពទាំងអស់អាចប្តូរទំហំបានសម្រាប់ពហុវិនដូ ដោយមិនគិតពីតម្លៃមេនីហ្វេសថ៍។"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"បើកដំណើរការផ្ទាំងវិនដូទម្រង់សេរី"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"បើកឱ្យអាចប្រើផ្ទាំងវិនដូទម្រង់សេរីពិសោធន៍។"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"មុខងារកុំព្យូទ័រ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ពាក្យ​សម្ងាត់​បម្រុង​ទុក​លើកុំព្យូទ័រ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"បច្ចុប្បន្ន ការ​បម្រុង​ទុក​ពេញលេញនៅលើកុំព្យូទ័រមិន​ត្រូវ​បាន​ការពារ​ទេ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ប៉ះដើម្បីប្ដូរ ឬយកពាក្យសម្ងាត់ចេញសម្រាប់ការបម្រុងទុកពេញលេញលើកុំព្យូទ័រ"</string>

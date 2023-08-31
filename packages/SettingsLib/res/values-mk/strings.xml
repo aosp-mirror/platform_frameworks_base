@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Сите активности ќе имаат променлива големина во режимот со повеќе прозорци, независно од вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Овозможи прозорци со слободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Овозможи поддршка за експериментални прозорци со слободна форма."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Режим за компјутер"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Лозинка за бекап на компјутер"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Целосниот бекап на компјутерот во моментов не е заштитен"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Допрете за да се промени или отстрани лозинката за целосен бекап на компјутерот"</string>

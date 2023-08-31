@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gjør at alle aktiviteter kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Slå på vinduer i fritt format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Slå på støtte for vinduer i eksperimentelt fritt format."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Skrivebordmodus"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Passord for sikkerhetskopiering på datamaskin"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Fullstendig sikkerhetskopiering på datamaskin er ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trykk for å endre eller fjerne passordet for fullstendige sikkerhetskopier på datamaskinen"</string>
