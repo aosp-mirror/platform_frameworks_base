@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ОК"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Нет недавних всплывающих чатов"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Здесь будут появляться недавние и скрытые всплывающие чаты."</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Всплывающие чаты"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Укажите приложения и разговоры, для которых разрешены всплывающие чаты."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Всплывающая подсказка"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Настроить"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Всплывающий чат закрыт."</string>
