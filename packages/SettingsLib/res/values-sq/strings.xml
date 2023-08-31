@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Bëj që të gjitha aktivitetet të kenë madhësi të ndryshueshme për përdorimin me shumë dritare, pavarësisht vlerave të manifestit."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivizo dritaret me formë të lirë"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivizo mbështetjen për dritaret eksperimentale me formë të lirë."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Modaliteti i desktopit"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Fjalëkalimi rezervë i kompjuterit"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Rezervimet e plota në kompjuter nuk janë të mbrojtura aktualisht"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Trokit për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>

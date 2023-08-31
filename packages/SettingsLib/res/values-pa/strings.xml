@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ਡੈਸਕਟਾਪ ਮੋਡ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ਡੈਸਕਟਾਪ ਬੈਕਅੱਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ਡੈਸਕਟਾਪ ਦੇ ਪੂਰੇ ਬੈਕਅੱਪ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ਡੈਸਕਟਾਪ ਦੇ ਮੁਕੰਮਲ ਬੈਕਅੱਪਾਂ ਲਈ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>

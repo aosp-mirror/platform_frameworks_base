@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"将所有 activity 设为可配合多窗口环境调整大小（无论清单值是什么）。"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"启用可自由调整的窗口"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"启用可自由调整的窗口这一实验性功能。"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"桌面模式"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"桌面备份密码"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"桌面完整备份当前未设置密码保护"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"点按即可更改或移除用于保护桌面完整备份的密码"</string>

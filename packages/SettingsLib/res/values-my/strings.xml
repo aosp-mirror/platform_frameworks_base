@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"သတ်မှတ်တန်ဖိုး မည်သို့ပင်ရှိစေ ဝင်းဒိုးများ၏ လုပ်ဆောင်မှုအားလုံးကို အရွယ်အစားပြင်သည်။"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ပုံစံမျိုးစုံ ဝင်းဒိုးများ ဖွင့်ရန်"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ပုံစံမျိုးစုံဝင်းဒိုးများ စမ်းသပ်ခြင်းအတွက် ပံ့ပိုးမှုကို ဖွင့်သည်"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ဒက်စ်တော့မုဒ်"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ဒက်စ်တော့ အရန်စကားဝှက်"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ဒက်စ်တော့ အရန်သိမ်းဆည်းခြင်းအားလုံးကို လောလောဆယ် ကာကွယ်မထားပါ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ဒက်စ်တော့ အပြည့်အဝ အရန်သိမ်းခြင်းအတွက် စကားဝှက်ကို ပြောင်းရန် သို့မဟုတ် ဖယ်ရှားရန် တို့ပါ။"</string>

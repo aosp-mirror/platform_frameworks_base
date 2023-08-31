@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsem aktivnostim spremeniti velikost za način z več okni."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogoči okna svobodne oblike"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogoči podporo za poskusna okna svobodne oblike."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Namizni način"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Geslo za varnostno kopijo namizja"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Popolne varnostne kopije namizja trenutno niso zaščitene."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Dotaknite se, če želite spremeniti ali odstraniti geslo za popolno varnostno kopiranje namizja"</string>

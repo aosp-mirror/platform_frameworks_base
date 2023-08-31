@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktivér understøttelse af eksperimentelle vinduer i frit format"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Computertilstand"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Kode til lokal backup"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>

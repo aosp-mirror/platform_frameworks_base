@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Cho phép thay đổi kích thước của tất cả các hoạt động cho nhiều cửa sổ, bất kể giá trị tệp kê khai là gì."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Bật cửa sổ dạng tự do"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Bật tính năng hỗ trợ cửa sổ dạng tự do thử nghiệm."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Chế độ máy tính"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Mật khẩu cho bản sao lưu qua máy tính"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Các bản sao lưu đầy đủ qua máy tính hiện không được bảo vệ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Nhấn để thay đổi hoặc xóa mật khẩu dành cho các bản sao lưu đầy đủ vào máy tính"</string>
