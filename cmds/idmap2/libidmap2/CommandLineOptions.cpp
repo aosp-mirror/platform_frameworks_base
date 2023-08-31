@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iomanip>
+#include <iterator>
 #include <memory>
 #include <ostream>
 #include <set>
