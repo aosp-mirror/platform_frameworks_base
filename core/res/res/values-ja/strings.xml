@@ -321,7 +321,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"写真と動画の撮影"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"付近のデバイス"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"付近のデバイスの検出と接続"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"付近のデバイスの\\n検出と接続"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"通話履歴"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"通話履歴の読み取りと書き込み"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"電話"</string>
