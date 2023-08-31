@@ -486,6 +486,13 @@ public class UserBackupManagerService {
             File baseStateDir,
             File dataDir,
             TransportManager transportManager) {
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        if (backupManagerMonitorDumpsysUtils.deleteExpiredBMMEvents() && DEBUG){
+            Slog.d(TAG, "BMM Events recorded for dumpsys have expired");
+        }
         return new UserBackupManagerService(
                 userId,
                 context,
@@ -4197,6 +4204,9 @@ public class UserBackupManagerService {
             // We have not recorded BMMEvents yet.
             pw.println("NO BACKUP MANAGER MONITOR EVENTS");
             return;
+        } else if (bm.isFileLargerThanSizeLimit(events)){
+            pw.println("BACKUP MANAGER MONITOR EVENTS FILE OVER SIZE LIMIT - "
+                    + "future events will not be recorded");
         }
         pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
         try (BufferedReader reader = new BufferedReader(new FileReader(events))) {

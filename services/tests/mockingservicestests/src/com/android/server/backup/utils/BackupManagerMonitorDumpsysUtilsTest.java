@@ -26,11 +26,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import java.io.File;
+import java.io.FileWriter;
 
 public class BackupManagerMonitorDumpsysUtilsTest {
     private long mRetentionPeriod;
     private File mTempBMMEventsFile;
     private File mTempSetUpDateFile;
+
+    private long mSizeLimit;
     private TestBackupManagerMonitorDumpsysUtils mBackupManagerMonitorDumpsysUtils;
     @Rule
     public TemporaryFolder tmp = new TemporaryFolder();
@@ -38,6 +41,7 @@ public class BackupManagerMonitorDumpsysUtilsTest {
     @Before
     public void setUp() throws Exception {
         mRetentionPeriod = 30 * 60 * 1000;
+        mSizeLimit = 25 * 1024 * 1000;
         mTempBMMEventsFile = tmp.newFile("testbmmevents.txt");
         mTempSetUpDateFile = tmp.newFile("testSetUpDate.txt");
         mBackupManagerMonitorDumpsysUtils = new TestBackupManagerMonitorDumpsysUtils();
@@ -109,6 +113,33 @@ public class BackupManagerMonitorDumpsysUtilsTest {
         assertTrue(setUpTimestampBefore.equals(setUpTimestampAfter));
     }
 
+
+    @Test
+    public void parseBackupManagerMonitorEventForDumpsys_fileOverSizeLimit_doNotRecordEvents()
+            throws Exception {
+        assertTrue(mTempBMMEventsFile.length() == 0);
+        Bundle event = createRestoreBMMEvent();
+        mBackupManagerMonitorDumpsysUtils.parseBackupManagerMonitorRestoreEventForDumpsys(event);
+        long fileSizeBefore = mTempBMMEventsFile.length();
+
+        mBackupManagerMonitorDumpsysUtils.setTestSizeLimit(0);
+        mBackupManagerMonitorDumpsysUtils.parseBackupManagerMonitorRestoreEventForDumpsys(event);
+        long fileSizeAfter = mTempBMMEventsFile.length();
+        assertTrue(mBackupManagerMonitorDumpsysUtils.isFileLargerThanSizeLimit(mTempBMMEventsFile));
+        assertTrue(fileSizeBefore == fileSizeAfter);
+    }
+
+    @Test
+    public void parseBackupManagerMonitorEventForDumpsys_fileUnderSizeLimit_recordEvents()
+            throws Exception {
+        assertTrue(mTempBMMEventsFile.length() == 0);
+        Bundle event = createRestoreBMMEvent();
+
+        mBackupManagerMonitorDumpsysUtils.setTestSizeLimit(25 * 1024 * 1000);
+        mBackupManagerMonitorDumpsysUtils.parseBackupManagerMonitorRestoreEventForDumpsys(event);
+        assertFalse(mBackupManagerMonitorDumpsysUtils.isFileLargerThanSizeLimit(mTempBMMEventsFile));
+        assertTrue(mTempBMMEventsFile.length() != 0);
+    }
 
     @Test
     public void deleteExpiredBackupManagerMonitorEvent_eventsAreExpired_deleteEventsAndReturnTrue()
@@ -238,14 +269,19 @@ public class BackupManagerMonitorDumpsysUtilsTest {
             extends BackupManagerMonitorDumpsysUtils {
 
         private long testRetentionPeriod;
+        private long testSizeLimit;
 
         TestBackupManagerMonitorDumpsysUtils() {
             super();
             this.testRetentionPeriod = mRetentionPeriod;
+            this.testSizeLimit = mSizeLimit;
         }
 
         public void setTestRetentionPeriod(long testRetentionPeriod) {
             this.testRetentionPeriod = testRetentionPeriod;
+        }
+        public void setTestSizeLimit(long testSizeLimit) {
+            this.testSizeLimit = testSizeLimit;
         }
 
         @Override
@@ -262,6 +298,12 @@ public class BackupManagerMonitorDumpsysUtilsTest {
         long getRetentionPeriodInMillisec() {
             return testRetentionPeriod;
         }
+
+        @Override
+        long getBMMEventsFileSizeLimit(){
+            return testSizeLimit;
+        }
+
 
     }
 }

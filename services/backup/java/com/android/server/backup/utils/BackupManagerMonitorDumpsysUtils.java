@@ -57,11 +57,17 @@ public class BackupManagerMonitorDumpsysUtils {
     // Retention period of 60 days (in millisec) for the BMM Events.
     // After tha time has passed the text file containing the BMM events will be emptied
     private static final long LOGS_RETENTION_PERIOD_MILLISEC = 60 * TimeUnit.DAYS.toMillis(1);
+    // Size limit for the text file containing the BMM events
+    private static final long BMM_FILE_SIZE_LIMIT_BYTES = 25 * 1024 * 1000; // 2.5 MB
+
     // We cache the value of IsAfterRetentionPeriod() to avoid unnecessary disk I/O
     // mIsAfterRetentionPeriodCached tracks if we have cached the value of IsAfterRetentionPeriod()
     private boolean mIsAfterRetentionPeriodCached = false;
-    // The cahched value of IsAfterRetentionPeriod()
+    // The cached value of IsAfterRetentionPeriod()
     private boolean mIsAfterRetentionPeriod;
+    // If isFileLargerThanSizeLimit(bmmEvents)  returns true we cache the value to avoid
+    // unnecessary disk I/O
+   private boolean mIsFileLargerThanSizeLimit = false;
 
     /**
      * Parses the BackupManagerMonitor bundle for a RESTORE event in a series of strings that
@@ -114,6 +120,11 @@ public class BackupManagerMonitorDumpsysUtils {
             // We are parsing the first restore event.
             // Time to also record the setup timestamp of the device
             recordSetUpTimestamp();
+        }
+
+        if(isFileLargerThanSizeLimit(bmmEvents)){
+            // Do not write more events if the file is over size limit
+            return;
         }
 
         try (FileOutputStream out = new FileOutputStream(bmmEvents, /*append*/ true);
@@ -190,6 +201,13 @@ public class BackupManagerMonitorDumpsysUtils {
         File dataDir = new File(Environment.getDataDirectory(), BACKUP_PERSISTENT_DIR);
         File fname = new File(dataDir, "bmmevents.txt");
         return fname;
+    }
+
+    public boolean isFileLargerThanSizeLimit(File events){
+        if (!mIsFileLargerThanSizeLimit) {
+            mIsFileLargerThanSizeLimit = events.length() > getBMMEventsFileSizeLimit();
+        }
+        return mIsFileLargerThanSizeLimit;
     }
 
     private String timestamp() {
@@ -400,6 +418,11 @@ public class BackupManagerMonitorDumpsysUtils {
     @VisibleForTesting
     long getRetentionPeriodInMillisec() {
         return LOGS_RETENTION_PERIOD_MILLISEC;
+    }
+
+    @VisibleForTesting
+    long getBMMEventsFileSizeLimit(){
+        return BMM_FILE_SIZE_LIMIT_BYTES;
     }
 
     /**
