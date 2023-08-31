@@ -24,7 +24,7 @@
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu de ecrã no ecrã"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"A app <xliff:g id="NAME">%s</xliff:g> está no modo de ecrã no ecrã"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Se não pretende que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="pip_play" msgid="3496151081459417097">"Reproduzir"</string>
     <string name="pip_pause" msgid="690688849510295232">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Mudar para o seguinte"</string>
@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balão"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gerir"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balão ignorado."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Toque para reiniciar esta app e ficar com uma melhor visão."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Toque para reiniciar esta app e ver melhor."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problemas com a câmara?\nToque aqui para reajustar"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Não foi corrigido?\nToque para reverter"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nenhum problema com a câmara? Toque para ignorar."</string>
