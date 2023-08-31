@@ -39,7 +39,7 @@
     <string name="all_printers" msgid="5018829726861876202">"सर्व प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"प्रिंट संवाद"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> पैकी <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> पृष्‍ठ"</string>
+    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> पैकी <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> पेज"</string>
     <string name="summary_template" msgid="8899734908625669193">"सारांश, प्रती <xliff:g id="COPIES">%1$s</xliff:g>, कागद आकार <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"विस्तृत करण्याचे हँडल"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"संक्षिप्त करण्याचे हँडल"</string>
