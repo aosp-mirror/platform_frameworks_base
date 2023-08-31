@@ -23,15 +23,22 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastPrintWriter;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /*
@@ -46,12 +53,21 @@ public class BackupManagerMonitorDumpsysUtils {
     // Name of the subdirectory where the text file containing the BMM events will be stored.
     // Same as {@link UserBackupManagerFiles}
     private static final String BACKUP_PERSISTENT_DIR = "backup";
+    private static final String INITIAL_SETUP_TIMESTAMP_KEY = "initialSetupTimestamp";
+    // Retention period of 60 days (in millisec) for the BMM Events.
+    // After tha time has passed the text file containing the BMM events will be emptied
+    private static final long LOGS_RETENTION_PERIOD_MILLISEC = 60 * TimeUnit.DAYS.toMillis(1);
+    // We cache the value of IsAfterRetentionPeriod() to avoid unnecessary disk I/O
+    // mIsAfterRetentionPeriodCached tracks if we have cached the value of IsAfterRetentionPeriod()
+    private boolean mIsAfterRetentionPeriodCached = false;
+    // The cahched value of IsAfterRetentionPeriod()
+    private boolean mIsAfterRetentionPeriod;
 
     /**
      * Parses the BackupManagerMonitor bundle for a RESTORE event in a series of strings that
      * will be persisted in a text file and printed in the dumpsys.
      *
-     * If the evenntBundle passed is not a RESTORE event, return early
+     * If the eventBundle passed is not a RESTORE event, return early
      *
      * Key information related to the event:
      * - Timestamp (HAS TO ALWAYS BE THE FIRST LINE OF EACH EVENT)
@@ -63,16 +79,21 @@ public class BackupManagerMonitorDumpsysUtils {
      *
      * Example of formatting:
      * RESTORE Event: [2023-08-18 17:16:00.735] Agent - Agent logging results
-     *     Package name: com.android.wallpaperbackup
-     *     Agent Logs:
-     *         Data Type: wlp_img_system
-     *             Item restored: 0/1
-     *             Agent Error - Category: no_wallpaper, Count: 1
-     *         Data Type: wlp_img_lock
-     *             Item restored: 0/1
-     *             Agent Error - Category: no_wallpaper, Count: 1
+     * Package name: com.android.wallpaperbackup
+     * Agent Logs:
+     * Data Type: wlp_img_system
+     * Item restored: 0/1
+     * Agent Error - Category: no_wallpaper, Count: 1
+     * Data Type: wlp_img_lock
+     * Item restored: 0/1
+     * Agent Error - Category: no_wallpaper, Count: 1
      */
     public void parseBackupManagerMonitorRestoreEventForDumpsys(Bundle eventBundle) {
+        if (isAfterRetentionPeriod()) {
+            // We only log data for the first 60 days since setup
+            return;
+        }
+
         if (eventBundle == null) {
             return;
         }
@@ -89,8 +110,14 @@ public class BackupManagerMonitorDumpsysUtils {
         }
         File bmmEvents = getBMMEventsFile();
 
+        if (bmmEvents.length() == 0) {
+            // We are parsing the first restore event.
+            // Time to also record the setup timestamp of the device
+            recordSetUpTimestamp();
+        }
+
         try (FileOutputStream out = new FileOutputStream(bmmEvents, /*append*/ true);
-            PrintWriter pw = new FastPrintWriter(out);) {
+             PrintWriter pw = new FastPrintWriter(out);) {
 
             int eventCategory = eventBundle.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY);
             int eventId = eventBundle.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID);
@@ -256,5 +283,124 @@ public class BackupManagerMonitorDumpsysUtils {
             case BackupAnnotations.OperationType.RESTORE -> true;
             default -> false;
         };
+    }
+
+    /**
+     * Store the timestamp when the device was set up (date when the first BMM event is parsed)
+     * in a text file.
+     */
+    @VisibleForTesting
+    void recordSetUpTimestamp() {
+        File setupDateFile = getSetUpDateFile();
+        // record setup timestamp only once
+        if (setupDateFile.length() == 0) {
+            try (FileOutputStream out = new FileOutputStream(setupDateFile, /*append*/ true);
+                 PrintWriter pw = new FastPrintWriter(out);) {
+                long currentDate = System.currentTimeMillis();
+                pw.println(currentDate);
+            } catch (IOException e) {
+                Slog.w(TAG, "An error occurred while recording the setup date: "
+                        + e.getMessage());
+            }
+        }
+
+    }
+
+    @VisibleForTesting
+    String getSetUpDate() {
+        File fname = getSetUpDateFile();
+        try (FileInputStream inputStream = new FileInputStream(fname);
+             InputStreamReader reader = new InputStreamReader(inputStream);
+             BufferedReader bufferedReader = new BufferedReader(reader);) {
+            return bufferedReader.readLine();
+        } catch (Exception e) {
+            Slog.w(TAG, "An error occurred while reading the date: " + e.getMessage());
+            return "Could not retrieve setup date";
+        }
+    }
+
+    @VisibleForTesting
+    static boolean isDateAfterNMillisec(long startTimeStamp, long endTimeStamp, long millisec) {
+        if (startTimeStamp > endTimeStamp) {
+            // Something has gone wrong, timeStamp1 should always precede timeStamp2.
+            // Out of caution return true: we would delete the logs rather than
+            // risking them being kept for longer than the retention period
+            return true;
+        }
+        long timeDifferenceMillis = endTimeStamp - startTimeStamp;
+        return (timeDifferenceMillis >= millisec);
+    }
+
+    /**
+     * Check if current date is after retention period
+     */
+    @VisibleForTesting
+    boolean isAfterRetentionPeriod() {
+        if (mIsAfterRetentionPeriodCached) {
+            return mIsAfterRetentionPeriod;
+        } else {
+            File setUpDateFile = getSetUpDateFile();
+            if (setUpDateFile.length() == 0) {
+                // We are yet to record a setup date. This means we haven't parsed the first event.
+                mIsAfterRetentionPeriod = false;
+                mIsAfterRetentionPeriodCached = true;
+                return false;
+            }
+            try {
+                long setupTimestamp = Long.parseLong(getSetUpDate());
+                long currentTimestamp = System.currentTimeMillis();
+                mIsAfterRetentionPeriod = isDateAfterNMillisec(setupTimestamp, currentTimestamp,
+                        getRetentionPeriodInMillisec());
+                mIsAfterRetentionPeriodCached = true;
+                return mIsAfterRetentionPeriod;
+            } catch (NumberFormatException e) {
+                // An error occurred when parsing the setup timestamp.
+                // Out of caution return true: we would delete the logs rather than
+                // risking them being kept for longer than the retention period
+                mIsAfterRetentionPeriod = true;
+                mIsAfterRetentionPeriodCached = true;
+                return true;
+            }
+        }
+    }
+
+    @VisibleForTesting
+    File getSetUpDateFile() {
+        File dataDir = new File(Environment.getDataDirectory(), BACKUP_PERSISTENT_DIR);
+        File setupDateFile = new File(dataDir, INITIAL_SETUP_TIMESTAMP_KEY + ".txt");
+        return setupDateFile;
+    }
+
+    @VisibleForTesting
+    long getRetentionPeriodInMillisec() {
+        return LOGS_RETENTION_PERIOD_MILLISEC;
+    }
+
+    /**
+     * Delete the BMM Events file after the retention period has passed.
+     *
+     * @return true if the retention period has passed false otherwise.
+     * we want to return true even if we were unable to delete the file, as this will prevent
+     * expired BMM events from being printed to the dumpsys
+     */
+    public boolean deleteExpiredBMMEvents() {
+        try {
+            if (isAfterRetentionPeriod()) {
+                File bmmEvents = getBMMEventsFile();
+                if (bmmEvents.exists()) {
+                    if (bmmEvents.delete()) {
+                        Slog.i(TAG, "Deleted expired BMM Events");
+                    } else {
+                        Slog.e(TAG, "Unable to delete expired BMM Events");
+                    }
+                }
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            // Handle any unexpected exceptions
+            // To be safe we return true as we want to avoid exposing expired BMMEvents
+            return true;
+        }
     }
 }

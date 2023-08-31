@@ -654,6 +654,13 @@ public class UserBackupManagerService {
         // the pending backup set
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
 
+        // check if we are past the retention period for BMM Events,
+        // if so delete expired events and do not print them to dumpsys
+        BackupManagerMonitorDumpsysUtils backupManagerMonitorDumpsysUtils =
+                new BackupManagerMonitorDumpsysUtils();
+        mBackupHandler.postDelayed(backupManagerMonitorDumpsysUtils::deleteExpiredBMMEvents,
+                INITIALIZATION_DELAY_MILLIS);
+
         mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
         // Power management
@@ -4181,7 +4188,16 @@ public class UserBackupManagerService {
     private void dumpBMMEvents(PrintWriter pw) {
         BackupManagerMonitorDumpsysUtils bm =
                 new BackupManagerMonitorDumpsysUtils();
+        if (bm.deleteExpiredBMMEvents()) {
+            pw.println("BACKUP MANAGER MONITOR EVENTS HAVE EXPIRED");
+            return;
+        }
         File events = bm.getBMMEventsFile();
+        if (events.length() == 0){
+            // We have not recorded BMMEvents yet.
+            pw.println("NO BACKUP MANAGER MONITOR EVENTS");
+            return;
+        }
         pw.println("START OF BACKUP MANAGER MONITOR EVENTS");
         try (BufferedReader reader = new BufferedReader(new FileReader(events))) {
             String line;
