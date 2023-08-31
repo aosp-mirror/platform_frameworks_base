@@ -67,6 +67,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private final ExpandableNotificationRowComponent.Builder
             mExpandableNotificationRowComponentBuilder;
     private final IconManager mIconManager;
+    private final NotificationRowBinderLogger mLogger;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
@@ -84,6 +85,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
             IconManager iconManager,
+            NotificationRowBinderLogger logger,
             FeatureFlags featureFlags) {
         mContext = context;
         mNotifBindPipeline = notifBindPipeline;
@@ -94,6 +96,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
         mIconManager = iconManager;
+        mLogger = logger;
         mFeatureFlags = featureFlags;
     }
 
@@ -124,15 +127,19 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
 
         if (entry.rowExists()) {
+            mLogger.logUpdatingRow(entry, params);
             mIconManager.updateIcons(entry);
             ExpandableNotificationRow row = entry.getRow();
             row.reset();
             updateRow(entry, row);
             inflateContentViews(entry, params, row, callback);
         } else {
+            mLogger.logCreatingRow(entry, params);
             mIconManager.createIcons(entry);
+            mLogger.logInflatingRow(entry);
             mRowInflaterTaskProvider.get().inflate(mContext, parent, entry,
                     row -> {
+                        mLogger.logInflatedRow(entry);
                         // Setup the controller for the view.
                         ExpandableNotificationRowComponent component =
                                 mExpandableNotificationRowComponentBuilder
@@ -154,8 +161,10 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     @Override
     public void releaseViews(NotificationEntry entry) {
         if (!entry.rowExists()) {
+            mLogger.logNotReleasingViewsRowDoesntExist(entry);
             return;
         }
+        mLogger.logReleasingViews(entry);
         final RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
@@ -220,7 +229,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         }
 
         params.rebindAllContentViews();
+        mLogger.logRequestingRebind(entry, inflaterParams);
         mRowContentBindStage.requestRebind(entry, en -> {
+            mLogger.logRebindComplete(entry);
             row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
             row.setIsLowPriority(isLowPriority);
             if (inflationCallback != null) {
