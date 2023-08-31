@@ -80,6 +80,14 @@ public class LogModule {
         return factory.create("NotifHeadsUpLog", 1000);
     }
 
+    /** Provides a logging buffer for logs related to inflation of notifications. */
+    @Provides
+    @SysUISingleton
+    @NotifInflationLog
+    public static LogBuffer provideNotifInflationLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifInflationLog", 100);
+    }
+
     /** Provides a logging buffer for notification interruption calculations. */
     @Provides
     @SysUISingleton
