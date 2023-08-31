@@ -34,3 +34,10 @@ flag {
     description: "Enable Virtual Camera"
     bug: "270352264"
 }
+
+flag {
+  name: "stream_permissions"
+  namespace: "virtual_devices"
+  description: "Enable streaming permission dialogs to Virtual Devices"
+  bug: "291737919"
+}
