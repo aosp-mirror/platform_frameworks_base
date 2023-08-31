@@ -772,7 +772,6 @@ public class AudioDeviceBroker {
         final int mVolume;
         final boolean mIsLeOutput;
         final @NonNull String mEventSource;
-        final @AudioSystem.AudioFormatNativeEnumForBtCodec int mCodec;
         final int mAudioSystemDevice;
         final int mMusicDevice;
 
@@ -787,7 +786,6 @@ public class AudioDeviceBroker {
             mEventSource = d.mEventSource;
             mAudioSystemDevice = audioDevice;
             mMusicDevice = AudioSystem.DEVICE_NONE;
-            mCodec = codec;
         }
 
         // constructor used by AudioDeviceBroker to search similar message
@@ -796,7 +794,6 @@ public class AudioDeviceBroker {
             mProfile = profile;
             mEventSource = "";
             mMusicDevice = AudioSystem.DEVICE_NONE;
-            mCodec = AudioSystem.AUDIO_FORMAT_DEFAULT;
             mAudioSystemDevice = 0;
             mState = 0;
             mSupprNoisy = false;
@@ -811,7 +808,6 @@ public class AudioDeviceBroker {
             mProfile = profile;
             mEventSource = "";
             mMusicDevice = musicDevice;
-            mCodec = AudioSystem.AUDIO_FORMAT_DEFAULT;
             mAudioSystemDevice = audioSystemDevice;
             mState = state;
             mSupprNoisy = false;
@@ -829,7 +825,6 @@ public class AudioDeviceBroker {
             mEventSource = src.mEventSource;
             mAudioSystemDevice = src.mAudioSystemDevice;
             mMusicDevice = src.mMusicDevice;
-            mCodec = src.mCodec;
         }
 
         // redefine equality op so we can match messages intended for this device
@@ -847,6 +842,19 @@ public class AudioDeviceBroker {
             }
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "BtDeviceInfo: device=" + mDevice.toString()
+                            + " state=" + mState
+                            + " prof=" + mProfile
+                            + " supprNoisy=" + mSupprNoisy
+                            + " volume=" + mVolume
+                            + " isLeOutput=" + mIsLeOutput
+                            + " eventSource=" + mEventSource
+                            + " audioSystemDevice=" + mAudioSystemDevice
+                            + " musicDevice=" + mMusicDevice;
+        }
     }
 
     BtDeviceInfo createBtDeviceInfo(@NonNull BtDeviceChangedData d, @NonNull BluetoothDevice device,
@@ -859,9 +867,6 @@ public class AudioDeviceBroker {
                 break;
             case BluetoothProfile.A2DP:
                 audioDevice = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
-                synchronized (mDeviceStateLock) {
-                    codec = mBtHelper.getA2dpCodec(device);
-                }
                 break;
             case BluetoothProfile.HEARING_AID:
                 audioDevice = AudioSystem.DEVICE_OUT_HEARING_AID;
@@ -1696,8 +1701,11 @@ public class AudioDeviceBroker {
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
-                            mDeviceInventory.onSetBtActiveDevice(btInfo,
+                            final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                            @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                                    mBtHelper.getA2dpCodecWithFallbackToSBC(
+                                            btInfo.mDevice, "MSG_L_SET_BT_ACTIVE_DEVICE");
+                            mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
                                     (btInfo.mProfile
                                             != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
                                             ? mAudioService.getBluetoothContextualVolumeStream()
@@ -1730,12 +1738,16 @@ public class AudioDeviceBroker {
                                 (String) msg.obj, msg.arg1);
                     }
                     break;
-                case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE:
+                case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
+                    final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
                     synchronized (mDeviceStateLock) {
+                        @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                                mBtHelper.getA2dpCodecWithFallbackToSBC(
+                                        btInfo.mDevice, "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
                         mDeviceInventory.onBluetoothDeviceConfigChange(
-                                (BtDeviceInfo) msg.obj, BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
+                                btInfo, codec, BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
                     }
-                    break;
+                } break;
                 case MSG_BROADCAST_AUDIO_BECOMING_NOISY:
                     onSendBecomingNoisyIntent();
                     break;
@@ -1831,20 +1843,12 @@ public class AudioDeviceBroker {
                     }
                     break;
                 case MSG_L_BT_ACTIVE_DEVICE_CHANGE_EXT: {
-                    final BtDeviceInfo info = (BtDeviceInfo) msg.obj;
-                    if (info.mDevice == null) break;
+                    final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                    if (btInfo.mDevice == null) break;
                     AudioService.sDeviceLogger.enqueue((new EventLogger.StringEvent(
-                            "msg: onBluetoothActiveDeviceChange "
-                                    + " state=" + info.mState
-                                    // only querying address as this is the only readily available
-                                    // field on the device
-                                    + " addr=" + info.mDevice.getAddress()
-                                    + " prof=" + info.mProfile
-                                    + " supprNoisy=" + info.mSupprNoisy
-                                    + " src=" + info.mEventSource
-                                    )).printLog(TAG));
+                            "msg: onBluetoothActiveDeviceChange " + btInfo)).printLog(TAG));
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.setBluetoothActiveDevice(info);
+                        mDeviceInventory.setBluetoothActiveDevice(btInfo);
                     }
                 } break;
                 case MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY: {
