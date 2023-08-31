@@ -67,6 +67,18 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowIncreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowDecreaseIdle">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Ramp speed used to decrease the screen brightness when in idle mode.
+                     In framework brightness units per second. Must exist with
+                     screenBrightnessRampSlowDecreaseIdle-->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncreaseIdle">
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <!-- Maximum time in milliseconds that a brightness increase animation
                      can take. -->
                 <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxMillis">
