@@ -28,7 +28,7 @@
     <string name="keyboard_layout_croatian" msgid="4172229471079281138">"क्रोएशियन"</string>
     <string name="keyboard_layout_czech" msgid="1349256901452975343">"चेक"</string>
     <string name="keyboard_layout_czech_qwerty" msgid="3331402534128515501">"चेक QWERTY स्टाइल"</string>
-    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"एस्टोनियाई"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"एस्टोनियन"</string>
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"हंगेरियाई"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"आइसलैंडिक"</string>
     <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ब्राज़ीलियाई"</string>
@@ -38,7 +38,7 @@
     <string name="keyboard_layout_turkish" msgid="7736163250907964898">"तुर्किये"</string>
     <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"Turkish F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"यूक्रेनियाई"</string>
-    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"अरबी"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"ऐरेबिक"</string>
     <string name="keyboard_layout_greek" msgid="7289253560162386040">"ग्रीक"</string>
     <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"हिब्रू"</string>
     <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"लिथुआनियाई"</string>
