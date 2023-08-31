@@ -112,9 +112,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"デバイスの再起動後はパターンの入力が必要になります"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"デバイスの再起動後は PIN の入力が必要になります"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"デバイスの再起動後はパスワードの入力が必要になります"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"セキュリティを強化するには代わりにパターンを使用してください"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"セキュリティを強化するには代わりに PIN を使用してください"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"セキュリティを強化するには代わりにパスワードを使用してください"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"画面ロックを解除するにはパターンを入力してください"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"画面ロックを解除するには PIN を入力してください"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"画面ロックを解除するにはパスワードを入力してください"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"デバイスは管理者によりロックされています"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"デバイスは手動でロックされました"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"認識されませんでした"</string>
@@ -124,5 +124,11 @@
     <string name="clock_title_default" msgid="6342735240617459864">"デフォルト"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"バブル"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"アナログ"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"続行するにはデバイスのロックを解除してください"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"続行するにはデバイスのロックを解除します"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"アップデートを後でインストールするには、PIN を入力してください"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"アップデートを後でインストールするには、パスワードを入力してください"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"アップデートを後でインストールするには、パターンを入力してください"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"デバイスの更新が完了しました。PIN を入力して続行してください。"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"デバイスの更新が完了しました。パスワードを入力して続行してください。"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"デバイスの更新が完了しました。パターンを入力して続行してください。"</string>
 </resources>
