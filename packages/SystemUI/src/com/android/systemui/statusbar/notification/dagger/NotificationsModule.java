@@ -167,11 +167,8 @@ public interface NotificationsModule {
     }
 
     /** Provides an instance of {@link GroupMembershipManager} */
-    @SysUISingleton
-    @Provides
-    static GroupMembershipManager provideGroupMembershipManager() {
-        return new GroupMembershipManagerImpl();
-    }
+    @Binds
+    GroupMembershipManager provideGroupMembershipManager(GroupMembershipManagerImpl impl);
 
     /** Provides an instance of {@link GroupExpansionManager} */
     @Binds

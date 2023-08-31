@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -31,13 +32,14 @@ public interface GroupMembershipManager {
      * @return whether a given notification is a top level entry or is the summary in a group which
      * has children
      */
-    boolean isGroupSummary(NotificationEntry entry);
+    boolean isGroupSummary(@NonNull NotificationEntry entry);
 
     /**
      * Get the summary of a specified status bar notification. For an isolated notification this
      * returns itself.
      */
-    NotificationEntry getGroupSummary(NotificationEntry entry);
+    @Nullable
+    NotificationEntry getGroupSummary(@NonNull NotificationEntry entry);
 
     /**
      * Similar to {@link #getGroupSummary(NotificationEntry)} but doesn't get the visual summary
@@ -46,19 +48,20 @@ public interface GroupMembershipManager {
      * TODO: remove this when migrating to the new pipeline, this is taken care of in the
      * dismissal logic built into NotifCollection
      */
-    default NotificationEntry getLogicalGroupSummary(NotificationEntry entry) {
+    @Nullable
+    default NotificationEntry getLogicalGroupSummary(@NonNull NotificationEntry entry) {
         return getGroupSummary(entry);
     }
 
     /**
      * @return whether a given notification is a child in a group
      */
-    boolean isChildInGroup(NotificationEntry entry);
+    boolean isChildInGroup(@NonNull NotificationEntry entry);
 
     /**
      * Whether this is the only child in a group
      */
-    boolean isOnlyChildInGroup(NotificationEntry entry);
+    boolean isOnlyChildInGroup(@NonNull NotificationEntry entry);
 
     /**
      * Get the children that are in the summary's group, not including those isolated.
@@ -67,5 +70,5 @@ public interface GroupMembershipManager {
      * @return list of the children
      */
     @Nullable
-    List<NotificationEntry> getChildren(ListEntry summary);
+    List<NotificationEntry> getChildren(@NonNull ListEntry summary);
 }
