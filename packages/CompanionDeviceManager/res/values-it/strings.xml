@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4470785958457506021">"Gestione dispositivi companion"</string>
+    <string name="app_label" msgid="4470785958457506021">"Gestione dispositivi associati"</string>
     <string name="confirmation_title" msgid="4593465730772390351">"Vuoi consentire all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di accedere a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"orologio"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Scegli un <xliff:g id="PROFILE_NAME">%1$s</xliff:g> da gestire con &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
@@ -43,10 +43,11 @@
     <string name="consent_yes" msgid="8344487259618762872">"Consenti"</string>
     <string name="consent_no" msgid="2640796915611404382">"Non consentire"</string>
     <string name="consent_back" msgid="2560683030046918882">"Indietro"</string>
+    <string name="permission_expand" msgid="893185038020887411">"Espandi <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"Comprimi <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Vuoi dare alle app su &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; le stesse autorizzazioni che hai dato su &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Potrebbero essere incluse le autorizzazioni &lt;strong&gt;Microfono&lt;/strong&gt;, &lt;strong&gt;Fotocamera&lt;/strong&gt; e &lt;strong&gt;Accesso alla posizione&lt;/strong&gt;, oltre ad altre autorizzazioni sensibili su &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Puoi cambiare queste autorizzazioni in qualsiasi momento nelle Impostazioni su &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"Icona dell\'app"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"Pulsante Altre informazioni"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"Maggiori informazioni"</string>
     <string name="permission_phone" msgid="2661081078692784919">"Telefono"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contatti"</string>
@@ -68,7 +69,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Puoi leggere tutte le notifiche, incluse le informazioni come contatti, messaggi e foto"</string>
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Trasmetti in streaming le app del tuo telefono"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Consente di trasmettere in streaming app e altre funzionalità di sistema dal telefono"</string>
+    <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Trasmettere in streaming app e altre funzionalità di sistema dal telefono"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefono"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"tablet"</string>
 </resources>

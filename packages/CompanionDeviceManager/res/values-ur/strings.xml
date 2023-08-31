@@ -43,10 +43,11 @@
     <string name="consent_yes" msgid="8344487259618762872">"اجازت دیں"</string>
     <string name="consent_no" msgid="2640796915611404382">"اجازت نہ دیں"</string>
     <string name="consent_back" msgid="2560683030046918882">"پیچھے"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> کو پھیلائیں"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> کو سکیڑیں"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏ایپس کو &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; پر وہی اجازتیں دیں جو &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; پر دی گئی ہیں؟"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"‏اس میں ‎&lt;strong&gt;‎مائیکروفون‎&lt;/strong&gt; ،&lt;strong&gt;‎کیمرا‎&lt;/strong&gt;‎ اور ‎&lt;strong&gt;‎مقام تک رسائی‎&lt;/strong&gt;‎ اور ‎&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;‎ پر دیگر حساس اجازتیں شامل ہو سکتی ہیں۔ ‎&lt;br/&gt;&lt;br/&gt;‎آپ ‎&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;‎ پر کسی بھی وقت اپنی ترتیبات میں ان اجازتوں کو تبدیل کر سکتے ہیں۔"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"ایپ کا آئیکن"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"مزید معلومات کا بٹن"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"مزید معلومات"</string>
     <string name="permission_phone" msgid="2661081078692784919">"فون"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"رابطے"</string>
