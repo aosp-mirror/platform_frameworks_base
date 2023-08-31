@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -57,7 +58,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val sceneInteractor = utils.sceneInteractor()
-    private val featureFlags = utils.featureFlags
+    private val sceneContainerFlags = utils.sceneContainerFlags
     private val authenticationRepository = utils.authenticationRepository()
     private val authenticationInteractor =
         utils.authenticationInteractor(
@@ -78,7 +79,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             sceneInteractor = sceneInteractor,
             authenticationInteractor = authenticationInteractor,
             keyguardInteractor = keyguardInteractor,
-            featureFlags = featureFlags,
+            flags = sceneContainerFlags,
             sysUiState = sysUiState,
             displayId = Display.DEFAULT_DISPLAY,
             sceneLogger = mock(),
@@ -516,7 +517,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
         initialSceneKey: SceneKey? = null,
         authenticationMethod: AuthenticationMethodModel? = null,
     ): MutableStateFlow<ObservableTransitionState> {
-        featureFlags.set(Flags.SCENE_CONTAINER, true)
+        assumeTrue(Flags.SCENE_CONTAINER_ENABLED)
+        sceneContainerFlags.enabled = true
         authenticationRepository.setUnlocked(isDeviceUnlocked)
         keyguardRepository.setBypassEnabled(isBypassEnabled)
         val transitionStateFlow =

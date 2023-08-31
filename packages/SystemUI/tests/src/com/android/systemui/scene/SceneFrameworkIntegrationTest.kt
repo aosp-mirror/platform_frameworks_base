@@ -25,8 +25,6 @@ import com.android.systemui.authentication.domain.model.AuthenticationMethodMode
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
@@ -140,8 +138,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.SCENE_CONTAINER, true) }
-
         authenticationRepository.setUnlocked(false)
 
         val displayTracker = FakeDisplayTracker(context)
@@ -152,7 +148,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 sceneInteractor = sceneInteractor,
                 authenticationInteractor = authenticationInteractor,
                 keyguardInteractor = keyguardInteractor,
-                featureFlags = featureFlags,
+                flags = utils.sceneContainerFlags,
                 sysUiState = sysUiState,
                 displayId = displayTracker.defaultDisplayId,
                 sceneLogger = mock(),

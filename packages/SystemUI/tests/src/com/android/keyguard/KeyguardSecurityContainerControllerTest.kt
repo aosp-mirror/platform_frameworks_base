@@ -191,7 +191,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         featureFlags = FakeFeatureFlags()
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
-        featureFlags.set(Flags.SCENE_CONTAINER, false)
         featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
         featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
 
@@ -244,6 +243,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 falsingManager,
                 userSwitcherController,
                 featureFlags,
+                sceneTestUtils.sceneContainerFlags,
                 globalSettings,
                 sessionTracker,
                 Optional.of(sideFpsController),
@@ -802,8 +802,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Test
     fun dismissesKeyguard_whenSceneChangesToGone() =
         sceneTestUtils.testScope.runTest {
-            featureFlags.set(Flags.SCENE_CONTAINER, true)
-
             // Upon init, we have never dismisses the keyguard.
             underTest.onInit()
             runCurrent()

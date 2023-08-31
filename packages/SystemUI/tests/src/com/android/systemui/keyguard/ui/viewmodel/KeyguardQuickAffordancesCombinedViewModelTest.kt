@@ -129,7 +129,6 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                 set(Flags.FACE_AUTH_REFACTOR, true)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, false)
                 set(Flags.LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP, false)
-                set(Flags.SCENE_CONTAINER, false)
             }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
