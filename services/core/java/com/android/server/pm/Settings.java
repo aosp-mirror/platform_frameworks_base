@@ -4893,6 +4893,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.print("]");
         }
         pw.println();
+        File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
+        pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
@@ -5192,10 +5194,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.println();
             pw.print("      installReason=");
             pw.println(userState.getInstallReason());
-
-            final File dataDir = PackageInfoUtils.getDataDir(ps, user.id);
-            pw.print("      dataDir=");
-            pw.println(dataDir == null ? "null" : dataDir.getAbsolutePath());
 
             final PackageUserStateInternal pus = ps.readUserState(user.id);
             pw.print("      firstInstallTime=");
