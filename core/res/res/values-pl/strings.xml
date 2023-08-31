@@ -1869,6 +1869,8 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> – praca 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Klon aplikacji <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Podaj PIN, aby odpiąć"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Aby odpiąć, poproś o hasło"</string>
@@ -2033,8 +2035,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Zaktualizować w: "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Zaktualizować: <xliff:g id="TYPE">%1$s</xliff:g> w: "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Zaktualizować: <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> w: "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Zaktualizować w "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" te elementy: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Zapisz"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Nie, dziękuję"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Nie teraz"</string>

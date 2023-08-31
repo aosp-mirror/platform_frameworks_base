@@ -1868,6 +1868,8 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> שני בעבודה"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> שלישי בעבודה"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"שכפול של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"יש לבקש קוד אימות לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"צריך לבקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"יש לבקש סיסמה לפני ביטול הצמדה"</string>
@@ -1956,7 +1958,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"מידע נוסף"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ביטול ההשהיה של האפליקציה"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"להפעיל את האפליקציות לעבודה?"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"הפעלה"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ביטול ההשהיה"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"שיחת חירום"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"האפליקציה לא זמינה"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא זמינה בשלב זה."</string>
@@ -2032,8 +2034,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"לעדכן בשירות "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"לעדכן <xliff:g id="TYPE">%1$s</xliff:g> בשירות "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"האם לעדכן את <xliff:g id="TYPE_0">%1$s</xliff:g> ואת <xliff:g id="TYPE_1">%2$s</xliff:g> ב-"<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"לעדכן את הפריטים אלה ב-"<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>":‏ <xliff:g id="TYPE_0">%1$s</xliff:g>,‏ <xliff:g id="TYPE_1">%2$s</xliff:g> ו-<xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"שמירה"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"לא, תודה"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"לא עכשיו"</string>

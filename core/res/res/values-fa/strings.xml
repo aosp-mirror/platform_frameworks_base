@@ -1133,9 +1133,9 @@
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ساعت}one{# ساعت}other{# ساعت}}"</string>
     <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# روز}one{# روز}other{# روز}}"</string>
     <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# سال}one{# سال}other{# سال}}"</string>
-    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدئو"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
-    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدئو ممکن نیست."</string>
+    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدیو"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
+    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدیو ممکن نیست."</string>
     <string name="VideoView_error_button" msgid="5138809446603764272">"تأیید"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"ظهر"</string>
@@ -1867,6 +1867,8 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"کار دوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"کار سوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"همسانه <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"درخواست کد پین قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"درخواست الگوی بازگشایی قفل قبل‌از برداشتن سنجاق"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"درخواست گذرواژه قبل از برداشتن سنجاق"</string>
@@ -2031,8 +2033,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"در "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" به‌روزرسانی شود؟"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> در "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" به‌روزرسانی شود؟"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> و <xliff:g id="TYPE_1">%2$s</xliff:g> در "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" به‌روزرسانی شود؟"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"این موارد در "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>، <xliff:g id="TYPE_1">%2$s</xliff:g>، و <xliff:g id="TYPE_2">%3$s</xliff:g> به‌روزرسانی شود؟"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"ذخیره"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"نه سپاسگزارم"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"حالا نه"</string>

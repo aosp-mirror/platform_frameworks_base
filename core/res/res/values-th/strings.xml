@@ -1867,6 +1867,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"โคลน <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"<xliff:g id="LABEL">%1$s</xliff:g> ส่วนตัว"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
@@ -2031,8 +2032,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"อัปเดตใน "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"อัปเดต<xliff:g id="TYPE">%1$s</xliff:g>ใน "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"อัปเดต<xliff:g id="TYPE_0">%1$s</xliff:g>และ<xliff:g id="TYPE_1">%2$s</xliff:g>ใน "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ไหม"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"อัปเดตข้อมูล<xliff:g id="TYPE_0">%1$s</xliff:g> <xliff:g id="TYPE_1">%2$s</xliff:g> และ<xliff:g id="TYPE_2">%3$s</xliff:g>ใน "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"บันทึก"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"ไม่เป็นไร"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ไว้ทีหลัง"</string>

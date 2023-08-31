@@ -1868,6 +1868,8 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para desactivar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir patrón de desbloqueo para dejar de fijar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para desactivar"</string>
@@ -2032,8 +2034,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"¿Actualizar en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"¿Actualizar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"¿Actualizar <xliff:g id="TYPE_0">%1$s</xliff:g> y <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"¿Actualizar estos elementos en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> y <xliff:g id="TYPE_2">%3$s</xliff:g>)?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"No, gracias"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Ahora no"</string>
