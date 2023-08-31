@@ -70,6 +70,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.preference.PreferenceManager;
@@ -85,9 +86,11 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
+import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.NotificationHelper;
 import com.android.systemui.people.PeopleBackupFollowUpJob;
 import com.android.systemui.people.PeopleSpaceUtils;
@@ -99,6 +102,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.wm.shell.bubbles.Bubbles;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -119,7 +123,8 @@ import javax.inject.Inject;
 
 /** Manager for People Space widget. */
 @SysUISingleton
-public class PeopleSpaceWidgetManager {
+public class PeopleSpaceWidgetManager implements Dumpable {
+
     private static final String TAG = "PeopleSpaceWidgetMgr";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
@@ -160,7 +165,8 @@ public class PeopleSpaceWidgetManager {
             CommonNotifCollection notifCollection,
             PackageManager packageManager, Optional<Bubbles> bubblesOptional,
             UserManager userManager, NotificationManager notificationManager,
-            BroadcastDispatcher broadcastDispatcher, @Background Executor bgExecutor) {
+            BroadcastDispatcher broadcastDispatcher, @Background Executor bgExecutor,
+            DumpManager dumpManager) {
         if (DEBUG) Log.d(TAG, "constructor");
         mContext = context;
         mAppWidgetManager = AppWidgetManager.getInstance(context);
@@ -180,6 +186,7 @@ public class PeopleSpaceWidgetManager {
         mManager = this;
         mBroadcastDispatcher = broadcastDispatcher;
         mBgExecutor = bgExecutor;
+        dumpManager.registerNormalDumpable(TAG, this);
     }
 
     /** Initializes {@PeopleSpaceWidgetManager}. */
@@ -1363,5 +1370,41 @@ public class PeopleSpaceWidgetManager {
                 .map(widgetsMapping::get)
                 .filter(id -> !TextUtils.isEmpty(id))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, TAG + ".dump");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
+        Map<String, ?> all = sp.getAll();
+        pw.println("People widget list:");
+        for (Map.Entry<String, ?> entry : all.entrySet()) {
+            String key = entry.getKey();
+            PeopleBackupHelper.SharedFileEntryType keyType = getEntryType(entry);
+            switch (keyType) {
+                case WIDGET_ID:
+                    SharedPreferences widgetSp = mContext.getSharedPreferences(key,
+                            Context.MODE_PRIVATE);
+                    pw.print("People widget (valid) [");
+                    pw.print(key);
+                    pw.print("] shortcut id: \"");
+                    pw.print(widgetSp.getString(SHORTCUT_ID, EMPTY_STRING));
+                    pw.print("\", user id: ");
+                    pw.print(widgetSp.getInt(USER_ID, INVALID_USER_ID));
+                    pw.print(", package: ");
+                    pw.println(widgetSp.getString(PACKAGE_NAME, EMPTY_STRING));
+                    break;
+                case PEOPLE_TILE_KEY:
+                case CONTACT_URI:
+                    pw.print("Extra data [");
+                    pw.print(key);
+                    pw.print(" : ");
+                    pw.print((Set<String>) entry.getValue());
+                    pw.println("]");
+                    break;
+            }
+        }
+
+        Trace.traceEnd(Trace.TRACE_TAG_APP);
     }
 }
