@@ -257,7 +257,7 @@
     <item msgid="1212561935004167943">"Wyróżnij testowane polecenia rysowania na zielono"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="634406443901014984">"Wyłączone"</item>
+    <item msgid="634406443901014984">"Wyłączono"</item>
     <item msgid="1288760936356000927">"Na ekranie w postaci pasków"</item>
     <item msgid="5023908510820531131">"W: <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
@@ -281,7 +281,5 @@
     <item msgid="3825132913289380004">"RNDIS (Ethernet przez USB)"</item>
     <item msgid="8828567335701536560">"Źródło dźwięku"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
-  </string-array>
-  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

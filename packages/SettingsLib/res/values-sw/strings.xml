@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Sauti ya HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Sauti ya HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Vifaa vya Kusaidia Kusikia"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Imeunganishwa kwenye Vifaa vya Kusaidia Kusikia"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Imeunganishwa kwenye LE audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Imeunganishwa kwenye sikika ya njia ya mawasiliano"</string>
@@ -214,7 +214,8 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
+    <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Kloni"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Weka chaguo kwa ajili ya maendeleo ya programu"</string>
@@ -393,7 +394,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Onyesha historia ya ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
@@ -486,7 +487,7 @@
     <string name="disabled" msgid="8017887509554714950">"Imezimwa"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Imeruhusiwa"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Hairuhusiwi"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Kuweka programu zisizojulikana"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Kusakinisha programu zisizojulikana"</string>
     <string name="home" msgid="973834627243661438">"Ukurasa wa Kwanza wa Mipangilio"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Muda zaidi."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
     <string name="cancel" msgid="5665114069455378395">"Ghairi"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Endelea"</string>
+    <string name="back" msgid="5554327870352703710">"Rudi nyuma"</string>
+    <string name="save" msgid="3745809743277153149">"Hifadhi"</string>
     <string name="okay" msgid="949938843324579502">"Sawa"</string>
     <string name="done" msgid="381184316122520313">"Nimemaliza"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ving\'ora na vikumbusho"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Sasa hivi"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Kompyuta kibao hii"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Spika ya kituo"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kifaa cha Nje"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Kifaa kilichounganishwa"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Simu hii"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Huwezi kucheza maudhui kwenye kifaa hiki"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pata toleo jipya la akaunti ili ubadilishe"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Ungependa kuongeza mtumiaji?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za ufikivu zisihamishiwe mtumiaji mgeni."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Mtumiaji mpya utakayemwongeza atahitaji kujitayarishia nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Ungependa kumruhusu mtumiaji huyu awe msimamizi?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Wasimamizi wana ruhusa maalum ambazo watumiaji wengine hawana. Msimamizi anaweza kudhibiti watumiaji wote, kusasisha au kuweka upya mipangilio ya kifaa hiki, kubadilisha mipangilio, kuangalia programu zote zilizosakinishwa na kuteua au kubatilisha uteuzi wa watumiaji wengine kuwa wasimamizi."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Mruhusu awe msimamizi"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Mtumiaji aongezwe sasa?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Hakikisha kuwa mtu huyu anaweza kuchukua kifaa na kujitayarishia nafasi yake"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ungependa kuweka wasifu sasa?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Hatua hii itaanzisha upya kipindi cha mgeni na kufuta programu na data yote kwenye kipindi cha sasa"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Utafunga matumizi ya wageni?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Hatua hii itafuta programu na data kutoka kwenye kipindi cha mgeni cha sasa"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ndiyo, mruhusu awe msimamizi"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Hapana, usimruhusu awe msimamizi"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Funga"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Utahifadhi shughuli za mgeni?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Unaweza kuhifadhi shughuli kutoka kipindi cha sasa au kufuta programu na data yote"</string>

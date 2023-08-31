@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"ኤችዲ ኦዲዮ፦ <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"ኤችዲ ኦዲዮ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"አጋዥ መስሚያዎች"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ኦዲዮ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ኦዲዮ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ከአጋዥ መስሚያዎች ጋር ተገናኝቷል"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"ከLE ኦዲዮ ጋር ተገናኝቷል"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"ወደ ማህደረ  መረጃ  አውዲዮ ተያይዟል"</string>
@@ -214,7 +214,8 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"መገለጫ ይምረጡ"</string>
     <string name="category_personal" msgid="6236798763159385225">"የግል"</string>
-    <string name="category_work" msgid="4014193632325996115">"ስራ"</string>
+    <string name="category_work" msgid="4014193632325996115">"ሥራ"</string>
+    <string name="category_clone" msgid="1554511758987195974">"አባዛ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"የገንቢዎች አማራጮች"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"የገንቢዎች አማራጮችን አንቃ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"ለመተግበሪያ ግንባታ አማራጮች አዘጋጅ"</string>
@@ -362,7 +363,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"የሃርድዌር ንብርብሮች ሲዘምኑ አረንጓዴ አብራ"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"የጂፒዩ አልፎ መሳል አርም"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"የHW ተደራቢዎችን አሰናክል"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"ለማያ ገጽ ማቀናበሪያ ሁልጊዜ GPU ተጠቀም"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"ለማያ ገፅ ማቀናበሪያ ሁልጊዜ GPU ተጠቀም"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"የቀለም ህዋ አስመስል"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"የ OpenGL ክትትሎችን ያንቁ"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"የUSB ተሰሚ ማዛወር ያሰናክሉ"</string>
@@ -370,9 +371,9 @@
     <string name="debug_layout" msgid="1659216803043339741">"የአቀማመጥ ገደቦችን አሳይ"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"የቅንጥብ ገደቦች፣ ጠርዞች፣ ወዘተ አሳይ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገጽ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገፅ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"የግልፅነት የአሰሳ አሞሌ"</string>
-    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"የአሰሳ አሞሌ የዳራ ቀለምን በነባሪ ግልጽ አድርግ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"የአሰሳ አሞሌ የዳራ ቀለምን በነባሪ ግልፅ አድርግ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"የመስኮት ደረጃ ብዥታዎችን ፍቀድ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
@@ -385,7 +386,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"የ Window እነማ ልኬት ለውጥ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"የእነማ ልኬት ለውጥ ሽግግር"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"እነማ አድራጊ ቆይታ መለኪያ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ስራ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ሥራ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"መተግበሪያዎች"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"እንቅስቃሴዎችን አትጠብቅ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ተጠቃሚው እስኪተወው ድረስ እያንዳንዱን እንቅስቃሴ አስወግድ"</string>
@@ -393,7 +394,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"የጀርባ ኤኤንአሮችን አሳይ"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ለጀርባ መተግበሪያዎች የመተግበሪያ ምላሽ አይሰጥም መገናኛን አሳይ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"የማሳወቂያ ሰርጥ ማስጠንቀቂያዎችን አሳይ"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"አንድ መተግበሪያ የሚሰራ ሰርጥ ሳይኖረው ማሳወቂያ ሲለጥፍ በማያ ገጽ-ላይ ማስጠንቀቂያን ያሳያል"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"አንድ መተግበሪያ የሚሰራ ሰርጥ ሳይኖረው ማሳወቂያ ሲለጥፍ በማያ ገፅ-ላይ ማስጠንቀቂያን ያሳያል"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"በውጫዊ ላይ ሃይል ይፈቀዳል"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"የዝርዝር ሰነዶች እሴቶች ግምት ውስጥ ሳያስገባ ማንኛውም መተግበሪያ ወደ ውጫዊ ማከማቻው ለመጻፍ ብቁ ያደርጋል"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"እንቅስቃሴዎች ዳግመኛ እንዲመጣጠኑ አስገድድ"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ተጨማሪ ጊዜ።"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ያነሰ ጊዜ።"</string>
     <string name="cancel" msgid="5665114069455378395">"ይቅር"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ቀጣይ"</string>
+    <string name="back" msgid="5554327870352703710">"ተመለስ"</string>
+    <string name="save" msgid="3745809743277153149">"አስቀምጥ"</string>
     <string name="okay" msgid="949938843324579502">"እሺ"</string>
     <string name="done" msgid="381184316122520313">"ተከናውኗል"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ማንቂያዎች እና አስታዋሾች"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ልክ አሁን"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ይህ ስልክ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ይህ ጡባዊ"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"የመትከያ ድምፅ ማውጫ"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"የውጭ መሣሪያ"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"የተገናኘ መሣሪያ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ይህ ስልክ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"በዚህ መሣሪያ ላይ ማጫወት አልተቻለም"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ለመቀየር መለያ ያልቁ"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"አዲስ ተጠቃሚ ይታከል?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ተጨማሪ ተጠቃሚዎችን በመፍጠር ይህን መሣሪያ ለሌሎች ሰዎች ማጋራት ይችላሉ። እያንዳንዱ ተጠቃሚ በራሱ መተግበሪያዎች፣ ልጣፍ እና በመሳሰሉ ነገሮች ሊያበጀው የሚችል የራሱ ቦታ አለው። ተጠቃሚዎችም እንዲሁ እንደ Wi‑Fi ያሉ በሁሉም ሰው ላይ ተጽዕኖ ሊኖራቸው የሚችሉ የመሣሪያ ቅንብሮችን ማስተካከል ይችላሉ። \n\nእርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምኑ ይችላሉ።"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"እርስዎ አንድ አዲስ ተጠቃሚ ሲያክሉ ያ ሰው የራሱ ቦታ ማዘጋጀት አለበት።\n\nማንኛውም ተጠቃሚ መተግበሪያዎችን ለሌሎች ተጠቃሚዎች ሁሉ ሊያዘምን ይችላል።"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ይህ ተጠቃሚ አስተዳዳሪ ይደረጉ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"አስተዳዳሪዎች ሌሎች ተጠቃሚዎች የሌሏቸው ልዩ መብቶች አሏቸው። አንድ አስተዳዳሪ ሁሉንም ተጠቃሚዎች ማስተዳደር፣ ይህን መሣሪያ ማዘመን ወይም ዳግም ማስጀመር፣ ቅንብሮች መቀየር፣ ሁሉንም የተጫኑ መተግበሪያዎች ማየት እና ለሌሎች የአስተዳዳሪ መብቶችን መፍቀድ ወይም መከልከል ይችላሉ።"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"አስተዳዳሪ አድርግ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ተጠቃሚ አሁን ይዋቀር?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ግለሰቡ መሣሪያውን ወስደው ቦታቸውን ለማዋቀር እንደሚገኙ ያረጋግጡ"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"መገለጫ አሁን ይዋቀር?"</string>
@@ -595,7 +593,7 @@
     <string name="user_new_profile_name" msgid="2405500423304678841">"አዲስ መገለጫ"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"የተጠቃሚ መረጃ"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"የመገለጫ መረጃ"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"የተገደበ መገለጫ መፍጠር ከመቻልዎ በፊት መተግበሪያዎችዎን እና የግል ውሂብዎን ለመጠበቅ ቁልፍ ማያ ገጽ ማዋቀር አለብዎት።"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"የተገደበ መገለጫ መፍጠር ከመቻልዎ በፊት መተግበሪያዎችዎን እና የግል ውሂብዎን ለመጠበቅ ቁልፍ ማያ ገፅ ማዋቀር አለብዎት።"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ቁልፍ አዘጋጅ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ወደ <xliff:g id="USER_NAME">%s</xliff:g> ቀይር"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"አዲስ ተጠቃሚ በመፍጠር ላይ…"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ይህ አዲስ የእንግዳ ክፍለ-ጊዜ ይጀምራል እና ሁሉንም መተግበሪያዎች እና ውሂብ አሁን ካለው ክፍለ-ጊዜ ይሰርዛል"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ከእንግዳ ሁኔታ ይውጣ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ይህ አሁን ካለው የእንግዳ ክፍለ-ጊዜ መተግበሪያዎችን እና ውሂብን ይሰርዛል"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"አዎ፣ እነሱን አስተዳዳሪ ያድርጓቸው"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"አይ፣ እነሱን አስተዳዳሪ አያድርጓቸው"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ውጣ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"የእንግዳ እንቅስቃሴ ይቀመጥ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"እንቅስቃሴን አሁን ካለው ክፍለ-ጊዜ ማስቀመጥ ወይም ሁሉንም መተግበሪያዎች እና ውሂብ መሰረዝ ይችላሉ"</string>

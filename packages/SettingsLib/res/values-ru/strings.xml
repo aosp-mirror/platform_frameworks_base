@@ -59,7 +59,7 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Возможно, вы указали неверный пароль. Повторите попытку."</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Недоступна"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Подключение не будет выполняться автоматически"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к Интернету"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Без доступа к интернету"</string>
     <string name="saved_network" msgid="7143698034077223645">"Сохранено: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Автоматически подключено к %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Автоматически подключено через автора рейтинга сетей"</string>
@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Подключено<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Устанавливается соединение..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Подключение..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Подключено (кроме звонков)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Подключено (кроме аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Подключено (кроме звонков и аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD Audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD Audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слуховые аппараты"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Слуховой аппарат подключен"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Подключено к LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Подключено к мультимедийному аудиоустройству"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Отмена"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключено: неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"\"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" не подключается: неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Выбор профиля"</string>
     <string name="category_personal" msgid="6236798763159385225">"Личный профиль"</string>
     <string name="category_work" msgid="4014193632325996115">"Рабочий профиль"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Клон"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Для разработчиков"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Включить параметры для разработчиков"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Настройка параметров для разработчиков"</string>
@@ -257,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить журнал HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>
@@ -366,7 +367,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Имитировать аномалию"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Вкл. трассировку OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Откл. передачу аудио (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Откл. автом. маршрутизацию на внеш. USB-устройства"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Отключить автоматическую передачу на внешние USB-устройства"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Увеличить продолжительность"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Уменьшить продолжительность"</string>
     <string name="cancel" msgid="5665114069455378395">"Отмена"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Далее"</string>
+    <string name="back" msgid="5554327870352703710">"Назад"</string>
+    <string name="save" msgid="3745809743277153149">"Сохранить"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники и напоминания"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Этот смартфон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Этот планшет"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Колонка с док-станцией"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Внешнее устройство"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Подключенное устройство"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Невозможно воспроизвести на этом устройстве."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Для переключения требуется премиум-аккаунт"</string>
@@ -577,14 +578,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Добавить пользователя"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профиль с огр. доступом"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать отдельный профиль – практически собственное пространство со своими приложениями, обоями и т. д. При этом из профиля можно поменять и настройки устройства, общие для всех, например выбрать сеть Wi-Fi.\n\nКогда вы добавляете нового пользователя, ему нужно настроить свой профиль.\n\nОбновлять общие приложения может любой пользователь, однако специальные возможности настраиваются индивидуально."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать профиль – отдельное пространство с выбранными приложениями, обоями и т. д. Новый пользователь настраивает его сам.\n\nИз профиля можно поменять и общие настройки устройства, например сеть Wi-Fi.\n\nОбновлять общие приложения могут все, однако специальные возможности настраиваются индивидуально."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Назначить этого пользователя администратором?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"У администраторов права шире, чем у других пользователей. Администратор может управлять аккаунтами всех пользователей, обновлять ПО на устройстве, менять и сбрасывать его настройки, просматривать установленные приложения, а также предоставлять и отзывать права администратора."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Назначить администратором"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настроить профиль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свой профиль."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Настроить профиль?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"При этом начнется новый гостевой сеанс, а все данные и приложения предыдущего сеанса будут удалены."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Выйти из гостевого режима?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Все приложения и данные текущего гостевого сеанса будут удалены."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Предоставить права администратора"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Не предоставлять права администратора"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Выйти"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Сохранить историю сеанса?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Сохраните историю текущего сеанса или удалите данные и приложения."</string>
@@ -628,8 +624,8 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Выйти из гостевого режима"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Сбросить гостевой сеанс"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйти из гостевого режима"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода."</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю."</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Можно сбросить историю сеанса прямо сейчас, либо удалить или сохранить ее при выходе."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>

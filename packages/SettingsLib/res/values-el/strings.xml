@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Ήχος HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Ήχος HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Βοηθήματα ακοής"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Έγινε σύνδεση σε βοηθήματα ακοής"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Συνδέθηκε σε LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Συνδέθηκε σε ήχο πολυμέσων"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Επιλογή προφίλ"</string>
     <string name="category_personal" msgid="6236798763159385225">"Προσωπικό"</string>
     <string name="category_work" msgid="4014193632325996115">"Εργασίας"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Κλωνοποίηση"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Επιλογές για προγραμματιστές"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ενεργοποίηση επιλογών για προγραμματιστές"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ορισμός επιλογών για ανάπτυξη εφαρμογής"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Περισσότερη ώρα."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Λιγότερη ώρα."</string>
     <string name="cancel" msgid="5665114069455378395">"Ακύρωση"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Επόμενο"</string>
+    <string name="back" msgid="5554327870352703710">"Πίσω"</string>
+    <string name="save" msgid="3745809743277153149">"Αποθήκευση"</string>
     <string name="okay" msgid="949938843324579502">"ΟΚ"</string>
     <string name="done" msgid="381184316122520313">"Τέλος"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ξυπνητήρια και ειδοποιήσεις"</string>
@@ -547,7 +545,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Μόλις τώρα"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Αυτό το τηλέφωνο"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Αυτό το tablet"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Αυτό το τηλέφωνο"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Ηχείο βάσης σύνδεσης"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Εξωτερική συσκευή"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Συνδεδεμένη συσκευή"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Αυτό το τηλέφ."</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Δεν είναι δυνατή η αναπαραγωγή σε αυτήν τη συσκευή"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Αναβαθμίστε τον λογαριασμό για εναλλαγή"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Δεν είναι δυνατή η αναπαραγωγή των λήψεων εδώ"</string>
@@ -577,16 +578,13 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Χρήστης"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Προφίλ περιορ. πρόσβασης"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Προσθήκη νέου χρήστη;"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Μπορείτε να μοιραστείτε αυτήν τη συσκευή με άλλα άτομα, δημιουργώντας επιπλέον χρήστες. Κάθε χρήστης θα έχει το δικό του χώρο, τον οποίο μπορεί να προσαρμόσει με τις δικές του εφαρμογές, ταπετσαρία κ.λπ. Οι χρήστες μπορούν επίσης να προσαρμόσουν ρυθμίσεις της συσκευής, όπως το Wi‑Fi, που επηρεάζουν τους πάντες.\n\nΚατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες. Οι ρυθμίσεις και οι υπηρεσίες προσβασιμότητας ενδέχεται να μην μεταφερθούν στον νέο χρήστη."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει το χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Μπορείτε να μοιραστείτε αυτήν τη συσκευή με άλλα άτομα, δημιουργώντας επιπλέον χρήστες. Κάθε χρήστης θα έχει τον δικό του χώρο, τον οποίο μπορεί να προσαρμόσει με τις δικές του εφαρμογές, ταπετσαρία κ.λπ. Οι χρήστες μπορούν επίσης να προσαρμόσουν ρυθμίσεις της συσκευής, όπως το Wi‑Fi, που επηρεάζουν τους πάντες.\n\nΚατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες. Οι ρυθμίσεις και οι υπηρεσίες προσβασιμότητας ενδέχεται να μην μεταφερθούν στον νέο χρήστη."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Κατά την προσθήκη ενός νέου χρήστη, αυτός θα πρέπει να ρυθμίσει τον χώρο του.\n\nΟποιοσδήποτε χρήστης μπορεί να ενημερώσει τις εφαρμογές για όλους τους άλλους χρήστες."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Να εκχωρηθούν δικαιώματα διαχειριστή σε αυτόν τον χρήστη;"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Οι διαχειριστές έχουν ειδικά προνόμια που δεν έχουν οι υπόλοιποι χρήστες Ένας διαχειριστής μπορεί να διαχειριστεί όλους τους χρήστες, να ενημερώσει ή να επαναφέρει αυτήν τη συσκευή, να τροποποιήσει τις ρυθμίσεις, να δει όλες τις εγκατεστημένες εφαρμογές και να εκχωρήσει ή να ανακαλέσει προνόμια διαχειριστή άλλων χρηστών."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Εκχώρηση δικαιωμάτων διαχειριστή"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Να γίνει ρύθμιση χρήστη τώρα;"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή και ρυθμίστε το χώρο του"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Βεβαιωθείτε ότι ο χρήστης μπορεί να πάρει τη συσκευή και ρυθμίστε τον χώρο του"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Να γίνει ρύθμιση προφίλ τώρα;"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Ρύθμιση τώρα"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Όχι τώρα"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Με αυτόν τον τρόπο θα ξεκινήσει μια νέα περίοδος σύνδεσης επισκέπτη και θα διαγραφούν όλες οι εφαρμογές και τα δεδομένα από την τρέχουσα περίοδο σύνδεσης"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Έξοδος από λειτ. επισκέπτη;"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Θα διαγραφούν εφαρμογές και δεδομένα από την τρέχουσα περίοδο σύνδεσης επισκέπτη"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ναι, να γίνει εκχώρηση δικαιωμάτων διαχειριστή"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Όχι, να μην γίνει εκχώρηση δικαιωμάτων διαχειριστή"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Έξοδος"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Αποθήκευση δραστ. επισκέπτη;"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Αποθήκευση δραστ. τρέχουσας περιόδου σύνδεσης ή διαγραφή εφαρμογών και δεδομένων"</string>
@@ -672,7 +668,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Χωρίς κλήσεις."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφίας προφίλ"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφ­ίας προφίλ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Προεπιλεγμένο εικονίδιο χρήστη"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Φυσικό πληκτρολόγιο"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Επιλέξτε διάταξη πληκτρολογίου"</string>

@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Kuuldeaparaadid"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Kuuldeaparaatidega ühendatud"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Ühendatud üksusega LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Ühendatud meediumiheliga"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Tühista"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Sidumine annab ühenduse ajal juurdepääsu kontaktidele ja kõneajaloole."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või parooli tõttu."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ei saanud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> siduda vale PIN-koodi või pääsuvõtme tõttu."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ei saa sidet luua."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> hülgas sidumise."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Arvuti"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profiili valimine"</string>
     <string name="category_personal" msgid="6236798763159385225">"Isiklik"</string>
     <string name="category_work" msgid="4014193632325996115">"Töö"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Kloonimine"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Arendaja valikud"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Arendaja valikute lubamine"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Rakenduse arenduse valikute määramine"</string>
@@ -269,7 +270,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Võrgundus"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Luba WiFi sõnaline logimine"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"WiFi-skannimise ahendamine"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ahenda WiFi-skannimist"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"WiFi-võrgu mittepüsiva MAC-aadressi juhuslikustamine"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Hoia mobiilne andmeside alati aktiivne"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Ühenduse jagamise riistvaraline kiirendus"</string>
@@ -325,7 +326,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Kas tühistada juurdepääs USB silumisele kõikides arvutites, mille olete varem volitanud?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Kas lubada arendajaseaded?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Need seaded on mõeldud ainult arendajatele. Need võivad põhjustada seadme ja seadmes olevate rakenduste rikkeid või valesti toimimist."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Kinnita rakendus USB kaudu"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Kinnita USB rakendused"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolli, kas ADB/ADT-ga installitud rakendused on ohtlikud."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Kuvatakse ilma nimedeta (ainult MAC-aadressidega) Bluetoothi seadmed"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Keelatakse Bluetoothi absoluutse helitugevuse funktsioon, kui kaugseadmetega on helitugevuse probleeme (nt liiga vali heli või juhitavuse puudumine)."</string>
@@ -373,12 +374,12 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Jõusta kõikides lokaatides paremalt vasakule ekraanipaigutus"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Läbipaistev navigeerimisriba"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Muuda navigeerimisriba taustavärv vaikimisi läbipaistvaks"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Luba akna tasemel hägust."</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Luba akna tasemel hägustus"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Jõusta 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Luba 4x MSAA OpenGL ES 2.0 rakendustes"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Silu mittetäisnurksed kärpimistoimingud"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profiili HWUI renderdamine"</string>
-    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU silumise kihtide lubamine"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Luba GPU silumise kihid"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Luba paljusõnaline logimine"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Veaaruannetesse kaasatakse täiendavad seadmepõhised teenusepakkuja logid, mis võivad sisaldada privaatset teavet, kasutada rohkem akut ja/või salvestusruumi."</string>
@@ -544,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Äsja"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"See telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"See tahvelarvuti"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doki kõlar"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Väline seade"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Ühendatud seade"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"See telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Selles seadmes ei saa esitada"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Lülitamiseks täiendage kontot"</string>
@@ -621,7 +625,7 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Lähtesta külastajaseanss"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Välju külastajaseansist"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Kõik tegevused kustutatakse väljumisel"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused salvestada või kustutada väljumisel."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused väljumisel salvestada või kustutada."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Seansi tegevuste kohe kustutamiseks lähtestage; või salvestage või kustutage need väljumisel."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Pildistage"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Valige pilt"</string>

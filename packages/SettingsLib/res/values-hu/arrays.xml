@@ -243,7 +243,7 @@
     <item msgid="8612549335720461635">"4K (biztonságos)"</item>
     <item msgid="7322156123728520872">"4K (felskálázott)"</item>
     <item msgid="7735692090314849188">"4K (felskálázott, biztonságos)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (két képernyő)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (Dual Screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Semelyik"</item>
@@ -281,7 +281,5 @@
     <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
     <item msgid="8828567335701536560">"Hangforrás"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
-  </string-array>
-  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

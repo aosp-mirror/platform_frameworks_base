@@ -37,7 +37,7 @@
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personnel"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
@@ -86,7 +86,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connexion en cours…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Connecté à <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association en cours…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connecté (aucun téléphone) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connecté (aucun média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2893204819854215433">"Connecté (aucun téléphone ni média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"G : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; D : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actif"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Active, gauche seulement"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche seulement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Active, droite seulement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Active, gauche et droite"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Paramètres audio du support"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Audio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Prothèses auditives"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Connecté aux prothèses auditives"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Connecté par LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Connecté aux paramètres audio du média"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
     <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Cloner"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les développeurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les développeurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
@@ -393,7 +394,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Afficher ANR arrière-plan"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher le message « L\'application ne répond plus » pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Affich. avertiss. canal notification"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une app présente une notific. sans canal valide"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une appli présente une notif. sans canal valide"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Plus longtemps."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Moins longtemps."</string>
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Suivant"</string>
+    <string name="back" msgid="5554327870352703710">"Retour"</string>
+    <string name="save" msgid="3745809743277153149">"Enregistrer"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"OK"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
@@ -547,12 +545,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"À l\'instant"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Cette tablette"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Haut-parleur du socle"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Appareil externe"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Appareil connecté"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de faire jouer le contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à jour le compte pour passer à la version payante"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Lecture des téléchargements impossible ici"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Réessayez après l\'annonce"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activer l\'appareil pour faire jouer le contenu ici"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activez l\'appareil pour faire jouer le contenu ici"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"L\'appareil n\'est pas autorisé à faire jouer le contenu"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossible de faire jouer ce contenu multimédia ici"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteingez et rallumez l\'appareil"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Ajouter un utilisateur?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Vous pouvez partager cet appareil avec d\'autres personnes en ajoutant des utilisateurs. Chaque utilisateur dispose de son propre espace, où il peut personnaliser, entre autres, ses applications et son fond d\'écran. Chacun peut également modifier les paramètres de l\'appareil, comme les réseaux Wi-Fi, qui touchent tous les utilisateurs.\n\nLorsque vous ajoutez un utilisateur, celui-ci doit configurer son propre espace.\n\nTout utilisateur peut mettre à jour les applications pour les autres utilisateurs. Il se peut que les paramètres et les services d\'accessibilité ne soient pas transférés aux nouveaux utilisateurs."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Lorsque vous ajoutez un utilisateur, celui-ci doit configurer son espace.\n\nTout utilisateur peut mettre à jour les applications pour tous les autres utilisateurs."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Définir cet utilisateur comme administrateur?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Les administrateurs ont des privilèges spéciaux que les autres utilisateurs n\'ont pas. Un administrateur peut gérer tous les utilisateurs, mettre à jour ou réinitialiser cet appareil, modifier les paramètres, voir toutes les applications installées et accorder ou révoquer les privilèges d\'administrateur à d\'autres personnes."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Définir comme administrateur"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurer l\'utilisateur?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assurez-vous que la personne est disponible et qu\'elle peut utiliser l\'appareil pour configurer son espace."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurer le profil maintenant?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Une nouvelle session d\'invité sera lancée, et toutes les applications et données de la session en cours seront supprimées"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Quitter le mode Invité?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Les applications et les données de la session d\'invité en cours seront supprimées"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Oui, le définir comme administrateur"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Non, ne pas le définir comme administrateur"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Quitter"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Enregistrer l\'activité d\'invité?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Vous pouvez enregistrer l\'activité de session ou supprimer les applis et données"</string>
@@ -677,9 +673,9 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Clavier physique"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Sélectionner disposition du clavier"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Par défaut"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans que vous lui demandiez."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

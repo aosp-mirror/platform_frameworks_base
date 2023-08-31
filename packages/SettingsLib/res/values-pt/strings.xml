@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Áudio HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Áudio HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Aparelhos auditivos"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Áudio de baixa energia"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Conectado a aparelhos auditivos"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Conectado ao perfil Áudio de baixa energia"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Conectado ao áudio da mídia"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"O pareamento dá acesso a seus contatos e ao histórico de ligações quando estiver conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> por causa de um PIN ou senha incorretos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: PIN ou senha incorretos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível se comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Pareamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Escolher perfil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pessoal"</string>
     <string name="category_work" msgid="4014193632325996115">"Trabalho"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Clone"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opções do desenvolvedor"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ativar opções do desenvolvedor"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Define as opções para o desenvolvimento do app"</string>
@@ -257,7 +258,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar um botão para gerar relatórios de bugs no menu do botão liga/desliga"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer ativo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"A tela nunca entra em suspensão enquanto está carregando"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registro de rastreamento Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Ativar registro de rastreamento de HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Capturar pacotes de Bluetooth. Ative o Bluetooth depois de alterar essa configuração."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueio de OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permitir que o bootloader seja desbloqueado"</string>
@@ -393,13 +394,13 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Mostrar ANRs em 2º plano"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificações"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta uma notificação s/ um canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta uma notificação sem um canal válido"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps em armazenamento externo"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Ativar janelas de forma livre"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ativar a compatibilidade com janelas experimentais de forma livre."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Ativar a compatibilidade com janelas experimentais de forma livre"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Modo área de trabalho"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Senha de backup local"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Os backups completos não estão protegidos no momento"</string>
@@ -542,9 +543,12 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Até você desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este smartphone"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este telefone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este smartphone"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telefone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Faça upgrade da conta para trocar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Não é possível abrir os downloads aqui"</string>
@@ -574,9 +578,9 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Usuário"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo usuário?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Você pode compartilhar este dispositivo com outras pessoas, adicionando usuários. Cada usuário tem o próprio espaço, que pode ser personalizado com apps, planos de fundo, etc. Os usuários também podem ajustar as configurações do dispositivo, como o Wi‑Fi, que afetam a todos.\n\nQuando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para todos os outros. Serviços e configurações de acessibilidade podem não ser transferidos para novos usuários."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Você pode compartilhar este dispositivo com outras pessoas, adicionando usuários. Cada um tem o próprio espaço de trabalho, que pode ser personalizado com apps, planos de fundo, etc. Também é possível ajustar as configurações do dispositivo, como o Wi‑Fi, que afetam a todos.\n\nQuando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para todos os outros. Serviços e configurações de acessibilidade podem não ser transferidos para novos usuários."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Quando você adiciona um novo usuário, essa pessoa precisa configurar o próprio espaço.\n\nQualquer usuário pode atualizar apps para os demais usuários."</string>
-    <string name="user_grant_admin_title" msgid="5157031020083343984">"Transformar esse usuário um administrador?"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Tornar esse usuário um administrador?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administradores têm privilégios especiais que outros usuários não têm. Um administrador pode gerenciar todos os usuários, atualizar ou redefinir este dispositivo, modificar configurações, conferir todos os apps instalados e conceder ou revogar privilégios de administrador para outras pessoas."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Transformar o usuário em administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o usuário agora?"</string>
@@ -598,8 +602,8 @@
     <string name="add_guest_failed" msgid="8074548434469843443">"Falha ao criar um novo convidado"</string>
     <string name="user_nickname" msgid="262624187455825083">"Apelido"</string>
     <string name="user_add_user" msgid="7876449291500212468">"Adicionar usuário"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar visitante"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Remover visitante"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Redefinir sessão de visitante"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Redefinir visitante?"</string>
     <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Remover visitante?"</string>
@@ -610,7 +614,7 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Essa ação vai iniciar uma nova Sessão de visitante e excluir todos os apps e dados da sessão atual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sair do modo visitante?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Essa ação vai excluir apps e dados da Sessão de visitante atual"</string>
-    <string name="grant_admin" msgid="4323199171790522574">"Sim, transformar esse usuário em administrador"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sim, tornar esse usuário um administrador"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Não, não transformar o usuário em administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Sair"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Salvar a atividade do visitante?"</string>
@@ -677,7 +681,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmitir <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Mudar saída"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animações de gestos \"Voltar\" preditivos"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ativar animações do sistema para gestos \"Voltar\" preditivos."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ativar animações do sistema para gestos \"Voltar\" preditivos"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Esta configuração ativa animações do sistema para gestos preditivos. Ela requer que a política enableOnBackInvokedCallback por app seja definida como verdadeira no arquivo de manifesto."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Mover para esquerda"</item>

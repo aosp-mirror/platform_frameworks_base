@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ഓഡിയോ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ഓഡിയോ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"ശ്രവണ സഹായികൾ"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE ഓഡിയോ"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE ഓഡിയോ"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"ശ്രവണ സഹായികളിലേക്ക് കണക്‌റ്റ് ചെയ്‌തു"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ഓഡിയോയിലേക്ക് കണക്‌റ്റ് ചെയ്‌തു"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"മീഡിയ ഓഡിയോയിലേക്ക് കണ‌ക്റ്റുചെയ്‌തു"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
     <string name="category_personal" msgid="6236798763159385225">"വ്യക്തിപരം"</string>
     <string name="category_work" msgid="4014193632325996115">"ഔദ്യോഗികം"</string>
+    <string name="category_clone" msgid="1554511758987195974">"ക്ലോൺ ചെയ്യുക"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"അപ്ലിക്കേഷൻ വികസനത്തിന് ഓപ്ഷനുകൾ സജ്ജീകരിക്കുക"</string>
@@ -544,12 +545,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ഇപ്പോൾ"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ഈ ടാബ്‌ലെറ്റ്"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ഡോക്ക് സ്‌പീക്കർ"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ബാഹ്യ ഉപകരണം"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ഈ ഫോൺ"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറുന്നതിന്, അത് അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡ് ചെയ്തവ ഇവിടെ പ്ലേ ചെയ്യാനാകില്ല"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറാൻ അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡുകൾ പ്ലേ ചെയ്യാനാകില്ല"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"പരസ്യത്തിന് ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ഇവിടെ പ്ലേ ചെയ്യാൻ ഉപകരണം സജീവമാക്കുക"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"പ്ലേ ചെയ്യാൻ ഉപകരണം സജീവമാക്കുക"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ഉപകരണത്തിന് പ്ലേ ചെയ്യാനുള്ള അനുമതിയില്ല"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ഈ മീഡിയ ഇവിടെ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>

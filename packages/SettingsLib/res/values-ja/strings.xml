@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD オーディオ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD オーディオ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"補聴器"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"補聴器に接続"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE Audio に接続"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"メディアの音声に接続"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"プロファイルの選択"</string>
     <string name="category_personal" msgid="6236798763159385225">"個人用"</string>
     <string name="category_work" msgid="4014193632325996115">"仕事用"</string>
+    <string name="category_clone" msgid="1554511758987195974">"クローン"</string>
     <string name="development_settings_title" msgid="140296922921597393">"開発者向けオプション"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"開発者向けオプションの有効化"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"アプリ開発オプションを設定する"</string>
@@ -258,13 +259,13 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電中に画面をスリープにしない"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI スヌープログ"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（この設定を変更した場合は Bluetooth を切り替えてください）。"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（設定変更後はBluetoothをオフ/オンしてください）。"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ロック解除"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ブートローダーによるロック解除を許可する"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ロック解除の許可"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"警告: この設定をONにしている場合、このデバイスではデバイス保護機能を利用できません。"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"現在地情報の強制変更アプリを選択"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"現在地情報の強制変更アプリが設定されていません"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"仮の現在地情報アプリを選択"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"仮の現在地情報アプリが設定されていません"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"現在地情報の強制変更アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
@@ -337,7 +338,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP チェック動作を設定"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"デバッグ"</string>
     <string name="debug_app" msgid="8903350241392391766">"デバッグアプリを選択"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグアプリケーションが設定されていません"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグ アプリケーションが設定されていません"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"デバッグアプリケーション: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"アプリを選択"</string>
     <string name="no_application" msgid="9038334538870247690">"なし"</string>
@@ -347,7 +348,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"描画"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ハードウェアアクセラレーテッドレンダリング"</string>
     <string name="media_category" msgid="8122076702526144053">"メディア"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"監視"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"モニタリング"</string>
     <string name="strict_mode" msgid="889864762140862437">"厳格モードを有効にする"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"メインスレッドの処理が長引く場合は画面を点滅させる"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ポインタの位置"</string>
@@ -385,7 +386,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウ アニメ スケール"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジション アニメ スケール"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 再生時間スケール"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"2 次画面シミュレート"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"第2画面のシミュレーション"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"アプリ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"アクティビティを保持しない"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
@@ -542,16 +543,19 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"毎回確認"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"OFF にするまで"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"たった今"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このスマートフォン"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"このデバイス"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"このタブレット"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このスマートフォン"</string>
-    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスで再生できません"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ホルダー スピーカー"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部デバイス"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"接続済みのデバイス"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"このデバイス"</string>
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"このデバイスでは再生できません"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"アカウントを更新して切り替えてください"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ダウンロードしたコンテンツをここでは再生できません"</string>
-    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"広告が表示されてから、もう一度試してください"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ここで再生するにはデバイスを起動してください"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"このデバイスでの再生が許可されていません"</string>
-    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアはここで再生できません"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"再生不可: ダウンロードしたコンテンツ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"広告の後にもう一度試してください"</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"デバイスの起動が必要です"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"再生が許可されていません"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアは再生できません"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>
@@ -574,7 +578,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ユーザー"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"制限付きプロファイル"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"新しいユーザーを追加しますか？"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加ユーザーを作成して、このデバイスを他のユーザーと共有できます。各ユーザーは各自のスペースを所有して、アプリや壁紙などのカスタマイズを行うことができます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。ユーザー補助機能の設定とサービスは新しいユーザーに適用されないことがあります。"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加したユーザーとは、このデバイスを共有できます。各ユーザーには独自のスペースが作成され、アプリや壁紙などをカスタマイズできます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しいユーザーは各自でスペースをセットアップする必要があります。\n\nアプリの更新は、すべてのユーザーが行えます。ユーザー補助機能の設定とサービスは新しいユーザーに引き継がれないことがあります。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"このユーザーを管理者にしますか？"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"管理者には、他のユーザーにはない特別な権限が与えられます。管理者は、すべてのユーザーの管理、このデバイスの更新やリセット、設定の変更、インストール済みのすべてのアプリの確認、他のユーザーに対する管理者権限の許可や取り消しを行えます。"</string>

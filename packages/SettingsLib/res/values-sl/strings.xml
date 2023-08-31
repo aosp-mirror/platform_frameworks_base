@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Zvok visoke kakovosti: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Zvok visoke kakovosti"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni pripomočki"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE zvok"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezava s slušnimi pripomočki je vzpostavljena"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s profilom LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezan s profilom za predstavnostni zvok"</string>
@@ -214,7 +214,8 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Izbira profila"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osebno"</string>
-    <string name="category_work" msgid="4014193632325996115">"Služba"</string>
+    <string name="category_work" msgid="4014193632325996115">"Delo"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Možnosti za razvijalce"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Omogočanje možnosti za razvijalce"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Nastavi možnosti za razvoj aplikacij"</string>
@@ -269,8 +270,8 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Omrežja"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogoči podrobno zapisovanje dnevnika za Wi-Fi"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Omejevanje iskanja omrežij Wi-Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Dodeljevanje nestalnega naključnega naslova MAC za Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Omeji iskanje omrežij Wi-Fi"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Dodeli nestalni naključni naslov MAC za Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prenos podatkov v mobilnem omrežju je vedno aktiven"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Strojno pospeševanje za internetno povezavo prek mobilnega telefona"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži naprave Bluetooth brez imen"</string>
@@ -515,7 +516,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ni registrirana"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Ni na voljo"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Naslov MAC je naključno izbran"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih}=1{1 naprava je povezana}one{# naprava je povezana}two{# napravi sta povezani}few{# naprave so povezane}other{# naprav je povezanih}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 naprav ni povezanih.}=1{1 naprava je povezana.}one{# naprava je povezana.}two{# napravi sta povezani.}few{# naprave so povezane.}other{# naprav je povezanih.}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daljši čas."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Krajši čas."</string>
     <string name="cancel" msgid="5665114069455378395">"Prekliči"</string>
@@ -544,12 +545,15 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Pravkar"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ta telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ta tablični računalnik"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Zvočnik nosilca"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Zunanja naprava"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Povezana naprava"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ta telefon"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ni mogoče predvajati v tej napravi."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Za preklop je potrebna nadgradnja računa"</string>
-    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tukaj ni mogoče predvajati prenosov"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Prenosov tu ni mogoče predvajati"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Poskusite znova po oglasu"</string>
-    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Zbudite napravo, če želite predvajati tukaj."</string>
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Zbudite napravo za predvajanje tu"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Naprava ni odobrena za predvajanje."</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Te predstavnosti ni mogoče predvajati tukaj."</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Težava pri povezovanju. Napravo izklopite in znova vklopite."</string>
@@ -591,7 +595,7 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Podatki za profil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Preden lahko ustvarite profil z omejitvami, morate nastaviti zaklepanje zaslona, da zaščitite aplikacije in osebne podatke."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Nastavi zaklepanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na račun <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Preklopi na uporabnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Ustvarjanje novega uporabnika …"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Ustvarjanje novega gosta …"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Ustvarjanje novega uporabnika ni uspelo."</string>

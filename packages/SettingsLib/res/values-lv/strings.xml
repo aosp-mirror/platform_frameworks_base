@@ -106,7 +106,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Tālruņa zvani"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failu pārsūtīšana"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ievades ierīce"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Interneta piekļuve"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Piekļuve internetam"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Kontaktpersonu un zvanu vēst. kopīgošana"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Paredzēts kontaktpersonu un zvanu vēstures kopīgošanai"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Interneta savienojuma koplietošana"</string>
@@ -115,7 +115,7 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Dzirdes aparāti"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE Audio"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"LE Audio"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Izveidots savienojums ar dzirdes aparātiem"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Izveidots savienojums ar LE Audio"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Savienots ar multivides audio"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Atcelt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Veicot savienošanu pārī, šī ierīce savienojuma laikā varēs piekļūt jūsu kontaktpersonām un zvanu vēsturei."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nevarēja savienot pārī ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nevarēja savienot pārī ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, jo tika ievadīts nepareizs PIN kods vai nepareiza ieejas atslēga."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nevarēja savienot pārī ar <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, jo tika ievadīts nepareizs PIN kods vai ieejas atslēga."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nevar sazināties ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> noraidīja pāra izveidi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Dators"</string>
@@ -215,6 +215,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Profila izvēlēšanās"</string>
     <string name="category_personal" msgid="6236798763159385225">"Privāts"</string>
     <string name="category_work" msgid="4014193632325996115">"Darba"</string>
+    <string name="category_clone" msgid="1554511758987195974">"Klons"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izstrādātāju opcijas"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātāju opciju iespējošana"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Iestatīt lietotņu izstrādes opcijas"</string>
@@ -519,12 +520,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Vairāk laika."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mazāk laika."</string>
     <string name="cancel" msgid="5665114069455378395">"Atcelt"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Tālāk"</string>
+    <string name="back" msgid="5554327870352703710">"Atpakaļ"</string>
+    <string name="save" msgid="3745809743277153149">"Saglabāt"</string>
     <string name="okay" msgid="949938843324579502">"LABI"</string>
     <string name="done" msgid="381184316122520313">"Gatavs"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signāli un atgādinājumi"</string>
@@ -547,6 +545,9 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Tikko"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Šis tālrunis"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Šis planšetdators"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doka skaļrunis"</string>
+    <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ārēja ierīce"</string>
+    <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pievienotā ierīce"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis tālrunis"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nevar atskaņot šajā ierīcē."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Lai pārslēgtu, jauniniet kontu"</string>
@@ -579,12 +580,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vai pievienot jaunu lietotāju?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Varat koplietot šo ierīci ar citām personām, izveidojot papildu lietotājus. Katram lietotājam ir sava vide, kas ir pielāgojama, izmantojot lietotnes, fona tapetes u.c. Lietotāji var pielāgot arī ierīces iestatījumus, kas attiecas uz visiem lietotājiem, piemēram, Wi‑Fi.\n\nKad pievienosiet jaunu lietotāju, viņam būs jāizveido sava vide.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā. Pieejamības iestatījumi un pakalpojumi var netikt pārsūtīti jaunajam lietotājam."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kad pievienosiet jaunu lietotāju, viņam būs jāizveido sava vide.\n\nIkviens lietotājs var atjaunināt lietotnes citu lietotāju vietā."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vai iestatīt šo lietotāju kā administratoru?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratoriem ir īpašas privilēģijas, kas nav citiem lietotājiem. Administrators var pārvaldīt visus lietotājus, atjaunināt vai atiestatīt šo ierīci, mainīt iestatījumus, skatīt visas instalētās lietotnes un piešķirt vai atsaukt administratora privilēģijas citiem lietotājiem."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Iestatīt kā administratoru"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Iestatīt kontu tūlīt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Pārliecinieties, ka persona var izmantot ierīci un iestatīt savu vidi."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vai iestatīt profilu tūlīt?"</string>
@@ -616,10 +614,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Jā, iestatīt kā administratoru"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nē, neiestatīt kā administratoru"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Iziet"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Vai saglabāt viesa darbības?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Varat saglabāt pašreizējās sesijas darbības vai dzēst visas lietotnes un datus"</string>

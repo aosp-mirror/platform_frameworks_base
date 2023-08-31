@@ -188,7 +188,7 @@
     <item msgid="409235464399258501">"No"</item>
     <item msgid="4195153527464162486">"64 K / memòria intermèdia del registre"</item>
     <item msgid="7464037639415220106">"256 K / memòria intermèdia del registre"</item>
-    <item msgid="8539423820514360724">"1 M / memòria intermèdia reg."</item>
+    <item msgid="8539423820514360724">"1 M / memòria intermèdia del registre"</item>
     <item msgid="1984761927103140651">"4 M / memòria intermèdia del registre"</item>
     <item msgid="2983219471251787208">"8 M / memòria intermèdia del registre"</item>
   </string-array>
@@ -281,7 +281,5 @@
     <item msgid="3825132913289380004">"RNDIS (USB Ethernet)"</item>
     <item msgid="8828567335701536560">"Font d\'àudio"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
-  </string-array>
-  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>
