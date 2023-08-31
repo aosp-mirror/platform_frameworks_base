@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -24,6 +25,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.content.Context;
@@ -33,24 +35,37 @@ import android.content.pm.IPackageArchiverService;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageArchiver;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.ParcelableException;
+import android.os.SELinux;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Responsible archiving apps and returning information about archived apps.
@@ -61,12 +76,16 @@ import java.util.Objects;
  */
 public class PackageArchiverService extends IPackageArchiverService.Stub {
 
+    private static final String TAG = "PackageArchiverService";
+
     /**
      * The maximum time granted for an app store to start a foreground service when unarchival
      * is requested.
      */
     // TODO(b/297358628) Make this configurable through a flag.
     private static final int DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS = 120 * 1000;
+
+    private static final String ARCHIVE_ICONS_DIR = "package_archiver";
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -97,25 +116,44 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
         verifyCaller(providedUid, binderUid);
-        ArchiveState archiveState;
+        CompletableFuture<ArchiveState> archiveStateFuture;
         try {
-            archiveState = createArchiveState(packageName, userId);
-            // TODO(b/282952870) Should be reverted if uninstall fails/cancels
-            storeArchiveState(packageName, archiveState, userId);
+            archiveStateFuture = createArchiveState(packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
+            Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s",
+                    packageName, e.getMessage()));
             throw new ParcelableException(e);
         }
 
-        // TODO(b/278553670) Add special strings for the delete dialog
-        mPm.mInstallerService.uninstall(
-                new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
-                callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
+        archiveStateFuture
+                .thenAccept(
+                        archiveState -> {
+                            // TODO(b/282952870) Should be reverted if uninstall fails/cancels
+                            try {
+                                storeArchiveState(packageName, archiveState, userId);
+                            } catch (PackageManager.NameNotFoundException e) {
+                                sendFailureStatus(intentSender, packageName, e.getMessage());
+                                return;
+                            }
+
+                            // TODO(b/278553670) Add special strings for the delete dialog
+                            mPm.mInstallerService.uninstall(
+                                    new VersionedPackage(packageName,
+                                            PackageManager.VERSION_CODE_HIGHEST),
+                                    callerPackageName, DELETE_KEEP_DATA, intentSender, userId,
+                                    binderUid);
+                        })
+                .exceptionally(
+                        e -> {
+                            sendFailureStatus(intentSender, packageName, e.getMessage());
+                            return null;
+                        });
     }
 
     /**
      * Creates archived state for the package and user.
      */
-    public ArchiveState createArchiveState(String packageName, int userId)
+    public CompletableFuture<ArchiveState> createArchiveState(String packageName, int userId)
             throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
                 Binder.getCallingUid(), userId);
@@ -123,16 +161,56 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         verifyInstaller(responsibleInstallerPackage);
 
         List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps, userId);
+        final CompletableFuture<ArchiveState> archiveState = new CompletableFuture<>();
+        mPm.mHandler.post(() -> {
+            try {
+                archiveState.complete(
+                        createArchiveStateInternal(packageName, userId, mainActivities,
+                                responsibleInstallerPackage));
+            } catch (IOException e) {
+                archiveState.completeExceptionally(e);
+            }
+        });
+        return archiveState;
+    }
+
+    private ArchiveState createArchiveStateInternal(String packageName, int userId,
+            List<LauncherActivityInfo> mainActivities, String installerPackage)
+            throws IOException {
         List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>();
         for (int i = 0; i < mainActivities.size(); i++) {
-            // TODO(b/278553670) Extract and store launcher icons
+            LauncherActivityInfo mainActivity = mainActivities.get(i);
+            Path iconPath = storeIcon(packageName, mainActivity, userId);
             ArchiveActivityInfo activityInfo = new ArchiveActivityInfo(
-                    mainActivities.get(i).getLabel().toString(),
-                    Path.of("/TODO"), null);
+                    mainActivity.getLabel().toString(), iconPath, null);
             archiveActivityInfos.add(activityInfo);
         }
 
-        return new ArchiveState(archiveActivityInfos, responsibleInstallerPackage);
+        return new ArchiveState(archiveActivityInfos, installerPackage);
+    }
+
+    // TODO(b/298452477) Handle monochrome icons.
+    @VisibleForTesting
+    Path storeIcon(String packageName, LauncherActivityInfo mainActivity,
+            @UserIdInt int userId)
+            throws IOException {
+        int iconResourceId = mainActivity.getActivityInfo().getIconResource();
+        if (iconResourceId == 0) {
+            // The app doesn't define an icon. No need to store anything.
+            return null;
+        }
+        File iconsDir = createIconsDir(userId);
+        File iconFile = new File(iconsDir, packageName + "-" + mainActivity.getName() + ".png");
+        Bitmap icon = drawableToBitmap(mainActivity.getIcon(/* density= */ 0));
+        try (FileOutputStream out = new FileOutputStream(iconFile)) {
+            // Note: Quality is ignored for PNGs.
+            if (!icon.compress(Bitmap.CompressFormat.PNG, /* quality= */ 100, out)) {
+                throw new IOException(TextUtils.formatSimple("Failure to store icon file %s",
+                        iconFile.getName()));
+            }
+            out.flush();
+        }
+        return iconFile.toPath();
     }
 
     private void verifyInstaller(String installerPackage)
@@ -313,6 +391,29 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         return ps;
     }
 
+    private void sendFailureStatus(IntentSender statusReceiver, String packageName,
+            String message) {
+        Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s", packageName,
+                message));
+        final Intent fillIn = new Intent();
+        fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, message);
+        try {
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityStartMode(
+                    MODE_BACKGROUND_ACTIVITY_START_DENIED);
+            statusReceiver.sendIntent(mContext, 0, fillIn, /* onFinished= */ null,
+                    /* handler= */ null, /* requiredPermission= */ null, options.toBundle());
+        } catch (IntentSender.SendIntentException e) {
+            Slog.e(
+                    TAG,
+                    TextUtils.formatSimple("Failed to send failure status for %s with message %s",
+                            packageName, message),
+                    e);
+        }
+    }
+
     private static void verifyCaller(int providedUid, int binderUid) {
         if (providedUid != binderUid) {
             throw new SecurityException(
@@ -322,5 +423,45 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
                             providedUid,
                             binderUid));
         }
+    }
+
+    private File createIconsDir(@UserIdInt int userId) throws IOException {
+        File iconsDir = getIconsDir(userId);
+        if (!iconsDir.isDirectory()) {
+            iconsDir.delete();
+            iconsDir.mkdirs();
+            if (!iconsDir.isDirectory()) {
+                throw new IOException("Unable to create directory " + iconsDir);
+            }
+        }
+        SELinux.restorecon(iconsDir);
+        return iconsDir;
+    }
+
+    private File getIconsDir(int userId) {
+        return new File(Environment.getDataSystemCeDirectory(userId), ARCHIVE_ICONS_DIR);
+    }
+
+    private static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+
+        }
+
+        Bitmap bitmap;
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            // Needed for drawables that are just a single color.
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        } else {
+            bitmap =
+                    Bitmap.createBitmap(
+                            drawable.getIntrinsicWidth(),
+                            drawable.getIntrinsicHeight(),
+                            Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }
