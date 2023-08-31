@@ -4830,7 +4830,7 @@ public class Editor {
             if (null == imm) {
                 return;
             }
-            if (!imm.isActive(mTextView)) {
+            if (!imm.hasActiveInputConnection(mTextView)) {
                 return;
             }
             // Skip if the IME has not requested the cursor/anchor position.
