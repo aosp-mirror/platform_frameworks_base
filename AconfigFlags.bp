@@ -22,6 +22,8 @@ java_defaults {
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ],
+    // Add aconfig-annotations-lib as a dependency for the optimization
+    libs: ["aconfig-annotations-lib"],
 }
 
 // Default flags for java_aconfig_libraries that go into framework-minus-apex
