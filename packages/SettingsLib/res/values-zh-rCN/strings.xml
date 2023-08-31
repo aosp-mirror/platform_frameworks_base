@@ -550,7 +550,7 @@
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"这部手机"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"无法在此设备上播放"</string>
-    <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级帐号后才能切换"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"升级账号后才能切换"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"无法在此设备上播放下载的内容"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"广告之后重试"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"若要在此设备上播放，请唤醒设备"</string>
@@ -574,7 +574,7 @@
     <string name="delete_blob_text" msgid="2819192607255625697">"删除共享数据"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"确定要删除这些共享数据吗？"</string>
     <string name="user_add_user_item_summary" msgid="5748424612724703400">"用户拥有个人专属的应用和内容"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制其他人使用来自您的帐号的应用和内容"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"您可以限制其他人使用来自您的账号的应用和内容"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"用户"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>

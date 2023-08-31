@@ -752,8 +752,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Апп-д шинэ телеком холболтуудыг бүртгэхийг зөвшөөрнө."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"телеком холболтуудыг удирдах."</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Апп-д телеком холболтуудыг удирдахыг зөвшөөрнө."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"дуудлагын дэлгэцтэй харьцах"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"call screen-тай харьцах"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Апп-д call screen-г хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"телефоны үйлчилгээтэй харилцах"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Апп-д телефон үйлчилгээтэй харилцаж дуудлага хийх/авахыг зөвшөөрнө."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"дуудлага хийж байгаа хэрэглэгчтэй харьцах"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дэмжигч аппад нүүрэн талын үйлчилгээнүүдийг ардаас эхлүүлэхийг зөвшөөрнө."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофоныг ашиглах боломжгүй байна"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофоныг блоклосон байна"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Хоёр дэлгэц"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Хоёр дэлгэц асаалттай байна"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen асаалттай байна"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> контент харуулахын тулд хоёр дэлгэцийг хоёуланг нь ашиглаж байна"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Төхөөрөмж хэт халуун байна"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Таны утас хэт халж байгаа тул Хоёр дэлгэц боломжгүй байна"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Таны утас хэт халж байгаа тул Dual screen боломжгүй байна"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen боломжгүй байна"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Батарей хэмнэгч асаалттай байгаа тул Dual Screen боломжгүй байна. Та үүнийг Тохиргоонд унтрааж болно."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Тохиргоо руу очих"</string>

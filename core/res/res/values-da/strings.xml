@@ -752,8 +752,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Tillader, at appen registrerer nye telefonforbindelser."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"administrere telefonforbindelser"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Tillader, at appen administrerer telefonforbindelser."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interager med skærmen under opkald"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Tillader, at appen styrer, hvornår og hvordan brugeren ser skærmen for indgående opkald."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interager med Call Screen-skærmen"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Tillader, at appen styrer, hvornår og hvordan brugeren ser Call Screen-skærmen."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"interagere med telefonitjenester"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Tillader, at appen kan interagere med telefonitjenester for at foretage/modtage opkald."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"leverer brugeroplevelsen under opkald"</string>
