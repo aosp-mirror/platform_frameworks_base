@@ -267,12 +267,13 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
     };
 
-    // TODO(b/297672475): make this take @Nullable
     /**
      * Sets the bounds to the provided {@link Rect}.
+     * Passing {@code null} sets the bounds {@link Rect} to empty.
+     *
      * @param rect the new bounds value.
      */
-    public void setBounds(Rect rect) {
+    public void setBounds(@Nullable Rect rect) {
         if (rect == null) {
             mBounds.setEmpty();
             return;
@@ -282,8 +283,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
-     * Set {@link #mAppBounds} to the input Rect.
-     * @param rect The rect value to set {@link #mAppBounds} to.
+     * Sets the app bounds to the provided {@link Rect}.
+     * Passing {@code null} sets the bounds to {@code null}.
+     *
+     * @param rect the new app bounds value.
      * @see #getAppBounds()
      */
     public void setAppBounds(@Nullable Rect rect) {
@@ -297,7 +300,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /**
      * Sets the maximum bounds to the provided {@link Rect}.
-     * @param rect the new bounds value.
+     * Passing {@code null} sets the bounds {@link Rect} to empty.
+     *
+     * @param rect the new max bounds value.
      * @see #getMaxBounds()
      */
     public void setMaxBounds(@Nullable Rect rect) {
@@ -364,8 +369,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return mAppBounds;
     }
 
-    // TODO(b/297672475): make this return @NonNull
     /** @see #setBounds(Rect) */
+    @NonNull
     public Rect getBounds() {
         return mBounds;
     }
