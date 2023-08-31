@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android सिस्‍टीम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"वैयक्तिक प्रोफाइलवर स्विच करा"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलवर स्विच करा"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या वैयक्तिक प्रोफाइलवर स्विच करा"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"आपल्या संपर्कांवर प्रवेश"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"स्थान"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"अ‍ॅपला व्हायब्रेटर स्थितीचा अ‍ॅक्सेस करण्याची अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"आपल्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देते. यामुळे अनपेक्षित शुल्क किंवा कॉल लागू शकतात. लक्षात ठेवा की हे आणीबाणीच्या नंबरवर कॉल करण्यासाठी अ‍ॅप ला अनुमती देत नाही. दुर्भावनापूर्ण अ‍ॅप्स नी आपल्या पुष्टिकरणाशिवाय कॉल केल्यामुळे तुमचे पैसे खर्च होऊ शकतात."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"अ‍ॅपला तुमच्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्याची अनुमती देते. यामुळे अनपेक्षित शुल्के आकारली जाऊ शकतात किंवा अनपेक्षित कॉल येऊ शकतात. लक्षात ठेवा, की हे अ‍ॅपला आणीबाणी नंबरवर कॉल करण्याची अनुमती देत नाही. दुर्भावनापूर्ण अ‍ॅप्सनी तुमच्या कंफर्मेशनशिवाय कॉल केल्याने किंवा वाहक कोड डायल केल्याने त्यासाठी तुमच्याकडून शुल्क आकारले जाऊ शकते, ज्यामुळे इनकमिंग कॉल आपोआप दुसर्‍या नंबरवर फॉरवर्ड केले जातात."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कॉल सेवा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिती आणि ओळख वाचा"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"नोंदणीकृत एड्स आणि मार्ग गंतव्यस्थान सारखी प्राधान्यकृत एनएफसी पेमेंट सेवेची माहिती मिळवण्यासाठी अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी ॲपला अनुमती देते."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"सुरक्षित घटक यावरील व्यवहार इव्हेंट"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"अ‍ॅपला सुरक्षित घटक यावर होत असलेल्या व्यवहारांविषयी माहिती मिळवू देते."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"तुमचे स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
@@ -636,14 +640,14 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"तुमच्या बोटाची स्थिती प्रत्येक वेळी थोडीशी बदला"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखले नाही"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखली नाही"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिंट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"खूप जास्त प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"चेहरा ऑपरेशन रद्द केले गेले."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"खूप वेळा प्रयत्न केले आहेत. फेस अनलॉक उपलब्ध नाही."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"बरेच प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"तुम्ही फेस अनलॉक सेट केले नाही"</string>
@@ -751,8 +754,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"नवीन टेलिकॉम कनेक्शनची नोंदणी करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"टेलिकॉम कनेक्शन व्यवस्थापित करा"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"टेलिकॉम कनेक्शन व्यवस्थापित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉल-मधील स्‍क्रीनशी परस्‍परसंवाद करा"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉल-मधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉलमधील स्‍क्रीनशी संवाद साधा"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉलमधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"टेलिफोनी सेवांशी परस्परसंवाद साधा"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"कॉल करण्यासाठी/घेण्यासाठी टेलिफोनी सेवांशी परस्परसंवाद साधण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"एक कॉल-मधील वापरकर्ता अनुभव प्रदान करा"</string>
@@ -1058,10 +1061,10 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज पुढील गोष्टी दर्शवते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पृष्ठ सोडा"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"या पेजवर रहा"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nआपल्‍याला खात्री आहे की तुम्ही या पृष्‍ठावरून नेव्‍हिगेट करू इच्‍छिता?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> सह ऑटोफील करा"</string>
@@ -1081,7 +1084,7 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"स्पेस"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"एंटर"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"हटवा"</string>
-    <string name="search_go" msgid="2141477624421347086">"शोध"</string>
+    <string name="search_go" msgid="2141477624421347086">"शोधा"</string>
     <string name="search_hint" msgid="455364685740251925">"शोधा…"</string>
     <string name="searchview_description_search" msgid="1045552007537359343">"शोधा"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"शोध क्वेरी"</string>
@@ -1228,7 +1231,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पृष्ठ प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद देत नाही.\n\nतुम्ही ते बंद करू इच्छिता का?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
@@ -1591,7 +1594,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"मोबाइल डेटाचा उच्च वापर"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"तुमच्या अ‍ॅप्सनी नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वपरला आहे"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> ने नेहमीपेक्षा जास्त डेटा वापरला आहे"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="5975877665505297662">"यावर जारी केले:"</string>
@@ -1618,7 +1621,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टॅबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टीव्ही"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"स्पीकर डॉक करा"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्पीकर"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"बाह्य डिव्हाइस"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोन"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"काढा"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"चेतावणी,\nव्यक्तीची सुरक्षितरीत्या हेडफोनवर मोठ्या आवाजातील सिग्नल ऐकण्याची एका आठवड्याची मर्यादा तुम्ही ओलांडली आहे.\n\nही मर्यादा ओलांडणे तुमच्या श्रवणशक्तीचे कायमचे नुकसान करू करेल."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"चेतावणी,\nव्यक्तीची सुरक्षितरीत्या हेडफोनवर मोठ्या आवाजातील सिग्नल ऐकण्याची एका आठवड्याची मर्यादा तुम्ही पाचपट ओलांडली आहे.\n\nतुमच्या श्रवणशक्तीच्या संरक्षणासाठी व्हॉल्यूम कमी केला गेला आहे."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"तुम्ही ज्या पातळीवर मीडिया ऐकत आहात, असे जास्त कालावधीसाठी सुरू राहिल्याचा परिणाम म्हणून तुमच्या श्रवणशक्तीचे कायमचे नुकसान होऊ शकते.\n\nया पातळीवर जास्त कालावधीसाठी प्ले करणे पुढे सुरू ठेवल्यामुळे तुमच्या श्रवणशक्तीचे नुकसान होऊ शकते."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"चेतावणी,\nतुम्ही सध्या असुरक्षित पातळीवर प्ले होणारा मोठ्या आवाजातील आशय ऐकत आहात.\n\nएवढ्या मोठ्याने ऐकणे पुढे सुरू ठेवणे तुमच्या श्रवणशक्तीचे कायमचे नुकसान करेल."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"उच्च व्हॉल्यूममध्ये ऐकत राहायचे आहे का?\n\n हेडफोनचा व्हॉल्यूम हा शिफारस केलेल्या वेळेपेक्षा जास्त वेळ उच्च आहे, जो तुमच्या ऐकण्याच्या क्षमतेवर विपरीत परिणाम करू शकतो"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"मोठा आवाज डिटेक्ट झाला आहे\n\nहेडफोनचा व्हॉल्यूम हा शिफारस केलेल्या व्हॉल्यूमपेक्षा उच्च आहे, जो तुमच्या ऐकण्याच्या क्षमतेवर विपरीत परिणाम करू शकतो"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी प्रेस करून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"अ‍ॅक्सेसिबिलिटी वैशिष्ट्यांसाठी शॉर्टकट सुरू करायचा आहे का?"</string>
@@ -1716,7 +1717,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"रंग सुधारणा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"श्रवणयंत्र डिव्हाइस"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"श्रवणयंत्रे"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"व्हॉल्यूम की रिलीझ करा. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू करण्यासाठी, दोन्ही व्हॉल्यूम की पुन्हा प्रेस करा आणि तीन सेकंदांसाठी धरून ठेवा."</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"समजले"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अधिक चांगल्या दृश्यासाठी फिरवा"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अधिक चांगल्या दृश्यासाठी स्प्लिट स्क्रीनमधून बाहेर पडा"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"अधिक चांगल्या दृश्यासाठी <xliff:g id="NAME">%s</xliff:g> हे फुल स्क्रीनमध्ये उघडा"</string>
     <string name="done_label" msgid="7283767013231718521">"पूर्ण झाले"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"तास परिपत्रक स्लायडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनिटे परिपत्रक स्लायडर"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"हे तुमच्या <xliff:g id="DEVICE">%1$s</xliff:g> वर अ‍ॅक्सेस केले जाऊ शकत नाही. त्याऐवजी तुमच्या फोनवर अ‍ॅक्सेस करून पहा."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"हे ॲप Android च्या जुन्या आवृत्तीसाठी तयार केले होते. ते कदाचित व्यवस्थित काम करणार नाही आणि त्यामध्ये सुरक्षा व गोपनीयतेशी संबंधित नवीनतम संरक्षणे समाविष्ट नाहीत. अपडेटसाठी तपासा किंवा अ‍ॅपच्या डेव्हलपरशी संपर्क साधा."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"अपडेटसाठी तपासा"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"हे ॲप Android च्या नवीनतम आवृत्तीशी कंपॅटिबल नाही. अपडेटसाठी तपासा किंवा अ‍ॅपच्या डेव्हलपरशी संपर्क साधा."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपल्याकडे नवीन मेसेज आहेत"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"पाहण्‍यासाठी SMS अ‍ॅप उघडा"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"काही कार्यक्षमता मर्यादित असू शकतात"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"हा आशय कार्य ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"हा आशय वैयक्तिक ॲप्ससह शेअर केला जाऊ शकत नाही"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"हा आशय वैयक्तिक ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"कार्य प्रोफाइल थांबवली आहे"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"सुरू करण्यासाठी टॅप करा"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"कामाशी संबंधित अ‍ॅप्स थांबवली आहेत"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"पुन्हा सुरू करा"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"वैयक्तिक प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"work app मधून कॉल करायचा आहे का?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"work app वर स्विच करायचे आहे का?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"तुमची संस्था तुम्हाला फक्त work app वरून कॉल करण्याची अनुमती देते"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"तुमची संस्था तुम्हाला फक्त work app वरून मेसेज पाठवण्याची अनुमती देते"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"कॉल करा"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"स्विच करा"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM नेटवर्क सबसेट अनलॉक पिन"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM कॉर्पोरेट अनलॉक पिन"</string>
@@ -2318,13 +2325,13 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"सहयोगी अ‍ॅपला बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करण्याची अनुमती देते."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"मायक्रोफोन उपलब्ध आहे"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"मायक्रोफोन ब्लॉक केलेला आहे"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ड्युअल स्क्रीन"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ड्युअल स्क्रीन सुरू आहे"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen सुरू आहे"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"आशय दाखवण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> दोन्ही डिस्प्ले वापरत आहे"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"डिव्हाइस खूप गरम आहे"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तुमचा फोन खूप गरम होत असल्यामुळे ड्युअल स्क्रीन उपलब्ध नाही"</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"ड्युअल स्क्रीन उपलब्ध नाही"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बॅटरी सेव्हर सुरू असल्यामुळे ड्युअल स्क्रीन उपलब्ध नाही. तुम्ही हे सेटिंग्ज मध्ये बंद करू शकता."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तुमचा फोन खूप गरम होत असल्यामुळे Dual Screen उपलब्ध नाही"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen उपलब्ध नाही"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"बॅटरी सेव्हर सुरू असल्यामुळे Dual Screen उपलब्ध नाही. तुम्ही हे सेटिंग्ज मध्ये बंद करू शकता."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"सेटिंग्ज वर जा"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करा"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> कॉंफिगर केले आहे"</string>

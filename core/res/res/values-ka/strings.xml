@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-ის სისტემა"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"პერსონალურ პროფილზე გადართვა"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"სამსახურის პროფილზე გადართვა"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის პირად ვერსიაზე გადასვლა"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის სამსახურის ვერსიაზე გადასვლა"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"კონტაქტები"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"თქვენს კონტაქტებზე წვდომა"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"მდებარეობა"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"პირდაპირი დარეკვა ტელეფონის ნომრებზე"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"აპს შეეძლება დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შესაძლოა გამოიწვიოს თქვენს სატელეფონი ქვითარზე მოულოდნელი ხარჯებისა და ზარების გაჩენა. გაითვალისწინეთ, რომ აპს გადაუდებელი დახმარების ნომრებზე დარეკვა არ შეუძლია. მავნე აპებს შეეძლება თქვენი დადასტურების გარეშე ზარების განხორციელება და შესაბამისი საფასურის გადახდაც მოგიწევთ."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"საშუალებას აძლევს აპს, დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შეიძლება გამოიწვიოს მოულოდნელი ზარები ან თანხის ჩამოჭრა. გაითვალისწინეთ, რომ ეს საშუალებას არ აძლევს აპს, დარეკოს საგანგებო ვითარებაში საკონტაქტო პირის ნომრებზე. მავნე აპების გამოყენებით, შესაძლოა, თანხის გადახდა მოგიწიოთ თქვენი ნებართვის გარეშე განხორციელებული ზარების გამო, ან იმ ოპერატორების კოდების აკრეფის გამო, რომლებიც ავტომატურად გადაამისამართებს შემომავალ ზარებს სხვა ნომერზე."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ზარების სერვისზე წვდომა"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"აპს შეეძლება, გამოიყენოს IMS სერვისი ზარების თქვენი ჩარევის გარეშე განსახორციელებლად."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ტელეფონის სტატუსისა და იდენტობის წაკითხვა"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"უსაფრთხო ელემენტის ტრანზაქციის ღონისძიება"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"საშუალებს აძლევს აპს, მიიღოს ინფორმაცია უსაფრთხო ელემენტზე განხორციელებული ტრანზაქციების შესახებ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ეკრანის დაბლოკვის მეთოდის სირთულის შესახებ ინფორმაციის მოთხოვნა"</string>
@@ -633,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
@@ -684,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"გაწიეთ ტელეფონი თქვენგან მარცხნივ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"გაწიეთ ტელეფონი თქვენგან მარჯვნივ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"გთხოვთ, უფრო პირდაპირ შეხედოთ თქვენს მოწყობილობას."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"თქვენი სახე არ ჩანს. დაიჭირეთ ტელეფონი თვალის დონეზე."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"სახე არ ჩანს. დაიჭირეთ ტელ. თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"აღმოჩენილია მუქი სათვალე. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"აღმოჩენილია სახის დაფარვა. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"სახე დაფარულია. ის მთლიანად უნდა ჩანდეს."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"სახის ამოცნობა გაუქმდა."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"დაფიქსირდა ბევრი მცდელობა. ცადეთ მოგვიანებით."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა მიუწვდომელია."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"მეტისმეტად ბევრი მცდელობა იყო. შეიყვანეთ ეკრანის დაბლოკვის პარამეტრები."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"სახის დადასტურება ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
@@ -986,7 +989,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
@@ -1369,7 +1372,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"აღმოჩენილია ანალოგური აუდიო აქსესუარი"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"მიერთებული მოწყობილობა არაა თავსებადი ამ ტელეფონთან. მეტის გასაგებად, შეეხეთ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB გამართვა შეერთებულია"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB შეცდ. გამართვა"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"შეეხეთ და გამორთეთ USB გამართვა"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"მონიშნეთ რათა შეწყვიტოთ USB-ის გამართვა"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"შეცდომების უსადენო გამართვა დაკავშირებულია"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"შეეხეთ შეცდომების უსადენო გამართვის გამოსართავად"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ამოშლა"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"გსურთ ხმის რეკომენდებულ დონეზე მაღლა აწევა?\n\nხანგრძლივად ხმამაღლა მოსმენით შესაძლოა სმენადობა დაიზიანოთ."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"გაფრთხილება,\nთქვენ გადააჭარბეთ ყურსასმენებით ერთ კვირაში ხმამაღალი სიგნალების უსაფრთხოდ მოსმენის დასაშვებ რაოდენობას.\n\nმოცემულ ზღვარს თუ გადააჭარბებთ, ეს სამუდამოდ დაგიზიანებთ სმენას."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"გაფრთხილება,\nთქვენ 5-ჯერ გადააჭარბეთ ყურსასმენებით ერთ კვირაში ხმამაღალი სიგნალების უსაფრთხოდ მოსმენის დასაშვებ რაოდენობას.\n\nხმა დაწეულია თქვენი სმენის დასაცავად."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"ხმის დონეს, რომელზეც მედიას უსმენთ, შეიძლება შედეგად მოყვეს სმენის დაზიანება თუ ამას ხანგრძლივად გააგრძელებთ.\n\nთუ გააგრძელებთ ხანგრძლივად დაკვრას ხმის მოცემულ დონეზე, ამან შეიძლება დააზიანოს თქვენი სმენა."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"გაფრთხილება,\nამჟამად უსმენთ ხმამაღალ კონტენტს, რომლის დაკვრის ხმის დონე არ არის უსაფრთხო.\n\nასეთი ხმამაღალი კონტენტის დაკვრა სამუდამოდ დაგიზიანებთ სმენას."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"განაგრძობთ მაღალ ხმაზე მოსმენას?\n\nყურსასმენების ხმა მაღალი იყო რეკომენდებულზე დიდხანს, რამაც შესაძლოა თქვენი სმენა დააზიანოს"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"მაღალი ხმაა ამოცნობილი\n\nყურსასმენების ხმა რეკომენდებულზე მაღალი იყო, რამაც შესაძლოა თქვენი სმენა დააზიანოს"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"გსურთ მარტივი წვდომის მალსახმობის გამოყენება?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"თუ მალსახმობი ჩართულია, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ჩაირთოს მარტივი წვდომის ფუნქციების მალსახმობი?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"გამოსვლისათვის, გაასრიალეთ ზემოდან ქვემოთ."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"უკეთესი ხედვისთვის გამოდით გაყოფილი ეკრანიდან"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"გახსენით <xliff:g id="NAME">%s</xliff:g> სრულ ეკრანზე უკეთესი ხედისთვის"</string>
     <string name="done_label" msgid="7283767013231718521">"დასრულდა"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"საათების წრიული სლაიდერი"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"წუთების წრიული სლაიდერი"</string>
@@ -1951,8 +1952,8 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ამჟამად მიუწვდომელია. ის იმართება <xliff:g id="APP_NAME_1">%2$s</xliff:g>-ის მიერ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"შეიტყვეთ მეტი"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"აპის დაპაუზების გაუქმება"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"გაუქმდეს სამსახურის აპების დაპაუზება?"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"პაუზის გაუქმება"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"კვლავ გააქტიურდეს სამსახურის აპები?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"გააქტიურება"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"საგანგებო სიტუაცია"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ამჟამად ამ აპზე თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან წვდომა შეუძლებელია. ცადეთ ტელეფონიდან."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ეს აპი Android-ის ძველი ვერსიისთვის შეიქმნა. ის შესაძლოა არ მიშაობდეს სწორად და არ შეიცავდეს უსაფრთხოებისა და კონფიდენციალურობის უახლეს დაცვას. შეამოწმეთ განახლება, ან დაუკავშირდით აპის დეველოპერს."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"განახლების შემოწმება"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ეს აპი არ არის თავსებადი Android-ის უახლეს ვერსიასთან. შეამოწმეთ განახლება, ან დაუკავშირდით აპის დეველოპერს."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"თქვენ ახალი შეტყობინებები გაქვთ"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"სანახავად, გახსენით SMS აპი"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ზოგიერთი ფუნქცია შეიძლება შეიზღუდოს"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ამ კონტენტის სამსახურის აპებით გახსნა შეუძლებელია"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ამ კონტენტის პირადი აპებისთვის გაზიარება შეუძლებელია"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ამ კონტენტის პირადი აპებით გახსნა შეუძლებელია"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"სამსახურის პროფილი დაპაუზებულია"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"შეეხეთ ჩასართავად"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"სამსახურის აპები დაპაუზებულია"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"პაუზის გაუქმება"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"სამსახურის აპები არ არის"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"პირადი აპები არ არის"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ის გახსნა?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"გსურთ, პირად <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"გსურთ, სამსახურის <xliff:g id="APP">%s</xliff:g>-ში გახსნა?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"სამსახურის აპიდან დარეკავთ?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"გადაერთვებით სამუშაო აპზე?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"თქვენი ორგანიზაცია ნებას გრთავთ, რომ დარეკოთ მხოლოდ სამსახურის აპებიდან"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"თქვენი ორგანიზაცია ნებას გრთავთ, მხოლოდ სამსახურის აპებიდან გაგზავნოთ შეტყობინებები"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"დარეკვა"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"გადართვა"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM ქსელის ქვედანაყოფის განბლოკვის PIN-კოდი"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-ის კორპორატიული განბლოკვის PIN-კოდი"</string>

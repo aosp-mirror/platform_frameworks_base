@@ -298,9 +298,11 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-system"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Byt till personlig profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Byt till jobbprofilen"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Byt till privat profil i <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Byt till jobbprofil i <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"få tillgång till dina kontakter"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"plats"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Plats"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"komma åt enhetens platsuppgifter"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"få tillgång till din kalender"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillåter att appen styr vibrationen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Appen beviljas åtkomst till vibrationsstatus."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringa telefonnummer direkt"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Tillåter att appen ringer telefonnummer utan någon aktiv åtgärd från dig. Detta kan leda till oväntade avgifter och samtal. Observera att appen inte tillåts ringa nödsamtal. Skadliga appar kan ringa utan ditt godkännande och detta kan kosta pengar."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tillåter att appen ringer telefonnummer utan åtgärd från dig. Detta kan leda till oväntade avgifter eller samtal. Observera att appen inte tillåts ringa nödsamtal. Skadliga appar kan ringa utan ditt godkännande och detta kan kosta pengar. De kan även ange operatörskoder vilket kan leda till att inkommande samtal automatiskt vidarebefordras till ett annat nummer."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"tillgång till tjänsten för snabbmeddelanden vid samtal"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tillåter att appen använder tjänsten för snabbmeddelanden för att ringa samtal utan åtgärd från dig."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"läsa telefonens status och identitet"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaktionshändelse i ett säkert element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tillåter att appen tar emot information om transaktioner som sker i ett säkert element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"inaktivera skärmlåset"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillåter att appen inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel kan vara att tangentlåset inaktiveras vid inkommande samtal och aktiveras igen när samtalet är avslutat."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"begär komplexitetsnivå för skärmlåset"</string>
@@ -623,7 +627,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fortsätt med hjälp av ditt skärmlås"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck på sensorn med ett stadigt tryck"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeravtrycket kändes inte igen. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
@@ -643,7 +647,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingeravtryckskonfigurering nådde tidsgränsen. Försök igen."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"För många försök. Använd låsskärmen i stället."</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mörka glasögon identifierades. Hela ansiktet måste synas."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något som täcker ansiktet identifierades. Hela ansiktet måste synas."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansiktsåtgärden har avbrutits."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås avbröts av användaren"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Du har gjort för många försök. Försök igen senare."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"För många försök. Ansiktslås är otillgängligt."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"För många försök. Ange skärmlås i stället."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Det gick inte att verifiera ansiktet. Försök igen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har inte konfigurerat ansiktslås"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ta bort"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Varning!\nDu har överskridit den säkra mängden höga ljudsignaler man kan lyssna på i hörlurar under en vecka.\n\nDin hörsel skadas permanent om du överskrider gränsen."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Varning!\nDu har lyssnat på över fem gånger den säkra mängden höga ljudsignaler man kan lyssna på i hörlurar under en vecka.\n\nVolymen har sänkts för att skydda din hörsel."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Du lyssnar på media med en volym som kan leda till hörselskador om den bibehålls under lång tid.\n\nDin hörsel kan skadas om du fortsätter att spela upp på den här nivån under lång tid."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Varning!\nDu lyssnar just nu på innehåll med farligt hög volym.\n\nDin hörsel skadas permanent om du fortsätter att lyssna med den här volymen."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vill du fortsätta lyssna på hög volym?\n\nVolymen i hörlurarna har varit hög längre än vad som rekommenderas, vilket kan skada hörseln"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Högt ljud har upptäckts\n\nVolymen i hörlurarna har varit högre än vad som rekommenderas, vilket kan skada hörseln"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vill du aktivera genvägen till tillgänglighetsfunktioner?"</string>
@@ -1716,7 +1717,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Färgkorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhandsläge"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradimmat"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörapparater"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörhjälpmedel"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Släpp volymknapparna. Du kan aktivera <xliff:g id="SERVICE_NAME">%1$s</xliff:g> genom att hålla båda volymknapparna nedtryckta i tre sekunder igen."</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Öppna <xliff:g id="NAME">%s</xliff:g> i fullskärmsläget för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g>. Testa med telefonen i stället."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Den här appen byggdes för en äldre version av Android. Den kanske inte fungerar som den ska och har inte de senaste säkerhets- och integritetsskydden. Sök efter en uppdatering eller kontakta appens utvecklare."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sök efter uppdateringar"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Denna app är inte kompatibel med den senaste versionen av Android. Sök efter en uppdatering eller kontakta appens utvecklare."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nya meddelanden"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Öppna sms-appen och visa meddelandet"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Vissa funktioner är begränsade"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Det här innehållet kan inte öppnas med jobbappar"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Det här innehållet kan inte delas med privata appar"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Det här innehållet kan inte öppnas med privata appar"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Jobbprofilen är pausad"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tryck för att aktivera"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Jobbappar har pausats"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Återuppta"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Inga jobbappar"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Inga privata appar"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Vill du öppna <xliff:g id="APP">%s</xliff:g> med din jobbprofil?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vill du öppna med din privata profil i <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vill du öppna med din jobbprofil i <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vill du ringa med jobbappen?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vill du byta till jobbappen?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisationen tillåter endast att du ringer samtal med jobbappar"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisationen tillåter endast att du skickar meddelanden med jobbappar"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Använd privat webbläsare"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Använd jobbwebbläsare"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Byt"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Pinkod för upplåsning av delnätverk för SIM-kort"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Pinkod för upplåsning av företag för SIM-kort"</string>
@@ -2288,7 +2295,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>
@@ -2318,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillåter att en tillhörande app startar förgrundstjänster i bakgrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen är tillgänglig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen är blockerad"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dubbel skärm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dubbel skärm är på"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen är på"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> använder båda skärmarna för att visa innehåll"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheten är för varm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbel skärm kan inte användas eftersom telefonen börjar bli för varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen kan inte användas eftersom telefonen börjar bli för varm"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen är inte tillgängligt"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen kan inte användas eftersom battersparläget är aktiverat. Du kan inaktivera detta i inställningarna."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Öppna inställningarna"</string>

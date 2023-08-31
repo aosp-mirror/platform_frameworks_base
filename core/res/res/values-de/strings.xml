@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Zum privaten Profil in <xliff:g id="APP_NAME">%1$s</xliff:g> wechseln"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Zum Arbeitsprofil in <xliff:g id="APP_NAME">%1$s</xliff:g> wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Standort"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ermöglicht der App, auf den Vibrationsstatus zuzugreifen."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Ermöglicht der App, ohne dein Eingreifen Telefonnummern zu wählen. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachte, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne deine Bestätigung tätigen."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ermöglicht der App, ohne dein Zutun Telefonnummern zu wählen. Das kann zu unerwarteten Anrufen bzw. Kosten führen. Beachte, dass die App keine Notrufnummer anrufen darf. Es gibt schädliche Apps, die Kosten verursachen können, indem sie eigenmächtig Anrufe starten, oder die bestimmte Betreiberkennzahlen wählen, woraufhin eingehende Anrufe automatisch an eine andere Nummer weitergeleitet werden."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"Zugriff auf IMS-Anrufdienst"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefonstatus und Identität abrufen"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaktion in einem Secure Element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ermöglicht der App, Informationen zu Transaktionen abzurufen, die in einem Secure Element stattfinden."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Komplexitätsstufe der Displaysperre anfragen"</string>
@@ -684,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesichtserkennung abgebrochen."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Entsperrung per Gesichtserkennung vom Nutzer abgebrochen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Zu oft versucht. Entsperrung per Gesichtserkennung nicht verfügbar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Gesichtsprüfung nicht möglich. Noch mal versuchen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Entsperrung per Gesichtserkennung ist nicht eingerichtet"</string>
@@ -1369,7 +1372,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analoges Audiozubehör erkannt"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Das angeschlossene Gerät ist nicht mit diesem Smartphone kompatibel. Für weitere Informationen tippen."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-Debugging aktiviert"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Zum Deaktivieren von USB-Debugging tippen"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Zum Deaktivieren tippen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB-Debugging deaktivieren: auswählen"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"\"Debugging über WLAN\" verbunden"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Tippen, um \"Debugging über WLAN\" zu deaktivieren"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Entfernen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lautstärke über den Schwellenwert anheben?\n\nWenn du über einen längeren Zeitraum Musik in hoher Lautstärke hörst, kann dies dein Gehör schädigen."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Warnung:\nDu hast den wöchentlichen Schwellenwert für laute Geräusche, die ohne Gesundheitsrisiko über Kopfhörer angehört werden können, überschritten.\n\nDies kann zu dauerhaften Hörschäden führen."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Warnung:\nDu hast den wöchentlichen Schwellenwert für laute Geräusche, die ohne Gesundheitsrisiko über Kopfhörer angehört werden können, 5-fach überschritten.\n\n Die Lautstärke wurde verringert, um Hörschäden zu vermeiden."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Die Lautstärke, mit der du dir Medien anhörst, kann über lange Zeiträume hinweg Hörschäden verursachen.\n\nWenn du dir weiterhin Medien bei dieser Lautstärke über lange Zeiträume hinweg anhörst, kann dies zu dauerhaften Hörschäden führen."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Warnung:\nDu überschreitest momentan den Schwellenwert für laute Geräusche, die ohne Gesundheitsrisiko über Kopfhörer angehört werden können.\n\nWenn du dir weiterhin Medien bei dieser Lautstärke anhörst, kann dies zu dauerhaften Hörschäden führen."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Weiter mit hoher Lautstärke hören?\n\nDu hast deine Kopfhörer länger als empfohlen mit einer hohen Lautstärke betrieben. Das kann deinem Hörvermögen schaden"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Lautes Geräusch erkannt\n\nDu hast deine Kopfhörer lauter als empfohlen eingestellt. Das kann deinem Hörvermögen schaden"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Verknüpfung für Bedienungshilfen verwenden?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Verknüpfung für Bedienungshilfen aktivieren?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Modus für geteilten Bildschirm beenden, um die Ansicht zu verbessern"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Du kannst <xliff:g id="NAME">%s</xliff:g> im Vollbildmodus öffnen, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>
@@ -1951,7 +1952,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ist momentan nicht verfügbar. Dies wird über die App \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\" verwaltet."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Weitere Informationen"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"App-Pausierung aufheben"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Geschäftl. Apps nicht mehr pausieren?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Geschäftliche Apps nicht mehr pausieren?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Nicht mehr pausieren"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Notruf"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Diese App wurde für eine ältere Android-Version entwickelt. Sie funktioniert möglicherweise nicht richtig und enthält nicht die neuesten Sicherheits- und Datenschutzeinstellungen. Suche nach einem Update oder wende dich an den App-Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Diese App ist nicht mit der neuesten Android-Version kompatibel. Suche nach einem Update oder wende dich an den App-Entwickler."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Zum Ansehen SMS-App öffnen"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Funktionen sind evtl. eingeschränkt"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Diese Art von Inhalt kann nicht mit geschäftlichen Apps geöffnet werden"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Diese Art von Inhalt kann nicht über private Apps geteilt werden"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Diese Art von Inhalt kann nicht mit privaten Apps geöffnet werden"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Arbeitsprofil pausiert"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zum Aktivieren tippen"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Geschäftliche Apps sind pausiert"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Nicht mehr pausieren"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Geschäftliche <xliff:g id="APP">%s</xliff:g>-Instanz öffnen?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"In der privaten <xliff:g id="APP">%s</xliff:g>-Instanz öffnen?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"In der geschäftlichen <xliff:g id="APP">%s</xliff:g>-Instanz öffnen?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Über geschäftliche App anrufen?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Zu geschäftlicher App wechseln?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Deine Organisation lässt das Telefonieren nur über geschäftliche Apps zu"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Deine Organisation lässt das Senden von Nachrichten nur über geschäftliche Apps zu"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Privaten Browser verwenden"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Arbeitsbrowser verwenden"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Anrufen"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Wechseln"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Entsperr-PIN für netzgebundenes Gerät"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"Entsperr-PIN für subnetzgebundenes Gerät"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Entsperr-PIN für unternehmensgebundenes Gerät"</string>

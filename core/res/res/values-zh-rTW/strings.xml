@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 系統"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"切換至個人設定檔"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"切換至工作資料夾"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"切換至個人 <xliff:g id="APP_NAME">%1$s</xliff:g> 帳戶"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"切換至工作用 <xliff:g id="APP_NAME">%1$s</xliff:g> 帳戶"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"聯絡人"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"存取你的聯絡人"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置"</string>
@@ -459,10 +461,10 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"允許應用程式修改 Android TV 裝置的通話記錄，包括來電和撥出電話相關資料。惡意應用程式可能會藉此清除或修改你的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。請注意，惡意應用程式可能濫用此功能刪除或修改你的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
-    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors" msgid="662918578601619569">"在使用期間可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
+    <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心率"</string>
+    <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心率、體溫和血氧比例。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動功能狀態。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"允許應用程式自行撥打電話，但可能產生非預期的費用或撥打非預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能利用此功能擅自撥打電話，增加你不必要的額外支出。"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"允許應用程式在你未操作的情況下自行撥打電話號碼，但可能產生非預期的費用或撥打非預期的電話。請注意，這項權限並不允許應用程式撥打緊急電話號碼。惡意應用程式可能利用此功能擅自撥打電話或撥打電信業者的代碼，導致來電自動轉接到其他號碼，增加不必要的額外支出。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"存取 IMS 撥號服務"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允許應用程式自動使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"讀取手機狀態和識別碼"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"允許應用程式與近距離無線通訊 (NFC) 電子感應標籤、卡片及感應器進行通訊。"</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"安全元件交易事件"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"允許應用程式接收在安全元件上發生的交易相關資訊。"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"停用螢幕鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性功能。例如：手機收到來電時停用按鍵鎖定，通話結束後重新啟用按鍵鎖定。"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"要求螢幕鎖定的複雜度"</string>
@@ -684,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"請將手機向左移"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"請將手機向右移"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"請儘可能直視裝置正面。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"未偵測到你的臉，請將手機舉到與視線同高。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"未偵測到你的臉，請將手機舉到與眼睛同高的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"鏡頭過度晃動，請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊你的臉孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識這張臉，請再試一次。"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"臉孔處理作業已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消人臉解鎖作業"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"嘗試次數過多，人臉解鎖功能無法使用。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改用螢幕鎖定功能驗證身分。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證臉孔，請再試一次。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"你尚未設定人臉解鎖功能"</string>
@@ -1391,7 +1394,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒絕"</string>
     <string name="select_input_method" msgid="3971267998568587025">"選擇輸入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"使用實體鍵盤時仍繼續顯示虛擬鍵盤"</string>
+    <string name="show_ime" msgid="6406112007347443383">"使用實體鍵盤時仍繼續顯示螢幕小鍵盤"</string>
     <string name="hardware" msgid="1800597768237606953">"顯示虛擬鍵盤"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"設定實體鍵盤"</string>
@@ -1681,12 +1684,10 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"警告：\n你在一週內使用耳罩式耳機聆聽的高分貝音訊量已超過安全範圍。\n\n繼續這個行為將導致聽力永久受損。"</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"警告：\n你在一週內使用耳罩式耳機聆聽的高分貝音訊量已超過安全範圍 5 倍。\n\n為了保護你的聽力，系統已調低音量。"</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"目前的媒體播放音量在長時間聆聽下可能會損害聽力。\n\n如果繼續以這個音量播放內容，長時間可能導致聽力受損。"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告：\n目前的內容播放音量已超過安全聆聽範圍。\n\n繼續聆聽這個音量將導致聽力永久受損。"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"要繼續以高音量聆聽嗎？\n\n耳罩式耳機以高音量播放已超過建議時間，可能會傷害聽力"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"偵測到過大音量\n\n耳罩式耳機的音量比建議音量高，可能會傷害聽力"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
@@ -1697,7 +1698,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"如要退出，請從畫面頂端向下滑動。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉螢幕以瀏覽完整的檢視畫面"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"結束分割畫面以全螢幕瀏覽"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"如要享有更優質的預覽體驗，可透過全螢幕模式開啟「<xliff:g id="NAME">%s</xliff:g>」"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時數環狀滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘數環狀滑桿"</string>
@@ -1941,7 +1942,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議的語言"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議地區"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"建議地區"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有語言"</string>
@@ -1951,7 +1952,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暫停應用程式"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"要取消暫停工作應用程式嗎？"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"要解除工作應用程式的暫停狀態嗎？"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"取消暫停"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作，且不提供最新的安全性和隱私保護服務。請檢查是否有更新版本，或與應用程式的開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"這個應用程式與最新版的 Android 不相容。請檢查是否有可用的更新，或與應用程式發人員聯絡。"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"你有新訊息"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"開啟簡訊應用程式來查看內容"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"部分功能可能遭到鎖定"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"無法使用工作應用程式開啟這項內容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"無法透過個人應用程式分享這項內容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"無法使用個人應用程式開啟這項內容"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"工作資料夾已暫停使用"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"輕觸即可啟用"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"工作應用程式目前為暫停狀態"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"解除暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"要開啟工作用「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"要在個人用「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"要在工作用「<xliff:g id="APP">%s</xliff:g>」中開啟嗎？"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"要透過工作應用程式撥號嗎？"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"要切換到工作應用程式嗎？"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"貴機構僅允許透過工作應用程式撥打電話"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"貴機構僅允許透過工作應用程式傳送訊息"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"撥號"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"切換"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 卡網路解鎖 PIN 碼"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM 卡網路子集解鎖 PIN 碼"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM 卡企業解鎖 PIN 碼"</string>

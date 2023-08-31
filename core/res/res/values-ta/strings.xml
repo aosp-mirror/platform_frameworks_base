@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"தனிப்பட்ட சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"தனிப்பட்ட கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"பணிக் கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"அதிர்வு நிலையை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் ஆப்ஸை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது ஆப்ஸை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் ஆப்ஸ், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"உங்கள் உறுதிப்படுத்தல் இல்லாமல் ஃபோன் எண்களை அழைக்க ஆப்ஸை அனுமதிக்கும். இது எதிர்பாராத கட்டணங்கள்/அழைப்புகளுக்கு வழிவகுக்கக்கூடும். அவசர உதவி எண்களை அழைக்க இது ஆப்ஸை அனுமதிக்காது என்பதை நினைவில் கொள்ளுங்கள். தீங்கிழைக்கும் ஆப்ஸ் உங்கள் உறுதிப்படுத்தல் இல்லாமல் அழைப்புகளை மேற்கொள்வதன் மூலம் உங்களுக்கு அநாவசியச் செலவு ஏற்படக்கூடும் அல்லது அவை கேரியர் குறியீடுகளை டயல் செய்து உங்களுக்கான உள்வரும் அழைப்புகளை வேறு எண்ணுக்குத் தானாகத் திசைதிருப்பக்கூடும்."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"பாதுகாப்பு உறுப்பில் நிகழ்கின்ற பணப் பரிமாற்ற நிகழ்வு"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"பாதுகாப்பு உறுப்பில் நிகழ்கின்ற பணப் பரிமாற்றங்கள் குறித்த தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி கோருதல்"</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"பயனரால் \'முகம் காட்டித் திறத்தல்\' ரத்துசெய்யப்பட்டது"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"பலமுறை முயன்றுவிட்டீர்கள். முகம் காட்டித் திறத்தல் இல்லை."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"பலமுறை முயன்றுவிட்டீர்கள். இதற்குப் பதிலாக, திரைப் பூட்டைப் பயன்படுத்தவும்."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்கவில்லை."</string>
@@ -1629,7 +1632,7 @@
     <string name="media_route_chooser_title" msgid="6646594924991269208">"சாதனத்துடன் இணைக்கவும்"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ஸ்கிரீனை சாதனத்தில் திரையிடு"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"சாதனங்களைத் தேடுகிறது..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்பு"</string>
+    <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"அமைப்புகள்"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"துண்டி"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"ஸ்கேன் செய்கிறது..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"இணைக்கிறது..."</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"அகற்று"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\n\nநீண்ட நேரத்திற்கு அதிகளவில் ஒலி கேட்பது கேட்கும் திறனைப் பாதிக்கலாம்."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"எச்சரிக்கை,\nஒரு வாரத்திற்கு ஹெட்ஃபோன்களில் ஒருவர் பாதுகாப்பாகக் கேட்கக்கூடிய சத்தமான ஒலியளவு வரம்பைக் கடந்துவிட்டீர்கள்.\n\nதொடர்ந்து இந்த வரம்பை மீறினால் உங்கள் கேட்கும் திறன் நிரந்தரப் பாதிப்புக்குள்ளாகும்."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"எச்சரிக்கை,\nஒரு வாரத்திற்கு ஹெட்ஃபோன்களில் ஒருவர் பாதுகாப்பாகக் கேட்கக்கூடிய சத்தமான ஒலியளவு வரம்பை 5 முறை கடந்துவிட்டீர்கள்.\n\nஉங்கள் கேட்கும் திறனின் நலன் கருதி ஒலியளவு குறைக்கப்பட்டுள்ளது."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"நீங்கள் தற்போது கேட்கும் ஒலியளவிலேயே தொடர்ந்து மீடியாவைக் கேட்டு வந்தால் உங்கள் கேட்கும் திறன் பாதிப்புக்குள்ளாகும்.\n\nஇந்த அளவிலேயே தொடர்ந்து கேட்டால் உங்கள் கேட்கும் திறன் பாதிப்படையலாம்."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"எச்சரிக்கை,\nபாதுகாப்பற்ற ஒலியளவில் மீடியாவைத் தற்போது சத்தமாகக் கேட்கிறீர்கள்.\n\nதொடர்ந்து இந்தளவில் கேட்டால் உங்கள் கேட்கும் திறன் நிரந்தரப் பாதிப்புக்குள்ளாகும்."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"அதிக ஒலியளவில் தொடர்ந்து கேட்க வேண்டுமா?\n\nபரிந்துரைக்கப்பட்டதைவிட அதிக நேரமாக அதிகளவில் ஹெட்ஃபோன் ஒலியளவு உள்ளது, இது உங்கள் கேட்கும் திறனைப் பாதிக்கலாம்"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"அதிகச் சத்தம் கண்டறியப்பட்டது\n\nஹெட்ஃபோன் ஒலியளவு பரிந்துரைக்கப்பட்டதைவிட அதிகளவில் உள்ளது, இது கேட்கும் திறனைப் பாதிக்கலாம்"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"அணுகல்தன்மை ஷார்ட்கட்டைப் பயன்படுத்தவா?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ஷார்ட்கட் இயக்கத்தில் இருக்கும்போது ஒலியளவு பட்டன்கள் இரண்டையும் 3 வினாடிகளுக்கு அழுத்தினால் அணுகல்தன்மை அம்சம் இயக்கப்படும்."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"அணுகல்தன்மை அம்சங்களுக்கான ஷார்ட்கட்டை ஆன் செய்யவா?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"சிறந்த காட்சிக்கு திரைப் பிரிப்புப் பயன்முறையில் இருந்து வெளியேறுங்கள்"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"சிறந்த காட்சிக்கு, <xliff:g id="NAME">%s</xliff:g> ஆப்ஸை முழுத்திரைப் பயன்முறையில் திறக்கவும்"</string>
     <string name="done_label" msgid="7283767013231718521">"முடிந்தது"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"மணிநேர வட்ட வடிவ ஸ்லைடர்"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"நிமிடங்களுக்கான வட்டவடிவ ஸ்லைடர்"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தில் இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் முயன்று பாருங்கள்."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"இந்த ஆப்ஸ் Androidன் பழைய பதிப்பிற்காக உருவாக்கப்பட்டது. இது சரியாகச் செயல்படாமல் போகலாம். மேலும் சமீபத்திய பாதுகாப்பு மற்றும் தனியுரிமை அம்சங்கள் இதில் இல்லை. புதுப்பிப்பு உள்ளதா எனப் பாருங்கள் அல்லது ஆப்ஸ் டெவெலப்பரைத் தொடர்புகொள்ளுங்கள்."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"இந்த ஆப்ஸ் சமீபத்திய Android பதிப்புடன் இணங்கவில்லை. புதுப்பிப்பு உள்ளதா எனப் பாருங்கள் அல்லது ஆப்ஸ் டெவெலப்பரைத் தொடர்புகொள்ளுங்கள்."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"புதிய செய்திகள் வந்துள்ளன"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"பார்க்க, SMS பயன்பாட்டைத் திறக்கவும்"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"சில செயலுக்கு கட்டுப்பாடு இருக்கலாம்"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"பணி ஆப்ஸ் மூலம் இந்த உள்ளடக்கத்தைத் திறக்க முடியாது"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"தனிப்பட்ட ஆப்ஸுடன் இந்த உள்ளடக்கத்தைப் பகிர முடியாது"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"தனிப்பட்ட ஆப்ஸ் மூலம் இந்த உள்ளடக்கத்தைத் திறக்க முடியாது"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"பணிக் கணக்கு இடைநிறுத்தப்பட்டுள்ளது"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ஆன் செய்யத் தட்டுக"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"பணி ஆப்ஸ் இடைநிறுத்தப்பட்டுள்ளன"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"மீண்டும் இயக்கு"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"பணி ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"தனிப்பட்ட ஆப்ஸ் எதுவுமில்லை"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"பணிக் கணக்கில் உள்நுழைந்துள்ள <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"தனிப்பட்ட கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"பணிக் கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறக்கவா?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"பணி ஆப்ஸிலிருந்து அழைக்கவா?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"பணி ஆப்ஸுக்கு மாற வேண்டுமா?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"உங்கள் நிறுவனம் பணி ஆப்ஸில் இருந்து மட்டுமே அழைக்க உங்களை அனுமதிக்கிறது"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"உங்கள் நிறுவனம் பணி ஆப்ஸில் இருந்து மட்டுமே மெசேஜ்களை அனுப்ப உங்களை அனுமதிக்கிறது"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"தனிப்பட்ட உலாவியைப் பயன்படுத்து"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"பணி உலாவியைப் பயன்படுத்து"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"அழை"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"மாற்று"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"சிம் நெட்வொர்க் அன்லாக் பின்"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"சிம் நெட்வொர்க் சப்செட் அன்லாக் பின்"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"கார்ப்பரேட் அன்லாக் பின்"</string>

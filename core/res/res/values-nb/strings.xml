@@ -144,7 +144,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring over mobilnettverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wifi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare wifi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g>-reserve for anrop"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-system"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Bytt til personlig profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Bytt til jobbprofil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Bytt til <xliff:g id="APP_NAME">%1$s</xliff:g> for personlig bruk"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Bytt til <xliff:g id="APP_NAME">%1$s</xliff:g> for jobb"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"se kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posisjon"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lar appen kontrollere vibreringsfunksjonen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Gir appen tilgang til vibreringstilstanden."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe telefonnummer direkte"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Lar appen ringe telefonnumre uten at du gjør noe. Dette kan resultere i uventede oppringninger og kostnader. Appen kan imidlertid ikke ringe nødnumre. Merk at skadelige apper kan påføre deg kostnader ved å ringe uten bekreftelse fra deg."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Dette gir appen tillatelse til å ringe telefonnumre uten at du gjør noe. Dette kan føre til uventede kostnader eller anrop. Vær oppmerksom på at dette ikke fører til at appen kan ringe nødnumre. Skadelige apper kan føre til kostnader ved at de kan ringe uten å få bekreftelse fra deg, eller de kan ringe operatørkoder som fører til at innkommende anrop automatisk viderekobles til andre numre."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"få tilgang til nettprattjenesten for ringing"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Lar appen bruke nettprattjenesten til å ringe uten at du gjør noe."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lese telefonstatus og -identitet"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gir appen tilgang til informasjon om prioritert NFC-betalingstjeneste, for eksempel registrerte hjelpemidler og destinasjon."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontroller overføring av data med NFC-teknologi"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaksjonshendelse på sikkert element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Lar appen motta informasjon om transaksjoner som finner sted på et sikkert element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"be om skjermlåsens kompleksitet"</string>
@@ -633,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"For lyst"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Trykk på av/på-knappen er registrert"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prøv å justere"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre posisjonen til fingeren litt hver gang"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre fingerens posisjon litt hver gang"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke lage ansiktsmodell. Prøv på nytt."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registrert. Ansiktet må være helt synlig."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktsdekke er registrert. Ansiktet må være helt synlig."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktet er tildekket. Hele ansiktet må vises."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansikt-operasjonen ble avbrutt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Ansiktslås ble avbrutt av brukeren"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"For mange forsøk. Prøv på nytt senere."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"For mange forsøk Ansiktslås er utilgjengelig."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"For mange forsøk. Skriv inn skjermlås i stedet."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan ikke bekrefte ansiktet. Prøv på nytt."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Du har ikke konfigurert ansiktslås"</string>
@@ -1121,7 +1124,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{for # minutt siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}other{For # timer siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}other{# timer siden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}other{For # dager siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minutt}other{# minutter}}"</string>
@@ -1364,7 +1367,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slått på"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Enheten er koblet til som webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilkoblet"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for å få flere alternativ."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for flere alternativer."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilkoblede enheten lades. Trykk for å se flere alternativer."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogt lydtilbehør ble oppdaget"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Den tilkoblede enheten er ikke kompatibel med denne telefonen. Trykk for å finne ut mer."</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du øke volumet til over anbefalt nivå?\n\nHvis du hører på et høyt volum over lengre perioder, kan det skade hørselen din."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Advarsel:\nDu har overskredet antallet høye lydsignaler det er trygt å lytte til i løpet av en uke via hodetelefoner.\n\nHvis du går over denne grensen, blir hørselen permanent skadet."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Advarsel:\nDu har overskredet 5 ganger antallet høye lydsignaler det er trygt å lytte til i løpet av en uke via hodetelefoner.\n\nVolumet er senket for å beskytte hørselen."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Lydnivået du bruker til å lytte til medier, kan føre til hørselsskade når det vedvarer over lengre perioder.\n\nHvis du fortsetter å spille av på dette nivået over lengre perioder, kan du skade hørselen."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Advarsel:\nDu lytter til høyt innhold som spilles av på et utrygt nivå.\n\nHvis du fortsetter å lytte på dette lydnivået, fører det til permanent hørselsskade."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vil du fortsette å lytte på høyt volum?\n\nVolumet på hodetelefonene har vært høyt lenger enn anbefalt, noe som kan skade hørselen din"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Høy lyd registrert\n\nVolumet på hodetelefonene har vært høyere enn anbefalt, noe som kan skade hørselen din"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruke tilgjengelighetssnarveien?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når snarveien er på, starter en tilgjengelighetsfunksjon når du trykker inn begge volumknappene i tre sekunder."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vil du slå på snarveien for tilgjengelighetsfunksjoner?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sveip ned fra toppen for å avslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Skjønner"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter for å få en bedre visning"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Avslutt delt skjerm for å få en bedre visning"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Åpne <xliff:g id="NAME">%s</xliff:g> i fullskjerm for å se bedre"</string>
     <string name="done_label" msgid="7283767013231718521">"Ferdig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Sirkulær glidebryter for timer"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Sirkulær glidebryter for minutter"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Dette er ikke tilgjengelig på <xliff:g id="DEVICE">%1$s</xliff:g>. Prøv på telefonen din i stedet."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Denne appen er utviklet for en eldre Android-versjon. Det er ikke sikkert at den fungerer som den skal, og den mangler det nyeste innen sikkerhet og personvern. Se etter en oppdatering, eller kontakt utvikleren av appen."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Se etter oppdateringer"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Denne appen er ikke kompatibel med den nyeste versjonen av Android. Se etter en oppdatering, eller kontakt utvikleren av appen."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nye meldinger"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Åpne SMS-appen for å se"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Enkelte funksjoner kan begrenses"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Dette innholdet kan ikke åpnes med jobbapper"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Dette innholdet kan ikke deles med personlige apper"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Dette innholdet kan ikke åpnes med personlige apper"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Jobbprofilen er satt på pause"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Trykk for å slå på"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Jobbapper er satt på pause"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Slå av pausen"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ingen jobbapper"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ingen personlige apper"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Vil du åpne <xliff:g id="APP">%s</xliff:g> for jobb?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Vil du åpne i <xliff:g id="APP">%s</xliff:g> for personlig bruk?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Vil du åpne i <xliff:g id="APP">%s</xliff:g> for jobb?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Vil du ringe fra en jobbapp?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vil du bytte til en jobbapp?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisasjonen din tillater bare at du ringer fra jobbapper"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisasjonen din tillater bare at du sender meldinger fra jobbapper"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Bruk den personlige nettleseren"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Bruk jobbnettleseren"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Ring"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Bytt"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-kode for å fjerne operatørlåser"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN-kode for å fjerne bestemte operatørlåser"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN-kode for å låse opp SIM-kort for bedrifter"</string>
@@ -2318,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Lar en følgeapp starte forgrunnstjenester fra bakgrunnen."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen er tilgjengelig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen er blokkert"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dobbel skjerm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dobbel skjerm er på"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen er på"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruker begge skjermene til å vise innhold"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheten er for varm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dobbel skjerm er ikke tilgjengelig fordi telefonen begynner å bli for varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen er ikke tilgjengelig fordi telefonen begynner å bli for varm"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen er ikke tilgjengelig"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen er ikke tilgjengelig fordi Batterisparing er slått på. Du kan slå av denne funksjonen i innstillingene."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gå til innstillingene"</string>

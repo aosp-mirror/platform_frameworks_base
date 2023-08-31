@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без заглавие&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Няма телефонен номер)"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Превключване към личния потребителски профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Превключване към служебния потребителски профил"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Превключване към <xliff:g id="APP_NAME">%1$s</xliff:g> в личния потребителски профил"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Превключване към <xliff:g id="APP_NAME">%1$s</xliff:g> в служебния потребителски профил"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"има достъп до контактите ви"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Местоположение"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Разрешава на приложението да контролира устройството за вибрация."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дава възможност на приложението да осъществява достъп до състоянието на вибриране."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно обаждане до телефонни номера"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Разрешава на приложението да се обажда без ваша намеса до телефонни номера, което може да доведе до неочаквано таксуване или обаждания. Обърнете внимание, че това не му позволява да извършва обаждания до спешните служби. Злонамерените приложения могат да ви въвлекат в разходи, като извършват обаждания без потвърждение от ваша страна."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Разрешава на приложението да се обажда без ваша намеса на телефонни номера. Това може да доведе до неочаквани таксувания или обаждания. Имайте предвид, че това не позволява на приложението да извършва обаждания до номера за спешни случаи. Злонамерените приложения могат да ви въвлекат в разходи, като извършват обаждания без потвърждение от ваша страна или като набират кодове на оператора, които автоматично пренасочват входящите обаждания към друг номер."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"достъп до услугата за незабавни съобщения за обаждания"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Разрешава на приложението да използва услугата за незабавни съобщения за извършване на обаждания без намеса от ваша страна."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"четене на състоянието и идентификационните данни на телефона"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дава възможност на приложението да получава информация за предпочитаната услуга за плащане чрез NFC, като например регистрирани помощни средства и местоназначение."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Събитие за транзакции в защитен елемент"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Разрешава на приложението да получава информация за транзакциите, които се осъществяват в защитен елемент."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"заявяване на сложност на опцията за заключване на екрана"</string>
@@ -684,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Преместете телефона наляво"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Преместете телефона надясно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето ви не се вижда. Дръжте телефона на нивото на очите си."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето не се вижда. Задръжте на нивото на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Моля, регистрирайте лицето си отново."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Лицето не е разпознато. Опитайте отново."</string>
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Моделът на лицето ви не бе създаден. Опитайте отново."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Изглежда, че носите тъмни очила. То трябва да е напълно видимо."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Изглежда, че лицето ви е покрито. То трябва да е напълно видимо."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лицето ви е покрито. То трябва да е напълно видимо."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Лицето не може да се потвърди. Хардуерът не е налице."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцията с лице е анулирана."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Отключването с лице е анулирано от потребителя"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Твърде много опити. Опитайте отново по-късно."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Твърде много опити. „Отключване с лице“ не е налице."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Твърде много опити. Използвайте опцията за заключване на екрана."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Лицето не може да се потвърди. Опитайте отново."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте настроили отключването с лице"</string>
@@ -1255,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, докато настройвате отпечатъка си."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Изключете екрана за изход от настройката"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За изход изключете екрана"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Изключване"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Напред с потвърждаването на отпечатъка?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Натиснахте бутона за включване/изключване – това обикновено изключва екрана.\n\nОпитайте да докоснете леко, за да потвърдите отпечатъка си."</string>
@@ -1618,7 +1621,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Докинг станц.: Високогов."</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Високоговорители докинг станция"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Външно устройство"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Премахване"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Внимание!\nНадвишихте безопасния брой сигнали със силен звук, които човек може да чуе със слушалки в рамките на една седмица.\n\nТова ще увреди слуха ви за постоянно."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Внимание!\nНадвишихте петкратно безопасния брой сигнали със силен звук, които човек може да чуе със слушалки в рамките на една седмица.\n\nСилата на звука бе намалена с цел предпазване на слуха ви."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Силата на звука, с която се възпроизвежда мултимедийно съдържание, може да доведе до увреждане на слуха, ако слушате продължително.\n\nПродължителното слушане при съответната сила на звука може да увреди слуха ви."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Внимание!\nВ момента слушате съдържание, което се възпроизвежда при опасно висока сила на звука.\n\nАко продължите да слушате с толкова силен звук, ще увредите слуха си за постоянно."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Искате да продължите да слушате при високо ниво на силата на звука?\n\nНивото на силата на звука на слушалките е било високо по-дълго, отколкото е препоръчително, което може да увреди слуха ви"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Установен е висок звук\n\nНивото на силата на звука на слушалките е било по-високо, отколкото е препоръчително, което може да увреди слуха ви"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Искате ли да използвате пряк път към функцията за достъпност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за силата на звука и ги задържите за 3 секунди."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Искате ли да включите прекия път за функциите за достъпност?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"За изход плъзнете пръст надолу от горната част."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Разбрах"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Завъртете за по-добър изглед"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Излезте от разделения екран за по-добър изглед"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Отворете <xliff:g id="NAME">%s</xliff:g> на цял екран за по-добър изглед"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Кръгов плъзгач за часовете"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Кръгов плъзгач за минутите"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от телефона си."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Това приложение бе създадено за по-стара версия на Android. То може да не работи правилно и не включва най-новите защити на поверителността и сигурността. Проверете за актуализация или се свържете с програмиста му."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверка за актуализация"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Това приложение не е съвместимо с най-новата версия на Android. Проверете за актуализация или се свържете с програмиста му."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Имате нови съобщения"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Преглед в приложението за SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Някои функции може да са ограничени"</string>
@@ -2064,7 +2066,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ОТВАРЯНЕ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Открито е опасно приложение"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Редакти­ране"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Това съдържание не може да се отваря със служебни приложения"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Това съдържание не може да се споделя с лични приложения"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Това съдържание не може да се отваря с лични приложения"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Служебният потребителски профил е поставен на пауза"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Докоснете за включване"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Служебните приложения са поставени на пауза"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Отмяна на паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма подходящи служебни приложения"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма подходящи лични приложения"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Да се отвори ли <xliff:g id="APP">%s</xliff:g> в служебния потребителски профил?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Да се отвори ли в(ъв) <xliff:g id="APP">%s</xliff:g> в личния потребителски профил?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Да се отвори ли в(ъв) <xliff:g id="APP">%s</xliff:g> в служебния потребителски профил?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Да се извърши ли обаждане от служебното приложение?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Искате ли да превключите към служебното приложение?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Организацията ви разрешава да извършвате обаждания само от служебни приложения"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Организацията ви разрешава да изпращате съобщения само от служебни приложения"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Използване на личния браузър"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Използване на служебния браузър"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Обаждане"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Превключване"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ПИН за отключване на мрежата за SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"ПИН за отключване на подмножеството от мрежи за SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"ПИН за отключване на корпоративната SIM карта"</string>
@@ -2318,11 +2325,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Разрешава на дадено придружаващо приложение да стартира услуги на преден план, докато се изпълнява на заден план."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофонът е налице"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофонът е блокиран"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Двоен екран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функцията за двоен екран е включена"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Приложението <xliff:g id="APP_NAME">%1$s</xliff:g> използва и двата екрана, за да показва съдържание"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Функцията Dual Screen е включена"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> използва и двата екрана, за да показва съдържание"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Устройството е твърде топло"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцията за двоен екран не е налице, защото телефонът ви е твърде топъл"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцията Dual Screen не е налице, защото телефонът ви е твърде топъл"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функцията Dual Screen не е налице"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функцията Dual Screen не е налице, защото режимът за запазване на батерията е включен. Можете да го изключите от настройките."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Към настройките"</string>

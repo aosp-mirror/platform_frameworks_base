@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Passa all\'app <xliff:g id="APP_NAME">%1$s</xliff:g> personale"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Passa all\'app <xliff:g id="APP_NAME">%1$s</xliff:g> di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
@@ -308,11 +310,11 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"Possono inviare e visualizzare SMS"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"File"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"Consente di accedere ai file sul tuo dispositivo"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"accedere ai file sul tuo dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musica e audio"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accesso a musica e audio sul tuo dispositivo"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accedere a musica e audio sul tuo dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Foto e video"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accesso a foto e video sul tuo dispositivo"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"accedere a foto e video sul tuo dispositivo"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Possono registrare audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Attività fisica"</string>
@@ -320,7 +322,7 @@
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"Possono scattare foto e registrare video"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Dispositivi nelle vicinanze"</string>
-    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"Consente di rilevare dispositivi nelle vicinanze e di connettersi a tali dispositivi"</string>
+    <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"rilevare e connettersi a dispositivi nelle vicinanze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Registri chiamate"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"Possono leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefono"</string>
@@ -504,7 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Consente all\'app di accedere allo stato di vibrazione."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chiamata diretta n. telefono"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Consente all\'applicazione di chiamare numeri di telefono senza il tuo intervento. Ciò può comportare chiamate o addebiti imprevisti. Tieni presente che ciò non consente all\'applicazione di chiamare numeri di emergenza. Applicazioni dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Consente all\'app di chiamare numeri di telefono senza il tuo intervento. Questo potrebbe comportare chiamate o addebiti imprevisti. Tieni presente che l\'app non può chiamare numeri di emergenza. Le app dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma o componendo codici di operatori a causa dei quali le chiamate in arrivo vengono deviate automaticamente su un altro numero."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesso al servizio di chiamata IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lettura stato e identità telefono"</string>
@@ -589,6 +591,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Consente all\'app di recuperare informazioni del servizio di pagamento NFC preferito, quali destinazione della route e identificatori applicazione registrati."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controllo Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Consente all\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento di transazione Secure Element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Consente all\'app di ricevere informazioni sulle transazioni in corso su Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disattivazione blocco schermo"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"richiesta di complessità del blocco schermo"</string>
@@ -680,20 +684,20 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Luce insufficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allontana il telefono"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Avvicina il telefono"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta il telefono più in alto"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta il telefono più in basso"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta il telefono verso sinistra"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta il telefono verso destra"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Sposta lo smartphone più in alto"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Sposta lo smartphone più in basso"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Sposta lo smartphone verso sinistra"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Sposta lo smartphone verso destra"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Guarda più direttamente verso il dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Impossibile vedere il volto. Tieni il telefono all\'altezza degli occhi."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Volto non visibile. Tieni lo smartphone all\'altezza degli occhi."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Troppo movimento. Tieni fermo il telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia leggermente la posizione della testa"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nel telefono"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nel telefono"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nello smartphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nello smartphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda dritto nel telefono"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -701,7 +705,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sono stati rilevati occhiali scuri. Il tuo volto deve essere visibile per intero."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"È stata rilevata una mascherina. Il tuo volto deve essere visibile per intero."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Il tuo volto è coperto. Deve essere visibile per intero."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
@@ -710,8 +714,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operazione associata al volto annullata."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Sblocco con il volto annullato dall\'utente"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Troppi tentativi. Riprova più tardi."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Troppi tentativi. Sblocco con il volto non disponibile."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Troppi tentativi. Inserisci il blocco schermo."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossibile verificare il volto. Riprova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Non hai configurato lo sblocco con il volto"</string>
@@ -1682,10 +1685,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Avviso,\nHai superato il limite di segnali audio a forte volume che è possibile ascoltare in sicurezza in una settimana tramite le cuffie.\n\nIl superamento di questo limite causerà danni permanenti al tuo udito."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Avviso,\nHai superato di 5 volte il limite di segnali audio a forte volume che è possibile ascoltare in sicurezza in una settimana tramite le cuffie.\n\nIl volume è stato abbassato per proteggere il tuo udito."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Il livello a cui stai ascoltando contenuti multimediali può causare danni all\'udito se viene usato per periodi di tempo prolungati.\n\nSe continui l\'ascolto a questo livello per lunghi periodi di tempo, il tuo udito potrebbe subire danni."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Avviso,\nStai ascoltando contenuti ad alto volume a un livello non sicuro.\n\nSe continui l\'ascolto a questo volume, il tuo udito subirà danni permanenti."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Vuoi continuare ad ascoltare a un volume alto?\n\nIl volume delle cuffie è rimasto alto per un periodo superiore a quello raccomandato, con il rischio di danneggiare l\'udito"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Rilevato un suono forte\n\nIl volume delle cuffie è più alto di quello raccomandato, con il rischio di danneggiare l\'udito"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vuoi attivare la scorciatoia per le funzioni di accessibilità?"</string>
@@ -1717,7 +1718,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correzione del colore"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Apparecchi acustici"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Protesi uditive"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
@@ -1852,10 +1853,10 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per uscire, scorri dall\'alto verso il basso."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Apri <xliff:g id="NAME">%s</xliff:g> a schermo intero per migliorare la visualizzazione"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
-    <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
-    <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
+    <string name="hour_picker_description" msgid="5153757582093524635">"Cursore circolare per le ore"</string>
+    <string name="minute_picker_description" msgid="9029797023621927294">"Cursore circolare per i minuti"</string>
     <string name="select_hours" msgid="5982889657313147347">"Seleziona le ore"</string>
     <string name="select_minutes" msgid="9157401137441014032">"Seleziona i minuti"</string>
     <string name="select_day" msgid="2060371240117403147">"Seleziona mese e giorno"</string>
@@ -1952,7 +1953,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Scopri di più"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Riattivare app di lavoro?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Riattivare le app di lavoro?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Riattiva"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergenza"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
@@ -1960,7 +1961,7 @@
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorizzazione necessaria"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotocamera non disponibile"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sul telefono"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sullo smartphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfono non disponibile"</string>
     <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store non disponibile"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Impostazioni di Android TV non disponibili"</string>
@@ -1977,6 +1978,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Questa app è stata progettata per una versione precedente di Android. Potrebbe non funzionare correttamente e non include le protezioni della sicurezza e della privacy più recenti. Verifica la presenza di un aggiornamento o contatta lo sviluppatore dell\'app."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Questa app non è compatibile con la versione più recente di Android. Verifica la presenza di un aggiornamento o contatta lo sviluppatore dell\'app."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Apri l\'app SMS per la visualizzazione"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Alcune funzionalità sono limitate"</string>
@@ -2160,16 +2162,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Questi contenuti non possono essere aperti con app di lavoro"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Questi contenuti non possono essere condivisi con app personali"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Questi contenuti non possono essere aperti con app personali"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profilo di lavoro in pausa"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tocca per attivare"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Le app di lavoro sono in pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Riattiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Aprire l\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> personale?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Aprire nell\'app <xliff:g id="APP">%s</xliff:g> di lavoro?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Chiamare dall\'app di lavoro?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vuoi passare all\'app di lavoro?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"La tua organizzazione consente di fare chiamate solo dalle app di lavoro"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"La tua organizzazione consente di inviare messaggi solo dalle app di lavoro"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Chiama"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Passa"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN di sblocco sottoinsieme rete SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN sblocco aziendale SIM"</string>

@@ -231,7 +231,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Reštartuje sa…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Obnovenie výrobných nastavení"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Reštartuje sa…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Prebieha vypínanie..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Vypína sa..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Váš tablet bude vypnutý."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Zariadenie Android TV sa vypne."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Hodinky sa vypnú."</string>
@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Systém Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Prepnúť na osobný profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Prepnúť na pracovný profil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Prepnúť na osobnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Prepnúť na pracovnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"prístup ku kontaktom"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Poloha"</string>
@@ -318,7 +320,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
@@ -505,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Povoľuje aplikácii prístup k stavu vibrátora."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"priamo volať na telefónne čísla"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na tiesňovú linku."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Umožňuje aplikácii volať na telefónne čísla bez vášho zásahu. Môže to viesť k neočakávaným poplatkom alebo hovorov. Upozorňujeme, že aplikácia nemôže volať na tiesňové linky. Škodlivé aplikácie vám môžu spôsobiť poplatky, pretože volajú bez vášho vedomia alebo vytáčajú kódy operátorov, ktoré automaticky presmerovávajú prichádzajúce hovory na iné číslo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"prístup k službe volania IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čítať stav a identitu telefónu"</string>
@@ -590,6 +592,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Udalosť transakcie bezpečnostného prvku"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Umožňuje aplikácii dostávať informácie o transakciách prebiehajúcich v bezpečnostnom prvku."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"požadovať zložitosť zámky obrazovky"</string>
@@ -694,7 +698,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Pozrite sa na telefón priamejšie"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vyčistite hornú časť obrazovky vrátane čierneho panela"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -711,8 +715,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odomknutie tvárou zrušil používateľ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to neskôr."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Priveľa pokusov. Odomknutie tvárou nie je k dispozícii."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Príliš veľa pokusov. Zadajte namiesto toho zámku obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nedá sa overiť tvár. Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nenastavili ste odomknutie tvárou"</string>
@@ -966,7 +969,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Odomknite nakreslením vzoru"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Stav tiesne"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Tiesňová linka"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Zavolať späť"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Skúsiť znova"</string>
@@ -1366,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Bol zapnutý režim MIDI cez USB"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Zariadenie pripojené ako webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Bolo pripojené príslušenstvo USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
@@ -1577,7 +1580,7 @@
     <string name="storage_internal" msgid="8490227947584914460">"Interné zdieľané úložisko"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD karta"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD karta <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
-    <string name="storage_usb_drive" msgid="448030813201444573">"Disk USB"</string>
+    <string name="storage_usb_drive" msgid="448030813201444573">"Kľúč USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"Disk USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"Ukladací priestor USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Upraviť"</string>
@@ -1683,10 +1686,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrániť"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšiť hlasitosť nad odporúčanú úroveň?\n\nDlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Upozornenie:\nPrekročili ste počet hlasných zvukových signálov, ktoré je možné počas týždňa bezpečne počúvať v slúchadlách.\n\nPrekročením tohto limitu si natrvalo poškodíte sluch."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Upozornenie:\nPäťnásobne ste prekročili počet hlasných zvukových signálov, ktoré je možné počas týždňa bezpečne počúvať v slúchadlách.\n\nHlasitosť bola znížená, aby sa chránil váš sluch."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Dlhodobé vystavenie hluku na úrovni, na ktorej počúvate médiá, môže viesť k poškodeniu sluchu.\n\nAk ich budete naďalej dlhodobo prehrávať na tejto úrovni, môžete si poškodiť sluch."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Upozornenie:\nMomentálne počúvate hlasný obsah prehrávaný na nebezpečnej úrovni.\n\nAk budete naďalej počúvať pri tejto hlasitosti, natrvalo si poškodíte sluch."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Počúvate pri vysokej hlasitosti?\n\nHlasitosť slúchadiel bola vyššia dlhšie ako sa odporúča, čo môže poškodiť váš sluch"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Bol rozpoznaný hlasný zvuk\n\nHlasitosť slúchadiel bola vyššia, ako sa odporúča, čo môže poškodiť váš sluch"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použiť skratku dostupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Keď je skratka zapnutá, stlačením obidvoch tlačidiel hlasitosti na tri sekundy spustíte funkciu dostupnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Chcete zapnúť skratku pre funkcie dostupnosti?"</string>
@@ -1853,7 +1854,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončite rozdelenú obrazovku pre lepšie zobrazenie"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorte <xliff:g id="NAME">%s</xliff:g> na celej obrazovke pre lepšie zobrazenie"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posúvač minút"</string>
@@ -1953,9 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ďalšie informácie"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Znova spustiť aplikáciu"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušiť pozastavenie aplikácií?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušiť pozast. prac. aplikácií?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušiť pozastavenie"</string>
-    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Zavolať na tiesňovú linku"</string>
+    <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Tiesňová linka"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
@@ -1978,6 +1979,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste použiť telefón."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Táto aplikácia bola vytvorená pre staršiu verziu Androidu. Nemusí správne fungovať a obsahovať najnovšie prvky zabezpečenia a ochrany súkromia. Skontrolujte dostupnosť aktualizácie alebo kontaktujte jej vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Táto aplikácia nie je kompatibilná s najnovšou verziou Androidu. Skontrolujte dostupnosť aktualizácie alebo kontaktujte jej vývojára."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Otvorte aplikáciu pre SMS a zobrazte správu"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Niektoré funkcie môžu byť obmedzené"</string>
@@ -2161,16 +2163,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah sa nedá otvoriť pomocou pracovných aplikácií"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah sa nedá zdieľať pomocou osobných aplikácií"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah sa nedá otvoriť pomocou osobných aplikácií"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Pracovný profil je pozastavený"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zapnúť klepnutím"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pracovné aplikácie sú pozastavené"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušiť pozastavenie"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žiadne pracovné aplikácie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žiadne osobné aplikácie"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Chcete otvoriť pracovnú aplikáciu <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Chcete obsah otvoriť v osobnej aplikácii <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Chcete obsah otvoriť v pracovnej aplikácii <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Chcete volať z pracovnej aplikácie?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Chcete prepnúť na pracovnú aplikáciu?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Vaša organizácia vám povoľuje volať iba z pracovných aplikácií"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Vaša organizácia vám povoľuje posielať správy iba z pracovných aplikácií"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použiť osobný prehliadač"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použiť pracovný prehliadač"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Volať"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Prepnúť"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN na odomknutie siete pre SIM kartu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN na odomknutie podmnožiny siete pre SIM kartu"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN na odomknutie podnikovej SIM karty"</string>
@@ -2320,8 +2327,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Umožňuje sprievodnej aplikácii spúšťať služby na popredí z pozadia."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofón je k dispozícii"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofón je blokovaný"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvojitá obrazovka"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dvojitá obrazovka je zapnutá"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkcia Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> zobrazuje obsah na oboch obrazovkách"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Zariadenie je príliš horúce"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvojitá obrazovka nie je k dispozícii, pretože telefón sa prehrieva"</string>
@@ -2332,7 +2339,7 @@
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Klávesnica <xliff:g id="DEVICE_NAME">%s</xliff:g> je nakonfigurovaná"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Rozloženie klávesnice je nastavené na jazyk <xliff:g id="LAYOUT_1">%s</xliff:g>. Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g> a <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Môžete to zmeniť klepnutím."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Môžete to zmeniť klepnutím."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Rozloženie klávesnice je nastavené na <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Môžete to zmeniť klepnutím."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice sú nakonfigurované"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klávesnice si zobrazíte klepnutím"</string>

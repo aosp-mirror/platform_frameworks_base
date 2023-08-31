@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Vaihda henkilökohtaiseen profiiliin"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Vaihda työprofiiliin"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Siirry henkilökohtaiseen profiiliin: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Siirry työprofiiliin: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Yhteystiedot"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pääsy yhteystietoihin"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Sijainti"</string>
@@ -503,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Antaa sovelluksen hallita värinää."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Sallii sovelluksen käyttää värinätilaa."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"soittaa puhelinnumeroihin suoraan"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Antaa sovelluksen soittaa puhelinnumeroihin kysymättä sinulta. Tämä voi aiheuttaa odottamattomia kuluja tai puheluita. Huomaa, että tämä ei anna sovellukselle lupaa soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa sinulle kuluja soittamalla puheluita ilman lupaa."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Sallii sovelluksen soittaa puhelinnumeroihin ilman toimintaasi. Tämä voi johtaa odottamattomiin veloituksiin tai puheluihin. Huomaa, että tämä lupa ei anna sovelluksen soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa rahallisia kuluja soittamalla puheluja ilman vahvistustasi tai käyttämällä operaattorikoodeja, joilla saapuvat puhelut siirretään automaattisesti toiseen numeroon."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pikaviestipalvelun puhelukäyttöoikeus"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Antaa sovelluksen soittaa puheluita pikaviestipalvelun avulla ilman käyttäjän toimia."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lue puhelimen tila ja identiteetti"</string>
@@ -588,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Sallii sovelluksen noutaa tietoja rekisteröidyistä sovellustunnuksista, maksureitin kohteesta ja muita ensisijaisia NFC-maksupalvelutietoja."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element ‑maksutapahtuma"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Sallii sovelluksen vastaanottaa tietoa Secure Elementissä tapahtuvista maksutapahtumista."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"poista näytön lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"pyytää näytön lukituksen monimutkaisuutta"</string>
@@ -627,7 +631,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sormenjälkeä ei voi tunnistaa. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina tunnistinta voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -692,7 +696,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Katso suoremmin puhelimeen"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -700,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kasvomallia ei voi luoda. Yritä uudelleen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tummat lasit havaittu. Kasvojen täytyy näkyä kokonaan."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kasvot peittävä asia havaittu. Kasvojen täytyy näkyä kokonaan."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Jokin peittää kasvot. Kasvojen täytyy näkyä kokonaan."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>
@@ -709,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Kasvotoiminto peruutettu"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Käyttäjä perui kasvojentunnistusavauksen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Liikaa yrityksiä. Face Unlock ei saatavilla."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Liian monta yritystä. Lisää sen sijaan näytön lukitus."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kasvoja ei voi vahvistaa. Yritä uudelleen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Et ole ottanut käyttöön kasvojentunnistusavausta"</string>
@@ -1255,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Käynnistetään sovelluksia."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Viimeistellään päivitystä."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nKosketa painiketta kevyesti tallentaessasi sormenjälkeä."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Lopeta käyttöönotto sammuttamalla näyttö"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Lopeta sammuttamalla näyttö"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Laita pois päältä"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Jatketaanko sormenjäljen vahvistamista?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Painoit virtapainiketta, mikä yleensä sammuttaa näytön.\n\nVahvista sormenjälki koskettamalla painiketta kevyesti."</string>
@@ -1681,10 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Poista"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Nostetaanko äänenvoimakkuus suositellun tason yläpuolelle?\n\nPitkäkestoinen kova äänenvoimakkuus saattaa heikentää kuuloa."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Varoitus,\nolet kuunnellut tällä viikolla enemmän äänekkäitä signaaleja kuin kuulokkeilla on turvallista.\n\nRajan ylittäminen vahingoittaa kuuloasi pysyvästi."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Varoitus,\nolet kuunnellut tällä viikolla viisi kertaa enemmän äänekkäitä signaaleja kuin kuulokkeilla on turvallista.\n\nÄänenvoimakkuutta on laskettu kuulosi suojaamiseksi."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Äänenvoimakkuus, jolla kuuntelet mediaa, voi ajan mittaan johtaa kuulovaurioihin.\n\nJos jatkat tällä äänenvoimakkuudella pitkään, kuulosi voi vaurioitua."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Varoitus,\nkuuntelet sisältöä äänenvoimakkuudella, joka ei ole turvallinen.\n\nTällä äänenvoimakkuudella jatkaminen voi vaurioittaa kuuloasi pysyvästi."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Haluatko jatkaa suurella äänenvoimakkuudella kuuntelua?\n\nKuulokkeiden äänenvoimakkuus on ollut suuri suositeltua pidemmän ajan, mikä voi vaurioittaa kuuloa"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Kova ääni havaittu\n\nKuulokkeiden äänenvoimakkuus on ollut suositeltua suurempi, mikä voi vaurioittaa kuuloa"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Käytetäänkö esteettömyyden pikanäppäintä?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kun pikanäppäin on käytössä, voit käynnistää esteettömyystoiminnon pitämällä molempia äänenvoimakkuuspainikkeita painettuna kolmen sekunnin ajan."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Laitetaanko esteettömyysominaisuuksien pikavalinta päälle?"</string>
@@ -1851,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Sulje palkki pyyhkäisemällä alas ruudun ylälaidasta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selvä"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Kierrä, niin saat paremman näkymän"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Poistu jaetulta näytöltä, niin saat paremman näkymän"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Avaa <xliff:g id="NAME">%s</xliff:g>, niin saat paremman näkymän"</string>
     <string name="done_label" msgid="7283767013231718521">"Valmis"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Tuntien ympyränmuotoinen liukusäädin"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Minuuttien ympyränmuotoinen liukusäädin"</string>
@@ -1976,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"<xliff:g id="DEVICE">%1$s</xliff:g> ei saa pääsyä sovellukseen. Kokeile striimausta puhelimella."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Tämä sovellus on suunniteltu vanhemmalle Android-versiolle. Se ei välttämättä toimi oikein eikä sisällä uusimpia tietoturvan ja yksityisyyden suojauksia. Tarkista päivitykset tai ota yhteyttä sovelluksen kehittäjään."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tarkista päivitykset"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Sovellus ei ole yhteensopiva uusimman Android-version kanssa. Tarkista päivitykset tai ota yhteyttä sovelluksen kehittäjään."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Sinulle on uusia viestejä"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Katso avaamalla tekstiviestisovellus."</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Osaa toiminnoista voidaan rajoittaa"</string>
@@ -2159,16 +2161,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tätä sisältöä ei voi avata työsovelluksilla"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tätä sisältöä ei voi jakaa henkilökohtaisilla sovelluksilla"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tätä sisältöä ei voi avata henkilökohtaisilla sovelluksilla"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Työprofiilin käyttö on keskeytetty"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Laita päälle napauttamalla"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Työsovellukset on keskeytetty"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Jatka"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ei työsovelluksia"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ei henkilökohtaisia sovelluksia"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Avataanko sisältö työprofiilissa (<xliff:g id="APP">%s</xliff:g>)?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Avataanko sisältö henkilökohtaisessa profiilissa (<xliff:g id="APP">%s</xliff:g>)?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Avataanko sisältö työprofiilissa (<xliff:g id="APP">%s</xliff:g>)?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Soitetaanko työsovelluksesta?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vaihdetaanko työsovellukseen?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Organisaatio sallii soittamisen vain työsovelluksilla"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Organisaatio sallii viestien lähettämisen vain työsovelluksilla"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Käytä henkilökohtaista selainta"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Käytä työselainta"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Soita"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Vaihda"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kortin verkkoversion lukituksen avaamisen PIN-koodi"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"SIM-kortin verkkoversion alijoukon lukituksen avaamisen PIN-koodi"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"SIM-kortin yritysversion lukituksen avaamisen PIN-koodi"</string>

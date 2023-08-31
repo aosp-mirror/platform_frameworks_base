@@ -270,7 +270,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Nastavení"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Asistence"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Hlas. asistence"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Zamknuto"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Zamknout"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Nové oznámení"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fyzická klávesnice"</string>
@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Systém Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Přepnout na osobní profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Přepnout na pracovní profil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Přepnout na osobní verzi aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Přepnout na pracovní verzi aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"přístup ke kontaktům"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Poloha"</string>
@@ -505,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Umožňuje aplikaci přístup ke stavu vibrací."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"přímé volání na telefonní čísla"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Umožňuje aplikaci volat na telefonní čísla bez vašeho přičinění. Může mít za následek neočekávané poplatky nebo hovory. Toto oprávnění neumožňuje aplikaci volat na tísňová čísla. Škodlivé aplikace vás mohou připravit o peníze uskutečňováním hovorů bez vašeho svolení."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Umožňuje aplikaci volat na telefonní čísla bez vašeho přičinění. Může to mít za následek neočekávané poplatky nebo hovory. Toto oprávnění neumožňuje aplikaci volat na tísňová čísla. Škodlivé aplikace mohou způsobit poplatky tím, že budou volat bez vašeho svolení nebo budou vytáčet kódy operátora, které příchozí hovory automaticky přesměrují na jiné číslo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"přístup ke službě zasílání rychlých zpráv pro účely hovorů"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikaci používat službu zasílání rychlých zpráv k uskutečňování hovorů bez vašeho zásahu."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čtení stavu a identity telefonu"</string>
@@ -590,6 +592,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikaci získat informace o preferované platební službě NFC, například o registrovaných pomůckách a cíli směrování."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládání technologie NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Událost transakce Secure Element"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Umožňuje aplikaci přijímat informace o transakcích probíhajících v prvku Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"vypnutí zámku obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Telefon například vypne zámek klávesnice při příchozím hovoru a po skončení hovoru jej zase zapne."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"zjištění složitosti zámku obrazovky"</string>
@@ -625,11 +629,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Při ověřování došlo k chybě"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použít zámek obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadáním zámku obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na snímač"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisk prstu se nepodařilo rozpoznat. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Zatlačte silně na senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně přitiskněte prst na snímač"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -681,10 +685,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nedostatečné osvětlení"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Umístěte telefon dál"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Umístěte telefon blíž"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Umístěte telefon výš"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Umístěte telefon níž"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Umístěte telefon víc doleva"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Umístěte telefon víc doprava"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Posuňte telefon výš"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Posuňte telefon níž"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Posuňte telefon doleva"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Posuňte telefon doprava"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon v úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
@@ -711,8 +715,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operace snímání obličeje byla zrušena."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odemknutí obličejem zrušeno uživatelem"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Příliš mnoho pokusů. Zkuste to později."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Příliš mnoho pokusů. Odemknutí obličejem je nedostupné."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Příliš mnoho pokusů. Zadejte zámek obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Obličej se nepodařilo ověřit. Zkuste to znovu."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Odemknutí obličejem nemáte nastavené."</string>
@@ -1241,7 +1244,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Vždy zobrazovat"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byla vytvořena nekompatibilní systému Android a může se chovat neočekávaně. K dispozici může být aktualizovaná verze aplikace."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Vždy zobrazovat"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat aktualizace"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat dostupnost aktualizace"</string>
     <string name="smv_application" msgid="3775183542777792638">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon se aktualizuje…"</string>
@@ -1366,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Byl zapnut režim MIDI přes USB"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Zařízení připojeno jako webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Je připojeno příslušenství USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Nabíjení připojeného zařízení. Klepnutím zobrazíte další možnosti."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bylo zjištěno analogové zvukové příslušenství"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Připojené zařízení není s tímto telefonem kompatibilní. Klepnutím zobrazíte další informace."</string>
@@ -1683,10 +1686,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odebrat"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšit hlasitost nad doporučenou úroveň?\n\nDlouhodobý poslech hlasitého zvuku může poškodit sluch."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="1032473160590983236">"Varování:\nPřekročili jste týdenní množství hlasitého zvuku, které lze bezpečně poslouchat přes sluchátka.\n\nPřekračování tohoto limitu trvale poškodí váš sluch."</string>
-    <string name="csd_dose_repeat_warning" product="default" msgid="6765471037071089401">"Varování:\nPřekročili jste 5násobek týdenního množství hlasitého zvuku, které lze bezpečně poslouchat přes sluchátka.\n\nKvůli ochraně vašeho sluchu byla snížena hlasitost."</string>
-    <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"Hlasitost, se kterou posloucháte média, může při dlouhodobém používání vést k poškození sluchu.\n\nPokud budete v přehrávání touto hlasitostí pokračovat dlouhou dobu, může vám to poškodit sluch."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"Varování:\nMomentálně posloucháte obsah nebezpečně hlasitě.\n\nPokud budete v poslechu takto hlasitého zvuku pokračovat, trvale vám to poškodí sluch."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Pokračovat v poslechu s vysokou hlasitostí?\n\nVe sluchátkách je nastavena vysoká hlasitost déle, než je doporučeno, což může poškodit sluch"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Byl zjištěn hlasitý zvuk\n\nVe sluchátkách je nastavena vyšší hlasitost, než je doporučeno, což může poškodit sluch"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použít zkratku přístupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Když je tato zkratka zapnutá, můžete funkci přístupnosti spustit tím, že na tři sekundy podržíte obě tlačítka hlasitosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Zapnout zkratku funkcí pro usnadnění přístupu?"</string>
@@ -1853,7 +1854,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Režim ukončíte přejetím prstem shora dolů."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Rozumím"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte obrazovku, abyste lépe viděli"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončete režim rozdělené obrazovky, abyste lépe viděli"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otevřete aplikaci <xliff:g id="NAME">%s</xliff:g> na celou obrazovku, aby byla lépe vidět"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posuvník hodin"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posuvník minut"</string>
@@ -1953,7 +1954,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikace <xliff:g id="APP_NAME_0">%1$s</xliff:g> momentálně není dostupná. Tato předvolba se spravuje v aplikaci <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Další informace"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Zrušit pozastavení aplikace"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozast. prac. aplikací?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozastavení pracovních aplikací?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušit pozastavení"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Stav nouze"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>
@@ -1978,6 +1979,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Tato položka na vašem zařízení <xliff:g id="DEVICE">%1$s</xliff:g> není k dispozici. Zkuste to na telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Tato aplikace byla vytvořena pro starší verzi Androidu. Nemusí fungovat správně a neobsahuje nejnovější zabezpečení a ochranu soukromí. Zkontrolujte dostupnost aktualizace nebo kontaktujte vývojáře aplikace."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Zkontrolovat aktualizace"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Tato aplikace není kompatibilní s poslední verzí Androidu. Zkontrolujte dostupnost aktualizace nebo kontaktujte vývojáře aplikace."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Zobrazíte je v aplikaci pro SMS"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Některé funkce mohou být omezeny"</string>
@@ -2161,16 +2163,21 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah nelze otevřít pomocí pracovních aplikací"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah nelze sdílet pomocí osobních aplikací"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah nelze otevřít pomocí osobních aplikací"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Pracovní profil je pozastaven"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Klepnutím ho zapnete"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pracovní aplikace jsou pozastaveny"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušit pozastavení"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žádné pracovní aplikace"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žádné osobní aplikace"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Otevřít pracovní aplikaci <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Otevřít v osobní aplikaci <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Otevřít v pracovní aplikaci <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_call_in_work" msgid="528779988307529039">"Volat z pracovní aplikace?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Přepnout na pracovní aplikaci?"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"Vaše organizace dovoluje volat jen z pracovních aplikací"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"Vaše organizace dovoluje odesílat zprávy jen z pracovních aplikací"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použít osobní prohlížeč"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použít pracovní prohlížeč"</string>
+    <string name="miniresolver_call" msgid="6386870060423480765">"Volat"</string>
+    <string name="miniresolver_switch" msgid="8011924662117617451">"Přepnout"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kód PIN odblokování sítě pro SIM kartu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN pro odblokování podskupiny sítí pro SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"Kód PIN odblokování podnikové sítě pro SIM kartu"</string>
@@ -2320,11 +2327,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Umožňuje doprovodné aplikaci spouštět z pozadí služby v popředí."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon je dostupný"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon je zablokován"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvojitá obrazovka"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkce Dvojitá obrazovka"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkce Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> používá k zobrazení obsahu oba displeje"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Zařízení je příliš horké"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvojitá obrazovka není k dispozici, protože se telefon příliš zahřívá"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Funkce Dual Screen není k dispozici, protože se telefon příliš zahřívá"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Funkce Dual Screen není k dispozici"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Funkce Dual Screen není k dispozici, protože je zapnutý spořič baterie. Tuto možnost můžete vypnout v nastavení."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Přejít do Nastavení"</string>
