@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -63,6 +64,8 @@ public class AuthenticationStatsPersisterTest {
     private static final String FINGERPRINT_REJECTIONS = "fingerprint_rejections";
     private static final String ENROLLMENT_NOTIFICATIONS = "enrollment_notifications";
     private static final String KEY = "frr_stats";
+    private static final String THRESHOLD_KEY = "frr_threshold";
+    private static final float FRR_THRESHOLD = 0.25f;
 
     @Mock
     private Context mContext;
@@ -74,6 +77,8 @@ public class AuthenticationStatsPersisterTest {
 
     @Captor
     private ArgumentCaptor<Set<String>> mStringSetArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Float> mFrrThresholdArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -81,6 +86,7 @@ public class AuthenticationStatsPersisterTest {
                 .thenReturn(mSharedPreferences);
         when(mSharedPreferences.edit()).thenReturn(mEditor);
         when(mEditor.putStringSet(anyString(), anySet())).thenReturn(mEditor);
+        when(mEditor.putFloat(anyString(), anyFloat())).thenReturn(mEditor);
 
         mAuthenticationStatsPersister = new AuthenticationStatsPersister(mContext);
     }
@@ -253,6 +259,14 @@ public class AuthenticationStatsPersisterTest {
 
         verify(mEditor).putStringSet(eq(KEY), mStringSetArgumentCaptor.capture());
         assertThat(mStringSetArgumentCaptor.getValue()).doesNotContain(authenticationStats);
+    }
+
+    @Test
+    public void persistFrrThreshold_shouldUpdateRecord() {
+        mAuthenticationStatsPersister.persistFrrThreshold(FRR_THRESHOLD);
+
+        verify(mEditor).putFloat(eq(THRESHOLD_KEY), mFrrThresholdArgumentCaptor.capture());
+        assertThat(mFrrThresholdArgumentCaptor.getValue()).isWithin(0f).of(FRR_THRESHOLD);
     }
 
     private String buildFrrStats(AuthenticationStats authenticationStats)
