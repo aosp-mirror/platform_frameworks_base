@@ -4746,6 +4746,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD, "VIRTUAL_PRELOAD",
             ApplicationInfo.PRIVATE_FLAG_ODM, "ODM",
             ApplicationInfo.PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING, "PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING",
+            ApplicationInfo.PRIVATE_FLAG_HAS_FRAGILE_USER_DATA, "PRIVATE_FLAG_HAS_FRAGILE_USER_DATA",
     };
 
     void dumpVersionLPr(IndentingPrintWriter pw) {
