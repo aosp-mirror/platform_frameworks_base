@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Спецыяльныя магчымасці"</string>
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"Меню спецыяльных магчымасцей"</string>
     <string name="accessibility_menu_intro" msgid="3164193281544042394">"Меню спецыяльных магчымасцей – гэта вялікае экраннае меню для кіравання прыладай. Вы можаце блакіраваць прыладу, рэгуляваць гучнасць і яркасць, рабіць здымкі экрана і выконваць іншыя дзеянні."</string>
     <string name="assistant_label" msgid="6796392082252272356">"Памочнік"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Памочнік"</string>
