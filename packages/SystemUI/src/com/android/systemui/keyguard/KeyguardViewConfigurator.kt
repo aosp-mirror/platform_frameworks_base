@@ -126,11 +126,11 @@ constructor(
         }
 
     override fun start() {
+        bindKeyguardRootView()
         if (featureFlags.isEnabled(Flags.LAZY_INFLATE_KEYGUARD)) {
             keyguardRootView.removeAllViews()
             initializeViews()
         } else {
-            bindKeyguardRootView()
             val notificationPanel =
                 notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
             unbindKeyguardBottomArea(notificationPanel)
