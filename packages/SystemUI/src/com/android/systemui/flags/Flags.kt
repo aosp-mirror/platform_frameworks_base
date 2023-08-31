@@ -670,6 +670,10 @@ object Flags {
     // TODO:(b/283203305): Tracking bug
     @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
 
+    // TODO(b/298380520): Tracking Bug
+    @JvmField
+    val USER_TRACKER_BACKGROUND_CALLBACKS = unreleasedFlag("user_tracker_background_callbacks")
+
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
     @Keep
