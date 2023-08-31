@@ -161,9 +161,6 @@ public class TrustManagerService extends SystemService {
     private final ActivityManager mActivityManager;
     private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
-    @GuardedBy("mUserIsTrusted")
-    private final SparseBooleanArray mUserIsTrusted = new SparseBooleanArray();
-
     private enum TrustState {
         UNTRUSTED, // the phone is not unlocked by any trustagents
         TRUSTABLE, // the phone is in a semi-locked state that can be unlocked if
@@ -2041,9 +2038,6 @@ public class TrustManagerService extends SystemService {
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
-                    synchronized (mUserIsTrusted) {
-                        mUserIsTrusted.delete(userId);
-                    }
                     synchronized (mDeviceLockedForUser) {
                         mDeviceLockedForUser.delete(userId);
                     }
