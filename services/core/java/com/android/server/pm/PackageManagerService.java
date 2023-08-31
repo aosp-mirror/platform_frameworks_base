@@ -7791,7 +7791,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             consumer.accept(mPackageStateMutator);
             mPackageStateMutator.onFinished();
-            onChanged();
         }
 
         return PackageStateMutator.Result.SUCCESS;
