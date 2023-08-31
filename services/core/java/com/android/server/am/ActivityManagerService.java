@@ -3524,6 +3524,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean clearApplicationUserData(final String packageName, boolean keepState,
             final IPackageDataObserver observer, int userId) {
+        return clearApplicationUserData(packageName, keepState, /*isRestore=*/ false, observer,
+                userId);
+    }
+
+    private boolean clearApplicationUserData(final String packageName, boolean keepState,
+            boolean isRestore, final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
@@ -3618,6 +3624,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.putExtra(Intent.EXTRA_UID,
                                 (appInfo != null) ? appInfo.uid : INVALID_UID);
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
+                        if (isRestore) {
+                            intent.putExtra(Intent.EXTRA_IS_RESTORE, true);
+                        }
                         if (isInstantApp) {
                             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
                         }
@@ -18929,6 +18938,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         public StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull) {
             return mAppProfiler.mCachedAppsWatermarkData.getCachedAppsHighWatermarkStats(
                     atomTag, resetAfterPull);
+        }
+
+        @Override
+        public boolean clearApplicationUserData(final String packageName, boolean keepState,
+                boolean isRestore, final IPackageDataObserver observer, int userId) {
+            return ActivityManagerService.this.clearApplicationUserData(packageName, keepState,
+                    isRestore, observer, userId);
         }
     }
 

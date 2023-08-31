@@ -159,7 +159,7 @@ public class CredentialManagerUi {
                         CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
                         mEnabledProviders,
                         // Don't need primary providers here.
-                        new HashSet<String>());
+                        new HashSet<ComponentName>());
 
         List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
                 .filter(provider -> !provider.isEnabled())

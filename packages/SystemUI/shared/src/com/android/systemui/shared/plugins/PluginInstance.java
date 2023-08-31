@@ -55,7 +55,9 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
     private final PluginListener<T> mListener;
     private final ComponentName mComponentName;
     private final PluginFactory<T> mPluginFactory;
+    private final String mTag;
 
+    private boolean mIsDebug = false;
     private Context mPluginContext;
     private T mPlugin;
 
@@ -71,9 +73,30 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         mComponentName = componentName;
         mPluginFactory = pluginFactory;
         mPlugin = plugin;
+        mTag = TAG + mComponentName.toShortString()
+                + '@' + Integer.toHexString(hashCode());
 
         if (mPlugin != null) {
             mPluginContext = mPluginFactory.createPluginContext();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return mTag;
+    }
+
+    public boolean getIsDebug() {
+        return mIsDebug;
+    }
+
+    public void setIsDebug(boolean debug) {
+        mIsDebug = debug;
+    }
+
+    private void logDebug(String message) {
+        if (mIsDebug) {
+            Log.i(mTag, message);
         }
     }
 
@@ -82,16 +105,19 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
         boolean loadPlugin = mListener.onPluginAttached(this);
         if (!loadPlugin) {
             if (mPlugin != null) {
+                logDebug("onCreate: auto-unload");
                 unloadPlugin();
             }
             return;
         }
 
         if (mPlugin == null) {
+            logDebug("onCreate auto-load");
             loadPlugin();
             return;
         }
 
+        logDebug("onCreate: load callbacks");
         mPluginFactory.checkVersion(mPlugin);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onCreate for plugins that aren't fragments, as fragments
@@ -103,6 +129,7 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
 
     /** Alerts listener and plugin that the plugin is being shutdown. */
     public void onDestroy() {
+        logDebug("onDestroy");
         unloadPlugin();
         mListener.onPluginDetached(this);
     }
@@ -118,15 +145,18 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
      */
     public void loadPlugin() {
         if (mPlugin != null) {
+            logDebug("Load request when already loaded");
             return;
         }
 
         mPlugin = mPluginFactory.createPlugin();
         mPluginContext = mPluginFactory.createPluginContext();
         if (mPlugin == null || mPluginContext == null) {
+            Log.e(mTag, "Requested load, but failed");
             return;
         }
 
+        logDebug("Loaded plugin; running callbacks");
         mPluginFactory.checkVersion(mPlugin);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onCreate for plugins that aren't fragments, as fragments
@@ -143,9 +173,11 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
      */
     public void unloadPlugin() {
         if (mPlugin == null) {
+            logDebug("Unload request when already unloaded");
             return;
         }
 
+        logDebug("Unloading plugin, running callbacks");
         mListener.onPluginUnloaded(mPlugin, this);
         if (!(mPlugin instanceof PluginFragment)) {
             // Only call onDestroy for plugins that aren't fragments, as fragments
