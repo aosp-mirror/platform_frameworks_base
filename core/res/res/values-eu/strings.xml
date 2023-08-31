@@ -669,14 +669,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazo bat izan da. Saiatu berriro."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
-    <!-- no translation found for device_unlock_notification_name (2632928999862915709) -->
-    <skip />
-    <!-- no translation found for alternative_unlock_setup_notification_title (6241508547901933544) -->
-    <skip />
-    <!-- no translation found for alternative_face_setup_notification_content (3384959224091897331) -->
-    <skip />
-    <!-- no translation found for alternative_fp_setup_notification_content (7454096947415721639) -->
-    <skip />
+    <string name="device_unlock_notification_name" msgid="2632928999862915709">"Gailua desblokeatzea"</string>
+    <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Probatu gailua desblokeatzeko beste modu bat"</string>
+    <string name="alternative_face_setup_notification_content" msgid="3384959224091897331">"Erabili Aurpegi bidez desblokeatzea hatz-marka ezagutzen ez denean (adibidez, hatzak bustita dauzkazunean)"</string>
+    <string name="alternative_fp_setup_notification_content" msgid="7454096947415721639">"Erabili Hatz-marka bidez desblokeatzea aurpegia ezagutzen ez denean (adibidez, argi nahikorik ez dagoenean)"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Aurpegi bidez desblokeatzea"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arazoak ditugu aurpegi bidez desblokeatzeko eginbidearekin"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
@@ -1871,6 +1867,8 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Laneko 2. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Laneko 3. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> aplikazioaren klona"</string>
+    <!-- no translation found for private_profile_label_badge (1712086003787839183) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Eskatu PINa aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Eskatu pasahitza aingura kendu aurretik"</string>
@@ -2035,8 +2033,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" zerbitzuan eguneratu nahi duzu?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" zerbitzuan eguneratu nahi duzu <xliff:g id="TYPE">%1$s</xliff:g>?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" zerbitzuan eguneratu nahi dituzu <xliff:g id="TYPE_0">%1$s</xliff:g> eta <xliff:g id="TYPE_1">%2$s</xliff:g>?"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" zerbitzuan eguneratu nahi dituzu <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> eta <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Gorde"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Ez, eskerrik asko"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Orain ez"</string>
