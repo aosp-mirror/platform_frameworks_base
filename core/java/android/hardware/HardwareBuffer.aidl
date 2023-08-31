@@ -16,4 +16,4 @@
 
 package android.hardware;
 
-@JavaOnlyStableParcelable @NdkOnlyStableParcelable parcelable HardwareBuffer ndk_header "android/hardware_buffer_aidl.h";
+@JavaOnlyStableParcelable @NdkOnlyStableParcelable @RustOnlyStableParcelable parcelable HardwareBuffer ndk_header "android/hardware_buffer_aidl.h" rust_type "nativewindow::HardwareBuffer";
