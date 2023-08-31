@@ -87,11 +87,6 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
             "location_indicators_enabled";
 
     /**
-     * Whether to show the Permissions Hub.
-     */
-    private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
-
-    /**
      * How long after an access to show it as "recent"
      */
     private static final String RECENT_ACCESS_TIME_MS = "recent_access_time_ms";
@@ -106,14 +101,9 @@ public class PermissionUsageHelper implements AppOpsManager.OnOpActiveChangedLis
     private static final long DEFAULT_RUNNING_TIME_MS = 5000L;
     private static final long DEFAULT_RECENT_TIME_MS = 15000L;
 
-    private static boolean shouldShowPermissionsHub() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_PERMISSIONS_HUB_2_ENABLED, false);
-    }
-
     private static boolean shouldShowIndicators() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true) || shouldShowPermissionsHub();
+                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true);
     }
 
     private static boolean shouldShowLocationIndicator() {
