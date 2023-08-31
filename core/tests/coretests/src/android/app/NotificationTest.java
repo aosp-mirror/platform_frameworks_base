@@ -1231,6 +1231,52 @@ public class NotificationTest {
     }
 
     @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureIconKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconNull_noPictureKey() {
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture((Bitmap) null);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeBitmap_noPictureIconKey() {
+        Bitmap bitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(bitmap);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE_ICON)).isFalse();
+    }
+
+    @Test
+    public void testBigPictureStyle_setExtras_pictureIconTypeIcon_noPictureKey() {
+        Icon icon = Icon.createWithResource(mContext, R.drawable.btn_plus);
+        Notification.BigPictureStyle bpStyle = new Notification.BigPictureStyle();
+        bpStyle.bigPicture(icon);
+
+        Bundle extras = new Bundle();
+        bpStyle.addExtras(extras);
+
+        assertThat(extras.containsKey(EXTRA_PICTURE)).isFalse();
+    }
+
+    @Test
     public void testMessagingChange_text() {
         Notification.Builder nM1 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle("")
