@@ -105,7 +105,7 @@ public class PanProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null) {
             return false;
         }
@@ -117,12 +117,12 @@ public class PanProfile implements LocalBluetoothProfile {
                     mService.setConnectionPolicy(sink, CONNECTION_POLICY_FORBIDDEN);
                 }
             }
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
         } else {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     public String toString() {

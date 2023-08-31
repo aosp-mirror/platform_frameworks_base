@@ -108,16 +108,16 @@ public class PbapServerProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        boolean isEnabled = false;
+        boolean isSuccessful = false;
         if (mService == null) {
             return false;
         }
 
         if (!enabled) {
-            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
 
-        return isEnabled;
+        return isSuccessful;
     }
 
     public String toString() {
