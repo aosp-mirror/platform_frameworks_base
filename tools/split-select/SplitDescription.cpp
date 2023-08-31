@@ -70,7 +70,7 @@ bool SplitDescription::match(const SplitDescription& o) const {
 String8 SplitDescription::toString() const {
     String8 extension;
     if (abi != abi::Variant_none) {
-        if (extension.isEmpty()) {
+        if (extension.empty()) {
             extension.append(":");
         } else {
             extension.append("-");
