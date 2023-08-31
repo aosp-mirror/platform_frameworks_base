@@ -3368,7 +3368,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // current focused activity could be another activity in the same Task if activities are
         // displayed on adjacent TaskFragments.
         final ActivityRecord currentFocusedApp = mDisplayContent.mFocusedApp;
-        if (currentFocusedApp != null && currentFocusedApp.task == task) {
+        final int topFocusedDisplayId = mRootWindowContainer.getTopFocusedDisplayContent() != null
+                ? mRootWindowContainer.getTopFocusedDisplayContent().getDisplayId()
+                : INVALID_DISPLAY;
+        if (currentFocusedApp != null && currentFocusedApp.task == task
+                && topFocusedDisplayId == mDisplayContent.getDisplayId()) {
             final Task topFocusableTask = mDisplayContent.getTask(
                     (t) -> t.isLeafTask() && t.isFocusable(), true /*  traverseTopToBottom */);
             if (task == topFocusableTask) {
