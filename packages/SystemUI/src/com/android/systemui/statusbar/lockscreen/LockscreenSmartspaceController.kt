@@ -124,6 +124,7 @@ constructor(
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
+    private var mSplitShadeEnabled = false
 
     // TODO(b/202758428): refactor so that we can test color updates via region samping, similar to
     //  how we test color updates when theme changes (See testThemeChangeUpdatesTextColor).
@@ -131,6 +132,7 @@ constructor(
     // TODO: Move logic into SmartspaceView
     var stateChangeListener = object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
+            (v as SmartspaceView).setSplitShadeEnabled(mSplitShadeEnabled)
             smartspaceViews.add(v as SmartspaceView)
 
             connectSession()
@@ -215,6 +217,11 @@ constructor(
         override fun onDozeAmountChanged(linear: Float, eased: Float) {
             execution.assertIsMainThread()
             smartspaceViews.forEach { it.setDozeAmount(eased) }
+        }
+
+        override fun onDozingChanged(isDozing: Boolean) {
+            execution.assertIsMainThread()
+            smartspaceViews.forEach { it.setDozing(isDozing) }
         }
     }
 
@@ -419,6 +426,11 @@ constructor(
 
         updateBypassEnabled()
         reloadSmartspace()
+    }
+
+    fun setSplitShadeEnabled(enabled: Boolean) {
+        mSplitShadeEnabled = enabled
+        smartspaceViews.forEach { it.setSplitShadeEnabled(enabled) }
     }
 
     /**

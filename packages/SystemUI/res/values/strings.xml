@@ -2089,23 +2089,11 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
 
-    <!-- Title for notification & dialog that the user's phone last shut down because it got too hot. [CHAR LIMIT=40] -->
-    <string name="thermal_shutdown_title">Phone turned off due to heat</string>
-    <!-- Message body for notification that user's phone last shut down because it got too hot. [CHAR LIMIT=120] -->
-    <string name="thermal_shutdown_message">Your phone is now running normally.\nTap for more info</string>
-    <!-- Text body for dialog alerting user that their phone last shut down because it got too hot. [CHAR LIMIT=500] -->
-    <string name="thermal_shutdown_dialog_message">Your phone was too hot, so it turned off to cool down. Your phone is now running normally.\n\nYour phone may get too hot if you:\n\t&#8226; Use resource-intensive apps (such as gaming, video, or navigation apps)\n\t&#8226; Download or upload large files\n\t&#8226; Use your phone in high temperatures</string>
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>
     <!-- URL for care instructions for overheating devices -->
     <string name="thermal_shutdown_dialog_help_url" translatable="false"></string>
 
-    <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
-    <string name="high_temp_title">Phone is getting warm</string>
-    <!-- Message body for notification that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=120] -->
-    <string name="high_temp_notif_message">Some features limited while phone cools down.\nTap for more info</string>
-    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=350] -->
-    <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="high_temp_dialog_help_text">See care steps</string>
     <!-- URL for care instructions for overheating devices -->

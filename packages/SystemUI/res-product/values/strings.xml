@@ -122,6 +122,44 @@
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
+    <!-- Title for notification & dialog that the user's phone last shut down because it got too hot. [CHAR LIMIT=40] -->
+    <string name="thermal_shutdown_title" product="default">Phone turned off due to heat</string>
+    <!-- Title for notification & dialog that the user's device last shut down because it got too hot. [CHAR LIMIT=40] -->
+    <string name="thermal_shutdown_title" product="device">Device turned off due to heat</string>
+    <!-- Title for notification & dialog that the user's tablet last shut down because it got too hot. [CHAR LIMIT=40] -->
+    <string name="thermal_shutdown_title" product="tablet">Tablet turned off due to heat</string>
+    <!-- Message body for notification that user's phone last shut down because it got too hot. [CHAR LIMIT=120] -->
+    <string name="thermal_shutdown_message" product="default">Your phone is now running normally.\nTap for more info</string>
+    <!-- Message body for notification that user's device last shut down because it got too hot. [CHAR LIMIT=120] -->
+    <string name="thermal_shutdown_message" product="device">Your device is now running normally.\nTap for more info</string>
+    <!-- Message body for notification that user's tablet last shut down because it got too hot. [CHAR LIMIT=120] -->
+    <string name="thermal_shutdown_message" product="tablet">Your tablet is now running normally.\nTap for more info</string>
+    <!-- Text body for dialog alerting user that their phone last shut down because it got too hot. [CHAR LIMIT=500] -->
+    <string name="thermal_shutdown_dialog_message" product="default">Your phone was too hot, so it turned off to cool down. Your phone is now running normally.\n\nYour phone may get too hot if you:\n\t&#8226; Use resource-intensive apps (such as gaming, video, or navigation apps)\n\t&#8226; Download or upload large files\n\t&#8226; Use your phone in high temperatures</string>
+    <!-- Text body for dialog alerting user that their device last shut down because it got too hot. [CHAR LIMIT=500] -->
+    <string name="thermal_shutdown_dialog_message" product="device">Your device was too hot, so it turned off to cool down. Your device is now running normally.\n\nYour device may get too hot if you:\n\t&#8226; Use resource-intensive apps (such as gaming, video, or navigation apps)\n\t&#8226; Download or upload large files\n\t&#8226; Use your device in high temperatures</string>
+    <!-- Text body for dialog alerting user that their tablet last shut down because it got too hot. [CHAR LIMIT=500] -->
+    <string name="thermal_shutdown_dialog_message" product="tablet">Your tablet was too hot, so it turned off to cool down. Your tablet is now running normally.\n\nYour tablet may get too hot if you:\n\t&#8226; Use resource-intensive apps (such as gaming, video, or navigation apps)\n\t&#8226; Download or upload large files\n\t&#8226; Use your tablet in high temperatures</string>
+
+    <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
+    <string name="high_temp_title" product="default">Phone is getting warm</string>
+    <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
+    <string name="high_temp_title" product="device">Device is getting warm</string>
+    <!-- Title for notification (and dialog) that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=30] -->
+    <string name="high_temp_title" product="tablet">Tablet is getting warm</string>
+    <!-- Message body for notification that user's phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=120] -->
+    <string name="high_temp_notif_message" product="default">Some features limited while phone cools down.\nTap for more info</string>
+    <!-- Message body for notification that user's device has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=120] -->
+    <string name="high_temp_notif_message" product="device">Some features limited while device cools down.\nTap for more info</string>
+    <!-- Message body for notification that user's tablet has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=120] -->
+    <string name="high_temp_notif_message" product="tablet">Some features limited while tablet cools down.\nTap for more info</string>
+    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=350] -->
+    <string name="high_temp_dialog_message" product="default">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
+    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=350] -->
+    <string name="high_temp_dialog_message" product="device">Your device will automatically try to cool down. You can still use your device, but it may run slower.\n\nOnce your device has cooled down, it will run normally.</string>
+    <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=350] -->
+    <string name="high_temp_dialog_message" product="tablet">Your tablet will automatically try to cool down. You can still use your tablet, but it may run slower.\n\nOnce your tablet has cooled down, it will run normally.</string>
+
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, to locate the sensor (tablet) for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet">The fingerprint sensor is on the power button. It’s the flat button next to the raised volume button on the edge of the tablet.</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, to locate the sensor (device) for accessibility (not shown on the screen). [CHAR LIMIT=NONE]-->

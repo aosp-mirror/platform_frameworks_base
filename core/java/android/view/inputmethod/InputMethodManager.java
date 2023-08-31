@@ -2657,17 +2657,6 @@ public final class InputMethodManager {
             }
         }
 
-        if (windowGainingFocus == null) {
-            windowGainingFocus = view.getWindowToken();
-            if (windowGainingFocus == null) {
-                Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
-                return false;
-            }
-            startInputFlags = getStartInputFlags(view, startInputFlags);
-            softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
-            windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
-        }
-
         // Now we need to get an input connection from the served view.
         // This is complicated in a couple ways: we can't be holding our lock
         // when calling out to the view, and we need to make sure we call into
@@ -2688,6 +2677,17 @@ public final class InputMethodManager {
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
             vh.post(() -> startInputOnWindowFocusGainInternal(startInputReason, null, 0, 0, 0));
             return false;
+        }
+
+        if (windowGainingFocus == null) {
+            windowGainingFocus = view.getWindowToken();
+            if (windowGainingFocus == null) {
+                Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
+                return false;
+            }
+            startInputFlags = getStartInputFlags(view, startInputFlags);
+            softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
+            windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
         }
 
         // Okay we are now ready to call into the served view and have it

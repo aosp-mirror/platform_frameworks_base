@@ -296,6 +296,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
             "com.android.settings", "com.android.settings.FallbackHome");
 
+    private static final List<Integer> ABSENT_SIM_STATE_LIST = Arrays.asList(
+            TelephonyManager.SIM_STATE_ABSENT,
+            TelephonyManager.SIM_STATE_UNKNOWN,
+            TelephonyManager.SIM_STATE_NOT_READY);
+
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final KeyguardUpdateMonitorLogger mLogger;
@@ -3698,8 +3703,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mLogger.logSimState(subId, slotId, state);
 
         boolean becameAbsent = false;
-        if (!SubscriptionManager.isValidSubscriptionId(subId)
-                && state != TelephonyManager.SIM_STATE_UNKNOWN) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             mLogger.w("invalid subId in handleSimStateChange()");
             /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
              * handleServiceStateChange() handle other case */
@@ -3717,10 +3721,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 }
             } else if (state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
                 updateTelephonyCapable(true);
-            } else {
-                return;
             }
         }
+
+        becameAbsent |= ABSENT_SIM_STATE_LIST.contains(state);
 
         SimData data = mSimDatas.get(subId);
         final boolean changed;
@@ -3734,7 +3738,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             data.subId = subId;
             data.slotId = slotId;
         }
-        if ((changed || becameAbsent) || state == TelephonyManager.SIM_STATE_UNKNOWN) {
+        if ((changed || becameAbsent)) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
                 if (cb != null) {
@@ -4477,13 +4481,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Cancels all operations in the scheduler if it is hung for 10 seconds.
      */
     public void startBiometricWatchdog() {
-        if (mFaceManager != null && !isFaceAuthInteractorEnabled()) {
-            mLogger.scheduleWatchdog("face");
-            mFaceManager.scheduleWatchdog();
-        }
-        if (mFpm != null) {
-            mLogger.scheduleWatchdog("fingerprint");
-            mFpm.scheduleWatchdog();
-        }
+        final boolean isFaceAuthInteractorEnabled = isFaceAuthInteractorEnabled();
+        mBackgroundExecutor.execute(() -> {
+            Trace.beginSection("#startBiometricWatchdog");
+            if (mFaceManager != null && !isFaceAuthInteractorEnabled) {
+                mLogger.scheduleWatchdog("face");
+                mFaceManager.scheduleWatchdog();
+            }
+            if (mFpm != null) {
+                mLogger.scheduleWatchdog("fingerprint");
+                mFpm.scheduleWatchdog();
+            }
+            Trace.endSection();
+        });
     }
 }

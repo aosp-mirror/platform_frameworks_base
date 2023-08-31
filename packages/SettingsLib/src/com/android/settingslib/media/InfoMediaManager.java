@@ -26,6 +26,7 @@ import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
@@ -90,6 +91,7 @@ public class InfoMediaManager extends MediaManager {
     MediaRouter2Manager mRouterManager;
     @VisibleForTesting
     String mPackageName;
+    boolean mIsScanning = false;
 
     private MediaDevice mCurrentConnectedDevice;
     private LocalBluetoothManager mBluetoothManager;
@@ -109,22 +111,29 @@ public class InfoMediaManager extends MediaManager {
 
     @Override
     public void startScan() {
-        mMediaDevices.clear();
-        mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
-        mRouterManager.registerScanRequest();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                && !TextUtils.isEmpty(mPackageName)) {
-            RouteListingPreference routeListingPreference =
-                    mRouterManager.getRouteListingPreference(mPackageName);
-            Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference, mPreferenceItemMap);
+        if (!mIsScanning) {
+            mMediaDevices.clear();
+            mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
+            mRouterManager.registerScanRequest();
+            mIsScanning = true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                    && !TextUtils.isEmpty(mPackageName)) {
+                RouteListingPreference routeListingPreference =
+                        mRouterManager.getRouteListingPreference(mPackageName);
+                Api34Impl.onRouteListingPreferenceUpdated(routeListingPreference,
+                        mPreferenceItemMap);
+            }
+            refreshDevices();
         }
-        refreshDevices();
     }
 
     @Override
     public void stopScan() {
-        mRouterManager.unregisterCallback(mMediaRouterCallback);
-        mRouterManager.unregisterScanRequest();
+        if (mIsScanning) {
+            mRouterManager.unregisterCallback(mMediaRouterCallback);
+            mRouterManager.unregisterScanRequest();
+            mIsScanning = false;
+        }
     }
 
     /**
@@ -547,6 +556,7 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_REMOTE_GAME_CONSOLE:
             case TYPE_REMOTE_CAR:
             case TYPE_REMOTE_SMARTWATCH:
+            case TYPE_REMOTE_SMARTPHONE:
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName, mPreferenceItemMap.get(route.getId()));
                 break;
@@ -558,8 +568,10 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_HDMI:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
-                mediaDevice =
-                        new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName);
+                mediaDevice = mPreferenceItemMap.containsKey(route.getId()) ? new PhoneMediaDevice(
+                        mContext, mRouterManager, route, mPackageName,
+                        mPreferenceItemMap.get(route.getId())) : new PhoneMediaDevice(mContext,
+                        mRouterManager, route, mPackageName);
                 break;
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
@@ -569,8 +581,11 @@ public class InfoMediaManager extends MediaManager {
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {
-                    mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
-                            route, mPackageName);
+                    mediaDevice = mPreferenceItemMap.containsKey(route.getId())
+                            ? new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                            route, mPackageName, mPreferenceItemMap.get(route.getId()))
+                            : new BluetoothMediaDevice(mContext, cachedDevice, mRouterManager,
+                                    route, mPackageName);
                 }
                 break;
             case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
@@ -699,19 +714,18 @@ public class InfoMediaManager extends MediaManager {
                 List<MediaRoute2Info> selectedRouteInfos, List<MediaRoute2Info> infolist,
                 List<RouteListingPreference.Item> preferenceRouteListing) {
             final List<MediaRoute2Info> sortedInfoList = new ArrayList<>(selectedRouteInfos);
+            infolist.removeAll(selectedRouteInfos);
+            sortedInfoList.addAll(infolist.stream().filter(
+                    MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
             for (RouteListingPreference.Item item : preferenceRouteListing) {
                 for (MediaRoute2Info info : infolist) {
                     if (item.getRouteId().equals(info.getId())
-                            && !selectedRouteInfos.contains(info)) {
+                            && !selectedRouteInfos.contains(info)
+                            && !info.isSystemRoute()) {
                         sortedInfoList.add(info);
                         break;
                     }
                 }
-            }
-            if (sortedInfoList.size() != infolist.size()) {
-                infolist.removeAll(sortedInfoList);
-                sortedInfoList.addAll(infolist.stream().filter(
-                        MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
             }
             return sortedInfoList;
         }

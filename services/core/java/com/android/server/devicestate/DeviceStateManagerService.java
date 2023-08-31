@@ -172,6 +172,7 @@ public final class DeviceStateManagerService extends SystemService {
     private DeviceState mRearDisplayState;
 
     // TODO(259328837) Generalize for all pending feature requests in the future
+    @GuardedBy("mLock")
     @Nullable
     private OverrideRequest mRearDisplayPendingOverrideRequest;
 
@@ -779,7 +780,7 @@ public final class DeviceStateManagerService extends SystemService {
      * {@link StatusBarManagerInternal} to notify SystemUI to display the educational dialog.
      */
     @GuardedBy("mLock")
-    private void showRearDisplayEducationalOverlayLocked(OverrideRequest request) {
+    private void showRearDisplayEducationalOverlayLocked(@NonNull OverrideRequest request) {
         mRearDisplayPendingOverrideRequest = request;
 
         StatusBarManagerInternal statusBar =
@@ -844,8 +845,8 @@ public final class DeviceStateManagerService extends SystemService {
      * request if it was dismissed in a way that should cancel the feature.
      */
     private void onStateRequestOverlayDismissedInternal(boolean shouldCancelRequest) {
-        if (mRearDisplayPendingOverrideRequest != null) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if (mRearDisplayPendingOverrideRequest != null) {
                 if (shouldCancelRequest) {
                     ProcessRecord processRecord = mProcessRecords.get(
                             mRearDisplayPendingOverrideRequest.getPid());

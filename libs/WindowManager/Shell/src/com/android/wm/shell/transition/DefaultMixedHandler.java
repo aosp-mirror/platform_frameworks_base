@@ -25,6 +25,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
@@ -476,6 +477,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 }
             }
 
+            mPipHandler.setEnterAnimationType(ANIM_TYPE_ALPHA);
             mPipHandler.startEnterAnimation(pipChange, startTransaction, finishTransaction,
                     finishCB);
             // Dispatch the rest of the transition normally. This will most-likely be taken by

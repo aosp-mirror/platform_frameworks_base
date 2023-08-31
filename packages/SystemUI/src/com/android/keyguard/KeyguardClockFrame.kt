@@ -13,7 +13,8 @@ class KeyguardClockFrame(
     private var drawAlpha: Int = 255
 
     protected override fun onSetAlpha(alpha: Int): Boolean {
-        drawAlpha = alpha
+        // Ignore alpha passed from View, prefer to compute it from set values
+        drawAlpha = (255 * this.alpha * transitionAlpha).toInt()
         return true
     }
 

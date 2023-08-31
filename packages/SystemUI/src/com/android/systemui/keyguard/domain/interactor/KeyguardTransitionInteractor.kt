@@ -49,11 +49,15 @@ constructor(
 ) {
     /** (any)->GONE transition information */
     val anyStateToGoneTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == KeyguardState.GONE }
+        repository.transitions.filter { step -> step.to == GONE }
 
     /** (any)->AOD transition information */
     val anyStateToAodTransition: Flow<TransitionStep> =
-        repository.transitions.filter { step -> step.to == KeyguardState.AOD }
+        repository.transitions.filter { step -> step.to == AOD }
+
+    /** DREAMING->(any) transition information. */
+    val fromDreamingTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.from == DREAMING }
 
     /** AOD->LOCKSCREEN transition information. */
     val aodToLockscreenTransition: Flow<TransitionStep> = repository.transition(AOD, LOCKSCREEN)

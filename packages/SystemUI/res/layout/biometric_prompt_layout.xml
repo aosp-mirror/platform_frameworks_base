@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center">
 
-        <com.airbnb.lottie.LottieAnimationView
+        <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
             android:id="@+id/biometric_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
             android:contentDescription="@null"
             android:scaleType="fitXY" />
 
-        <com.airbnb.lottie.LottieAnimationView
+        <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
             android:id="@+id/biometric_icon_overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

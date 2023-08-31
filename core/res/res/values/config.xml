@@ -2560,6 +2560,17 @@
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
 
+    <!-- Whether to send a user activity event to PowerManager when a dream quits unexpectedly so
+         that the screen won't immediately shut off.
+
+         When a dream stops unexpectedly, such as due to an app update, if the device has been
+         inactive less than the user's screen timeout, the device goes to keyguard and times out
+         back to dreaming after a few seconds. If the device has been inactive longer, the screen
+         will immediately turn off. With this flag on, the device will go back to keyguard in all
+         scenarios rather than turning off, which gives the device a chance to start dreaming
+         again. -->
+    <bool name="config_resetScreenTimeoutOnUnexpectedDreamExit">false</bool>
+
     <!-- The prefixes of dream component names that are loggable.
          Matched against ComponentName#flattenToString() for dream components.
          If empty, logs "other" for all. -->
@@ -2805,12 +2816,14 @@
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether the device allows users to start in background visible on displays.
-         Should be false for most devices, except automotive vehicle with passenger displays. -->
+         Should be false for all devices in production. Can be enabled only for development use
+         in automotive vehicles with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether the device allows users to start in background visible on the default display.
-         Should be false for most devices, except passenger-only automotive build (i.e., when
-         Android runs in a separate system in the back seat to manage the passenger displays).
+         Should be false for all devices in production. Can be enabled only for development use
+         in passenger-only automotive build (i.e., when Android runs in a separate system in the
+         back seat to manage the passenger displays).
          When set to true, config_multiuserVisibleBackgroundUsers must also be true. -->
     <bool name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay">false</bool>
 
@@ -5178,7 +5191,7 @@
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
-    <integer name="config_selected_udfps_touch_detection">3</integer>
+    <integer name="config_selected_udfps_touch_detection">0</integer>
 
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly

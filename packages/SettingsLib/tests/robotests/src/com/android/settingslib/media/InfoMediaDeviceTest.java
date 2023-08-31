@@ -20,6 +20,7 @@ import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
@@ -143,5 +144,9 @@ public class InfoMediaDeviceTest {
 
         assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(
                 R.drawable.ic_media_smartwatch);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SMARTPHONE);
+
+        assertThat(mInfoMediaDevice.getDrawableResIdByType()).isEqualTo(R.drawable.ic_smartphone);
     }
 }

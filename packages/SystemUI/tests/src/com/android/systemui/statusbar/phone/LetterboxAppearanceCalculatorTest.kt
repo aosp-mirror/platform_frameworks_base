@@ -105,6 +105,30 @@ class LetterboxAppearanceCalculatorTest : SysuiTestCase() {
         expect.that(letterboxAppearance.appearanceRegions).isEqualTo(TEST_APPEARANCE_REGIONS)
     }
 
+    /** Regression test for b/287508741 */
+    @Test
+    fun getLetterboxAppearance_withOverlap_doesNotMutateOriginalBounds() {
+        val statusBarStartSideBounds = Rect(left = 0, top = 0, right = 100, bottom = 100)
+        val statusBarEndSideBounds = Rect(left = 200, top = 0, right = 300, bottom = 100)
+        val letterBoxInnerBounds = Rect(left = 150, top = 50, right = 250, bottom = 150)
+        val statusBarStartSideBoundsCopy = Rect(statusBarStartSideBounds)
+        val statusBarEndSideBoundsCopy = Rect(statusBarEndSideBounds)
+        val letterBoxInnerBoundsCopy = Rect(letterBoxInnerBounds)
+        whenever(statusBarBoundsProvider.visibleStartSideBounds)
+                .thenReturn(statusBarStartSideBounds)
+        whenever(statusBarBoundsProvider.visibleEndSideBounds).thenReturn(statusBarEndSideBounds)
+
+        calculator.getLetterboxAppearance(
+                TEST_APPEARANCE,
+                TEST_APPEARANCE_REGIONS,
+                arrayOf(letterboxWithInnerBounds(letterBoxInnerBounds))
+        )
+
+        expect.that(statusBarStartSideBounds).isEqualTo(statusBarStartSideBoundsCopy)
+        expect.that(statusBarEndSideBounds).isEqualTo(statusBarEndSideBoundsCopy)
+        expect.that(letterBoxInnerBounds).isEqualTo(letterBoxInnerBoundsCopy)
+    }
+
     @Test
     fun getLetterboxAppearance_noOverlap_BackgroundMultiColor_returnsAppearanceWithScrim() {
         whenever(letterboxBackgroundProvider.isLetterboxBackgroundMultiColored).thenReturn(true)

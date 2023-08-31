@@ -279,7 +279,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         controlsListingController.get().removeCallback(listingCallback)
         controlsController.get().unsubscribe()
-        taskViewController?.dismiss()
+        taskViewController?.removeTask()
         taskViewController = null
 
         val fadeAnim = ObjectAnimator.ofFloat(parent, "alpha", 1.0f, 0.0f)
@@ -777,7 +777,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
             closeDialogs(true)
             controlsController.get().unsubscribe()
-            taskViewController?.dismiss()
+            taskViewController?.removeTask()
             taskViewController = null
 
             controlsById.clear()

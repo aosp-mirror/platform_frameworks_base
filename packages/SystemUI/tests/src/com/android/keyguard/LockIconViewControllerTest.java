@@ -33,6 +33,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -266,5 +267,76 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
 
         // THEN the lock icon is shown
         verify(mLockIconView).setContentDescription(LOCKED_LABEL);
+    }
+
+    @Test
+    public void lockIconAccessibility_notVisibleToUser() {
+        // GIVEN lock icon controller is initialized and view is attached
+        init(/* useMigrationFlag= */false);
+        captureKeyguardStateCallback();
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        // and biometric running state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+        reset(mLockIconView);
+        when(mLockIconView.isVisibleToUser()).thenReturn(false);
+
+        // WHEN the unlocked state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
+        mKeyguardStateCallback.onUnlockedChanged();
+
+        // THEN the lock icon is shown
+        verify(mLockIconView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    @Test
+    public void lockIconAccessibility_bouncerAnimatingAway() {
+        // GIVEN lock icon controller is initialized and view is attached
+        init(/* useMigrationFlag= */false);
+        captureKeyguardStateCallback();
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        // and biometric running state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+        reset(mLockIconView);
+        when(mLockIconView.isVisibleToUser()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isAnimatingAway()).thenReturn(true);
+
+        // WHEN the unlocked state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
+        mKeyguardStateCallback.onUnlockedChanged();
+
+        // THEN the lock icon is shown
+        verify(mLockIconView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    @Test
+    public void lockIconAccessibility_bouncerNotAnimatingAway_viewVisible() {
+        // GIVEN lock icon controller is initialized and view is attached
+        init(/* useMigrationFlag= */false);
+        captureKeyguardStateCallback();
+        captureKeyguardUpdateMonitorCallback();
+
+        // GIVEN user has unlocked with a biometric auth (ie: face auth)
+        // and biometric running state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricRunningStateChanged(false,
+                BiometricSourceType.FACE);
+        reset(mLockIconView);
+        when(mLockIconView.isVisibleToUser()).thenReturn(true);
+        when(mPrimaryBouncerInteractor.isAnimatingAway()).thenReturn(false);
+
+        // WHEN the unlocked state changes
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(anyInt())).thenReturn(false);
+        mKeyguardStateCallback.onUnlockedChanged();
+
+        // THEN the lock icon is shown
+        verify(mLockIconView).setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 }

@@ -30,6 +30,7 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Pair;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -515,12 +516,13 @@ public abstract class WindowManagerInternal {
      * Invalidate all visible windows on a given display, and report back on the callback when all
      * windows have redrawn.
      *
-     * @param callback reporting callback to be called when all windows have redrawn.
+     * @param message The message will be sent when all windows have redrawn. Note that the message
+     *                must be obtained from handler, otherwise it will throw NPE.
      * @param timeout calls the callback anyway after the timeout.
      * @param displayId waits for the windows on the given display, INVALID_DISPLAY to wait for all
      *                  windows on all displays.
      */
-    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId);
+    public abstract void waitForAllWindowsDrawn(Message message, long timeout, int displayId);
 
     /**
      * Overrides the display size.
