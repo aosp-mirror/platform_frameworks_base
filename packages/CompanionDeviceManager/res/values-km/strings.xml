@@ -43,10 +43,11 @@
     <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
     <string name="consent_no" msgid="2640796915611404382">"មិនអនុញ្ញាត"</string>
     <string name="consent_back" msgid="2560683030046918882">"ថយក្រោយ"</string>
+    <string name="permission_expand" msgid="893185038020887411">"ពង្រីក <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"បង្រួម <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"ផ្ដល់​ការអនុញ្ញាតឱ្យ​កម្មវិធីនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ដូចនៅលើ &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ឬ?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"សកម្មភាពនេះ​អាចរួមបញ្ចូល&lt;strong&gt;មីក្រូហ្វូន&lt;/strong&gt; &lt;strong&gt;កាមេរ៉ា&lt;/strong&gt; និង&lt;strong&gt;សិទ្ធិចូលប្រើទីតាំង&lt;/strong&gt; និងការអនុញ្ញាត​ដែលមានលក្ខណៈរសើបផ្សេងទៀតនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;។ &lt;br/&gt;&lt;br/&gt;អ្នកអាចប្ដូរ​ការអនុញ្ញាតទាំងនេះ​បានគ្រប់ពេល​នៅក្នុងការកំណត់​របស់អ្នកនៅលើ &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;។"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"រូប​កម្មវិធី"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"ប៊ូតុងព័ត៌មានបន្ថែម"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"ព័ត៌មាន​បន្ថែម"</string>
     <string name="permission_phone" msgid="2661081078692784919">"ទូរសព្ទ"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>

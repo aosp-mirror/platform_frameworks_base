@@ -43,10 +43,11 @@
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दिनुहोस्"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमति नदिनुहोस्"</string>
     <string name="consent_back" msgid="2560683030046918882">"पछाडि"</string>
+    <string name="permission_expand" msgid="893185038020887411">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> एक्स्पान्ड गर्नुहोस्"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"<xliff:g id="PERMISSION_TYPE">%1$s</xliff:g> कोल्याप्स गर्नुहोस्"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; मा भएका एपहरूलाई पनि &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; मा दिइएकै अनुमति दिने हो?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"यसअन्तर्गत &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt; का &lt;strong&gt;माइक्रोफोन&lt;/strong&gt;, &lt;strong&gt;क्यामेरा&lt;/strong&gt; र &lt;strong&gt;लोकेसन प्रयोग गर्ने अनुमति&lt;/strong&gt; तथा अन्य संवेदनशील अनुमतिहरू समावेश हुन्छन्। &lt;br/&gt;&lt;br/&gt;तपाईं जुनसुकै बेला &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt; का सेटिङमा गई यी अनुमति परिवर्तन गर्न सक्नुहुन्छ।"</string>
-    <string name="vendor_icon_description" msgid="4445875290032225965">"एपको आइकन"</string>
-    <string name="vendor_header_button_description" msgid="6566660389500630608">"थप जानकारी देखाउने बटन"</string>
+    <string name="vendor_header_button_description" msgid="7994879208461111473">"थप जानकारी"</string>
     <string name="permission_phone" msgid="2661081078692784919">"फोन"</string>
     <string name="permission_sms" msgid="6337141296535774786">"SMS"</string>
     <string name="permission_contacts" msgid="3858319347208004438">"Contacts"</string>
