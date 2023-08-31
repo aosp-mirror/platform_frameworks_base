@@ -2101,7 +2101,7 @@ public class Editor {
         if (ims != null && ims.mBatchEditNesting == 0) {
             InputMethodManager imm = getInputMethodManager();
             if (imm != null) {
-                if (imm.isActive(mTextView)) {
+                if (imm.hasActiveInputConnection(mTextView)) {
                     if (ims.mContentChanged || ims.mSelectionModeChanged) {
                         // We are in extract mode and the content has changed
                         // in some way... just report complete new text to the
