@@ -76,19 +76,14 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ठीक है"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"हाल ही के कोई बबल्स नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"जब चाहें, बबल्स की सुविधा को कंट्रोल करें"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"किसी ऐप्लिकेशन और बातचीत के लिए बबल की सुविधा को मैनेज करने के लिए यहां टैप करें"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
-    <!-- no translation found for restart_button_description (4564728020654658478) -->
-    <skip />
-    <!-- no translation found for user_aspect_ratio_settings_button_hint (734835849600713016) -->
-    <skip />
-    <!-- no translation found for user_aspect_ratio_settings_button_description (4315566801697411684) -->
-    <skip />
+    <string name="restart_button_description" msgid="4564728020654658478">"बेहतर व्यू पाने के लिए, टैप करके ऐप्लिकेशन को रीस्टार्ट करें"</string>
+    <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"सेटिंग में जाकर इस ऐप्लिकेशन का आसपेक्ट रेशियो (लंबाई-चौड़ाई का अनुपात) बदलें"</string>
+    <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"आसपेक्ट रेशियो (लंबाई-चौड़ाई का अनुपात) बदलें"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्या कैमरे से जुड़ी कोई समस्या है?\nफिर से फ़िट करने के लिए टैप करें"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"क्या समस्या ठीक नहीं हुई?\nपहले जैसा करने के लिए टैप करें"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्या कैमरे से जुड़ी कोई समस्या नहीं है? खारिज करने के लिए टैप करें."</string>

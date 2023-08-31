@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"বুঝেছি"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"কোন অ্যাপ ও কথোপকথনের জন্য বাবলের সুবিধা চান তা ম্যানেজ করতে এখানে ট্যাপ করুন"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
