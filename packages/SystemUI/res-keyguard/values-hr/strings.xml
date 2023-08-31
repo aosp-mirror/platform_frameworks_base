@@ -98,7 +98,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Otključavanje SIM-a…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Unesite PIN koji ima od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kôd treba imati 8 brojeva ili više."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Netočno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Netočno ste unijeli zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netočan PIN kôd SIM kartice; sada morate kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mjehurić"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da biste nastavili"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite zaporku da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Nacrtajte uzorak da biste ažuriranje instalirali kasnije"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da biste nastavili."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite zaporku da biste nastavili."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Nacrtajte uzorak da biste nastavili."</string>
 </resources>

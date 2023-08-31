@@ -81,7 +81,7 @@
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Потрібен додатковий захист. Пароль довго не використовувався."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Потрібен додатковий захист. Ключ довго не використовувався."</string>
     <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Потрібен додатковий захист. Пристрій довго не розблоковувався."</string>
-    <string name="kg_face_locked_out" msgid="2751559491287575">"Не розблоковано (фейсконтроль). Забагато спроб."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Не розблоковано (фейс-контроль). Забагато спроб."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Не розблоковано (відбиток пальця). Забагато спроб."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Довірчий агент недоступний"</string>
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Неправильний PIN-код введено забагато разів"</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Бульбашковий"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоговий"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Розблокуйте пристрій, щоб продовжити"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Щоб установити оновлення пізніше, введіть PIN-код"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Щоб установити оновлення пізніше, введіть пароль"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Щоб установити оновлення пізніше, намалюйте ключ"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Пристрій оновлено. Щоб продовжити, введіть PIN-код."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Пристрій оновлено. Щоб продовжити, введіть пароль."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Пристрій оновлено. Щоб продовжити, намалюйте ключ."</string>
 </resources>

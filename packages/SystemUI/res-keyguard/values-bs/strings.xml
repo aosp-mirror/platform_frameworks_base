@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Unesite svoj PIN"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Unesite PIN"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"Unesite PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Unesite uzorak"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Unesite uzorak"</string>
@@ -98,8 +98,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Otključavanje SIM-a…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Unesite PIN koji sadrži 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK kôd treba sadržavati najmanje 8 brojeva."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Pogrešno ste napisali PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Pogrešno ste napisali lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Pogrešno ste nacrtali svoj uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"PIN za SIM karticu je netačan. Za otključavanje uređaja sada se morate obratiti svom operateru."</string>
     <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{PIN kôd za SIM je netačan. Imate još # pokušaj prije nego što budete morali kontaktirati mobilnog operatera da vam otključa uređaj.}one{PIN kôd za SIM je netačan. Imate još # pokušaj. }few{PIN kôd za SIM je netačan. Imate još # pokušaja. }other{PIN kôd za SIM je netačan. Imate još # pokušaja. }}"</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mjehurići"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Otključajte uređaj da nastavite"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Unesite PIN da kasnije instalirate ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Unesite lozinku da kasnije instalirate ažuriranje"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Unesite uzorak da kasnije instalirate ažuriranje"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Uređaj je ažuriran. Unesite PIN da nastavite."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Uređaj je ažuriran. Unesite lozinku da nastavite."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Uređaj je ažuriran. Unesite uzorak da nastavite."</string>
 </resources>

@@ -98,7 +98,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Се отклучува SIM-картичката…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Внесете PIN што содржи 4 - 8 броеви."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"PUK-кодот треба да содржи 8 или повеќе броеви."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Погрешно сте го напишале вашиот PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Внесовте погрешен PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно по <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Погрешно сте ја напишале вашата лозинка <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Погрешно сте ја нацртале вашата шема за отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Погрешен PIN-код за SIM, сега мора да контактирате со вашиот оператор за да го отклучите уредот."</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонче"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоген"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Отклучете го уредот за да продолжите"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Внесете PIN за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Внесете ја лозинката за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Нацртајте ја шемата за да го инсталирате ажурирањето подоцна"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Уредот е ажуриран. Внесете PIN за да продолжите."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Уредот е ажуриран. Внесете лозинка за да продолжите."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Уредот е ажуриран. Нацртајте ја шемата за да продолжите."</string>
 </resources>

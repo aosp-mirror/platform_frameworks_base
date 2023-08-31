@@ -98,7 +98,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Ξεκλείδωμα SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Ο κωδικός PUK θα πρέπει να περιέχει τουλάχιστον 8 αριθμούς."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Έχετε πληκτρολογήσει τον αριθμό PIN εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Έχετε πληκτρολογήσει το PIN σας εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%1$d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%2$d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Λανθασμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με την εταιρεία κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Συννεφάκι"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Αναλογικό"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Ξεκλειδώστε τη συσκευή σας για να συνεχίσετε"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Εισαγάγετε το PIN για να εγκαταστήσετε την ενημέρωση αργότερα"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Εισαγ. τον κωδ. πρόσβασης για να εγκαταστήσετε την ενημέρωση αργότερα"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Σχεδιάστε το μοτίβο για να εγκαταστήσετε την ενημέρωση αργότερα"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Η συσκευή ενημερώθηκε. Εισαγάγετε το PIN για να συνεχίσετε."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Η συσκευή ενημερώθηκε. Εισαγάγ. τον κωδ. πρόσβασης για να συνεχίσετε."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Η συσκευή ενημερώθηκε. Σχεδιάστε το μοτίβο για να συνεχίσετε."</string>
 </resources>

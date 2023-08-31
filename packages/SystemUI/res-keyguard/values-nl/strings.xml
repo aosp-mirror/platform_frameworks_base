@@ -113,7 +113,7 @@
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Pincode is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Wachtwoord is vereist na opnieuw opstarten apparaat"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Gebruik in plaats daarvan het patroon voor extra beveiliging"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik in plaats daarvan de pincode voor extra beveiliging"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Gebruik de pincode voor extra beveiliging"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Gebruik in plaats daarvan het wachtwoord voor extra beveiliging"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Apparaat vergrendeld door beheerder"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Apparaat is handmatig vergrendeld"</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bel"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoog"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Ontgrendel je apparaat om door te gaan"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Voer de pincode in om de update later te installeren"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Voer het wachtwoord in om de update later te installeren"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Teken het patroon om de update later te installeren"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Apparaat geüpdatet. Voer de pincode in om door te gaan."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Apparaat geüpdatet. Voer het wachtwoord in om door te gaan."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Apparaat geüpdatet. Teken het patroon om door te gaan."</string>
 </resources>

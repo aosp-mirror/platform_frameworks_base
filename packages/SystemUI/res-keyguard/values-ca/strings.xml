@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"El PIN no és correcte"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN incorrecte. Torna-hi."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"O desbloqueja amb l\'empremta digital"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no es reconeix"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"L\'empremta no s\'ha reconegut"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"No s\'ha reconegut la cara"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Torna-ho a provar o introdueix el PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Torna-ho a provar o introdueix la contrasenya"</string>
@@ -98,8 +98,8 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"S\'està desbloquejant la targeta SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Escriu un PIN que tingui entre 4 i 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"El codi PUK ha de tenir 8 números o més."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Has escrit el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Has escrit la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"El codi PIN de la SIM no és correcte. Contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
     <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{El codi PIN de la SIM no és correcte. Et queda # intent; si no l\'encertes, contacta amb l\'operador per desbloquejar el dispositiu.}many{El codi PIN de la SIM no és correcte. Et queden # intents. }other{El codi PIN de la SIM no és correcte. Et queden # intents. }}"</string>
@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bombolla"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analògica"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Desbloqueja el dispositiu per continuar"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Introdueix el PIN per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Introdueix la contrasenya per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Dibuixa el patró per instal·lar l\'actualització més tard"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Dispositiu actualitzat. Introdueix el PIN per continuar."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Dispositiu actualitzat. Introdueix la contrasenya per continuar."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Dispositiu actualitzat. Dibuixa el patró per continuar."</string>
 </resources>
