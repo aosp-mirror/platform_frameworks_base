@@ -16,15 +16,19 @@
 
 package com.android.systemui.qs.ui.composable
 
+import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.footer.ui.compose.QuickSettings
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
@@ -33,6 +37,10 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
+import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
+import com.android.systemui.statusbar.phone.StatusBarIconController
+import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +52,9 @@ class QuickSettingsScene
 @Inject
 constructor(
     private val viewModel: QuickSettingsSceneViewModel,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    private val statusBarIconController: StatusBarIconController,
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
@@ -61,6 +72,9 @@ constructor(
     ) {
         QuickSettingsScene(
             viewModel = viewModel,
+            createTintedIconManager = tintedIconManagerFactory::create,
+            createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
+            statusBarIconController = statusBarIconController,
             modifier = modifier,
         )
     }
@@ -69,16 +83,27 @@ constructor(
 @Composable
 private fun SceneScope.QuickSettingsScene(
     viewModel: QuickSettingsSceneViewModel,
+    createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
+    createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
+    statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/280887232): implement the real UI.
-
-    Box(
-        modifier
-            .fillMaxSize()
-            .clickable(onClick = { viewModel.onContentClicked() })
-            .padding(horizontal = 16.dp, vertical = 48.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier =
+            modifier
+                .fillMaxSize()
+                .clickable(onClick = { viewModel.onContentClicked() })
+                .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
     ) {
-        QuickSettings(modifier = Modifier.fillMaxHeight())
+        ExpandedShadeHeader(
+            viewModel = viewModel.shadeHeaderViewModel,
+            createTintedIconManager = createTintedIconManager,
+            createBatteryMeterViewController = createBatteryMeterViewController,
+            statusBarIconController = statusBarIconController,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        QuickSettings()
     }
 }
