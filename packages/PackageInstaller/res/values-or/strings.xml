@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7488448184431507488">"ପ୍ୟାକେଜ୍‌ ଇନଷ୍ଟଲର୍‍"</string>
-    <string name="install" msgid="711829760615509273">"ଇନଷ୍ଟଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="install" msgid="711829760615509273">"ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="update" msgid="3932142540719227615">"ଅପଡେଟ୍ କରନ୍ତୁ"</string>
     <string name="done" msgid="6632441120016885253">"ହୋଇଗଲା"</string>
     <string name="cancel" msgid="1018267193425558088">"ବାତିଲ କରନ୍ତୁ"</string>
@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ଆପ ଇନଷ୍ଟଲ ହୋଇଗଲା।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ଆପଣ ଏହି ଆପକୁ ଇନଷ୍ଟଲ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ଆପଣ ଏହି ଆପକୁ ଅପଡେଟ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?\n\nଏହି ଆପ ସାଧାରଣତଃ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>ରୁ ଅପଡେଟ ପାଇଥାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣ ଆପଣଙ୍କ ଫୋନରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>ରୁ ଏହି ଆପକୁ ଅପଡେଟ କରିବେ?\n\nଏହି ଆପ ସାଧାରଣତଃ <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>ରୁ ଅପଡେଟଗୁଡ଼ିକ ପାଏ। ଏକ ଭିନ୍ନ ସୋର୍ସରୁ ଅପଡେଟ କରି ଆପଣଙ୍କ ଫୋନରେ ଯେ କୌଣସି ସୋର୍ସରୁ ଭବିଷ୍ୟତର ଅପଡେଟଗୁଡ଼ିକ ଆପଣ ପାଇପାରନ୍ତି। ଆପ କାର୍ଯ୍ୟକ୍ଷମତା ପରିବର୍ତ୍ତନ ହୋଇପାରେ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ଏହି ପ୍ୟାକେଜ୍‌କୁ ଇନଷ୍ଟଲ୍‍ କରାଯିବାରୁ ଅବରୋଧ କରାଯାଇଥିଲା।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ପୂର୍ବରୁ ଥିବା ପ୍ୟାକେଜ୍‍ ସହ ଏହି ପ୍ୟାକେଜ୍‌ର ସମସ୍ୟା ଉପୁଯିବାରୁ ଆପ୍‍ ଇନଷ୍ଟଲ୍‍ ହୋଇପାରିଲା ନାହିଁ।"</string>
