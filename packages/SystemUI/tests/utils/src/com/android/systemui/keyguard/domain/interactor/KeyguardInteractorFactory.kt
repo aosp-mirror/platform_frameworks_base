@@ -23,7 +23,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.util.mockito.mock
 
 /**
  * Simply put, I got tired of adding a constructor argument and then having to tweak dozens of
@@ -40,6 +42,7 @@ object KeyguardInteractorFactory {
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         configurationRepository: FakeConfigurationRepository = FakeConfigurationRepository(),
         shadeRepository: FakeShadeRepository = FakeShadeRepository(),
+        sceneInteractor: SceneInteractor = mock(),
     ): WithDependencies {
         return WithDependencies(
             repository = repository,
@@ -55,6 +58,7 @@ object KeyguardInteractorFactory {
                 bouncerRepository = bouncerRepository,
                 configurationRepository = configurationRepository,
                 shadeRepository = shadeRepository,
+                sceneInteractorProvider = { sceneInteractor },
             )
         )
     }

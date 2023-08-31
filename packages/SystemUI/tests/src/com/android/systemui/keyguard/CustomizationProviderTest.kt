@@ -63,6 +63,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -174,12 +175,17 @@ class CustomizationProviderTest : SysuiTestCase() {
                 set(Flags.REVAMPED_WALLPAPER_UI, true)
                 set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
                 set(Flags.FACE_AUTH_REFACTOR, true)
+                set(Flags.SCENE_CONTAINER, false)
             }
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
                     KeyguardInteractorFactory.create(
                             featureFlags = featureFlags,
+                            sceneInteractor =
+                                mock {
+                                    whenever(transitioningTo).thenReturn(MutableStateFlow(null))
+                                },
                         )
                         .keyguardInteractor,
                 lockPatternUtils = lockPatternUtils,

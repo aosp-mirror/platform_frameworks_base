@@ -52,6 +52,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -103,6 +104,7 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             FakeFeatureFlags().apply {
                 set(Flags.FACE_AUTH_REFACTOR, false)
                 set(Flags.DELAY_BOUNCER, false)
+                set(Flags.SCENE_CONTAINER, false)
             }
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()
@@ -121,6 +123,8 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
                         repository = keyguardRepository,
                         bouncerRepository = bouncerRepository,
                         configurationRepository = configurationRepository,
+                        sceneInteractor =
+                            mock { whenever(transitioningTo).thenReturn(MutableStateFlow(null)) },
                     )
                     .keyguardInteractor,
                 PrimaryBouncerInteractor(
