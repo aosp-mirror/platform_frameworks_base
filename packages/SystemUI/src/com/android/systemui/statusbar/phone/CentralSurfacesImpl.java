@@ -1649,11 +1649,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         logStateToEventlog();
     }
 
-    @Override
-    public NotificationPresenter getPresenter() {
-        return mPresenter;
-    }
-
     @VisibleForTesting
     @Override
     public void setBarStateForTest(int state) {
@@ -1725,11 +1720,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean getCommandQueuePanelsEnabled() {
         return mCommandQueue.panelsEnabled();
-    }
-
-    @Override
-    public BiometricUnlockController getBiometricUnlockController() {
-        return mBiometricUnlockController;
     }
 
     @Override
@@ -2486,7 +2476,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mStatusBarKeyguardViewManager.reset(true);
             } else if (mState == StatusBarState.KEYGUARD
                     && !mStatusBarKeyguardViewManager.primaryBouncerIsOrWillBeShowing()
-                    && isKeyguardSecure()) {
+                    && mStatusBarKeyguardViewManager.isSecure()) {
                 mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
             }
         }
@@ -2825,11 +2815,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     };
 
-    @Override
-    public int getWakefulnessState() {
-        return mWakefulnessLifecycle.getWakefulness();
-    }
-
     /**
      * @return true if the screen is currently fully off, i.e. has finished turning off and has
      * since not started turning on.
@@ -2895,7 +2880,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDevicePolicyManager.getCameraDisabled(null,
                 mLockscreenUserManager.getCurrentUserId())) {
             return false;
-        } else if (isKeyguardShowing() && isKeyguardSecure()) {
+        } else if (isKeyguardShowing() && mStatusBarKeyguardViewManager.isSecure()) {
             // Check if the admin has disabled the camera specifically for the keyguard
             return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
                     mLockscreenUserManager.getCurrentUserId())
@@ -3196,11 +3181,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public boolean isBouncerShowingOverDream() {
         return mBouncerShowingOverDream;
-    }
-
-    @Override
-    public boolean isKeyguardSecure() {
-        return mStatusBarKeyguardViewManager.isSecure();
     }
 
     // End Extra BaseStatusBarMethods.
