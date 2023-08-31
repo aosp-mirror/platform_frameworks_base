@@ -2594,6 +2594,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
                         userHandle);
             }
+            // Enforcing the restriction of private profile creation in case device owner is set.
+            if (!mUserManager.hasUserRestriction(
+                    UserManager.DISALLOW_ADD_PRIVATE_PROFILE, userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, true,
+                        userHandle);
+            }
             // Creation of managed profile is restricted in case device owner is set, enforcing this
             // restriction by setting user level restriction at time of device owner setup.
             if (!mUserManager.hasUserRestriction(
@@ -4036,6 +4042,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                             false, user);
                 }
+
+                // When a device owner is set, the system automatically restricts adding a
+                // private profile.
+                // Remove this restriction when the device owner is cleared.
+                if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                        user)) {
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                            false, user);
+                }
             }
         } else {
             // ManagedProvisioning/DPC sets DISALLOW_ADD_USER. Clear to recover to the original state
@@ -4060,6 +4075,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                         false,
                         userHandle);
+            }
+
+            // When a device owner is set, the system automatically restricts adding a
+            // private profile.
+            // Remove this restriction when the device owner is cleared.
+            if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                    userHandle)) {
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                        false, userHandle);
             }
         }
     }
@@ -9423,6 +9447,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
                                 true,
                                 UserHandle.of(u));
+
+                        // Restrict adding a private profile when a device owner is set.
+                        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                                true,
+                                UserHandle.of(u));
                     }
                 } else {
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE,
@@ -9433,6 +9462,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     // on the same device.
                     // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
                     mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                            true,
+                            UserHandle.of(userId));
+                    mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
                             true,
                             UserHandle.of(userId));
                 }
@@ -13199,6 +13231,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserManager.ALLOW_PARENT_PROFILE_APP_LINKING, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_CLONE_PROFILE, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
+        USER_RESTRICTION_PERMISSIONS.put(
+                UserManager.DISALLOW_ADD_PRIVATE_PROFILE, new String[]{MANAGE_DEVICE_POLICY_PROFILES});
         USER_RESTRICTION_PERMISSIONS.put(
                 UserManager.DISALLOW_ADD_USER, new String[]{MANAGE_DEVICE_POLICY_MODIFY_USERS});
         USER_RESTRICTION_PERMISSIONS.put(
