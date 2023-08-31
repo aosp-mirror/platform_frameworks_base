@@ -238,6 +238,15 @@ public class VirtualDeviceInternal {
         }
     }
 
+    void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        try {
+            mVirtualDevice.setDevicePolicy(policyType, devicePolicy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull
     VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
         try {

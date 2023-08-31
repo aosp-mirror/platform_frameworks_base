@@ -150,6 +150,17 @@ public final class VirtualDeviceParams implements Parcelable {
     public @interface PolicyType {}
 
     /**
+     * Policy types that can be dynamically changed during the virtual device's lifetime.
+     *
+     * @see VirtualDeviceManager.VirtualDevice#setDevicePolicy
+     * @hide
+     */
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS})
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
+    public @interface DynamicPolicyType {}
+
+    /**
      * Tells the sensor framework how to handle sensor requests from contexts associated with this
      * virtual device, namely the sensors returned by
      * {@link android.hardware.SensorManager#getSensorList}:
@@ -372,6 +383,14 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     public @DevicePolicy int getDevicePolicy(@PolicyType int policyType) {
         return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
+    }
+
+    /**
+     * Returns all device policies.
+     * @hide
+     */
+    public @NonNull SparseIntArray getDevicePolicies() {
+        return mDevicePolicies;
     }
 
     /**
