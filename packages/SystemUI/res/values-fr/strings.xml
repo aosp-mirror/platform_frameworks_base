@@ -57,8 +57,7 @@
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Changement de langue système demandé par un autre appareil"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Changer de langue"</string>
     <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Garder la langue actuelle"</string>
-    <!-- no translation found for share_wifi_button_text (1285273973812029240) -->
-    <skip />
+    <string name="share_wifi_button_text" msgid="1285273973812029240">"Partager le Wi‑Fi"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Autoriser le débogage sans fil sur ce réseau ?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nom du réseau (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresse Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Toujours autoriser sur ce réseau"</string>
@@ -160,8 +159,7 @@
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Schéma incorrect"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Mot de passe incorrect"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"Trop de tentatives incorrectes.\nVeuillez réessayer dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
-    <!-- no translation found for work_challenge_emergency_button_text (8946588434515599288) -->
-    <skip />
+    <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"Urgence"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"Réessayez. Tentative <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> sur <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"Risque de perte des données"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"Si vous dessinez un schéma incorrect lors de la prochaine tentative, les données de cet appareil seront supprimées."</string>
@@ -415,8 +413,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Lorsque vous partagez, enregistrez ou castez, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Lorsque vous partagez, enregistrez ou castez une appli, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Commencer"</string>
-    <!-- no translation found for media_projection_entry_app_permission_dialog_single_app_disabled (8999903044874669995) -->
-    <skip />
+    <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g> a désactivé cette option"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Commencer à caster ?"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Lorsque vous castez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Lorsque vous castez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
@@ -1173,6 +1170,10 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant à l\'écoute"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Définir une appli de notes par défaut dans les paramètres"</string>
     <string name="install_app" msgid="5066668100199613936">"Installer l\'appli"</string>
+    <!-- no translation found for connected_display_dialog_start_mirroring (6237895789920854982) -->
+    <skip />
+    <!-- no translation found for enable_display (8308309634883321977) -->
+    <skip />
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Micro et caméra"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Utilisation récente par les applis"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Consulter les accès récents"</string>
