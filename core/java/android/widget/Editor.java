@@ -2098,17 +2098,14 @@ public class Editor {
         final int selectionEnd = mTextView.getSelectionEnd();
 
         final InputMethodState ims = mInputMethodState;
-        if (ims != null && ims.mBatchEditNesting == 0) {
+        if (ims != null && ims.mBatchEditNesting == 0
+                && (ims.mContentChanged || ims.mSelectionModeChanged)) {
             InputMethodManager imm = getInputMethodManager();
-            if (imm != null) {
-                if (imm.hasActiveInputConnection(mTextView)) {
-                    if (ims.mContentChanged || ims.mSelectionModeChanged) {
-                        // We are in extract mode and the content has changed
-                        // in some way... just report complete new text to the
-                        // input method.
-                        reportExtractedText();
-                    }
-                }
+            if (imm != null && imm.hasActiveInputConnection(mTextView)) {
+                // We are in extract mode and the content has changed
+                // in some way... just report complete new text to the
+                // input method.
+                reportExtractedText();
             }
         }
 
