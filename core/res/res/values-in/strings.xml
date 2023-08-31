@@ -1639,7 +1639,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"Sedang digunakan"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"Layar HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Overlay #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", aman"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Lupa Pola?"</string>
