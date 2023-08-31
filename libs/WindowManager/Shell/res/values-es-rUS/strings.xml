@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Entendido"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Controla las burbujas"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Presiona para administrar las apps y conversaciones que pueden mostrar burbujas"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Cuadro"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Se descartó el cuadro."</string>

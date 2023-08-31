@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"OK"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Hech qanday bulutcha topilmadi"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Eng oxirgi va yopilgan bulutchali chatlar shu yerda chiqadi"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Bulutchalardagi bildirishnomalar"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Bulutchalarda bildirishnomalar chiqishiga ruxsat beruvchi ilova va suhbatlarni tanlang."</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Pufaklar"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Boshqarish"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulutcha yopildi."</string>
