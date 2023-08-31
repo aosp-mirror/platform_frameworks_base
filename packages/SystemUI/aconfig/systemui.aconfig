@@ -1,4 +1,4 @@
-package: "com.android.systemui.aconfig"
+package: "com.android.systemui"
 
 flag {
     name: "example_flag"

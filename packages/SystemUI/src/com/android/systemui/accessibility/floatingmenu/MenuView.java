@@ -38,7 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
-import com.android.systemui.aconfig.Flags;
+import com.android.systemui.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
