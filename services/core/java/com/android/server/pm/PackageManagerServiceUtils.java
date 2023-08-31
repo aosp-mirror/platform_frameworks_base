@@ -919,16 +919,22 @@ public class PackageManagerServiceUtils {
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
-        try {
-            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
-        } catch (IOException e) {
-            if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
-            } else {
-                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
-            }
+        if (!PackageInstallerSession.isArchivedInstallation(flags)) {
+            try {
+                sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
+            } catch (IOException e) {
+                if (!packageFile.exists()) {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation =
+                            InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
+                }
 
-            return ret;
+                return ret;
+            }
+        } else {
+            sizeBytes = 0;
         }
 
         final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(

@@ -953,8 +953,10 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             String8 msg;
             msg.appendFormat("Unknown binder error code. 0x%" PRIx32, err);
             // RemoteException is a checked exception, only throw from certain methods.
-            jniThrowException(env, canThrowRemoteException
-                    ? "android/os/RemoteException" : "java/lang/RuntimeException", msg.string());
+            jniThrowException(env,
+                              canThrowRemoteException ? "android/os/RemoteException"
+                                                      : "java/lang/RuntimeException",
+                              msg.c_str());
             break;
     }
 }
@@ -1286,8 +1288,7 @@ static jstring android_os_BinderProxy_getInterfaceDescriptor(JNIEnv* env, jobjec
     IBinder* target = getBPNativeData(env, obj)->mObject.get();
     if (target != NULL) {
         const String16& desc = target->getInterfaceDescriptor();
-        return env->NewString(reinterpret_cast<const jchar*>(desc.string()),
-                              desc.size());
+        return env->NewString(reinterpret_cast<const jchar*>(desc.c_str()), desc.size());
     }
     jniThrowException(env, "java/lang/RuntimeException",
             "No binder found for object");

@@ -1540,7 +1540,7 @@ status_t AaptAssets::buildIncludedResources(Bundle* bundle)
     }
 
     const String8& featureOfBase = bundle->getFeatureOfPackage();
-    if (!featureOfBase.isEmpty()) {
+    if (!featureOfBase.empty()) {
         if (bundle->getVerbose()) {
             printf("Including base feature resources from package: %s\n",
                     featureOfBase.c_str());

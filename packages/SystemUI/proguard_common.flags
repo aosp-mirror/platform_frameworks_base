@@ -70,9 +70,6 @@
 -keep class com.android.systemui.log.core.** {
     *;
 }
--keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
-    *;
-}
 -keep class androidx.core.app.CoreComponentFactory
 
 # Keep the wm shell lib

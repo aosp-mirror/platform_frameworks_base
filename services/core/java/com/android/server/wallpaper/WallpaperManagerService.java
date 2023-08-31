@@ -2000,7 +2000,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             WallpaperData wallpaper, IRemoteCallback reply, ServiceInfo serviceInfo) {
 
         if (serviceInfo == null) {
-            clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, reply);
+            if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
+                clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, null);
+                clearWallpaperLocked(FLAG_LOCK, wallpaper.userId, reply);
+            } else {
+                clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, reply);
+            }
             return;
         }
         Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
@@ -2032,7 +2037,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData data = null;
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
-                clearWallpaperLocked(callingPackage, which, userId, null);
+                clearWallpaperLocked(callingPackage, which, userId);
             } else {
                 clearWallpaperLocked(which, userId, null);
             }
@@ -2052,8 +2057,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void clearWallpaperLocked(String callingPackage, int which, int userId,
-            IRemoteCallback reply) {
+    private void clearWallpaperLocked(String callingPackage, int which, int userId) {
 
         // Might need to bring it in the first time to establish our rewrite
         if (!mWallpaperMap.contains(userId)) {
@@ -2092,8 +2096,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 finalWhich = which;
             }
 
-            boolean success = withCleanCallingIdentity(() -> setWallpaperComponentInternal(
-                    component, callingPackage, finalWhich, userId, reply));
+            boolean success = withCleanCallingIdentity(() -> setWallpaperComponent(
+                    component, callingPackage, finalWhich, userId));
             if (success) return;
         } catch (IllegalArgumentException e1) {
             e = e1;
@@ -2105,23 +2109,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // wallpaper.
         Slog.e(TAG, "Default wallpaper component not found!", e);
         withCleanCallingIdentity(() -> clearWallpaperComponentLocked(wallpaper));
-        if (reply != null) {
-            try {
-                reply.sendResult(null);
-            } catch (RemoteException e1) {
-                Slog.w(TAG, "Failed to notify callback after wallpaper clear", e1);
-            }
-        }
     }
 
+    // TODO(b/266818039) remove this version of the method
     private void clearWallpaperLocked(int which, int userId, IRemoteCallback reply) {
-
-        if (mIsLockscreenLiveWallpaperEnabled) {
-            String callingPackage = mPackageManagerInternal.getNameForUid(getCallingUid());
-            clearWallpaperLocked(callingPackage, which, userId, reply);
-            return;
-        }
-
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
@@ -3293,7 +3284,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     boolean setWallpaperComponent(ComponentName name, String callingPackage,
             @SetWallpaperFlags int which, int userId) {
         if (mIsLockscreenLiveWallpaperEnabled) {
-            return setWallpaperComponentInternal(name, callingPackage, which, userId, null);
+            return setWallpaperComponentInternal(name, callingPackage, which, userId);
         } else {
             setWallpaperComponentInternalLegacy(name, callingPackage, which, userId);
             return true;
@@ -3301,7 +3292,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private boolean setWallpaperComponentInternal(ComponentName name, String callingPackage,
-            @SetWallpaperFlags int which, int userIdIn, IRemoteCallback reply) {
+            @SetWallpaperFlags int which, int userIdIn) {
         if (DEBUG) {
             Slog.v(TAG, "Setting new live wallpaper: which=" + which + ", component: " + name);
         }
@@ -3350,7 +3341,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             Slog.d(TAG, "publish system wallpaper changed!");
                         }
                         liveSync.complete();
-                        if (reply != null) reply.sendResult(null);
                     }
                 };
 

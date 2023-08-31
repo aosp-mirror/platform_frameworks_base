@@ -22,6 +22,7 @@ import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
@@ -114,6 +115,27 @@ class WifiViewModelTest : SysuiTestCase() {
             assertThat(latestHome).isInstanceOf(WifiIcon.Visible::class.java)
             assertThat(latestHome).isEqualTo(latestKeyguard)
             assertThat(latestKeyguard).isEqualTo(latestQs)
+        }
+
+    @Test
+    fun wifiIcon_validHotspot_hotspotIconNotShown() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiIcon)
+
+            // Even WHEN the network has a valid hotspot type
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.Active(
+                    NETWORK_ID,
+                    isValidated = true,
+                    level = 1,
+                    hotspotDeviceType = WifiNetworkModel.HotspotDeviceType.LAPTOP,
+                )
+            )
+
+            // THEN the hotspot icon is not used for the status bar icon, and the typical wifi icon
+            // is used instead
+            assertThat(latest).isInstanceOf(WifiIcon.Visible::class.java)
+            assertThat((latest as WifiIcon.Visible).res).isEqualTo(WifiIcons.WIFI_FULL_ICONS[1])
         }
 
     @Test

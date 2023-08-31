@@ -375,6 +375,10 @@ public interface ParsingPackage {
 
     ParsingPackage setBaseRevisionCode(int baseRevisionCode);
 
+    ParsingPackage setVersionCode(int vesionCode);
+
+    ParsingPackage setVersionCodeMajor(int vesionCodeMajor);
+
     ParsingPackage setVersionName(String versionName);
 
     ParsingPackage setCompileSdkVersion(int compileSdkVersion);

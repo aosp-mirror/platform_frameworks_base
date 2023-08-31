@@ -13,11 +13,10 @@
 # limitations under the License.
 
 #
-# Input Device Configuration file for a flavor of the Google Reference RCU Remote.
+# Input Device Configuration file for a flavor of Google Remote Control.
 #
 #
 
 # Basic Parameters
-keyboard.layout = Vendor_0957_Product_0001
 keyboard.doNotWakeByDefault = 1
 audio.mic = 1

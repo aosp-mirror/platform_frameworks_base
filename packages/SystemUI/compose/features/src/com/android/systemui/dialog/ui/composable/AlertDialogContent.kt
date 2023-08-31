@@ -19,13 +19,11 @@ package com.android.systemui.dialog.ui.composable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalContentColor
@@ -35,9 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.compose.theme.LocalAndroidColorScheme
+import kotlin.math.roundToInt
 
 /**
  * The content of an AlertDialog which can be used together with
@@ -99,28 +101,101 @@ fun AlertDialogContent(
         Spacer(Modifier.height(32.dp))
 
         // Buttons.
-        // TODO(b/283817398): If there is not enough space, the buttons should automatically stack
-        // as shown in go/sysui-dialog-styling.
         if (positiveButton != null || negativeButton != null || neutralButton != null) {
-            Row(Modifier.fillMaxWidth()) {
-                if (neutralButton != null) {
-                    neutralButton()
-                    Spacer(Modifier.width(8.dp))
-                }
+            AlertDialogButtons(
+                positiveButton = positiveButton,
+                negativeButton = negativeButton,
+                neutralButton = neutralButton,
+            )
+        }
+    }
+}
 
-                Spacer(Modifier.weight(1f))
+@Composable
+private fun AlertDialogButtons(
+    positiveButton: (@Composable () -> Unit)?,
+    negativeButton: (@Composable () -> Unit)?,
+    neutralButton: (@Composable () -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Layout(
+        content = {
+            positiveButton?.let { Box(Modifier.layoutId("positive")) { it() } }
+            negativeButton?.let { Box(Modifier.layoutId("negative")) { it() } }
+            neutralButton?.let { Box(Modifier.layoutId("neutral")) { it() } }
+        },
+        modifier,
+    ) { measurables, constraints ->
+        check(constraints.hasBoundedWidth) {
+            "AlertDialogButtons should not be composed in an horizontally scrollable layout"
+        }
+        val maxWidth = constraints.maxWidth
 
-                if (negativeButton != null) {
-                    negativeButton()
-                }
+        // Measure the buttons.
+        var positive: Placeable? = null
+        var negative: Placeable? = null
+        var neutral: Placeable? = null
+        for (i in measurables.indices) {
+            val measurable = measurables[i]
+            when (val layoutId = measurable.layoutId) {
+                "positive" -> positive = measurable.measure(constraints)
+                "negative" -> negative = measurable.measure(constraints)
+                "neutral" -> neutral = measurable.measure(constraints)
+                else -> error("Unexpected layoutId=$layoutId")
+            }
+        }
 
-                if (positiveButton != null) {
-                    if (negativeButton != null) {
-                        Spacer(Modifier.width(8.dp))
+        fun Placeable?.width() = this?.width ?: 0
+        fun Placeable?.height() = this?.height ?: 0
+
+        // The min horizontal spacing between buttons.
+        val horizontalSpacing = 8.dp.toPx()
+        val totalHorizontalSpacing = (measurables.size - 1) * horizontalSpacing
+        val requiredWidth =
+            positive.width() + negative.width() + neutral.width() + totalHorizontalSpacing
+
+        if (requiredWidth <= maxWidth) {
+            // Stack horizontally: [neutral][flexSpace][negative][positive].
+            val height = maxOf(positive.height(), negative.height(), neutral.height())
+            layout(maxWidth, height) {
+                positive?.let { it.placeRelative(maxWidth - it.width, 0) }
+
+                negative?.let { negative ->
+                    if (positive == null) {
+                        negative.placeRelative(maxWidth - negative.width, 0)
+                    } else {
+                        negative.placeRelative(
+                            maxWidth -
+                                negative.width -
+                                positive.width -
+                                horizontalSpacing.roundToInt(),
+                            0
+                        )
                     }
-
-                    positiveButton()
                 }
+
+                neutral?.placeRelative(0, 0)
+            }
+        } else {
+            // Stack vertically, aligned on the right (in LTR layouts):
+            //   [positive]
+            //   [negative]
+            //    [neutral]
+            //
+            // TODO(b/283817398): Introduce a ResponsiveDialogButtons composable to create buttons
+            // that have different styles when stacked horizontally, as shown in
+            // go/sysui-dialog-styling.
+            val height = positive.height() + negative.height() + neutral.height()
+            layout(maxWidth, height) {
+                var y = 0
+                fun Placeable.place() {
+                    placeRelative(maxWidth - width, y)
+                    y += this.height
+                }
+
+                positive?.place()
+                negative?.place()
+                neutral?.place()
             }
         }
     }

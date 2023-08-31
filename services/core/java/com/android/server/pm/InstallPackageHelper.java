@@ -1144,8 +1144,16 @@ final class InstallPackageHelper {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
         try (PackageParser2 pp = mPm.mInjector.getPreparingPackageParser()) {
-            parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
-            AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
+            if (request.getPackageLite() == null || !PackageInstallerSession.isArchivedInstallation(
+                    request.getInstallFlags())) {
+                // TODO: pass packageLite from install request instead of reparsing the package
+                parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
+                AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
+            } else {
+                // Archived install mode, no APK.
+                parsedPackage = pp.parsePackageFromPackageLite(request.getPackageLite(),
+                        parseFlags);
+            }
         } catch (PackageManagerException e) {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
         } finally {
@@ -1547,6 +1555,7 @@ final class InstallPackageHelper {
                     // TODO: Are these system flags actually set properly at this stage?
                     boolean isUpdatedSystemAppInferred =
                             pkgSetting != null && pkgSetting.isSystem();
+                    // derivePackageAbi works OK for archived packages despite logging some errors.
                     final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                             derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage,
                             systemApp, (isUpdatedSystemAppFromExistingSetting
@@ -1582,7 +1591,8 @@ final class InstallPackageHelper {
 
         final PackageFreezer freezer =
                 freezePackageForInstall(pkgName, UserHandle.USER_ALL, installFlags,
-                        "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED);
+                        "installPackageLI", ApplicationExitInfo.REASON_PACKAGE_UPDATED, request);
+
         boolean shouldCloseFreezerBeforeReturn = true;
         try {
             final PackageState oldPackageState;
@@ -2032,11 +2042,11 @@ final class InstallPackageHelper {
     }
 
     private PackageFreezer freezePackageForInstall(String packageName, int userId, int installFlags,
-            String killReason, int exitInfoReason) {
+            String killReason, int exitInfoReason, InstallRequest request) {
         if ((installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
-            return new PackageFreezer(mPm);
+            return new PackageFreezer(mPm, request);
         } else {
-            return mPm.freezePackage(packageName, userId, killReason, exitInfoReason);
+            return mPm.freezePackage(packageName, userId, killReason, exitInfoReason, request);
         }
     }
 
@@ -3207,7 +3217,7 @@ final class InstallPackageHelper {
             try (PackageFreezer freezer =
                          mPm.freezePackage(stubPkg.getPackageName(), UserHandle.USER_ALL,
                                  "setEnabledSetting",
-                                 ApplicationExitInfo.REASON_PACKAGE_UPDATED)) {
+                                 ApplicationExitInfo.REASON_PACKAGE_UPDATED, null /* request */)) {
                 pkg = installStubPackageLI(stubPkg, parseFlags, 0 /*scanFlags*/);
                 mAppDataHelper.prepareAppDataAfterInstallLIF(pkg);
                 synchronized (mPm.mLock) {
@@ -3231,7 +3241,8 @@ final class InstallPackageHelper {
                 try (PackageFreezer freezer =
                              mPm.freezePackage(stubPkg.getPackageName(), UserHandle.USER_ALL,
                                      "setEnabledSetting",
-                                     ApplicationExitInfo.REASON_PACKAGE_UPDATED)) {
+                                     ApplicationExitInfo.REASON_PACKAGE_UPDATED,
+                                     null /* request */)) {
                     synchronized (mPm.mLock) {
                         // NOTE: Ensure the system package is enabled; even for a compressed stub.
                         // If we don't, installing the system package fails during scan
@@ -4291,7 +4302,8 @@ final class InstallPackageHelper {
                                 + " name: " + pkgSetting.getPackageName());
                 try (@SuppressWarnings("unused") PackageFreezer freezer = mPm.freezePackage(
                         parsedPackage.getPackageName(), UserHandle.USER_ALL,
-                        "scanPackageInternalLI", ApplicationExitInfo.REASON_OTHER)) {
+                        "scanPackageInternalLI", ApplicationExitInfo.REASON_OTHER,
+                        null /* request */)) {
                     DeletePackageHelper deletePackageHelper = new DeletePackageHelper(mPm);
                     deletePackageHelper.deletePackageLIF(parsedPackage.getPackageName(), null, true,
                             mPm.mUserManager.getUserIds(), 0, null, false);

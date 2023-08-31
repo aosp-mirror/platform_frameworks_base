@@ -72,7 +72,6 @@ import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -109,12 +108,12 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
+import java.util.Optional;
+
 import dagger.BindsOptionalOf;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-
-import java.util.Optional;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -800,30 +799,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<DesktopMode> provideDesktopMode(
-            Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController) {
-        if (DesktopModeStatus.isProto2Enabled()) {
-            return desktopTasksController.map(DesktopTasksController::asDesktopMode);
-        }
-        return desktopModeController.map(DesktopModeController::asDesktopMode);
+        return desktopTasksController.map(DesktopTasksController::asDesktopMode);
     }
 
-    @BindsOptionalOf
-    @DynamicOverride
-    abstract DesktopModeController optionalDesktopModeController();
-
-    @WMSingleton
-    @Provides
-    static Optional<DesktopModeController> provideDesktopModeController(
-            @DynamicOverride Optional<Lazy<DesktopModeController>> desktopModeController) {
-        // Use optional-of-lazy for the dependency that this provider relies on.
-        // Lazy ensures that this provider will not be the cause the dependency is created
-        // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isProto1Enabled()) {
-            return desktopModeController.map(Lazy::get);
-        }
-        return Optional.empty();
-    }
 
     @BindsOptionalOf
     @DynamicOverride
@@ -836,7 +815,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isProto2Enabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             return desktopTasksController.map(Lazy::get);
         }
         return Optional.empty();
@@ -853,7 +832,7 @@ public abstract class WMShellBaseModule {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        if (DesktopModeStatus.isAnyEnabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             return desktopModeTaskRepository.map(Lazy::get);
         }
         return Optional.empty();

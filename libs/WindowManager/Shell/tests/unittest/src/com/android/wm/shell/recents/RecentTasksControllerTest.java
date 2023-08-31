@@ -257,7 +257,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isProto2Enabled()).thenReturn(true);
+        when(DesktopModeStatus.isEnabled()).thenReturn(true);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -297,7 +297,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
         StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
                 DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isProto2Enabled()).thenReturn(false);
+        when(DesktopModeStatus.isEnabled()).thenReturn(false);
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);

@@ -73,7 +73,7 @@ public class ApkLiteParseUtils {
     // Constants copied from services.jar side since they're not accessible
     private static final String ANDROID_RES_NAMESPACE =
             "http://schemas.android.com/apk/res/android";
-    private static final int DEFAULT_MIN_SDK_VERSION = 1;
+    public static final int DEFAULT_MIN_SDK_VERSION = 1;
     private static final int DEFAULT_TARGET_SDK_VERSION = 0;
     public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
     private static final int PARSE_IS_SYSTEM_DIR = 1 << 4;

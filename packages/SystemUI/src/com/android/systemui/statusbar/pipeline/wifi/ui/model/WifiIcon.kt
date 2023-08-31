@@ -65,8 +65,18 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
         @VisibleForTesting
         internal val NO_INTERNET = R.string.data_connection_no_internet
 
-        /** Mapping from a [WifiNetworkModel] to the appropriate [WifiIcon] */
-        fun fromModel(model: WifiNetworkModel, context: Context): WifiIcon =
+        /**
+         * Mapping from a [WifiNetworkModel] to the appropriate [WifiIcon].
+         *
+         * @param showHotspotInfo true if the wifi icon should represent the hotspot device (if it
+         *   exists) and false if the wifi icon should only ever show the wifi level and *not* the
+         *   hotspot device.
+         */
+        fun fromModel(
+            model: WifiNetworkModel,
+            context: Context,
+            showHotspotInfo: Boolean,
+        ): WifiIcon =
             when (model) {
                 is WifiNetworkModel.Unavailable -> Hidden
                 is WifiNetworkModel.Invalid -> Hidden
@@ -82,22 +92,50 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
                     )
                 is WifiNetworkModel.Active -> {
                     val levelDesc = context.getString(WIFI_CONNECTION_STRENGTH[model.level])
-                    when {
-                        model.isValidated ->
-                            Visible(
-                                WifiIcons.WIFI_FULL_ICONS[model.level],
-                                ContentDescription.Loaded(levelDesc),
-                            )
-                        else ->
-                            Visible(
-                                WifiIcons.WIFI_NO_INTERNET_ICONS[model.level],
-                                ContentDescription.Loaded(
-                                    "$levelDesc,${context.getString(NO_INTERNET)}"
-                                ),
-                            )
-                    }
+                    val contentDescription =
+                        ContentDescription.Loaded(
+                            if (model.isValidated) {
+                                (levelDesc)
+                            } else {
+                                "$levelDesc,${context.getString(NO_INTERNET)}"
+                            }
+                        )
+                    Visible(model.toIcon(showHotspotInfo), contentDescription)
                 }
             }
+
+        @DrawableRes
+        private fun WifiNetworkModel.Active.toIcon(showHotspotInfo: Boolean): Int {
+            return if (!showHotspotInfo) {
+                this.toBasicIcon()
+            } else {
+                when (this.hotspotDeviceType) {
+                    WifiNetworkModel.HotspotDeviceType.NONE -> this.toBasicIcon()
+                    WifiNetworkModel.HotspotDeviceType.TABLET ->
+                        com.android.settingslib.R.drawable.ic_hotspot_tablet
+                    WifiNetworkModel.HotspotDeviceType.LAPTOP ->
+                        com.android.settingslib.R.drawable.ic_hotspot_laptop
+                    WifiNetworkModel.HotspotDeviceType.WATCH ->
+                        com.android.settingslib.R.drawable.ic_hotspot_watch
+                    WifiNetworkModel.HotspotDeviceType.AUTO ->
+                        com.android.settingslib.R.drawable.ic_hotspot_auto
+                    // Use phone as the default drawable
+                    WifiNetworkModel.HotspotDeviceType.PHONE,
+                    WifiNetworkModel.HotspotDeviceType.UNKNOWN,
+                    WifiNetworkModel.HotspotDeviceType.INVALID ->
+                        com.android.settingslib.R.drawable.ic_hotspot_phone
+                }
+            }
+        }
+
+        @DrawableRes
+        private fun WifiNetworkModel.Active.toBasicIcon(): Int {
+            return if (this.isValidated) {
+                WifiIcons.WIFI_FULL_ICONS[this.level]
+            } else {
+                WifiIcons.WIFI_NO_INTERNET_ICONS[this.level]
+            }
+        }
     }
 }
 

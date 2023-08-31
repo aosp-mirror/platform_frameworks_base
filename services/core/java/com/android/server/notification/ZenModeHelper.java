@@ -1101,8 +1101,11 @@ public class ZenModeHelper {
                     .allowAlarms(true)
                     .allowMedia(true)
                     .build());
-        } else {
+        } else if (rule.zenPolicy != null) {
             policy.apply(rule.zenPolicy);
+        } else {
+            // active rule with no specified policy inherits the default settings
+            policy.apply(mConfig.toZenPolicy());
         }
     }
 

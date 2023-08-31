@@ -711,7 +711,7 @@ status_t Reporter::execute_section(const Section* section, IncidentMetadata* met
         return NO_ERROR;
     }
 
-    ALOGD("Start incident report section %d '%s'", sectionId, section->name.string());
+    ALOGD("Start incident report section %d '%s'", sectionId, section->name.c_str());
     IncidentMetadata::SectionStats* sectionMetadata = metadata->add_sections();
 
     // Notify listener of starting
@@ -747,7 +747,7 @@ status_t Reporter::execute_section(const Section* section, IncidentMetadata* met
                     sectionId, IIncidentReportStatusListener::STATUS_FINISHED);
     });
 
-    ALOGD("Finish incident report section %d '%s'", sectionId, section->name.string());
+    ALOGD("Finish incident report section %d '%s'", sectionId, section->name.c_str());
     return NO_ERROR;
 }
 

@@ -40,8 +40,11 @@ public class ViewCompiler {
     public boolean compileLayouts(PackageStateInternal ps, String apkPath) {
         try {
             final String packageName = ps.getPackageName();
-            // TODO(b/143971007): Use a cross-user directory
-            File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
+            final File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
+            if (dataDir == null) {
+                // The app is not installed on the target user and doesn't have a data dir
+                return false;
+            }
             final String outDexFile = dataDir.getAbsolutePath() + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                 ") to " + outDexFile);

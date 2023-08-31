@@ -175,7 +175,7 @@ public:
         String16 filename16(filename);
         String16 path16;
         if (mMountService->getMountedObbPath(filename16, path16)) {
-            return String8(path16).string();
+            return String8(path16).c_str();
         } else {
             return NULL;
         }
@@ -183,7 +183,7 @@ public:
 };
 
 void ObbActionListener::onObbResult(const android::String16& filename, const int32_t nonce, const int32_t state) {
-    mStorageManager->fireCallback(String8(filename).string(), nonce, state);
+    mStorageManager->fireCallback(String8(filename).c_str(), nonce, state);
 }
 
 

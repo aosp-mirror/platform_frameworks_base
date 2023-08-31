@@ -65,7 +65,7 @@ constructor(
     // [DefaultConnectionModel]
     private val wifiIconFlow: Flow<InternetTileModel> =
         wifiInteractor.wifiNetwork.flatMapLatest {
-            val wifiIcon = WifiIcon.fromModel(it, context)
+            val wifiIcon = WifiIcon.fromModel(it, context, showHotspotInfo = true)
             if (it is WifiNetworkModel.Active && wifiIcon is WifiIcon.Visible) {
                 flowOf(
                     InternetTileModel.Active(

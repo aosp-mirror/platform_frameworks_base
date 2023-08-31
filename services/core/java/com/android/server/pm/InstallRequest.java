@@ -35,6 +35,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
+import android.content.pm.parsing.PackageLite;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
@@ -93,6 +94,8 @@ final class InstallRequest {
     private int[] mNewUsers;
     @Nullable
     private AndroidPackage mPkg;
+    @Nullable
+    private PackageLite mPackageLite;
     private int mReturnCode;
     private int mInternalErrorCode;
     @Nullable
@@ -142,6 +145,7 @@ final class InstallRequest {
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
                 params.mDataLoaderType, params.mPackageSource,
                 params.mApplicationEnabledSettingPersistent);
+        mPackageLite = params.mPackageLite;
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
         mSessionId = params.mSessionId;
@@ -303,6 +307,11 @@ final class InstallRequest {
     @Nullable
     public AndroidPackage getPkg() {
         return mPkg;
+    }
+
+    @Nullable
+    public PackageLite getPackageLite() {
+        return mPackageLite;
     }
 
     @Nullable
@@ -829,6 +838,18 @@ final class InstallRequest {
             if (mPackageMetrics != null) {
                 mPackageMetrics.onInstallSucceed();
             }
+        }
+    }
+
+    public void onFreezeStarted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
+        }
+    }
+
+    public void onFreezeCompleted() {
+        if (mPackageMetrics != null) {
+            mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }
 }

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
@@ -833,4 +834,6 @@ interface IPackageManager {
     void registerPackageMonitorCallback(IRemoteCallback callback, int userId);
 
     void unregisterPackageMonitorCallback(IRemoteCallback callback);
+
+    ArchivedPackageParcel getArchivedPackage(in String apkPath);
 }

@@ -93,6 +93,7 @@ final class PackageHandler extends Handler {
                 mPm.mRunningInstalls.delete(msg.arg1);
 
                 request.closeFreezer();
+                request.onInstallCompleted();
                 request.runPostInstallRunnable();
                 if (!request.isInstallExistingForUser()) {
                     mInstallPackageHelper.handlePackagePostInstall(request, didRestore);

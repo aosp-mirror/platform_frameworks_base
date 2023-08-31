@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -115,6 +114,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -143,6 +143,8 @@ public class BubbleController implements ConfigurationChangeListener,
     // Should match with PhoneWindowManager
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
+    private static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+    private static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
 
     /**
      * Common interface to send updates to bubble views.
@@ -182,6 +184,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
     private final TaskViewTransitions mTaskViewTransitions;
+    private final Transitions mTransitions;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
@@ -282,6 +285,7 @@ public class BubbleController implements ConfigurationChangeListener,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
+            Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
             BubbleProperties bubbleProperties) {
@@ -317,6 +321,7 @@ public class BubbleController implements ConfigurationChangeListener,
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         mTaskViewTransitions = taskViewTransitions;
+        mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
@@ -416,23 +421,9 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         }, mMainHandler);
 
-        mTaskStackListener.addListener(new TaskStackListenerCallback() {
-            @Override
-            public void onTaskMovedToFront(int taskId) {
-                mMainExecutor.execute(() -> {
-                    int expandedId = INVALID_TASK_ID;
-                    if (mStackView != null && mStackView.getExpandedBubble() != null
-                            && isStackExpanded()
-                            && !mStackView.isExpansionAnimating()
-                            && !mStackView.isSwitchAnimating()) {
-                        expandedId = mStackView.getExpandedBubble().getTaskId();
-                    }
-                    if (expandedId != INVALID_TASK_ID && expandedId != taskId) {
-                        mBubbleData.setExpanded(false);
-                    }
-                });
-            }
+        mTransitions.registerObserver(new BubblesTransitionObserver(this, mBubbleData));
 
+        mTaskStackListener.addListener(new TaskStackListenerCallback() {
             @Override
             public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                     boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
@@ -883,8 +874,10 @@ public class BubbleController implements ConfigurationChangeListener,
 
             String action = intent.getAction();
             String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
-            if ((Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
-                    && SYSTEM_DIALOG_REASON_GESTURE_NAV.equals(reason))
+            boolean validReasonToCollapse = SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)
+                    || SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)
+                    || SYSTEM_DIALOG_REASON_GESTURE_NAV.equals(reason);
+            if ((Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action) && validReasonToCollapse)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mMainExecutor.execute(() -> collapseStack());
             }
@@ -1959,6 +1952,15 @@ public class BubbleController implements ConfigurationChangeListener,
         } else if (mLayerView != null) {
             // TODO(b/273313561): handle a11y for BubbleBarLayerView
         }
+    }
+
+    /**
+     * Returns whether the stack is animating or not.
+     */
+    public boolean isStackAnimating() {
+        return mStackView != null
+                && (mStackView.isExpansionAnimating()
+                || mStackView.isSwitchAnimating());
     }
 
     @VisibleForTesting

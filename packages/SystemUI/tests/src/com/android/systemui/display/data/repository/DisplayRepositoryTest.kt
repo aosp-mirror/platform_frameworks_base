@@ -230,7 +230,7 @@ class DisplayRepositoryTest : SysuiTestCase() {
     }
 
     private fun TestScope.latestPendingDisplayFlowValue(): FlowValue<Int?> {
-        val flowValue = collectLastValue(displayRepository.pendingDisplay)
+        val flowValue = collectLastValue(displayRepository.pendingDisplayId)
         verify(displayManager)
             .registerDisplayListener(
                 displayListener.capture(),

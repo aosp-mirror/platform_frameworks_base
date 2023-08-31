@@ -1514,7 +1514,7 @@ public final class CachedAppOptimizer {
                     mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
                         pid,
                         (int) Math.min(opt.getFreezeUnfreezeTime() - freezeTime, Integer.MAX_VALUE),
-                        new Pair<String, Integer>(app.processName, reason)));
+                        new Pair<ProcessRecord, Integer>(app, reason)));
         }
     }
 
@@ -2159,11 +2159,12 @@ public final class CachedAppOptimizer {
                 case REPORT_UNFREEZE_MSG: {
                     int pid = msg.arg1;
                     int frozenDuration = msg.arg2;
-                    Pair<String, Integer> obj = (Pair<String, Integer>) msg.obj;
-                    String processName = obj.first;
+                    Pair<ProcessRecord, Integer> obj = (Pair<ProcessRecord, Integer>) msg.obj;
+                    ProcessRecord app = obj.first;
+                    String processName = app.processName;
                     int reason = obj.second;
 
-                    reportUnfreeze(pid, frozenDuration, processName, reason);
+                    reportUnfreeze(app, pid, frozenDuration, processName, reason);
                 } break;
                 case UID_FROZEN_STATE_CHANGED_MSG: {
                     final boolean frozen = (msg.arg1 == 1);
@@ -2358,10 +2359,11 @@ public final class CachedAppOptimizer {
             }
         }
 
-        private void reportUnfreeze(int pid, int frozenDuration, String processName,
-                @UnfreezeReason int reason) {
+        private void reportUnfreeze(ProcessRecord app, int pid, int frozenDuration,
+                String processName, @UnfreezeReason int reason) {
 
             EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName, reason);
+            app.onProcessUnfrozen();
 
             // See above for why we're not taking mPhenotypeFlagLock here
             if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {

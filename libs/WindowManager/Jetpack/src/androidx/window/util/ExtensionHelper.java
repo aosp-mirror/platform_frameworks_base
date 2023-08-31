@@ -16,8 +16,6 @@
 
 package androidx.window.util;
 
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
@@ -25,8 +23,8 @@ import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.util.RotationUtils;
 import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -45,10 +43,9 @@ public final class ExtensionHelper {
      * Rotates the input rectangle specified in default display orientation to the current display
      * rotation.
      */
-    public static void rotateRectToDisplayRotation(int displayId, Rect inOutRect) {
+    public static void rotateRectToDisplayRotation(int displayId, int rotation, Rect inOutRect) {
         DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
         DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
-        int rotation = displayInfo.rotation;
 
         boolean isSideRotation = rotation == ROTATION_90 || rotation == ROTATION_270;
         int displayWidth = isSideRotation ? displayInfo.logicalHeight : displayInfo.logicalWidth;
@@ -56,35 +53,7 @@ public final class ExtensionHelper {
 
         inOutRect.intersect(0, 0, displayWidth, displayHeight);
 
-        rotateBounds(inOutRect, displayWidth, displayHeight, rotation);
-    }
-
-    /**
-     * Rotates the input rectangle within parent bounds for a given delta.
-     */
-    private static void rotateBounds(Rect inOutRect, int parentWidth, int parentHeight,
-            @Surface.Rotation int delta) {
-        int origLeft = inOutRect.left;
-        switch (delta) {
-            case ROTATION_0:
-                return;
-            case ROTATION_90:
-                inOutRect.left = inOutRect.top;
-                inOutRect.top = parentWidth - inOutRect.right;
-                inOutRect.right = inOutRect.bottom;
-                inOutRect.bottom = parentWidth - origLeft;
-                return;
-            case ROTATION_180:
-                inOutRect.left = parentWidth - inOutRect.right;
-                inOutRect.right = parentWidth - origLeft;
-                return;
-            case ROTATION_270:
-                inOutRect.left = parentHeight - inOutRect.bottom;
-                inOutRect.bottom = inOutRect.right;
-                inOutRect.right = parentHeight - inOutRect.top;
-                inOutRect.top = origLeft;
-                return;
-        }
+        RotationUtils.rotateBounds(inOutRect, displayWidth, displayHeight, rotation);
     }
 
     /** Transforms rectangle from absolute coordinate space to the window coordinate space. */

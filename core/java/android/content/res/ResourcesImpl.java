@@ -27,7 +27,6 @@ import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
-import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -430,49 +429,35 @@ public class ResourcesImpl {
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
                     if (locales.size() > 1) {
                         String[] availableLocales;
-                        if (ResourcesManager.getInstance().getLocaleList().isEmpty()) {
-                            // The LocaleList has changed. We must query the AssetManager's
-                            // available Locales and figure out the best matching Locale in the new
-                            // LocaleList.
-                            availableLocales = mAssets.getNonSystemLocales();
+                        // The LocaleList has changed. We must query the AssetManager's
+                        // available Locales and figure out the best matching Locale in the new
+                        // LocaleList.
+                        availableLocales = mAssets.getNonSystemLocales();
+                        if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                            // No app defined locales, so grab the system locales.
+                            availableLocales = mAssets.getLocales();
                             if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                // No app defined locales, so grab the system locales.
-                                availableLocales = mAssets.getLocales();
-                                if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                    availableLocales = null;
-                                }
+                                availableLocales = null;
                             }
+                        }
 
-                            if (availableLocales != null) {
-                                final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
-                                        availableLocales);
-                                if (bestLocale != null) {
-                                    selectedLocales = new String[]{
-                                            adjustLanguageTag(bestLocale.toLanguageTag())};
-                                    if (!bestLocale.equals(locales.get(0))) {
-                                        mConfiguration.setLocales(
-                                                new LocaleList(bestLocale, locales));
-                                    }
+                        if (availableLocales != null) {
+                            final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
+                                    availableLocales);
+                            if (bestLocale != null) {
+                                selectedLocales = new String[]{
+                                        adjustLanguageTag(bestLocale.toLanguageTag())};
+                                if (!bestLocale.equals(locales.get(0))) {
+                                    mConfiguration.setLocales(
+                                            new LocaleList(bestLocale, locales));
                                 }
                             }
-                        } else {
-                            selectedLocales = locales.getIntersection(
-                                    ResourcesManager.getInstance().getLocaleList());
-                            defaultLocale = ResourcesManager.getInstance()
-                                    .getLocaleList().get(0).toLanguageTag();
                         }
                     }
                 }
                 if (selectedLocales == null) {
-                    if (ResourcesManager.getInstance().getLocaleList().isEmpty()) {
-                        selectedLocales = new String[]{
-                                adjustLanguageTag(locales.get(0).toLanguageTag())};
-                    } else {
-                        selectedLocales = new String[locales.size()];
-                        for (int i = 0; i < locales.size(); i++) {
-                            selectedLocales[i] = adjustLanguageTag(locales.get(i).toLanguageTag());
-                        }
-                    }
+                    selectedLocales = new String[]{
+                            adjustLanguageTag(locales.get(0).toLanguageTag())};
                 }
 
                 if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {

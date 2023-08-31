@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -63,6 +64,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -443,7 +445,7 @@ final class DeletePackageHelper {
             // semantics than normal for uninstalling system apps.
             final boolean clearPackageStateAndReturn;
             synchronized (mPm.mLock) {
-                markPackageUninstalledForUserLPw(ps, user);
+                markPackageUninstalledForUserLPw(ps, user, flags);
                 if (!systemApp) {
                     // Do not uninstall the APK if an app should be cached
                     boolean keepUninstalledPackage =
@@ -547,7 +549,7 @@ final class DeletePackageHelper {
     }
 
     @GuardedBy("mPm.mLock")
-    private void markPackageUninstalledForUserLPw(PackageSetting ps, UserHandle user) {
+    private void markPackageUninstalledForUserLPw(PackageSetting ps, UserHandle user, int flags) {
         final int[] userIds = (user == null || user.getIdentifier() == UserHandle.USER_ALL)
                 ? mUserManagerInternal.getUserIds()
                 : new int[] {user.getIdentifier()};
@@ -556,6 +558,12 @@ final class DeletePackageHelper {
                 Slog.d(TAG, "Marking package:" + ps.getPackageName()
                         + " uninstalled for user:" + nextUserId);
             }
+            // Preserve ArchiveState if this is not a full uninstall
+            ArchiveState archiveState =
+                    (flags & DELETE_KEEP_DATA) == 0
+                            ? null
+                            : ps.getUserStateOrDefault(nextUserId).getArchiveState();
+
             ps.setUserState(nextUserId,
                     ps.getCeDataInode(nextUserId),
                     COMPONENT_ENABLED_STATE_DEFAULT,
@@ -576,7 +584,7 @@ final class DeletePackageHelper {
                     null /*splashScreenTheme*/,
                     0 /*firstInstallTime*/,
                     PackageManager.USER_MIN_ASPECT_RATIO_UNSET,
-                    null /*archiveState*/);
+                    archiveState);
         }
         mPm.mSettings.writeKernelMappingLPr(ps);
     }

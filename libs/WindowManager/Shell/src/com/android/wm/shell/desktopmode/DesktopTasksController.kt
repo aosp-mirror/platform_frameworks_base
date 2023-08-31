@@ -122,7 +122,7 @@ class DesktopTasksController(
 
     init {
         desktopMode = DesktopModeImpl()
-        if (DesktopModeStatus.isProto2Enabled()) {
+        if (DesktopModeStatus.isEnabled()) {
             shellInit.addInitCallback({ onInit() }, this)
         }
     }

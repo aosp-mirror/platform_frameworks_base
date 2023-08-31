@@ -261,7 +261,8 @@ public class AudioDeviceBrokerTest {
         // Verify disconnection has been cancelled and we're seeing two connections attempts,
         // with the device connected at the end of the test
         verify(mSpyDevInventory, times(2)).onSetBtActiveDevice(
-                any(AudioDeviceBroker.BtDeviceInfo.class), anyInt());
+                any(AudioDeviceBroker.BtDeviceInfo.class), anyInt() /*codec*/,
+                anyInt() /*streamType*/);
         Assert.assertTrue("Mock device not connected",
                 mSpyDevInventory.isA2dpDeviceConnected(mFakeBtDevice));
 

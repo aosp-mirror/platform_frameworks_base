@@ -210,7 +210,8 @@ object Flags {
 
     /** Inflate and bind views upon emitting a blueprint value . */
     // TODO(b/297365780): Tracking Bug
-    @JvmField val LAZY_INFLATE_KEYGUARD = unreleasedFlag("lazy_inflate_keyguard")
+    @JvmField
+    val LAZY_INFLATE_KEYGUARD = unreleasedFlag("lazy_inflate_keyguard", teamfood = true)
 
     /** Enables UI updates for AI wallpapers in the wallpaper picker. */
     // TODO(b/267722622): Tracking Bug
@@ -497,11 +498,6 @@ object Flags {
     @JvmField
     val HIDE_NAVBAR_WINDOW =
         sysPropBooleanFlag("persist.wm.debug.hide_navbar_window", default = false)
-
-    @Keep
-    @JvmField
-    val WM_DESKTOP_WINDOWING =
-        sysPropBooleanFlag("persist.wm.debug.desktop_mode", default = false)
 
     @Keep
     @JvmField
