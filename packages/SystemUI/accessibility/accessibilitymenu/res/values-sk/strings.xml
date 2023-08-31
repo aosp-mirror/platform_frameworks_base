@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Prejsť na predchádzajúcu obrazovku"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Prejsť na ďalšiu obrazovku"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Ponuka dostupnosti spustí na obrazovke telefónu veľkú ponuku, pomocou ktorej môžete ovládať svoje zariadenie. Môžete ho uzamknúť, ovládať hlasitosť a jas, vytvárať snímky obrazovky a mnoho ďalšieho."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ovládajte zariadenie pomocou veľkej ponuky"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ovládať zariadenie pomocou veľkej ponuky"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Nastavenia ponuky dostupnosti"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Veľké tlačidlá"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Zväčšiť tlačidlá ponuky dostupnosti"</string>
