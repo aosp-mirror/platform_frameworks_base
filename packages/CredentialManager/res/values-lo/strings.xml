@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"ຕົວຈັດການຂໍ້ມູນການເຂົ້າສູ່ລະບົບ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ຍົກເລີກ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ສືບຕໍ່"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"ຕົວເລືອກເພີ່ມເຕີມ"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"ບັນທຶກດ້ວຍວິທີອື່ນ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"ສະແດງລະຫັດຜ່ານ"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"ເຊື່ອງລະຫັດຜ່ານ"</string>
@@ -33,10 +49,13 @@
     <string name="sign_ins" msgid="4710739369149469208">"ການເຂົ້າສູ່ລະບົບ"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ຂໍ້ມູນການເຂົ້າສູ່ລະບົບ"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"ບັນທຶກ <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ໃສ່"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"ສ້າງກະແຈຜ່ານໃນອຸປະກອນອື່ນບໍ?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"ສ້າງກະແຈຜ່ານຢູ່ອຸປະກອນອື່ນບໍ?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ບັນທຶກລະຫັດຜ່ານຢູ່ອຸປະກອນອື່ນບໍ?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ບັນທຶກການເຂົ້າສູ່ລະບົບຢູ່ອຸປະກອນອື່ນບໍ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ໃຊ້ <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ສຳລັບການເຂົ້າສູ່ລະບົບທັງໝົດຂອງທ່ານບໍ?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"ຕົວຈັດການລະຫັດຜ່ານນີ້ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ຈະຈັດເກັບລະຫັດຜ່ານ ແລະ ກະແຈຜ່ານຂອງທ່ານໄວ້ເພື່ອຊ່ວຍໃຫ້ທ່ານເຂົ້າສູ່ລະບົບໄດ້ຢ່າງງ່າຍດາຍ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ຕັ້ງເປັນຄ່າເລີ່ມຕົ້ນ"</string>
+    <string name="settings" msgid="6536394145760913145">"ການຕັ້ງຄ່າ"</string>
     <string name="use_once" msgid="9027366575315399714">"ໃຊ້ເທື່ອດຽວ"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> ກະແຈຜ່ານ"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> ລະຫັດຜ່ານ"</string>
@@ -50,8 +69,13 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"ປິດ"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ປິດໄວ້"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ໃຊ້ກະແຈຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"ໃຊ້ການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"ໃຊ້ລະຫັດຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"ເລືອກການເຂົ້າສູ່ລະບົບຂອງທ່ານສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"ປົດລັອກຕົວເລືອກການເຂົ້າສູ່ລະບົບສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"ເລືອກກະແຈຜ່ານທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"ເລືອກລະຫັດຜ່ານທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"ເລືອກການເຂົ້າສູ່ລະບົບທີ່ບັນທຶກໄວ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"ເລືອກການເຂົ້າສູ່ລະບົບສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ເລືອກຕົວເລືອກສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ໃຊ້ຂໍ້ມູນນີ້ຢູ່ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"ເຂົ້າສູ່ລະບົບດ້ວຍວິທີອື່ນ"</string>

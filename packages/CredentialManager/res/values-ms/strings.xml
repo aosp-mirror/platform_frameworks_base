@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Pengurus Bukti Kelayakan"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Batal"</string>
     <string name="string_continue" msgid="1346732695941131882">"Teruskan"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Lagi pilihan"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Simpan cara lain"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Ketahui lebih lanjut"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Tunjukkan kata laluan"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Sembunyikan kata laluan"</string>
@@ -20,7 +36,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Keselamatan akaun yang dipertingkatkan"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Setiap kunci dipautkan secara eksklusif dengan apl atau laman web kunci dicipta, jadi anda tidak boleh log masuk ke apl atau laman web penipuan secara tidak sengaja. Selain itu, dengan pelayan yang hanya menyimpan kunci awam, penggodaman menjadi jauh lebih sukar."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Peralihan yang lancar"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Semasa kita bergerak menuju ke arah masa depan tanpa kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Meskipun masa depan kita nanti tidak memerlukan kata laluan, kata laluan masih akan tersedia bersama dengan kunci laluan."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Pilih tempat untuk menyimpan <xliff:g id="CREATETYPES">%1$s</xliff:g> anda"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Pilih Password Manager untuk menyimpan maklumat anda dan log masuk lebih pantas pada kali seterusnya"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Cipta kunci laluan untuk <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -33,14 +49,17 @@
     <string name="sign_ins" msgid="4710739369149469208">"log masuk"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"maklumat log masuk"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Simpan <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> pada"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Cipta kunci laluan dalam peranti lain?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Buat kunci laluan pada peranti lain?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Simpan kata laluan pada peranti lain?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Simpan log masuk pada peranti lain?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gunakan <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> untuk semua log masuk anda?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Password Manager untuk <xliff:g id="USERNAME">%1$s</xliff:g> akan menyimpan kata laluan dan kunci laluan anda untuk membantu anda log masuk dengan mudah"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Tetapkan sebagai lalai"</string>
+    <string name="settings" msgid="6536394145760913145">"Tetapan"</string>
     <string name="use_once" msgid="9027366575315399714">"Gunakan sekali"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> kata laluan • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci laluan"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Kata laluan <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Kunci laluan <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"<xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g> kunci laluan"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"<xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g> bukti kelayakan"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Kunci laluan"</string>
     <string name="another_device" msgid="5147276802037801217">"Peranti lain"</string>
@@ -50,8 +69,13 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Tutup"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Ketepikan"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Gunakan kunci laluan anda yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Gunakan maklumat log masuk anda yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Pilih log masuk yang telah disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Gunakan kata laluan anda yang disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Gunakan log masuk anda untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Buka kunci pilihan log masuk untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Pilih kunci laluan yang disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Pilih kata laluan yang disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Pilih log masuk yang disimpan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Pilih log masuk untuk <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Pilih satu pilihan untuk <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Gunakan maklumat ini pada <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Log masuk menggunakan cara lain"</string>
