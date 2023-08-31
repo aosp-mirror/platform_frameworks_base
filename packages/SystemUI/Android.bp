@@ -240,6 +240,9 @@ filegroup {
 
         /* Log fakes */
         "tests/src/com/android/systemui/log/core/FakeLogBuffer.kt",
+
+        /* QS fakes */
+        "tests/src/com/android/systemui/qs/pipeline/domain/interactor/FakeQSTile.kt",
     ],
     path: "tests/src",
 }
@@ -354,6 +357,11 @@ filegroup {
         "tests/src/com/android/systemui/smartspace/DreamSmartspaceControllerTest.kt",
         "tests/src/com/android/systemui/smartspace/LockscreenAndDreamTargetFilterTest.kt",
         "tests/src/com/android/systemui/smartspace/LockscreenPreconditionTest.kt",
+
+        /* Quick Settings new pipeline converted tests */
+        "tests/src/com/android/systemui/qs/pipeline/data/**/*Test.kt",
+        "tests/src/com/android/systemui/qs/pipeline/domain/**/*Test.kt",
+        "tests/src/com/android/systemui/qs/pipeline/shared/TileSpecTest.kt",
     ],
     path: "tests/src",
 }
