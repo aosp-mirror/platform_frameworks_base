@@ -102,17 +102,19 @@ private fun LockscreenScene(
     longPressViewModel: KeyguardLongPressViewModel,
     modifier: Modifier = Modifier,
 ) {
-    var settingsMenu: View? = null
+    fun findSettingsMenu(): View {
+        return viewProvider().requireViewById(R.id.keyguard_settings_button)
+    }
 
     Box(
         modifier = modifier,
     ) {
         LongPressSurface(
             viewModel = longPressViewModel,
-            isSettingsMenuVisible = { settingsMenu?.isVisible == true },
+            isSettingsMenuVisible = { findSettingsMenu().isVisible },
             settingsMenuBounds = {
                 val bounds = android.graphics.Rect()
-                settingsMenu?.getHitRect(bounds)
+                findSettingsMenu().getHitRect(bounds)
                 bounds.toComposeRect()
             },
             modifier = Modifier.fillMaxSize(),
@@ -124,11 +126,7 @@ private fun LockscreenScene(
                 // Remove the KeyguardRootView from any parent it might already have in legacy code
                 // just in case (a view can't have two parents).
                 (keyguardRootView.parent as? ViewGroup)?.removeView(keyguardRootView)
-                settingsMenu = keyguardRootView.requireViewById(R.id.keyguard_settings_button)
                 keyguardRootView
-            },
-            update = { keyguardRootView ->
-                keyguardRootView.requireViewById<View>(R.id.lock_icon_view)
             },
             modifier = Modifier.fillMaxSize(),
         )
