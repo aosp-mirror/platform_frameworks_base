@@ -117,7 +117,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
@@ -492,9 +491,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifySystemUiStateFlags(mSysUiState.getFlags());
 
             notifyConnectionChanged();
-            if (mLatchForOnUserChanging != null) {
-                mLatchForOnUserChanging.countDown();
-                mLatchForOnUserChanging = null;
+            if (mDoneUserChanging != null) {
+                mDoneUserChanging.run();
+                mDoneUserChanging = null;
             }
         }
 
@@ -550,14 +549,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     };
 
-    private CountDownLatch mLatchForOnUserChanging;
+    private Runnable mDoneUserChanging;
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanging(int newUser, @NonNull Context userContext,
-                        CountDownLatch latch) {
+                        @NonNull Runnable resultCallback) {
                     mConnectionBackoffAttempts = 0;
-                    mLatchForOnUserChanging = latch;
+                    mDoneUserChanging = resultCallback;
                     internalConnectToCurrentUser("User changed");
                 }
             };

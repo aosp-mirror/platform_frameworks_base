@@ -33,11 +33,22 @@ import androidx.annotation.GuardedBy
 import androidx.annotation.WorkerThread
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.Assert
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
+import javax.inject.Provider
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -58,20 +69,26 @@ import kotlin.reflect.KProperty
  */
 open class UserTrackerImpl internal constructor(
     private val context: Context,
+    private val featureFlagsProvider: Provider<FeatureFlagsClassic>,
     private val userManager: UserManager,
     private val iActivityManager: IActivityManager,
     private val dumpManager: DumpManager,
-    private val backgroundHandler: Handler
+    private val appScope: CoroutineScope,
+    private val backgroundContext: CoroutineDispatcher,
+    private val backgroundHandler: Handler,
 ) : UserTracker, Dumpable, BroadcastReceiver() {
 
     companion object {
         private const val TAG = "UserTrackerImpl"
+        private const val USER_CHANGE_THRESHOLD = 5L * 1000 // 5 sec
     }
 
     var initialized = false
         private set
 
     private val mutex = Any()
+    private val isBackgroundUserSwitchEnabled: Boolean get() =
+        featureFlagsProvider.get().isEnabled(Flags.USER_TRACKER_BACKGROUND_CALLBACKS)
 
     override var userId: Int by SynchronizedDelegate(context.userId)
         protected set
@@ -103,6 +120,10 @@ open class UserTrackerImpl internal constructor(
     @GuardedBy("callbacks")
     private val callbacks: MutableList<DataItem> = ArrayList()
 
+    private var beforeUserSwitchingJob: Job? = null
+    private var userSwitchingJob: Job? = null
+    private var afterUserSwitchingJob: Job? = null
+
     open fun initialize(startingUser: Int) {
         if (initialized) {
             return
@@ -119,7 +140,7 @@ open class UserTrackerImpl internal constructor(
             addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
         }
-        context.registerReceiverForAllUsers(this, filter, null /* permission */, backgroundHandler)
+        context.registerReceiverForAllUsers(this, filter, null, backgroundHandler)
 
         registerUserSwitchObserver()
 
@@ -162,16 +183,39 @@ open class UserTrackerImpl internal constructor(
     private fun registerUserSwitchObserver() {
         iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
             override fun onBeforeUserSwitching(newUserId: Int) {
-                handleBeforeUserSwitching(newUserId)
+                if (isBackgroundUserSwitchEnabled) {
+                    beforeUserSwitchingJob?.cancel()
+                    beforeUserSwitchingJob = appScope.launch(backgroundContext) {
+                        handleBeforeUserSwitching(newUserId)
+                    }
+                } else {
+                    handleBeforeUserSwitching(newUserId)
+                }
             }
 
             override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
-                handleUserSwitching(newUserId)
-                reply?.sendResult(null)
+                if (isBackgroundUserSwitchEnabled) {
+                    userSwitchingJob?.cancel()
+                    userSwitchingJob = appScope.launch(backgroundContext) {
+                        handleUserSwitchingCoroutines(newUserId) {
+                            reply?.sendResult(null)
+                        }
+                    }
+                } else {
+                    handleUserSwitching(newUserId)
+                    reply?.sendResult(null)
+                }
             }
 
             override fun onUserSwitchComplete(newUserId: Int) {
-                handleUserSwitchComplete(newUserId)
+                if (isBackgroundUserSwitchEnabled) {
+                    afterUserSwitchingJob?.cancel()
+                    afterUserSwitchingJob = appScope.launch(backgroundContext) {
+                        handleUserSwitchComplete(newUserId)
+                    }
+                } else {
+                    handleUserSwitchComplete(newUserId)
+                }
             }
         }, TAG)
     }
@@ -195,7 +239,7 @@ open class UserTrackerImpl internal constructor(
             val callback = it.callback.get()
             if (callback != null) {
                 it.executor.execute {
-                    callback.onUserChanging(userId, userContext, latch)
+                    callback.onUserChanging(userId, userContext) { latch.countDown() }
                 }
             } else {
                 latch.countDown()
@@ -203,6 +247,28 @@ open class UserTrackerImpl internal constructor(
         }
         latch.await()
     }
+
+    @WorkerThread
+    protected open suspend fun handleUserSwitchingCoroutines(newUserId: Int, onDone: () -> Unit) =
+            coroutineScope {
+                Assert.isNotMainThread()
+                Log.i(TAG, "Switching to user $newUserId")
+
+                for (callbackDataItem in synchronized(callbacks) { callbacks.toList() }) {
+                    val callback: UserTracker.Callback = callbackDataItem.callback.get() ?: continue
+                    launch(callbackDataItem.executor.asCoroutineDispatcher()) {
+                        val mutex = Mutex(true)
+                        val thresholdLogJob = launch(backgroundContext) {
+                            delay(USER_CHANGE_THRESHOLD)
+                            Log.e(TAG, "Failed to finish $callback in time")
+                        }
+                        callback.onUserChanging(userId, userContext) { mutex.unlock() }
+                        mutex.lock()
+                        thresholdLogJob.cancel()
+                    }.join()
+                }
+                onDone()
+            }
 
     @WorkerThread
     protected open fun handleUserSwitchComplete(newUserId: Int) {

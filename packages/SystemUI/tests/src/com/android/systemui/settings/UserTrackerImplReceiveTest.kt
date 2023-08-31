@@ -11,10 +11,13 @@ import androidx.concurrent.futures.DirectExecutor
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +63,9 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
     @Mock private lateinit var callback: UserTracker.Callback
     @Captor private lateinit var captor: ArgumentCaptor<List<UserInfo>>
 
+    private val fakeFeatures = FakeFeatureFlagsClassic()
+    private val testDispatcher = StandardTestDispatcher()
+
     private lateinit var tracker: UserTrackerImpl
 
     @Before
@@ -68,12 +74,21 @@ class UserTrackerImplReceiveTest : SysuiTestCase() {
 
         `when`(context.user).thenReturn(UserHandle.SYSTEM)
         `when`(context.createContextAsUser(ArgumentMatchers.any(), anyInt())).thenReturn(context)
-
-        tracker = UserTrackerImpl(context, userManager, iActivityManager, dumpManager, handler)
     }
 
     @Test
-    fun callsCallbackAndUpdatesProfilesWhenAnIntentReceived() {
+    fun callsCallbackAndUpdatesProfilesWhenAnIntentReceived() = runTest {
+        tracker =
+            UserTrackerImpl(
+                context,
+                { fakeFeatures },
+                userManager,
+                iActivityManager,
+                dumpManager,
+                this,
+                testDispatcher,
+                handler
+            )
         tracker.initialize(0)
         tracker.addCallback(callback, executor)
         val profileID = tracker.userId + 10
