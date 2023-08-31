@@ -971,7 +971,7 @@
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Тайлах хээгээ зурна уу"</string>
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Яаралтай тусламж"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Дуудлагаруу буцах"</string>
-    <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Зөв!"</string>
+    <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Зөв"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дахин оролдох"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дахин оролдох"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Бүх онцлог, өгөгдлийн түгжээг тайлах"</string>
