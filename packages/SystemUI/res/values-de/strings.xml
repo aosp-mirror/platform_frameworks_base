@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> hat diesen Screenshot erkannt."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> und andere geöffnete Apps haben diesen Screenshot erkannt."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Zu Notiz hinzufügen"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Aufzeichnung starten?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Beim Aufnehmen kann das Android-System vertrauliche Informationen erfassen, die auf deinem Bildschirm angezeigt oder von deinem Gerät wiedergegeben werden. Das können Passwörter, Zahlungsinformationen, Fotos, Nachrichten und Audioinhalte sein."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Gesamten Bildschirm aufnehmen"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Eine einzelne App aufnehmen"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Während der Aufnahme hat Android Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Während der Aufnahme einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Aufnahme starten"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Aufnahme starten?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Während der Aufnahme hat Android Zugriff auf alle Inhalte, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Während der Aufnahme einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder von ihr wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Aufnahme starten"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio aufnehmen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio des Geräts"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über Mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Starten"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Starten"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Bildschirm wird aufgezeichnet"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Bildschirm und Ton werden aufgezeichnet"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Berührungen des Bildschirms anzeigen"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Teilen"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"Bildschirmaufzeichnung gespeichert"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Zum Ansehen tippen"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"Fehler beim Löschen der Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"Fehler beim Speichern der Bildschirmaufzeichnung"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Fehler beim Start der Bildschirmaufzeichnung"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Zurück"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startbildschirm"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bestätigt"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Per Gesichtserkennung entsperrt. Tippe auf das Symbol „Entsperren“, um fortzufahren."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Mit Gesicht entsperrt"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Wenn du beim nächsten Versuch ein falsches Muster eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Wenn du beim nächsten Versuch eine falsche PIN eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Wenn du beim nächsten Versuch ein falsches Passwort eingibst, werden dein Arbeitsprofil und die zugehörigen Daten gelöscht."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Einrichten"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Nicht jetzt"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dies ist nötig, um die Sicherheit und Leistung zu erhöhen"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Entsperrung per Fingerabdruck neu einrichten"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Entsperrung per Fingerabdruck"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Entsperrung per Fingerabdruck einrichten"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Wenn du die Entsperrung per Fingerabdruck neu einrichtest, werden die aktuellen Bilder und Modelle deines Fingerabdrucks gelöscht.\n\nNachdem sie gelöscht wurden, musst du die Entsperrung per Fingerabdruck neu einrichten, damit du deinen Fingerabdruck nutzen kannst, um dein Smartphone zu entsperren oder deine Identität zu bestätigen."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Wenn du die Entsperrung per Fingerabdruck neu einrichtest, werden die aktuellen Bilder und das aktuelle Modell deines Fingerabdrucks gelöscht.\n\nNachdem sie gelöscht wurden, musst du die Entsperrung per Fingerabdruck neu einrichten, damit du deinen Fingerabdruck nutzen kannst, um dein Smartphone zu entsperren oder deine Identität zu bestätigen."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Die Entsperrung per Fingerabdruck konnte nicht eingerichtet werden. Gehe zu den Einstellungen und versuche es noch einmal."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Entsperrung per Gesichtserkennung neu einrichten"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Entsperrung per Gesichtserkennung"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Entsperrung per Gesichtserkennung einrichten"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Wenn du die Entsperrung per Gesichtserkennung neu einrichtest, wird dein aktuelles Gesichtsmodell gelöscht.\n\nDu musst diese Funktion neu einrichten, damit du dein Smartphone weiterhin mit deinem Gesicht entsperren kannst."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Die Entsperrung per Gesichtserkennung konnte nicht eingerichtet werden. Gehe zu den Einstellungen und versuche es noch einmal."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Berühre den Fingerabdrucksensor"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gesicht wurde nicht erkannt. Verwende stattdessen den Fingerabdruck."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -232,7 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Eingabe"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörhilfen"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörgeräte"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Wird aktiviert…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. drehen"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Bildschirm automatisch drehen"</string>
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Nutzer entfernen?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle Apps und Daten dieses Nutzers werden gelöscht."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Entfernen"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Die App \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise angezeigte Passwörter und Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise angezeigte Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Aufnahme oder Stream starten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Aufnehmen oder Streamen mit der App \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" starten?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Zulassen, dass <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Inhalte teilt oder aufnimmt?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Gesamter Bildschirm"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Eine einzelne App"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Beim Teilen, Aufnehmen oder Übertragen hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Beim Teilen, Aufnehmen oder Übertragen einer App hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Weiter"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"App teilen oder aufnehmen"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Dieser App das Teilen oder Aufnehmen erlauben?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Beim Teilen, Aufnehmen oder Übertragen hat diese App Zugriff auf alle Inhalte, die auf dem Bildschirm sichtbar sind oder auf dem Gerät wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Beim Teilen, Aufnehmen oder Übertragen einer App hat diese App Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder wiedergegeben werden. Sei daher vorsichtig mit Passwörtern, Zahlungsdetails, Nachrichten oder anderen vertraulichen Informationen."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Die <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Aufnahme oder Stream starten?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Der Anbieter dieser App erhält Zugriff auf alle Informationen, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden, während du aufnimmst oder streamst. Dazu gehören beispielsweise Passwörter, Zahlungsdetails, Fotos, Nachrichten und Audioinhalte."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Gesamter Bildschirm"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Einzelne App"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"App teilen oder aufnehmen"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Aufnehmen oder Streamen mit der <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> App starten?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Beim Teilen, Aufnehmen oder Streamen hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Beim Teilen, Aufnehmen oder Streamen einer App hat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder von ihr wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Starten"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Stream starten?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Beim Streamen hat Android Zugriff auf alle Inhalte, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Beim Streamen einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder von ihr wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Stream starten"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Teilen starten?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Beim Teilen, Aufnehmen oder Streamen hat Android Zugriff auf alle Inhalte, die auf deinem Bildschirm sichtbar sind oder von deinem Gerät wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Beim Teilen, Aufnehmen oder Streamen einer App hat Android Zugriff auf alle Inhalte, die in dieser App sichtbar sind oder von ihr wiedergegeben werden. Sei also vorsichtig mit Informationen wie Passwörtern, Zahlungsdetails, Nachrichten, Fotos sowie Audio- und Videoinhalten."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Starten"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Vom IT-Administrator blockiert"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Bildschirmaufnahme ist durch die Geräterichtlinien deaktiviert"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alle löschen"</string>
@@ -436,21 +452,22 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA-Zertifikate"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Richtlinien ansehen"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Jugendschutzeinstellungen"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kann möglicherweise auf die Daten zugreifen, die mit diesem Gerät verknüpft sind, Apps verwalten und die Geräteeinstellungen ändern.\n\nFalls du Fragen hast, wende dich an <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört deiner Organisation.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört Ihrer Organisation.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle auf deinem Gerät installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle in deinem Arbeitsprofil installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Auf dem Gerät ist das Zertifikat einer Zertifizierungsstelle installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Dein Administrator hat die Netzwerkprotokollierung aktiviert. Damit wird der Netzwerkverkehr auf deinem Gerät überwacht."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Dein Administrator hat die Netzwerkprotokollierung aktiviert. Damit werden die Zugriffe in deinem Arbeitsprofil erfasst, jedoch nicht in deinem privaten Profil."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Dieses Gerät ist über <xliff:g id="VPN_APP">%1$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten, sind für deinen IT-Administrator sichtbar."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Dieses Gerät geht über <xliff:g id="VPN_APP">%1$s</xliff:g> ins Internet. Der VPN-Anbieter hat Zugriff auf Daten zu deinen Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Dieses Gerät ist über die <xliff:g id="VPN_APP">%1$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten, sind für deinen IT-Administrator sichtbar."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Dieses Gerät ist über <xliff:g id="VPN_APP_0">%1$s</xliff:g> und <xliff:g id="VPN_APP_1">%2$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten, sind für deinen IT-Administrator sichtbar."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Deine geschäftlichen Apps sind über <xliff:g id="VPN_APP">%1$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten in geschäftlichen Apps, einschließlich E-Mails und Browserdaten, sind für deinen IT-Administrator und deinen VPN-Anbieter sichtbar."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Deine privaten Apps sind über <xliff:g id="VPN_APP">%1$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten, sind für deinen VPN-Anbieter sichtbar."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-Einstellungen öffnen"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dieses Gerät wird von deinen Eltern verwaltet. Sie können unter anderem Informationen über deine genutzten Apps, deinen Standort und deine Gerätenutzungsdauer einsehen und verwalten."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dieses Gerät wird von deinen Eltern verwaltet. Sie können unter anderem Informationen über deine genutzten Apps, deinen Standort und deine Bildschirmzeit einsehen und verwalten."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Durch TrustAgent entsperrt"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Ton &amp; Vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Lautstärke zur Sicherheit verringert"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Die Lautstärke war länger als empfohlen hoch eingestellt"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf sicherere Lautstärke gesenkt"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörerlautstärke war länger als empfohlen hoch eingestellt"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Die Kopfhörerlautstärke hat für diese Woche das Sicherheitslimit überschritten"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Leiser stellen"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
@@ -643,10 +663,10 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sperrbildschirm"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"Notizen-App für schnelles Memo aufrufen"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"System-Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Geteilten Bildschirm aktivieren, aktuelle App rechts"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Geteilten Bildschirm aktivieren, aktuelle App links"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Vom geteilten Bildschirm zum Vollbild wechseln"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Im geteilten Bildschirm: eine App durch eine andere ersetzen"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Splitscreen aktivieren, aktuelle App rechts"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Splitscreen aktivieren, aktuelle App links"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Vom Splitscreen zum Vollbild wechseln"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"Im Splitscreen: eine App durch eine andere ersetzen"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"Eingabesprache ändern (nächste Sprache)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Eingabesprache ändern (vorherige Sprache)"</string>
@@ -876,8 +896,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Einstellungen und Inhalte hier angezeigt werden."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Einstellungen für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Steuerelemente und Inhalte hier angezeigt werden."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Steuerelemente für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
@@ -885,18 +905,14 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Entfernen aus Favoriten"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Für schnellen Zugriff Gerätesteuerung auswählen"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zum Verschieben von Steuerelementen halten und ziehen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle Steuerelemente entfernt"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Änderungen nicht gespeichert"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Andere Apps ansehen"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Neu anordnen"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Steuerelemente hinzufügen"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Zurück zum Bearbeiten"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Steuerelemente konnten nicht geladen werden. Prüfe in der <xliff:g id="APP">%s</xliff:g> App, ob die Einstellungen möglicherweise geändert wurden."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatible Steuerelemente nicht verfügbar"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Andere"</string>
@@ -920,13 +936,14 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Wischen, um weitere zu sehen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Dieses Mediensteuerelement für <xliff:g id="APP_NAME">%1$s</xliff:g> ausblenden?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Mediensteuerung für <xliff:g id="APP_NAME">%1$s</xliff:g> ausblenden?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Einstellungen"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> wird gerade über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergegeben"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g> von <xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird ausgeführt"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"Wiedergeben"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Pausieren"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Vorheriger Titel"</string>
@@ -972,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Lautsprecher &amp; Displays"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Vorgeschlagene Geräte"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Beende die Freigabesitzung zur Übertragung von Medien auf das andere Gerät"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Beenden"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Funktionsweise von Nachrichten an alle"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Nachricht an alle"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personen, die in der Nähe sind und kompatible Bluetooth-Geräten haben, können sich die Medien anhören, die du per Nachricht an alle sendest"</string>
@@ -984,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Speichern nicht möglich. Versuche es noch einmal."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Speichern nicht möglich."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gib mindestens vier Zeichen ein"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Maximal 16 Zeichen möglich"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Maximal <xliff:g id="LENGTH">%1$d</xliff:g> Zeichen möglich"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build-Nummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build-Nummer in Zwischenablage kopiert."</string>
     <string name="basic_status" msgid="2315371112182658176">"Offene Unterhaltung"</string>
@@ -1078,7 +1097,7 @@
     <string name="clipboard_edit" msgid="4500155216174011640">"bearbeiten"</string>
     <string name="add" msgid="81036585205287996">"Hinzufügen"</string>
     <string name="manage_users" msgid="1823875311934643849">"Nutzer verwalten"</string>
-    <string name="drag_split_not_supported" msgid="7173481676120546121">"Diese Benachrichtigung lässt sich nicht auf einen geteilten Bildschirm ziehen"</string>
+    <string name="drag_split_not_supported" msgid="7173481676120546121">"Diese Benachrichtigung lässt sich nicht auf einen Splitscreen ziehen"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WLAN nicht verfügbar"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritätsmodus"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Wecker gestellt"</string>
@@ -1104,37 +1123,39 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Weitere Informationen"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Weitere Informationen unter <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> öffnen"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet wurde mindestens eine Karte hinzugefügt"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-App ist installiert"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Mindestens ein Gerät ist verfügbar"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Damit du die Wallet App als Verknüpfung hinzufügen kannst, muss die App installiert sein"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Damit du die Wallet App als Verknüpfung hinzufügen kannst, muss mindestens eine Karte hinzugefügt sein"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Damit du den QR-Code-Scanner als Verknüpfung hinzufügen kannst, muss eine Kamera-App installiert sein"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Damit du die Home App als Verknüpfung hinzufügen kannst, muss die App installiert sein"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Mindestens ein Gerät ist verfügbar"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Wähle eine Standard-App für Notizen aus, die du für die Verknüpfung verwenden möchtest"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App wählen"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Verknüpfung berühren &amp; halten"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Abbrechen"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bildschirm jetzt wechseln"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Jetzt umdrehen"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Smartphone auffalten"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Bildschirm wechseln?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Mit der Rückkamera lassen sich Fotos mit höherer Auflösung aufnehmen"</string>
-    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Smartphone umdrehen, um Fotos mit höherer Auflösung aufzunehmen"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Für höhere Auflösung Smartphone umdrehen"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Faltbares Gerät wird geöffnet"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Faltbares Gerät wird umgeklappt"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akku bei <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Schließe deinen Eingabestift an ein Ladegerät an"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"Stylus-Akkustand niedrig"</string>
     <string name="video_camera" msgid="7654002575156149298">"Videokamera"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"Keine Anrufe über dieses Profil möglich"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"Gemäß den Arbeitsrichtlinien darfst du nur über dein Arbeitsprofil telefonieren"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"Telefonieren über private App nicht möglich"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Deine Organisation lässt das Telefonieren nur über geschäftliche Apps zu"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Zum Arbeitsprofil wechseln"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"Schließen"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Geschäftliche Smartphone-App installieren"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"Abbrechen"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Sperrbildschirm personalisieren"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Zum Anpassen des Sperrbildschirms entsperren"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Kein WLAN verfügbar"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera blockiert"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera und Mikrofon blockiert"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon blockiert"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritätsmodus an"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant-Aktivierung an"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standard-Notizen-App in den Einstellungen einrichten"</string>
+    <string name="install_app" msgid="5066668100199613936">"App installieren"</string>
 </resources>

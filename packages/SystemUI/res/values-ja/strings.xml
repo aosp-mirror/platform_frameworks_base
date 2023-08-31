@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB を有効にする"</string>
     <string name="learn_more" msgid="4690632085667273811">"詳細"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"スクリーンショット"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock は無効です"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"ロック解除延長は無効です"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"画像を送信しました"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"スクリーンショットを保存しています..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"スクリーンショットを仕事用プロファイルに保存中…"</string>
@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> がこのスクリーンショットを検出しました。"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> とその他の開いているアプリがこのスクリーンショットを検出しました。"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"メモに追加"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"スクリーン レコーダー"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"スクリーン レコーダー"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"画面の録画を処理しています"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"録画を開始しますか？"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"録画中に機密情報が画面に表示されたりデバイスで再生されたりした場合、Android システムでキャプチャされることがあります。これには、パスワード、お支払い情報、写真、メッセージ、音声などが含まれます。"</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"画面全体を録画する"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"1 つのアプリを録画する"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"録画中は、画面に表示されている内容やデバイスで再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"アプリの録画中は、そのアプリで表示されている内容や再生されている内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"録画を開始"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"録画を開始しますか？"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"録画中は、表示や再生される内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"アプリの録画中は、そのアプリで表示または再生される内容に Android がアクセスできます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"録画を開始"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"録音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"デバイスの音声"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"デバイスからの音（音楽、通話、着信音など）"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"マイク"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"デバイスの音声とマイク"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"開始"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"開始"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"画面を録画しています"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"画面と音声を記録しています"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"画面上のタップも記録する"</string>
@@ -119,7 +116,7 @@
     <string name="screenrecord_share_label" msgid="5025590804030086930">"共有"</string>
     <string name="screenrecord_save_title" msgid="1886652605520893850">"画面の録画を保存しました"</string>
     <string name="screenrecord_save_text" msgid="3008973099800840163">"タップすると表示されます"</string>
-    <string name="screenrecord_delete_error" msgid="2870506119743013588">"画面の録画の削除中にエラーが発生しました"</string>
+    <string name="screenrecord_save_error" msgid="5862648532560118815">"画面の録画の保存中にエラーが発生しました"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"画面の録画中にエラーが発生しました"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"戻る"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ホーム"</string>
@@ -145,7 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"確認しました"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"完了するには [確認] をタップしてください"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"顔でロック解除しました。アイコンを押すと続行します。"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"顔でロック解除しました"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"顔でロック解除しました。押して続行してください。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"顔を認識しました。押して続行してください。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"顔を認識しました。ロック解除アイコンを押して続行します。"</string>
@@ -168,6 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"パターンをあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"PIN をあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"パスワードをあと 1 回間違えると、仕事用プロファイルと関連データが削除されます。"</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"設定"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"後で"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"これはセキュリティとパフォーマンスを向上させるために必要です"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"指紋認証をもう一度設定してください"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"指紋認証"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"指紋認証を設定する"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"指紋認証をもう一度設定するために、現在の指紋の画像とモデルが削除されます。\n\n削除された後に、スマートフォンのロックの解除や本人確認に指紋を使用するには、指紋認証をもう一度設定する必要があります。"</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"指紋認証をもう一度設定するために、現在の指紋の画像とモデルが削除されます。\n\n削除された後に、スマートフォンのロックの解除や本人確認に指紋を使用するには、指紋認証をもう一度設定する必要があります。"</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"指紋認証を設定できませんでした。[設定] に移動してもう一度お試しください。"</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"顔認証をもう一度設定してください"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"顔認証"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"顔認証の設定"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"顔認証をもう一度設定するために、現在の顔モデルが削除されます。\n\nスマートフォンのロックの解除に顔認証を使用するには、この機能をもう一度設定する必要があります。"</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"顔認証を設定できませんでした。[設定] に移動してもう一度お試しください。"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"指紋認証センサーをタッチ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"顔を認識できません。指紋認証を使用してください。"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -382,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ユーザーを削除しますか？"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"このユーザーのアプリとデータがすべて削除されます。"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"削除"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中やキャスト中に画面に表示されたり、デバイスで再生されるすべての情報にアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示される情報、またはキャスト先に転送される情報すべてにアクセスできます。これには、パスワード、お支払いの詳細、写真、メッセージ、再生される音声などが含まれます。"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"録画やキャストを開始しますか？"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> に共有や録画を許可しますか？"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"画面全体"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"1 つのアプリ"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"共有、録画、キャスト中は、画面に表示されている内容やデバイスで再生している内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"アプリの共有、録画、キャスト中は、そのアプリで表示されている内容や再生している内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"続行"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"アプリの共有、録画"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"このアプリに共有や録画を許可しますか？"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"共有、録画、キャスト中は、画面に表示されている内容やデバイスで再生している内容にこのアプリがアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"アプリの共有、録画、キャスト中は、そのアプリで表示されている内容や再生している内容にこのアプリがアクセスできるため、パスワード、お支払いの詳細、メッセージなどの機密情報にご注意ください。"</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> は、録画中またはキャスト中に画面上に表示または再生される情報のすべてにアクセスできるようになります。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"録画やキャストを開始しますか？"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"この機能を提供するサービスは、録画中またはキャスト中に画面上に表示または再生される情報のすべてにアクセスできるようになります。これには、パスワード、お支払いの詳細、写真、メッセージ、音声などが含まれます。"</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"画面全体"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"1 つのアプリ"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"アプリの共有または録画"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> で録画やキャストを開始しますか？"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"共有、録画、キャスト中は、画面に表示される内容やデバイスで再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"アプリの共有、録画、キャスト中は、そのアプリで表示または再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"開始"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"キャスト開始しますか？"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"キャスト中は、画面に表示される内容やデバイスで再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"アプリのキャスト中は、そのアプリで表示または再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"キャストを開始"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"共有を開始しますか？"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"共有、録画、キャスト中は、画面に表示される内容やデバイスで再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"アプリの共有、録画、キャスト中は、そのアプリで表示または再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"開始"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IT 管理者によりブロックされました"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"デバイス ポリシーに基づき、画面のキャプチャが無効になりました"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
@@ -444,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"このデバイスには認証局がインストールされています。保護されたネットワーク トラフィックが監視、変更される可能性があります。"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"管理者がネットワーク ログを有効にしているため、このデバイスのトラフィックが監視されています。"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"管理者がネットワーク ログを有効にしているため、仕事用プロファイルのトラフィックは監視されています（個人用プロファイルは対象外）。"</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"このデバイスは <xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、ネットワーク アクティビティは、IT 管理者に公開されます。"</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"このデバイスは <xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、ネットワーク アクティビティは、VPN プロバイダに公開されます。"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"このデバイスは <xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、ネットワーク アクティビティは、IT 管理者に公開されます。"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"このデバイスは <xliff:g id="VPN_APP_0">%1$s</xliff:g>と <xliff:g id="VPN_APP_1">%2$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、ネットワーク アクティビティは、IT 管理者に公開されます。"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"仕事用アプリは <xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、仕事用アプリのネットワーク アクティビティは、IT 管理者と VPN プロバイダに公開されます。"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"個人用アプリは <xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています。メールや閲覧データなど、ネットワーク アクティビティは、VPN プロバイダに公開されます。"</string>
@@ -462,8 +479,11 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"無効にする"</string>
     <string name="sound_settings" msgid="8874581353127418308">"音とバイブレーション"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
-    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"安全な音量まで下げました"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"おすすめの時間よりも長く大音量になっていました"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量を安全なレベルまで下げました"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"おすすめの時間よりも長い時間にわたってヘッドフォンの音量が大きく設定されています"</string>
+    <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ヘッドフォンの音量が今週一週間の安全基準とされる音量、時間を超えています"</string>
+    <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"引き続き聴く"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"音量を下げる"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"アプリは固定されています"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [ホーム] を同時に押し続けると固定が解除されます。"</string>
@@ -623,7 +643,7 @@
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"テキストを消去"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ショートカット"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ショートカットの検索"</string>
-    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ショートカットがないです"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ショートカットがありません"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"システム"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"入力"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"開いているアプリ"</string>
@@ -634,7 +654,7 @@
     <string name="group_system_go_back" msgid="8838454003680364227">"戻る: 前の状態に戻る（[戻る] ボタン）"</string>
     <string name="group_system_access_home_screen" msgid="1857344316928441909">"ホーム画面にアクセス"</string>
     <string name="group_system_overview_open_apps" msgid="6897128761003265350">"開いているアプリの概要"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"最近使ったアプリを切り替え（進）"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"最近使ったアプリを切り替え（進む）"</string>
     <string name="group_system_cycle_back" msgid="5163464503638229131">"最近使ったアプリを切り替え（戻る）"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"すべてのアプリの一覧にアクセスして検索（検索 / ランチャー）"</string>
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"タスクバーを非表示 /（再）表示"</string>
@@ -861,7 +881,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"タップしてユーザー補助機能を開きます。ボタンのカスタマイズや入れ替えを [設定] で行えます。\n\n"<annotation id="link">"設定を表示"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ボタンを一時的に非表示にするには、端に移動させてください"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"元に戻す"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> のショートカットを削除"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> のショートカットを削除しました"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# 個のショートカットを削除}other{# 個のショートカットを削除}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"左上に移動"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"右上に移動"</string>
@@ -885,14 +905,13 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"デバイス コントロールを選んで、すばやくアクセスしましょう"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"その他のアプリを表示"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"再配置"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"コントロールを追加する"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"コントロールを追加"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"編集に戻る"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"コントロールを読み込めませんでした。<xliff:g id="APP">%s</xliff:g> アプリで、アプリの設定が変更されていないことをご確認ください。"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"互換性のあるコントロールがありません"</string>
@@ -924,6 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）が <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生中"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> を実行中"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"再生"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"一時停止"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"前のトラック"</string>
@@ -969,6 +989,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"スピーカーとディスプレイ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"デバイスの候補"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"メディアを他のデバイスに移動する共有中のセッションを停止します。"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ブロードキャストの仕組み"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ブロードキャスト"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth 対応デバイスを持っている付近のユーザーは、あなたがブロードキャストしているメディアを聴けます"</string>
@@ -981,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"保存できません。もう一度お試しください。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"保存できません。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"4 文字以上にしてください"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"使用できる文字数は 16 文字未満です"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"使用できる文字数は <xliff:g id="LENGTH">%1$d</xliff:g> 文字未満です"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
     <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>
@@ -1046,7 +1068,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi に自動接続しません"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"すべて表示"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ネットワークを変更するにはイーサネット接続を解除してください"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの機能向上のため、アプリやサービスは、Wi-Fi が OFF の場合でも、いつでも Wi-Fi ネットワークをスキャンできます。この設定は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの利便性向上のため、アプリやサービスは、Wi-Fi が OFF の場合でもいつでも Wi-Fi ネットワークをスキャンすることができます。この動作は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"機内モードを OFF にする"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> が以下のタイルをクイック設定に追加しようとしています"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>
@@ -1101,11 +1123,13 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"詳細"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"詳しくは、<xliff:g id="URL">%s</xliff:g> をご覧ください"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> を開く"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• アプリが設定されている"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ウォーレットに追加されているカードが 1 枚以上ある"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• カメラアプリをインストールする"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• アプリが設定されている"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 利用できるデバイスが 1 台以上ある"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"ウォレット アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"ウォレット アプリをショートカットとして追加するには、カードが 1 枚以上追加されていることを確認してください"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR コードスキャナをショートカットとして追加するには、カメラアプリがインストールされていることを確認してください"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Google Home アプリをショートカットとして追加するには、アプリがインストールされていることを確認してください"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• 利用できるデバイスが 1 台以上ある"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"メモのショートカットを使用するデフォルトのメモアプリを選択してください"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"アプリを選択"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ショートカットの長押しが必要です"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"キャンセル"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"画面を切り替えましょう"</string>
@@ -1119,10 +1143,11 @@
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"タッチペンを充電器に接続してください"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"タッチペンのバッテリー残量が少なくなっています"</string>
     <string name="video_camera" msgid="7654002575156149298">"ビデオカメラ"</string>
-    <string name="call_from_work_profile_title" msgid="6991157106804289643">"このプロファイルからは通話を発信できません"</string>
-    <string name="call_from_work_profile_text" msgid="3458704745640229638">"仕事用ポリシーでは、通話の発信を仕事用プロファイルからのみに制限できます"</string>
+    <string name="call_from_work_profile_title" msgid="5418253516453177114">"個人用アプリからの通話はできません"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"組織では、仕事用アプリからの通話のみ許可されています"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"仕事用プロファイルに切り替える"</string>
-    <string name="call_from_work_profile_close" msgid="7927067108901068098">"閉じる"</string>
+    <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"仕事用電話アプリをインストール"</string>
+    <string name="call_from_work_profile_close" msgid="5830072964434474143">"キャンセル"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"ロック画面のカスタマイズ"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ロック画面をカスタマイズするにはロックを解除してください"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi は利用できません"</string>
@@ -1132,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"優先モードは ON です"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"アシスタントは起動済みです"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"[設定] でデフォルトのメモアプリを設定してください"</string>
+    <string name="install_app" msgid="5066668100199613936">"アプリをインストール"</string>
 </resources>
