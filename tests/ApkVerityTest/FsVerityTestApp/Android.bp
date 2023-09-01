@@ -22,17 +22,8 @@ package {
 }
 
 android_test_helper_app {
-  name: "ApkVerityTestApp",
-  manifest: "AndroidManifest.xml",
-  srcs: ["src/**/*.java"],
-}
-
-android_test_helper_app {
-  name: "ApkVerityTestAppSplit",
-  manifest: "feature_split/AndroidManifest.xml",
-  srcs: ["src/**/*.java"],
-  aaptflags: [
-      "--custom-package com.android.apkverity.feature_x",
-      "--package-id 0x80",
-  ],
+    name: "FsVerityTestApp",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.java"],
+    static_libs: ["compatibility-device-util-axt"],
 }

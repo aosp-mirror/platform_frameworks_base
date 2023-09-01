@@ -16,8 +16,12 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.apkverity">
+    package="com.android.fsverity">
     <application>
         <activity android:name=".DummyActivity"/>
     </application>
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+                     android:targetPackage="com.android.fsverity"
+                     android:label="Helper app of fs-verity test">
+    </instrumentation>/>
 </manifest>
