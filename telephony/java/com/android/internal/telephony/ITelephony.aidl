@@ -3033,4 +3033,42 @@ interface ITelephony {
      @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
                  + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
      List<String> getShaIdFromAllowList(String pkgName, int carrierId);
+
+    /**
+     * Add a restriction reason for disallowing satellite communication.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param reason Reason for disallowing satellite communication for carrier.
+     * @param callback Listener for the {@link SatelliteManager.SatelliteError} result of the
+     * operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void addSatelliteAttachRestrictionForCarrier(int subId, int reason,
+            in IIntegerConsumer callback);
+
+    /**
+     * Remove a restriction reason for disallowing satellite communication.
+     *
+     * @param subId The subId of the subscription to request for.
+     * @param reason Reason for disallowing satellite communication.
+     * @param callback Listener for the {@link SatelliteManager.SatelliteError} result of the
+     * operation.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void removeSatelliteAttachRestrictionForCarrier(int subId, int reason,
+            in IIntegerConsumer callback);
+
+    /**
+     * Get reasons for disallowing satellite communication, as requested by
+     * {@link #addSatelliteAttachRestrictionForCarrier(int, int)}.
+     *
+     * @param subId The subId of the subscription to request for.
+     *
+     * @return Set of reasons for disallowing satellite communication.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int[] getSatelliteAttachRestrictionReasonsForCarrier(int subId);
 }

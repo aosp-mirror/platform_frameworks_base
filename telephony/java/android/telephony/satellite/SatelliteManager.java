@@ -44,10 +44,14 @@ import com.android.telephony.Rlog;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Manages satellite operations such as provisioning, pointing, messaging, location sharing, etc.
@@ -77,6 +81,23 @@ public final class SatelliteManager {
      * Context this SatelliteManager is for.
      */
     @Nullable private final Context mContext;
+
+    /**
+     * Create a new SatelliteManager object pinned to the given subscription ID.
+     * This is needed only to handle carrier specific satellite features.
+     * For eg: requestSatelliteAttachEnabledForCarrier and
+     *         requestIsSatelliteAttachEnabledForCarrier
+     *
+     * @return a SatelliteManager that uses the given subId for all satellite activities.
+     * @throws IllegalArgumentException if the subscription is invalid.
+     * @hide
+     */
+    public SatelliteManager createForSubscriptionId(int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid subscription ID");
+        }
+        return new SatelliteManager(mContext, subId);
+    }
 
     /**
      * Create an instance of the SatelliteManager.
@@ -789,6 +810,27 @@ public final class SatelliteManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
+
+    /**
+     * Satellite communication restricted by user.
+     * @hide
+     */
+    public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER = 0;
+
+    /**
+     * Satellite communication restricted by geolocation. This can be
+     * triggered based upon geofence input provided by carrier to enable or disable satellite.
+     * @hide
+     */
+    public static final int SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION = 1;
+
+    /** @hide */
+    @IntDef(prefix = "SATELLITE_COMMUNICATION_RESTRICTION_REASON_", value = {
+            SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
+            SATELLITE_COMMUNICATION_RESTRICTION_REASON_GEOLOCATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SatelliteCommunicationRestrictionReason {}
 
     /**
      * Start receiving satellite transmission updates.
@@ -1557,6 +1599,182 @@ public final class SatelliteManager {
             loge("informDeviceAlignedToSatellite() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * User request to enable or disable carrier supported satellite plmn scan and attach by modem.
+     * <p>
+     * This API should be called by only settings app to pass down the user input for
+     * enabling/disabling satellite. This user input will be persisted across device reboots.
+     * <p>
+     * Satellite will be enabled only when the following conditions are met:
+     * <ul>
+     * <li>Users want to enable it.</li>
+     * <li>There is no satellite communication restriction, which is added by
+     * {@link #addSatelliteAttachRestrictionForCarrier(int, Executor, Consumer)}</li>
+     * <li>The carrier config {@link
+     * android.telephony.CarrierConfigManager#KEY_SATELLITE_ATTACH_SUPPORTED_BOOL} is set to
+     * {@code true}.</li>
+     * </ul>
+     *
+     * @param enableSatellite {@code true} to enable the satellite and {@code false} to disable.
+     * @param executor The executor on which the error code listener will be called.
+     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestSatelliteAttachEnabledForCarrier(boolean enableSatellite,
+            @NonNull @CallbackExecutor Executor executor,
+            @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        if (enableSatellite) {
+            removeSatelliteAttachRestrictionForCarrier(
+                    SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER, executor, resultListener);
+        } else {
+            addSatelliteAttachRestrictionForCarrier(
+                    SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER, executor, resultListener);
+        }
+    }
+
+    /**
+     * Request to get whether the carrier supported satellite plmn scan and attach by modem is
+     * enabled by user.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code boolean} with value {@code true} if the satellite
+     *                 is enabled and {@code false} otherwise.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestIsSatelliteAttachEnabledForCarrier(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        Set<Integer> restrictionReason = getSatelliteAttachRestrictionReasonsForCarrier();
+        executor.execute(() -> callback.onResult(
+                !restrictionReason.contains(SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER)));
+    }
+
+    /**
+     * Add a restriction reason for disallowing carrier supported satellite plmn scan and attach
+     * by modem.
+     *
+     * @param reason Reason for disallowing satellite communication.
+     * @param executor The executor on which the error code listener will be called.
+     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void addSatelliteAttachRestrictionForCarrier(
+            @SatelliteCommunicationRestrictionReason int reason,
+            @NonNull @CallbackExecutor Executor executor,
+            @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+                telephony.addSatelliteAttachRestrictionForCarrier(mSubId, reason, errorCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("addSatelliteAttachRestrictionForCarrier() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove a restriction reason for disallowing carrier supported satellite plmn scan and attach
+     * by modem.
+     *
+     * @param reason Reason for disallowing satellite communication.
+     * @param executor The executor on which the error code listener will be called.
+     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void removeSatelliteAttachRestrictionForCarrier(
+            @SatelliteCommunicationRestrictionReason int reason,
+            @NonNull @CallbackExecutor Executor executor,
+            @SatelliteResult @NonNull Consumer<Integer> resultListener) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+                telephony.removeSatelliteAttachRestrictionForCarrier(mSubId, reason, errorCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("removeSatelliteAttachRestrictionForCarrier() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get reasons for disallowing satellite attach, as requested by
+     * {@link #addSatelliteAttachRestrictionForCarrier(int, Executor, Consumer)}
+     *
+     * @return Set of reasons for disallowing satellite communication.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteCommunicationRestrictionReason
+    public @NonNull Set<Integer> getSatelliteAttachRestrictionReasonsForCarrier() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                int[] receivedArray =
+                        telephony.getSatelliteAttachRestrictionReasonsForCarrier(mSubId);
+                if (receivedArray.length == 0) {
+                    logd("received set is empty, create empty set");
+                    return new HashSet<>();
+                } else {
+                    return Arrays.stream(receivedArray).boxed().collect(Collectors.toSet());
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("getSatelliteAttachRestrictionReasonsForCarrier() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return null;
     }
 
     private static ITelephony getITelephony() {
