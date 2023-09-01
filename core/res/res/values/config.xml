@@ -1185,6 +1185,9 @@
     -->
     <integer name="config_shortPressOnSleepBehavior">0</integer>
 
+    <!-- Whether to silence telephony ringer on sleep key event -->
+    <bool name="config_silenceRingerOnSleepKey">false</bool>
+
     <!-- Control the behavior when the user long presses the stem primary button.
          Stem primary button is only used on watch form factor. If a device is not
          a watch, setting this config is no-op.
