@@ -1608,6 +1608,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
+     * Check if the display is valid for primary home activity.
+     *
+     * @param displayId The target display ID
+     * @return {@code true} if allowed to launch, {@code false} otherwise.
+     */
+    boolean shouldPlacePrimaryHomeOnDisplay(int displayId) {
+        // No restrictions to default display, vr 2d display or main display for visible users.
+        return displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
+                && (displayId == mService.mVr2dDisplayId
+                || mWmService.shouldPlacePrimaryHomeOnDisplay(displayId)));
+    }
+
+    /**
      * Check if the display area is valid for secondary home activity.
      *
      * @param taskDisplayArea The target display area.
@@ -1680,10 +1693,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         final int displayId = taskDisplayArea != null ? taskDisplayArea.getDisplayId()
                 : INVALID_DISPLAY;
-        if (displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
-                && (displayId == mService.mVr2dDisplayId
-                || mWmService.shouldPlacePrimaryHomeOnDisplay(displayId)))) {
-            // No restrictions to default display, vr 2d display or main display for visible users.
+        if (shouldPlacePrimaryHomeOnDisplay(displayId)) {
             return true;
         }
 
