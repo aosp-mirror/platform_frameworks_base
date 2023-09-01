@@ -538,7 +538,7 @@ public class DeviceIdleController extends SystemService
 
     /**
      * Package names the system has white-listed to opt out of power save restrictions,
-     * except for device idle mode.
+     * except for device idle modes (light and full doze).
      */
     private final ArrayMap<String, Integer> mPowerSaveWhitelistAppsExceptIdle = new ArrayMap<>();
 
