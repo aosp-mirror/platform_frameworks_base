@@ -2648,9 +2648,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAmInternal.enforceCallingPermission(Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
                     "updateLockTaskPackages()");
         }
-        synchronized (mGlobalLock) {
-            ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowlisting %d:%s", userId, Arrays.toString(packages));
-            getLockTaskController().updateLockTaskPackages(userId, packages);
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                ProtoLog.w(WM_DEBUG_LOCKTASK, "Allowlisting %d:%s", userId,
+                        Arrays.toString(packages));
+                getLockTaskController().updateLockTaskPackages(userId, packages);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 
