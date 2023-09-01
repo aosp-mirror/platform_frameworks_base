@@ -50,6 +50,8 @@ import static android.view.ViewRootImplProto.VISIBLE_RECT;
 import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
+import static android.view.ViewRootRefreshRateController.RefreshRatePref.LOWER;
+import static android.view.ViewRootRefreshRateController.RefreshRatePref.RESTORE;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
@@ -96,6 +98,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UiContext;
+import android.annotation.UiThread;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ICompatCameraControlCallback;
@@ -240,6 +243,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -423,11 +427,105 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Used to notify if the user is typing or not.
+     * @hide
+     */
+    public interface TypingHintNotifier {
+        /**
+         * Called when the typing hint is changed. This would be invoked by the
+         * {@link android.view.inputmethod.RemoteInputConnectionImpl}
+         * to hint if the user is typing when the it is {@link #isActive() active}.
+         *
+         * This can be only happened on the UI thread. The behavior won't be guaranteed if
+         * invoking this on a non-UI thread.
+         *
+         * @param isTyping {@code true} if the user is typing.
+         */
+        @UiThread
+        void onTypingHintChanged(boolean isTyping);
+
+        /**
+         * Indicates whether the notifier is currently in active state or not.
+         *
+         * @see #deactivate()
+         */
+        boolean isActive();
+
+        /**
+         * Deactivate the notifier when no longer in use. Mostly invoked when finishing the typing.
+         */
+        void deactivate();
+    }
+
+    /**
+     * The {@link TypingHintNotifier} implementation used to handle
+     * the refresh rate preference when the typing state is changed.
+     */
+    private static class TypingHintNotifierImpl implements TypingHintNotifier {
+
+        private final AtomicReference<TypingHintNotifier> mActiveNotifier;
+
+        @NonNull
+        private final ViewRootRefreshRateController mController;
+
+        TypingHintNotifierImpl(@NonNull AtomicReference<TypingHintNotifier> notifier,
+                @NonNull ViewRootRefreshRateController controller) {
+            mController = controller;
+            mActiveNotifier = notifier;
+        }
+
+        @Override
+        public void onTypingHintChanged(boolean isTyping) {
+            if (!isActive()) {
+                // No-op when the listener was deactivated.
+                return;
+            }
+            mController.updateRefreshRatePreference(isTyping ? LOWER : RESTORE);
+        }
+
+        @Override
+        public boolean isActive() {
+            return mActiveNotifier.get() == this;
+        }
+
+        @Override
+        public void deactivate() {
+            mActiveNotifier.compareAndSet(this, null);
+        }
+    }
+
+    /**
      * Callback used to notify corresponding activity about camera compat control changes, override
      * configuration change and make sure that all resources are set correctly before updating the
      * ViewRootImpl's internal state.
      */
     private ActivityConfigCallback mActivityConfigCallback;
+
+    /**
+     * The current active {@link TypingHintNotifier} to handle
+     * typing hint change operations.
+     */
+    private final AtomicReference<TypingHintNotifier> mActiveTypingHintNotifier =
+            new AtomicReference<>(null);
+
+    /**
+     * Create a {@link TypingHintNotifier} if the client support variable
+     * refresh rate for typing. The {@link TypingHintNotifier} is created
+     * and mapped to a new active input connection each time.
+     *
+     * @hide
+     */
+    @Nullable
+    public TypingHintNotifier createTypingHintNotifierIfSupported() {
+        if (mRefreshRateController == null) {
+            return null;
+        }
+        final TypingHintNotifier newNotifier = new TypingHintNotifierImpl(mActiveTypingHintNotifier,
+                mRefreshRateController);
+        mActiveTypingHintNotifier.set(newNotifier);
+
+        return newNotifier;
+    }
 
     /**
      * Used when configuration change first updates the config of corresponding activity.
@@ -858,6 +956,8 @@ public final class ViewRootImpl implements ViewParent,
     private final InsetsController mInsetsController;
     private final ImeFocusController mImeFocusController;
 
+    private ViewRootRefreshRateController mRefreshRateController;
+
     private boolean mIsSurfaceOpaque;
 
     private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
@@ -1047,6 +1147,13 @@ public final class ViewRootImpl implements ViewParent,
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
+
+        // Whether the variable refresh rate for typing is supported.
+        boolean useVariableRefreshRateWhenTyping = context.getResources().getBoolean(
+                R.bool.config_variableRefreshRateTypingSupported);
+        if (useVariableRefreshRateWhenTyping) {
+            mRefreshRateController = new ViewRootRefreshRateController(this);
+        }
 
         mViewBoundsSandboxingEnabled = getViewBoundsSandboxingEnabled();
         mIsStylusPointerIconEnabled =
@@ -2088,6 +2195,10 @@ public final class ViewRootImpl implements ViewParent,
         // during the current traversal.
         if (!mIsInTraversal) {
             scheduleTraversals();
+        }
+
+        if (!mInsetsController.getState().isSourceOrDefaultVisible(ID_IME, Type.ime())) {
+            notifyLeaveTypingEvent();
         }
     }
 
@@ -6850,6 +6961,17 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
+     * Restores the refresh rate after leaving typing, the leaving typing cases like
+     * the IME insets is invisible or the user interacts the screen outside keyboard.
+     */
+    @UiThread
+    private void notifyLeaveTypingEvent() {
+        if (mRefreshRateController != null && mActiveTypingHintNotifier.get() != null) {
+            mRefreshRateController.updateRefreshRatePreference(RESTORE);
+        }
+    }
+
+    /**
      * Delivers post-ime input events to the view hierarchy.
      */
     final class ViewPostImeInputStage extends InputStage {
@@ -7064,6 +7186,10 @@ public final class ViewRootImpl implements ViewParent,
             if (handled) {
                 // If handwriting is started, toolkit doesn't receive ACTION_UP.
                 mLastClickToolType = event.getToolType(event.getActionIndex());
+            }
+
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                notifyLeaveTypingEvent();
             }
 
             mAttachInfo.mUnbufferedDispatchRequested = false;
