@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.ANIMATION_TYPE_RESIZE;
@@ -171,8 +171,7 @@ public class InsetsControllerTest {
             mController.onStateChanged(state);
             mController.calculateInsets(
                     false,
-                    false,
-                    TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                    TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mController.onFrameChanged(new Rect(0, 0, 100, 100));
         });
