@@ -21,6 +21,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.IDisplayChangeWindowCallback;
 import android.window.DisplayAreaInfo;
@@ -40,6 +41,7 @@ import java.util.List;
 public class RemoteDisplayChangeController {
 
     private static final String TAG = "RemoteDisplayChangeController";
+    private static final String REMOTE_DISPLAY_CHANGE_TRACE_TAG = "RemoteDisplayChange";
 
     private static final int REMOTE_DISPLAY_CHANGE_TIMEOUT_MS = 800;
 
@@ -82,6 +84,10 @@ public class RemoteDisplayChangeController {
         }
         mCallbacks.add(callback);
 
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.beginAsyncSection(REMOTE_DISPLAY_CHANGE_TRACE_TAG, callback.hashCode());
+        }
+
         if (newDisplayAreaInfo != null) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION,
                     "Starting remote display change: "
@@ -122,6 +128,10 @@ public class RemoteDisplayChangeController {
                     mCallbacks.clear();
                 }
                 callback.onContinueRemoteDisplayChange(null /* transaction */);
+
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.endAsyncSection(REMOTE_DISPLAY_CHANGE_TRACE_TAG, callback.hashCode());
+                }
             }
         }
     }
@@ -137,13 +147,23 @@ public class RemoteDisplayChangeController {
             for (int i = 0; i < idx; ++i) {
                 // Expect remote callbacks in order. If they don't come in order, then force
                 // ordering by continuing everything up until this one with empty transactions.
-                mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
+                ContinueRemoteDisplayChangeCallback currentCallback = mCallbacks.get(i);
+                currentCallback.onContinueRemoteDisplayChange(null /* transaction */);
+
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.endAsyncSection(REMOTE_DISPLAY_CHANGE_TRACE_TAG,
+                            currentCallback.hashCode());
+                }
             }
             mCallbacks.subList(0, idx + 1).clear();
             if (mCallbacks.isEmpty()) {
                 mService.mH.removeCallbacks(mTimeoutRunnable);
             }
             callback.onContinueRemoteDisplayChange(transaction);
+
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.endAsyncSection(REMOTE_DISPLAY_CHANGE_TRACE_TAG, callback.hashCode());
+            }
         }
     }
 
