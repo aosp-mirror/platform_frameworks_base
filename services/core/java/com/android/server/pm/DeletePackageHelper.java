@@ -24,7 +24,6 @@ import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.DELETE_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_KNOWN_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
@@ -464,10 +463,7 @@ final class DeletePackageHelper {
                         if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
                         clearPackageStateAndReturn = true;
                     } else {
-                        // We need to set it back to 'installed' so the uninstall
-                        // broadcasts will be sent correctly.
                         if (DEBUG_REMOVE) Slog.d(TAG, "Not installed by other users, full delete");
-                        ps.setInstalled(true, userId);
                         mPm.mSettings.writeKernelMappingLPr(ps);
                         clearPackageStateAndReturn = false;
                     }

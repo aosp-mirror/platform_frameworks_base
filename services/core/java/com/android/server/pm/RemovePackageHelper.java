@@ -22,7 +22,6 @@ import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
-
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
@@ -399,6 +398,21 @@ final class RemovePackageHelper {
                 preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
                         changedUsers);
                 mPm.postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+            }
+        } else if (!deletedPs.isSystem() && outInfo != null && !outInfo.mIsUpdate
+                && outInfo.mRemovedUsers != null) {
+            // For non-system uninstalls with DELETE_KEEP_DATA, set the installed state to false
+            // for affected users. This does not apply to app updates where the old apk is replaced
+            // but the old data remains.
+            if (DEBUG_REMOVE) {
+                Slog.d(TAG, "Updating installed state to false because of DELETE_KEEP_DATA");
+            }
+            for (int userId : outInfo.mRemovedUsers) {
+                if (DEBUG_REMOVE) {
+                    final boolean wasInstalled = deletedPs.getInstalled(userId);
+                    Slog.d(TAG, "    user " + userId + ": " + wasInstalled + " => " + false);
+                }
+                deletedPs.setInstalled(/* installed= */ false, userId);
             }
         }
         // make sure to preserve per-user installed state if this removal was just
