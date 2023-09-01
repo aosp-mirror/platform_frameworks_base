@@ -652,7 +652,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mLastLegacySoftInputMode;
     private int mLastLegacyWindowFlags;
     private int mLastLegacySystemUiFlags;
-    private int mLastWindowingMode;
+    private int mLastActivityType;
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
     private int mImeCaptionBarInsetsHeight = 0;
@@ -803,10 +803,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 }
             }
 
-            WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
-                    mLastInsets.isRound(), false /* alwaysConsumeSystemBars */,
+            WindowInsets insets = state.calculateInsets(mFrame,
+                    mState /* ignoringVisibilityState */, mLastInsets.isRound(),
                     mLastLegacySoftInputMode, mLastLegacyWindowFlags, mLastLegacySystemUiFlags,
-                    mWindowType, mLastWindowingMode, null /* idSideMap */);
+                    mWindowType, mLastActivityType, null /* idSideMap */);
             mHost.dispatchWindowInsetsAnimationProgress(insets,
                     Collections.unmodifiableList(runningAnimations));
             if (DEBUG) {
@@ -969,30 +969,29 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, boolean, int, int, int, int,
-     *      int, android.util.SparseIntArray)
+     * @see InsetsState#calculateInsets(Rect, InsetsState, boolean, int, int, int, int, int,
+     *      android.util.SparseIntArray)
      */
     @VisibleForTesting
-    public WindowInsets calculateInsets(boolean isScreenRound, boolean alwaysConsumeSystemBars,
-            int windowType, int windowingMode, int legacySoftInputMode, int legacyWindowFlags,
-            int legacySystemUiFlags) {
+    public WindowInsets calculateInsets(boolean isScreenRound, int windowType, int activityType,
+            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags) {
         mWindowType = windowType;
-        mLastWindowingMode = windowingMode;
+        mLastActivityType = activityType;
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacyWindowFlags = legacyWindowFlags;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
-        mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
-                isScreenRound, alwaysConsumeSystemBars, legacySoftInputMode, legacyWindowFlags,
-                legacySystemUiFlags, windowType, windowingMode, null /* idSideMap */);
+        mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState */,
+                isScreenRound, legacySoftInputMode, legacyWindowFlags,
+                legacySystemUiFlags, windowType, activityType, null /* idSideMap */);
         return mLastInsets;
     }
 
     /**
      * @see InsetsState#calculateVisibleInsets(Rect, int, int, int, int)
      */
-    public Insets calculateVisibleInsets(int windowType, int windowingMode,
+    public Insets calculateVisibleInsets(int windowType, int activityType,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
-        return mState.calculateVisibleInsets(mFrame, windowType, windowingMode, softInputMode,
+        return mState.calculateVisibleInsets(mFrame, windowType, activityType, softInputMode,
                 windowFlags);
     }
 
