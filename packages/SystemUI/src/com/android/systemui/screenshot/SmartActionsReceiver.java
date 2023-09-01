@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT;
+import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_INTENT_FILLIN;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ACTION_TYPE;
 import static com.android.systemui.screenshot.ScreenshotController.EXTRA_ID;
 
@@ -46,7 +47,9 @@ public class SmartActionsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        PendingIntent pendingIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
+        PendingIntent pendingIntent =
+                intent.getParcelableExtra(EXTRA_ACTION_INTENT, PendingIntent.class);
+        Intent fillIn = intent.getParcelableExtra(EXTRA_ACTION_INTENT_FILLIN, Intent.class);
         String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
         if (DEBUG_ACTIONS) {
             Log.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
@@ -54,7 +57,7 @@ public class SmartActionsReceiver extends BroadcastReceiver {
         ActivityOptions opts = ActivityOptions.makeBasic();
 
         try {
-            pendingIntent.send(context, 0, null, null, null, null, opts.toBundle());
+            pendingIntent.send(context, 0, fillIn, null, null, null, opts.toBundle());
         } catch (PendingIntent.CanceledException e) {
             Log.e(TAG, "Pending intent canceled", e);
         }

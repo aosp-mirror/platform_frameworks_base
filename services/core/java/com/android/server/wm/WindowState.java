@@ -3596,10 +3596,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // apps won't always be considered as foreground state.
         // Exclude private presentations as they can only be shown on private virtual displays and
         // shouldn't be the cause of an app be considered foreground.
-        if (mAttrs.type >= FIRST_SYSTEM_WINDOW && mAttrs.type != TYPE_TOAST
-                && mAttrs.type != TYPE_PRIVATE_PRESENTATION) {
+        // Exclude presentations on virtual displays as they are not actually visible.
+        if (mAttrs.type >= FIRST_SYSTEM_WINDOW
+                && mAttrs.type != TYPE_TOAST
+                && mAttrs.type != TYPE_PRIVATE_PRESENTATION
+                && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay())
+        ) {
             mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
         }
+    }
+
+    private boolean isOnVirtualDisplay() {
+        return getDisplayContent().mDisplay.getType() == Display.TYPE_VIRTUAL;
     }
 
     private void logExclusionRestrictions(int side) {
