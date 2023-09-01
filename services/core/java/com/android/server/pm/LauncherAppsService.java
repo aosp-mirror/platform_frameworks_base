@@ -1569,7 +1569,17 @@ public class LauncherAppsService extends SystemService {
          */
         private void forEachViewCaptureWindow(
                 @NonNull BiConsumer<String, InputStream> outputtingConsumer) {
-            for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
+            int i;
+            try {
+                i = mDumpCallbacks.beginBroadcast() - 1;
+            } catch (IllegalStateException e) {
+                Log.d(TAG, "The previous broadcast must have been killed, because a broadcast"
+                        + "was occurring when it should not have been. Calling finishBroadcast and "
+                        + "retrying.", e);
+                mDumpCallbacks.finishBroadcast();
+                i = mDumpCallbacks.beginBroadcast() - 1;
+            }
+            for (; i >= 0; i--) {
                 String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
                 String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
 
