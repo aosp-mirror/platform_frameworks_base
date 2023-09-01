@@ -27,9 +27,6 @@ android_app {
     name: "EncryptedLocalTransport",
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
     static_libs: ["LocalTransport"],
     platform_apis: true,
     certificate: "platform",
