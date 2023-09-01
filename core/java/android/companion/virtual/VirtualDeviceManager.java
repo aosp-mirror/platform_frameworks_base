@@ -55,11 +55,13 @@ import android.hardware.input.VirtualNavigationTouchpadConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
+import android.os.Binder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Surface;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.AnnotationValidations;
 
 import java.lang.annotation.ElementType;
@@ -67,6 +69,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -147,6 +150,9 @@ public final class VirtualDeviceManager {
     private final IVirtualDeviceManager mService;
     private final Context mContext;
 
+    @GuardedBy("mVirtualDeviceListeners")
+    private final List<VirtualDeviceListenerDelegate> mVirtualDeviceListeners = new ArrayList<>();
+
     /** @hide */
     public VirtualDeviceManager(
             @Nullable IVirtualDeviceManager service, @NonNull Context context) {
@@ -203,6 +209,88 @@ public final class VirtualDeviceManager {
             return mService.getVirtualDevices();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the details of the virtual device with the given ID, if any.
+     *
+     * <p>The returned object is a read-only representation of the virtual device that expose its
+     * properties.</p>
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    @Nullable
+    public android.companion.virtual.VirtualDevice getVirtualDevice(int deviceId) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
+            return null;
+        }
+        if (deviceId == Context.DEVICE_ID_INVALID || deviceId == Context.DEVICE_ID_DEFAULT) {
+            return null;  // Don't even bother making a Binder call.
+        }
+        try {
+            return mService.getVirtualDevice(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers a virtual device listener to receive notifications when virtual devices are created
+     * or closed.
+     *
+     * @param executor The executor where the listener is executed on.
+     * @param listener The listener to add.
+     * @see #unregisterVirtualDeviceListener
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public void registerVirtualDeviceListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull VirtualDeviceListener listener) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to register listener; no virtual device manager service.");
+            return;
+        }
+        final VirtualDeviceListenerDelegate delegate =
+                new VirtualDeviceListenerDelegate(Objects.requireNonNull(executor),
+                        Objects.requireNonNull(listener));
+        synchronized (mVirtualDeviceListeners) {
+            try {
+                mService.registerVirtualDeviceListener(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mVirtualDeviceListeners.add(delegate);
+        }
+    }
+
+    /**
+     * Unregisters a virtual device listener previously registered with
+     * {@link #registerVirtualDeviceListener}.
+     *
+     * @param listener The listener to unregister.
+     * @see #registerVirtualDeviceListener
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public void unregisterVirtualDeviceListener(@NonNull VirtualDeviceListener listener) {
+        if (mService == null) {
+            Log.w(TAG, "Failed to unregister listener; no virtual device manager service.");
+            return;
+        }
+        Objects.requireNonNull(listener);
+        synchronized (mVirtualDeviceListeners) {
+            final Iterator<VirtualDeviceListenerDelegate> it = mVirtualDeviceListeners.iterator();
+            while (it.hasNext()) {
+                final VirtualDeviceListenerDelegate delegate = it.next();
+                if (delegate.mListener == listener) {
+                    try {
+                        mService.unregisterVirtualDeviceListener(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    it.remove();
+                }
+            }
         }
     }
 
@@ -748,7 +836,7 @@ public final class VirtualDeviceManager {
          *
          * @param executor The executor where the listener is executed on.
          * @param soundEffectListener The listener to add.
-         * @see #removeActivityListener(ActivityListener)
+         * @see #removeSoundEffectListener(SoundEffectListener)
          */
         public void addSoundEffectListener(@CallbackExecutor @NonNull Executor executor,
                 @NonNull SoundEffectListener soundEffectListener) {
@@ -876,5 +964,60 @@ public final class VirtualDeviceManager {
          * @see android.media.AudioManager.SystemSoundEffect
          */
         void onPlaySoundEffect(@AudioManager.SystemSoundEffect int effectType);
+    }
+
+    /**
+     * Listener for changes in the available virtual devices.
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public interface VirtualDeviceListener {
+        /**
+         * Called whenever a new virtual device has been added to the system.
+         * Use {@link VirtualDeviceManager#getVirtualDevice(int)} to get more information about
+         * the device.
+         *
+         * @param deviceId The id of the virtual device that was added.
+         */
+        default void onVirtualDeviceCreated(int deviceId) {}
+
+        /**
+         * Called whenever a virtual device has been removed from the system.
+         *
+         * @param deviceId The id of the virtual device that was removed.
+         */
+        default void onVirtualDeviceClosed(int deviceId) {}
+    }
+
+    /**
+     * A wrapper for {@link VirtualDeviceListener} that executes callbacks on the given executor.
+     */
+    private static class VirtualDeviceListenerDelegate extends IVirtualDeviceListener.Stub {
+        private final VirtualDeviceListener mListener;
+        private final Executor mExecutor;
+
+        private VirtualDeviceListenerDelegate(Executor executor, VirtualDeviceListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onVirtualDeviceCreated(int deviceId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mListener.onVirtualDeviceCreated(deviceId));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void onVirtualDeviceClosed(int deviceId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mListener.onVirtualDeviceClosed(deviceId));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 }
