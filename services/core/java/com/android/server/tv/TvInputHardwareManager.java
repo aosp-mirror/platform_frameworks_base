@@ -96,6 +96,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     /* A map from a HDMI logical address to the matching TV input ID. */
     private final SparseArray<String> mHdmiInputIdMap = new SparseArray<>();
     private final Map<String, TvInputInfo> mInputMap = new ArrayMap<>();
+    /* A map from a HDMI input parent ID to the related input IDs. */
+    private final Map<String, List<String>> mHdmiParentInputMap = new ArrayMap<>();
 
     private final AudioManager mAudioManager;
     private final IHdmiHotplugEventListener mHdmiHotplugEventListener =
@@ -293,6 +295,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    public Map<String, List<String>> getHdmiParentInputMap() {
+        synchronized (mLock) {
+            return Collections.unmodifiableMap(mHdmiParentInputMap);
+        }
+    }
+
     private boolean checkUidChangedLocked(
             Connection connection, int callingUid, int resolvedUserId) {
         Integer connectionCallingUid = connection.getCallingUidLocked();
@@ -379,12 +387,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             mHdmiInputIdMap.put(id, info.getId());
             mInputMap.put(info.getId(), info);
+            if (!mHdmiParentInputMap.containsKey(parentId)) {
+                mHdmiParentInputMap.put(parentId, new ArrayList<String>());
+            }
+            mHdmiParentInputMap.get(parentId).add(info.getId());
         }
     }
 
     public void removeHardwareInput(String inputId) {
         synchronized (mLock) {
-            mInputMap.remove(inputId);
             int hardwareIndex = indexOfEqualValue(mHardwareInputIdMap, inputId);
             if (hardwareIndex >= 0) {
                 mHardwareInputIdMap.removeAt(hardwareIndex);
@@ -392,6 +403,17 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             int deviceIndex = indexOfEqualValue(mHdmiInputIdMap, inputId);
             if (deviceIndex >= 0) {
                 mHdmiInputIdMap.removeAt(deviceIndex);
+            }
+            if (mInputMap.containsKey(inputId)) {
+                String parentId = mInputMap.get(inputId).getParentId();
+                if (parentId != null && mHdmiParentInputMap.containsKey(parentId)) {
+                    List<String> parentInputList = mHdmiParentInputMap.get(parentId);
+                    parentInputList.remove(inputId);
+                    if (parentInputList.isEmpty()) {
+                        mHdmiParentInputMap.remove(parentId);
+                    }
+                }
+                mInputMap.remove(inputId);
             }
         }
     }
