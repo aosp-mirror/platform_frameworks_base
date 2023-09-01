@@ -44,7 +44,6 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.shared.system.RemoteAnimationRunnerCompat;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
@@ -183,8 +182,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         return contextForUser.getPackageManager();
     }
 
-    void start();
-
     boolean updateIsKeyguard();
 
     boolean updateIsKeyguard(boolean forceStateChange);
@@ -199,8 +196,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isLaunchingActivityOverLockscreen();
 
     void onKeyguardViewManagerStatesUpdated();
-
-    NotificationPresenter getPresenter();
 
     /**
      * Used to dispatch initial touch events before crossing the threshold to pull down the
@@ -220,8 +215,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     /** */
     boolean getCommandQueuePanelsEnabled();
 
-    BiometricUnlockController getBiometricUnlockController();
-
     void showWirelessChargingAnimation(int batteryLevel);
 
     void checkBarModes();
@@ -229,9 +222,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     void updateBubblesVisibility();
 
     void setInteracting(int barWindow, boolean interacting);
-
-    @Override
-    void dump(PrintWriter pwOriginal, String[] args);
 
     /** @deprecated Use {@link DisplayMetricsRepository} instead. */
     @Deprecated
@@ -281,8 +271,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void setBouncerShowing(boolean bouncerShowing);
 
-    int getWakefulnessState();
-
     boolean isScreenFullyOff();
 
     void showScreenPinningRequest(int taskId, boolean allowCancel);
@@ -322,8 +310,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean isBouncerShowingScrimmed();
 
     boolean isBouncerShowingOverDream();
-
-    boolean isKeyguardSecure();
 
     void updateNotificationPanelTouchState();
 

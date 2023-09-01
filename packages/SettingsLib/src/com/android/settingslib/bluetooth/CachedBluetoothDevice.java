@@ -760,6 +760,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     void onAudioModeChanged() {
         dispatchAttributesChanged();
     }
+
+    /**
+     * Notify that the audio category has changed.
+     */
+    public void onAudioDeviceCategoryChanged() {
+        dispatchAttributesChanged();
+    }
+
     /**
      * Get the device status as active or non-active per Bluetooth profile.
      *

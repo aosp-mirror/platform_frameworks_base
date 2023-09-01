@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলির আকার পরিবর্তনযোগ্য করুন৷"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ফ্রি-ফর্ম উইন্ডো চালু করুন"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"\'ডেস্কটপ\' মোড"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ডেস্কটপ পূর্ণ ব্যাকআপ বর্তমানে সুরক্ষিত নয়"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ডেস্কটপের সম্পূর্ণ ব্যাকআপের পাসওয়ার্ডটি পরিবর্তন করতে বা মুছে ফেলতে আলতো চাপুন"</string>

@@ -167,6 +167,7 @@ class SceneTestUtils(
             bouncerRepository = FakeKeyguardBouncerRepository(),
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),
+            sceneInteractorProvider = { sceneInteractor() },
         )
     }
 

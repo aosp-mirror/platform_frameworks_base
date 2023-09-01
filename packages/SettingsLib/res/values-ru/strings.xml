@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Разрешить изменение размера окон в многооконном режиме (независимо от значений в манифесте)"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Разрешить создание окон произвольной формы"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Включить экспериментальную функцию создания окон произвольной формы"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Режим компьютера"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Пароль для резервного копирования"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Полные локальные резервные копии в настоящее время не защищены"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Нажмите, чтобы изменить или удалить пароль для резервного копирования"</string>

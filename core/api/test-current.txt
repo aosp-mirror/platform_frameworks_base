@@ -2247,6 +2247,10 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void unplugBattery(boolean);
   }
 
+  public final class BugreportParams {
+    field public static final int BUGREPORT_MODE_MAX_VALUE = 7; // 0x7
+  }
+
   public class Build {
     method public static boolean is64BitAbi(String);
     method public static boolean isDebuggable();

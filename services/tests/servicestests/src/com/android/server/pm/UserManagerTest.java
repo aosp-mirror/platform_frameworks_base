@@ -1174,6 +1174,24 @@ public final class UserManagerTest {
         }
     }
 
+    // Make sure the creation of a private profile fails if DISALLOW_ADD_PRIVATE_PROFILE is true.
+    @MediumTest
+    @Test
+    public void testCreateProfileForUser_disallowAddPrivateProfile() {
+        final int mainUserId = ActivityManager.getCurrentUser();
+        final UserHandle mainUserHandle = asHandle(mainUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE,
+                true, mainUserHandle);
+        try {
+            UserInfo privateProfileInfo = createProfileForUser("Private",
+                    UserManager.USER_TYPE_PROFILE_PRIVATE, mainUserId);
+            assertThat(privateProfileInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_PRIVATE_PROFILE, false,
+                    mainUserHandle);
+        }
+    }
+
     @MediumTest
     @Test
     public void testAddRestrictedProfile() throws Exception {

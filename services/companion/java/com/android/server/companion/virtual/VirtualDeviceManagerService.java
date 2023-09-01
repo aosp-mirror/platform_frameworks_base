@@ -34,6 +34,7 @@ import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.AttributionSource;
 import android.content.Context;
@@ -323,6 +324,15 @@ public class VirtualDeviceManagerService extends SystemService {
                 @NonNull IVirtualDeviceSoundEffectListener soundEffectListener) {
             createVirtualDevice_enforcePermission();
             attributionSource.enforceCallingUid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (Flags.moreLogs()) {
+                    Slog.i(TAG, "Creating VirtualDevice");
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
             final int callingUid = getCallingUid();
             final String packageName = attributionSource.getPackageName();
             if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {

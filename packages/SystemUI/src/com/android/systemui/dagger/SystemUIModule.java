@@ -76,7 +76,6 @@ import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.retail.dagger.RetailModeModule;
-import com.android.systemui.scene.SceneContainerFrameworkModule;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
@@ -195,7 +194,6 @@ import javax.inject.Named;
             QRCodeScannerModule.class,
             QSFragmentStartableModule.class,
             RetailModeModule.class,
-            SceneContainerFrameworkModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SecurityRepositoryModule.class,

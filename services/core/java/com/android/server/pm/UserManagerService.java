@@ -23,6 +23,7 @@ import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
 import static android.os.UserManager.USER_OPERATION_ERROR_UNKNOWN;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_ABORTED;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_UNSPECIFIED;
 import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_USER_ALREADY_AN_ADMIN;
@@ -2938,8 +2939,10 @@ public class UserManagerService extends IUserManager.Stub {
                     UserHandle.USER_NULL, UserManager.RESTRICTION_SOURCE_SYSTEM));
         }
 
-        result.addAll(getDevicePolicyManagerInternal()
-                .getUserRestrictionSources(restrictionKey, userId));
+        final DevicePolicyManagerInternal dpmi = getDevicePolicyManagerInternal();
+        if (dpmi != null) {
+            result.addAll(dpmi.getUserRestrictionSources(restrictionKey, userId));
+        }
         return result;
     }
 
@@ -4787,11 +4790,14 @@ public class UserManagerService extends IUserManager.Stub {
         // default check is for DISALLOW_ADD_USER
         // If new user is of type CLONE, check if creation of clone profile is allowed
         // If new user is of type MANAGED, check if creation of managed profile is allowed
+        // If new user is of type PRIVATE, check if creation of private profile is allowed
         String restriction = UserManager.DISALLOW_ADD_USER;
         if (UserManager.isUserTypeCloneProfile(userType)) {
             restriction = UserManager.DISALLOW_ADD_CLONE_PROFILE;
         } else if (UserManager.isUserTypeManagedProfile(userType)) {
             restriction = UserManager.DISALLOW_ADD_MANAGED_PROFILE;
+        } else if (UserManager.isUserTypePrivateProfile(userType)) {
+            restriction = UserManager.DISALLOW_ADD_PRIVATE_PROFILE;
         }
 
         enforceUserRestriction(restriction, UserHandle.getCallingUserId(),
@@ -5329,12 +5335,12 @@ public class UserManagerService extends IUserManager.Stub {
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.USER_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
         statsManager.setPullAtomCallback(
                 FrameworkStatsLog.MULTI_USER_INFO,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 this::onPullAtom);
     }
 

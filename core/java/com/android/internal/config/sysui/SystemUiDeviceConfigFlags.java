@@ -128,11 +128,6 @@ public final class SystemUiDeviceConfigFlags {
     // Flag related to Privacy Indicators
 
     /**
-     * Whether to show the complete ongoing app ops chip.
-     */
-    public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_2_enabled";
-
-    /**
      * Whether to show app ops chip for just microphone + camera.
      */
     public static final String PROPERTY_MIC_CAMERA_ENABLED = "camera_mic_icons_enabled";

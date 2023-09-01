@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Membuat semua aktivitas dapat diubah ukurannya untuk banyak jendela, terlepas dari nilai manifes."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Aktifkan jendela berformat bebas"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Aktifkan dukungan untuk jendela eksperimental berformat bebas."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Mode desktop"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Sandi cadangan desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Saat ini cadangan desktop penuh tidak dilindungi"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ketuk guna mengubah atau menghapus sandi untuk cadangan lengkap desktop"</string>

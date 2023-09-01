@@ -494,7 +494,7 @@
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Омогућава апликацији да шаље команде SIM картици. То је веома опасно."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"препознавање физичких активности"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ова апликација може да препозна физичке активности."</string>
-    <string name="permlab_camera" msgid="6320282492904119413">"снимање фотографија и видео снимака"</string>
+    <string name="permlab_camera" msgid="6320282492904119413">"снимање фотографија и видеа"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"Ова апликација може да снима слике и видео снимке помоћу камере док се апликација користи."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"да снима слике и видео снимке у позадини"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Ова апликација може да снима фотографије и видео снимке помоћу камере у било ком тренутку."</string>
@@ -745,8 +745,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Омогућава апликацији да чита видео фајлове из дељеног меморијског простора."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"читање фајлова слика из дељеног меморијског простора"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Омогућава апликацији да чита фајлове слика из дељеног меморијског простора."</string>
-    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"читање фајлова слика и видео снимака које корисник бира из дељеног меморијског простора"</string>
-    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Омогућава апликацији да чита фајлове слика и видео снимака које изаберете из дељеног меморијског простора."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"читање фајлова слика и видеа које корисник бира из дељеног меморијског простора"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Омогућава апликацији да чита фајлове слика и видеа које изаберете из дељеног меморијског простора."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"мењање или брисање садржаја дељеног меморијског простора"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Дозвољава апликацији да уписује садржај дељеног меморијског простора."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"упућивање/пријем SIP позива"</string>
@@ -1172,7 +1172,7 @@
     <string name="app_running_notification_text" msgid="5120815883400228566">"Додирните за више информација или заустављање апликације."</string>
     <string name="ok" msgid="2646370155170753815">"Потврди"</string>
     <string name="cancel" msgid="6908697720451760115">"Откажи"</string>
-    <string name="yes" msgid="9069828999585032361">"Потврди"</string>
+    <string name="yes" msgid="9069828999585032361">"У реду"</string>
     <string name="no" msgid="5122037903299899715">"Откажи"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Пажња"</string>
     <string name="loading" msgid="3138021523725055037">"Учитава се…"</string>
@@ -1417,7 +1417,7 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Додирните да бисте подесили"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Изаберите да бисте подесили"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Можда морате да реформатирате уређај. Додирните да бисте избацили."</string>
-    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"За чување слика, видео снимака, музике и другог садржаја"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"За чување слика, видеа, музике и другог садржаја"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"Прегледајте медијске фајлове"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем са: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не ради"</string>
@@ -1868,6 +1868,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. пословни <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. пословни имејл <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"Клонирај <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="private_profile_label_badge" msgid="1712086003787839183">"Приватни <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Тражи PIN пре откачињања"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Тражи шаблон за откључавање пре откачињања"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Тражи лозинку пре откачињања"</string>
@@ -2032,8 +2033,7 @@
     <string name="autofill_update_title" msgid="3630695947047069136">"Желите ли да ажурирате у услузи "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Желите ли да ажурирате ставку <xliff:g id="TYPE">%1$s</xliff:g> у услузи "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Желите ли да ажурирате ставке <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> у услузи "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <!-- no translation found for autofill_update_title_with_3types (8285767070604652626) -->
-    <skip />
+    <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"Желите ли да ажурирате ове ставке у услузи "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Сачувај"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Не, хвала"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Не сада"</string>

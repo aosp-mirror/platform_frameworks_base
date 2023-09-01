@@ -513,17 +513,21 @@ public class ParsingPackageUtils {
         // parseBaseAppBasicFlags
         pkg
                 // Default true
-                .setBackupAllowed(true)
-                .setClearUserDataAllowed(true)
-                .setClearUserDataOnFailedRestoreAllowed(true)
+                .setBackupAllowed(lite.isBackupAllowed())
+                .setClearUserDataAllowed(lite.isClearUserDataAllowed())
+                .setClearUserDataOnFailedRestoreAllowed(
+                        lite.isClearUserDataOnFailedRestoreAllowed())
                 .setAllowNativeHeapPointerTagging(true)
                 .setEnabled(true)
                 .setExtractNativeLibrariesRequested(true)
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(targetSdk >= Build.VERSION_CODES.Q)
                 .setHardwareAccelerated(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-                .setRequestLegacyExternalStorage(targetSdk < Build.VERSION_CODES.Q)
+                .setRequestLegacyExternalStorage(lite.isRequestLegacyExternalStorage())
                 .setCleartextTrafficAllowed(targetSdk < Build.VERSION_CODES.P)
+                // Default false
+                .setDefaultToDeviceProtectedStorage(lite.isDefaultToDeviceProtectedStorage())
+                .setUserDataFragile(lite.isUserDataFragile())
                 // Ints
                 .setCategory(ApplicationInfo.CATEGORY_UNDEFINED)
                 // Floats Default 0f

@@ -15,6 +15,8 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
@@ -42,10 +44,14 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import javax.inject.Provider
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -74,6 +80,7 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
     shadeRepository: ShadeRepository,
+    sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
     /** Position information for the shared notification container. */
     val sharedNotificationContainerPosition =
@@ -187,7 +194,7 @@ constructor(
         combine(isKeyguardShowing, isKeyguardOccluded) { showing, occluded -> showing && !occluded }
 
     /** Whether camera is launched over keyguard. */
-    var isSecureCameraActive =
+    val isSecureCameraActive: Flow<Boolean> by lazy {
         if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
             combine(
                     isKeyguardVisible,
@@ -204,6 +211,7 @@ constructor(
         } else {
             flowOf(false)
         }
+    }
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
     val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation
@@ -240,11 +248,29 @@ constructor(
         }
 
     /** Whether to animate the next doze mode transition. */
-    val animateDozingTransitions: Flow<Boolean> = repository.animateBottomAreaDozingTransitions
+    val animateDozingTransitions: Flow<Boolean> by lazy {
+        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            sceneInteractorProvider
+                .get()
+                .transitioningTo
+                .map { it == SceneKey.Lockscreen }
+                .distinctUntilChanged()
+                .flatMapLatest { isTransitioningToLockscreenScene ->
+                    if (isTransitioningToLockscreenScene) {
+                        flowOf(false)
+                    } else {
+                        repository.animateBottomAreaDozingTransitions
+                    }
+                }
+        } else {
+            repository.animateBottomAreaDozingTransitions
+        }
+    }
 
     fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { states.contains(it.to) }
     }
+
     fun isKeyguardShowing(): Boolean {
         return repository.isKeyguardShowing()
     }

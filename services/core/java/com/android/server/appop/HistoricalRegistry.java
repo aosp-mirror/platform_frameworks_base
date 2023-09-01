@@ -37,7 +37,6 @@ import android.app.AppOpsManager.UidState;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -46,7 +45,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.LongSparseArray;
@@ -136,7 +134,6 @@ final class HistoricalRegistry {
 
     private static final String PARAMETER_DELIMITER = ",";
     private static final String PARAMETER_ASSIGNMENT = "=";
-    private static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
 
     private volatile @NonNull DiscreteRegistry mDiscreteRegistry;
 
@@ -304,10 +301,6 @@ final class HistoricalRegistry {
     void dump(String prefix, PrintWriter pw, int filterUid, @Nullable String filterPackage,
             @Nullable String filterAttributionTag, int filterOp,
             @HistoricalOpsRequestFilter int filter) {
-        if (!isApiEnabled()) {
-            return;
-        }
-
         synchronized (mOnDiskLock) {
             synchronized (mInMemoryLock) {
                 pw.println();
@@ -371,11 +364,6 @@ final class HistoricalRegistry {
             @OpHistoryFlags int historyFlags, @HistoricalOpsRequestFilter int filter,
             long beginTimeMillis, long endTimeMillis, @OpFlags int flags,
             String[] attributionExemptedPackages, @NonNull RemoteCallback callback) {
-        if (!isApiEnabled()) {
-            callback.sendResult(new Bundle());
-            return;
-        }
-
         final HistoricalOps result = new HistoricalOps(beginTimeMillis, endTimeMillis);
 
         if ((historyFlags & HISTORY_FLAG_AGGREGATE) != 0) {
@@ -409,11 +397,6 @@ final class HistoricalRegistry {
             @HistoricalOpsRequestFilter int filter, long beginTimeMillis, long endTimeMillis,
             @OpFlags int flags, @Nullable String[] attributionExemptPkgs,
             @NonNull RemoteCallback callback) {
-        if (!isApiEnabled()) {
-            callback.sendResult(new Bundle());
-            return;
-        }
-
         final long currentTimeMillis = System.currentTimeMillis();
         if (endTimeMillis == Long.MAX_VALUE) {
             endTimeMillis = currentTimeMillis;
@@ -805,12 +788,6 @@ final class HistoricalRegistry {
                 Persistence.spliceFromBeginning(op, filterScale);
             }
         }
-    }
-
-    private static boolean isApiEnabled() {
-        return Binder.getCallingUid() == Process.myUid()
-                || DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_PERMISSIONS_HUB_ENABLED, true);
     }
 
     private static final class Persistence {

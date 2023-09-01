@@ -186,7 +186,12 @@ class HandleMenu {
         // More Actions pill setup.
         final View moreActionsPillView = mMoreActionsPill.mWindowViewHost.getView();
         final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
-        closeBtn.setOnClickListener(mOnClickListener);
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            closeBtn.setVisibility(View.GONE);
+        } else {
+            closeBtn.setVisibility(View.VISIBLE);
+            closeBtn.setOnClickListener(mOnClickListener);
+        }
         final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
         selectBtn.setOnClickListener(mOnClickListener);
     }
@@ -228,7 +233,6 @@ class HandleMenu {
 
     /**
      * Update pill layout, in case task changes have caused positioning to change.
-     * @param t
      */
     void relayout(SurfaceControl.Transaction t) {
         if (mAppInfoPill != null) {
@@ -245,10 +249,12 @@ class HandleMenu {
                     mMoreActionsPillPosition.x, mMoreActionsPillPosition.y);
         }
     }
+
     /**
      * Check a passed MotionEvent if a click has occurred on any button on this caption
      * Note this should only be called when a regular onClick is not possible
      * (i.e. the button was clicked through status bar layer)
+     *
      * @param ev the MotionEvent to compare against.
      */
     void checkClickEvent(MotionEvent ev) {
@@ -267,6 +273,7 @@ class HandleMenu {
      * A valid menu input is one of the following:
      * An input that happens in the menu views.
      * Any input before the views have been laid out.
+     *
      * @param inputPoint the input to compare against.
      */
     boolean isValidMenuInput(PointF inputPoint) {
@@ -297,7 +304,6 @@ class HandleMenu {
 
     /**
      * Check if the views for handle menu can be seen.
-     * @return
      */
     private boolean viewsLaidOut() {
         return mAppInfoPill.mWindowViewHost.getView().isLaidOut();
@@ -318,8 +324,7 @@ class HandleMenu {
                 R.dimen.desktop_mode_handle_menu_app_info_pill_height);
         mWindowingPillHeight = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_windowing_pill_height);
-        mMoreActionsPillHeight = loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
+        mMoreActionsPillHeight = shouldShowCloseButton(resources);
         mShadowRadius = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_shadow_radius);
         mCornerRadius = loadDimensionPixelSize(resources,
@@ -331,6 +336,14 @@ class HandleMenu {
             return 0;
         }
         return resources.getDimensionPixelSize(resourceId);
+    }
+
+    private int shouldShowCloseButton(Resources resources) {
+        return (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM)
+                ? loadDimensionPixelSize(resources,
+                R.dimen.desktop_mode_handle_menu_more_actions_pill_freeform_height)
+                : loadDimensionPixelSize(resources,
+                        R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
     }
 
     void close() {

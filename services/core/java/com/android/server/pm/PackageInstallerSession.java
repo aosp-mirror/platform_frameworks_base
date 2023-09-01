@@ -2805,9 +2805,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
                         "Session not sealed");
             }
-            Objects.requireNonNull(mPackageName);
-            Objects.requireNonNull(mSigningDetails);
-            Objects.requireNonNull(mResolvedBaseFile);
+            if (mPackageName == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session no package name");
+            }
+            if (mSigningDetails == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session no signing data");
+            }
+            if (mResolvedBaseFile == null) {
+                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                        "Session no resolved base file");
+            }
             final PackageLite result;
             if (!isApexSession()) {
                 // For mode inherit existing, it would link/copy existing files to stage dir in

@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ମାନିଫେଷ୍ଟ ମୂଲ୍ୟ ଯାହା ହୋଇଥାଉ ନା କାହିଁକି, ଏକାଧିକ-ୱିଣ୍ଡୋ ପାଇଁ ସମସ୍ତ କାର୍ଯ୍ୟକଳାପକୁ ରିସାଇଜ କରନ୍ତୁ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ଫ୍ରିଫର୍ମ ୱିଣ୍ଡୋକୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ପରୀକ୍ଷାମୂଳକ ଫ୍ରିଫର୍ମ ୱିଣ୍ଡୋଗୁଡ଼ିକ ପାଇଁ ସପୋର୍ଟକୁ ସକ୍ଷମ କରନ୍ତୁ।"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ଡେସ୍କଟପ ମୋଡ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ଡେସ୍କଟପ ବେକଅପ ପାସୱାର୍ଡ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ଡେସ୍କଟପ୍‌ର ସମ୍ପୂର୍ଣ୍ଣ ବ୍ୟାକଅପ୍‌ଗୁଡ଼ିକ ବର୍ତ୍ତମାନ ସୁରକ୍ଷିତ ନୁହେଁ"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ଡେସ୍କଟପ୍‌ର ସମ୍ପୂର୍ଣ୍ଣ ବ୍ୟାକ୍‌ଅପ୍‌ ପାଇଁ ପାସ୍‌ୱର୍ଡ ବଦଳାଇବା କିମ୍ୱା କାଢ଼ିଦେବା ନିମନ୍ତେ ଟାପ୍‌ କରନ୍ତୁ"</string>

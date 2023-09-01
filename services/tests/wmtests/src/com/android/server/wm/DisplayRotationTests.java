@@ -1194,12 +1194,12 @@ public class DisplayRotationTests {
     }
 
     @Test
-    public void testIsFixedToUserRotation_displayContentOrientationFixed() throws Exception {
+    public void testIsFixedToUserRotation_displayShouldNotRotateWithContent() throws Exception {
         mBuilder.build();
-        when(mMockDisplayContent.isDisplayOrientationFixed()).thenReturn(true);
+        when(mMockDisplayContent.shouldRotateWithContent()).thenReturn(false);
 
         assertFalse("Display rotation should respect app requested orientation if"
-                + " the display has fixed orientation.", mTarget.isFixedToUserRotation());
+                + " the display does not rotate with content.", mTarget.isFixedToUserRotation());
     }
 
     @Test
@@ -1453,6 +1453,7 @@ public class DisplayRotationTests {
                     .thenReturn(mock(TaskDisplayArea.class));
             when(mMockDisplayContent.getWindowConfiguration())
                     .thenReturn(new WindowConfiguration());
+            when(mMockDisplayContent.shouldRotateWithContent()).thenReturn(true);
 
             Field field = DisplayContent.class
                     .getDeclaredField("mFixedRotationTransitionListener");

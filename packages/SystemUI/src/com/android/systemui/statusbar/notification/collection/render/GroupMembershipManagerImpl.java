@@ -18,40 +18,65 @@ package com.android.systemui.statusbar.notification.collection.render;
 
 import static com.android.systemui.statusbar.notification.collection.GroupEntry.ROOT_ENTRY;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * ShadeListBuilder groups notifications from system server. This manager translates
  * ShadeListBuilder's method of grouping to be used within SystemUI.
  */
+@SysUISingleton
 public class GroupMembershipManagerImpl implements GroupMembershipManager {
-    @Override
-    public boolean isGroupSummary(NotificationEntry entry) {
-        return getGroupSummary(entry) == entry;
+    FeatureFlags mFeatureFlags;
+
+    @Inject
+    public GroupMembershipManagerImpl(FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
     }
 
     @Override
-    public NotificationEntry getGroupSummary(NotificationEntry entry) {
-        if (isEntryTopLevel(entry) || entry.getParent() == null) {
-            return null;
+    public boolean isGroupSummary(@NonNull NotificationEntry entry) {
+        return getGroupSummary(entry) == entry;
+    }
+
+    @Nullable
+    @Override
+    public NotificationEntry getGroupSummary(@NonNull NotificationEntry entry) {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
+            if (!isChildInGroup(entry)) {
+                return entry.getRepresentativeEntry();
+            }
+        } else {
+            if (isEntryTopLevel(entry) || entry.getParent() == null) {
+                return null;
+            }
         }
 
         return entry.getParent().getRepresentativeEntry();
     }
 
     @Override
-    public boolean isChildInGroup(NotificationEntry entry) {
-        return !isEntryTopLevel(entry);
+    public boolean isChildInGroup(@NonNull NotificationEntry entry) {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE)) {
+            return !isEntryTopLevel(entry) && entry.getParent() != null;
+        } else {
+            return !isEntryTopLevel(entry);
+        }
     }
 
     @Override
-    public boolean isOnlyChildInGroup(NotificationEntry entry) {
+    public boolean isOnlyChildInGroup(@NonNull NotificationEntry entry) {
         if (entry.getParent() == null) {
             return false;
         }
@@ -61,20 +86,24 @@ public class GroupMembershipManagerImpl implements GroupMembershipManager {
 
     @Nullable
     @Override
-    public List<NotificationEntry> getChildren(ListEntry entry) {
+    public List<NotificationEntry> getChildren(@NonNull ListEntry entry) {
         if (entry instanceof GroupEntry) {
             return ((GroupEntry) entry).getChildren();
         }
 
-        if (isGroupSummary(entry.getRepresentativeEntry())) {
+        NotificationEntry representativeEntry = entry.getRepresentativeEntry();
+        if (representativeEntry != null && isGroupSummary(representativeEntry)) {
             // maybe we were actually passed the summary
-            return entry.getRepresentativeEntry().getParent().getChildren();
+            GroupEntry parent = representativeEntry.getParent();
+            if (parent != null) {
+                return parent.getChildren();
+            }
         }
 
         return null;
     }
 
-    private boolean isEntryTopLevel(NotificationEntry entry) {
+    private boolean isEntryTopLevel(@NonNull NotificationEntry entry) {
         return entry.getParent() == ROOT_ENTRY;
     }
 }

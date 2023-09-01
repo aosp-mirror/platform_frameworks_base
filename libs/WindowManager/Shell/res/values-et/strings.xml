@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Selge"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Hiljutisi mulle pole"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Siin kuvatakse hiljutised ja suletud mullid."</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Juhtige mulle igal ajal"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Puudutage siin, et hallata, milliseid rakendusi ja vestlusi saab mullina kuvada"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Mull"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Halda"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Mullist loobuti."</string>

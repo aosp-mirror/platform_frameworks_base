@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"السماح بتغيير حجم جميع الأنشطة لتناسب تعدد النوافذ، بغض النظر عن قيم البيان"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"تفعيل النوافذ الحرة"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"إتاحة استخدام النوافذ الحرة التجريبية"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"وضع سطح المكتب"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"كلمة مرور احتياطية للكمبيوتر"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"النُسخ الاحتياطية الكاملة لسطح المكتب غير محمية في الوقت الحالي."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"انقر لتغيير كلمة مرور النسخ الاحتياطية الكاملة لسطح المكتب أو إزالتها."</string>

@@ -19,13 +19,23 @@ package com.android.systemui.statusbar.notification.collection.render
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
+import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager.OnGroupExpansionChangeListener
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
-import org.junit.Assert
+import com.android.systemui.util.mockito.withArgCaptor
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -34,15 +44,45 @@ class GroupExpansionManagerTest : SysuiTestCase() {
 
     private val dumpManager: DumpManager = mock()
     private val groupMembershipManager: GroupMembershipManager = mock()
-    private val featureFlags = FakeFeatureFlags()
+    private val featureFlags = FakeFeatureFlagsClassic()
 
-    private val entry1 = NotificationEntryBuilder().build()
-    private val entry2 = NotificationEntryBuilder().build()
+    private val pipeline: NotifPipeline = mock()
+    private lateinit var beforeRenderListListener: OnBeforeRenderListListener
+
+    private val summary1 = notificationEntry("foo", 1)
+    private val summary2 = notificationEntry("bar", 1)
+    private val entries =
+        listOf<ListEntry>(
+            GroupEntryBuilder()
+                .setSummary(summary1)
+                .setChildren(
+                    listOf(
+                        notificationEntry("foo", 2),
+                        notificationEntry("foo", 3),
+                        notificationEntry("foo", 4)
+                    )
+                )
+                .build(),
+            GroupEntryBuilder()
+                .setSummary(summary2)
+                .setChildren(
+                    listOf(
+                        notificationEntry("bar", 2),
+                        notificationEntry("bar", 3),
+                        notificationEntry("bar", 4)
+                    )
+                )
+                .build(),
+            notificationEntry("baz", 1)
+        )
+
+    private fun notificationEntry(pkg: String, id: Int) =
+        NotificationEntryBuilder().setPkg(pkg).setId(id).build().apply { row = mock() }
 
     @Before
     fun setUp() {
-        whenever(groupMembershipManager.getGroupSummary(entry1)).thenReturn(entry1)
-        whenever(groupMembershipManager.getGroupSummary(entry2)).thenReturn(entry2)
+        whenever(groupMembershipManager.getGroupSummary(summary1)).thenReturn(summary1)
+        whenever(groupMembershipManager.getGroupSummary(summary2)).thenReturn(summary2)
 
         gem = GroupExpansionManagerImpl(dumpManager, groupMembershipManager, featureFlags)
     }
@@ -54,16 +94,16 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         var listenerCalledCount = 0
         gem.registerGroupExpansionChangeListener { _, _ -> listenerCalledCount++ }
 
-        gem.setGroupExpanded(entry1, false)
-        Assert.assertEquals(0, listenerCalledCount)
-        gem.setGroupExpanded(entry1, true)
-        Assert.assertEquals(1, listenerCalledCount)
-        gem.setGroupExpanded(entry2, true)
-        Assert.assertEquals(2, listenerCalledCount)
-        gem.setGroupExpanded(entry1, true)
-        Assert.assertEquals(2, listenerCalledCount)
-        gem.setGroupExpanded(entry2, false)
-        Assert.assertEquals(3, listenerCalledCount)
+        gem.setGroupExpanded(summary1, false)
+        assertThat(listenerCalledCount).isEqualTo(0)
+        gem.setGroupExpanded(summary1, true)
+        assertThat(listenerCalledCount).isEqualTo(1)
+        gem.setGroupExpanded(summary2, true)
+        assertThat(listenerCalledCount).isEqualTo(2)
+        gem.setGroupExpanded(summary1, true)
+        assertThat(listenerCalledCount).isEqualTo(2)
+        gem.setGroupExpanded(summary2, false)
+        assertThat(listenerCalledCount).isEqualTo(3)
     }
 
     @Test
@@ -73,15 +113,39 @@ class GroupExpansionManagerTest : SysuiTestCase() {
         var listenerCalledCount = 0
         gem.registerGroupExpansionChangeListener { _, _ -> listenerCalledCount++ }
 
-        gem.setGroupExpanded(entry1, false)
-        Assert.assertEquals(1, listenerCalledCount)
-        gem.setGroupExpanded(entry1, true)
-        Assert.assertEquals(2, listenerCalledCount)
-        gem.setGroupExpanded(entry2, true)
-        Assert.assertEquals(3, listenerCalledCount)
-        gem.setGroupExpanded(entry1, true)
-        Assert.assertEquals(4, listenerCalledCount)
-        gem.setGroupExpanded(entry2, false)
-        Assert.assertEquals(5, listenerCalledCount)
+        gem.setGroupExpanded(summary1, false)
+        assertThat(listenerCalledCount).isEqualTo(1)
+        gem.setGroupExpanded(summary1, true)
+        assertThat(listenerCalledCount).isEqualTo(2)
+        gem.setGroupExpanded(summary2, true)
+        assertThat(listenerCalledCount).isEqualTo(3)
+        gem.setGroupExpanded(summary1, true)
+        assertThat(listenerCalledCount).isEqualTo(4)
+        gem.setGroupExpanded(summary2, false)
+        assertThat(listenerCalledCount).isEqualTo(5)
+    }
+
+    @Test
+    fun testSyncWithPipeline() {
+        featureFlags.set(Flags.NOTIFICATION_GROUP_EXPANSION_CHANGE, true)
+        gem.attach(pipeline)
+        beforeRenderListListener = withArgCaptor {
+            verify(pipeline).addOnBeforeRenderListListener(capture())
+        }
+
+        val listener: OnGroupExpansionChangeListener = mock()
+        gem.registerGroupExpansionChangeListener(listener)
+
+        beforeRenderListListener.onBeforeRenderList(entries)
+        verify(listener, never()).onGroupExpansionChange(any(), any())
+
+        // Expand one of the groups.
+        gem.setGroupExpanded(summary1, true)
+        verify(listener).onGroupExpansionChange(summary1.row, true)
+
+        // Empty the pipeline list and verify that the group is no longer expanded.
+        beforeRenderListListener.onBeforeRenderList(emptyList())
+        verify(listener).onGroupExpansionChange(summary1.row, false)
+        verifyNoMoreInteractions(listener)
     }
 }

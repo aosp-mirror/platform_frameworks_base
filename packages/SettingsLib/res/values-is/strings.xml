@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Gera stærð allrar virkni breytanlega svo að hún henti fyrir marga glugga, óháð gildum í upplýsingaskrá."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Virkja glugga með frjálsu sniði"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Virkja stuðning við glugga með frjálsu sniði á tilraunastigi."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Skjáborðsstilling"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Aðgangsorð tölvuafritunar"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Heildarafritun á tölvu er ekki varin sem stendur."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Ýttu til að breyta eða fjarlægja aðgangsorðið fyrir heildarafritun á tölvu"</string>

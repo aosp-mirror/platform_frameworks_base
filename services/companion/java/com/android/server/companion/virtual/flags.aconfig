@@ -1,3 +1,5 @@
+# OLD PACKAGE, DO NOT USE: Prefer `flags.aconfig` in core/java/android/companion/virtual
+# (or other custom files) to define your flags
 package: "com.android.server.companion.virtual"
 
 flag {

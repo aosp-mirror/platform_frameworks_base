@@ -78,7 +78,7 @@ public final class FileIntegrityManager {
      * as a separate file and stored next to the targeting file in the filesystem. The public key of
      * the signer (normally the same app developer) can be put in the APK, and the app can use the
      * public key to verify the signature to the file's actual fs-verity digest (from {@link
-     * #getFsverityDigest}) before using the file. The exact format is not prescribed by the
+     * #getFsVerityDigest}) before using the file. The exact format is not prescribed by the
      * framework. App developers may choose to use common practices like JCA for the signing and
      * verification, or their own preferred approach.
      *
@@ -87,7 +87,7 @@ public final class FileIntegrityManager {
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)
-    public void setupFsverity(@NonNull File file) throws IOException {
+    public void setupFsVerity(@NonNull File file) throws IOException {
         if (!file.isAbsolute()) {
             throw new IllegalArgumentException("Expect an absolute path");
         }
@@ -104,7 +104,7 @@ public final class FileIntegrityManager {
             int errno = mService.setupFsverity(authToken, file.getPath(),
                     mContext.getPackageName());
             if (errno != 0) {
-                new ErrnoException("setupFsverity", errno).rethrowAsIOException();
+                new ErrnoException("setupFsVerity", errno).rethrowAsIOException();
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -120,7 +120,7 @@ public final class FileIntegrityManager {
      * @see <a href="https://www.kernel.org/doc/html/next/filesystems/fsverity.html">Kernel doc</a>
      */
     @FlaggedApi(Flags.FLAG_FSVERITY_API)
-    public @Nullable byte[] getFsverityDigest(@NonNull File file) throws IOException {
+    public @Nullable byte[] getFsVerityDigest(@NonNull File file) throws IOException {
         return VerityUtils.getFsverityDigest(file.getPath());
     }
 

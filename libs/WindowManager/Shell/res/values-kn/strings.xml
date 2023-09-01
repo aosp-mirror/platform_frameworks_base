@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ಯಾವುದೇ ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಇಲ್ಲ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಮತ್ತು ವಜಾಗೊಳಿಸಿದ ಬಬಲ್ಸ್ ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಬಬಲ್ಸ್ ಅನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ಯಾವ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸಂಭಾಷಣೆಗಳನ್ನು ಬಬಲ್ ಮಾಡಬಹುದು ಎಂಬುದನ್ನು ನಿರ್ವಹಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ಬಬಲ್"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ಬಬಲ್ ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>

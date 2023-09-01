@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Yenza yonke imisebenzi ibe nosayizi abasha kumawindi amaningi, ngokunganaki amavelu e-manifest."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Nika amandla amawindi e-freeform"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Nika amandla usekelo lwe-windows yokuhlola kwe-freeform."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Imodi yedeskithophu"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Iphasiwedi yokusekela ngokulondoloza ye-Desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Ukusekela ngokulondoloza okugcwele kwe-Desktop akuvikelekile okwamanje."</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Thepha ukushintsha noma ukususa iphasiwedi yokwenziwa kwezipele ngokugcwele kwideskithophu"</string>

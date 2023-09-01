@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"මැනිෆෙස්ට් අගයන් නොසලකා, සියලු ක්‍රියාකාරකම් බහු-කවුළුව සඳහා ප්‍රතිප්‍රමාණ කළ හැකි බවට පත් කරන්න."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"අනියම් හැඩැති කවුළු සබල කරන්න"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"පරීක්ෂණාත්මක අනියම් හැඩැති කවුළු සඳහා සහාය සබල කරන්න."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ඩෙස්ක්ටොප් ප්‍රකාරය"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ඩෙස්ක්ටොප් උපස්ථ මුරපදය"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ දැනට ආරක්ෂා කර නොමැත"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ සඳහා මුරපදය වෙනස් කිරීමට හෝ ඉවත් කිරීමට තට්ටු කරන්න"</string>

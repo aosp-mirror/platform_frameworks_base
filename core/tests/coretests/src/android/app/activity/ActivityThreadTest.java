@@ -630,7 +630,7 @@ public class ActivityThreadTest {
         });
     }
 
-    @FlakyTest(bugId = 295234586)
+    @FlakyTest(bugId = 298331121)
     @Test
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
@@ -836,8 +836,10 @@ public class ActivityThreadTest {
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
+        final Configuration currentConfig = activity.getResources().getConfiguration();
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(), false /* preserveWindow */);
+                null, 0, new MergedConfiguration(currentConfig, currentConfig),
+                false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);

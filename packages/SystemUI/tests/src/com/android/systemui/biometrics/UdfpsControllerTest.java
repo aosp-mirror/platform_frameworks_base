@@ -106,7 +106,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -252,7 +251,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        Execution execution = new FakeExecution();
+        mContext.getOrCreateTestableResources()
+                .addOverride(com.android.internal.R.bool.config_ignoreUdfpsVote, false);
+
         mUdfpsUtils = new UdfpsUtils();
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))

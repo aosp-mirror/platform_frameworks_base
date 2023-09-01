@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"مینی فیسٹ اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"‏freeform ونڈوز فعال کریں"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"تجرباتی فری فارم ونڈوز کیلئے سپورٹ فعال کریں۔"</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"ڈیسک ٹاپ موڈ"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"ڈیسک ٹاپ کا بیک اپ پاس ورڈ"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"ڈیسک ٹاپ کے مکمل بیک اپس فی الحال محفوظ کیے ہوئے نہیں ہیں"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"ڈیسک ٹاپ کے مکمل بیک اپس کیلئے پاس ورڈ کو تبدیل کرنے یا ہٹانے کیلئے تھپتھپائیں"</string>

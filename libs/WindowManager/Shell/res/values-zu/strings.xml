@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Ngiyezwa"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Awekho amabhamuza akamuva"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Amabhamuza akamuva namabhamuza asusiwe azobonakala lapha."</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Lawula amabhamuza noma nini"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"Thepha lapha ukuze ulawule ukuthi yimaphi ama-app kanye nezingxoxo ezingenza amabhamuza"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"Ibhamuza"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Phatha"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ibhamuza licashisiwe."</string>

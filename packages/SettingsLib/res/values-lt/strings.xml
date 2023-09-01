@@ -403,7 +403,6 @@
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Nustatyti, kad visus veiksmus būtų galima atlikti kelių dydžių languose, nepaisant aprašo verčių."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Įgalinti laisvos formos langus"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Įgalinti eksperimentinių laisvos formos langų palaikymą."</string>
-    <string name="desktop_mode" msgid="2389067840550544462">"Stalinio komp. režimas"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Viet. atsrg. kop. slapt."</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Šiuo metu visos vietinės atsarginės kopijos neapsaugotos"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Jei norite pakeisti ar pašalinti visų stalinio kompiuterio atsarginių kopijų slaptažodį, palieskite"</string>

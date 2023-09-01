@@ -16,6 +16,8 @@
 
 package com.android.systemui.aconfig
 
+import com.android.systemui.FeatureFlags
+import com.android.systemui.FeatureFlagsImpl
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Module
 import dagger.Provides
