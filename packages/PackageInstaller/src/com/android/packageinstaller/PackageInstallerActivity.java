@@ -16,9 +16,7 @@
 */
 package com.android.packageinstaller;
 
-import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
-import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
@@ -790,8 +788,12 @@ public class PackageInstallerActivity extends AlertActivity {
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (!isDestroyed()) {
-                    startActivity(getIntent().addFlags(
-                            FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP));
+                    startActivity(getIntent());
+                    // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
+                    // work for the multiple user case, i.e. the caller task user and started
+                    // Activity user are not the same. To avoid having multiple PIAs in the task,
+                    // finish the current PackageInstallerActivity
+                    finish();
                 }
             }, 500);
 
