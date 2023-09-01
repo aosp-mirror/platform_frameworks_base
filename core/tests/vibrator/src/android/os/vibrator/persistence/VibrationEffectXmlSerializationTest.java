@@ -363,8 +363,7 @@ public class VibrationEffectXmlSerializationTest {
 
     private void assertParseDocumentSucceeds(String xml, int flags, VibrationEffect... effects)
             throws Exception {
-        assertThat(parseDocument(xml, flags).getVibrationEffectListForTesting())
-                .containsExactly(effects);
+        assertThat(parseDocument(xml, flags).getVibrationEffects()).containsExactly(effects);
     }
 
     /**
@@ -381,8 +380,7 @@ public class VibrationEffectXmlSerializationTest {
         String tagName = parser.getName();
         assertThat(Set.of("vibration", "vibration-select")).contains(tagName);
 
-        assertThat(parseElement(parser, flags).getVibrationEffectListForTesting())
-                .containsExactly(effects);
+        assertThat(parseElement(parser, flags).getVibrationEffects()).containsExactly(effects);
         assertThat(parser.getEventType()).isEqualTo(XmlPullParser.END_TAG);
         assertThat(parser.getName()).isEqualTo(tagName);
     }
