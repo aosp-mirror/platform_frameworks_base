@@ -117,20 +117,21 @@ public class SettingsToPropertiesMapper {
     // All the aconfig flags under the listed DeviceConfig scopes will be synced to native level.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
-      "core_experiments_team_internal",
-      "camera_platform",
-      "power",
-      "vibrator",
-      "haptics",
-      "text",
-      "arc_next",
-      "test_suites",
-      "hardware_backed_security_mainline",
-      "threadnetwork",
-      "media_solutions",
-      "responsible_apis",
-      "rust",
-      "pixel_biometrics",
+        "biometrics_framework",
+        "core_experiments_team_internal",
+        "camera_platform",
+        "power",
+        "vibrator",
+        "haptics",
+        "text",
+        "arc_next",
+        "test_suites",
+        "hardware_backed_security_mainline",
+        "threadnetwork",
+        "media_solutions",
+        "responsible_apis",
+        "rust",
+        "pixel_biometrics",
     };
 
     private final String[] mGlobalSettings;
