@@ -196,13 +196,13 @@ public class TransactionExecutorHelper {
                 // Fall through to return the PAUSE item to ensure the activity is properly
                 // resumed while relaunching.
             case ON_PAUSE:
-                lifecycleItem = PauseActivityItem.obtain();
+                lifecycleItem = PauseActivityItem.obtain(r.token);
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(0 /* configChanges */);
+                lifecycleItem = StopActivityItem.obtain(r.token, 0 /* configChanges */);
                 break;
             default:
-                lifecycleItem = ResumeActivityItem.obtain(false /* isForward */,
+                lifecycleItem = ResumeActivityItem.obtain(r.token, false /* isForward */,
                         false /* shouldSendCompatFakeFocus */);
                 break;
         }

@@ -228,9 +228,9 @@ final class DisplayRotationCompatPolicy {
                             + "activityRecord=%s", activity);
             final ClientTransaction transaction = ClientTransaction.obtain(
                     activity.app.getThread(), activity.token);
-            transaction.addCallback(
-                    RefreshCallbackItem.obtain(cycleThroughStop ? ON_STOP : ON_PAUSE));
-            transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(
+            transaction.addCallback(RefreshCallbackItem.obtain(activity.token,
+                            cycleThroughStop ? ON_STOP : ON_PAUSE));
+            transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(activity.token,
                     /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
             activity.mAtmService.getLifecycleManager().scheduleTransaction(transaction);
             mHandler.postDelayed(

@@ -16,11 +16,15 @@
 
 package android.app.servertransaction;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.PictureInPictureUiState;
+import android.os.IBinder;
 import android.os.Parcel;
+
+import java.util.Objects;
 
 /**
  * Request an activity to enter picture-in-picture mode.
@@ -31,8 +35,8 @@ public final class PipStateTransactionItem extends ActivityTransactionItem {
     private PictureInPictureUiState mPipState;
 
     @Override
-    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
-            PendingTransactionActions pendingActions) {
+    public void execute(@NonNull ClientTransactionHandler client, @NonNull ActivityClientRecord r,
+            @NonNull PendingTransactionActions pendingActions) {
         client.handlePictureInPictureStateChanged(r, mPipState);
     }
 
@@ -41,11 +45,14 @@ public final class PipStateTransactionItem extends ActivityTransactionItem {
     private PipStateTransactionItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static PipStateTransactionItem obtain(PictureInPictureUiState pipState) {
+    @NonNull
+    public static PipStateTransactionItem obtain(@NonNull IBinder activityToken,
+            @NonNull PictureInPictureUiState pipState) {
         PipStateTransactionItem instance = ObjectPool.obtain(PipStateTransactionItem.class);
         if (instance == null) {
             instance = new PipStateTransactionItem();
         }
+        instance.setActivityToken(activityToken);
         instance.mPipState = pipState;
 
         return instance;
@@ -53,6 +60,7 @@ public final class PipStateTransactionItem extends ActivityTransactionItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mPipState = null;
         ObjectPool.recycle(this);
     }
@@ -61,33 +69,49 @@ public final class PipStateTransactionItem extends ActivityTransactionItem {
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         mPipState.writeToParcel(dest, flags);
     }
 
     /** Read from Parcel. */
-    private PipStateTransactionItem(Parcel in) {
+    private PipStateTransactionItem(@NonNull Parcel in) {
+        super(in);
         mPipState = PictureInPictureUiState.CREATOR.createFromParcel(in);
     }
 
-    public static final @android.annotation.NonNull Creator<PipStateTransactionItem> CREATOR =
-            new Creator<PipStateTransactionItem>() {
-                public PipStateTransactionItem createFromParcel(Parcel in) {
-                    return new PipStateTransactionItem(in);
-                }
+    public static final @NonNull Creator<PipStateTransactionItem> CREATOR = new Creator<>() {
+        public PipStateTransactionItem createFromParcel(@NonNull Parcel in) {
+            return new PipStateTransactionItem(in);
+        }
 
-                public PipStateTransactionItem[] newArray(int size) {
-                    return new PipStateTransactionItem[size];
-                }
-            };
+        public PipStateTransactionItem[] newArray(int size) {
+            return new PipStateTransactionItem[size];
+        }
+    };
 
     @Override
     public boolean equals(@Nullable Object o) {
-        return this == o;
+        if (this == o) {
+            return true;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final PipStateTransactionItem other = (PipStateTransactionItem) o;
+        return Objects.equals(mPipState, other.mPipState);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + super.hashCode();
+        result = 31 * result + Objects.hashCode(mPipState);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "PipStateTransactionItem{}";
+        return "PipStateTransactionItem{" + super.toString() + "}";
     }
 }

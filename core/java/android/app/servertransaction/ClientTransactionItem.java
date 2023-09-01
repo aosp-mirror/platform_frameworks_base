@@ -19,6 +19,8 @@ package android.app.servertransaction;
 import static android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
@@ -26,13 +28,15 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * A callback message to a client that can be scheduled and executed.
  * Examples of these might be activity configuration change, multi-window mode change, activity
  * result delivery etc.
  *
  * @see ClientTransaction
- * @see com.android.server.am.ClientLifecycleManager
+ * @see com.android.server.wm.ClientLifecycleManager
  * @hide
  */
 public abstract class ClientTransactionItem implements BaseClientRequest, Parcelable {
@@ -54,6 +58,16 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
     @Nullable
     public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
             @NonNull IBinder token) {
+        return null;
+    }
+
+    /**
+     * Returns the activity token if this transaction item is activity-targeting. Otherwise,
+     * returns {@code null}.
+     */
+    @VisibleForTesting(visibility = PACKAGE)
+    @Nullable
+    public IBinder getActivityToken() {
         return null;
     }
 

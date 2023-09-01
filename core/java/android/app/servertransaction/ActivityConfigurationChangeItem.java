@@ -45,7 +45,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
-        client.updatePendingActivityConfiguration(token, mConfiguration);
+        client.updatePendingActivityConfiguration(getActivityToken(), mConfiguration);
     }
 
     @Override
@@ -61,8 +61,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     @Override
     public Context getContextToUpdate(@NonNull ClientTransactionHandler client,
             @Nullable IBinder token) {
-        // TODO(b/260873529): Update ClientTransaction to bundle multiple activity config updates.
-        return client.getActivity(token);
+        return client.getActivity(getActivityToken());
     }
 
     // ObjectPoolItem implementation
@@ -70,7 +69,9 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     private ActivityConfigurationChangeItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ActivityConfigurationChangeItem obtain(@NonNull Configuration config) {
+    @NonNull
+    public static ActivityConfigurationChangeItem obtain(@NonNull IBinder activityToken,
+            @NonNull Configuration config) {
         if (config == null) {
             throw new IllegalArgumentException("Config must not be null.");
         }
@@ -80,6 +81,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
         if (instance == null) {
             instance = new ActivityConfigurationChangeItem();
         }
+        instance.setActivityToken(activityToken);
         instance.mConfiguration = config;
 
         return instance;
@@ -87,6 +89,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     @Override
     public void recycle() {
+        super.recycle();
         mConfiguration = Configuration.EMPTY;
         ObjectPool.recycle(this);
     }
@@ -96,32 +99,34 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     /** Write to Parcel. */
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeTypedObject(mConfiguration, flags);
     }
 
     /** Read from Parcel. */
-    private ActivityConfigurationChangeItem(Parcel in) {
+    private ActivityConfigurationChangeItem(@NonNull Parcel in) {
+        super(in);
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
     public static final @NonNull Creator<ActivityConfigurationChangeItem> CREATOR =
-            new Creator<ActivityConfigurationChangeItem>() {
-        public ActivityConfigurationChangeItem createFromParcel(Parcel in) {
-            return new ActivityConfigurationChangeItem(in);
-        }
+            new Creator<>() {
+                public ActivityConfigurationChangeItem createFromParcel(@NonNull Parcel in) {
+                    return new ActivityConfigurationChangeItem(in);
+                }
 
-        public ActivityConfigurationChangeItem[] newArray(int size) {
-            return new ActivityConfigurationChangeItem[size];
-        }
-    };
+                public ActivityConfigurationChangeItem[] newArray(int size) {
+                    return new ActivityConfigurationChangeItem[size];
+                }
+            };
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!super.equals(o)) {
             return false;
         }
         final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
@@ -130,11 +135,15 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     @Override
     public int hashCode() {
-        return mConfiguration.hashCode();
+        int result = 17;
+        result = 31 * result + super.hashCode();
+        result = 31 * result + Objects.hashCode(mConfiguration);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "ActivityConfigurationChange{config=" + mConfiguration + "}";
+        return "ActivityConfigurationChange{" + super.toString()
+                + ",config=" + mConfiguration + "}";
     }
 }
