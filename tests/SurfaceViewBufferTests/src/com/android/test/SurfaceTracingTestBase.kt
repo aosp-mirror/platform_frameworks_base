@@ -21,9 +21,11 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import android.tools.common.flicker.subject.layers.LayerSubject
 import android.tools.common.traces.surfaceflinger.LayersTrace
+import android.tools.device.traces.io.ResultWriter
+import android.tools.device.traces.monitors.surfaceflinger.LayersTraceMonitor
 import android.tools.device.traces.monitors.withSFTracing
-import android.tools.device.traces.monitors.PerfettoTraceMonitor
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -31,7 +33,6 @@ import org.junit.Rule
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
-import perfetto.protos.PerfettoConfig.SurfaceFlingerLayersConfig
 
 open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
         SurfaceViewBufferTestBase(useBlastAdapter) {
@@ -42,7 +43,7 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     @Before
     override fun setup() {
         super.setup()
-        PerfettoTraceMonitor.stopAllSessions()
+        stopLayerTrace()
         addSurfaceView()
     }
 
@@ -82,6 +83,10 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
         instrumentation.waitForIdleSync()
     }
 
+    private fun stopLayerTrace() {
+        LayersTraceMonitor().stop(ResultWriter())
+    }
+
     fun checkPixels(bounds: Rect, @ColorInt color: Int) {
         val screenshot = instrumentation.getUiAutomation().takeScreenshot()
         val pixels = IntArray(screenshot.width * screenshot.height)
@@ -101,19 +106,14 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
                         Log.e("SurfaceViewBufferTests", "Error writing bitmap to file", e)
                     }
                 }
-                Assert.assertEquals(
-                    "Checking $bounds found mismatch $i,$j",
-                    Color.valueOf(color),
-                    Color.valueOf(actualColor)
-                )
+                Assert.assertEquals("Checking $bounds found mismatch $i,$j",
+                        Color.valueOf(color), Color.valueOf(actualColor))
             }
         }
     }
 
     private companion object {
-        private val TRACE_FLAGS = listOf(
-            SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_BUFFERS,
-            SurfaceFlingerLayersConfig.TraceFlag.TRACE_FLAG_VIRTUAL_DISPLAYS,
-        )
+        private const val TRACE_FLAGS =
+                (1 shl 0) or (1 shl 5) or (1 shl 6) // TRACE_CRITICAL | TRACE_BUFFERS | TRACE_SYNC
     }
 }
