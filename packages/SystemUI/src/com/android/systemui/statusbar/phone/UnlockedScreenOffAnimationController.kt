@@ -125,6 +125,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
     // FrameCallback used to delay starting the light reveal animation until the next frame
     private val startLightRevealCallback = TraceUtils.namedRunnable("startLightReveal") {
+        lightRevealAnimationPlaying = true
         lightRevealAnimator.start()
     }
 
@@ -268,7 +269,6 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             decidedToAnimateGoingToSleep = true
 
             shouldAnimateInKeyguard = true
-            lightRevealAnimationPlaying = true
 
             // Start the animation on the next frame. startAnimation() is called after
             // PhoneWindowManager makes a binder call to System UI on
@@ -283,7 +283,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // dispatched, a race condition could make it possible for this callback to be run
                 // as the device is waking up. That results in the AOD UI being shown while we wake
                 // up, with unpredictable consequences.
-                if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY)) {
+                if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
+                        shouldAnimateInKeyguard) {
                     aodUiAnimationPlaying = true
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
