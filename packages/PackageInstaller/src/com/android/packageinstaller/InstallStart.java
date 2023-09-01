@@ -34,7 +34,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -53,11 +52,10 @@ public class InstallStart extends Activity {
 
     private static final String DOWNLOADS_AUTHORITY = "downloads";
 
-    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = 1;
-    private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = 2;
     private PackageManager mPackageManager;
     private UserManager mUserManager;
     private boolean mAbortInstall = false;
+    private boolean mShouldFinish = true;
 
     private final boolean mLocalLOGV = false;
 
@@ -130,7 +128,7 @@ public class InstallStart extends Activity {
             mAbortInstall = true;
         }
 
-        checkDevicePolicyRestriction();
+        checkDevicePolicyRestrictions();
 
         final String installerPackageNameFromIntent = getIntent().getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME);
@@ -149,7 +147,9 @@ public class InstallStart extends Activity {
 
         if (mAbortInstall) {
             setResult(RESULT_CANCELED);
-            finish();
+            if (mShouldFinish) {
+                finish();
+            }
             return;
         }
 
@@ -291,58 +291,52 @@ public class InstallStart extends Activity {
         return originatingUid == installerUid;
     }
 
-    private void checkDevicePolicyRestriction() {
-        // Check for install apps user restriction first.
-        final int installAppsRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_APPS, Process.myUserHandle());
-        if ((installAppsRestrictionSource & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-            if (mLocalLOGV) Log.i(TAG, "install not allowed: " + UserManager.DISALLOW_INSTALL_APPS);
-            mAbortInstall = true;
-            showDialogInner(DLG_INSTALL_APPS_RESTRICTED_FOR_USER);
-            return;
-        } else if (installAppsRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            if (mLocalLOGV) {
-                Log.i(TAG, "install not allowed by admin; showing "
-                        + Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
-            }
-            mAbortInstall = true;
-            startActivity(new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS));
-            return;
-        }
+    private void checkDevicePolicyRestrictions() {
+        final String[] restrictions = new String[] {
+            UserManager.DISALLOW_INSTALL_APPS,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+        };
 
-        final int unknownSourcesRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, Process.myUserHandle());
-        final int unknownSourcesGlobalRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, Process.myUserHandle());
-        final int systemRestriction = UserManager.RESTRICTION_SOURCE_SYSTEM
-                & (unknownSourcesRestrictionSource | unknownSourcesGlobalRestrictionSource);
-        if (systemRestriction != 0) {
-            if (mLocalLOGV) Log.i(TAG, "Showing DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER");
+        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
+        for (String restriction : restrictions) {
+            if (!mUserManager.hasUserRestrictionForUser(restriction, Process.myUserHandle())) {
+                continue;
+            }
+
             mAbortInstall = true;
-            showDialogInner(DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER);
-        } else if (unknownSourcesRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            mAbortInstall = true;
-            startAdminSupportDetailsActivity(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-        } else if (unknownSourcesGlobalRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            mAbortInstall = true;
-            startAdminSupportDetailsActivity(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY);
+
+            // If the given restriction is set by an admin, display information about the
+            // admin enforcing the restriction for the affected user. If not enforced by the admin,
+            // show the system dialog.
+            final Intent showAdminSupportDetailsIntent = dpm.createAdminSupportIntent(restriction);
+            if (showAdminSupportDetailsIntent != null) {
+                if (mLocalLOGV) Log.i(TAG, "starting " + showAdminSupportDetailsIntent);
+                startActivity(showAdminSupportDetailsIntent);
+            } else {
+                if (mLocalLOGV) Log.i(TAG, "Restriction set by system: " + restriction);
+                mShouldFinish = false;
+                showDialogInner(restriction);
+            }
+            break;
         }
     }
 
     /**
-     * Replace any dialog shown by the dialog with the one for the given {@link #createDialog(int)}.
+     * Replace any dialog shown by the dialog with the one for the given
+     * {@link #createDialog(String)}.
      *
-     * @param id The dialog type to add
+     * @param restriction The restriction to create the dialog for
      */
-    private void showDialogInner(int id) {
-        if (mLocalLOGV) Log.i(TAG, "showDialogInner(" + id + ")");
+    private void showDialogInner(String restriction) {
+        if (mLocalLOGV) Log.i(TAG, "showDialogInner(" + restriction + ")");
         DialogFragment currentDialog =
                 (DialogFragment) getFragmentManager().findFragmentByTag("dialog");
         if (currentDialog != null) {
             currentDialog.dismissAllowingStateLoss();
         }
 
-        DialogFragment newDialog = createDialog(id);
+        DialogFragment newDialog = createDialog(restriction);
         if (newDialog != null) {
             getFragmentManager().beginTransaction()
                     .add(newDialog, "dialog").commitAllowingStateLoss();
@@ -352,35 +346,20 @@ public class InstallStart extends Activity {
     /**
      * Create a new dialog.
      *
-     * @param id The id of the dialog (determines dialog type)
-     *
+     * @param restriction The restriction to create the dialog for
      * @return The dialog
      */
-    private DialogFragment createDialog(int id) {
-        if (mLocalLOGV) Log.i(TAG, "createDialog(" + id + ")");
-        switch (id) {
-            case DLG_INSTALL_APPS_RESTRICTED_FOR_USER:
+    private DialogFragment createDialog(String restriction) {
+        if (mLocalLOGV) Log.i(TAG, "createDialog(" + restriction + ")");
+        switch (restriction) {
+            case UserManager.DISALLOW_INSTALL_APPS:
                 return PackageUtil.SimpleErrorDialog.newInstance(
                         R.string.install_apps_user_restriction_dlg_text);
-            case DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER:
+            case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
+            case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY:
                 return PackageUtil.SimpleErrorDialog.newInstance(
                         R.string.unknown_apps_user_restriction_dlg_text);
         }
         return null;
-    }
-
-    private void startAdminSupportDetailsActivity(String restriction) {
-        if (mLocalLOGV) Log.i(TAG, "startAdminSupportDetailsActivity(): " + restriction);
-
-        // If the given restriction is set by an admin, display information about the
-        // admin enforcing the restriction for the affected user.
-        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
-        final Intent showAdminSupportDetailsIntent = dpm.createAdminSupportIntent(restriction);
-        if (showAdminSupportDetailsIntent != null) {
-            if (mLocalLOGV) Log.i(TAG, "starting " + showAdminSupportDetailsIntent);
-            startActivity(showAdminSupportDetailsIntent);
-        } else {
-            if (mLocalLOGV) Log.w(TAG, "not intent for " + restriction);
-        }
     }
 }
