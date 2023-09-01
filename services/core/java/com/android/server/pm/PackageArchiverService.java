@@ -112,16 +112,15 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
                 callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
     }
 
-    private ArchiveState createArchiveState(String packageName, int userId)
+    /**
+     * Creates archived state for the package and user.
+     */
+    public ArchiveState createArchiveState(String packageName, int userId)
             throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
                 Binder.getCallingUid(), userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
-        if (responsibleInstallerPackage == null) {
-            throw new PackageManager.NameNotFoundException(
-                    TextUtils.formatSimple("No installer found to archive app %s.",
-                            packageName));
-        }
+        verifyInstaller(responsibleInstallerPackage);
 
         List<LauncherActivityInfo> mainActivities = getLauncherActivityInfos(ps, userId);
         List<ArchiveActivityInfo> archiveActivityInfos = new ArrayList<>();
@@ -134,6 +133,26 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
         }
 
         return new ArchiveState(archiveActivityInfos, responsibleInstallerPackage);
+    }
+
+    private void verifyInstaller(String installerPackage)
+            throws PackageManager.NameNotFoundException {
+        if (TextUtils.isEmpty(installerPackage)) {
+            throw new PackageManager.NameNotFoundException("No installer found");
+        }
+        if (!verifySupportsUnarchival(installerPackage)) {
+            throw new PackageManager.NameNotFoundException("Installer does not support unarchival");
+        }
+    }
+
+    /**
+     * @return true if installerPackage support unarchival:
+     * - has an action Intent.ACTION_UNARCHIVE_PACKAGE,
+     * - has permissions to install packages.
+     */
+    public boolean verifySupportsUnarchival(String installerPackage) {
+        // TODO(b/278553670) Check if installerPackage supports unarchival.
+        return true;
     }
 
     @Override
@@ -246,7 +265,7 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
     }
 
     private String getResponsibleInstallerPackage(PackageStateInternal ps) {
-        return ps.getInstallSource().mUpdateOwnerPackageName == null
+        return TextUtils.isEmpty(ps.getInstallSource().mUpdateOwnerPackageName)
                 ? ps.getInstallSource().mInstallerPackageName
                 : ps.getInstallSource().mUpdateOwnerPackageName;
     }

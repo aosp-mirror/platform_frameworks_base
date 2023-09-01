@@ -29,7 +29,6 @@ parcelable ArchivedPackageParcel {
     int versionCode;
     int versionCodeMajor;
     int targetSdkVersion;
-    boolean clearUserDataAllowed;
     boolean backupAllowed;
     boolean defaultToDeviceProtectedStorage;
     boolean requestLegacyExternalStorage;
