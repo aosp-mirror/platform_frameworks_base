@@ -37,7 +37,6 @@ import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.service.dreams.IDreamOverlayClient;
 import android.service.dreams.IDreamOverlayClientCallback;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -45,10 +44,12 @@ import android.view.WindowManagerImpl;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.complication.ComplicationLayoutEngine;
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler;
@@ -71,8 +72,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {
     private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
             "lowlight");

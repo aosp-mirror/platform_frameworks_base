@@ -15,8 +15,9 @@
  */
 package com.android.systemui.dreams
 
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -29,8 +30,9 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DreamOverlayCallbackControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var callback: DreamOverlayCallbackController.Callback
