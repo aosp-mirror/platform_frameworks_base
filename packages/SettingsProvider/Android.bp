@@ -31,6 +31,7 @@ android_app {
         "unsupportedappusage",
     ],
     static_libs: [
+        "device_config_service_flags_java",
         "junit",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
@@ -56,7 +57,10 @@ android_test {
     ],
     static_libs: [
         "androidx.test.rules",
+        "device_config_service_flags_java",
+        "flag-junit",
         "mockito-target-minus-junit4",
+        "platform-test-annotations",
         "SettingsLibDeviceStateRotationLock",
         "SettingsLibDisplayUtils",
         "platform-test-annotations",
@@ -78,4 +82,17 @@ android_test {
     test_suites: ["device-tests"],
     manifest: "test/AndroidManifest.xml",
     test_config: "test/AndroidTest.xml",
+}
+
+aconfig_declarations {
+    name: "device_config_service_flags",
+    package: "com.android.providers.settings",
+    srcs: [
+        "src/com/android/providers/settings/device_config_service.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "device_config_service_flags_java",
+    aconfig_declarations: "device_config_service_flags",
 }
