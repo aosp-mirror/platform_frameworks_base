@@ -24,6 +24,7 @@ java_defaults {
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
         ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
+        ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
@@ -115,4 +116,17 @@ aconfig_declarations {
     name: "android.companion.virtual.flags-aconfig",
     package: "android.companion.virtual.flags",
     srcs: ["core/java/android/companion/virtual/*.aconfig"],
+}
+
+// InputMethod
+aconfig_declarations {
+    name: "android.view.inputmethod.flags-aconfig",
+    package: "android.view.inputmethod",
+    srcs: ["core/java/android/view/inputmethod/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.view.inputmethod.flags-aconfig-java",
+    aconfig_declarations: "android.view.inputmethod.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
