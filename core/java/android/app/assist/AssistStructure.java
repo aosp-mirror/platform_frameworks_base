@@ -2495,7 +2495,8 @@ public class AssistStructure implements Parcelable {
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized()
-                    + ", important=" + node.getImportantForAutofill());
+                    + ", important=" + node.getImportantForAutofill()
+                    + ", visibility=" + node.getVisibility());
         }
 
         final int NCHILDREN = node.getChildCount();
