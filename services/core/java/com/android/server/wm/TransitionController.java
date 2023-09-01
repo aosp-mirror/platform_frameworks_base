@@ -721,6 +721,7 @@ class TransitionController {
             // set the pip task in the request if provided
             if (mCollectingTransition.getPipActivity() != null) {
                 pipTaskInfo = mCollectingTransition.getPipActivity().getTask().getTaskInfo();
+                mCollectingTransition.setPipActivity(null);
             }
 
             final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,

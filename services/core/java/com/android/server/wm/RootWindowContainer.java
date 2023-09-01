@@ -60,6 +60,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STATE
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
+import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
@@ -2017,6 +2018,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
             @Nullable ActivityRecord launchIntoPipHostActivity, String reason,
             @Nullable Transition transition) {
+        moveActivityToPinnedRootTask(r, launchIntoPipHostActivity, reason, transition,
+                null /* bounds */);
+    }
+
+    void moveActivityToPinnedRootTask(@NonNull ActivityRecord r,
+            @Nullable ActivityRecord launchIntoPipHostActivity, String reason,
+            @Nullable Transition transition, @Nullable Rect bounds) {
         final TaskDisplayArea taskDisplayArea = r.getDisplayArea();
         final Task task = r.getTask();
         final Task rootTask;
@@ -2053,7 +2061,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Defer the windowing mode change until after the transition to prevent the activity
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
-            r.setWindowingMode(r.getWindowingMode());
+            if (!isPip2ExperimentEnabled()) {
+                r.setWindowingMode(r.getWindowingMode());
+            }
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
@@ -2169,6 +2179,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // TODO(remove-legacy-transit): Move this to the `singleActivity` case when removing
             //                              legacy transit.
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
+            if (isPip2ExperimentEnabled() && bounds != null) {
+                // set the final pip bounds in advance if pip2 is enabled
+                rootTask.setBounds(bounds);
+            }
+
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
                 // Record the snapshot now, it will be later fetched for content-pip animation.
@@ -2180,10 +2195,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
             rootTask.setDeferTaskAppear(false);
 
-            // After setting this, it is not expected to change activity configuration until the
-            // transition animation is finished. So the activity can keep consistent appearance
-            // when animating.
-            r.mWaitForEnteringPinnedMode = true;
+            if (!isPip2ExperimentEnabled()) {
+                // After setting this, it is not expected to change activity configuration until the
+                // transition animation is finished. So the activity can keep consistent appearance
+                // when animating.
+                r.mWaitForEnteringPinnedMode = true;
+            }
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
@@ -2198,7 +2215,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         } finally {
             mService.continueWindowLayout();
             try {
-                ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+                if (!isPip2ExperimentEnabled()) {
+                    ensureActivitiesVisible(null, 0, false /* preserveWindows */);
+                }
             } finally {
                 transitionController.continueTransitionReady();
             }
@@ -2214,7 +2233,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             newTransition.setReady(rootTask, true /* ready */);
         }
 
-        resumeFocusedTasksTopActivities();
+        if (!isPip2ExperimentEnabled()) {
+            resumeFocusedTasksTopActivities();
+        }
 
         notifyActivityPipModeChanged(r.getTask(), r);
     }
