@@ -21,6 +21,7 @@ import static com.android.server.biometrics.AuthenticationStatsCollector.MAXIMUM
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -78,6 +79,8 @@ public class AuthenticationStatsCollectorTest {
     @Mock
     private SharedPreferences mSharedPreferences;
     @Mock
+    private SharedPreferences.Editor mEditor;
+    @Mock
     private BiometricNotification mBiometricNotification;
 
     @Before
@@ -99,6 +102,8 @@ public class AuthenticationStatsCollectorTest {
         when(mContext.getSharedPreferences(any(File.class), anyInt()))
                 .thenReturn(mSharedPreferences);
         when(mSharedPreferences.getStringSet(anyString(), anySet())).thenReturn(emptySet());
+        when(mSharedPreferences.edit()).thenReturn(mEditor);
+        when(mEditor.putFloat(anyString(), anyFloat())).thenReturn(mEditor);
 
         mAuthenticationStatsCollector = new AuthenticationStatsCollector(mContext,
                 0 /* modality */, mBiometricNotification);

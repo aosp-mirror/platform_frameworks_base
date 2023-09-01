@@ -53,7 +53,7 @@
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Chcete uložiť heslo v inom zariadení?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Chcete uložiť prihlasovacie údaje v inom zariadení?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Chcete pre všetky svoje prihlasovacie údaje použiť <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tento správca hesiel poskytovateľa <xliff:g id="USERNAME">%1$s</xliff:g> uchová vaše heslá a prístupové kľúče, aby vám pomohol ľahšie sa prihlasovať"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tento správca hesiel pre účet <xliff:g id="USERNAME">%1$s</xliff:g> bude uchovávať vaše heslá a prístupové kľúče, aby ste sa mohli ľahšie prihlasovať"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastaviť ako predvolené"</string>
     <string name="settings" msgid="6536394145760913145">"Nastavenia"</string>
     <string name="use_once" msgid="9027366575315399714">"Použiť raz"</string>

@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"နားလည်ပြီ"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ပူဖောင်းကွက်ကို အချိန်မရွေး ထိန်းချုပ်ရန်"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"ပူဖောင်းကွက်သုံးနိုင်သည့် အက်ပ်နှင့် စကားဝိုင်းများ စီမံရန် ဤနေရာကို တို့ပါ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ပူဖောင်းဖောက်သံ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"စီမံရန်"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ပူဖောင်းကွက် ဖယ်လိုက်သည်။"</string>

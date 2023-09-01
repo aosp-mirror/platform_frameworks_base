@@ -76,10 +76,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"ବୁଝିଗଲି"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
-    <!-- no translation found for bubble_bar_education_manage_title (6148404487810835924) -->
-    <skip />
-    <!-- no translation found for bubble_bar_education_manage_text (3199732148641842038) -->
-    <skip />
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"ଯେ କୌଣସି ସମୟରେ ବବଲଗୁଡ଼ିକ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
+    <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"କେଉଁ ଆପ୍ସ ଓ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ବବଲ ହୋଇପାରିବ ତାହା ପରିଚାଳନା କରିବାକୁ ଏଠାରେ ଟାପ କରନ୍ତୁ"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"ବବଲ୍"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ବବଲ୍ ଖାରଜ କରାଯାଇଛି।"</string>
