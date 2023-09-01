@@ -235,4 +235,42 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         verify(controller).showNoteTask(any())
     }
+
+    @Test
+    fun tailButtonGestureDetection_doublePress_shouldNotShowNoteTaskTwice() {
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+        val callback = withArgCaptor { verify(commandQueue).addCallback(capture()) }
+
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 0)
+        )
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_UP, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 50)
+        )
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 99, eventTime = 99)
+        )
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_UP, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 99, eventTime = 150)
+        )
+
+        verify(controller, times(1)).showNoteTask(any())
+    }
+
+    @Test
+    fun tailButtonGestureDetection_longPress_shouldNotShowNoteTask() {
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+        val callback = withArgCaptor { verify(commandQueue).addCallback(capture()) }
+
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 0)
+        )
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_UP, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 1000)
+        )
+
+        verify(controller, never()).showNoteTask(any())
+    }
 }
