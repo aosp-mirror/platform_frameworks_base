@@ -65,12 +65,6 @@ constructor(
      * [NoteTaskController], ensure custom actions can be triggered (i.e., keyboard shortcut).
      */
     private fun initializeHandleSystemKey() {
-        val callbacks =
-            object : CommandQueue.Callbacks {
-                override fun handleSystemKey(key: KeyEvent) {
-                    key.toNoteTaskEntryPointOrNull()?.let(controller::showNoteTask)
-                }
-            }
         commandQueue.addCallback(callbacks)
     }
 
@@ -142,7 +136,7 @@ constructor(
  */
 private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? =
     when {
-        keyCode == KEYCODE_STYLUS_BUTTON_TAIL -> TAIL_BUTTON
+        keyCode == KEYCODE_STYLUS_BUTTON_TAIL && action == KeyEvent.ACTION_UP -> TAIL_BUTTON
         keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
         else -> null
     }

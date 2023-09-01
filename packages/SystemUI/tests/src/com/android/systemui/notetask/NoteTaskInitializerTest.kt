@@ -22,6 +22,8 @@ import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_DOWN
+import android.view.KeyEvent.ACTION_UP
+import android.view.KeyEvent.KEYCODE_N
 import android.view.KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -30,7 +32,6 @@ import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -43,7 +44,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -66,6 +66,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     private val executor = FakeExecutor(FakeSystemClock())
     private val userTracker = FakeUserTracker()
+    private val handlerCallbacks = mutableListOf<Runnable>()
 
     @Before
     fun setUp() {
@@ -74,19 +75,27 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     }
 
     private fun createUnderTest(
-            isEnabled: Boolean,
-            bubbles: Bubbles?,
+        isEnabled: Boolean,
+        bubbles: Bubbles?,
     ): NoteTaskInitializer =
-            NoteTaskInitializer(
-                    controller = controller,
-                    commandQueue = commandQueue,
-                    optionalBubbles = Optional.ofNullable(bubbles),
-                    isEnabled = isEnabled,
-                    roleManager = roleManager,
-                    userTracker = userTracker,
-                    keyguardUpdateMonitor = keyguardMonitor,
-                    backgroundExecutor = executor,
-            )
+        NoteTaskInitializer(
+            controller = controller,
+            commandQueue = commandQueue,
+            optionalBubbles = Optional.ofNullable(bubbles),
+            isEnabled = isEnabled,
+            roleManager = roleManager,
+            userTracker = userTracker,
+            keyguardUpdateMonitor = keyguardMonitor,
+            backgroundExecutor = executor,
+        )
+
+    private fun createKeyEvent(
+        action: Int,
+        code: Int,
+        downTime: Long = 0L,
+        eventTime: Long = 0L,
+        metaState: Int = 0
+    ): KeyEvent = KeyEvent(downTime, eventTime, action, code, 0 /*repeat*/, metaState)
 
     @Test
     fun initialize_withUserUnlocked() {
@@ -120,12 +129,12 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         underTest.initialize()
 
         verifyZeroInteractions(
-                commandQueue,
-                bubbles,
-                controller,
-                roleManager,
-                userManager,
-                keyguardMonitor,
+            commandQueue,
+            bubbles,
+            controller,
+            roleManager,
+            userManager,
+            keyguardMonitor,
         )
     }
 
@@ -136,18 +145,23 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         underTest.initialize()
 
         verifyZeroInteractions(
-                commandQueue,
-                bubbles,
-                controller,
-                roleManager,
-                userManager,
-                keyguardMonitor,
+            commandQueue,
+            bubbles,
+            controller,
+            roleManager,
+            userManager,
+            keyguardMonitor,
         )
     }
 
     @Test
     fun initialize_handleSystemKey() {
-        val expectedKeyEvent = KeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL)
+        val expectedKeyEvent =
+            createKeyEvent(
+                ACTION_DOWN,
+                KEYCODE_N,
+                metaState = KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON
+            )
         val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
         underTest.initialize()
         val callback = withArgCaptor { verify(commandQueue).addCallback(capture()) }
@@ -176,7 +190,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         underTest.initialize()
         val callback = withArgCaptor {
             verify(roleManager)
-                    .addOnRoleHoldersChangedListenerAsUser(any(), capture(), eq(UserHandle.ALL))
+                .addOnRoleHoldersChangedListenerAsUser(any(), capture(), eq(UserHandle.ALL))
         }
 
         callback.onRoleHoldersChanged(ROLE_NOTES, userTracker.userHandle)
@@ -202,5 +216,23 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
         userTracker.callbacks.first().onUserChanged(0, mock())
 
         verify(controller, times(2)).updateNoteTaskForCurrentUserAndManagedProfiles()
+    }
+
+    @Test
+    fun tailButtonGestureDetection_singlePress_shouldShowNoteTaskOnUp() {
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+        val callback = withArgCaptor { verify(commandQueue).addCallback(capture()) }
+
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_DOWN, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 0)
+        )
+        verify(controller, never()).showNoteTask(any())
+
+        callback.handleSystemKey(
+            createKeyEvent(ACTION_UP, KEYCODE_STYLUS_BUTTON_TAIL, downTime = 0, eventTime = 50)
+        )
+
+        verify(controller).showNoteTask(any())
     }
 }
