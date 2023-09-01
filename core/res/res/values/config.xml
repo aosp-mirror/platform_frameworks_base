@@ -572,6 +572,9 @@
          docked if the dock is configured to enable the accelerometer. -->
     <bool name="config_supportAutoRotation">true</bool>
 
+    <!-- If true, allows rotation resolver service to help resolve screen rotation. -->
+    <bool name="config_allowRotationResolver">true</bool>
+
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">false</bool>
