@@ -2146,6 +2146,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 if ("cancel".equals(cmd)) {
                     return runCancel();
                 }
+                if ("feedback".equals(cmd)) {
+                    return runHapticFeedback();
+                }
                 return handleDefaultCommands(cmd);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
@@ -2179,14 +2182,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             HalVibration vib = vibrateWithPermissionCheck(Binder.getCallingUid(),
                     Display.DEFAULT_DISPLAY, SHELL_PACKAGE_NAME, combined, attrs,
                     commonOptions.description, deathBinder);
-            if (vib != null && !commonOptions.background) {
-                try {
-                    // Waits for the client vibration to finish, but the VibrationThread may still
-                    // do cleanup after this.
-                    vib.waitForEnd();
-                } catch (InterruptedException e) {
-                }
-            }
+            maybeWaitOnVibration(vib, commonOptions);
         }
 
         private int runMono() {
@@ -2231,6 +2227,21 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             // terminated by the shell command ending. In these cases, the token was that of the
             // service rather than the client.
             cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, VibratorManagerService.this);
+            return 0;
+        }
+
+        private int runHapticFeedback() {
+            CommonOptions commonOptions = new CommonOptions();
+            int constant = Integer.parseInt(getNextArgRequired());
+
+            IBinder deathBinder = commonOptions.background ? VibratorManagerService.this
+                    : mShellCallbacksToken;
+            HalVibration vib = performHapticFeedbackInternal(Binder.getCallingUid(),
+                    Display.DEFAULT_DISPLAY, SHELL_PACKAGE_NAME, constant,
+                    /* always= */ commonOptions.force, /* reason= */ commonOptions.description,
+                    deathBinder);
+            maybeWaitOnVibration(vib, commonOptions);
+
             return 0;
         }
 
@@ -2443,6 +2454,17 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             }
         }
 
+        private void maybeWaitOnVibration(HalVibration vib, CommonOptions commonOptions) {
+            if (vib != null && !commonOptions.background) {
+                try {
+                    // Waits for the client vibration to finish, but the VibrationThread may still
+                    // do cleanup after this.
+                    vib.waitForEnd();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+
         @Override
         public void onHelp() {
             try (PrintWriter pw = getOutPrintWriter();) {
@@ -2468,6 +2490,10 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    XML containing a single effect it runs on all vibrators in sync.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
+                pw.println("  feedback [-f] [-d <description>] <constant>");
+                pw.println("    Performs a haptic feedback with the given constant.");
+                pw.println("    The force (-f) option enables the `always` configuration, which");
+                pw.println("    plays the haptic irrespective of the vibration intensity settings");
                 pw.println("");
                 pw.println("Effect commands:");
                 pw.println("  oneshot [-w delay] [-a] <duration> [<amplitude>]");
