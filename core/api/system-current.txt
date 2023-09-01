@@ -3797,6 +3797,10 @@ package android.content.pm {
     method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
   }
 
+  public class PackageInfo implements android.os.Parcelable {
+    field public boolean isArchived;
+  }
+
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
@@ -4016,6 +4020,7 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
+    field public static final long MATCH_ARCHIVED_PACKAGES = 4294967296L; // 0x100000000L
     field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
