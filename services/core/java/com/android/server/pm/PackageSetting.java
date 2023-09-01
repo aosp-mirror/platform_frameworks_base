@@ -818,7 +818,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             if (userState.isInstalled()) {
                 return true;
             }
-            if (userState.getCeDataInode() > 0) {
+            if (userState.dataExists()) {
                 return true;
             }
         }

@@ -27,6 +27,7 @@ import android.os.Debug;
 import android.util.DebugUtils;
 import android.util.Slog;
 
+import com.android.server.pm.Flags;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 
 /** @hide */
@@ -82,15 +83,38 @@ public class PackageUserStateUtils {
         return reportIfDebug(matchesUnaware || matchesAware, flags);
     }
 
+    /**
+     * @return true if any of the following conditions is met:
+     * <p><ul>
+     * <li> If it is installed and not hidden for this user;
+     * <li> If it is installed but hidden for this user, still return true if
+     * {@link PackageManager#MATCH_UNINSTALLED_PACKAGES} or
+     * {@link PackageManager#MATCH_ARCHIVED_PACKAGES} is requested;
+     * <li> If MATCH_ANY_USER is requested, always return true, because the fact that
+     * this object exists means that the package must be installed or has data on at least one user;
+     * <li> (When feature enabled) If it is not installed but still has data (i.e., it was
+     * previously uninstalled with {@link PackageManager#DELETE_KEEP_DATA}), return true if the
+     * caller requested {@link PackageManager#MATCH_UNINSTALLED_PACKAGES} or
+     * {@link PackageManager#MATCH_ARCHIVED_PACKAGES};
+     * </ul><p>
+     */
     public static boolean isAvailable(@NonNull PackageUserState state, long flags) {
-        // True if it is installed for this user and it is not hidden. If it is hidden,
-        // still return true if the caller requested MATCH_UNINSTALLED_PACKAGES
         final boolean matchAnyUser = (flags & PackageManager.MATCH_ANY_USER) != 0;
         final boolean matchUninstalled = (flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0;
         final boolean matchArchived = (flags & PackageManager.MATCH_ARCHIVED_PACKAGES) != 0;
-        return matchAnyUser
-                || (state.isInstalled()
-                && (!state.isHidden() || matchUninstalled || matchArchived));
+        final boolean matchDataExists = matchUninstalled || matchArchived;
+
+        if (matchAnyUser) {
+            return true;
+        }
+        if (state.isInstalled()) {
+            if (!state.isHidden()) {
+                return true;
+            } else return matchDataExists;
+        } else {
+            // not installed
+            return matchDataExists && Flags.newMatchUninstalledEnabled() && state.dataExists();
+        }
     }
 
     public static boolean reportIfDebug(boolean result, long flags) {
