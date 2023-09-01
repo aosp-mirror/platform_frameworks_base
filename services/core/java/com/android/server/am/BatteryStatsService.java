@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.BATTERY_STATS;
-import static android.Manifest.permission.BLUETOOTH_CONNECT;
 import static android.Manifest.permission.DEVICE_POWER;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
@@ -31,6 +30,7 @@ import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
+import android.annotation.SuppressLint;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -82,6 +82,7 @@ import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
 import android.power.PowerStatsInternal;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -169,6 +170,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .replaceWith("?");
     private static final int MAX_LOW_POWER_STATS_SIZE = 32768;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
+    private static final String MIN_CONSUMED_POWER_THRESHOLD_KEY = "min_consumed_power_threshold";
     private static final String EMPTY = "Empty";
 
     private final HandlerThread mHandlerThread;
@@ -855,12 +857,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final BatteryUsageStats bus;
             switch (atomTag) {
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
+                    @SuppressLint("MissingPermission")
+                    final double minConsumedPowerThreshold =
+                            DeviceConfig.getFloat(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                                    MIN_CONSUMED_POWER_THRESHOLD_KEY, 0);
                     final BatteryUsageStatsQuery querySinceReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
                                     .includeProcessStateData()
                                     .includeVirtualUids()
                                     .includePowerModels()
+                                    .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
                                     .build();
                     bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
