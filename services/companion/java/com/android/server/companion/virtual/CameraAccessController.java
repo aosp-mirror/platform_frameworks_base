@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import static android.hardware.camera2.CameraInjectionSession.InjectionStatusCallback.ERROR_INJECTION_UNSUPPORTED;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -146,6 +147,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
      *
      * @param runningUids uids of the application running on the virtual display
      */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void blockCameraAccessIfNeeded(Set<Integer> runningUids) {
         synchronized (mLock) {
             for (int i = 0; i < mAppsToBlockOnVirtualDevice.size(); i++) {
@@ -181,6 +183,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void onCameraOpened(@NonNull String cameraId, @NonNull String packageName) {
         synchronized (mLock) {
             InjectionSessionData data = mPackageToSessionData.get(packageName);
@@ -243,6 +246,7 @@ class CameraAccessController extends CameraManager.AvailabilityCallback implemen
     /**
      * Turns on blocking for a particular camera and package.
      */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     private void startBlocking(String packageName, String cameraId) {
         try {
             Slog.d(

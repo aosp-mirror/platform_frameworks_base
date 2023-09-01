@@ -323,8 +323,5 @@ public class SensorController {
         SensorCreationException(String message) {
             super(message);
         }
-        SensorCreationException(String message, Exception cause) {
-            super(message, cause);
-        }
     }
 }
