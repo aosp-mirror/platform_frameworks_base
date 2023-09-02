@@ -260,22 +260,20 @@ public class KeyguardService extends Service {
                 );
             }
 
-            public void mergeAnimation(IBinder transition, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishCallback) {
+            public void mergeAnimation(IBinder candidateTransition, TransitionInfo candidateInfo,
+                    SurfaceControl.Transaction candidateT, IBinder currentTransition,
+                    IRemoteTransitionFinishedCallback candidateFinishCallback) {
                 try {
-                    final IRemoteTransitionFinishedCallback origFinishCB;
+                    final IRemoteTransitionFinishedCallback currentFinishCB;
                     synchronized (mFinishCallbacks) {
-                        origFinishCB = mFinishCallbacks.remove(transition);
+                        currentFinishCB = mFinishCallbacks.remove(currentTransition);
                     }
-                    info.releaseAllSurfaces();
-                    t.close();
-                    if (origFinishCB == null) {
-                        // already finished (or not started yet), so do nothing.
+                    if (currentFinishCB == null) {
+                        Slog.e(TAG, "Called mergeAnimation, but finish callback is missing");
                         return;
                     }
                     runner.onAnimationCancelled(false /* isKeyguardOccluded */);
-                    origFinishCB.onTransitionFinished(null /* wct */, null /* t */);
+                    currentFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
                 }
