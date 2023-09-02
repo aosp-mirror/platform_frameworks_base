@@ -544,8 +544,6 @@ public final class AttributionSource implements Parcelable {
                 o.mAttributionSourceState.packageName)
                 && Objects.equals(mAttributionSourceState.attributionTag,
                 o.mAttributionSourceState.attributionTag)
-                && Objects.equals(mAttributionSourceState.token,
-                o.mAttributionSourceState.token)
                 && Arrays.equals(mAttributionSourceState.renouncedPermissions,
                 o.mAttributionSourceState.renouncedPermissions)
                 && Objects.equals(getNext(), o.getNext());
