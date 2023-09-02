@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test class for {@link WindowExtensionsTest}.
+ * Test class for {@link WindowExtensions}.
  *
  * Build/Install/Run:
  *  atest WMJetpackUnitTests:WindowExtensionsTest
