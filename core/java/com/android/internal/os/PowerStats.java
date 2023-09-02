@@ -24,9 +24,16 @@ import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -61,6 +68,13 @@ public final class PowerStats {
      * to adjust the algorithm in accordance with the stats available on the device.
      */
     public static class Descriptor {
+        public static final String XML_TAG_DESCRIPTOR = "descriptor";
+        private static final String XML_ATTR_ID = "id";
+        private static final String XML_ATTR_NAME = "name";
+        private static final String XML_ATTR_STATS_ARRAY_LENGTH = "stats-array-length";
+        private static final String XML_ATTR_UID_STATS_ARRAY_LENGTH = "uid-stats-array-length";
+        private static final String XML_TAG_EXTRAS = "extras";
+
         /**
          * {@link BatteryConsumer.PowerComponent} (e.g. CPU, WIFI etc) that this snapshot relates
          * to; or a custom power component ID (if the value
@@ -126,7 +140,7 @@ public final class PowerStats {
             int firstWord = parcel.readInt();
             int version = (firstWord & PARCEL_FORMAT_VERSION_MASK) >>> PARCEL_FORMAT_VERSION_SHIFT;
             if (version != PARCEL_FORMAT_VERSION) {
-                Log.w(TAG, "Cannot read PowerStats from Parcel - the parcel format version has "
+                Slog.w(TAG, "Cannot read PowerStats from Parcel - the parcel format version has "
                            + "changed from " + version + " to " + PARCEL_FORMAT_VERSION);
                 return null;
             }
@@ -153,6 +167,71 @@ public final class PowerStats {
                    && extras.size() == that.extras.size()        // Unparcel the Parcel if not yet
                    && Bundle.kindofEquals(extras,
                     that.extras);  // Since the Parcel is now unparceled, do a deep comparison
+        }
+
+        /**
+         * Stores contents in an XML doc.
+         */
+        public void writeXml(TypedXmlSerializer serializer) throws IOException {
+            serializer.startTag(null, XML_TAG_DESCRIPTOR);
+            serializer.attributeInt(null, XML_ATTR_ID, powerComponentId);
+            serializer.attribute(null, XML_ATTR_NAME, name);
+            serializer.attributeInt(null, XML_ATTR_STATS_ARRAY_LENGTH, statsArrayLength);
+            serializer.attributeInt(null, XML_ATTR_UID_STATS_ARRAY_LENGTH, uidStatsArrayLength);
+            try {
+                serializer.startTag(null, XML_TAG_EXTRAS);
+                extras.saveToXml(serializer);
+                serializer.endTag(null, XML_TAG_EXTRAS);
+            } catch (XmlPullParserException e) {
+                throw new IOException(e);
+            }
+            serializer.endTag(null, XML_TAG_DESCRIPTOR);
+        }
+
+        /**
+         * Creates a Descriptor by parsing an XML doc.  The parser is expected to be positioned
+         * on or before the opening "descriptor" tag.
+         */
+        public static Descriptor createFromXml(TypedXmlPullParser parser)
+                throws XmlPullParserException, IOException {
+            int powerComponentId = -1;
+            String name = null;
+            int statsArrayLength = 0;
+            int uidStatsArrayLength = 0;
+            PersistableBundle extras = null;
+            int eventType = parser.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT
+                   && !(eventType == XmlPullParser.END_TAG
+                        && parser.getName().equals(XML_TAG_DESCRIPTOR))) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    switch (parser.getName()) {
+                        case XML_TAG_DESCRIPTOR:
+                            powerComponentId = parser.getAttributeInt(null, XML_ATTR_ID);
+                            name = parser.getAttributeValue(null, XML_ATTR_NAME);
+                            statsArrayLength = parser.getAttributeInt(null,
+                                    XML_ATTR_STATS_ARRAY_LENGTH);
+                            uidStatsArrayLength = parser.getAttributeInt(null,
+                                    XML_ATTR_UID_STATS_ARRAY_LENGTH);
+                            break;
+                        case XML_TAG_EXTRAS:
+                            extras = PersistableBundle.restoreFromXml(parser);
+                            break;
+                    }
+                }
+                eventType = parser.next();
+            }
+            if (powerComponentId == -1) {
+                return null;
+            } else if (powerComponentId >= BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID) {
+                return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
+                        extras);
+            } else if (powerComponentId < BatteryConsumer.POWER_COMPONENT_COUNT) {
+                return new Descriptor(powerComponentId, statsArrayLength, uidStatsArrayLength,
+                        extras);
+            } else {
+                Slog.e(TAG, "Unrecognized power component: " + powerComponentId);
+                return null;
+            }
         }
 
         @Override
@@ -259,7 +338,7 @@ public final class PowerStats {
 
             Descriptor descriptor = registry.get(powerComponentId);
             if (descriptor == null) {
-                Log.e(TAG, "Unsupported PowerStats for power component ID: " + powerComponentId);
+                Slog.e(TAG, "Unsupported PowerStats for power component ID: " + powerComponentId);
                 return null;
             }
             PowerStats stats = new PowerStats(descriptor);
@@ -274,7 +353,7 @@ public final class PowerStats {
                 stats.uidStats.put(uid, uidStats);
             }
             if (parcel.dataPosition() != endPos) {
-                Log.e(TAG, "Corrupted PowerStats parcel. Expected length: " + length
+                Slog.e(TAG, "Corrupted PowerStats parcel. Expected length: " + length
                            + ", actual length: " + (parcel.dataPosition() - startPos));
                 return null;
             }

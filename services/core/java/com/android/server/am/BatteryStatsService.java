@@ -117,9 +117,11 @@ import com.android.server.Watchdog;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.power.optimization.Flags;
+import com.android.server.power.stats.AggregatedPowerStatsConfig;
 import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
+import com.android.server.power.stats.PowerStatsAggregator;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
@@ -170,6 +172,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     final BatteryStatsImpl mStats;
     final CpuWakeupStats mCpuWakeupStats;
     private final PowerStatsStore mPowerStatsStore;
+    private final PowerStatsAggregator mPowerStatsAggregator;
     private final PowerStatsScheduler mPowerStatsScheduler;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
     private final Context mContext;
@@ -410,13 +413,35 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.startTrackingSystemServerCpuTime();
-        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
+
+        AggregatedPowerStatsConfig aggregatedPowerStatsConfig = getAggregatedPowerStatsConfig();
+        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler, aggregatedPowerStatsConfig);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats,
                 mPowerStatsStore);
-        mPowerStatsScheduler = new PowerStatsScheduler(mPowerStatsStore, mMonotonicClock, mHandler,
-                mStats, mBatteryUsageStatsProvider);
+        mPowerStatsAggregator = new PowerStatsAggregator(aggregatedPowerStatsConfig,
+                mStats.getHistory());
+        final long aggregatedPowerStatsSpanDuration = context.getResources().getInteger(
+                com.android.internal.R.integer.config_aggregatedPowerStatsSpanDuration);
+        final long powerStatsAggregationPeriod = context.getResources().getInteger(
+                com.android.internal.R.integer.config_powerStatsAggregationPeriod);
+        mPowerStatsScheduler = new PowerStatsScheduler(context, mPowerStatsAggregator,
+                aggregatedPowerStatsSpanDuration, powerStatsAggregationPeriod, mPowerStatsStore,
+                Clock.SYSTEM_CLOCK, mMonotonicClock, mHandler, mStats, mBatteryUsageStatsProvider);
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
         mConfigFile = new AtomicFile(new File(systemDir, "battery_usage_stats_config"));
+    }
+
+    private AggregatedPowerStatsConfig getAggregatedPowerStatsConfig() {
+        AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
+        return config;
     }
 
     /**
@@ -475,7 +500,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      */
     public void onSystemReady() {
         mStats.onSystemReady();
-        mPowerStatsScheduler.start();
+        mPowerStatsScheduler.start(Flags.streamlinedBatteryStats());
     }
 
     private final class LocalService extends BatteryStatsInternal {
@@ -2646,7 +2671,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void dumpAggregatedStats(PrintWriter pw) {
-        mStats.dumpAggregatedStats(pw, /* startTime */ 0, /* endTime */0);
+        mPowerStatsScheduler.aggregateAndDumpPowerStats(pw);
     }
 
     private void dumpPowerStatsStore(PrintWriter pw) {

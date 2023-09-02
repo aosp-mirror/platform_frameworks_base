@@ -191,6 +191,27 @@ public final class LongArrayMultiStateCounter implements Parcelable {
     }
 
     /**
+     * Sets the new values for the given state.
+     */
+    public void setValues(int state, long[] values) {
+        if (state < 0 || state >= mStateCount) {
+            throw new IllegalArgumentException(
+                    "State: " + state + ", outside the range: [0-" + (mStateCount - 1) + "]");
+        }
+        if (values.length != mLength) {
+            throw new IllegalArgumentException(
+                    "Invalid array length: " + values.length + ", expected: " + mLength);
+        }
+        LongArrayContainer container = sTmpArrayContainer.getAndSet(null);
+        if (container == null || container.mLength != values.length) {
+            container = new LongArrayContainer(values.length);
+        }
+        container.setValues(values);
+        native_setValues(mNativeObject, state, container.mNativeObject);
+        sTmpArrayContainer.set(container);
+    }
+
+    /**
      * Sets the new values.  The delta between the previously set values and these values
      * is distributed among the state according to the time the object spent in those states
      * since the previous call to updateValues.
@@ -315,6 +336,10 @@ public final class LongArrayMultiStateCounter implements Parcelable {
 
     @CriticalNative
     private static native void native_setState(long nativeObject, int state, long timestampMs);
+
+    @CriticalNative
+    private static native void native_setValues(long nativeObject, int state,
+            long longArrayContainerNativeObject);
 
     @CriticalNative
     private static native void native_updateValues(long nativeObject,

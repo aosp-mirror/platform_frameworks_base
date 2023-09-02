@@ -62,16 +62,16 @@ public class PowerStatsAggregatorTest {
                 mock(BatteryStatsHistory.HistoryStepDetailsCalculator.class), mClock,
                 mMonotonicClock);
 
-        PowerStatsAggregator.Builder builder = new PowerStatsAggregator.Builder(mHistory);
-        builder.trackPowerComponent(TEST_POWER_COMPONENT)
+        AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
+        config.trackPowerComponent(TEST_POWER_COMPONENT)
                 .trackDeviceStates(
-                        PowerStatsAggregator.STATE_POWER,
-                        PowerStatsAggregator.STATE_SCREEN)
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
                 .trackUidStates(
-                        PowerStatsAggregator.STATE_POWER,
-                        PowerStatsAggregator.STATE_SCREEN,
-                        PowerStatsAggregator.STATE_PROCESS_STATE);
-        mAggregator = builder.build();
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE);
+        mAggregator = new PowerStatsAggregator(config, mHistory);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class PowerStatsAggregatorTest {
         powerStats.uidStats.put(TEST_UID, new long[]{4444});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
 
-        mAggregator.aggregateBatteryStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, 0, stats -> {
             assertThat(mAggregatedStatsCount++).isEqualTo(0);
             assertThat(stats.getStartTime()).isEqualTo(START_TIME);
 
@@ -138,34 +138,34 @@ public class PowerStatsAggregatorTest {
                     TEST_POWER_COMPONENT);
 
             assertThat(powerComponentStats.getDeviceStats(values, new int[]{
-                    PowerStatsAggregator.POWER_STATE_OTHER,
-                    PowerStatsAggregator.SCREEN_STATE_ON}))
+                    AggregatedPowerStatsConfig.POWER_STATE_OTHER,
+                    AggregatedPowerStatsConfig.SCREEN_STATE_ON}))
                     .isTrue();
             assertThat(values).isEqualTo(new long[]{10000});
 
             assertThat(powerComponentStats.getDeviceStats(values, new int[]{
-                    PowerStatsAggregator.POWER_STATE_BATTERY,
-                    PowerStatsAggregator.SCREEN_STATE_OTHER}))
+                    AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                    AggregatedPowerStatsConfig.SCREEN_STATE_OTHER}))
                     .isTrue();
             assertThat(values).isEqualTo(new long[]{20000});
 
             assertThat(powerComponentStats.getUidStats(values, TEST_UID, new int[]{
-                    PowerStatsAggregator.POWER_STATE_OTHER,
-                    PowerStatsAggregator.SCREEN_STATE_ON,
+                    AggregatedPowerStatsConfig.POWER_STATE_OTHER,
+                    AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                     BatteryConsumer.PROCESS_STATE_FOREGROUND}))
                     .isTrue();
             assertThat(values).isEqualTo(new long[]{1234});
 
             assertThat(powerComponentStats.getUidStats(values, TEST_UID, new int[]{
-                    PowerStatsAggregator.POWER_STATE_BATTERY,
-                    PowerStatsAggregator.SCREEN_STATE_OTHER,
+                    AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                    AggregatedPowerStatsConfig.SCREEN_STATE_OTHER,
                     BatteryConsumer.PROCESS_STATE_FOREGROUND}))
                     .isTrue();
             assertThat(values).isEqualTo(new long[]{1111});
 
             assertThat(powerComponentStats.getUidStats(values, TEST_UID, new int[]{
-                    PowerStatsAggregator.POWER_STATE_BATTERY,
-                    PowerStatsAggregator.SCREEN_STATE_OTHER,
+                    AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                    AggregatedPowerStatsConfig.SCREEN_STATE_OTHER,
                     BatteryConsumer.PROCESS_STATE_BACKGROUND}))
                     .isTrue();
             assertThat(values).isEqualTo(new long[]{3333});
@@ -211,7 +211,7 @@ public class PowerStatsAggregatorTest {
 
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 50, /* plugged */ true);
 
-        mAggregator.aggregateBatteryStats(0, 0, stats -> {
+        mAggregator.aggregatePowerStats(0, 0, stats -> {
             long[] values = new long[1];
 
             PowerComponentAggregatedPowerStats powerComponentStats =
@@ -222,13 +222,13 @@ public class PowerStatsAggregatorTest {
                 assertThat(stats.getDuration()).isEqualTo(2000);
 
                 assertThat(powerComponentStats.getDeviceStats(values, new int[]{
-                        PowerStatsAggregator.POWER_STATE_OTHER,
-                        PowerStatsAggregator.SCREEN_STATE_ON}))
+                        AggregatedPowerStatsConfig.POWER_STATE_OTHER,
+                        AggregatedPowerStatsConfig.SCREEN_STATE_ON}))
                         .isTrue();
                 assertThat(values).isEqualTo(new long[]{10000});
                 assertThat(powerComponentStats.getUidStats(values, TEST_UID, new int[]{
-                        PowerStatsAggregator.POWER_STATE_OTHER,
-                        PowerStatsAggregator.SCREEN_STATE_ON,
+                        AggregatedPowerStatsConfig.POWER_STATE_OTHER,
+                        AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                         BatteryConsumer.PROCESS_STATE_FOREGROUND}))
                         .isTrue();
                 assertThat(values).isEqualTo(new long[]{1234});
@@ -237,13 +237,13 @@ public class PowerStatsAggregatorTest {
                 assertThat(stats.getDuration()).isEqualTo(1000);
 
                 assertThat(powerComponentStats.getDeviceStats(values, new int[]{
-                        PowerStatsAggregator.POWER_STATE_BATTERY,
-                        PowerStatsAggregator.SCREEN_STATE_ON}))
+                        AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                        AggregatedPowerStatsConfig.SCREEN_STATE_ON}))
                         .isTrue();
                 assertThat(values).isEqualTo(new long[]{20000});
                 assertThat(powerComponentStats.getUidStats(values, TEST_UID, new int[]{
-                        PowerStatsAggregator.POWER_STATE_BATTERY,
-                        PowerStatsAggregator.SCREEN_STATE_ON,
+                        AggregatedPowerStatsConfig.POWER_STATE_BATTERY,
+                        AggregatedPowerStatsConfig.SCREEN_STATE_ON,
                         BatteryConsumer.PROCESS_STATE_FOREGROUND}))
                         .isTrue();
                 assertThat(values).isEqualTo(new long[]{4444});

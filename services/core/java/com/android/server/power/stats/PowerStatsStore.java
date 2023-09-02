@@ -41,6 +41,7 @@ import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -66,16 +67,12 @@ public class PowerStatsStore {
     private final long mMaxStorageBytes;
     private final Handler mHandler;
     private final PowerStatsSpan.SectionReader mSectionReader;
-    private final List<PowerStatsSpan.Metadata> mTableOfContents = new ArrayList<>();
-    private boolean mTableOfContentsLoaded;
+    private volatile List<PowerStatsSpan.Metadata> mTableOfContents;
 
-    public PowerStatsStore(@NonNull File systemDir, Handler handler) {
-        this(systemDir, MAX_POWER_STATS_SPAN_STORAGE_BYTES, handler);
-    }
-
-    @VisibleForTesting
-    public PowerStatsStore(@NonNull File systemDir, long maxStorageBytes, Handler handler) {
-        this(systemDir, maxStorageBytes, handler, new DefaultSectionReader());
+    public PowerStatsStore(@NonNull File systemDir, Handler handler,
+            AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+        this(systemDir, MAX_POWER_STATS_SPAN_STORAGE_BYTES, handler,
+                new DefaultSectionReader(aggregatedPowerStatsConfig));
     }
 
     @VisibleForTesting
@@ -95,13 +92,15 @@ public class PowerStatsStore {
      */
     @NonNull
     public List<PowerStatsSpan.Metadata> getTableOfContents() {
-        if (mTableOfContentsLoaded) {
-            return mTableOfContents;
+        List<PowerStatsSpan.Metadata> toc = mTableOfContents;
+        if (toc != null) {
+            return toc;
         }
 
         TypedXmlPullParser parser = Xml.newBinaryPullParser();
         lockStoreDirectory();
         try {
+            toc = new ArrayList<>();
             for (File file : mStoreDir.listFiles()) {
                 String fileName = file.getName();
                 if (!fileName.endsWith(POWER_STATS_SPAN_FILE_EXTENSION)) {
@@ -111,7 +110,7 @@ public class PowerStatsStore {
                     parser.setInput(inputStream, StandardCharsets.UTF_8.name());
                     PowerStatsSpan.Metadata metadata = PowerStatsSpan.Metadata.read(parser);
                     if (metadata != null) {
-                        mTableOfContents.add(metadata);
+                        toc.add(metadata);
                     } else {
                         Slog.e(TAG, "Removing incompatible PowerStatsSpan file: " + fileName);
                         file.delete();
@@ -120,13 +119,13 @@ public class PowerStatsStore {
                     Slog.wtf(TAG, "Cannot read PowerStatsSpan file: " + fileName);
                 }
             }
-            mTableOfContentsLoaded = true;
+            toc.sort(PowerStatsSpan.Metadata.COMPARATOR);
+            mTableOfContents = Collections.unmodifiableList(toc);
         } finally {
             unlockStoreDirectory();
         }
 
-        mTableOfContents.sort(PowerStatsSpan.Metadata.COMPARATOR);
-        return mTableOfContents;
+        return toc;
     }
 
     /**
@@ -152,10 +151,7 @@ public class PowerStatsStore {
                     throw new RuntimeException(e);
                 }
             });
-            if (mTableOfContentsLoaded) {
-                mTableOfContents.add(span.getMetadata());
-                mTableOfContents.sort(PowerStatsSpan.Metadata.COMPARATOR);
-            }
+            mTableOfContents = null;
             removeOldSpansLocked();
         } finally {
             unlockStoreDirectory();
@@ -181,6 +177,41 @@ public class PowerStatsStore {
             unlockStoreDirectory();
         }
         return null;
+    }
+
+    void storeAggregatedPowerStats(AggregatedPowerStats stats) {
+        PowerStatsSpan span = createPowerStatsSpan(stats);
+        if (span == null) {
+            return;
+        }
+        storePowerStatsSpan(span);
+    }
+
+    static PowerStatsSpan createPowerStatsSpan(AggregatedPowerStats stats) {
+        List<AggregatedPowerStats.ClockUpdate> clockUpdates = stats.getClockUpdates();
+        if (clockUpdates.isEmpty()) {
+            Slog.w(TAG, "No clock updates in aggregated power stats " + stats);
+            return null;
+        }
+
+        long monotonicTime = clockUpdates.get(0).monotonicTime;
+        long durationSum = 0;
+        PowerStatsSpan span = new PowerStatsSpan(monotonicTime);
+        for (int i = 0; i < clockUpdates.size(); i++) {
+            AggregatedPowerStats.ClockUpdate clockUpdate = clockUpdates.get(i);
+            long duration;
+            if (i == clockUpdates.size() - 1) {
+                duration = stats.getDuration() - durationSum;
+            } else {
+                duration = clockUpdate.monotonicTime - monotonicTime;
+            }
+            span.addTimeFrame(clockUpdate.monotonicTime, clockUpdate.currentTime, duration);
+            monotonicTime = clockUpdate.monotonicTime;
+            durationSum += duration;
+        }
+
+        span.addSection(new AggregatedPowerStatsSection(stats));
+        return span;
     }
 
     /**
@@ -261,7 +292,7 @@ public class PowerStatsStore {
             }
             totalSize -= entry.getValue();
             mFileSizes.remove(file);
-            mTableOfContentsLoaded = false;
+            mTableOfContents = null;
         }
     }
 
@@ -278,8 +309,7 @@ public class PowerStatsStore {
                     }
                 }
             }
-            mTableOfContents.clear();
-            mTableOfContentsLoaded = false;
+            mTableOfContents = List.of();
         } finally {
             unlockStoreDirectory();
         }
@@ -316,13 +346,26 @@ public class PowerStatsStore {
     }
 
     private static class DefaultSectionReader implements PowerStatsSpan.SectionReader {
+        private final AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
+
+        DefaultSectionReader(AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+            mAggregatedPowerStatsConfig = aggregatedPowerStatsConfig;
+        }
+
         @Override
         public PowerStatsSpan.Section read(String sectionType, TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
-            if (BatteryUsageStatsSection.TYPE.equals(sectionType)) {
-                return new BatteryUsageStatsSection(BatteryUsageStats.createFromXml(parser));
+            switch (sectionType) {
+                case AggregatedPowerStatsSection.TYPE:
+                    return new AggregatedPowerStatsSection(
+                            AggregatedPowerStats.createFromXml(parser,
+                                    mAggregatedPowerStatsConfig));
+                case BatteryUsageStatsSection.TYPE:
+                    return new BatteryUsageStatsSection(
+                            BatteryUsageStats.createFromXml(parser));
+                default:
+                    return null;
             }
-            return null;
         }
     }
 }

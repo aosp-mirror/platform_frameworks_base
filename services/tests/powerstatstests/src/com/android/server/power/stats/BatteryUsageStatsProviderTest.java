@@ -381,7 +381,7 @@ public class BatteryUsageStatsProviderTest {
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
                 new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
-                Integer.MAX_VALUE, new TestHandler());
+                new TestHandler(), null);
 
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context,
                 batteryStats, powerStatsStore);

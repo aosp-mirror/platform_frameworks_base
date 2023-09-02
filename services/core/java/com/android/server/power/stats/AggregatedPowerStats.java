@@ -18,6 +18,8 @@ package com.android.server.power.stats;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
+import android.annotation.NonNull;
+import android.os.BatteryConsumer;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
@@ -25,8 +27,13 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.os.PowerStats;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
-import java.io.PrintWriter;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -40,6 +47,8 @@ import java.util.Set;
 class AggregatedPowerStats {
     private static final String TAG = "AggregatedPowerStats";
     private static final int MAX_CLOCK_UPDATES = 100;
+    private static final String XML_TAG_AGGREGATED_POWER_STATS = "agg-power-stats";
+
     private final PowerComponentAggregatedPowerStats[] mPowerComponentStats;
 
     static class ClockUpdate {
@@ -52,8 +61,23 @@ class AggregatedPowerStats {
     @DurationMillisLong
     private long mDurationMs;
 
-    AggregatedPowerStats(PowerComponentAggregatedPowerStats... powerComponentAggregatedPowerStats) {
-        this.mPowerComponentStats = powerComponentAggregatedPowerStats;
+    AggregatedPowerStats(AggregatedPowerStatsConfig aggregatedPowerStatsConfig) {
+        List<AggregatedPowerStatsConfig.PowerComponent> configs =
+                aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs();
+        mPowerComponentStats = new PowerComponentAggregatedPowerStats[configs.size()];
+        for (int i = 0; i < configs.size(); i++) {
+            mPowerComponentStats[i] = createPowerComponentAggregatedPowerStats(configs.get(i));
+        }
+    }
+
+    private PowerComponentAggregatedPowerStats createPowerComponentAggregatedPowerStats(
+            AggregatedPowerStatsConfig.PowerComponent config) {
+        switch (config.getPowerComponentId()) {
+            case BatteryConsumer.POWER_COMPONENT_CPU:
+                return new CpuAggregatedPowerStats(config);
+            default:
+                return new PowerComponentAggregatedPowerStats(config);
+        }
     }
 
     /**
@@ -110,13 +134,14 @@ class AggregatedPowerStats {
         return null;
     }
 
-    void setDeviceState(@PowerStatsAggregator.TrackedState int stateId, int state, long time) {
+    void setDeviceState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
+            long time) {
         for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             stats.setState(stateId, state, time);
         }
     }
 
-    void setUidState(int uid, @PowerStatsAggregator.TrackedState int stateId, int state,
+    void setUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long time) {
         for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             stats.setUidState(uid, stateId, state, time);
@@ -150,8 +175,56 @@ class AggregatedPowerStats {
         }
     }
 
-    void dump(PrintWriter pw) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+    public void writeXml(TypedXmlSerializer serializer) throws IOException {
+        serializer.startTag(null, XML_TAG_AGGREGATED_POWER_STATS);
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.writeXml(serializer);
+        }
+        serializer.endTag(null, XML_TAG_AGGREGATED_POWER_STATS);
+        serializer.flush();
+    }
+
+    @NonNull
+    public static AggregatedPowerStats createFromXml(
+            TypedXmlPullParser parser, AggregatedPowerStatsConfig aggregatedPowerStatsConfig)
+            throws XmlPullParserException, IOException {
+        AggregatedPowerStats stats = new AggregatedPowerStats(aggregatedPowerStatsConfig);
+        boolean inElement = false;
+        boolean skipToEnd = false;
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT
+                   && !(eventType == XmlPullParser.END_TAG
+                        && parser.getName().equals(XML_TAG_AGGREGATED_POWER_STATS))) {
+            if (!skipToEnd && eventType == XmlPullParser.START_TAG) {
+                switch (parser.getName()) {
+                    case XML_TAG_AGGREGATED_POWER_STATS:
+                        inElement = true;
+                        break;
+                    case PowerComponentAggregatedPowerStats.XML_TAG_POWER_COMPONENT:
+                        if (!inElement) {
+                            break;
+                        }
+
+                        int powerComponentId = parser.getAttributeInt(null,
+                                PowerComponentAggregatedPowerStats.XML_ATTR_ID);
+                        for (PowerComponentAggregatedPowerStats powerComponent :
+                                stats.mPowerComponentStats) {
+                            if (powerComponent.powerComponentId == powerComponentId) {
+                                if (!powerComponent.readFromXml(parser)) {
+                                    skipToEnd = true;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                }
+            }
+            eventType = parser.next();
+        }
+        return stats;
+    }
+
+    void dump(IndentingPrintWriter ipw) {
         StringBuilder sb = new StringBuilder();
         long baseTime = 0;
         for (int i = 0; i < mClockUpdates.size(); i++) {

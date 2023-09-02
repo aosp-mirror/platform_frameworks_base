@@ -122,7 +122,7 @@ public class MultiStateStatsTest {
         // 4 * 10 = 40 bits needed to represent the composite state
         MultiStateStats.States[] states = new MultiStateStats.States[10];
         for (int i = 0; i < states.length; i++) {
-            states[i] = new MultiStateStats.States(true, labels);
+            states[i] = new MultiStateStats.States("foo", true, labels);
         }
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
                 () -> new MultiStateStats.Factory(DIMENSION_COUNT, states));
@@ -191,8 +191,8 @@ public class MultiStateStatsTest {
     private static MultiStateStats.Factory makeFactory(boolean trackBatteryState,
             boolean trackProcState, boolean trackScreenState) {
         return new MultiStateStats.Factory(DIMENSION_COUNT,
-                new MultiStateStats.States(trackBatteryState, "plugged-in", "on-battery"),
-                new MultiStateStats.States(trackProcState,
+                new MultiStateStats.States("bs", trackBatteryState, "plugged-in", "on-battery"),
+                new MultiStateStats.States("ps", trackProcState,
                         BatteryConsumer.processStateToString(
                                 BatteryConsumer.PROCESS_STATE_UNSPECIFIED),
                         BatteryConsumer.processStateToString(
@@ -203,7 +203,7 @@ public class MultiStateStatsTest {
                                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE),
                         BatteryConsumer.processStateToString(
                                 BatteryConsumer.PROCESS_STATE_CACHED)),
-                new MultiStateStats.States(trackScreenState, "screen-off", "plugged-in"));
+                new MultiStateStats.States("scr", trackScreenState, "screen-off", "plugged-in"));
     }
 
     private FactorySubject assertThatCpuPerformanceStatsFactory(

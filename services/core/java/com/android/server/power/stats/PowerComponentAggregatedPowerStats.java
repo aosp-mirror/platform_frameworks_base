@@ -21,7 +21,13 @@ import android.util.SparseArray;
 
 import com.android.internal.os.MultiStateStats;
 import com.android.internal.os.PowerStats;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -31,6 +37,12 @@ import java.util.Collection;
  * as part of the {@link PowerStats.Descriptor}.
  */
 class PowerComponentAggregatedPowerStats {
+    static final String XML_TAG_POWER_COMPONENT = "power_component";
+    static final String XML_ATTR_ID = "id";
+    private static final String XML_TAG_DEVICE_STATS = "device-stats";
+    private static final String XML_TAG_UID_STATS = "uid-stats";
+    private static final String XML_ATTR_UID = "uid";
+
     public final int powerComponentId;
     private final MultiStateStats.States[] mDeviceStateConfig;
     private final MultiStateStats.States[] mUidStateConfig;
@@ -49,22 +61,24 @@ class PowerComponentAggregatedPowerStats {
         public MultiStateStats stats;
     }
 
-    PowerComponentAggregatedPowerStats(int powerComponentId,
-            MultiStateStats.States[] deviceStates,
-            MultiStateStats.States[] uidStates) {
-        this.powerComponentId = powerComponentId;
-        mDeviceStateConfig = deviceStates;
-        mUidStateConfig = uidStates;
+    PowerComponentAggregatedPowerStats(AggregatedPowerStatsConfig.PowerComponent config) {
+        this.powerComponentId = config.getPowerComponentId();
+        mDeviceStateConfig = config.getDeviceStateConfig();
+        mUidStateConfig = config.getUidStateConfig();
         mDeviceStates = new int[mDeviceStateConfig.length];
         mDeviceStateTimestamps = new long[mDeviceStateConfig.length];
     }
 
-    void setState(@PowerStatsAggregator.TrackedState int stateId, int state, long time) {
+    public PowerStats.Descriptor getPowerStatsDescriptor() {
+        return mPowerStatsDescriptor;
+    }
+
+    void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state, long time) {
         mDeviceStates[stateId] = state;
         mDeviceStateTimestamps[stateId] = time;
 
         if (mDeviceStateConfig[stateId].isTracked()) {
-            if (mDeviceStats != null || createDeviceStats()) {
+            if (mDeviceStats != null) {
                 mDeviceStats.setState(stateId, state, time);
             }
         }
@@ -72,14 +86,14 @@ class PowerComponentAggregatedPowerStats {
         if (mUidStateConfig[stateId].isTracked()) {
             for (int i = mUidStats.size() - 1; i >= 0; i--) {
                 PowerComponentAggregatedPowerStats.UidStats uidStats = mUidStats.valueAt(i);
-                if (uidStats.stats != null || createUidStats(uidStats)) {
+                if (uidStats.stats != null) {
                     uidStats.stats.setState(stateId, state, time);
                 }
             }
         }
     }
 
-    void setUidState(int uid, @PowerStatsAggregator.TrackedState int stateId, int state,
+    void setUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long time) {
         if (!mUidStateConfig[stateId].isTracked()) {
             return;
@@ -89,7 +103,7 @@ class PowerComponentAggregatedPowerStats {
         uidStats.states[stateId] = state;
         uidStats.stateTimestampMs[stateId] = time;
 
-        if (uidStats.stats != null || createUidStats(uidStats)) {
+        if (uidStats.stats != null) {
             uidStats.stats.setState(stateId, state, time);
         }
     }
@@ -102,13 +116,6 @@ class PowerComponentAggregatedPowerStats {
         mPowerStatsDescriptor = powerStats.descriptor;
 
         if (mDeviceStats == null) {
-            if (mStatsFactory == null) {
-                mStatsFactory = new MultiStateStats.Factory(
-                        mPowerStatsDescriptor.statsArrayLength, mDeviceStateConfig);
-                mUidStatsFactory = new MultiStateStats.Factory(
-                        mPowerStatsDescriptor.uidStatsArrayLength, mUidStateConfig);
-            }
-
             createDeviceStats();
         }
 
@@ -183,7 +190,11 @@ class PowerComponentAggregatedPowerStats {
 
     private boolean createDeviceStats() {
         if (mStatsFactory == null) {
-            return false;
+            if (mPowerStatsDescriptor == null) {
+                return false;
+            }
+            mStatsFactory = new MultiStateStats.Factory(
+                    mPowerStatsDescriptor.statsArrayLength, mDeviceStateConfig);
         }
 
         mDeviceStats = mStatsFactory.create();
@@ -196,7 +207,11 @@ class PowerComponentAggregatedPowerStats {
 
     private boolean createUidStats(UidStats uidStats) {
         if (mUidStatsFactory == null) {
-            return false;
+            if (mPowerStatsDescriptor == null) {
+                return false;
+            }
+            mUidStatsFactory = new MultiStateStats.Factory(
+                    mPowerStatsDescriptor.uidStatsArrayLength, mUidStateConfig);
         }
 
         uidStats.stats = mUidStatsFactory.create();
@@ -207,6 +222,74 @@ class PowerComponentAggregatedPowerStats {
         for (int stateId = mDeviceStateConfig.length; stateId < mUidStateConfig.length; stateId++) {
             uidStats.stats.setState(stateId, uidStats.states[stateId],
                     uidStats.stateTimestampMs[stateId]);
+        }
+        return true;
+    }
+
+    public void writeXml(TypedXmlSerializer serializer) throws IOException {
+        // No stats aggregated - can skip writing XML altogether
+        if (mPowerStatsDescriptor == null) {
+            return;
+        }
+
+        serializer.startTag(null, XML_TAG_POWER_COMPONENT);
+        serializer.attributeInt(null, XML_ATTR_ID, powerComponentId);
+        mPowerStatsDescriptor.writeXml(serializer);
+
+        if (mDeviceStats != null) {
+            serializer.startTag(null, XML_TAG_DEVICE_STATS);
+            mDeviceStats.writeXml(serializer);
+            serializer.endTag(null, XML_TAG_DEVICE_STATS);
+        }
+
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            int uid = mUidStats.keyAt(i);
+            UidStats uidStats = mUidStats.valueAt(i);
+            if (uidStats.stats != null) {
+                serializer.startTag(null, XML_TAG_UID_STATS);
+                serializer.attributeInt(null, XML_ATTR_UID, uid);
+                uidStats.stats.writeXml(serializer);
+                serializer.endTag(null, XML_TAG_UID_STATS);
+            }
+        }
+
+        serializer.endTag(null, XML_TAG_POWER_COMPONENT);
+        serializer.flush();
+    }
+
+    public boolean readFromXml(TypedXmlPullParser parser) throws XmlPullParserException,
+            IOException {
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                switch (parser.getName()) {
+                    case PowerStats.Descriptor.XML_TAG_DESCRIPTOR:
+                        mPowerStatsDescriptor = PowerStats.Descriptor.createFromXml(parser);
+                        if (mPowerStatsDescriptor == null) {
+                            return false;
+                        }
+                        break;
+                    case XML_TAG_DEVICE_STATS:
+                        if (mDeviceStats == null) {
+                            createDeviceStats();
+                        }
+                        if (!mDeviceStats.readFromXml(parser)) {
+                            return false;
+                        }
+                        break;
+                    case XML_TAG_UID_STATS:
+                        int uid = parser.getAttributeInt(null, XML_ATTR_UID);
+                        UidStats uidStats = getUidStats(uid);
+                        if (uidStats.stats == null) {
+                            createUidStats(uidStats);
+                        }
+                        if (!uidStats.stats.readFromXml(parser)) {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            eventType = parser.next();
         }
         return true;
     }

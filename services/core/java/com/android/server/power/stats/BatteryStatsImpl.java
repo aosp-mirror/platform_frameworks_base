@@ -284,7 +284,6 @@ public class BatteryStatsImpl extends BatteryStats {
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
     private final CpuPowerStatsCollector mCpuPowerStatsCollector;
-    private final PowerStatsAggregator mPowerStatsAggregator;
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -355,6 +354,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected Queue<UidToRemove> mPendingRemovedUids = new LinkedList<>();
+
+    @NonNull
+    public BatteryStatsHistory getHistory() {
+        return mHistory;
+    }
 
     @NonNull
     BatteryStatsHistory copyHistory() {
@@ -1744,7 +1748,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mEnergyConsumerRetriever = null;
         mUserInfoProvider = null;
         mCpuPowerStatsCollector = null;
-        mPowerStatsAggregator = null;
     }
 
     private void init(Clock clock) {
@@ -10937,18 +10940,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHandler, mBatteryStatsConfig.getPowerStatsThrottlePeriodCpu());
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
 
-        PowerStatsAggregator.Builder builder = new PowerStatsAggregator.Builder(mHistory);
-        builder.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
-                .trackDeviceStates(
-                        PowerStatsAggregator.STATE_POWER,
-                        PowerStatsAggregator.STATE_SCREEN)
-                .trackUidStates(
-                        PowerStatsAggregator.STATE_POWER,
-                        PowerStatsAggregator.STATE_SCREEN,
-                        PowerStatsAggregator.STATE_PROCESS_STATE);
-
-        mPowerStatsAggregator = builder.build();
-
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
@@ -15690,18 +15681,21 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Schedules an immediate (but asynchronous) collection of PowerStats samples.
+     * Callers will need to wait for the collection to complete on the handler thread.
+     */
+    public void schedulePowerStatsSampleCollection() {
+        if (mCpuPowerStatsCollector == null) {
+            return;
+        }
+        mCpuPowerStatsCollector.forceSchedule();
+    }
+
+    /**
      * Grabs one sample of PowerStats and prints it.
      */
     public void dumpStatsSample(PrintWriter pw) {
         mCpuPowerStatsCollector.collectAndDump(pw);
-    }
-
-    /**
-     * Aggregates power stats between the specified times and prints them.
-     */
-    public void dumpAggregatedStats(PrintWriter pw, long startTimeMs, long endTimeMs) {
-        mPowerStatsAggregator.aggregateBatteryStats(startTimeMs, endTimeMs,
-                stats-> stats.dump(pw));
     }
 
     private final Runnable mWriteAsyncRunnable = () -> {
