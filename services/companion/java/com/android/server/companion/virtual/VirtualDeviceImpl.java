@@ -19,6 +19,8 @@ package com.android.server.companion.virtual;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -42,6 +44,7 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.AttributionSource;
@@ -82,6 +85,7 @@ import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -146,6 +150,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private VirtualAudioController mVirtualAudioController;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;
+    @GuardedBy("mVirtualDeviceLock")
+    private SparseIntArray mDevicePolicies;
     @GuardedBy("mVirtualDeviceLock")
     private final SparseArray<VirtualDisplayWrapper> mVirtualDisplays = new SparseArray<>();
     private final IVirtualDeviceActivityListener mActivityListener;
@@ -261,6 +267,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mDeviceId = deviceId;
         mAppToken = token;
         mParams = params;
+        mDevicePolicies = params.getDevicePolicies();
         mDisplayManager = displayManager;
         if (inputController == null) {
             mInputController = new InputController(
@@ -323,7 +330,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     /** Returns the policy specified for this policy type */
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             @VirtualDeviceParams.PolicyType int policyType) {
-        return mParams.getDevicePolicy(policyType);
+        if (Flags.dynamicPolicy()) {
+            synchronized (mVirtualDeviceLock) {
+                return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
+            }
+        } else {
+            return mParams.getDevicePolicy(policyType);
+        }
     }
 
     /** Returns device-specific audio session id for playback. */
@@ -505,6 +518,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mVirtualAudioController.stopListening();
                 mVirtualAudioController = null;
             }
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
+            @VirtualDeviceParams.DevicePolicy int devicePolicy) {
+        super.setDevicePolicy_enforcePermission();
+        switch (policyType) {
+            case POLICY_TYPE_RECENTS:
+                synchronized (mVirtualDeviceLock) {
+                    mDevicePolicies.put(policyType, devicePolicy);
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
+                                .setShowInHostDeviceRecents(devicePolicy == DEVICE_POLICY_DEFAULT);
+                    }
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Device policy " + policyType
+                        + " cannot be changed at runtime. ");
         }
     }
 
@@ -787,6 +821,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mParams.dump(fout, "        ");
         fout.println("    mVirtualDisplayIds: ");
         synchronized (mVirtualDeviceLock) {
+            fout.println("    mDevicePolicies: " + mDevicePolicies);
             for (int i = 0; i < mVirtualDisplays.size(); i++) {
                 fout.println("      " + mVirtualDisplays.keyAt(i));
             }
@@ -813,9 +848,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         this::onSecureWindowShown,
                         this::shouldInterceptIntent,
                         displayCategories,
-                        mParams.getDevicePolicy(
-                                VirtualDeviceParams.POLICY_TYPE_RECENTS)
-                                == VirtualDeviceParams.DEVICE_POLICY_DEFAULT);
+                        mParams.getDevicePolicy(POLICY_TYPE_RECENTS) == DEVICE_POLICY_DEFAULT);
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
     }
