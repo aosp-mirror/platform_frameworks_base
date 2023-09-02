@@ -6089,6 +6089,8 @@
 
     <!-- Default value for Settings.SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED -->
     <bool name="config_searchPressHoldNavHandleEnabledDefault">true</bool>
+    <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED for search overlay -->
+    <bool name="config_searchLongPressHomeEnabledDefault">true</bool>
 
     <!-- The maximum byte size of the information contained in the bundle of
     HotwordDetectedResult. -->
@@ -6561,6 +6563,9 @@
     <!-- Whether the AOSP support for app cloning building blocks is to be enabled for the
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
+
+    <!-- Whether the variable refresh rate when typing feature is enabled for the device. -->
+    <bool name="config_variableRefreshRateTypingSupported">false</bool>
 
     <!-- Enables or disables support for repair mode. The feature creates a secure
          environment to protect the user's privacy when the device is being repaired.

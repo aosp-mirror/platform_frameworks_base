@@ -2813,7 +2813,7 @@ class Task extends TaskFragment {
         final WindowManager.LayoutParams attrs = win.mAttrs;
         visibleFrame.set(win.getFrame());
         visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, attrs.type, win.getWindowingMode(), attrs.softInputMode,
+                visibleFrame, attrs.type, win.getActivityType(), attrs.softInputMode,
                 attrs.flags));
         out.union(visibleFrame);
     }

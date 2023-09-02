@@ -1292,9 +1292,9 @@ public abstract class WallpaperService extends Service {
                     visibleFrame.intersect(mInsetsState.getDisplayFrame());
                     WindowInsets windowInsets = mInsetsState.calculateInsets(visibleFrame,
                             null /* ignoringVisibilityState */, config.isScreenRound(),
-                            false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
-                            mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
-                            config.windowConfiguration.getWindowingMode(), null /* idSideMap */);
+                            mLayout.softInputMode, mLayout.flags, SYSTEM_UI_FLAG_VISIBLE,
+                            mLayout.type, config.windowConfiguration.getActivityType(),
+                            null /* idSideMap */);
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;
