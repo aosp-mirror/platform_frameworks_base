@@ -32,6 +32,7 @@ class RegularFile : public IFile {
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
   const android::Source& GetSource() const override;
+  bool GetModificationTime(struct tm* buf) const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RegularFile);

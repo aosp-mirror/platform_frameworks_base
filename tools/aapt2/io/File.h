@@ -57,6 +57,11 @@ class IFile {
     return false;
   }
 
+  // Fills in buf with the last modification time of the file. Returns true if successful,
+  // otherwise false (i.e., the operation is not supported or the file system is unable to provide
+  // a last modification time).
+  virtual bool GetModificationTime(struct tm* buf) const = 0;
+
  private:
   // Any segments created from this IFile need to be owned by this IFile, so
   // keep them
@@ -78,6 +83,10 @@ class FileSegment : public IFile {
   const android::Source& GetSource() const override {
     return file_->GetSource();
   }
+
+  bool GetModificationTime(struct tm* buf) const override {
+    return file_->GetModificationTime(buf);
+  };
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileSegment);
