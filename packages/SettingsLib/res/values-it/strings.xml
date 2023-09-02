@@ -543,12 +543,12 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Chiedi ogni volta"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
-    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo telefono"</string>
+    <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo smartphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Base con altoparlante"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo esterno"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo connesso"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo telefono"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo smartphone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossibile riprodurre su questo dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Esegui l\'upgrade dell\'account per cambiare"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Qui non è possibile riprodurre i download"</string>

@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"কম্প্যানিয়ন অ্যাপকে, ব্যাকগ্রাউন্ড থেকে ফোরগ্রাউন্ড পরিষেবা চালু করার অনুমতি দেয়।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"মাইক্রোফোন উপলভ্য আছে"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্রোফোন ব্লক করা হয়েছে"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ডুয়াল স্ক্রিন"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"\'ডুয়াল স্ক্রিন\' চালু করা আছে"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen চালু করা আছে"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"কন্টেন্ট দেখানোর জন্য <xliff:g id="APP_NAME">%1$s</xliff:g> দুটি ডিসপ্লে ব্যবহার করছে"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ডিভাইস খুব গরম হয়ে গেছে"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপনার ফোন খুব বেশি গরম হয়ে যাচ্ছে বলে \'ডুয়াল স্ক্রিন\' উপলভ্য নেই"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপনার ফোন খুব বেশি গরম হয়ে যাচ্ছে বলে Dual screen উপলভ্য নেই"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen উপলভ্য নেই"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"\'ব্যাটারি সেভার\' চালু করা আছে বলে Dual Screen ফিচারের সুবিধা উপলভ্য হবে না। আপনি সেটিংস থেকে এটি বন্ধ করতে পারবেন।"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"সেটিংসে যান"</string>

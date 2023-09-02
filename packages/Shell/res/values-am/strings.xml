@@ -35,9 +35,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"የሳንካ ሪፖርት ዝርዝሮችን ወደ ዚፕ ፋይል ማከል አልተቻለም"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ያልተሰየመ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ዝርዝሮች"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ቅጽበታዊ ገፅ እይታ"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ቅጽበታዊ ገፅ እይታ በተሳካ ሁኔታ ተነስቷል"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ቅጽበታዊ ገፅ እይታ ሊነሳ አይችልም"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ቅጽበታዊ ገፅ ዕይታ"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ቅጽበታዊ ገፅ ዕይታ በተሳካ ሁኔታ ተነስቷል"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ቅጽበታዊ ገፅ ዕይታ ሊነሳ አይችልም"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"የሳንካ ሪፖርት <xliff:g id="ID">#%d</xliff:g> ዝርዝሮች"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"የፋይል ስም"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"የሳንካ ርዕስ"</string>
