@@ -1129,9 +1129,9 @@
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ساعت}one{# ساعت}other{# ساعت}}"</string>
     <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# روز}one{# روز}other{# روز}}"</string>
     <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# سال}one{# سال}other{# سال}}"</string>
-    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدئو"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
-    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدئو ممکن نیست."</string>
+    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدیو"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
+    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدیو ممکن نیست."</string>
     <string name="VideoView_error_button" msgid="5138809446603764272">"تأیید"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"ظهر"</string>
@@ -1592,7 +1592,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"برای برداشتن محدودیت ضربه بزنید."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"مصرف بالای داده تلفن همراه"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"برنامه‌های شما بیش از معمول داده مصرف کرده‌اند"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"‫<xliff:g id="APP">%s</xliff:g> بیش از معمول داده مصرف کرده است"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"گواهی امنیتی"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"این گواهی معتبر است."</string>
     <string name="issued_to" msgid="5975877665505297662">"صادرشده برای:"</string>

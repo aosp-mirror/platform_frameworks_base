@@ -31,8 +31,8 @@
     <string name="template_all_pages" msgid="3322235982020148762">"ሁሉም <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"የ<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ክልል"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ለምሳሌ፦ 1–5,8,11–13"</string>
-    <string name="print_preview" msgid="8010217796057763343">"የህትመት ቅድመ እይታ"</string>
-    <string name="install_for_print_preview" msgid="6366303997385509332">"ለቅድመ-እይታ የፒ ዲ ኤፍ መመልከቻ ይጫኑ"</string>
+    <string name="print_preview" msgid="8010217796057763343">"የህትመት ቅድመ ዕይታ"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"ለቅድመ-ዕይታ የፒ ዲ ኤፍ መመልከቻ ይጫኑ"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"የአታሚ መተግበሪያ ተበላሽቷል"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"የህትመት ስራን በማመንጨት ላይ"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"እንደ PDF አስቀምጥ"</string>
