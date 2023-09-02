@@ -1113,15 +1113,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (insets != null) {
                 mLastForceConsumingTypes = insets.getForceConsumingTypes();
 
-                @InsetsType int compatInsetsTypes =
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
+                        getResources().getConfiguration().windowConfiguration.getActivityType(),
+                        mLastForceConsumingTypes);
+                final @InsetsType int compatInsetsTypes =
                         WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout();
-                if (clearsCompatInsets(attrs.type, attrs.flags,
-                        getResources().getConfiguration().windowConfiguration.getWindowingMode())) {
-                    compatInsetsTypes &= mLastForceConsumingTypes;
-                }
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                final Insets systemInsets = compatInsetsTypes == 0
+                final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(compatInsetsTypes), stableBarInsets);
                 mLastTopInset = systemInsets.top;

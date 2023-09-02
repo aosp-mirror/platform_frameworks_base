@@ -1679,9 +1679,10 @@ public class ActivityStarterTests extends WindowTestsBase {
 
     @Test
     public void testResultCanceledWhenNotAllowedStartingActivity() {
+        final Task task = new TaskBuilder(mSupervisor).build();
         final ActivityStarter starter = prepareStarter(0, false);
         final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
-        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setTask(task).build();
         targetRecord.resultTo = sourceRecord;
 
         // Abort the activity start and ensure the sourceRecord gets the result (RESULT_CANCELED).

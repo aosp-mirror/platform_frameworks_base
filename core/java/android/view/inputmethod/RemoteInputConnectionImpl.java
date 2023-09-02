@@ -28,6 +28,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiThread;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -182,6 +183,8 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     private CancellationSignalBeamer.Receiver mBeamer;
 
+    private ViewRootImpl.TypingHintNotifier mTypingHintNotifier;
+
     RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
@@ -190,6 +193,12 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
         mH = new Handler(mLooper);
         mParentInputMethodManager = inputMethodManager;
         mServedView = new WeakReference<>(servedView);
+        if (servedView != null) {
+            final ViewRootImpl viewRoot = servedView.getViewRootImpl();
+            if (viewRoot != null) {
+                mTypingHintNotifier = viewRoot.createTypingHintNotifierIfSupported();
+            }
+        }
     }
 
     /**
@@ -364,6 +373,12 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             return;
         }
         dispatch(() -> {
+            notifyTypingHint(false /* isTyping */);
+            // Deactivate the notifier when finishing typing.
+            if (mTypingHintNotifier != null) {
+                mTypingHintNotifier.deactivate();
+            }
+
             // Note that we do not need to worry about race condition here, because 1) mFinished is
             // updated only inside this block, and 2) the code here is running on a Handler hence we
             // assume multiple closeConnection() tasks will not be handled at the same time.
@@ -628,6 +643,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.commitText(text, newCursorPosition);
+            notifyTypingHint(true /* isTyping */);
         });
     }
 
@@ -783,6 +799,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.setComposingText(text, newCursorPosition);
+            notifyTypingHint(true /* isTyping */);
         });
     }
 
@@ -910,6 +927,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
                 return;
             }
             ic.deleteSurroundingText(beforeLength, afterLength);
+            notifyTypingHint(true /* isTyping */);
         });
     }
 
@@ -1472,5 +1490,17 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
 
     private static boolean useImeTracing() {
         return ImeTracing.getInstance().isEnabled();
+    }
+
+    /**
+     * Dispatch the typing hint to {@link ViewRootImpl.TypingHintNotifier}.
+     * The input connection indicates that the user is typing when {@link #commitText} or
+     * {@link #setComposingText)} and the user finish typing when {@link #deactivate()}.
+     */
+    @UiThread
+    private void notifyTypingHint(boolean isTyping) {
+        if (mTypingHintNotifier != null) {
+            mTypingHintNotifier.onTypingHintChanged(isTyping);
+        }
     }
 }
