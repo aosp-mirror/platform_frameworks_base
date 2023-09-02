@@ -554,7 +554,7 @@
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan ikke spille av nedlastinger her"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prøv igjen etter annonsen"</string>
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Vekk enheten for å spille her"</string>
-    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheten er ikke godkjent"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Enheten er ikke godkjent til å spille av"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Kan ikke spille av dette her"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
