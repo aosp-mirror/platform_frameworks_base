@@ -54,10 +54,12 @@
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         app:layout_constraintEnd_toStartOf="@id/actionPlayPause"
+        app:layout_constraintTop_toBottomOf="@id/media_seamless"
         app:layout_constrainedWidth="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/header_artist"
-        app:layout_constraintHorizontal_bias="0" />
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintVertical_bias="1" />
 
     <Constraint
         android:id="@+id/media_explicit_indicator"
