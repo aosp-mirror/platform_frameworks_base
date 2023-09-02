@@ -6976,6 +6976,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return mDistractingPackageHelper.getDistractingPackageRestrictionsAsUser(snapshot,
                     packageNames, userId, callingUid);
         }
+
+        @Override
+        public ParceledListSlice<PackageInstaller.SessionInfo> getHistoricalSessions(int userId) {
+            return mInstallerService.getHistoricalSessions(userId);
+        }
     }
 
     private void setEnabledOverlayPackages(@UserIdInt int userId,

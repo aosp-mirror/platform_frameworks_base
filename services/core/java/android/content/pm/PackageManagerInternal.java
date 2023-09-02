@@ -1409,4 +1409,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isPackageQuarantined(@NonNull String packageName,
             @UserIdInt int userId);
+
+    /**
+     * Return a list of all historical install sessions for the given user.
+     */
+    public abstract ParceledListSlice<PackageInstaller.SessionInfo> getHistoricalSessions(
+            int userId);
 }

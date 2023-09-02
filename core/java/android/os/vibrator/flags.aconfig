@@ -1,0 +1,8 @@
+package: "android.os.vibrator"
+
+flag {
+    namespace: "vibrator"
+    name: "use_vibrator_haptic_feedback"
+    description: "Enables performHapticFeedback to directly use the vibrator service instead of going through the window session"
+    bug: "295459081"
+}

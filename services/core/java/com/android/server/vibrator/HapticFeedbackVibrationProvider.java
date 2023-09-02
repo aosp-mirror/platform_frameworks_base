@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
@@ -29,8 +30,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Provides the {@link VibrationEffect} and {@link VibrationAttributes} for haptic feedback.
@@ -47,7 +46,7 @@ public final class HapticFeedbackVibrationProvider {
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
-    private final Vibrator mVibrator;
+    private final VibratorInfo mVibratorInfo;
     private final boolean mHapticTextHandleEnabled;
     // Vibrator effect for haptic feedback during boot when safe mode is enabled.
     private final VibrationEffect mSafeModeEnabledVibrationEffect;
@@ -58,25 +57,25 @@ public final class HapticFeedbackVibrationProvider {
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
-        this(res, vibrator, loadHapticCustomizations(res, vibrator));
+        this(res, vibrator.getInfo());
+    }
+
+    /** @hide */
+    public HapticFeedbackVibrationProvider(Resources res, VibratorInfo vibratorInfo) {
+        this(res, vibratorInfo, loadHapticCustomizations(res, vibratorInfo));
     }
 
     /** @hide */
     @VisibleForTesting HapticFeedbackVibrationProvider(
             Resources res,
-            Vibrator vibrator,
+            VibratorInfo vibratorInfo,
             @Nullable SparseArray<VibrationEffect> hapticCustomizations) {
-        mVibrator = vibrator;
+        mVibratorInfo = vibratorInfo;
         mHapticTextHandleEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
 
-        if (hapticCustomizations != null) {
-            // Clean up the customizations to remove vibrations which may not ever be used due to
-            // Vibrator properties or other device configurations.
-            removeUnsupportedVibrations(hapticCustomizations, vibrator);
-            if (hapticCustomizations.size() == 0) {
-                hapticCustomizations = null;
-            }
+        if (hapticCustomizations != null && hapticCustomizations.size() == 0) {
+            hapticCustomizations = null;
         }
         mHapticCustomizations = hapticCustomizations;
 
@@ -257,7 +256,7 @@ public final class HapticFeedbackVibrationProvider {
         if (effectHasCustomization(hapticFeedbackId)) {
             return mHapticCustomizations.get(hapticFeedbackId);
         }
-        if (mVibrator.areAllPrimitivesSupported(primitiveId)) {
+        if (mVibratorInfo.isPrimitiveSupported(primitiveId)) {
             return VibrationEffect.startComposition()
                     .addPrimitive(primitiveId, primitiveScale)
                     .compose();
@@ -270,9 +269,8 @@ public final class HapticFeedbackVibrationProvider {
         if (effectHasCustomization(HapticFeedbackConstants.ASSISTANT_BUTTON)) {
             return mHapticCustomizations.get(HapticFeedbackConstants.ASSISTANT_BUTTON);
         }
-        if (mVibrator.areAllPrimitivesSupported(
-                VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
-                VibrationEffect.Composition.PRIMITIVE_TICK)) {
+        if (mVibratorInfo.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE)
+                && mVibratorInfo.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK)) {
             // quiet ramp, short pause, then sharp tick
             return VibrationEffect.startComposition()
                     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE, 0.25f)
@@ -289,27 +287,12 @@ public final class HapticFeedbackVibrationProvider {
 
     @Nullable
     private static SparseArray<VibrationEffect> loadHapticCustomizations(
-            Resources res, Vibrator vibrator) {
+            Resources res, VibratorInfo vibratorInfo) {
         try {
-            return HapticFeedbackCustomization.loadVibrations(res, vibrator);
+            return HapticFeedbackCustomization.loadVibrations(res, vibratorInfo);
         } catch (IOException | HapticFeedbackCustomization.CustomizationParserException e) {
             Slog.e(TAG, "Unable to load haptic customizations.", e);
             return null;
-        }
-    }
-
-    private static void removeUnsupportedVibrations(
-            SparseArray<VibrationEffect> customizations, Vibrator vibrator) {
-        Set<Integer> keysToRemove = new HashSet<>();
-        for (int i = 0; i < customizations.size(); i++) {
-            int key = customizations.keyAt(i);
-            if (!vibrator.areVibrationFeaturesSupported(customizations.get(key))) {
-                keysToRemove.add(key);
-            }
-        }
-
-        for (int key : keysToRemove) {
-            customizations.remove(key);
         }
     }
 }

@@ -136,7 +136,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     @Nullable private final SecureWindowCallback mSecureWindowCallback;
     @Nullable private final Set<String> mDisplayCategories;
 
-    private final boolean mShowTasksInHostDeviceRecents;
+    @GuardedBy("mGenericWindowPolicyControllerLock")
+    private boolean mShowTasksInHostDeviceRecents;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -202,6 +203,15 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      */
     public void setDisplayId(int displayId) {
         mDisplayId = displayId;
+    }
+
+    /**
+     * Set whether to show activities in recents on the host device.
+     */
+    public void setShowInHostDeviceRecents(boolean showInHostDeviceRecents) {
+        synchronized (mGenericWindowPolicyControllerLock) {
+            mShowTasksInHostDeviceRecents = showInHostDeviceRecents;
+        }
     }
 
     /** Register a listener for running applications changes. */
@@ -347,7 +357,9 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public boolean canShowTasksInHostDeviceRecents() {
-        return mShowTasksInHostDeviceRecents;
+        synchronized (mGenericWindowPolicyControllerLock) {
+            return mShowTasksInHostDeviceRecents;
+        }
     }
 
     @Override

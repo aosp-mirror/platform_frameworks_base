@@ -6,3 +6,10 @@ flag {
   description: "More logs to test flags with"
   bug: "291725823"
 }
+
+flag {
+  name: "dynamic_policy"
+  namespace: "virtual_devices"
+  description: "Enable dynamic policy API"
+  bug: "298401780"
+}

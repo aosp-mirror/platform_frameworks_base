@@ -36,4 +36,10 @@ interface IVibratorManagerService {
     void vibrate(int uid, int displayId, String opPkg, in CombinedVibration vibration,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(int usageFilter, IBinder token);
+
+    // Async oneway APIs.
+    // There is no order guarantee with respect to the two-way APIs above like
+    // vibrate/isVibrating/cancel.
+    oneway void performHapticFeedback(int uid, int displayId, String opPkg, int constant,
+            boolean always, String reason, IBinder token);
 }

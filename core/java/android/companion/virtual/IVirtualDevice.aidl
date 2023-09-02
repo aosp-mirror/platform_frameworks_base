@@ -70,6 +70,12 @@ interface IVirtualDevice {
     void close();
 
     /**
+     * Specifies a policy for this virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void setDevicePolicy(int policyType, int devicePolicy);
+
+    /**
      * Notifies that an audio session being started.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
