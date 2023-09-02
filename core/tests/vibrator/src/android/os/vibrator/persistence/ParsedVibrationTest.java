@@ -92,18 +92,18 @@ public class ParsedVibrationTest {
     }
 
     @Test
-    public void testGetVibrationEffectListForTesting() {
+    public void testGetVibrationEffects() {
         ParsedVibration parsedVibration =
                 new ParsedVibration(List.of(mEffect1, mEffect2, mEffect3));
-        assertThat(parsedVibration.getVibrationEffectListForTesting())
+        assertThat(parsedVibration.getVibrationEffects())
                 .containsExactly(mEffect1, mEffect2, mEffect3)
                 .inOrder();
 
         parsedVibration = new ParsedVibration(List.of(mEffect1));
-        assertThat(parsedVibration.getVibrationEffectListForTesting()).containsExactly(mEffect1);
+        assertThat(parsedVibration.getVibrationEffects()).containsExactly(mEffect1);
 
         parsedVibration = new ParsedVibration(List.of());
-        assertThat(parsedVibration.getVibrationEffectListForTesting()).isEmpty();
+        assertThat(parsedVibration.getVibrationEffects()).isEmpty();
     }
 
     private Subject assertThatResolution(

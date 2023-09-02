@@ -382,4 +382,64 @@ oneway interface ISatellite {
      */
     void requestTimeForNextSatelliteVisibility(in IIntegerConsumer resultCallback,
             in IIntegerConsumer callback);
+
+    /**
+     * Set the non-terrestrial PLMN with lower priority than terrestrial networks.
+     * MCC/MNC broadcast by the non-terrestrial networks may not be included in OPLMNwACT file on
+     * SIM profile. Acquisition of satellite based system is lower priority to terrestrial
+     * networks. UE shall make all attempts to acquire terrestrial service prior to camping on
+     * satellite LTE service.
+     *
+     * @param simSlot Indicates the SIM slot to which this API will be applied. The modem will use
+     *                this information to determine the relevant carrier.
+     * @param plmnList The list of roaming PLMN used for connecting to satellite networks.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *
+     * Valid error codes returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_ARGUMENTS
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:NO_RESOURCES
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    void setSatellitePlmn(int simSlot, in List<String> plmnList,
+            in IIntegerConsumer resultCallback);
+
+    /**
+     * Enable or disable satellite in the cellular modem associated with a carrier.
+     * Refer setSatellitePlmn for the details of satellite PLMN scanning process.
+     *
+     * @param simSlot Indicates the SIM slot to which this API will be applied. The modem will use
+     *                this information to determine the relevant carrier.
+     * @param serial Serial number of request.
+     * @param enable {@code true} to enable satellite, {@code false} to disable satellite.
+     *
+     * Valid errors returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    void setSatelliteEnabledForCarrier(int simSlot, boolean satelliteEnabled,
+         in IIntegerConsumer callback);
+
+    /**
+     * Check whether satellite is enabled in the cellular modem associated with a carrier.
+     *
+     * @param simSlot Indicates the SIM slot to which this API will be applied. The modem will use
+     *                this information to determine the relevant carrier.
+     * @param serial Serial number of request.
+     *
+     * Valid errors returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    void requestIsSatelliteEnabledForCarrier(int simSlot, in IIntegerConsumer resultCallback,
+            in IBooleanConsumer callback);
 }

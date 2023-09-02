@@ -2831,7 +2831,7 @@ public final class Settings {
     /** @hide - Private call() method to query the 'global' table */
     public static final String CALL_METHOD_LIST_GLOBAL = "LIST_global";
 
-    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    /** @hide - Private call() method to query the 'configuration' table */
     public static final String CALL_METHOD_LIST_CONFIG = "LIST_config";
 
     /** @hide - Private call() method to disable / re-enable syncs to the 'configuration' table */
@@ -10662,20 +10662,6 @@ public final class Settings {
          */
         public static final String SEARCH_PRESS_HOLD_NAV_HANDLE_ENABLED =
                 "search_press_hold_nav_handle_enabled";
-
-        /**
-         * Control whether Trust Agents are in active unlock or extend unlock mode.
-         * @hide
-         */
-        @Readable
-        public static final String TRUST_AGENTS_EXTEND_UNLOCK = "trust_agents_extend_unlock";
-
-        /**
-         * Control whether the screen locks when trust is lost.
-         * @hide
-         */
-        @Readable
-        public static final String LOCK_SCREEN_WHEN_TRUST_LOST = "lock_screen_when_trust_lost";
 
         /**
          * Control whether Night display is currently activated.
@@ -19420,6 +19406,36 @@ public final class Settings {
         public static Map<String, String> getStrings(@NonNull String namespace,
                 @NonNull List<String> names) {
             return getStrings(getContentResolver(), namespace, names);
+        }
+
+        /**
+         * Return all stored flags.
+         *
+         * The keys take the form {@code namespace/flag}, and the values are the flag values.
+         *
+         * @hide
+         */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @NonNull
+        public static Map<String, String> getAllStrings() {
+            HashMap<String, String> allFlags = new HashMap<String, String>();
+            try {
+                ContentResolver resolver = getContentResolver();
+                Bundle arg = new Bundle();
+                arg.putInt(Settings.CALL_METHOD_USER_KEY, resolver.getUserId());
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                Bundle b = cp.call(resolver.getAttributionSource(),
+                        sProviderHolder.mUri.getAuthority(), CALL_METHOD_LIST_CONFIG, null, arg);
+                if (b != null) {
+                    Map<String, String> flagsToValues =
+                            (HashMap) b.getSerializable(Settings.NameValueTable.VALUE,
+                                            java.util.HashMap.class);
+                    allFlags.putAll(flagsToValues);
+                }
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't query configuration table for " + CONTENT_URI, e);
+            }
+            return allFlags;
         }
 
         /**

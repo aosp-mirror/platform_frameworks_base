@@ -43,6 +43,10 @@ object Flags {
     val ADD_TRANSIENT_HUN_IN_STACK_STATE_ANIMATOR =
         unreleasedFlag("add_transient_hun_in_stack_state_animator", teamfood = false)
 
+    // TODO(b/298308067): Tracking Bug
+    val SWIPE_UNCLEARED_TRANSIENT_VIEW_FIX =
+        unreleasedFlag("swipe_uncleared_transient_view_fix", teamfood = false)
+
     // TODO(b/254512751): Tracking Bug
     val NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
         unreleasedFlag("notification_pipeline_developer_logging")

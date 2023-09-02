@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,6 +32,7 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 
 import com.android.internal.telecom.IVideoProvider;
+import com.android.server.telecom.flags.Flags;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -720,6 +722,7 @@ public final class Call {
          * The underlying connection was added as a transactional call via the
          * {@link TelecomManager#addCall} API.
          */
+        @FlaggedApi(Flags.FLAG_VOIP_APP_ACTIONS_SUPPORT)
         public static final int PROPERTY_IS_TRANSACTIONAL = 0x00008000;
 
         //******************************************************************************************

@@ -1,0 +1,8 @@
+package: "android.view.inputmethod"
+
+flag {
+    name: "refactor_insets_controller"
+    namespace: "inputmethod"
+    description: "Feature flag for refactoring InsetsController and removing ImeInsetsSourceConsumer"
+    bug: "298172246"
+}

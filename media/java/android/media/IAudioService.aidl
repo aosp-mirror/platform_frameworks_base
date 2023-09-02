@@ -54,6 +54,8 @@ import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
@@ -355,6 +357,11 @@ interface IAudioService {
     int addMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
 
     int removeMixForPolicy(in AudioPolicyConfig policyConfig, in IAudioPolicyCallback pcb);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    int updateMixingRulesForPolicy(in AudioMix[] mixesToUpdate,
+                                   in AudioMixingRule[] updatedMixingRules,
+                                   in IAudioPolicyCallback pcb);
 
     int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 

@@ -3797,6 +3797,10 @@ package android.content.pm {
     method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
   }
 
+  public class PackageInfo implements android.os.Parcelable {
+    field public boolean isArchived;
+  }
+
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
@@ -4016,6 +4020,7 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
+    field public static final long MATCH_ARCHIVED_PACKAGES = 4294967296L; // 0x100000000L
     field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
@@ -7281,8 +7286,11 @@ package android.media.audiofx {
 
 package android.media.audiopolicy {
 
-  public class AudioMix {
+  public class AudioMix implements android.os.Parcelable {
+    method public int describeContents();
     method public int getMixState();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioMix> CREATOR;
     field public static final int MIX_STATE_DISABLED = -1; // 0xffffffff
     field public static final int MIX_STATE_IDLE = 0; // 0x0
     field public static final int MIX_STATE_MIXING = 1; // 0x1
@@ -7291,15 +7299,18 @@ package android.media.audiopolicy {
   }
 
   public static class AudioMix.Builder {
-    ctor public AudioMix.Builder(android.media.audiopolicy.AudioMixingRule) throws java.lang.IllegalArgumentException;
+    ctor public AudioMix.Builder(@NonNull android.media.audiopolicy.AudioMixingRule) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix build() throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix.Builder setDevice(@NonNull android.media.AudioDeviceInfo) throws java.lang.IllegalArgumentException;
-    method public android.media.audiopolicy.AudioMix.Builder setFormat(android.media.AudioFormat) throws java.lang.IllegalArgumentException;
+    method public android.media.audiopolicy.AudioMix.Builder setFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMix.Builder setRouteFlags(int) throws java.lang.IllegalArgumentException;
   }
 
-  public class AudioMixingRule {
+  public class AudioMixingRule implements android.os.Parcelable {
+    method public int describeContents();
     method public int getTargetMixRole();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioMixingRule> CREATOR;
     field public static final int MIX_ROLE_INJECTOR = 1; // 0x1
     field public static final int MIX_ROLE_PLAYERS = 0; // 0x0
     field public static final int RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET = 2; // 0x2
@@ -7336,6 +7347,7 @@ package android.media.audiopolicy {
     method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public boolean setUserIdDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int updateMixingRules(@NonNull java.util.List<android.util.Pair<android.media.audiopolicy.AudioMix,android.media.audiopolicy.AudioMixingRule>>);
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_POLICY = 1; // 0x1

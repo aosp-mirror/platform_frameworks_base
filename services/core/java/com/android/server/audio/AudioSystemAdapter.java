@@ -26,6 +26,7 @@ import android.media.IDevicesForAttributesCallback;
 import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -598,6 +599,21 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     public int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register) {
         invalidateRoutingCache();
         return AudioSystem.registerPolicyMixes(mixes, register);
+    }
+
+    /**
+     * Update already {@link AudioMixingRule}-s for already registered {@link AudioMix}-es.
+     *
+     * @param mixes              - array of registered {@link AudioMix}-es to update.
+     * @param updatedMixingRules - array of {@link AudioMixingRule}-s corresponding to
+     *                           {@code mixesToUpdate} mixes. The array must be same size as
+     *                           {@code mixesToUpdate} and i-th {@link AudioMixingRule} must
+     *                           correspond to i-th {@link AudioMix} from mixesToUpdate array.
+     */
+    public int updateMixingRules(@NonNull AudioMix[] mixes,
+            @NonNull AudioMixingRule[] updatedMixingRules) {
+        invalidateRoutingCache();
+        return AudioSystem.updatePolicyMixes(mixes, updatedMixingRules);
     }
 
     /**

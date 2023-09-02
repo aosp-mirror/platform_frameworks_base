@@ -25,6 +25,7 @@ import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.util.TelephonyUtils;
 
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -210,6 +211,34 @@ public class SatelliteImplBase extends SatelliteService {
                     () -> SatelliteImplBase.this
                             .requestTimeForNextSatelliteVisibility(errorCallback, callback),
                     "requestTimeForNextSatelliteVisibility");
+        }
+
+        @Override
+        public void setSatellitePlmn(int simSlot, List<String> plmnList,
+                IIntegerConsumer errorCallback)
+                throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this
+                            .setSatellitePlmn(simSlot, plmnList, errorCallback),
+                    "setSatellitePlmn");
+        }
+
+        @Override
+        public void setSatelliteEnabledForCarrier(int simSlot, boolean enableSatellite,
+                IIntegerConsumer errorCallback) throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this
+                            .setSatelliteEnabledForCarrier(simSlot, enableSatellite, errorCallback),
+                    "setSatelliteEnabledForCarrier");
+        }
+
+        @Override
+        public void requestIsSatelliteEnabledForCarrier(int simSlot, IIntegerConsumer errorCallback,
+                IBooleanConsumer callback) throws RemoteException {
+            executeMethodAsync(
+                    () -> SatelliteImplBase.this
+                            .requestIsSatelliteEnabledForCarrier(simSlot, errorCallback, callback),
+                    "requestIsSatelliteEnabledForCarrier");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -616,6 +645,77 @@ public class SatelliteImplBase extends SatelliteService {
      */
     public void requestTimeForNextSatelliteVisibility(@NonNull IIntegerConsumer errorCallback,
             @NonNull IIntegerConsumer callback) {
+        // stub implementation
+    }
+
+
+    /**
+     * Set the non-terrestrial PLMN with lower priority than terrestrial networks.
+     * MCC/MNC broadcast by the non-terrestrial networks may not be included in OPLMNwACT file on
+     * SIM profile. Acquisition of satellite based system is lower priority to terrestrial
+     * networks. UE shall make all attempts to acquire terrestrial service prior to camping on
+     * satellite LTE service.
+     * This method must only take effect if {@link #setSatelliteEnabledForCarrier} is {@code true},
+     * and return an error otherwise.
+     *
+     * @param simLogicalSlotIndex Indicates the SIM logical slot index to which this API will be
+     * applied. The modem will use this information to determine the relevant carrier.
+     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param plmnList The list of roaming PLMN used for connecting to satellite networks.
+     *
+     * Valid error codes returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_ARGUMENTS
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:NO_RESOURCES
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    public void setSatellitePlmn(@NonNull int simLogicalSlotIndex, @NonNull List<String> plmnList,
+            @NonNull IIntegerConsumer errorCallback) {
+        // stub implementation
+    }
+
+    /**
+     * Request to enable or disable carrier supported satellite plmn scan and attach by modem.
+     * Refer {@link #setSatellitePlmn} for the details of satellite PLMN scanning process.
+     *
+     * @param simLogicalSlotIndex Indicates the SIM logical slot index to which this API will be
+     * applied. The modem will use this information to determine the relevant carrier.
+     * @param satelliteEnabled {@code true} to enable satellite, {@code false} to disable satellite.
+     * @param callback {@code true} to enable satellite, {@code false} to disable satellite.
+     *
+     * Valid errors returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    public void setSatelliteEnabledForCarrier(@NonNull int simLogicalSlotIndex,
+            @NonNull boolean satelliteEnabled, @NonNull IIntegerConsumer callback) {
+        // stub implementation
+    }
+
+    /**
+     * Request to get whether the satellite is enabled in the cellular modem associated with a
+     * carrier.
+     *
+     * @param simLogicalSlotIndex Indicates the SIM logical slot index to which this API will be
+     * applied. The modem will use this information to determine the relevant carrier.
+     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param callback {@code true} to satellite enabled, {@code false} to satellite disabled.
+     *
+     * Valid errors returned:
+     *   SatelliteError:NONE
+     *   SatelliteError:INVALID_MODEM_STATE
+     *   SatelliteError:MODEM_ERR
+     *   SatelliteError:RADIO_NOT_AVAILABLE
+     *   SatelliteError:REQUEST_NOT_SUPPORTED
+     */
+    public void requestIsSatelliteEnabledForCarrier(@NonNull int simLogicalSlotIndex,
+            @NonNull IIntegerConsumer errorCallback, @NonNull IBooleanConsumer callback) {
         // stub implementation
     }
 }

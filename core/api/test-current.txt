@@ -2712,7 +2712,7 @@ package android.os.vibrator {
 package android.os.vibrator.persistence {
 
   public class ParsedVibration {
-    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffectListForTesting();
+    method @NonNull public java.util.List<android.os.VibrationEffect> getVibrationEffects();
     method @Nullable public android.os.VibrationEffect resolve(@NonNull android.os.Vibrator);
   }
 

@@ -880,6 +880,58 @@ final class LetterboxConfiguration {
                         false /* forTabletopMode */);
     }
 
+    /**
+     * Overrides persistent horizontal position of the letterboxed app window when horizontal
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForHorizontalReachability(boolean forBookMode,
+            @LetterboxHorizontalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                forBookMode, position);
+    }
+
+    /**
+     * Overrides persistent vertical position of the letterboxed app window when vertical
+     * reachability is enabled.
+     */
+    void setPersistentLetterboxPositionForVerticalReachability(boolean forTabletopMode,
+            @LetterboxVerticalReachabilityPosition int position) {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                forTabletopMode, position);
+    }
+
+    /**
+     * Resets persistent horizontal position of the letterboxed app window when horizontal
+     * reachability
+     * is enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForHorizontalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                false /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        false /* forBookMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                true /* forBookMode */,
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        true /* forBookMode */));
+    }
+
+    /**
+     * Resets persistent vertical position of the letterboxed app window when vertical reachability
+     * is
+     * enabled to default position.
+     */
+    void resetPersistentLetterboxPositionForVerticalReachability() {
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                false /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        false /* forTabletopMode */));
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                true /* forTabletopMode */,
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        true /* forTabletopMode */));
+    }
+
     @LetterboxHorizontalReachabilityPosition
     private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context,
             boolean forBookMode) {

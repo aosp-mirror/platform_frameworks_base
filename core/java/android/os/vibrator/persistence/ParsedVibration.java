@@ -70,7 +70,7 @@ public class ParsedVibration {
     @TestApi
     @VisibleForTesting
     @NonNull
-    public List<VibrationEffect> getVibrationEffectListForTesting() {
+    public List<VibrationEffect> getVibrationEffects() {
         return Collections.unmodifiableList(mEffects);
     }
 

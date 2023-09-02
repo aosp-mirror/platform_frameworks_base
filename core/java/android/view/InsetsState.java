@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.InsetsStateProto.DISPLAY_CUTOUT;
@@ -39,7 +40,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.WindowConfiguration;
+import android.app.WindowConfiguration.ActivityType;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -136,9 +137,8 @@ public class InsetsState implements Parcelable {
      * @return The calculated insets.
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
-            boolean isScreenRound, boolean alwaysConsumeSystemBars,
-            int legacySoftInputMode, int legacyWindowFlags, int legacySystemUiFlags,
-            int windowType, @WindowConfiguration.WindowingMode int windowingMode,
+            boolean isScreenRound, int legacySoftInputMode, int legacyWindowFlags,
+            int legacySystemUiFlags, int windowType, @ActivityType int activityType,
             @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
@@ -185,9 +185,8 @@ public class InsetsState implements Parcelable {
         if ((legacyWindowFlags & FLAG_FULLSCREEN) != 0) {
             compatInsetsTypes &= ~statusBars();
         }
-        if (clearsCompatInsets(windowType, legacyWindowFlags, windowingMode)) {
-            // Clear all types but forceConsumingTypes.
-            compatInsetsTypes &= forceConsumingTypes;
+        if (clearsCompatInsets(windowType, legacyWindowFlags, activityType, forceConsumingTypes)) {
+            compatInsetsTypes = 0;
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
@@ -295,26 +294,27 @@ public class InsetsState implements Parcelable {
         return insets;
     }
 
-    public Insets calculateVisibleInsets(Rect frame, int windowType, int windowingMode,
+    public Insets calculateVisibleInsets(Rect frame, int windowType, @ActivityType int activityType,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
-        final boolean clearsCompatInsets = clearsCompatInsets(
-                windowType, windowFlags, windowingMode);
         final int softInputAdjustMode = softInputMode & SOFT_INPUT_MASK_ADJUST;
         final int visibleInsetsTypes = softInputAdjustMode != SOFT_INPUT_ADJUST_NOTHING
                 ? systemBars() | ime()
                 : systemBars();
+        @InsetsType int forceConsumingTypes = 0;
         Insets insets = Insets.NONE;
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
             if ((source.getType() & visibleInsetsTypes) == 0) {
                 continue;
             }
-            if (clearsCompatInsets && !source.hasFlags(FLAG_FORCE_CONSUMING)) {
-                continue;
+            if (source.hasFlags(FLAG_FORCE_CONSUMING)) {
+                forceConsumingTypes |= source.getType();
             }
             insets = Insets.max(source.calculateVisibleInsets(frame), insets);
         }
-        return insets;
+        return clearsCompatInsets(windowType, windowFlags, activityType, forceConsumingTypes)
+                ? Insets.NONE
+                : insets;
     }
 
     /**
@@ -662,10 +662,15 @@ public class InsetsState implements Parcelable {
         mSources.put(source.getId(), source);
     }
 
-    public static boolean clearsCompatInsets(int windowType, int windowFlags, int windowingMode) {
+    public static boolean clearsCompatInsets(int windowType, int windowFlags,
+            @ActivityType int activityType, @InsetsType int forceConsumingTypes) {
         return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
+                // For compatibility reasons, this excludes the wallpaper, the system error windows,
+                // and the app windows while any system bar is forcibly consumed.
                 && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
-                && !WindowConfiguration.inMultiWindowMode(windowingMode);
+                // This ensures the app content won't be obscured by compat insets even if the app
+                // has FLAG_LAYOUT_NO_LIMITS.
+                && (forceConsumingTypes == 0 || activityType != ACTIVITY_TYPE_STANDARD);
     }
 
     public void dump(String prefix, PrintWriter pw) {

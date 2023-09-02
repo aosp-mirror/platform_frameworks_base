@@ -12,15 +12,17 @@
       ]
     },
     {
-      "name": "ApkVerityTest",
-      "file_patterns": ["VerityUtils\\.java"]
-    },
-    {
       "name": "UpdatableSystemFontTest",
       "file_patterns": ["VerityUtils\\.java"]
     },
     {
       "name": "CtsApkVerityInstallHostTestCases",
+      "file_patterns": ["VerityUtils\\.java"]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FsVerityTest",
       "file_patterns": ["VerityUtils\\.java"]
     }
   ]

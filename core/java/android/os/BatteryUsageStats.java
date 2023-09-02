@@ -707,7 +707,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                         XML_ATTR_PREFIX_INCLUDES_PROC_STATE_DATA, false);
 
                 builder = new Builder(customComponentNames.toArray(new String[0]), true,
-                        includesProcStateData);
+                        includesProcStateData, 0);
 
                 builder.setStatsStartTimestamp(
                         parser.getAttributeLong(null, XML_ATTR_START_TIMESTAMP));
@@ -782,6 +782,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private final String[] mCustomPowerComponentNames;
         private final boolean mIncludePowerModels;
         private final boolean mIncludesProcessStateData;
+        private final double mMinConsumedPowerThreshold;
         private final BatteryConsumer.BatteryConsumerDataLayout mBatteryConsumerDataLayout;
         private long mStatsStartTimestampMs;
         private long mStatsEndTimestampMs;
@@ -802,11 +803,11 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         private BatteryStatsHistory mBatteryStatsHistory;
 
         public Builder(@NonNull String[] customPowerComponentNames) {
-            this(customPowerComponentNames, false, false);
+            this(customPowerComponentNames, false, false, 0);
         }
 
         public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
-                boolean includeProcessStateData) {
+                boolean includeProcessStateData, double minConsumedPowerThreshold) {
             mBatteryConsumersCursorWindow =
                     new CursorWindow(null, BATTERY_CONSUMER_CURSOR_WINDOW_SIZE);
             mBatteryConsumerDataLayout =
@@ -817,12 +818,14 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             mCustomPowerComponentNames = customPowerComponentNames;
             mIncludePowerModels = includePowerModels;
             mIncludesProcessStateData = includeProcessStateData;
+            mMinConsumedPowerThreshold = minConsumedPowerThreshold;
             for (int scope = 0; scope < AGGREGATE_BATTERY_CONSUMER_SCOPE_COUNT; scope++) {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
                 mAggregateBatteryConsumersBuilders[scope] =
-                        new AggregateBatteryConsumer.Builder(data, scope);
+                        new AggregateBatteryConsumer.Builder(
+                                data, scope, mMinConsumedPowerThreshold);
             }
         }
 
@@ -961,7 +964,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UidBatteryConsumer.Builder(data, batteryStatsUid);
+                builder = new UidBatteryConsumer.Builder(data, batteryStatsUid,
+                        mMinConsumedPowerThreshold);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -979,7 +983,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UidBatteryConsumer.Builder(data, uid);
+                builder = new UidBatteryConsumer.Builder(data, uid, mMinConsumedPowerThreshold);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -996,7 +1000,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                 final BatteryConsumer.BatteryConsumerData data =
                         BatteryConsumer.BatteryConsumerData.create(mBatteryConsumersCursorWindow,
                                 mBatteryConsumerDataLayout);
-                builder = new UserBatteryConsumer.Builder(data, userId);
+                builder = new UserBatteryConsumer.Builder(data, userId, mMinConsumedPowerThreshold);
                 mUserBatteryConsumerBuilders.put(userId, builder);
             }
             return builder;

@@ -41,12 +41,13 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.view.View;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.FakeLogBuffer;
@@ -71,8 +72,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+@RoboPilotTest
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     private static final String NOTIFICATION_INDICATOR_FORMATTER_STRING =
             "{count, plural, =1 {# notification} other {# notifications}}";
@@ -91,8 +93,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     Resources mResources;
     @Mock
     AlarmManager mAlarmManager;
-    @Mock
-    AlarmManager.AlarmClockInfo mAlarmClockInfo;
     @Mock
     NextAlarmController mNextAlarmController;
     @Mock
@@ -203,8 +203,9 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnViewAttachedShowsAlarmIconWhenAlarmExists() {
-        when(mAlarmClockInfo.getTriggerTime()).thenReturn(1L);
-        when(mAlarmManager.getNextAlarmClock(anyInt())).thenReturn(mAlarmClockInfo);
+        final AlarmManager.AlarmClockInfo alarmClockInfo =
+                new AlarmManager.AlarmClockInfo(1L, null);
+        when(mAlarmManager.getNextAlarmClock(anyInt())).thenReturn(alarmClockInfo);
         mController.onViewAttached();
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_ALARM_SET), eq(true), any());

@@ -1975,9 +1975,10 @@ public class ContentProviderHelper {
         return mProviderMap.dumpProviderProto(fd, pw, name, args);
     }
 
-    private Boolean isAuthorityRedirectedForCloneProfileCached(String auth) {
+    private boolean isAuthorityRedirectedForCloneProfileCached(String auth) {
         if (mCloneProfileAuthorityRedirectionCache.containsKey(auth)) {
-            return mCloneProfileAuthorityRedirectionCache.get(auth);
+            final Boolean retVal = mCloneProfileAuthorityRedirectionCache.get(auth);
+            return retVal == null ? false : retVal.booleanValue();
         } else {
             boolean isAuthRedirected = isAuthorityRedirectedForCloneProfile(auth);
             mCloneProfileAuthorityRedirectionCache.put(auth, isAuthRedirected);

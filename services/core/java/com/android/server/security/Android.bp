@@ -1,0 +1,17 @@
+aconfig_declarations {
+    name: "com.android.server.security.flags-aconfig",
+    package: "com.android.server.security",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.server.security.flags-aconfig-java",
+    aconfig_declarations: "com.android.server.security.flags-aconfig",
+}
+
+java_aconfig_library {
+    name: "com.android.server.security.flags-aconfig-java-host",
+    aconfig_declarations: "com.android.server.security.flags-aconfig",
+    host_supported: true,
+    test: true,
+}

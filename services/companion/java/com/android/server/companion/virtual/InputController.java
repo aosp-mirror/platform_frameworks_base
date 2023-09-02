@@ -16,6 +16,8 @@
 
 package com.android.server.companion.virtual;
 
+import static android.text.TextUtils.formatSimple;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.StringDef;
@@ -350,7 +352,7 @@ class InputController {
     }
 
     private static String createPhys(@PhysType String type) {
-        return String.format("virtual%s:%d", type, sNextPhysId.getAndIncrement());
+        return formatSimple("virtual%s:%d", type, sNextPhysId.getAndIncrement());
     }
 
     private void setUniqueIdAssociation(int displayId, String phys) {
