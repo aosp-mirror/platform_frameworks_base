@@ -1169,6 +1169,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    PackageInstallerHistoricalSession createHistoricalSession() {
+        final float progress;
+        final float clientProgress;
+        synchronized (mProgressLock) {
+            progress = mProgress;
+            clientProgress = mClientProgress;
+        }
+        synchronized (mLock) {
+            return new PackageInstallerHistoricalSession(sessionId, userId, mOriginalInstallerUid,
+                    mOriginalInstallerPackageName, mInstallSource, mInstallerUid, createdMillis,
+                    updatedMillis, committedMillis, stageDir, stageCid, clientProgress, progress,
+                    isCommitted(), isPreapprovalRequested(), mSealed, mPermissionsManuallyAccepted,
+                    mStageDirInUse, mDestroyed, mFds.size(), mBridges.size(), mFinalStatus,
+                    mFinalMessage, params, mParentSessionId, getChildSessionIdsLocked(),
+                    mSessionApplied, mSessionFailed, mSessionReady, mSessionErrorCode,
+                    mSessionErrorMessage, mPreapprovalDetails);
+        }
+    }
+
     /**
      * Returns {@code true} if the {@link SessionInfo} object should be produced with potentially
      * sensitive data scrubbed from its fields.
