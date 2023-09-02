@@ -35,7 +35,8 @@ import android.util.Log;
 public abstract class VibratorManager {
     private static final String TAG = "VibratorManager";
 
-    private final String mPackageName;
+    /** @hide */
+    protected final String mPackageName;
 
     /**
      * @hide to prevent subclassing from outside of the framework
@@ -135,6 +136,21 @@ public abstract class VibratorManager {
     @RequiresPermission(android.Manifest.permission.VIBRATE)
     public abstract void vibrate(int uid, String opPkg, @NonNull CombinedVibration effect,
             String reason, @Nullable VibrationAttributes attributes);
+
+    /**
+     * Performs a haptic feedback.
+     *
+     * @param constant the ID of the requested haptic feedback. Should be one of the constants
+     *          defined in {@link HapticFeedbackConstants}.
+     * @param always {@code true} if the haptic feedback should be played regardless of the user
+     *          vibration intensity settings applicable to the corresponding vibration.
+     *          {@code false} otherwise.
+     * @param reason the reason for this haptic feedback.
+     * @hide
+     */
+    public void performHapticFeedback(int constant, boolean always, String reason) {
+        Log.w(TAG, "performHapticFeedback is not supported");
+    }
 
     /**
      * Turn all the vibrators off.
