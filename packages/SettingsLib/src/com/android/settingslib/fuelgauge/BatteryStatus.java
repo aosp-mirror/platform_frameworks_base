@@ -40,9 +40,7 @@ import java.util.Optional;
  * Stores and computes some battery information.
  */
 public class BatteryStatus {
-    private static final int LOW_BATTERY_THRESHOLD = 20;
-    private static final int SEVERE_LOW_BATTERY_THRESHOLD = 10;
-    private static final int EXTREME_LOW_BATTERY_THRESHOLD = 3;
+
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
     public static final int BATTERY_LEVEL_UNKNOWN = -1;
@@ -50,6 +48,9 @@ public class BatteryStatus {
     public static final int CHARGING_SLOWLY = 0;
     public static final int CHARGING_REGULAR = 1;
     public static final int CHARGING_FAST = 2;
+    public static final int LOW_BATTERY_THRESHOLD = 20;
+    public static final int SEVERE_LOW_BATTERY_THRESHOLD = 10;
+    public static final int EXTREME_LOW_BATTERY_THRESHOLD = 3;
 
     public final int status;
     public final int level;
@@ -197,9 +198,14 @@ public class BatteryStatus {
                 : Math.round((level / (float) scale) * 100f);
     }
 
+    /** Returns the plugged type from {@code batteryChangedIntent}. */
+    public static int getPluggedType(Intent batteryChangedIntent) {
+        return batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0);
+    }
+
     /** Whether the device is plugged or not. */
     public static boolean isPluggedIn(Intent batteryChangedIntent) {
-        return isPluggedIn(batteryChangedIntent.getIntExtra(EXTRA_PLUGGED, 0));
+        return isPluggedIn(getPluggedType(batteryChangedIntent));
     }
 
     /** Whether the device is plugged or not. */
