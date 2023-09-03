@@ -46,6 +46,8 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="powerThrottlingConfig" name="powerThrottlingConfig" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="luxThrottling" name="luxThrottling" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
@@ -348,6 +350,43 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="powerThrottlingMap">
+        <xs:sequence>
+            <xs:element name="powerThrottlingPoint" type="powerThrottlingPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="powerThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="powerQuotaMilliWatts">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="powerThrottlingConfig">
+        <xs:element type="nonNegativeDecimal" name="brightnessLowestCapAllowed">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element type="powerThrottlingMap" name="powerThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+        </xs:element>
     </xs:complexType>
 
     <xs:complexType name="nitsMap">

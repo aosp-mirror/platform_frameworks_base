@@ -179,6 +179,89 @@ public final class DisplayDeviceConfigTest {
     }
 
     @Test
+    public void testPowerThrottlingConfigFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        DisplayDeviceConfig.PowerThrottlingConfigData powerThrottlingConfigData =
+                mDisplayDeviceConfig.getPowerThrottlingConfigData();
+        assertNotNull(powerThrottlingConfigData);
+        assertEquals(0.1f, powerThrottlingConfigData.brightnessLowestCapAllowed, SMALL_DELTA);
+        assertEquals(10, powerThrottlingConfigData.pollingWindowMillis);
+    }
+
+    @Test
+    public void testPowerThrottlingDataFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        List<DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel>
+                defaultThrottlingLevels = new ArrayList<>();
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 800f
+                ));
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 600f
+                ));
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 400f
+                ));
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 200f
+                ));
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 100f
+                ));
+        defaultThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 50f
+                ));
+
+        DisplayDeviceConfig.PowerThrottlingData defaultThrottlingData =
+                new DisplayDeviceConfig.PowerThrottlingData(defaultThrottlingLevels);
+
+        List<DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel>
+                concurrentThrottlingLevels = new ArrayList<>();
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 800f
+                ));
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 600f
+                ));
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 400f
+                ));
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 200f
+                ));
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 100f
+                ));
+        concurrentThrottlingLevels.add(
+                new DisplayDeviceConfig.PowerThrottlingData.ThrottlingLevel(
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 50f
+                ));
+        DisplayDeviceConfig.PowerThrottlingData concurrentThrottlingData =
+                new DisplayDeviceConfig.PowerThrottlingData(concurrentThrottlingLevels);
+
+        HashMap<String, DisplayDeviceConfig.PowerThrottlingData> throttlingDataMap =
+                new HashMap<>(2);
+        throttlingDataMap.put("default", defaultThrottlingData);
+        throttlingDataMap.put("concurrent", concurrentThrottlingData);
+
+        assertEquals(throttlingDataMap,
+                mDisplayDeviceConfig.getPowerThrottlingDataMapByThrottlingId());
+    }
+
+    @Test
     public void testConfigValuesFromConfigResource() {
         setupDisplayDeviceConfigFromConfigResourceFile();
         verifyConfigValuesFromConfigResource();
@@ -845,6 +928,64 @@ public final class DisplayDeviceConfigTest {
                 +   "</screenBrightnessRampSlowIncreaseIdle>\n";
     }
 
+    private String getPowerThrottlingConfig() {
+        return  "<powerThrottlingConfig >\n"
+                +       "<brightnessLowestCapAllowed>0.1</brightnessLowestCapAllowed>\n"
+                +       "<pollingWindowMillis>10</pollingWindowMillis>\n"
+                +       "<powerThrottlingMap>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>light</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>800</powerQuotaMilliWatts>\n"
+                +        "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>moderate</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>600</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>severe</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>400</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>critical</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>200</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>emergency</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>100</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>shutdown</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>50</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +       "</powerThrottlingMap>\n"
+                +       "<powerThrottlingMap id=\"concurrent\">\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>light</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>800</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>moderate</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>600</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>severe</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>400</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>critical</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>200</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>emergency</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>100</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +           "<powerThrottlingPoint>\n"
+                +               "<thermalStatus>shutdown</thermalStatus>\n"
+                +               "<powerQuotaMilliWatts>50</powerQuotaMilliWatts>\n"
+                +           "</powerThrottlingPoint>\n"
+                +       "</powerThrottlingMap>\n"
+                +   "</powerThrottlingConfig>\n";
+    }
     private String getScreenBrightnessRampCapsIdle() {
         return "<screenBrightnessRampIncreaseMaxIdleMillis>"
                 +       "4000"
@@ -915,6 +1056,7 @@ public final class DisplayDeviceConfigTest {
                 +            "</displayBrightnessPoint>\n"
                 +       "</displayBrightnessMapping>\n"
                 +   "</autoBrightness>\n"
+                +  getPowerThrottlingConfig()
                 +   "<highBrightnessMode enabled=\"true\">\n"
                 +       "<transitionPoint>" + BRIGHTNESS[1] + "</transitionPoint>\n"
                 +       "<minimumLux>10000</minimumLux>\n"
