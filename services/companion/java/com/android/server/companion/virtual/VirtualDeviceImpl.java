@@ -134,8 +134,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final int mOwnerUid;
     private final VirtualDeviceLog mVirtualDeviceLog;
     private final String mOwnerPackageName;
-    private int mDeviceId;
-    private @Nullable String mPersistentDeviceId;
+    private final int mDeviceId;
+    private @Nullable final String mPersistentDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -151,7 +151,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;
     @GuardedBy("mVirtualDeviceLock")
-    private SparseIntArray mDevicePolicies;
+    private final SparseIntArray mDevicePolicies;
     @GuardedBy("mVirtualDeviceLock")
     private final SparseArray<VirtualDisplayWrapper> mVirtualDisplays = new SparseArray<>();
     private final IVirtualDeviceActivityListener mActivityListener;
@@ -160,7 +160,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     private final Map<IBinder, IntentFilter> mIntentInterceptors = new ArrayMap<>();
     @NonNull
-    private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
+    private final Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     // The default setting for showing the pointer on new displays.
     @GuardedBy("mVirtualDeviceLock")
     private boolean mDefaultShowPointerIcon = true;
@@ -425,14 +425,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void close() {
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
-        boolean removed = mService.removeVirtualDevice(mDeviceId);
-        mVirtualDeviceLog.logClosed(mDeviceId, mOwnerUid);
-        mDeviceId = Context.DEVICE_ID_INVALID;
-
-        // Device is already closed.
-        if (!removed) {
+        if (!mService.removeVirtualDevice(mDeviceId)) {
+            // Device is already closed.
             return;
         }
+
+        mVirtualDeviceLog.logClosed(mDeviceId, mOwnerUid);
 
         final long ident = Binder.clearCallingIdentity();
         try {
