@@ -29,6 +29,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.util.Compile
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -239,7 +240,7 @@ constructor(
 
     private companion object {
         const val TAG = "DisplayRepository"
-        val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
+        val DEBUG = Log.isLoggable(TAG, Log.DEBUG) || Compile.IS_DEBUG
     }
 }
 
