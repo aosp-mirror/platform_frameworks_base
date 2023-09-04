@@ -3504,6 +3504,10 @@ package android.view {
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
+  public static final class MotionEvent.PointerCoords {
+    method public boolean isResampled();
+  }
+
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
   }
