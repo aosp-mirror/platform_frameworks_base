@@ -40,20 +40,21 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
+        _password.value = ""
         interactor.resetMessage()
     }
 
     /** Notifies that the user has changed the password input. */
-    fun onPasswordInputChanged(password: String) {
-        if (this.password.value.isEmpty() && password.isNotEmpty()) {
+    fun onPasswordInputChanged(newPassword: String) {
+        if (this.password.value.isEmpty() && newPassword.isNotEmpty()) {
             interactor.clearMessage()
         }
 
-        if (password.isNotEmpty()) {
+        if (newPassword.isNotEmpty()) {
             interactor.onIntentionalUserInput()
         }
 
-        _password.value = password
+        _password.value = newPassword
     }
 
     /** Notifies that the user has pressed the key for attempting to authenticate the password. */
