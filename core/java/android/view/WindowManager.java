@@ -3139,15 +3139,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 1 << 10;
 
         /**
-         * Flag to force the status bar window to be visible all the time. If the bar is hidden when
-         * this flag is set it will be shown again.
-         * This can only be set by {@link LayoutParams#TYPE_STATUS_BAR}.
-         *
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 1 << 11;
-
-        /**
          * Flag to indicate that the window frame should be the requested frame adding the display
          * cutout frame. This will only be applied if a specific size smaller than the parent frame
          * is given, and the window is covering the display cutout. The extended frame will not be
@@ -3238,15 +3229,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_NOT_MAGNIFIABLE = 1 << 22;
 
         /**
-         * Flag to indicate that the status bar window is in a state such that it forces showing
-         * the navigation bar unless the navigation bar window is explicitly set to
-         * {@link View#GONE}.
-         * It only takes effects if this is set by {@link LayoutParams#TYPE_STATUS_BAR}.
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 1 << 23;
-
-        /**
          * Flag to indicate that the window is color space agnostic, and the color can be
          * interpreted to any color space.
          * @hide
@@ -3334,7 +3316,6 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_OPTIMIZE_MEASURE,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
-                PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                 PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -3345,7 +3326,6 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
-                PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                 PRIVATE_FLAG_USE_BLAST,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
@@ -3401,10 +3381,6 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                         name = "DISABLE_WALLPAPER_TOUCH_EVENTS"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                        equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                        name = "FORCE_STATUS_BAR_VISIBLE"),
-                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                         name = "LAYOUT_SIZE_EXTENDED_BY_CUTOUT"),
@@ -3444,10 +3420,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         equals = PRIVATE_FLAG_NOT_MAGNIFIABLE,
                         name = "NOT_MAGNIFIABLE"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
-                        equals = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
-                        name = "STATUS_FORCE_SHOW_NAVIGATION"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
@@ -4412,6 +4384,16 @@ public interface WindowManager extends ViewManager {
         public InsetsFrameProvider[] providedInsets;
 
         /**
+         * Specifies which {@link InsetsType}s should be forcibly shown. The types shown by this
+         * method won't affect the app's layout. This field only takes effects if the caller has
+         * {@link android.Manifest.permission#STATUS_BAR_SERVICE} or the caller has the same uid as
+         * the recents component.
+         *
+         * @hide
+         */
+        public @InsetsType int forciblyShownTypes;
+
+        /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
          * This will make layout during rotation change smoothly.
          *
@@ -4869,6 +4851,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(mBlurBehindRadius);
             out.writeBoolean(mWallpaperTouchEventsEnabled);
             out.writeTypedArray(providedInsets, 0 /* parcelableFlags */);
+            out.writeInt(forciblyShownTypes);
             checkNonRecursiveParams();
             out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
             out.writeInt(mDisplayFlags);
@@ -4940,6 +4923,7 @@ public interface WindowManager extends ViewManager {
             mBlurBehindRadius = in.readInt();
             mWallpaperTouchEventsEnabled = in.readBoolean();
             providedInsets = in.createTypedArray(InsetsFrameProvider.CREATOR);
+            forciblyShownTypes = in.readInt();
             paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
             mDisplayFlags = in.readInt();
         }
@@ -5245,6 +5229,11 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (forciblyShownTypes != o.forciblyShownTypes) {
+                forciblyShownTypes = o.forciblyShownTypes;
+                changes |= PRIVATE_FLAGS_CHANGED;
+            }
+
             if (paramsForRotation != o.paramsForRotation) {
                 if ((changes & LAYOUT_CHANGED) == 0) {
                     if (paramsForRotation != null && o.paramsForRotation != null
@@ -5481,6 +5470,11 @@ public interface WindowManager extends ViewManager {
                     sb.append(System.lineSeparator());
                     sb.append(prefix).append("    ").append(providedInsets[i]);
                 }
+            }
+            if (forciblyShownTypes != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  forciblyShownTypes=").append(
+                        WindowInsets.Type.toString(forciblyShownTypes));
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());

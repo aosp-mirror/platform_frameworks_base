@@ -41,6 +41,7 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
@@ -397,9 +398,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private void applyForceShowNavigationFlag(NotificationShadeWindowState state) {
         if (state.panelExpanded || state.bouncerShowing
                 || ENABLE_REMOTE_INPUT && state.remoteInputActive) {
-            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+            mLpChanged.forciblyShownTypes |= WindowInsets.Type.navigationBars();
         } else {
-            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+            mLpChanged.forciblyShownTypes &= ~WindowInsets.Type.navigationBars();
         }
     }
 

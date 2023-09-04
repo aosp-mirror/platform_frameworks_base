@@ -23,8 +23,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import android.annotation.NonNull;
@@ -473,7 +471,7 @@ class InsetsPolicy {
             // we will dispatch the real visibility of status bar to the client.
             return mPermanentControlTarget;
         }
-        if (forceShowsStatusBarTransiently() && !fake) {
+        if (mPolicy.areTypesForciblyShownTransiently(Type.statusBars()) && !fake) {
             // Status bar is forcibly shown transiently, and its new visibility won't be
             // dispatched to the client so that we can keep the layout stable. We will dispatch the
             // fake control to the client, so that it can re-show the bar during this scenario.
@@ -505,7 +503,7 @@ class InsetsPolicy {
         if (imeWin != null && imeWin.isVisible() && !mHideNavBarForKeyboard) {
             // Force showing navigation bar while IME is visible and if navigation bar is not
             // configured to be hidden by the IME.
-            return null;
+            return mPermanentControlTarget;
         }
         if (!fake && isTransient(Type.navigationBars())) {
             return mTransientControlTarget;
@@ -533,7 +531,7 @@ class InsetsPolicy {
             // bar, and we will dispatch the real visibility of navigation bar to the client.
             return mPermanentControlTarget;
         }
-        if (forceShowsNavigationBarTransiently() && !fake) {
+        if (mPolicy.areTypesForciblyShownTransiently(Type.navigationBars()) && !fake) {
             // Navigation bar is forcibly shown transiently, and its new visibility won't be
             // dispatched to the client so that we can keep the layout stable. We will dispatch the
             // fake control to the client, so that it can re-show the bar during this scenario.
@@ -601,17 +599,6 @@ class InsetsPolicy {
         // where we want to dictate system bar inset state for applications.
         return focusedWin.getAttrs().type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                 && focusedWin.getAttrs().type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-    }
-
-    private boolean forceShowsStatusBarTransiently() {
-        final WindowState win = mPolicy.getStatusBar();
-        return win != null && (win.mAttrs.privateFlags & PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR) != 0;
-    }
-
-    private boolean forceShowsNavigationBarTransiently() {
-        final WindowState win = mPolicy.getNotificationShade();
-        return win != null
-                && (win.mAttrs.privateFlags & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
     }
 
     private void dispatchTransientSystemBarsVisibilityChanged(
