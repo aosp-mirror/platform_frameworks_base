@@ -17,17 +17,26 @@
 package com.android.server.pm;
 
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
+import static android.os.PowerExemptionManager.REASON_PACKAGE_UNARCHIVE;
+import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.IPackageArchiverService;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageArchiver;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -36,6 +45,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -52,6 +62,13 @@ import java.util.Objects;
 public class PackageArchiverService extends IPackageArchiverService.Stub {
 
     private static final String TAG = "PackageArchiver";
+
+    /**
+     * The maximum time granted for an app store to start a foreground service when unarchival
+     * is requested.
+     */
+    // TODO(b/297358628) Make this configurable through a flag.
+    private static final int DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS = 120 * 1000;
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -83,7 +100,12 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
                 "archiveApp");
         verifyCaller(providedUid, binderUid);
         PackageStateInternal ps = getPackageState(packageName, snapshot, binderUid, userId);
-        verifyInstaller(packageName, ps);
+        if (getResponsibleInstallerPackage(ps) == null) {
+            throw new ParcelableException(
+                    new PackageManager.NameNotFoundException(
+                            TextUtils.formatSimple("No installer found to archive app %s.",
+                                    packageName)));
+        }
 
         // TODO(b/291569242) Verify that this list is not empty and return failure with
         //  intentsender
@@ -100,14 +122,99 @@ public class PackageArchiverService extends IPackageArchiverService.Stub {
                 callerPackageName, DELETE_KEEP_DATA, intentSender, userId);
     }
 
-    private static void verifyInstaller(String packageName, PackageStateInternal ps) {
-        if (ps.getInstallSource().mUpdateOwnerPackageName == null
-                && ps.getInstallSource().mInstallerPackageName == null) {
+    @Override
+    public void requestUnarchive(
+            @NonNull String packageName,
+            @NonNull String callerPackageName,
+            @NonNull UserHandle userHandle) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(callerPackageName);
+        Objects.requireNonNull(userHandle);
+
+        Computer snapshot = mPm.snapshotComputer();
+        int userId = userHandle.getIdentifier();
+        int binderUid = Binder.getCallingUid();
+        int providedUid = snapshot.getPackageUid(callerPackageName, 0, userId);
+        snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
+                "unarchiveApp");
+        verifyCaller(providedUid, binderUid);
+        PackageStateInternal ps = getPackageState(packageName, snapshot, binderUid, userId);
+        verifyArchived(ps, userId);
+        String installerPackage = getResponsibleInstallerPackage(ps);
+        if (installerPackage == null) {
             throw new ParcelableException(
                     new PackageManager.NameNotFoundException(
-                            TextUtils.formatSimple("No installer found to archive app %s.",
+                            TextUtils.formatSimple("No installer found to unarchive app %s.",
                                     packageName)));
         }
+
+        mPm.mHandler.post(() -> unarchiveInternal(packageName, userHandle, installerPackage));
+    }
+
+    private void verifyArchived(PackageStateInternal ps, int userId) {
+        PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
+        // TODO(b/288142708) Check for isInstalled false here too.
+        if (userState.getArchiveState() == null) {
+            throw new ParcelableException(
+                    new PackageManager.NameNotFoundException(
+                            TextUtils.formatSimple("Package %s is not currently archived.",
+                                    ps.getPackageName())));
+        }
+    }
+
+    @RequiresPermission(
+            allOf = {
+                    Manifest.permission.INTERACT_ACROSS_USERS,
+                    android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+                    android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+                    android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND},
+            conditional = true)
+    private void unarchiveInternal(String packageName, UserHandle userHandle,
+            String installerPackage) {
+        int userId = userHandle.getIdentifier();
+        Intent unarchiveIntent = new Intent(Intent.ACTION_UNARCHIVE_PACKAGE);
+        unarchiveIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        unarchiveIntent.putExtra(PackageArchiver.EXTRA_UNARCHIVE_PACKAGE_NAME, packageName);
+        unarchiveIntent.putExtra(PackageArchiver.EXTRA_UNARCHIVE_ALL_USERS,
+                userId == UserHandle.USER_ALL);
+        unarchiveIntent.setPackage(installerPackage);
+
+        // If the unarchival is requested for all users, the current user is used for unarchival.
+        UserHandle userForUnarchival = userId == UserHandle.USER_ALL
+                ? UserHandle.of(mPm.mUserManager.getCurrentUserId())
+                : userHandle;
+        mContext.sendOrderedBroadcastAsUser(
+                unarchiveIntent,
+                userForUnarchival,
+                /* receiverPermission = */ null,
+                AppOpsManager.OP_NONE,
+                createUnarchiveOptions(),
+                /* resultReceiver= */ null,
+                /* scheduler= */ null,
+                /* initialCode= */ 0,
+                /* initialData= */ null,
+                /* initialExtras= */ null);
+    }
+
+    @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
+            android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+            android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
+    private Bundle createUnarchiveOptions() {
+        BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setTemporaryAppAllowlist(getUnarchiveForegroundTimeout(),
+                TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                REASON_PACKAGE_UNARCHIVE, "");
+        return options.toBundle();
+    }
+
+    private static int getUnarchiveForegroundTimeout() {
+        return DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS;
+    }
+
+    private String getResponsibleInstallerPackage(PackageStateInternal ps) {
+        return ps.getInstallSource().mUpdateOwnerPackageName == null
+                ? ps.getInstallSource().mInstallerPackageName
+                : ps.getInstallSource().mUpdateOwnerPackageName;
     }
 
     @NonNull
