@@ -1018,8 +1018,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            final ClientTransaction transaction = ClientTransaction.obtain(
-                    r.app.getThread(), r.token);
+            final ClientTransaction transaction = ClientTransaction.obtain(r.app.getThread());
             transaction.addCallback(EnterPipRequestedItem.obtain(r.token));
             mService.getLifecycleManager().scheduleTransaction(transaction);
             return true;
@@ -1040,8 +1039,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            final ClientTransaction transaction = ClientTransaction.obtain(
-                    r.app.getThread(), r.token);
+            final ClientTransaction transaction = ClientTransaction.obtain(r.app.getThread());
             transaction.addCallback(PipStateTransactionItem.obtain(r.token, pipState));
             mService.getLifecycleManager().scheduleTransaction(transaction);
         } catch (Exception e) {

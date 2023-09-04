@@ -36,7 +36,7 @@ public class WindowContextWindowRemovalItem extends ClientTransactionItem {
     private IBinder mClientToken;
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.handleWindowContextWindowRemoval(mClientToken);
     }

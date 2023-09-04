@@ -27,6 +27,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import android.app.ActivityOptions;
+import android.app.IApplicationThread;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -41,8 +42,11 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.function.Supplier;
 
@@ -60,7 +64,15 @@ import java.util.function.Supplier;
 @Presubmit
 public class ObjectPoolTests {
 
-    private final IBinder mActivityToken = new Binder();
+    @Mock
+    private IApplicationThread mApplicationThread;
+    @Mock
+    private IBinder mActivityToken;
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     // 1. Check if two obtained objects from pool are not the same.
     // 2. Check if the state of the object is cleared after recycling.
@@ -309,15 +321,15 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleClientTransaction() {
-        ClientTransaction emptyItem = ClientTransaction.obtain(null, null);
-        ClientTransaction item = ClientTransaction.obtain(null, new Binder());
+        ClientTransaction emptyItem = ClientTransaction.obtain(null);
+        ClientTransaction item = ClientTransaction.obtain(mApplicationThread);
         assertNotSame(item, emptyItem);
         assertNotEquals(item, emptyItem);
 
         item.recycle();
         assertEquals(item, emptyItem);
 
-        ClientTransaction item2 = ClientTransaction.obtain(null, new Binder());
+        ClientTransaction item2 = ClientTransaction.obtain(mApplicationThread);
         assertSame(item, item2);
         assertNotEquals(item2, emptyItem);
     }

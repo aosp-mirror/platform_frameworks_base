@@ -84,7 +84,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private IActivityClientController mActivityClientController;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         CompatibilityInfo.applyOverrideScaleIfNeeded(mCurConfig);
@@ -96,7 +96,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void execute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
         ActivityClientRecord r = new ActivityClientRecord(mActivityToken, mIntent, mIdent, mInfo,
@@ -109,7 +109,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         client.countLaunchingActivities(-1);
     }

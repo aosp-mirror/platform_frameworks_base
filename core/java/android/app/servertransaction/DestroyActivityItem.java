@@ -36,7 +36,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     private int mConfigChanges;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         client.getActivitiesToBeDestroyed().put(getActivityToken(), this);
     }
 

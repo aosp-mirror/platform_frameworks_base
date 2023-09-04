@@ -111,7 +111,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
                 return null;
             }
             final WindowContextInfoChangeItem infoChangeItem = (WindowContextInfoChangeItem) item;
-            infoChangeItem.execute(mHandler, null, null);
+            infoChangeItem.execute(mHandler, null /* pendingActions */);
             return null;
         }).when(mWpc).scheduleClientTransactionItem(any());
     }

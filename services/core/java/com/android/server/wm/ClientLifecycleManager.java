@@ -18,11 +18,10 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.app.IApplicationThread;
+import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
-import android.app.servertransaction.ActivityLifecycleItem;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
 
 /**
@@ -36,13 +35,13 @@ class ClientLifecycleManager {
     // TODO(lifecycler): Use object pools for transactions and transaction items.
 
     /**
-     * Schedule a transaction, which may consist of multiple callbacks and a lifecycle request.
+     * Schedules a transaction, which may consist of multiple callbacks and a lifecycle request.
      * @param transaction A sequence of client transaction items.
      * @throws RemoteException
      *
      * @see ClientTransaction
      */
-    void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
+    void scheduleTransaction(@NonNull ClientTransaction transaction) throws RemoteException {
         final IApplicationThread client = transaction.getClient();
         transaction.schedule();
         if (!(client instanceof Binder)) {
@@ -54,75 +53,22 @@ class ClientLifecycleManager {
     }
 
     /**
-     * Schedule a single lifecycle request or callback to client activity.
+     * Schedules a single transaction item, either a callback or a lifecycle request, delivery to
+     * client application.
      * @param client Target client.
-     * @param activityToken Target activity token.
-     * @param stateRequest A request to move target activity to a desired lifecycle state.
-     * @throws RemoteException
-     *
-     * @see ClientTransactionItem
-     */
-    void scheduleTransaction(@NonNull IApplicationThread client, @NonNull IBinder activityToken,
-            @NonNull ActivityLifecycleItem stateRequest) throws RemoteException {
-        final ClientTransaction clientTransaction = transactionWithState(client, activityToken,
-                stateRequest);
-        scheduleTransaction(clientTransaction);
-    }
-
-    /**
-     * Schedule a single callback delivery to client activity.
-     * @param client Target client.
-     * @param activityToken Target activity token.
-     * @param callback A request to deliver a callback.
-     * @throws RemoteException
-     *
-     * @see ClientTransactionItem
-     */
-    void scheduleTransaction(@NonNull IApplicationThread client, @NonNull IBinder activityToken,
-            @NonNull ClientTransactionItem callback) throws RemoteException {
-        final ClientTransaction clientTransaction = transactionWithCallback(client, activityToken,
-                callback);
-        scheduleTransaction(clientTransaction);
-    }
-
-    /**
-     * Schedule a single callback delivery to client application.
-     * @param client Target client.
-     * @param callback A request to deliver a callback.
+     * @param transactionItem A transaction item to deliver a message.
      * @throws RemoteException
      *
      * @see ClientTransactionItem
      */
     void scheduleTransaction(@NonNull IApplicationThread client,
-            @NonNull ClientTransactionItem callback) throws RemoteException {
-        final ClientTransaction clientTransaction = transactionWithCallback(client,
-                null /* activityToken */, callback);
+            @NonNull ClientTransactionItem transactionItem) throws RemoteException {
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
+        if (transactionItem instanceof ActivityLifecycleItem) {
+            clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
+        } else {
+            clientTransaction.addCallback(transactionItem);
+        }
         scheduleTransaction(clientTransaction);
-    }
-
-    /**
-     * @return A new instance of {@link ClientTransaction} with a single lifecycle state request.
-     *
-     * @see ClientTransaction
-     * @see ClientTransactionItem
-     */
-    private static ClientTransaction transactionWithState(@NonNull IApplicationThread client,
-            @NonNull IBinder activityToken, @NonNull ActivityLifecycleItem stateRequest) {
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(client, activityToken);
-        clientTransaction.setLifecycleStateRequest(stateRequest);
-        return clientTransaction;
-    }
-
-    /**
-     * @return A new instance of {@link ClientTransaction} with a single callback invocation.
-     *
-     * @see ClientTransaction
-     * @see ClientTransactionItem
-     */
-    private static ClientTransaction transactionWithCallback(@NonNull IApplicationThread client,
-            IBinder activityToken, @NonNull ClientTransactionItem callback) {
-        final ClientTransaction clientTransaction = ClientTransaction.obtain(client, activityToken);
-        clientTransaction.addCallback(callback);
-        return clientTransaction;
     }
 }

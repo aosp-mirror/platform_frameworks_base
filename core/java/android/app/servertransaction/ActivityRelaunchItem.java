@@ -56,7 +56,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     private ActivityClientRecord mActivityClientRecord;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         // The local config is already scaled so only apply if this item is from server side.
         if (!client.isExecutingLocalTransaction()) {
             CompatibilityInfo.applyOverrideScaleIfNeeded(mConfig);
@@ -78,7 +78,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     }
 
     @Override
-    public void postExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
+    public void postExecute(@NonNull ClientTransactionHandler client,
             @NonNull PendingTransactionActions pendingActions) {
         final ActivityClientRecord r = getActivityClientRecord(client);
         client.reportRelaunch(r);

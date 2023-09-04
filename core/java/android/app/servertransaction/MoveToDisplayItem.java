@@ -40,7 +40,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
     private Configuration mConfiguration;
 
     @Override
-    public void preExecute(@NonNull ClientTransactionHandler client, @NonNull IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
         CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
