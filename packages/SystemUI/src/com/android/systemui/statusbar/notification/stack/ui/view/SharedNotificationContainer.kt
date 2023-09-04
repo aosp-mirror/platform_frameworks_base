@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import androidx.constraintlayout.core.widgets.Optimizer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -45,6 +46,7 @@ class SharedNotificationContainer(
     private val baseConstraintSet = ConstraintSet()
 
     init {
+        optimizationLevel = optimizationLevel or Optimizer.OPTIMIZATION_GRAPH
         baseConstraintSet.apply {
             create(R.id.nssl_guideline, VERTICAL)
             setGuidelinePercent(R.id.nssl_guideline, 0.5f)
