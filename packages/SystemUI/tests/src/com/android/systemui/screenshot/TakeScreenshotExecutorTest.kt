@@ -1,6 +1,7 @@
 package com.android.systemui.screenshot
 
 import android.content.ComponentName
+import android.graphics.Bitmap
 import android.net.Uri
 import android.testing.AndroidTestingRunner
 import android.view.Display
@@ -10,6 +11,7 @@ import android.view.Display.TYPE_OVERLAY
 import android.view.Display.TYPE_VIRTUAL
 import android.view.Display.TYPE_WIFI
 import android.view.WindowManager
+import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
@@ -90,6 +92,35 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             assertThat(eventLogger.get(1).eventId)
                 .isEqualTo(ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id)
             assertThat(eventLogger.get(1).packageName).isEqualTo(topComponent.packageName)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    fun executeScreenshots_providedImageType_callsOnlyDefaultDisplayController() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE),
+                onSaved,
+                callback
+            )
+
+            verify(controllerFactory).create(eq(0))
+            verify(controllerFactory, never()).create(eq(1))
+
+            val capturer = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller0).handleScreenshot(capturer.capture(), any(), any())
+            assertThat(capturer.value.displayId).isEqualTo(0)
+            // OnSaved callback should be different.
+            verify(controller1, never()).handleScreenshot(any(), any(), any())
+
+            assertThat(eventLogger.numLogs()).isEqualTo(1)
+            assertThat(eventLogger.get(0).eventId)
+                .isEqualTo(ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id)
+            assertThat(eventLogger.get(0).packageName).isEqualTo(topComponent.packageName)
 
             screenshotExecutor.onDestroy()
         }
@@ -283,12 +314,14 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         runCurrent()
     }
 
-    private fun createScreenshotRequest() =
-        ScreenshotRequest.Builder(
-                WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
-            )
+    private fun createScreenshotRequest(type: Int = WindowManager.TAKE_SCREENSHOT_FULLSCREEN) =
+        ScreenshotRequest.Builder(type, WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER)
             .setTopComponent(topComponent)
+            .also {
+                if (type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+                    it.setBitmap(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))
+                }
+            }
             .build()
 
     private class FakeRequestProcessor : ScreenshotRequestProcessor {
