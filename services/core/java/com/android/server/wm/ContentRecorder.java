@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
 import android.view.ContentRecordingSession;
+import android.view.ContentRecordingSession.RecordContent;
 import android.view.Display;
 import android.view.SurfaceControl;
 
@@ -84,6 +85,7 @@ final class ContentRecorder implements WindowContainerListener {
     /**
      * The last configuration orientation.
      */
+    @Configuration.Orientation
     private int mLastOrientation = ORIENTATION_UNDEFINED;
 
     ContentRecorder(@NonNull DisplayContent displayContent) {
@@ -156,7 +158,8 @@ final class ContentRecorder implements WindowContainerListener {
             // Retrieve the size of the region to record, and continue with the update
             // if the bounds or orientation has changed.
             final Rect recordedContentBounds = mRecordedWindowContainer.getBounds();
-            int recordedContentOrientation = mRecordedWindowContainer.getOrientation();
+            @Configuration.Orientation int recordedContentOrientation =
+                    mRecordedWindowContainer.getConfiguration().orientation;
             if (!mLastRecordedBounds.equals(recordedContentBounds)
                     || lastOrientation != recordedContentOrientation) {
                 Point surfaceSize = fetchSurfaceSizeIfPresent();
@@ -356,7 +359,7 @@ final class ContentRecorder implements WindowContainerListener {
      */
     @Nullable
     private WindowContainer retrieveRecordedWindowContainer() {
-        final int contentToRecord = mContentRecordingSession.getContentToRecord();
+        @RecordContent final int contentToRecord = mContentRecordingSession.getContentToRecord();
         final IBinder tokenToRecord = mContentRecordingSession.getTokenToRecord();
         switch (contentToRecord) {
             case RECORD_CONTENT_DISPLAY:
@@ -471,6 +474,12 @@ final class ContentRecorder implements WindowContainerListener {
         if (scaledHeight != surfaceSize.y) {
             shiftedY = (surfaceSize.y - scaledHeight) / 2;
         }
+
+        ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
+                "Content Recording: Apply transformations of shift %d x %d, scale %f, crop %d x "
+                        + "%d for display %d",
+                shiftedX, shiftedY, scale, recordedContentBounds.width(),
+                recordedContentBounds.height(), mDisplayContent.getDisplayId());
 
         transaction
                 // Crop the area to capture to exclude the 'extra' wallpaper that is used
