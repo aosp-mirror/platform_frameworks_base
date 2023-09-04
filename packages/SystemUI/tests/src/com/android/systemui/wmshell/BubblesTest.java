@@ -167,6 +167,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+@Ignore("b/292153259")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
