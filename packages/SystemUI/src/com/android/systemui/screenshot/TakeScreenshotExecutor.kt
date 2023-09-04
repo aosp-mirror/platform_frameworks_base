@@ -144,16 +144,18 @@ constructor(
     }
 
     /**
-     * Returns a [RequestCallback] that calls [RequestCallback.onFinish] only when all callbacks for
-     * id created have finished.
+     * Returns a [RequestCallback] that wraps [originalCallback].
      *
-     * If any callback created calls [reportError], then following [onFinish] are not considered.
+     * Each [RequestCallback] created with [createCallbackForId] is expected to be used with either
+     * [reportError] or [onFinish]. Once they are both called:
+     * - If any finished with an error, [reportError] of [originalCallback] is called
+     * - Otherwise, [onFinish] is called.
      */
     private class MultiResultCallbackWrapper(
         private val originalCallback: RequestCallback,
     ) {
         private val idsPending = mutableSetOf<Int>()
-        private var errorReported = false
+        private val idsWithErrors = mutableSetOf<Int>()
 
         /**
          * Creates a callback for [id].
@@ -166,23 +168,32 @@ constructor(
             idsPending += id
             return object : RequestCallback {
                 override fun reportError() {
-                    Log.d(TAG, "ReportError id=$id")
-                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TAG, id)
-                    Trace.instantForTrack(Trace.TRACE_TAG_APP, TAG, "reportError id=$id")
-                    originalCallback.reportError()
-                    errorReported = true
+                    endTrace("reportError id=$id")
+                    idsWithErrors += id
+                    idsPending -= id
+                    reportToOriginalIfNeeded()
                 }
 
                 override fun onFinish() {
-                    Log.d(TAG, "onFinish id=$id")
-                    if (errorReported) return
+                    endTrace("onFinish id=$id")
                     idsPending -= id
-                    Trace.instantForTrack(Trace.TRACE_TAG_APP, TAG, "onFinish id=$id")
-                    if (idsPending.isEmpty()) {
-                        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TAG, id)
-                        originalCallback.onFinish()
-                    }
+                    reportToOriginalIfNeeded()
                 }
+
+                private fun endTrace(reason: String) {
+                    Log.d(TAG, "Finished waiting for id=$id. $reason")
+                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TAG, id)
+                    Trace.instantForTrack(Trace.TRACE_TAG_APP, TAG, reason)
+                }
+            }
+        }
+
+        private fun reportToOriginalIfNeeded() {
+            if (idsPending.isNotEmpty()) return
+            if (idsWithErrors.isEmpty()) {
+                originalCallback.onFinish()
+            } else {
+                originalCallback.reportError()
             }
         }
     }
