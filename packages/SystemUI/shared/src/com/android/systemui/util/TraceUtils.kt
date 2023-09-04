@@ -19,6 +19,12 @@ package com.android.systemui.util
 import android.os.Trace
 import android.os.TraceNameSupplier
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 
 /**
  * Run a block within a [Trace] section. Calls [Trace.beginSection] before and [Trace.endSection]
@@ -84,6 +90,19 @@ class TraceUtils {
             } finally {
                 Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, trackName, cookie)
             }
+        }
+
+        /**
+         * Convenience method to avoid one indentation level when we want to add a trace when
+         * launching a coroutine
+         */
+        fun <T> CoroutineScope.tracedAsync(
+            method: String,
+            context: CoroutineContext = EmptyCoroutineContext,
+            start: CoroutineStart = CoroutineStart.DEFAULT,
+            block: suspend () -> T
+        ): Deferred<T> {
+            return async(context, start) { traceAsync(method) { block() } }
         }
     }
 }
