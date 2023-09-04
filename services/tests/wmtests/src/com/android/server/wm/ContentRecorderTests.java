@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -360,6 +363,39 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTaskWindowingModeChanged_pip_stopsRecording() {
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+
+        // WHEN a configuration change arrives, and the task is now pinned.
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+        Configuration configuration = mTask.getConfiguration();
+        mTask.onConfigurationChanged(configuration);
+
+        // THEN recording is paused.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testTaskWindowingModeChanged_fullscreen_startsRecording() {
+        // WHEN a recording is ongoing.
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+
+        // WHEN the task is now fullscreen.
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        mContentRecorder.updateRecording();
+
+        // THEN recording is started.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
     public void testStartRecording_notifiesCallback_taskSession() {
         // WHEN a recording is ongoing.
         mContentRecorder.setContentRecordingSession(mTaskSession);
@@ -381,6 +417,45 @@ public class ContentRecorderTests extends WindowTestsBase {
         // THEN the visibility change callback is notified.
         verify(mMediaProjectionManagerWrapper)
                 .notifyActiveProjectionCapturedContentVisibilityChanged(true);
+    }
+
+    @Test
+    public void testStartRecording_taskInPIP_recordingNotStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testStartRecording_taskInSplit_recordingStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
+    public void testStartRecording_taskInFullscreen_recordingStarted() {
+        // GIVEN a task is in PIP.
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        // WHEN a recording tries to start.
+        mContentRecorder.updateRecording();
+
+        // THEN recording does not start.
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
     }
 
     @Test
