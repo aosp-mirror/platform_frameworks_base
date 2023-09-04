@@ -757,7 +757,8 @@ public final class DisplayManagerService extends SystemService {
 
         mContext.registerReceiver(mIdleModeReceiver, filter);
 
-        mSmallAreaDetectionController = SmallAreaDetectionController.create(mContext);
+        mSmallAreaDetectionController = (mFlags.isSmallAreaDetectionEnabled())
+                ? SmallAreaDetectionController.create(mContext) : null;
     }
 
     @VisibleForTesting
