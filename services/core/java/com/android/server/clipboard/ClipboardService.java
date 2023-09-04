@@ -144,6 +144,7 @@ public class ClipboardService extends SystemService {
     private final VirtualDeviceManagerInternal mVdmInternal;
     private final VirtualDeviceManager mVdm;
     private BroadcastReceiver mVirtualDeviceRemovedReceiver;
+    private VirtualDeviceManager.VirtualDeviceListener mVirtualDeviceListener;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
@@ -216,12 +217,14 @@ public class ClipboardService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.CLIPBOARD_SERVICE, new ClipboardImpl());
-        if (mVdmInternal != null) {
-            registerVirtualDeviceRemovedListener();
+        if (!android.companion.virtual.flags.Flags.vdmPublicApis() && mVdmInternal != null) {
+            registerVirtualDeviceBroadcastReceiver();
+        } else if (android.companion.virtual.flags.Flags.vdmPublicApis() && mVdm != null) {
+            registerVirtualDeviceListener();
         }
     }
 
-    private void registerVirtualDeviceRemovedListener() {
+    private void registerVirtualDeviceBroadcastReceiver() {
         if (mVirtualDeviceRemovedReceiver != null) {
             return;
         }
@@ -243,6 +246,23 @@ public class ClipboardService extends SystemService {
         IntentFilter filter = new IntentFilter(ACTION_VIRTUAL_DEVICE_REMOVED);
         getContext().registerReceiver(mVirtualDeviceRemovedReceiver, filter,
                 Context.RECEIVER_NOT_EXPORTED);
+    }
+
+    private void registerVirtualDeviceListener() {
+        if (mVirtualDeviceListener != null) {
+            return;
+        }
+        mVirtualDeviceListener = new VirtualDeviceManager.VirtualDeviceListener() {
+            @Override
+            public void onVirtualDeviceClosed(int deviceId) {
+                synchronized (mLock) {
+                    for (int i = mClipboards.numMaps() - 1; i >= 0; i--) {
+                        mClipboards.delete(mClipboards.keyAt(i), deviceId);
+                    }
+                }
+            }
+        };
+        mVdm.registerVirtualDeviceListener(getContext().getMainExecutor(), mVirtualDeviceListener);
     }
 
     @Override
