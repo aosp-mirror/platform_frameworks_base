@@ -729,8 +729,10 @@ final class InstallPackageHelper {
                         mAppDataHelper.prepareAppDataAfterInstallLIF(pkgSetting.getPkg());
                     }
                 }
+                // TODO(b/278553670) Store archive state for the user.
+                boolean isArchived = (pkgSetting.getPkg() == null);
                 mPm.sendPackageAddedForUser(mPm.snapshotComputer(), packageName, pkgSetting, userId,
-                        DataLoaderType.NONE);
+                        isArchived, DataLoaderType.NONE);
                 synchronized (mPm.mLock) {
                     mPm.updateSequenceNumberLP(pkgSetting, new int[]{ userId });
                 }
@@ -1712,7 +1714,6 @@ final class InstallPackageHelper {
                     allUsers = mPm.mUserManager.getUserIds();
                     installedUsers = ps.queryInstalledUsers(allUsers, true);
                     uninstalledUsers = ps.queryInstalledUsers(allUsers, false);
-
 
                     // don't allow an upgrade from full to ephemeral
                     if (isInstantApp) {
@@ -2798,6 +2799,7 @@ final class InstallPackageHelper {
         final int dataLoaderType = request.getDataLoaderType();
         final boolean succeeded = request.getReturnCode() == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = request.isUpdate();
+        final boolean archived = request.isArchived();
         final String packageName = request.getName();
         final PackageStateInternal pkgSetting =
                 succeeded ? mPm.snapshotComputer().getPackageStateInternal(packageName) : null;
@@ -2837,7 +2839,7 @@ final class InstallPackageHelper {
                             false /* mediaStatus */, true /* replacing */, pkgNames, uids);
                 }
                 request.getRemovedInfo().sendPackageRemovedBroadcasts(
-                        killApp, false /*removedBySystem*/);
+                        killApp, false /*removedBySystem*/, false /*isArchived*/);
             }
 
             final String installerPackageName =
@@ -2896,6 +2898,9 @@ final class InstallPackageHelper {
             if (update) {
                 extras.putBoolean(Intent.EXTRA_REPLACING, true);
             }
+            if (archived) {
+                extras.putBoolean(Intent.EXTRA_ARCHIVAL, true);
+            }
             extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
             // If a package is a static shared library, then only the installer of the package
@@ -2919,7 +2924,7 @@ final class InstallPackageHelper {
                 boolean isSystem = request.isInstallSystem();
                 mPm.sendPackageAddedForNewUsers(mPm.snapshotComputer(), packageName,
                         isSystem || virtualPreload, virtualPreload /*startReceiver*/, appId,
-                        firstUserIds, firstInstantUserIds, dataLoaderType);
+                        firstUserIds, firstInstantUserIds, archived, dataLoaderType);
 
                 // Send PACKAGE_ADDED broadcast for users that don't see
                 // the package for the first time
@@ -3034,12 +3039,14 @@ final class InstallPackageHelper {
                     if (DEBUG_INSTALL) {
                         Slog.i(TAG, "upgrading pkg " + request.getPkg() + " is external");
                     }
-                    final String[] pkgNames = new String[]{packageName};
-                    final int[] uids = new int[]{request.getPkg().getUid()};
-                    mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
-                            true /* mediaStatus */, true /* replacing */, pkgNames, uids);
-                    mPm.notifyResourcesChanged(true /* mediaStatus */, true /* replacing */,
-                            pkgNames, uids);
+                    if (!archived) {
+                        final String[] pkgNames = new String[]{packageName};
+                        final int[] uids = new int[]{request.getPkg().getUid()};
+                        mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer,
+                                true /* mediaStatus */, true /* replacing */, pkgNames, uids);
+                        mPm.notifyResourcesChanged(true /* mediaStatus */, true /* replacing */,
+                                pkgNames, uids);
+                    }
                 }
             } else if (!ArrayUtils.isEmpty(request.getLibraryConsumers())) { // if static shared lib
                 // No need to kill consumers if it's installation of new version static shared lib.
@@ -3092,19 +3099,34 @@ final class InstallPackageHelper {
                 VMRuntime.getRuntime().requestConcurrentGC();
             }
 
-            final Computer snapshot = mPm.snapshotComputer();
-            // Notify DexManager that the package was installed for new users.
-            // The updated users should already be indexed and the package code paths
-            // should not change.
-            // Don't notify the manager for ephemeral apps as they are not expected to
-            // survive long enough to benefit of background optimizations.
-            for (int userId : firstUserIds) {
-                PackageInfo info = snapshot.getPackageInfo(packageName, /*flags*/ 0, userId);
-                // There's a race currently where some install events may interleave with an
-                // uninstall. This can lead to package info being null (b/36642664).
-                if (info != null) {
-                    mDexManager.notifyPackageInstalled(info, userId);
+            if (!archived) {
+                final Computer snapshot = mPm.snapshotComputer();
+                // Notify DexManager that the package was installed for new users.
+                // The updated users should already be indexed and the package code paths
+                // should not change.
+                // Don't notify the manager for ephemeral apps as they are not expected to
+                // survive long enough to benefit of background optimizations.
+                for (int userId : firstUserIds) {
+                    PackageInfo info = snapshot.getPackageInfo(packageName, /*flags*/ 0, userId);
+                    // There's a race currently where some install events may interleave with an
+                    // uninstall. This can lead to package info being null (b/36642664).
+                    if (info != null) {
+                        mDexManager.notifyPackageInstalled(info, userId);
+                    }
                 }
+            } else {
+                // Now send PACKAGE_REMOVED + EXTRA_REPLACING broadcast.
+                final PackageRemovedInfo info = new PackageRemovedInfo(mPm);
+                info.mRemovedPackage = packageName;
+                info.mInstallerPackageName = request.getInstallerPackageName();
+                info.mRemovedUsers = firstUserIds;
+                info.mBroadcastUsers = firstUserIds;
+                info.mRemovedAppId = request.getAppId();
+                info.mRemovedPackageVersionCode = request.getPkg().getLongVersionCode();
+                info.mRemovedForAllUsers = true;
+
+                info.sendPackageRemovedBroadcasts(false /*killApp*/,
+                        false /*removedBySystem*/, true /*isArchived*/);
             }
         }
 

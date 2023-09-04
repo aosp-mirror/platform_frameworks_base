@@ -6270,6 +6270,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_REPLACING = "android.intent.extra.REPLACING";
 
     /**
+     * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_ADDED} and
+     * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} intents to indicate that
+     * the package is being archived. Either by removing the existing APK, or by installing
+     * a package without an APK.
+     */
+    public static final String EXTRA_ARCHIVAL = "android.intent.extra.ARCHIVAL";
+
+    /**
      * Used as a boolean extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
      * intents to indicate that this is a system update uninstall.
      * @hide
