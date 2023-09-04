@@ -120,7 +120,7 @@ final class PackageMetrics {
                     versionCode = ps.getVersionCode();
                     apksSize = getApksSize(ps.getPath());
                 }
-            } catch (IllegalStateException e) {
+            } catch (IllegalStateException | NullPointerException e) {
                 // no-op
             }
         }
