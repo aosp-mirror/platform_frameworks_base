@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.ParcelableException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.text.TextUtils;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -75,7 +76,6 @@ public class PackageArchiverServiceTest {
     private static final String PACKAGE = "com.example";
     private static final String CALLER_PACKAGE = "com.caller";
     private static final String INSTALLER_PACKAGE = "com.installer";
-
 
     @Rule
     public final MockSystemRule mMockSystem = new MockSystemRule();
@@ -209,6 +209,20 @@ public class PackageArchiverServiceTest {
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
         assertThat(e.getCause()).hasMessageThat().isEqualTo(
                 String.format("No installer found to archive app %s.", PACKAGE));
+    }
+
+    @Test
+    public void archiveApp_noMainActivities() {
+        when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
+                List.of());
+
+        Exception e = assertThrows(
+                ParcelableException.class,
+                () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
+                        UserHandle.CURRENT));
+        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
+        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+                TextUtils.formatSimple("The app %s does not have a main activity.", PACKAGE));
     }
 
     @Test
