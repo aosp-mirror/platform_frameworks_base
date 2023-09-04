@@ -438,7 +438,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mPreloadedRecentApps;
     final Object mServiceAcquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
-    SearchManager mSearchManager;
     AccessibilityManager mAccessibilityManager;
     AccessibilityManagerInternal mAccessibilityManagerInternal;
     BurnInProtectionHelper mBurnInProtectionHelper;
@@ -2217,7 +2216,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mSensorPrivacyManager = mContext.getSystemService(SensorPrivacyManager.class);
-        mSearchManager = mContext.getSystemService(SearchManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -4009,8 +4007,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         args.putLong(Intent.EXTRA_TIME, eventTime);
         args.putInt(AssistUtils.INVOCATION_TYPE_KEY, invocationType);
 
-        if (mSearchManager != null) {
-            mSearchManager.launchAssist(args);
+        SearchManager searchManager = mContext.getSystemService(SearchManager.class);
+        if (searchManager != null) {
+            searchManager.launchAssist(args);
         } else {
             // Fallback to status bar if search manager doesn't exist (e.g. on wear).
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();

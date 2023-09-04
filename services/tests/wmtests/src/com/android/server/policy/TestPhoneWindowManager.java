@@ -447,7 +447,7 @@ class TestPhoneWindowManager {
     }
 
     void overrideSearchManager(SearchManager searchManager) {
-        mPhoneWindowManager.mSearchManager = searchManager;
+        doReturn(searchManager).when(mContext).getSystemService(eq(SearchManager.class));
     }
 
     void assumeResolveActivityNotNull() {
