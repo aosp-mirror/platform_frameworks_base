@@ -258,10 +258,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     final SparseArray<SleepToken> mSleepTokens = new SparseArray<>();
 
-    // The default minimal size that will be used if the activity doesn't specify its minimal size.
-    // It will be calculated when the default display gets added.
-    int mDefaultMinSizeOfResizeableTaskDp = -1;
-
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
     private int mTmpTaskLayerRank;
