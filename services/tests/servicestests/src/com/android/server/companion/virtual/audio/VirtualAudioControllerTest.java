@@ -25,7 +25,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.content.Context;
@@ -79,11 +78,10 @@ public class VirtualAudioControllerTest {
                         FLAG_SECURE,
                         SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         /* allowedUsers= */ new ArraySet<>(),
-                        /* allowedCrossTaskNavigations= */ new ArraySet<>(),
-                        /* blockedCrossTaskNavigations= */ new ArraySet<>(),
-                        /* allowedActivities= */ new ArraySet<>(),
-                        /* blockedActivities= */ new ArraySet<>(),
-                        VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
+                        /* activityLaunchAllowedByDefault= */ true,
+                        /* activityPolicyExceptions= */ new ArraySet<>(),
+                        /* crossTaskNavigationAllowedByDefault= */ true,
+                        /* crossTaskNavigationExceptions= */ new ArraySet<>(),
                         /* activityListener= */ null,
                         /* pipBlockedCallback= */ null,
                         /* activityBlockedCallback= */ null,
