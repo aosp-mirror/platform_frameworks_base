@@ -18,6 +18,7 @@ java_defaults {
 
     // Add java_aconfig_libraries to here to add them to the core framework
     srcs: [
+        ":android.app.usage.flags-aconfig-java{.generated_srcjars}",
         ":android.os.flags-aconfig-java{.generated_srcjars}",
         ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
         ":android.security.flags-aconfig-java{.generated_srcjars}",
@@ -104,6 +105,19 @@ java_aconfig_library {
     aconfig_declarations: "android.security.flags-aconfig",
     host_supported: true,
     test: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// UsageStats
+aconfig_declarations {
+    name: "android.app.usage.flags-aconfig",
+    package: "android.app.usage",
+    srcs: ["core/java/android/app/usage/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.usage.flags-aconfig-java",
+    aconfig_declarations: "android.app.usage.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
