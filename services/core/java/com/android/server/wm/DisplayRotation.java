@@ -948,7 +948,7 @@ public class DisplayRotation {
         mDisplayWindowSettings.setUserRotation(mDisplayContent, userRotationMode,
                 userRotation);
         if (changed) {
-            mService.updateRotation(true /* alwaysSendConfiguration */,
+            mService.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
         }
     }
@@ -2127,7 +2127,7 @@ public class DisplayRotation {
         @Override
         public void onChange(boolean selfChange) {
             if (updateSettings()) {
-                mService.updateRotation(true /* alwaysSendConfiguration */,
+                mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
             }
         }
