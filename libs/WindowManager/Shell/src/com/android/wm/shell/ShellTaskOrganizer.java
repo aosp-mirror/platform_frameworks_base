@@ -103,7 +103,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
         /** Whether this task listener supports compat UI. */
         default boolean supportCompatUI() {
-            // All TaskListeners should support compat UI except PIP.
+            // All TaskListeners should support compat UI except PIP and StageCoordinator.
             return true;
         }
         /** Attaches a child window surface to the task surface. */
