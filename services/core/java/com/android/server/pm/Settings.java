@@ -27,7 +27,6 @@ import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
-
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.WRITE_USER_PACKAGE_RESTRICTIONS;
 import static com.android.server.pm.SharedUidMigration.BEST_EFFORT;
@@ -4896,8 +4895,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.print("]");
         }
         pw.println();
-        File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
-        pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
@@ -5197,6 +5194,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.println();
             pw.print("      installReason=");
             pw.println(userState.getInstallReason());
+
+            File dataDir = PackageInfoUtils.getDataDir(ps, user.id);
+            pw.print("      dataDir=");
+            pw.println(dataDir.getAbsolutePath());
 
             final PackageUserStateInternal pus = ps.readUserState(user.id);
             pw.print("      firstInstallTime=");
