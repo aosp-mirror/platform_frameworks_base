@@ -24,6 +24,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.util.mockito.mock
 
@@ -37,6 +39,7 @@ object KeyguardInteractorFactory {
     @JvmStatic
     fun create(
         featureFlags: FakeFeatureFlags = createFakeFeatureFlags(),
+        sceneContainerFlags: SceneContainerFlags = FakeSceneContainerFlags(),
         repository: FakeKeyguardRepository = FakeKeyguardRepository(),
         commandQueue: FakeCommandQueue = FakeCommandQueue(),
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
@@ -48,6 +51,7 @@ object KeyguardInteractorFactory {
             repository = repository,
             commandQueue = commandQueue,
             featureFlags = featureFlags,
+            sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,
@@ -55,6 +59,7 @@ object KeyguardInteractorFactory {
                 repository = repository,
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
+                sceneContainerFlags = sceneContainerFlags,
                 bouncerRepository = bouncerRepository,
                 configurationRepository = configurationRepository,
                 shadeRepository = shadeRepository,
@@ -72,6 +77,7 @@ object KeyguardInteractorFactory {
         val repository: FakeKeyguardRepository,
         val commandQueue: FakeCommandQueue,
         val featureFlags: FakeFeatureFlags,
+        val sceneContainerFlags: SceneContainerFlags,
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
         val shadeRepository: FakeShadeRepository,

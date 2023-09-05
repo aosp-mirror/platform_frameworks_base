@@ -36,6 +36,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeViewController
@@ -146,6 +147,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 sysuiUnlockAnimationController,
                 assistUtils,
                 featureFlags,
+                FakeSceneContainerFlags(),
                 dumpManager,
                 unfoldTransitionProgressForwarder
             )

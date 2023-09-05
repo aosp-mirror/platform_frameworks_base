@@ -85,7 +85,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
@@ -96,6 +95,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -143,6 +143,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final FeatureFlags mFeatureFlags;
+    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -218,7 +219,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
                             // If scene framework is enabled, set the scene container window to
                             // visible and let the touch "slip" into that window.
-                            if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+                            if (mSceneContainerFlags.isEnabled()) {
                                 mSceneInteractor.get().setVisible(true, "swipe down on launcher");
                             } else {
                                 centralSurfaces.onInputFocusTransfer(
@@ -229,7 +230,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
 
-                            if (!mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+                            if (!mSceneContainerFlags.isEnabled()) {
                                 float velocity = (event.getY() - mInputFocusTransferStartY)
                                         / (event.getEventTime() - mInputFocusTransferStartMillis);
                                 centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
@@ -582,6 +583,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
             FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
     ) {
@@ -592,6 +594,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         mContext = context;
         mFeatureFlags = featureFlags;
+        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;

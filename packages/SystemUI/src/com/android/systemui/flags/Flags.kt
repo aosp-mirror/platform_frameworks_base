@@ -643,6 +643,18 @@ object Flags {
      */
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
+    @Deprecated(
+        message = """
+            Do not use this flag directly. Please use
+            [com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled].
+
+            (Not really deprecated but using this as a simple way to bring attention to the above).
+        """,
+        replaceWith = ReplaceWith(
+            "com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
 
     // 1900

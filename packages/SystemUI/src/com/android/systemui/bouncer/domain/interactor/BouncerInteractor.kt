@@ -26,9 +26,8 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.kotlin.pairwise
@@ -51,7 +50,7 @@ constructor(
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
-    featureFlags: FeatureFlags,
+    flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
 ) {
 
@@ -94,7 +93,7 @@ constructor(
     val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
     init {
-        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+        if (flags.isEnabled()) {
             // Clear the message if moved from throttling to no-longer throttling.
             applicationScope.launch {
                 isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->

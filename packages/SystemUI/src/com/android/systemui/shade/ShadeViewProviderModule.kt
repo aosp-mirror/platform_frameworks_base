@@ -26,13 +26,13 @@ import com.android.systemui.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleView
-import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.ui.view.SceneWindowRootView
@@ -70,17 +70,13 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
-            featureFlags: FeatureFlags,
+            sceneContainerFlags: SceneContainerFlags,
             viewModelProvider: Provider<SceneContainerViewModel>,
             containerConfigProvider: Provider<SceneContainerConfig>,
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
-            return if (
-                Flags.SCENE_CONTAINER_ENABLED &&
-                    featureFlags.isEnabled(Flags.SCENE_CONTAINER) &&
-                    ComposeFacade.isComposeAvailable()
-            ) {
+            return if (sceneContainerFlags.isEnabled()) {
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
@@ -104,9 +100,9 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesNotificationShadeWindowView(
             root: WindowRootView,
-            featureFlags: FeatureFlags,
+            sceneContainerFlags: SceneContainerFlags,
         ): NotificationShadeWindowView {
-            if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            if (sceneContainerFlags.isEnabled()) {
                 return root.requireViewById(R.id.legacy_window_root)
             }
             return root as NotificationShadeWindowView?
