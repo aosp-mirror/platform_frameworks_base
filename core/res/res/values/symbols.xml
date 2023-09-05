@@ -4288,6 +4288,8 @@
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
   <java-symbol type="array" name="config_forceSlowJpegModeList" />
 
+  <java-symbol type="array" name="config_smallAreaDetectionAllowlist" />
+
   <java-symbol type="layout" name="chooser_dialog" />
   <java-symbol type="layout" name="chooser_dialog_item" />
   <java-symbol type="drawable" name="chooser_dialog_background" />
