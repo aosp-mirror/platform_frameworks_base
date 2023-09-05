@@ -468,6 +468,8 @@ public final class DisplayManagerService extends SystemService {
     private SensorManager mSensorManager;
     private BrightnessTracker mBrightnessTracker;
 
+    private SmallAreaDetectionController mSmallAreaDetectionController;
+
 
     // Whether minimal post processing is allowed by the user.
     @GuardedBy("mSyncRoot")
@@ -731,6 +733,8 @@ public final class DisplayManagerService extends SystemService {
         filter.addAction(Intent.ACTION_DOCK_EVENT);
 
         mContext.registerReceiver(mIdleModeReceiver, filter);
+
+        mSmallAreaDetectionController = SmallAreaDetectionController.create(mContext);
     }
 
     @VisibleForTesting
@@ -3046,6 +3050,9 @@ public final class DisplayManagerService extends SystemService {
         pw.println();
         mDisplayModeDirector.dump(pw);
         mBrightnessSynchronizer.dump(pw);
+        if (mSmallAreaDetectionController != null) {
+            mSmallAreaDetectionController.dump(pw);
+        }
     }
 
     private static float[] getFloatArray(TypedArray array) {
