@@ -868,6 +868,11 @@ public abstract class WallpaperService extends Service {
          * This will trigger a {@link #onComputeColors()} call.
          */
         public void notifyColorsChanged() {
+            if (mDestroyed) {
+                Log.i(TAG, "Ignoring notifyColorsChanged(), Engine has already been destroyed.");
+                return;
+            }
+
             final long now = mClockFunction.get();
             if (now - mLastColorInvalidation < NOTIFY_COLORS_RATE_LIMIT_MS) {
                 Log.w(TAG, "This call has been deferred. You should only call "
@@ -2226,7 +2231,11 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        void detach() {
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public void detach() {
             if (mDestroyed) {
                 return;
             }
@@ -2442,6 +2451,14 @@ public abstract class WallpaperService extends Service {
         }
 
         public void reportShown() {
+            if (mEngine == null) {
+                Log.i(TAG, "Can't report null engine as shown.");
+                return;
+            }
+            if (mEngine.mDestroyed) {
+                Log.i(TAG, "Engine was destroyed before we could draw.");
+                return;
+            }
             if (!mShownReported) {
                 mShownReported = true;
                 Trace.beginSection("WPMS.mConnection.engineShown");

@@ -690,7 +690,8 @@ class ControlsUiControllerImpl @Inject constructor (
                     bgExecutor,
                     controlActionCoordinator,
                     controlsMetricsLogger,
-                    selected.uid
+                    selected.uid,
+                    controlsController.get().currentUserId,
                 )
                 cvh.bindData(it, false /* isLocked, will be ignored on initial load */)
                 controlViewsById.put(key, cvh)

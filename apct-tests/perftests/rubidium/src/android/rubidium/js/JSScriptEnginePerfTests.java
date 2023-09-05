@@ -44,6 +44,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.adservices.LoggerFactory;
 import com.android.adservices.data.adselection.CustomAudienceSignals;
 import com.android.adservices.service.adselection.AdCounterKeyCopier;
 import com.android.adservices.service.adselection.AdCounterKeyCopierNoOpImpl;
@@ -101,9 +102,10 @@ public class JSScriptEnginePerfTests {
     private static final Context sContext = ApplicationProvider.getApplicationContext();
     private static final ExecutorService sExecutorService = Executors.newFixedThreadPool(10);
 
+    private static final LoggerFactory.Logger sLogger = LoggerFactory.getFledgeLogger();
     private static final JSScriptEngine sJSScriptEngine =
             JSScriptEngine.getInstanceForTesting(
-                    sContext, Profiler.createInstance(JSScriptEngine.TAG));
+                    sContext, Profiler.createInstance(JSScriptEngine.TAG), sLogger);
     private static final Clock CLOCK = Clock.fixed(Instant.now(), ZoneOffset.UTC);
     private static final Instant ACTIVATION_TIME = CLOCK.instant();
     private static final Instant EXPIRATION_TIME = CLOCK.instant().plus(Duration.ofDays(1));

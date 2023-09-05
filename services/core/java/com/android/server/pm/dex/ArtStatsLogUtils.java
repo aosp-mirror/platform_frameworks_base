@@ -334,7 +334,10 @@ public class ArtStatsLogUtils {
                             ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__STATUS__STATUS_UNKNOWN),
                     cancellationReason,
                     durationMs,
-                    0);  // deprecated, used to be durationIncludingSleepMs
+                    0, // deprecated, used to be durationIncludingSleepMs
+                    0, // optimizedPackagesCount
+                    0, // packagesDependingOnBootClasspathCount
+                    0); // totalPackagesCount
         }
     }
 }
