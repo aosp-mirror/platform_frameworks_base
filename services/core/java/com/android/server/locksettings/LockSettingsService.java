@@ -873,6 +873,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         getAuthSecretHal();
         mDeviceProvisionedObserver.onSystemReady();
 
+        // Work around an issue in PropertyInvalidatedCache where the cache doesn't work until the
+        // first invalidation.  This can be removed if PropertyInvalidatedCache is fixed.
+        LockPatternUtils.invalidateCredentialTypeCache();
+
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
         mBiometricDeferredQueue.systemReady(mInjector.getFingerprintManager(),

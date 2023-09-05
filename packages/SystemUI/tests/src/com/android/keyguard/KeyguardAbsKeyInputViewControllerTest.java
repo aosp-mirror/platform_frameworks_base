@@ -187,9 +187,7 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
 
     @Test
     public void testLockedOut_verifyPasswordAndUnlock_doesNotEnableViewInput() {
-        mKeyguardAbsKeyInputViewController.handleAttemptLockout(
-                SystemClock.elapsedRealtime() + 1000);
-        mKeyguardAbsKeyInputViewController.verifyPasswordAndUnlock();
+        mKeyguardAbsKeyInputViewController.handleAttemptLockout(SystemClock.elapsedRealtime());
         verify(mAbsKeyInputView).setPasswordEntryInputEnabled(false);
         verify(mAbsKeyInputView).setPasswordEntryEnabled(false);
         verify(mAbsKeyInputView, never()).setPasswordEntryInputEnabled(true);

@@ -186,7 +186,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
                 BiometricSourceType.FINGERPRINT, true /* isStrongBiometric */);
 
-        verify(mKeyguardViewMediator).onWakeAndUnlocking();
+        verify(mKeyguardViewMediator).onWakeAndUnlocking(false);
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING);
     }
@@ -204,7 +204,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.onBiometricAuthenticated(UserHandle.USER_CURRENT,
                 BiometricSourceType.FINGERPRINT, true /* isStrongBiometric */);
 
-        verify(mKeyguardViewMediator).onWakeAndUnlocking();
+        verify(mKeyguardViewMediator).onWakeAndUnlocking(false);
         assertThat(mBiometricUnlockController.getMode())
                 .isEqualTo(MODE_WAKE_AND_UNLOCK);
     }
@@ -541,5 +541,22 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+    }
+
+    private void givenDreamingLocked() {
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+    }
+    @Test
+    public void onSideFingerprintSuccess_dreaming_unlockNoWake() {
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+        givenDreamingLocked();
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT, true);
+        verify(mKeyguardViewMediator).onWakeAndUnlocking(true);
+        // Ensure that the power hasn't been told to wake up yet.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
     }
 }

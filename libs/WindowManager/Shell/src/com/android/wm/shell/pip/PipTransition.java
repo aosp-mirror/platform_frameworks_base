@@ -72,6 +72,7 @@ import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.util.TransitionUtil;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
@@ -339,19 +340,36 @@ public class PipTransition extends PipTransitionController {
         }
         // This means an expand happened before enter-pip finished and we are now "merging" a
         // no-op transition that happens to match our exit-pip.
+        // Or that the keyguard is up and preventing the transition from applying, in which case we
+        // want to manually reset pip. (b/283783868)
         boolean cancelled = false;
         if (mPipAnimationController.getCurrentAnimator() != null) {
             mPipAnimationController.getCurrentAnimator().cancel();
+            mPipAnimationController.resetAnimatorState();
             cancelled = true;
         }
+
         // Unset exitTransition AFTER cancel so that finishResize knows we are merging.
         mExitTransition = null;
-        if (!cancelled || aborted) return;
+        if (!cancelled) return;
         final ActivityManager.RunningTaskInfo taskInfo = mPipOrganizer.getTaskInfo();
         if (taskInfo != null) {
-            startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
-                    mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
-                    new Rect(mExitDestinationBounds), Surface.ROTATION_0, null /* startT */);
+            if (aborted) {
+                // keyguard case - the transition got aborted, so we want to reset state and
+                // windowing mode before reapplying the resize transaction
+                sendOnPipTransitionFinished(TRANSITION_DIRECTION_LEAVE_PIP);
+                mPipOrganizer.onExitPipFinished(taskInfo);
+
+                WindowContainerTransaction wct = new WindowContainerTransaction();
+                mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
+                wct.setBounds(taskInfo.token, null);
+                mPipOrganizer.applyFinishBoundsResize(wct, TRANSITION_DIRECTION_LEAVE_PIP, false);
+            } else {
+                // merge case
+                startExpandAnimation(taskInfo, mPipOrganizer.getSurfaceControl(),
+                        mPipBoundsState.getBounds(), mPipBoundsState.getBounds(),
+                        new Rect(mExitDestinationBounds), Surface.ROTATION_0, null /* startT */);
+            }
         }
         mExitDestinationBounds.setEmpty();
         mCurrentPipTaskToken = null;
@@ -434,6 +452,9 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void forceFinishTransition() {
+        // mFinishCallback might be null with an outdated mCurrentPipTaskToken
+        // for example, when app crashes while in PiP and exit transition has not started
+        mCurrentPipTaskToken = null;
         if (mFinishCallback == null) return;
         mFinishCallback.onTransitionFinished(null /* wct */, null /* callback */);
         mFinishCallback = null;
@@ -567,7 +588,16 @@ public class PipTransition extends PipTransitionController {
                 mPipBoundsState.getDisplayBounds());
         mFinishCallback = (wct, wctCB) -> {
             mPipOrganizer.onExitPipFinished(taskInfo);
-            if (!Transitions.SHELL_TRANSITIONS_ROTATION && toFullscreen) {
+
+            // TODO(b/286346098): remove the OPEN app flicker completely
+            // not checking if we go to fullscreen helps avoid getting pip into an inconsistent
+            // state after the flicker occurs. This is a temp solution until flicker is removed.
+            if (!Transitions.SHELL_TRANSITIONS_ROTATION) {
+                // will help to debug the case when we are not exiting to fullscreen
+                if (!toFullscreen) {
+                    ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                            "%s: startExitAnimation() not exiting to fullscreen", TAG);
+                }
                 wct = wct != null ? wct : new WindowContainerTransaction();
                 wct.setBounds(pipTaskToken, null);
                 mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
@@ -831,7 +861,7 @@ public class PipTransition extends PipTransitionController {
         }
 
         final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
-        final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
+        final Rect currentBounds = pipChange.getStartAbsBounds();
         int rotationDelta = deltaRotation(startRotation, endRotation);
         Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
                 taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
@@ -856,6 +886,9 @@ public class PipTransition extends PipTransitionController {
         final int enterAnimationType = mEnterAnimationType;
         if (enterAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
+        } else {
+            // set alpha to 1, because for multi-activity PiP it will create a new task with alpha 0
+            startTransaction.setAlpha(leash, 1f);
         }
         startTransaction.apply();
 
@@ -1047,7 +1080,7 @@ public class PipTransition extends PipTransitionController {
         // When the PIP window is visible and being a part of the transition, such as display
         // rotation, we need to update its bounds and rounded corner.
         final SurfaceControl leash = pipChange.getLeash();
-        final Rect destBounds = mPipBoundsState.getBounds();
+        final Rect destBounds = mPipOrganizer.getCurrentOrAnimatingBounds();
         final boolean isInPip = mPipTransitionState.isInPip();
         mSurfaceTransactionHelper
                 .crop(startTransaction, leash, destBounds)
@@ -1107,5 +1140,13 @@ public class PipTransition extends PipTransitionController {
         mPipMenuController.movePipMenu(null, null, destinationBounds,
                 PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.println(prefix + TAG);
+        pw.println(innerPrefix + "mCurrentPipTaskToken=" + mCurrentPipTaskToken);
+        pw.println(innerPrefix + "mFinishCallback=" + mFinishCallback);
     }
 }

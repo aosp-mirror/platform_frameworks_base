@@ -61,8 +61,11 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
         options.setTestMethodName("testCollectAllApexInfo");
 
         // Collect APEX package names from /apex, then pass them as expectation to be verified.
+        // The package names are collected from the find name with deduplication (NB: we used to
+        // deduplicate by dropping directory names with '@', but there's a DCLA case where it only
+        // has one directory with '@'. So we have to keep it and deduplicate the current way).
         CommandResult result = getDevice().executeShellV2Command(
-                "ls -d /apex/*/ |grep -v @ |grep -v /apex/sharedlibs |cut -d/ -f3");
+                "ls -d /apex/*/ |grep -v /apex/sharedlibs |cut -d/ -f3 |cut -d@ -f1 |sort |uniq");
         assertTrue(result.getStatus() == CommandStatus.SUCCESS);
         String[] packageNames = result.getStdout().split("\n");
         for (var i = 0; i < packageNames.length; i++) {

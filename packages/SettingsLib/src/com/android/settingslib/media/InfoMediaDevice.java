@@ -19,6 +19,7 @@ import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
@@ -102,6 +103,9 @@ public class InfoMediaDevice extends MediaDevice {
                 break;
             case TYPE_REMOTE_SMARTWATCH:
                 resId = R.drawable.ic_media_smartwatch;
+                break;
+            case TYPE_REMOTE_SMARTPHONE:
+                resId = R.drawable.ic_smartphone;
                 break;
             case TYPE_REMOTE_SPEAKER:
             default:

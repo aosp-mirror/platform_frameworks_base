@@ -510,6 +510,17 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void keyguardStatusView_willPlayDelayedDoze_notifiesKeyguardMediaController() {
+        when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
+        mStatusBarStateController.setState(KEYGUARD);
+        enableSplitShade(/* enabled= */ true);
+
+        mNotificationPanelViewController.setWillPlayDelayedDozeAmountAnimation(true);
+
+        verify(mKeyguardMediaController).setDozeWakeUpAnimationWaiting(true);
+    }
+
+    @Test
     public void keyguardStatusView_willPlayDelayedDoze_isCentered_thenStillCenteredIfNoNotifs() {
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
         mStatusBarStateController.setState(KEYGUARD);

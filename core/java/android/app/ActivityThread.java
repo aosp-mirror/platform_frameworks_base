@@ -4226,21 +4226,22 @@ public final class ActivityThread extends ClientTransactionHandler
         decorView.addView(view);
         view.requestLayout();
 
-        view.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
+        view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             private boolean mHandled = false;
             @Override
-            public void onDraw() {
+            public boolean onPreDraw() {
                 if (mHandled) {
-                    return;
+                    return true;
                 }
                 mHandled = true;
                 // Transfer the splash screen view from shell to client.
-                // Call syncTransferSplashscreenViewTransaction at the first onDraw so we can ensure
-                // the client view is ready to show and we can use applyTransactionOnDraw to make
-                // all transitions happen at the same frame.
+                // Call syncTransferSplashscreenViewTransaction at the first onPreDraw, so we can
+                // ensure the client view is ready to show, and can use applyTransactionOnDraw to
+                // make all transitions happen at the same frame.
                 syncTransferSplashscreenViewTransaction(
                         view, r.token, decorView, startingWindowLeash);
-                view.post(() -> view.getViewTreeObserver().removeOnDrawListener(this));
+                view.post(() -> view.getViewTreeObserver().removeOnPreDrawListener(this));
+                return true;
             }
         });
     }

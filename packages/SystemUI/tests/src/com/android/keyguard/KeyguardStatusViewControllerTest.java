@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -154,5 +155,19 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 10, 1f, KeyguardStatusViewController.CLOCK_ANIMATION_PROPERTIES, true);
         verify(mControllerMock).setProperty(AnimatableProperty.SCALE_X, 20f, true);
         verify(mControllerMock).setProperty(AnimatableProperty.SCALE_Y, 20f, true);
+    }
+
+    @Test
+    public void splitShadeEnabledPassedToClockSwitchController() {
+        mController.setSplitShadeEnabled(true);
+        verify(mKeyguardClockSwitchController, times(1)).setSplitShadeEnabled(true);
+        verify(mKeyguardClockSwitchController, times(0)).setSplitShadeEnabled(false);
+    }
+
+    @Test
+    public void splitShadeDisabledPassedToClockSwitchController() {
+        mController.setSplitShadeEnabled(false);
+        verify(mKeyguardClockSwitchController, times(1)).setSplitShadeEnabled(false);
+        verify(mKeyguardClockSwitchController, times(0)).setSplitShadeEnabled(true);
     }
 }

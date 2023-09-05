@@ -61,6 +61,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -1424,6 +1425,15 @@ public class TransitionTests extends WindowTestsBase {
         assertNull(activity1ChangeInfo);
         // No need to wait for the activity in transient hide task.
         assertEquals(WindowContainer.SYNC_STATE_NONE, activity1.mSyncState);
+
+        // An active transient launch overrides idle state to avoid clearing power mode before the
+        // transition is finished.
+        spyOn(mRootWindowContainer.mTransitionController);
+        doAnswer(invocation -> controller.isTransientLaunch(invocation.getArgument(0))).when(
+                mRootWindowContainer.mTransitionController).isTransientLaunch(any());
+        activity2.getTask().setResumedActivity(activity2, "test");
+        activity2.idle = true;
+        assertFalse(mRootWindowContainer.allResumedActivitiesIdle());
 
         activity1.setVisibleRequested(false);
         activity2.setVisibleRequested(true);

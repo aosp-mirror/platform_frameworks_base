@@ -90,8 +90,8 @@ public:
                                            requireUnpremul, prefColorSpace);
     }
 
-    bool decodeGainmapRegion(sp<uirenderer::Gainmap>* outGainmap, const SkIRect& desiredSubset,
-                             int sampleSize, bool requireUnpremul) {
+    bool decodeGainmapRegion(sp<uirenderer::Gainmap>* outGainmap, int outWidth, int outHeight,
+                             const SkIRect& desiredSubset, int sampleSize, bool requireUnpremul) {
         SkColorType decodeColorType = mGainmapBRD->computeOutputColorType(kN32_SkColorType);
         sk_sp<SkColorSpace> decodeColorSpace =
                 mGainmapBRD->computeOutputColorSpace(decodeColorType, nullptr);
@@ -109,9 +109,8 @@ public:
         // kPremul_SkAlphaType is used just as a placeholder as it doesn't change the underlying
         // allocation type. RecyclingClippingPixelAllocator will populate this with the
         // actual alpha type in either allocPixelRef() or copyIfNecessary()
-        sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(
-                SkImageInfo::Make(desiredSubset.width(), desiredSubset.height(), decodeColorType,
-                                  kPremul_SkAlphaType, decodeColorSpace));
+        sk_sp<Bitmap> nativeBitmap = Bitmap::allocateHeapBitmap(SkImageInfo::Make(
+                outWidth, outHeight, decodeColorType, kPremul_SkAlphaType, decodeColorSpace));
         if (!nativeBitmap) {
             ALOGE("OOM allocating Bitmap for Gainmap");
             return false;
@@ -134,9 +133,12 @@ public:
         return true;
     }
 
-    SkIRect calculateGainmapRegion(const SkIRect& mainImageRegion) {
+    SkIRect calculateGainmapRegion(const SkIRect& mainImageRegion, int* inOutWidth,
+                                   int* inOutHeight) {
         const float scaleX = ((float)mGainmapBRD->width()) / mMainImageBRD->width();
         const float scaleY = ((float)mGainmapBRD->height()) / mMainImageBRD->height();
+        *inOutWidth *= scaleX;
+        *inOutHeight *= scaleY;
         // TODO: Account for rounding error?
         return SkIRect::MakeLTRB(mainImageRegion.left() * scaleX, mainImageRegion.top() * scaleY,
                                  mainImageRegion.right() * scaleX,
@@ -328,21 +330,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     sp<uirenderer::Gainmap> gainmap;
     bool hasGainmap = brd->hasGainmap();
     if (hasGainmap) {
-        SkIRect adjustedSubset{};
+        int gainmapWidth = bitmap.width();
+        int gainmapHeight = bitmap.height();
         if (javaBitmap) {
-            // Clamp to the width/height of the recycled bitmap in case the reused bitmap
-            // was too small for the specified rectangle, in which case we need to clip
-            adjustedSubset = SkIRect::MakeXYWH(inputX, inputY,
-                                               std::min(subset.width(), recycledBitmap->width()),
-                                               std::min(subset.height(), recycledBitmap->height()));
-        } else {
-            // We are not recycling, so use the decoded width/height for calculating the gainmap
-            // subset instead to ensure the gainmap region proportionally matches
-            adjustedSubset = SkIRect::MakeXYWH(std::max(0, inputX), std::max(0, inputY),
-                                               bitmap.width(), bitmap.height());
+            // If we are recycling we must match the inBitmap's relative dimensions
+            gainmapWidth = recycledBitmap->width();
+            gainmapHeight = recycledBitmap->height();
         }
-        SkIRect gainmapSubset = brd->calculateGainmapRegion(adjustedSubset);
-        if (!brd->decodeGainmapRegion(&gainmap, gainmapSubset, sampleSize, requireUnpremul)) {
+        SkIRect gainmapSubset = brd->calculateGainmapRegion(subset, &gainmapWidth, &gainmapHeight);
+        if (!brd->decodeGainmapRegion(&gainmap, gainmapWidth, gainmapHeight, gainmapSubset,
+                                      sampleSize, requireUnpremul)) {
             // If there is an error decoding Gainmap - we don't fail. We just don't provide Gainmap
             hasGainmap = false;
         }

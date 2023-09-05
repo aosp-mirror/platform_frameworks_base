@@ -27,6 +27,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -711,6 +712,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
             return;
         }
+        // Activity doesn't need to capture snapshot if the starting window has associated to task.
+        if (wc.asActivityRecord() != null) {
+            final ActivityRecord activityRecord = wc.asActivityRecord();
+            if (activityRecord.mStartingData != null
+                    && activityRecord.mStartingData.mAssociatedTask != null) {
+                return;
+            }
+        }
 
         if (mContainerFreezer == null) {
             mContainerFreezer = new ScreenshotFreezer();
@@ -1093,6 +1102,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 final Task task = ar.getTask();
                 if (task == null) continue;
                 boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(ar);
+                // visibleAtTransitionEnd is used to guard against pre-maturely committing
+                // invisible on a window which is actually hidden by a later transition and not this
+                // one. However, for a transient launch, we can't use this mechanism because the
+                // visibility is determined at finish. Instead, use a different heuristic: don't
+                // commit invisible if the window is already in a later transition. That later
+                // transition will then handle the commit.
+                if (isTransientLaunch(ar) && !ar.isVisibleRequested()
+                        && mController.inCollectingTransition(ar)) {
+                    visibleAtTransitionEnd = true;
+                }
                 // We need both the expected visibility AND current requested-visibility to be
                 // false. If it is expected-visible but not currently visible, it means that
                 // another animation is queued-up to animate this to invisibility, so we can't
@@ -2649,7 +2668,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     private void validateKeyguardOcclusion() {
-        if ((mFlags & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
+        if ((mFlags & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
             mController.mStateValidators.add(
                 mController.mAtm.mWindowManager.mPolicy::applyKeyguardOcclusionChange);
         }
@@ -2666,7 +2685,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mController.mStateValidators.add(() -> {
             for (int i = mTargets.size() - 1; i >= 0; --i) {
                 final ChangeInfo change = mTargets.get(i);
-                if (!change.mContainer.isVisibleRequested()) continue;
+                if (!change.mContainer.isVisibleRequested()
+                        || change.mContainer.mSurfaceControl == null) {
+                    continue;
+                }
                 Slog.e(TAG, "Force show for visible " + change.mContainer
                         + " which may be hidden by transition unexpectedly");
                 change.mContainer.getSyncTransaction().show(change.mContainer.mSurfaceControl);
