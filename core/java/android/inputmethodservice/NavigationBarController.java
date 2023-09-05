@@ -237,7 +237,7 @@ final class NavigationBarController {
                 mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
                     if (mNavigationBarFrame != null) {
                         boolean visible = insets.isVisible(captionBar());
-                        mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+                        mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
                     }
                     return view.onApplyWindowInsets(insets);
                 });

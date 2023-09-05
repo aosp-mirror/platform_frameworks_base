@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
@@ -427,11 +428,11 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
+        Assume.assumeFalse("Behavior no longer needed with ENABLE_HIDE_IME_CAPTION_BAR",
+                ENABLE_HIDE_IME_CAPTION_BAR);
+
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = 1000;
-        displayInfo.logicalHeight = 2000;
-        displayInfo.rotation = ROTATION_0;
+        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
 
         WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
         displayPolicy.addWindowLw(mNavBarWindow, attrs);
@@ -466,10 +467,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
     @Test
     public void testImeInsetsGivenContentFrame() {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = 1000;
-        displayInfo.logicalHeight = 2000;
-        displayInfo.rotation = ROTATION_0;
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
