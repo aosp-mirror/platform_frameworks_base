@@ -164,7 +164,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.shade.transition.ShadeTransitionController;
-import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -368,7 +367,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     /** The current squish amount for the predictive back animation */
     private float mCurrentBackProgress = 0.0f;
     private boolean mTracking;
-    private boolean mIsTrackingExpansionFromStatusBar;
     private boolean mHintAnimationRunning;
     @Deprecated
     private KeyguardBottomAreaView mKeyguardBottomArea;
@@ -2839,7 +2837,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void onTrackingStopped(boolean expand) {
         mTracking = false;
-        maybeStopTrackingExpansionFromStatusBar(expand);
 
         updateExpansionAndVisibility();
         if (expand) {
@@ -4234,42 +4231,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public boolean handleExternalTouch(MotionEvent event) {
         return mTouchHandler.onTouchEvent(event);
-    }
-
-    @Override
-    public void startTrackingExpansionFromStatusBar() {
-        mIsTrackingExpansionFromStatusBar = true;
-        InteractionJankMonitorWrapper.begin(
-                mView, InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-    }
-
-    /**
-     * Stops tracking an expansion that originated from the status bar (if we had started tracking
-     * it).
-     *
-     * @param expand the expand boolean passed to {@link #onTrackingStopped(boolean)}.
-     */
-    private void maybeStopTrackingExpansionFromStatusBar(boolean expand) {
-        if (!mIsTrackingExpansionFromStatusBar) {
-            return;
-        }
-        mIsTrackingExpansionFromStatusBar = false;
-
-        // Determine whether the shade actually expanded due to the status bar touch:
-        // - If the user just taps on the status bar, then #isExpanded is false but
-        // #onTrackingStopped is called with `true`.
-        // - If the user drags down on the status bar but doesn't drag down far enough, then
-        // #onTrackingStopped is called with `false` but #isExpanded is true.
-        // So, we need *both* #onTrackingStopped called with `true` *and* #isExpanded to be true in
-        // order to confirm that the shade successfully opened.
-        boolean shadeExpansionFromStatusBarSucceeded = expand && isExpanded();
-        if (shadeExpansionFromStatusBarSucceeded) {
-            InteractionJankMonitorWrapper.end(
-                    InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-        } else {
-            InteractionJankMonitorWrapper.cancel(
-                    InteractionJankMonitorWrapper.CUJ_SHADE_EXPAND_FROM_STATUS_BAR);
-        }
     }
 
     @Override
