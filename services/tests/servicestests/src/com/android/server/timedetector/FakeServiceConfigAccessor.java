@@ -35,7 +35,7 @@ public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
     private final List<StateChangeListener> mConfigurationInternalChangeListeners =
             new ArrayList<>();
-    private ConfigurationInternal mConfigurationInternal;
+    private ConfigurationInternal mCurrentUserConfigurationInternal;
 
     @Override
     public void addConfigurationInternalChangeListener(StateChangeListener listener) {
@@ -49,21 +49,23 @@ public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
     @Override
     public ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mConfigurationInternal;
+        return mCurrentUserConfigurationInternal;
     }
 
     @Override
     public boolean updateConfiguration(
-            @UserIdInt int userID, @NonNull TimeConfiguration requestedChanges,
+            @UserIdInt int userId, @NonNull TimeConfiguration requestedChanges,
             boolean bypassUserPolicyChecks) {
-        assertNotNull(mConfigurationInternal);
+        assertNotNull(mCurrentUserConfigurationInternal);
         assertNotNull(requestedChanges);
+
+        ConfigurationInternal toUpdate = getConfigurationInternal(userId);
 
         // Simulate the real strategy's behavior: the new configuration will be updated to be the
         // old configuration merged with the new if the user has the capability to up the settings.
         // Then, if the configuration changed, the change listener is invoked.
         TimeCapabilitiesAndConfig capabilitiesAndConfig =
-                mConfigurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+                toUpdate.createCapabilitiesAndConfig(bypassUserPolicyChecks);
         TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
         TimeConfiguration configuration = capabilitiesAndConfig.getConfiguration();
         TimeConfiguration newConfiguration =
@@ -73,28 +75,36 @@ public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
         }
 
         if (!newConfiguration.equals(capabilitiesAndConfig.getConfiguration())) {
-            mConfigurationInternal = mConfigurationInternal.merge(newConfiguration);
+            mCurrentUserConfigurationInternal = toUpdate.merge(newConfiguration);
 
             // Note: Unlike the real strategy, the listeners are invoked synchronously.
-            simulateConfigurationChangeForTests();
+            notifyConfigurationChange();
         }
         return true;
     }
 
-    void initializeConfiguration(ConfigurationInternal configurationInternal) {
-        mConfigurationInternal = configurationInternal;
+
+    void initializeCurrentUserConfiguration(ConfigurationInternal configurationInternal) {
+        mCurrentUserConfigurationInternal = configurationInternal;
     }
 
-    void simulateConfigurationChangeForTests() {
-        for (StateChangeListener listener : mConfigurationInternalChangeListeners) {
-            listener.onChange();
-        }
+    void simulateCurrentUserConfigurationInternalChange(
+            ConfigurationInternal configurationInternal) {
+        mCurrentUserConfigurationInternal = configurationInternal;
+        // Note: Unlike the real strategy, the listeners are invoked synchronously.
+        notifyConfigurationChange();
     }
 
     @Override
     public ConfigurationInternal getConfigurationInternal(int userId) {
         assertEquals("Multi-user testing not supported currently",
-                userId, mConfigurationInternal.getUserId());
-        return mConfigurationInternal;
+                userId, mCurrentUserConfigurationInternal.getUserId());
+        return mCurrentUserConfigurationInternal;
+    }
+
+    private void notifyConfigurationChange() {
+        for (StateChangeListener listener : mConfigurationInternalChangeListeners) {
+            listener.onChange();
+        }
     }
 }
