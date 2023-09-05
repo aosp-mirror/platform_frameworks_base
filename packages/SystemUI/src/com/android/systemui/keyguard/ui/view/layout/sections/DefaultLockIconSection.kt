@@ -73,7 +73,13 @@ constructor(
         val mBottomPaddingPx =
             context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
         val bounds = windowManager.currentWindowMetrics.bounds
-        val widthPixels = bounds.right.toFloat()
+        val insets = windowManager.currentWindowMetrics.windowInsets
+        var widthPixels = bounds.right.toFloat()
+        if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
+            // Assumed to be initially neglected as there are no left or right insets in portrait.
+            // However, on landscape, these insets need to included when calculating the midpoint.
+            widthPixels -= (insets.systemWindowInsetLeft + insets.systemWindowInsetRight).toFloat()
+        }
         val heightPixels = bounds.bottom.toFloat()
         val defaultDensity =
             DisplayMetrics.DENSITY_DEVICE_STABLE.toFloat() /
