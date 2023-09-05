@@ -42,6 +42,26 @@ import android.os.RemoteException;
 @SystemApi
 public class PackageArchiver {
 
+    /**
+     * Extra field for the package name of a package that is requested to be unarchived. Sent as
+     * part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE} intent.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_UNARCHIVE_PACKAGE_NAME =
+            "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
+
+    /**
+     * If true, the requestor of the unarchival has specified that the app should be unarchived
+     * for {@link android.os.UserHandle#ALL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_UNARCHIVE_ALL_USERS =
+            "android.content.pm.extra.UNARCHIVE_ALL_USERS";
+
     private final Context mContext;
     private final IPackageArchiverService mService;
 
@@ -58,7 +78,7 @@ public class PackageArchiver {
      *
      * @param statusReceiver Callback used to notify when the operation is completed.
      * @throws NameNotFoundException If {@code packageName} isn't found or not available to the
-     *                               caller.
+     *                               caller or isn't archived.
      * @hide
      */
     @RequiresPermission(anyOf = {
@@ -70,6 +90,36 @@ public class PackageArchiver {
         try {
             mService.requestArchive(packageName, mContext.getPackageName(), statusReceiver,
                     mContext.getUser());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(NameNotFoundException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests to unarchive a currently archived package.
+     *
+     * <p> Sends a request to unarchive an app to the responsible installer. The installer is
+     * determined by {@link InstallSourceInfo#getUpdateOwnerPackageName()}, or
+     * {@link InstallSourceInfo#getInstallingPackageName()} if the former value is null.
+     *
+     * <p> The installation will happen asynchronously and can be observed through
+     * {@link android.content.Intent#ACTION_PACKAGE_ADDED}.
+     *
+     * @throws NameNotFoundException If {@code packageName} isn't found or not visible to the
+     *                               caller or if the package has no installer on the device
+     *                               anymore to unarchive it.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES})
+    @SystemApi
+    public void requestUnarchive(@NonNull String packageName)
+            throws NameNotFoundException {
+        try {
+            mService.requestUnarchive(packageName, mContext.getPackageName(), mContext.getUser());
         } catch (ParcelableException e) {
             e.maybeRethrow(NameNotFoundException.class);
         } catch (RemoteException e) {

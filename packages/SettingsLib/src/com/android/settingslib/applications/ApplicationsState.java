@@ -1776,7 +1776,8 @@ public class ApplicationsState {
             final int userId = UserHandle.getUserId(this.info.uid);
             if (UserManager.get(context).isManagedProfile(userId)) {
                 this.labelDescription = context.getString(
-                        com.android.settingslib.R.string.accessibility_work_profile_app_description,
+                        com.android.settingslib.utils.R
+                                .string.accessibility_work_profile_app_description,
                         this.label);
             } else {
                 this.labelDescription = this.label;

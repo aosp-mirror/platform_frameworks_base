@@ -18,6 +18,7 @@ package com.android.wm.shell.common;
 
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.IDisplayChangeWindowCallback;
 import android.view.IDisplayChangeWindowController;
@@ -40,6 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class DisplayChangeController {
     private static final String TAG = DisplayChangeController.class.getSimpleName();
+    private static final String HANDLE_DISPLAY_CHANGE_TRACE_TAG = "HandleRemoteDisplayChange";
 
     private final ShellExecutor mMainExecutor;
     private final IWindowManager mWmService;
@@ -81,8 +83,14 @@ public class DisplayChangeController {
     /** Query all listeners for changes that should happen on display change. */
     void dispatchOnDisplayChange(WindowContainerTransaction outWct, int displayId,
             int fromRotation, int toRotation, DisplayAreaInfo newDisplayAreaInfo) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.beginSection("dispatchOnDisplayChange");
+        }
         for (OnDisplayChangingListener c : mDisplayChangeListener) {
             c.onDisplayChange(displayId, fromRotation, toRotation, newDisplayAreaInfo, outWct);
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.endSection();
         }
     }
 
@@ -94,6 +102,10 @@ public class DisplayChangeController {
             callback.continueDisplayChange(t);
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to continue handling display change", e);
+        } finally {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.endAsyncSection(HANDLE_DISPLAY_CHANGE_TRACE_TAG, callback.hashCode());
+            }
         }
     }
 
@@ -103,6 +115,9 @@ public class DisplayChangeController {
         @Override
         public void onDisplayChange(int displayId, int fromRotation, int toRotation,
                 DisplayAreaInfo newDisplayAreaInfo, IDisplayChangeWindowCallback callback) {
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.beginAsyncSection(HANDLE_DISPLAY_CHANGE_TRACE_TAG, callback.hashCode());
+            }
             mMainExecutor.execute(() -> DisplayChangeController.this
                     .onDisplayChange(displayId, fromRotation, toRotation,
                             newDisplayAreaInfo, callback));

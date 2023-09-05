@@ -5270,6 +5270,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
             "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
+    /**
+     * Broadcast Action: Sent to the responsible installer of an archived package when unarchival
+     * is requested.
+     *
+     * @see android.content.pm.PackageArchiver
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UNARCHIVE_PACKAGE = "android.intent.action.UNARCHIVE_PACKAGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).

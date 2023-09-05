@@ -21,8 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.res.Resources;
 import android.graphics.Paint;
 
-import com.android.settingslib.R;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
