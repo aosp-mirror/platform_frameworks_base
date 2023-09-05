@@ -624,7 +624,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
-    private final NotificationPresenter mPresenter;
+    private final Lazy<NotificationPresenter> mPresenterLazy;
     private NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
@@ -725,7 +725,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            NotificationPresenter notificationPresenter,
+            // Lazy due to b/298099682.
+            Lazy<NotificationPresenter> notificationPresenterLazy,
             NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
             ScrimController scrimController,
@@ -833,7 +834,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScrollerController = notificationStackScrollLayoutController;
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
-        mPresenter = notificationPresenter;
+        mPresenterLazy = notificationPresenterLazy;
         mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
@@ -1556,9 +1557,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
-        mShadeController.setNotificationPresenter(mPresenter);
+        mShadeController.setNotificationPresenter(mPresenterLazy.get());
         mNotificationsController.initialize(
-                mPresenter,
+                mPresenterLazy.get(),
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarter);
@@ -1736,12 +1737,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @Override
     public boolean isDeviceInVrMode() {
-        return mPresenter.isDeviceInVrMode();
+        return mPresenterLazy.get().isDeviceInVrMode();
     }
 
     @Override
     public NotificationPresenter getPresenter() {
-        return mPresenter;
+        return mPresenterLazy.get();
     }
 
     @VisibleForTesting
@@ -2148,7 +2149,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             String action = intent.getAction();
             if (ACTION_FAKE_ARTWORK.equals(action)) {
                 if (DEBUG_MEDIA_FAKE_ARTWORK) {
-                    mPresenter.updateMediaMetaData(true, true);
+                    mPresenterLazy.get().updateMediaMetaData(true, true);
                 }
             }
         }
@@ -2234,10 +2235,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
          */
         boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
         boolean clearNotificationEffects =
-                !mPresenter.isPresenterFullyCollapsed() && (mState == StatusBarState.SHADE
+                !mPresenterLazy.get().isPresenterFullyCollapsed() && (mState == StatusBarState.SHADE
                         || mState == StatusBarState.SHADE_LOCKED);
         int notificationLoad = mNotificationsController.getActiveNotificationsCount();
-        if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
+        if (pinnedHeadsUp && mPresenterLazy.get().isPresenterFullyCollapsed()) {
             notificationLoad = 1;
         }
         final int finalNotificationLoad = notificationLoad;
@@ -2405,7 +2406,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
         mKeyguardStateController.setLaunchTransitionFadingAway(false);
-        mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
+        mPresenterLazy.get().updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
     /**
@@ -2429,7 +2430,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 beforeFading.run();
             }
             updateScrimController();
-            mPresenter.updateMediaMetaData(false, true);
+            mPresenterLazy.get().updateMediaMetaData(false, true);
             mShadeSurface.resetAlpha();
             mShadeSurface.fadeOut(
                     FADE_KEYGUARD_START_DELAY, FADE_KEYGUARD_DURATION,
@@ -3564,7 +3565,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     updateDozingState();
                     checkBarModes();
                     updateScrimController();
-                    mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
+                    mPresenterLazy.get()
+                            .updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
                     Trace.endSection();
                 }
 
