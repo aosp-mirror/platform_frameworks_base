@@ -253,6 +253,7 @@ private fun SingleRowTopAppBar(
             hideTitleSemantics = false,
             navigationIcon = navigationIcon,
             actions = actionsRow,
+            titleScaleDisabled = false,
         )
     }
 }
@@ -426,6 +427,7 @@ private fun TwoRowsTopAppBar(
  * accessibility services at the same time, when animating between collapsed / expanded states.
  * @param navigationIcon a navigation icon [Composable]
  * @param actions actions [Composable]
+ * @param titleScaleDisabled whether the title font scaling is disabled. Default is disabled.
  */
 @Composable
 private fun TopAppBarLayout(
@@ -443,6 +445,7 @@ private fun TopAppBarLayout(
     hideTitleSemantics: Boolean,
     navigationIcon: @Composable () -> Unit,
     actions: @Composable () -> Unit,
+    titleScaleDisabled: Boolean = true,
 ) {
     Layout(
         {
@@ -466,9 +469,12 @@ private fun TopAppBarLayout(
                 ProvideTextStyle(value = titleTextStyle) {
                     CompositionLocalProvider(
                         LocalContentColor provides titleContentColor,
-                        // Disable the title font scaling by only passing the density but not the
-                        // font scale.
-                        LocalDensity provides Density(density = LocalDensity.current.density),
+                        LocalDensity provides with(LocalDensity.current) {
+                          Density(
+                              density = density,
+                              fontScale = if (titleScaleDisabled) 1f else fontScale,
+                          )
+                        },
                         content = title
                     )
                 }
