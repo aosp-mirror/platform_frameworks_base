@@ -22,7 +22,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.android.internal.R;
+import com.android.internal.foldables.FoldLockSettingAvailabilityProvider;
 import com.android.internal.util.SettingsWrapper;
 
 import java.util.Set;
@@ -51,14 +51,14 @@ public class FoldSettingProvider {
     private static final String TAG = "FoldSettingProvider";
 
     private final ContentResolver mContentResolver;
-    private final boolean mIsFoldLockBehaviorAvailable;
     private final SettingsWrapper mSettingsWrapper;
+    private final FoldLockSettingAvailabilityProvider mFoldLockSettingAvailabilityProvider;
 
-    public FoldSettingProvider(Context context, SettingsWrapper settingsWrapper) {
+    public FoldSettingProvider(Context context, SettingsWrapper settingsWrapper,
+            FoldLockSettingAvailabilityProvider foldLockSettingAvailabilityProvider) {
         mContentResolver = context.getContentResolver();
         mSettingsWrapper = settingsWrapper;
-        mIsFoldLockBehaviorAvailable = context.getResources().getBoolean(
-                R.bool.config_fold_lock_behavior);
+        mFoldLockSettingAvailabilityProvider = foldLockSettingAvailabilityProvider;
     }
 
     /**
@@ -83,7 +83,9 @@ public class FoldSettingProvider {
     }
 
     private String getFoldSettingValue() {
-        if (!mIsFoldLockBehaviorAvailable) {
+        boolean isFoldLockBehaviorAvailable =
+                mFoldLockSettingAvailabilityProvider.isFoldLockBehaviorAvailable();
+        if (!isFoldLockBehaviorAvailable) {
             return SETTING_VALUE_DEFAULT;
         }
         String foldSettingValue = mSettingsWrapper.getStringForUser(
