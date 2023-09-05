@@ -636,7 +636,13 @@ object Flags {
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
+    /**
+     * Whether the scene container (Flexiglass) is enabled. Note that [SCENE_CONTAINER] should be
+     * checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can remove
+     * unused code from our APK at compile time.
+     */
     // TODO(b/283300105): Tracking Bug
+    @JvmField val SCENE_CONTAINER_ENABLED = false
     @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
 
     // 1900
@@ -764,11 +770,11 @@ object Flags {
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
-    val COMPOSE_PEOPLE_SPACE = unreleasedFlag("compose_people_space")
+    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
 
     /** Enable the Compose implementation of the Quick Settings footer actions. */
     @JvmField
-    val COMPOSE_QS_FOOTER_ACTIONS = unreleasedFlag("compose_qs_footer_actions")
+    val COMPOSE_QS_FOOTER_ACTIONS = releasedFlag("compose_qs_footer_actions")
 
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
