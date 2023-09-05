@@ -116,6 +116,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -123,6 +124,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.WindowManagerGlobal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputBinding;
@@ -2988,12 +2990,28 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "Waiting for the lazy init of mImeDrawsImeNavBarRes");
         }
         final boolean canImeDrawsImeNavBar =
-                mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get();
+                mImeDrawsImeNavBarRes != null && mImeDrawsImeNavBarRes.get()
+                        && hasNavigationBarOnCurrentDisplay();
         final boolean shouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherLocked(
                 InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE);
         return (canImeDrawsImeNavBar ? InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR : 0)
                 | (shouldShowImeSwitcherWhenImeIsShown
                 ? InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN : 0);
+    }
+
+    /**
+     * Whether the current display has a navigation bar. When this is {@code false} (e.g. emulator),
+     * the IME should <em>not</em> draw the IME navigation bar.
+     */
+    @GuardedBy("ImfLock.class")
+    private boolean hasNavigationBarOnCurrentDisplay() {
+        final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        try {
+            return wm.hasNavigationBar(mCurTokenDisplayId != INVALID_DISPLAY
+                    ? mCurTokenDisplayId : DEFAULT_DISPLAY);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @GuardedBy("ImfLock.class")
