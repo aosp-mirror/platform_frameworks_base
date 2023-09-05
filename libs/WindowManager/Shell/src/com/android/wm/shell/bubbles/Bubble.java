@@ -973,9 +973,9 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         pw.print("  isDismissable: "); pw.println(mIsDismissable);
-        pw.println("  bubbleMetadataFlagListener null: " + (mBubbleMetadataFlagListener == null));
+        pw.println("  bubbleMetadataFlagListener null?: " + (mBubbleMetadataFlagListener == null));
         if (mExpandedView != null) {
-            mExpandedView.dump(pw);
+            mExpandedView.dump(pw, "  ");
         }
     }
 

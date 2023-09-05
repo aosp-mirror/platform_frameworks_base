@@ -1231,29 +1231,30 @@ public class BubbleData {
      * Description of current bubble data state.
      */
     public void dump(PrintWriter pw) {
-        pw.print("selected: ");
+        pw.println("BubbleData state:");
+        pw.print("  selected: ");
         pw.println(mSelectedBubble != null
                 ? mSelectedBubble.getKey()
                 : "null");
-        pw.print("expanded: ");
+        pw.print("  expanded: ");
         pw.println(mExpanded);
 
-        pw.print("stack bubble count:    ");
+        pw.print("Stack bubble count: ");
         pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
             bubble.dump(pw);
         }
 
-        pw.print("overflow bubble count:    ");
+        pw.print("Overflow bubble count: ");
         pw.println(mOverflowBubbles.size());
         for (Bubble bubble : mOverflowBubbles) {
             bubble.dump(pw);
         }
 
-        pw.print("summaryKeys: ");
+        pw.print("SummaryKeys: ");
         pw.println(mSuppressedGroupKeys.size());
         for (String key : mSuppressedGroupKeys.keySet()) {
-            pw.println("   suppressing: " + key);
+            pw.println("     suppressing: " + key);
         }
     }
 }

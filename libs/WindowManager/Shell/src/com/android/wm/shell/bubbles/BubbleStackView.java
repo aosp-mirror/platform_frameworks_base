@@ -305,8 +305,7 @@ public class BubbleStackView extends FrameLayout
 
         String bubblesOnScreen = BubbleDebugConfig.formatBubblesString(
                 getBubblesOnScreen(), getExpandedBubble());
-        pw.print("  stack visibility :       "); pw.println(getVisibility());
-        pw.print("  bubbles on screen:       "); pw.println(bubblesOnScreen);
+        pw.println("  bubbles on screen:       "); pw.println(bubblesOnScreen);
         pw.print("  gestureInProgress:       "); pw.println(mIsGestureInProgress);
         pw.print("  showingDismiss:          "); pw.println(mDismissView.isShowing());
         pw.print("  isExpansionAnimating:    "); pw.println(mIsExpansionAnimating);
@@ -314,7 +313,8 @@ public class BubbleStackView extends FrameLayout
         pw.print("  expandedContainerAlpha:  "); pw.println(mExpandedViewContainer.getAlpha());
         pw.print("  expandedContainerMatrix: ");
         pw.println(mExpandedViewContainer.getAnimationMatrix());
-
+        pw.print("  stack visibility :       "); pw.println(getVisibility());
+        pw.print("  temporarilyInvisible:    "); pw.println(mTemporarilyInvisible);
         mStackAnimationController.dump(pw);
         mExpandedAnimationController.dump(pw);
 
