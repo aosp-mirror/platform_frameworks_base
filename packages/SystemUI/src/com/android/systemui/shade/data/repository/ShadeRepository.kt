@@ -34,21 +34,48 @@ interface ShadeRepository {
     /** ShadeModel information regarding shade expansion events */
     val shadeModel: Flow<ShadeModel>
 
-    /** Amount qs has expanded. Quick Settings can be expanded without the full shade expansion. */
+    /**
+     * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
+     * Settings can be expanded without the full shade expansion.
+     */
     val qsExpansion: StateFlow<Float>
 
-    /** The amount the shade has expanded */
-    val shadeExpansion: StateFlow<Float>
+    /**
+     * The amount the lockscreen shade has dragged down by the user, [0-1]. 0 means fully collapsed,
+     * 1 means fully expanded.
+     */
+    val lockscreenShadeExpansion: StateFlow<Float>
+
+    /**
+     * NotificationPanelViewController.mExpandedFraction as a StateFlow. This nominally represents
+     * the amount the shade has expanded 0-1 like many other flows in this repo, but there are cases
+     * where its value will be 1 and no shade will be rendered, e.g. whenever the keyguard is
+     * visible and when quick settings is expanded. The confusing nature and impending deletion of
+     * this makes it unsuitable for future development, so usage is discouraged.
+     */
+    @Deprecated("Use ShadeInteractor.shadeExpansion instead")
+    val legacyShadeExpansion: StateFlow<Float>
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
     /** The amount QS has expanded without notifications */
     fun setQsExpansion(qsExpansion: Float)
+
     fun setUdfpsTransitionToFullShadeProgress(progress: Float)
 
-    /** The amount the shade has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded */
-    fun setShadeExpansion(expansion: Float)
+    /**
+     * Set the amount the shade has dragged down by the user, [0-1]. 0 means fully collapsed, 1
+     * means fully expanded.
+     */
+    fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float)
+
+    /**
+     * Set the legacy expansion value. This should only be called whenever the value of
+     * NotificationPanelViewController.mExpandedFraction changes or in tests.
+     */
+    @Deprecated("Should only be called by NPVC and tests")
+    fun setLegacyShadeExpansion(expandedFraction: Float)
 }
 
 /** Business logic for shade interactions */
@@ -84,18 +111,29 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 
-    private val _shadeExpansion = MutableStateFlow(0f)
-    override val shadeExpansion: StateFlow<Float> = _shadeExpansion.asStateFlow()
+    private val _lockscreenShadeExpansion = MutableStateFlow(0f)
+    override val lockscreenShadeExpansion: StateFlow<Float> =
+        _lockscreenShadeExpansion.asStateFlow()
 
     private var _udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
     override val udfpsTransitionToFullShadeProgress: StateFlow<Float> =
         _udfpsTransitionToFullShadeProgress.asStateFlow()
+
+    private val _legacyShadeExpansion = MutableStateFlow(0f)
+    @Deprecated("Use ShadeInteractor.shadeExpansion instead")
+    override val legacyShadeExpansion: StateFlow<Float> = _legacyShadeExpansion.asStateFlow()
+
     override fun setQsExpansion(qsExpansion: Float) {
         _qsExpansion.value = qsExpansion
     }
 
-    override fun setShadeExpansion(expansion: Float) {
-        _shadeExpansion.value = expansion
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyShadeExpansion(expandedFraction: Float) {
+        _legacyShadeExpansion.value = expandedFraction
+    }
+
+    override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
+        _lockscreenShadeExpansion.value = lockscreenShadeExpansion
     }
 
     override fun setUdfpsTransitionToFullShadeProgress(progress: Float) {

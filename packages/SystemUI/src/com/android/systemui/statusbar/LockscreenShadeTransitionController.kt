@@ -447,7 +447,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 if (!nsslController.isInLockedDownShade() || field == 0f || forceApplyAmount) {
                     fractionToShade =
                         MathUtils.saturate(dragDownAmount / notificationShelfTransitionDistance)
-                    shadeRepository.setShadeExpansion(fractionToShade)
+                    shadeRepository.setLockscreenShadeExpansion(fractionToShade)
                     nsslController.setTransitionToFullShadeAmount(fractionToShade)
 
                     qsTransitionController.dragDownAmount = value
@@ -857,12 +857,12 @@ class DragDownHelper(
             MotionEvent.ACTION_MOVE -> {
                 val h = y - initialTouchY
                 // Adjust the touch slop if another gesture may be being performed.
-                val touchSlop = if (event.classification
-                    == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE) {
-                    touchSlop * slopMultiplier
-                } else {
-                    touchSlop
-                }
+                val touchSlop =
+                    if (event.classification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE) {
+                        touchSlop * slopMultiplier
+                    } else {
+                        touchSlop
+                    }
                 if (h > touchSlop && h > Math.abs(x - initialTouchX)) {
                     isDraggingDown = true
                     captureStartingChild(initialTouchX, initialTouchY)

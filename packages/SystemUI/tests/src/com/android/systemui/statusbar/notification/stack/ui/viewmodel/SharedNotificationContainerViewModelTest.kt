@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.shade.data.repository.FakeShadeRepository
@@ -97,7 +98,11 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 keyguardTransitionInteractor = it.keyguardTransitionInteractor
                 keyguardTransitionRepository = it.repository
             }
-
+        sharedNotificationContainerInteractor =
+            SharedNotificationContainerInteractor(
+                configurationRepository,
+                mContext,
+            )
         shadeInteractor =
             ShadeInteractor(
                 testScope.backgroundScope,
@@ -106,13 +111,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 userSetupRepository,
                 deviceProvisionedController,
                 userInteractor,
+                sharedNotificationContainerInteractor,
                 shadeRepository,
-            )
-
-        sharedNotificationContainerInteractor =
-            SharedNotificationContainerInteractor(
-                configurationRepository,
-                mContext,
             )
         underTest =
             SharedNotificationContainerViewModel(
@@ -228,7 +228,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val isOnLockscreenWithoutShade by collectLastValue(underTest.isOnLockscreenWithoutShade)
 
             // First on AOD
-            shadeRepository.setShadeExpansion(0f)
+            shadeRepository.setLockscreenShadeExpansion(0f)
             shadeRepository.setQsExpansion(0f)
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
@@ -242,19 +242,19 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             showLockscreen()
 
             // While state is LOCKSCREEN, validate variations of both shade and qs expansion
-            shadeRepository.setShadeExpansion(0.1f)
+            shadeRepository.setLockscreenShadeExpansion(0.1f)
             shadeRepository.setQsExpansion(0f)
             assertThat(isOnLockscreenWithoutShade).isFalse()
 
-            shadeRepository.setShadeExpansion(0.1f)
+            shadeRepository.setLockscreenShadeExpansion(0.1f)
             shadeRepository.setQsExpansion(0.1f)
             assertThat(isOnLockscreenWithoutShade).isFalse()
 
-            shadeRepository.setShadeExpansion(0f)
+            shadeRepository.setLockscreenShadeExpansion(0f)
             shadeRepository.setQsExpansion(0.1f)
             assertThat(isOnLockscreenWithoutShade).isFalse()
 
-            shadeRepository.setShadeExpansion(0f)
+            shadeRepository.setLockscreenShadeExpansion(0f)
             shadeRepository.setQsExpansion(0f)
             assertThat(isOnLockscreenWithoutShade).isTrue()
         }
@@ -366,8 +366,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     private suspend fun showLockscreen() {
-        shadeRepository.setShadeExpansion(0f)
+        shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
+        keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         keyguardTransitionRepository.sendTransitionStep(
             TransitionStep(
                 to = KeyguardState.LOCKSCREEN,
@@ -377,8 +378,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     }
 
     private suspend fun showLockscreenWithShadeExpanded() {
-        shadeRepository.setShadeExpansion(1f)
+        shadeRepository.setLockscreenShadeExpansion(1f)
         shadeRepository.setQsExpansion(0f)
+        keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
         keyguardTransitionRepository.sendTransitionStep(
             TransitionStep(
                 to = KeyguardState.LOCKSCREEN,
