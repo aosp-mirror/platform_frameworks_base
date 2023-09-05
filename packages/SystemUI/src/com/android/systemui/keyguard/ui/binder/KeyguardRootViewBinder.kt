@@ -177,14 +177,13 @@ object KeyguardRootViewBinder {
             oldRight: Int,
             oldBottom: Int
         ) {
-            val ksv = v.findViewById(R.id.keyguard_status_view) as View?
-            val lockIcon = v.findViewById(R.id.lock_icon_view) as View?
+            val nsslPlaceholder = v.findViewById(R.id.nssl_placeholder) as View?
 
-            if (ksv != null && lockIcon != null) {
+            if (nsslPlaceholder != null) {
                 // After layout, ensure the notifications are positioned correctly
                 viewModel.onSharedNotificationContainerPositionChanged(
-                    ksv!!.top.toFloat() + ksv!!.height,
-                    lockIcon!!.y
+                    nsslPlaceholder.top.toFloat(),
+                    nsslPlaceholder.bottom.toFloat(),
                 )
             }
         }

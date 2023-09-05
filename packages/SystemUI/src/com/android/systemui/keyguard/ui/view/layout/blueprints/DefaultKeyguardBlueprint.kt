@@ -22,6 +22,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
@@ -50,6 +51,7 @@ constructor(
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
     splitShadeGuidelines: SplitShadeGuidelines,
+    aodNotificationIconsSection: AodNotificationIconsSection,
     private val featureFlags: FeatureFlags,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
@@ -64,6 +66,7 @@ constructor(
             defaultStatusViewSection,
             defaultNotificationStackScrollLayoutSection,
             splitShadeGuidelines,
+            aodNotificationIconsSection,
         )
 
     override fun addViews(

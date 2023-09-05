@@ -27,6 +27,7 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
@@ -60,6 +61,8 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
     @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
+    @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
+
     private val featureFlags = FakeFeatureFlags()
 
     @Before
@@ -76,6 +79,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultStatusViewSection,
                 defaultNSSLSection,
                 splitShadeGuidelines,
+                aodNotificationIconsSection,
                 featureFlags,
             )
         featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, false)

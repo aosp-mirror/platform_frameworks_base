@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
@@ -42,6 +41,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.log.LogBuffer;
@@ -240,7 +240,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         View nic = mView.findViewById(
                 R.id.left_aligned_notification_icon_container);
-        nic.setVisibility(View.GONE);
+        if (nic != null) {
+            nic.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -307,7 +309,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     int getNotificationIconAreaHeight() {
-        return mNotificationIconAreaController.getHeight();
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            return 0;
+        } else {
+            return mNotificationIconAreaController.getHeight();
+        }
     }
 
     @Override
@@ -518,10 +524,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateAodIcons() {
-        NotificationIconContainer nic = (NotificationIconContainer)
-                mView.findViewById(
-                        com.android.systemui.R.id.left_aligned_notification_icon_container);
-        mNotificationIconAreaController.setupAodIcons(nic);
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            NotificationIconContainer nic = (NotificationIconContainer)
+                    mView.findViewById(
+                            com.android.systemui.R.id.left_aligned_notification_icon_container);
+            mNotificationIconAreaController.setupAodIcons(nic);
+        }
     }
 
     private void setClock(ClockController clock) {
