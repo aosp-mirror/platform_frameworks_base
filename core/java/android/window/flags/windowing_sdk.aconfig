@@ -8,3 +8,10 @@ flag {
     description: "Whether the feature to sync different window-related config updates is enabled"
     bug: "260873529"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_embedding_overlay_presentation_flag"
+    description: "Whether the overlay presentation feature is enabled"
+    bug: "243518738"
+}
