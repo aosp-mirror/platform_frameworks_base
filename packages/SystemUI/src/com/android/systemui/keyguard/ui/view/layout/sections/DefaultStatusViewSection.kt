@@ -91,7 +91,7 @@ constructor(
                     it.requireViewById<ViewGroup>(R.id.status_view_media_container)
                 )
                 keyguardViewConfigurator.get().keyguardStatusViewController = controller
-                notificationPanelViewController.get().updateStatusBarViewController()
+                notificationPanelViewController.get().updateStatusViewController()
             }
         }
     }
@@ -100,6 +100,8 @@ constructor(
         constraintSet.apply {
             constrainWidth(statusViewId, MATCH_CONSTRAINT)
             constrainHeight(statusViewId, WRAP_CONTENT)
+            // TODO(b/296122465): Constrain to the top of [DefaultStatusBarSection] and remove the
+            // extra margin below.
             connect(statusViewId, TOP, PARENT_ID, TOP)
             connect(statusViewId, START, PARENT_ID, START)
             connect(statusViewId, END, PARENT_ID, END)
