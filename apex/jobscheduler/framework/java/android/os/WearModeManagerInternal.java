@@ -49,13 +49,25 @@ public interface WearModeManagerInternal {
     String QUICK_DOZE_REQUEST_IDENTIFIER = "quick_doze_request";
 
     /**
+     * Mode manager off body state identifier.
+     *
+     * <p>Unique identifier that can be used as identifier parameter in
+     * registerInternalStateObserver
+     * to listen to changes in quick doze request state from mode manager.
+     *
+     * TODO(b/288276510): convert to int constant
+     */
+    String OFFBODY_STATE_ID = "off_body";
+
+    /**
      * StringDef for Mode manager identifiers.
      *
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            QUICK_DOZE_REQUEST_IDENTIFIER
+            QUICK_DOZE_REQUEST_IDENTIFIER,
+            OFFBODY_STATE_ID
     })
     @Target(ElementType.TYPE_USE)
     @interface Identifier {
