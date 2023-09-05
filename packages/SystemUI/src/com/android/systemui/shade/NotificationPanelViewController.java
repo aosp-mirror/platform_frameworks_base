@@ -1680,6 +1680,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @ClockSize
     private int computeDesiredClockSize() {
+        if (shouldForceSmallClock()) {
+            return SMALL;
+        }
+
         if (mSplitShadeEnabled) {
             return computeDesiredClockSizeForSplitShade();
         }
@@ -1710,6 +1714,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             return SMALL;
         }
         return LARGE;
+    }
+
+    private boolean shouldForceSmallClock() {
+        return mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)
+                && !isOnAod()
+                // True on small landscape screens
+                && mResources.getBoolean(R.bool.force_small_clock_on_lockscreen);
     }
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
