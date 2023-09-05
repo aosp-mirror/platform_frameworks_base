@@ -57,6 +57,15 @@ interface DisplayStateInteractor {
     /** Display change event indicating a change to the given displayId has occurred. */
     val displayChanges: Flow<Int>
 
+    /**
+     * If true, the direction rotation is applied to get to an application's requested orientation
+     * is reversed. Normally, the model is that landscape is clockwise from portrait; thus on a
+     * portrait device an app requesting landscape will cause a clockwise rotation, and on a
+     * landscape device an app requesting portrait will cause a counter-clockwise rotation. Setting
+     * true here reverses that logic. See go/natural-orientation for context.
+     */
+    val isReverseDefaultRotation: Boolean
+
     /** Called on configuration changes, used to keep the display state in sync */
     fun onConfigurationChanged(newConfig: Configuration)
 }
@@ -111,6 +120,8 @@ constructor(
 
     override val currentRotation: StateFlow<DisplayRotation> =
         displayStateRepository.currentRotation
+
+    override val isReverseDefaultRotation: Boolean = displayStateRepository.isReverseDefaultRotation
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         screenSizeFoldProvider.onConfigurationChange(newConfig)
