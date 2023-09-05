@@ -142,7 +142,7 @@ constructor(
                         private val connectedIds = mutableSetOf<Int>()
                         override fun onDisplayConnected(id: Int) {
                             if (DEBUG) {
-                                Log.d(TAG, "$id connected")
+                                Log.d(TAG, "display with id=$id connected.")
                             }
                             connectedIds += id
                             ignoredDisplayIds.value -= id
@@ -152,7 +152,7 @@ constructor(
                         override fun onDisplayDisconnected(id: Int) {
                             connectedIds -= id
                             if (DEBUG) {
-                                Log.d(TAG, "$id disconnected. Connected ids: $connectedIds")
+                                Log.d(TAG, "display with id=$id disconnected.")
                             }
                             ignoredDisplayIds.value -= id
                             trySend(connectedIds.toSet())
@@ -203,6 +203,9 @@ constructor(
                     override val id = id
                     override suspend fun enable() {
                         traceSection("DisplayRepository#enable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Enabling display with id=$id")
+                            }
                             displayManager.enableConnectedDisplay(id)
                         }
                         // After the display has been enabled, it is automatically ignored.
@@ -218,6 +221,9 @@ constructor(
                     override suspend fun disable() {
                         ignore()
                         traceSection("DisplayRepository#disable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Disabling display with id=$id")
+                            }
                             displayManager.disableConnectedDisplay(id)
                         }
                     }
