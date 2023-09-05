@@ -13,3 +13,10 @@ flag {
   description: "This flag controls the polite notification feature"
   bug: "270456865"
 }
+
+flag {
+  name: "refactor_attention_helper"
+  namespace: "systemui"
+  description: "This flag controls the refactoring of NMS to NotificationAttentionHelper"
+  bug: "291907312"
+}
