@@ -2312,7 +2312,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         return mKeyguardInteractor.getWakefulnessModel().getValue();
     }
 
-    private void maybeAnimateBottomAreaAlpha() {
+    @VisibleForTesting
+    void maybeAnimateBottomAreaAlpha() {
         mBottomAreaShadeAlphaAnimator.cancel();
         if (mBarState == StatusBarState.SHADE_LOCKED) {
             mBottomAreaShadeAlphaAnimator.setFloatValues(mBottomAreaShadeAlpha, 0.0f);
@@ -2674,10 +2675,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // • User tapping on lock screen: bouncer won't be visible but panel expansion will
         //   change due to "unlock hint animation." In this case, fading out the bottom area
         //   would also hide the message that says "swipe to unlock," we don't want to do that.
-        float expansionAlpha = MathUtils.map(
-                isUnlockHintRunning() ? 0 : KeyguardBouncerConstants.ALPHA_EXPANSION_THRESHOLD, 1f,
-                0f, 1f,
+        float expansionAlpha = MathUtils.constrainedMap(0f, 1f,
+                isUnlockHintRunning() ? 0f : KeyguardBouncerConstants.ALPHA_EXPANSION_THRESHOLD, 1f,
                 getExpandedFraction());
+
         float alpha = Math.min(expansionAlpha, 1 - mQsController.computeExpansionFraction());
         alpha *= mBottomAreaShadeAlpha;
         if (mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
