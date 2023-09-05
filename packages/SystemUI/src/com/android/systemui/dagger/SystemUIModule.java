@@ -124,7 +124,6 @@ import com.android.systemui.user.UserModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.CoroutinesModule;
-import com.android.systemui.util.leak.GarbageMonitorModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
@@ -177,7 +176,6 @@ import javax.inject.Named;
             FlagsModule.class,
             SystemPropertiesFlagsModule.class,
             FooterActionsModule.class,
-            GarbageMonitorModule.class,
             KeyboardModule.class,
             LetterboxModule.class,
             KeyguardBlueprintModule.class,
