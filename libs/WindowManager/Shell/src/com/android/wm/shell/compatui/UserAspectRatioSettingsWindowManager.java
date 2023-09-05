@@ -208,7 +208,7 @@ class UserAspectRatioSettingsWindowManager extends CompatUIWindowManagerAbstract
     }
 
     private boolean getHasUserAspectRatioSettingsButton(@NonNull TaskInfo taskInfo) {
-        return  taskInfo.topActivityEligibleForUserAspectRatioButton
+        return taskInfo.topActivityEligibleForUserAspectRatioButton
                 && (taskInfo.topActivityBoundsLetterboxed
                     || taskInfo.isUserFullscreenOverrideEnabled);
     }

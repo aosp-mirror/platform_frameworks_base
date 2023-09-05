@@ -83,7 +83,6 @@ public class TimeDetectorServiceTest {
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
-    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeTimeDetectorStrategy mFakeTimeDetectorStrategySpy;
 
     private NtpTrustedTime mMockNtpTrustedTime;
@@ -101,13 +100,12 @@ public class TimeDetectorServiceTest {
         mTestCallerIdentityInjector = new TestCallerIdentityInjector();
         mTestCallerIdentityInjector.initializeCallingUserId(ARBITRARY_USER_ID);
 
-        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
         mFakeTimeDetectorStrategySpy = spy(new FakeTimeDetectorStrategy());
         mMockNtpTrustedTime = mock(NtpTrustedTime.class);
 
         mTimeDetectorService = new TimeDetectorService(
                 mMockContext, mTestHandler, mTestCallerIdentityInjector,
-                mFakeServiceConfigAccessorSpy, mFakeTimeDetectorStrategySpy, mMockNtpTrustedTime);
+                mFakeTimeDetectorStrategySpy, mMockNtpTrustedTime);
     }
 
     @After
@@ -132,14 +130,14 @@ public class TimeDetectorServiceTest {
 
         ConfigurationInternal configuration =
                 createConfigurationInternal(true /* autoDetectionEnabled*/);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(configuration);
+        mFakeTimeDetectorStrategySpy.initializeConfiguration(configuration);
 
         TimeCapabilitiesAndConfig actualCapabilitiesAndConfig =
                 mTimeDetectorService.getCapabilitiesAndConfig();
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION), anyString());
         int expectedUserId = mTestCallerIdentityInjector.getCallingUserId();
-        verify(mFakeServiceConfigAccessorSpy).getConfigurationInternal(expectedUserId);
+        verify(mFakeTimeDetectorStrategySpy).getCapabilitiesAndConfig(expectedUserId, false);
 
         boolean bypassUserPolicyChecks = false;
         TimeCapabilitiesAndConfig expectedCapabilitiesAndConfig =
@@ -174,7 +172,7 @@ public class TimeDetectorServiceTest {
     public void testListenerRegistrationAndCallbacks() throws Exception {
         ConfigurationInternal initialConfiguration =
                 createConfigurationInternal(false /* autoDetectionEnabled */);
-        mFakeServiceConfigAccessorSpy.initializeConfiguration(initialConfiguration);
+        mFakeTimeDetectorStrategySpy.initializeConfiguration(initialConfiguration);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeDetectorListener mockListener = mock(ITimeDetectorListener.class);

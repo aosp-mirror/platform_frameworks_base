@@ -228,6 +228,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private final Toast mSplitUnsupportedToast;
     private SplitRequest mSplitRequest;
 
+    /**
+     * Since StageCoordinator only coordinates MainStage and SideStage, it shouldn't support
+     * CompatUI layouts. CompatUI is handled separately by MainStage and SideStage.
+     */
+    @Override
+    public boolean supportCompatUI() {
+        return false;
+    }
+
     class SplitRequest {
         @SplitPosition
         int mActivatePosition;
