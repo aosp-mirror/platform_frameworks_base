@@ -46,7 +46,7 @@ constructor(
     override val id: String = SHORTCUTS_BESIDE_UDFPS
 
     override val sections =
-        arrayOf(
+        setOf(
             defaultIndicationAreaSection,
             defaultLockIconSection,
             defaultAmbientIndicationAreaSection,

@@ -31,7 +31,7 @@ constructor(
     defaultCommunalWidgetSection: DefaultCommunalWidgetSection,
 ) : KeyguardBlueprint {
     override val id: String = COMMUNAL
-    override val sections: Array<KeyguardSection> = arrayOf(defaultCommunalWidgetSection)
+    override val sections: Set<KeyguardSection> = setOf(defaultCommunalWidgetSection)
 
     companion object {
         const val COMMUNAL = "communal"

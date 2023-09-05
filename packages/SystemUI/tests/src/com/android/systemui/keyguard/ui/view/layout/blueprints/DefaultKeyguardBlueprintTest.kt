@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
@@ -34,10 +35,12 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopu
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -81,7 +84,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Test
     fun addViews() {
         val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
+        underTest.addViews(null, constraintLayout)
         underTest.sections.forEach { verify(it, never()).addViews(constraintLayout) }
     }
 
@@ -89,8 +92,32 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     fun addViews_lazyInflateFlagOn() {
         featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, true)
         val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
+        underTest.addViews(null, constraintLayout)
         underTest.sections.forEach { verify(it).addViews(constraintLayout) }
+    }
+
+    @Test
+    fun addViews_withPrevBlueprint() {
+        val prevBlueprint = mock(KeyguardBlueprint::class.java)
+        whenever(prevBlueprint.sections)
+            .thenReturn(underTest.sections.minus(defaultLockIconSection))
+        featureFlags.set(Flags.LAZY_INFLATE_KEYGUARD, true)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(prevBlueprint, constraintLayout)
+        underTest.sections.minus(defaultLockIconSection).forEach {
+            verify(it, never()).addViews(constraintLayout)
+        }
+
+        verify(defaultLockIconSection).addViews(constraintLayout)
+    }
+
+    @Test
+    fun addViews_withNextBlueprint() {
+        val nextBlueprint = mock(KeyguardBlueprint::class.java)
+        whenever(nextBlueprint.sections).thenReturn(setOf())
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.removeViews(nextBlueprint, constraintLayout)
+        underTest.sections.forEach { verify(it).removeViews(constraintLayout) }
     }
 
     @Test

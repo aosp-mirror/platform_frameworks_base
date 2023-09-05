@@ -18,14 +18,17 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -58,7 +61,23 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
     }
 
     @Test
-    fun apply() {
+    fun addViewsConditionally() {
+        whenever(featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)).thenReturn(true)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        assertThat(constraintLayout.childCount).isGreaterThan(0)
+    }
+
+    @Test
+    fun addViewsConditionally_migrateFlagOff() {
+        whenever(featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)).thenReturn(false)
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.addViews(constraintLayout)
+        assertThat(constraintLayout.childCount).isEqualTo(0)
+    }
+
+    @Test
+    fun applyConstraints() {
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 

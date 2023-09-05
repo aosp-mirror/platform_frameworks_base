@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -46,19 +45,21 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val keyguardAmbientIndicationViewModel: KeyguardAmbientIndicationViewModel,
     private val keyguardRootViewModel: KeyguardRootViewModel,
-) : KeyguardSection {
+) : KeyguardSection() {
     private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
-            if (constraintLayout.findViewById<View>(R.id.ambient_indication_container) == null) {
-                val view =
-                    LayoutInflater.from(constraintLayout.context)
-                        .inflate(R.layout.ambient_indication, constraintLayout, false)
+            val view =
+                LayoutInflater.from(constraintLayout.context)
+                    .inflate(R.layout.ambient_indication, constraintLayout, false)
 
-                constraintLayout.addView(view)
-            }
+            constraintLayout.addView(view)
+        }
+    }
 
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             ambientIndicationAreaHandle =
                 KeyguardAmbientIndicationAreaViewBinder.bind(
                     constraintLayout,
@@ -94,7 +95,9 @@ constructor(
         }
     }
 
-    override fun onDestroy() {
+    override fun removeViews(constraintLayout: ConstraintLayout) {
         ambientIndicationAreaHandle?.destroy()
+
+        constraintLayout.removeView(R.id.ambient_indication_container)
     }
 }
