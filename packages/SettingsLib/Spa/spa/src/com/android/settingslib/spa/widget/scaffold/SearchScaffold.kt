@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.R
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -96,7 +97,8 @@ fun SearchScaffold(
             Modifier
                 .padding(paddingValues.horizontalValues())
                 .padding(top = paddingValues.calculateTopPadding())
-                .fillMaxSize(),
+                .focusable()
+                .fillMaxSize()
         ) {
             content(
                 paddingValues.calculateBottomPadding(),
