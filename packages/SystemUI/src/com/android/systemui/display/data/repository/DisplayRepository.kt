@@ -174,24 +174,35 @@ constructor(
                 initialValue = emptySet()
             )
 
+    private val connectedExternalDisplayIds: Flow<Set<Int>> =
+        connectedDisplayIds
+            .map { connectedDisplayIds ->
+                connectedDisplayIds
+                    .filter { id -> displayManager.getDisplay(id)?.type == Display.TYPE_EXTERNAL }
+                    .toSet()
+            }
+            .flowOn(backgroundCoroutineDispatcher)
+            .debugLog("connectedExternalDisplayIds")
+
     /**
      * Pending displays are the ones connected, but not enabled and not ignored. A connected display
      * is ignored after the user makes the decision to use it or not. For now, the initial decision
      * from the user is final and not reversible.
      */
     private val pendingDisplayIds: Flow<Set<Int>> =
-        combine(enabledDisplayIds, connectedDisplayIds, ignoredDisplayIds) {
+        combine(enabledDisplayIds, connectedExternalDisplayIds, ignoredDisplayIds) {
                 enabledDisplaysIds,
-                connectedDisplayIds,
+                connectedExternalDisplayIds,
                 ignoredDisplayIds ->
                 if (DEBUG) {
                     Log.d(
                         TAG,
-                        "combining enabled: $enabledDisplaysIds, " +
-                            "connected: $connectedDisplayIds, ignored: $ignoredDisplayIds"
+                        "combining enabled=$enabledDisplaysIds, " +
+                            "connectedExternalDisplayIds=$connectedExternalDisplayIds, " +
+                            "ignored=$ignoredDisplayIds"
                     )
                 }
-                connectedDisplayIds - enabledDisplaysIds - ignoredDisplayIds
+                connectedExternalDisplayIds - enabledDisplaysIds - ignoredDisplayIds
             }
             .debugLog("pendingDisplayIds")
 

@@ -350,6 +350,27 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(pendingDisplay).isNotNull()
         }
 
+    @Test
+    fun onPendingDisplay_internalDisplay_ignored() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1, Display.TYPE_INTERNAL)
+
+            assertThat(pendingDisplay).isNull()
+        }
+
+    @Test
+    fun onPendingDisplay_OneInternalAndOneExternalDisplay_internalIgnored() =
+        testScope.runTest {
+            val pendingDisplay by lastPendingDisplay()
+
+            sendOnDisplayConnected(1, Display.TYPE_EXTERNAL)
+            sendOnDisplayConnected(2, Display.TYPE_INTERNAL)
+
+            assertThat(pendingDisplay!!.id).isEqualTo(1)
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     // Wrapper to capture the displayListener.
@@ -392,9 +413,12 @@ class DisplayRepositoryTest : SysuiTestCase() {
 
     private fun sendOnDisplayDisconnected(id: Int) {
         connectedDisplayListener.value.onDisplayDisconnected(id)
+        whenever(displayManager.getDisplay(eq(id))).thenReturn(null)
     }
 
-    private fun sendOnDisplayConnected(id: Int) {
+    private fun sendOnDisplayConnected(id: Int, displayType: Int = Display.TYPE_EXTERNAL) {
+        val mockDisplay = display(id = id, type = displayType)
+        whenever(displayManager.getDisplay(eq(id))).thenReturn(mockDisplay)
         connectedDisplayListener.value.onDisplayConnected(id)
     }
 
