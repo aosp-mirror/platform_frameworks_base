@@ -377,6 +377,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int oldPath = getActivePortId() != Constants.INVALID_PORT_ID
+                && getActivePortId() != Constants.CEC_SWITCH_HOME
                 ? mService.portIdToPath(getActivePortId()) : getDeviceInfo().getPhysicalAddress();
         setActivePath(oldPath);
         if (mSkipRoutingControl) {

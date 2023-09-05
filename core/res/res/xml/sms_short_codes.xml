@@ -40,7 +40,7 @@
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
 
     <!-- Argentina: 5 digits, known short codes listed -->
-    <shortcode country="ar" pattern="\\d{5}" free="11711|28291|44077" />
+    <shortcode country="ar" pattern="\\d{5}" free="11711|28291|44077|78887" />
 
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->
     <shortcode country="am" pattern="\\d{3,4}" premium="11[2456]1|3024" free="10[123]" />
@@ -162,7 +162,7 @@
     <shortcode country="jp" pattern="\\d{1,5}" free="8083" />
 
     <!-- Kenya: 5 digits, known premium codes listed -->
-    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520|23342" />
+    <shortcode country="ke" pattern="\\d{5}" free="21725|21562|40520|23342|40023" />
 
     <!-- Kyrgyzstan: 4 digits, known premium codes listed -->
     <shortcode country="kg" pattern="\\d{4}" premium="415[2367]|444[69]" />
@@ -208,7 +208,7 @@
     <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|176|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
     <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="pe" pattern="\\d{4,5}" free="9963|40777" />
+    <shortcode country="pe" pattern="\\d{4,5}" free="9963|40778" />
 
     <!-- Philippines -->
     <shortcode country="ph" pattern="\\d{1,5}" free="2147|5495|5496" />
