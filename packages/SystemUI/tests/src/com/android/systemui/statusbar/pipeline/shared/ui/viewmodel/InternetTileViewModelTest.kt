@@ -17,13 +17,14 @@
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
+import com.android.settingslib.AccessibilityContentDescriptions.WIFI_OTHER_DEVICE_CONNECTION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.WifiIcons
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
@@ -181,6 +182,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(WifiIcons.WIFI_NO_INTERNET_ICONS[4]))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .doesNotContain(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -192,6 +195,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_tablet))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -203,6 +208,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_laptop))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -214,6 +221,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_watch))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -225,6 +234,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_auto))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -236,6 +247,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -247,6 +260,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
@@ -258,6 +273,8 @@ class InternetTileViewModelTest : SysuiTestCase() {
 
             assertThat(latest?.icon)
                 .isEqualTo(ResourceIcon.get(com.android.settingslib.R.drawable.ic_hotspot_phone))
+            assertThat(latest?.stateDescription.loadContentDescription(context))
+                .isEqualTo(context.getString(WIFI_OTHER_DEVICE_CONNECTION))
         }
 
     @Test
