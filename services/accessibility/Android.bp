@@ -27,4 +27,20 @@ java_library_static {
         "services.core",
         "androidx.annotation_annotation",
     ],
+    static_libs: [
+        "com_android_server_accessibility_flags_lib",
+    ],
+}
+
+aconfig_declarations {
+    name: "com_android_server_accessibility_flags",
+    package: "com.android.server.accessibility",
+    srcs: [
+        "accessibility.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "com_android_server_accessibility_flags_lib",
+    aconfig_declarations: "com_android_server_accessibility_flags",
 }
