@@ -4,3 +4,4 @@ include /core/java/android/security/OWNERS
 
 per-file *AttestationVerification* = file:/core/java/android/security/attestationverification/OWNERS
 per-file FileIntegrity*.java = victorhsieh@google.com
+per-file KeyChainSystemService.java = file:platform/packages/apps/KeyChain:/OWNERS
