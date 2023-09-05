@@ -1779,7 +1779,7 @@ public final class Bitmap implements Parcelable {
      * If the bitmap's internal config is in one of the public formats, return
      * that config, otherwise return null.
      */
-    @NonNull
+    @Nullable
     public final Config getConfig() {
         if (mRecycled) {
             Log.w(TAG, "Called getConfig() on a recycle()'d bitmap! This is undefined behavior!");
