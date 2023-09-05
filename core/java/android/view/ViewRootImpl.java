@@ -434,15 +434,15 @@ public final class ViewRootImpl implements ViewParent,
         /**
          * Called when the typing hint is changed. This would be invoked by the
          * {@link android.view.inputmethod.RemoteInputConnectionImpl}
-         * to hint if the user is typing when the it is {@link #isActive() active}.
+         * to hint if the user is typing when it is {@link #isActive() active}.
          *
-         * This can be only happened on the UI thread. The behavior won't be guaranteed if
-         * invoking this on a non-UI thread.
+         * The operation in this method should be dispatched to the UI thread to
+         * keep the sequence.
          *
          * @param isTyping {@code true} if the user is typing.
+         * @param deactivate {code true} if the input connection deactivate
          */
-        @UiThread
-        void onTypingHintChanged(boolean isTyping);
+        void onTypingHintChanged(boolean isTyping, boolean deactivate);
 
         /**
          * Indicates whether the notifier is currently in active state or not.
@@ -468,19 +468,40 @@ public final class ViewRootImpl implements ViewParent,
         @NonNull
         private final ViewRootRefreshRateController mController;
 
+        @NonNull
+        private final Handler mHandler;
+
+        @NonNull
+        private final Thread mThread;
+
         TypingHintNotifierImpl(@NonNull AtomicReference<TypingHintNotifier> notifier,
-                @NonNull ViewRootRefreshRateController controller) {
+                @NonNull ViewRootRefreshRateController controller, @NonNull Handler handler,
+                @NonNull Thread thread) {
             mController = controller;
             mActiveNotifier = notifier;
+            mHandler = handler;
+            mThread = thread;
         }
 
         @Override
-        public void onTypingHintChanged(boolean isTyping) {
-            if (!isActive()) {
-                // No-op when the listener was deactivated.
-                return;
+        public void onTypingHintChanged(boolean isTyping, boolean deactivate) {
+            final Runnable runnable = () -> {
+                if (!isActive()) {
+                    // No-op when the listener was deactivated.
+                    return;
+                }
+                mController.updateRefreshRatePreference(isTyping ? LOWER : RESTORE);
+                if (deactivate) {
+                    deactivate();
+                }
+            };
+
+            if (Thread.currentThread() == mThread) {
+                // Run directly if it's on the UiThread.
+                runnable.run();
+            } else {
+                mHandler.post(runnable);
             }
-            mController.updateRefreshRatePreference(isTyping ? LOWER : RESTORE);
         }
 
         @Override
@@ -521,7 +542,7 @@ public final class ViewRootImpl implements ViewParent,
             return null;
         }
         final TypingHintNotifier newNotifier = new TypingHintNotifierImpl(mActiveTypingHintNotifier,
-                mRefreshRateController);
+                mRefreshRateController, mHandler, mThread);
         mActiveTypingHintNotifier.set(newNotifier);
 
         return newNotifier;
