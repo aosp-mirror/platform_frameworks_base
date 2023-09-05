@@ -3643,6 +3643,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (r.getParent() == null) {
                     Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
+                    if (transition != null) {
+                        transition.abort();
+                    }
                     return;
                 }
                 EventLogTags.writeWmEnterPip(r.mUserId, System.identityHashCode(r),
