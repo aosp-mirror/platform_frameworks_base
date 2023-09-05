@@ -3530,7 +3530,7 @@ public class CarrierConfigManager {
     /**
      * When a partial sms / mms message stay in raw table for too long without being completed,
      * we expire them and delete them from the raw table. This carrier config defines the
-     * expiration time.
+     * expiration time. The default value is milliseconds in 7 days.
      * @hide
      */
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
@@ -10318,6 +10318,8 @@ public class CarrierConfigManager {
                 "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000", "NR_SA_MMWAVE:145000,60000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPLINK_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
+        sDefaults.putLong(
+                KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME, (long) (60 * 60 * 1000) * 24 * 7);
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
