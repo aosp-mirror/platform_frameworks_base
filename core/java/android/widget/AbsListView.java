@@ -53,6 +53,7 @@ import android.view.ActionMode;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.HapticScrollFeedbackProvider;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -91,6 +92,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.SurroundingText;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
+import android.widget.flags.Flags;
 import android.widget.RemoteViews.InteractionHandler;
 
 import com.android.internal.R;
@@ -917,6 +919,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
+    private HapticScrollFeedbackProvider mHapticScrollFeedbackProvider;
 
     public AbsListView(Context context) {
         super(context);
@@ -4502,10 +4506,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
-                    // Tracks whether or not we should attempt fling for this event.
-                    // Fling should not be attempted if the view is already at the limit of scroll,
-                    // since it conflicts with EdgeEffect.
-                    boolean shouldAttemptFling = true;
                     // If we're moving down, we want the top item. If we're moving up, bottom item.
                     final int motionIndex = delta > 0 ? 0 : getChildCount() - 1;
 
@@ -4518,10 +4518,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
-                        if (shouldAttemptFling) {
-                            initDifferentialFlingHelperIfNotExists();
-                            mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
+                        if (Flags.platformWidgetHapticScrollFeedback()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollProgress(event, axis, delta);
                         }
+                        initDifferentialFlingHelperIfNotExists();
+                        mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
                         return true;
                     } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
                             && (overscrollMode == OVER_SCROLL_ALWAYS
@@ -4530,7 +4532,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         int motionViewRealTop = motionView.getTop();
                         float overscroll = (delta - (motionViewRealTop - motionViewPrevTop))
                                 / ((float) getHeight());
-                        if (delta > 0) {
+                        boolean hitTopLimit = delta > 0;
+                        if (Flags.platformWidgetHapticScrollFeedback()) {
+                            initHapticScrollFeedbackProviderIfNotExists();
+                            mHapticScrollFeedbackProvider.onScrollLimit(
+                                    event, axis, /* isStart= */ hitTopLimit);
+                        }
+                        if (hitTopLimit) {
                             mEdgeGlowTop.onPullDistance(overscroll, 0.5f);
                             mEdgeGlowTop.onRelease();
                         } else {
@@ -4693,6 +4701,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mDifferentialMotionFlingHelper =
                     new DifferentialMotionFlingHelper(
                             mContext, new DifferentialFlingTarget());
+        }
+    }
+
+    private void initHapticScrollFeedbackProviderIfNotExists() {
+        if (mHapticScrollFeedbackProvider == null) {
+            mHapticScrollFeedbackProvider = new HapticScrollFeedbackProvider(this);
         }
     }
 

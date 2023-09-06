@@ -29,6 +29,7 @@ java_defaults {
         ":telecom_flags_core_java_lib{.generated_srcjars}",
         ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
         ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
+        ":android.widget.flags-aconfig-java{.generated_srcjars}",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
@@ -185,3 +186,17 @@ java_aconfig_library {
     aconfig_declarations: "android.view.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
+
+// Widget
+aconfig_declarations {
+    name: "android.widget.flags-aconfig",
+    package: "android.widget.flags",
+    srcs: ["core/java/android/widget/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.widget.flags-aconfig-java",
+    aconfig_declarations: "android.widget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
