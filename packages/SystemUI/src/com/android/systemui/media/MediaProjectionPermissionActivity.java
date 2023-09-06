@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -72,6 +73,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
     private final FeatureFlags mFeatureFlags;
     private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
+    private final StatusBarManager mStatusBarManager;
 
     private String mPackageName;
     private int mUid;
@@ -87,9 +89,11 @@ public class MediaProjectionPermissionActivity extends Activity
 
     @Inject
     public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
-            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver) {
+            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
+            StatusBarManager statusBarManager) {
         mFeatureFlags = featureFlags;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
+        mStatusBarManager = statusBarManager;
     }
 
     @Override
@@ -311,6 +315,8 @@ public class MediaProjectionPermissionActivity extends Activity
                 // WM Shell running inside.
                 mUserSelectingTask = true;
                 startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                // close shade if it's open
+                mStatusBarManager.collapsePanels();
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
