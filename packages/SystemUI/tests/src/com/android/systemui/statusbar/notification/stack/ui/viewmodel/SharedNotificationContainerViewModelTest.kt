@@ -220,6 +220,14 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 )
             )
             assertThat(isOnLockscreen).isTrue()
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            assertThat(isOnLockscreen).isTrue()
         }
 
     @Test
