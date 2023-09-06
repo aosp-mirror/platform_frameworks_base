@@ -2143,9 +2143,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         mDeviceManagementResourcesProvider.load();
-        if (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled()) {
-            mDevicePolicyEngine.load();
-        }
+	mDevicePolicyEngine.load();
 
         mContactSystemRoleHolders = fetchOemSystemHolders(/* roleResIds...= */
                 com.android.internal.R.string.config_defaultSms,
@@ -3378,6 +3376,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 loadAdminDataAsync();
                 mOwners.systemReady();
                 applyManagedSubscriptionsPolicyIfRequired();
+                break;
+            case SystemService.PHASE_SYSTEM_SERVICES_READY:
+            	synchronized (getLockObject()) {
+                    mDevicePolicyEngine.reapplyAllPoliciesLocked();
+                }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
