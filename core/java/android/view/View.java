@@ -2434,7 +2434,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #getId()
      */
     @IdRes
-    @ViewDebug.ExportedProperty(resolveId = true)
     int mID = NO_ID;
 
     /** The ID of this view for autofill purposes.
@@ -4241,71 +4240,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This view's request for the visibility of the status bar.
      * @hide
      */
-    @ViewDebug.ExportedProperty(flagMapping = {
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LOW_PROFILE,
-                    equals = SYSTEM_UI_FLAG_LOW_PROFILE,
-                    name = "LOW_PROFILE"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
-                    equals = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
-                    name = "HIDE_NAVIGATION"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_FULLSCREEN,
-                    equals = SYSTEM_UI_FLAG_FULLSCREEN,
-                    name = "FULLSCREEN"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_STABLE,
-                    equals = SYSTEM_UI_FLAG_LAYOUT_STABLE,
-                    name = "LAYOUT_STABLE"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
-                    equals = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
-                    name = "LAYOUT_HIDE_NAVIGATION"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
-                    equals = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
-                    name = "LAYOUT_FULLSCREEN"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_IMMERSIVE,
-                    equals = SYSTEM_UI_FLAG_IMMERSIVE,
-                    name = "IMMERSIVE"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
-                    equals = SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
-                    name = "IMMERSIVE_STICKY"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
-                    equals = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
-                    name = "LIGHT_STATUS_BAR"),
-            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                    equals = SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                    name = "LIGHT_NAVIGATION_BAR"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_EXPAND,
-                    equals = STATUS_BAR_DISABLE_EXPAND,
-                    name = "STATUS_BAR_DISABLE_EXPAND"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
-                    equals = STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
-                    name = "STATUS_BAR_DISABLE_NOTIFICATION_ICONS"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
-                    equals = STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
-                    name = "STATUS_BAR_DISABLE_NOTIFICATION_ALERTS"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
-                    equals = STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
-                    name = "STATUS_BAR_DISABLE_NOTIFICATION_TICKER"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SYSTEM_INFO,
-                    equals = STATUS_BAR_DISABLE_SYSTEM_INFO,
-                    name = "STATUS_BAR_DISABLE_SYSTEM_INFO"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_HOME,
-                    equals = STATUS_BAR_DISABLE_HOME,
-                    name = "STATUS_BAR_DISABLE_HOME"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_BACK,
-                    equals = STATUS_BAR_DISABLE_BACK,
-                    name = "STATUS_BAR_DISABLE_BACK"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_CLOCK,
-                    equals = STATUS_BAR_DISABLE_CLOCK,
-                    name = "STATUS_BAR_DISABLE_CLOCK"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_RECENT,
-                    equals = STATUS_BAR_DISABLE_RECENT,
-                    name = "STATUS_BAR_DISABLE_RECENT"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SEARCH,
-                    equals = STATUS_BAR_DISABLE_SEARCH,
-                    name = "STATUS_BAR_DISABLE_SEARCH"),
-            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
-                    equals = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
-                    name = "STATUS_BAR_DISABLE_ONGOING_CALL_CHIP")
-    }, formatToHexString = true)
     @SystemUiVisibility
     int mSystemUiVisibility;
 
@@ -4424,7 +4358,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the left edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mLeft;
     /**
@@ -4432,7 +4365,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the right edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mRight;
     /**
@@ -4440,7 +4372,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the top edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mTop;
     /**
@@ -4448,7 +4379,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the bottom edge of this view.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mBottom;
 
@@ -4459,7 +4389,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * accessing these directly.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "scrolling")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollX;
     /**
@@ -4469,7 +4398,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * accessing these directly.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "scrolling")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mScrollY;
 
@@ -4478,7 +4406,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * pixels between the left edge of this view and the left edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingLeft = 0;
     /**
@@ -4486,7 +4413,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * pixels between the right edge of this view and the right edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingRight = 0;
     /**
@@ -4494,7 +4420,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * pixels between the top edge of this view and the top edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingTop;
     /**
@@ -4502,7 +4427,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * pixels between the bottom edge of this view and the bottom edge of its content.
      * {@hide}
      */
-    @ViewDebug.ExportedProperty(category = "padding")
     @UnsupportedAppUsage
     protected int mPaddingBottom;
 
@@ -17197,6 +17121,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The left edge of the displayed part of your view, in pixels.
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "scrolling")
     public final int getScrollX() {
         return mScrollX;
     }
@@ -17209,6 +17134,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The top edge of the displayed part of your view, in pixels.
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "scrolling")
     public final int getScrollY() {
         return mScrollY;
     }
@@ -17999,6 +17925,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The top of this view, in pixels.
      */
     @ViewDebug.CapturedViewProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getTop() {
         return mTop;
     }
@@ -18058,6 +17985,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The bottom of this view, in pixels.
      */
     @ViewDebug.CapturedViewProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getBottom() {
         return mBottom;
     }
@@ -18123,6 +18051,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The left edge of this view, in pixels.
      */
     @ViewDebug.CapturedViewProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getLeft() {
         return mLeft;
     }
@@ -18182,6 +18111,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The right edge of this view, in pixels.
      */
     @ViewDebug.CapturedViewProperty
+    @ViewDebug.ExportedProperty(category = "layout")
     public final int getRight() {
         return mRight;
     }
@@ -25390,6 +25320,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the top padding in pixels
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     public int getPaddingTop() {
         return mPaddingTop;
     }
@@ -25402,6 +25333,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the bottom padding in pixels
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     public int getPaddingBottom() {
         return mPaddingBottom;
     }
@@ -25414,6 +25346,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the left padding in pixels
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     public int getPaddingLeft() {
         if (!isPaddingResolved()) {
             resolvePadding();
@@ -25444,6 +25377,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the right padding in pixels
      */
     @InspectableProperty
+    @ViewDebug.ExportedProperty(category = "padding")
     public int getPaddingRight() {
         if (!isPaddingResolved()) {
             resolvePadding();
@@ -26129,6 +26063,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @IdRes
     @ViewDebug.CapturedViewProperty
+    @ViewDebug.ExportedProperty(resolveId = true)
     @InspectableProperty
     public int getId() {
         return mID;
@@ -27091,6 +27026,71 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @deprecated SystemUiVisibility flags are deprecated. Use {@link WindowInsetsController}
      * instead.
      */
+    @ViewDebug.ExportedProperty(flagMapping = {
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LOW_PROFILE,
+                    equals = SYSTEM_UI_FLAG_LOW_PROFILE,
+                    name = "LOW_PROFILE"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+                    equals = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+                    name = "HIDE_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_FULLSCREEN,
+                    equals = SYSTEM_UI_FLAG_FULLSCREEN,
+                    name = "FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_STABLE,
+                    equals = SYSTEM_UI_FLAG_LAYOUT_STABLE,
+                    name = "LAYOUT_STABLE"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
+                    equals = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
+                    name = "LAYOUT_HIDE_NAVIGATION"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
+                    equals = SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
+                    name = "LAYOUT_FULLSCREEN"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_IMMERSIVE,
+                    equals = SYSTEM_UI_FLAG_IMMERSIVE,
+                    name = "IMMERSIVE"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
+                    equals = SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
+                    name = "IMMERSIVE_STICKY"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                    equals = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+                    name = "LIGHT_STATUS_BAR"),
+            @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                    equals = SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                    name = "LIGHT_NAVIGATION_BAR"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_EXPAND,
+                    equals = STATUS_BAR_DISABLE_EXPAND,
+                    name = "STATUS_BAR_DISABLE_EXPAND"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
+                    equals = STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
+                    name = "STATUS_BAR_DISABLE_NOTIFICATION_ICONS"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
+                    equals = STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
+                    name = "STATUS_BAR_DISABLE_NOTIFICATION_ALERTS"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
+                    equals = STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
+                    name = "STATUS_BAR_DISABLE_NOTIFICATION_TICKER"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SYSTEM_INFO,
+                    equals = STATUS_BAR_DISABLE_SYSTEM_INFO,
+                    name = "STATUS_BAR_DISABLE_SYSTEM_INFO"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_HOME,
+                    equals = STATUS_BAR_DISABLE_HOME,
+                    name = "STATUS_BAR_DISABLE_HOME"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_BACK,
+                    equals = STATUS_BAR_DISABLE_BACK,
+                    name = "STATUS_BAR_DISABLE_BACK"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_CLOCK,
+                    equals = STATUS_BAR_DISABLE_CLOCK,
+                    name = "STATUS_BAR_DISABLE_CLOCK"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_RECENT,
+                    equals = STATUS_BAR_DISABLE_RECENT,
+                    name = "STATUS_BAR_DISABLE_RECENT"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_SEARCH,
+                    equals = STATUS_BAR_DISABLE_SEARCH,
+                    name = "STATUS_BAR_DISABLE_SEARCH"),
+            @ViewDebug.FlagToString(mask = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
+                    equals = STATUS_BAR_DISABLE_ONGOING_CALL_CHIP,
+                    name = "STATUS_BAR_DISABLE_ONGOING_CALL_CHIP")
+    }, formatToHexString = true)
     @Deprecated
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
