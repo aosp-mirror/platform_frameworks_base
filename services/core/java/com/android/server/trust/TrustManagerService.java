@@ -870,7 +870,12 @@ public class TrustManagerService extends SystemService {
                 continue;
             }
 
-            boolean trusted = aggregateIsTrusted(id);
+            final boolean trusted;
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+                trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
+            } else {
+                trusted = aggregateIsTrusted(id);
+            }
             boolean showingKeyguard = true;
             boolean biometricAuthenticated = false;
             boolean currentUserIsUnlocked = false;
