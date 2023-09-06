@@ -51,6 +51,10 @@ cc_defaults {
         "libz",
     ],
 
+    whole_static_libs: [
+        "libandroidfw_pathutils",
+    ],
+
     cflags: [
         "-Wall",
         "-Werror",
