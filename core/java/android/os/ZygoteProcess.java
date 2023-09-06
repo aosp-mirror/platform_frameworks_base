@@ -355,6 +355,7 @@ public class ZygoteProcess {
                                                           allowlistedDataInfoList,
                                                   boolean bindMountAppsData,
                                                   boolean bindMountAppStorageDirs,
+                                                  boolean bindOverrideSysprops,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
@@ -367,7 +368,7 @@ public class ZygoteProcess {
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
                     pkgDataInfoMap, allowlistedDataInfoList, bindMountAppsData,
-                    bindMountAppStorageDirs, zygoteArgs);
+                    bindMountAppStorageDirs, bindOverrideSysprops, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -638,6 +639,7 @@ public class ZygoteProcess {
                                                               allowlistedDataInfoList,
                                                       boolean bindMountAppsData,
                                                       boolean bindMountAppStorageDirs,
+                                                      boolean bindMountOverrideSysprops,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -751,6 +753,10 @@ public class ZygoteProcess {
 
         if (bindMountAppsData) {
             argsForZygote.add(Zygote.BIND_MOUNT_APP_DATA_DIRS);
+        }
+
+        if (bindMountOverrideSysprops) {
+            argsForZygote.add(Zygote.BIND_MOUNT_SYSPROP_OVERRIDES);
         }
 
         if (disabledCompatChanges != null && disabledCompatChanges.length > 0) {
@@ -1306,7 +1312,8 @@ public class ZygoteProcess {
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
                     null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
                     null /* allowlistedDataInfoList */, true /* bindMountAppsData*/,
-                    /* bindMountAppStorageDirs */ false, extraArgs);
+                    /* bindMountAppStorageDirs */ false, /*bindMountOverrideSysprops */ false,
+                    extraArgs);
 
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
