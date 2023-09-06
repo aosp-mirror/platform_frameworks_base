@@ -78,7 +78,6 @@ class MobileIconsViewModelTest : SysuiTestCase() {
                 airplaneModeInteractor,
                 constants,
                 testScope.backgroundScope,
-                statusBarPipelineFlags,
             )
 
         interactor.filteredSubscriptions.value = listOf(SUB_1, SUB_2)
