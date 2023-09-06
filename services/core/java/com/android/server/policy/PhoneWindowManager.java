@@ -607,10 +607,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     DisplayPolicy mDefaultDisplayPolicy;
 
     // What we do when the user long presses on home
-    private int mLongPressOnHomeBehavior;
+    int mLongPressOnHomeBehavior;
 
     // What we do when the user double-taps on home
-    private int mDoubleTapOnHomeBehavior;
+    int mDoubleTapOnHomeBehavior;
 
     // Must match config_primaryShortPressTargetActivity in config.xml
     ComponentName mPrimaryShortPressTargetActivity;
@@ -1853,7 +1853,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.Secure.TV_USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
-    private void handleShortPressOnHome(int displayId) {
+    private void handleShortPressOnHome(KeyEvent event) {
+        logKeyboardSystemsEvent(event, KeyboardLogEvent.HOME);
+
         // Turn on the connected TV and switch HDMI input if we're a HDMI playback device.
         final HdmiControl hdmiControl = getHdmiControl();
         if (hdmiControl != null) {
@@ -1869,7 +1871,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Go home!
-        launchHomeFromHotKey(displayId);
+        launchHomeFromHotKey(event.getDisplayId());
     }
 
     /**
@@ -1974,17 +1976,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private class DisplayHomeButtonHandler {
 
         private final int mDisplayId;
-
-        private boolean mHomeDoubleTapPending;
         private boolean mHomePressed;
         private boolean mHomeConsumed;
-
+        private KeyEvent mPendingHomeKeyEvent;
         private final Runnable mHomeDoubleTapTimeoutRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mHomeDoubleTapPending) {
-                    mHomeDoubleTapPending = false;
-                    handleShortPressOnHome(mDisplayId);
+                if (mPendingHomeKeyEvent != null) {
+                    handleShortPressOnHome(mPendingHomeKeyEvent);
+                    mPendingHomeKeyEvent = null;
                 }
             }
         };
@@ -2007,7 +2007,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // If we have released the home key, and didn't do anything else
             // while it was pressed, then it is time to go home!
             if (!down) {
-                logKeyboardSystemsEvent(event, KeyboardLogEvent.HOME);
                 if (mDisplayId == DEFAULT_DISPLAY) {
                     cancelPreloadRecentApps();
                 }
@@ -2029,7 +2028,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_PIP_MENU
                             || mPictureInPictureVisible) {
                         mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
-                        mHomeDoubleTapPending = true;
+                        mPendingHomeKeyEvent = event;
                         mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
                                 ViewConfiguration.getDoubleTapTimeout());
                         return true;
@@ -2037,7 +2036,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
 
                 // Post to main thread to avoid blocking input pipeline.
-                mHandler.post(() -> handleShortPressOnHome(mDisplayId));
+                mHandler.post(() -> handleShortPressOnHome(event));
                 return true;
             }
 
@@ -2063,10 +2062,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Remember that home is pressed and handle special actions.
             if (repeatCount == 0) {
                 mHomePressed = true;
-                if (mHomeDoubleTapPending) {
-                    mHomeDoubleTapPending = false;
+                if (mPendingHomeKeyEvent != null) {
+                    mPendingHomeKeyEvent = null;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
-                    mHandler.post(this::handleDoubleTapOnHome);
+                    mHandler.post(() -> handleDoubleTapOnHome(event));
                 // TODO(multi-display): Remove display id check once we support recents on
                 // multi-display
                 } else if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI
@@ -2076,19 +2075,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
                     // Post to main thread to avoid blocking input pipeline.
-                    mHandler.post(() -> handleLongPressOnHome(event.getDeviceId(),
-                            event.getEventTime()));
+                    mHandler.post(() -> handleLongPressOnHome(event));
                 }
             }
             return true;
         }
 
-        private void handleDoubleTapOnHome() {
+        private void handleDoubleTapOnHome(KeyEvent event) {
             if (mHomeConsumed) {
                 return;
             }
             switch (mDoubleTapOnHomeBehavior) {
                 case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                    logKeyboardSystemsEvent(event, KeyboardLogEvent.APP_SWITCH);
                     mHomeConsumed = true;
                     toggleRecentApps();
                     break;
@@ -2103,7 +2102,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        private void handleLongPressOnHome(int deviceId, long eventTime) {
+        private void handleLongPressOnHome(KeyEvent event) {
             if (mHomeConsumed) {
                 return;
             }
@@ -2115,13 +2114,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     "Home - Long Press");
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
+                    logKeyboardSystemsEvent(event, KeyboardLogEvent.ALL_APPS);
                     launchAllAppsAction();
                     break;
                 case LONG_PRESS_HOME_ASSIST:
-                    launchAssistAction(null, deviceId, eventTime,
+                    logKeyboardSystemsEvent(event, KeyboardLogEvent.LAUNCH_ASSISTANT);
+                    launchAssistAction(null, event.getDeviceId(), event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
+                    logKeyboardSystemsEvent(event, KeyboardLogEvent.TOGGLE_NOTIFICATION_PANEL);
                     toggleNotificationPanel();
                     break;
                 default:
@@ -3269,7 +3271,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_HOME:
-                return handleHomeShortcuts(displayId, focusedToken, event);
+                return handleHomeShortcuts(focusedToken, event);
             case KeyEvent.KEYCODE_MENU:
                 // Hijack modified menu keys for debugging features
                 final int chordBug = KeyEvent.META_SHIFT_ON;
@@ -3311,7 +3313,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_H:
             case KeyEvent.KEYCODE_ENTER:
                 if (event.isMetaPressed()) {
-                    return handleHomeShortcuts(displayId, focusedToken, event);
+                    return handleHomeShortcuts(focusedToken, event);
                 }
                 break;
             case KeyEvent.KEYCODE_I:
@@ -3661,15 +3663,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         upEvent.recycle();
     }
 
-    private boolean handleHomeShortcuts(int displayId, IBinder focusedToken, KeyEvent event) {
+    private boolean handleHomeShortcuts(IBinder focusedToken, KeyEvent event) {
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
         // timeout.
-        DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
+        DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(event.getDisplayId());
         if (handler == null) {
-            handler = new DisplayHomeButtonHandler(displayId);
-            mDisplayHomeButtonHandlers.put(displayId, handler);
+            handler = new DisplayHomeButtonHandler(event.getDisplayId());
+            mDisplayHomeButtonHandlers.put(event.getDisplayId(), handler);
         }
         return handler.handleHomeButton(focusedToken, event);
     }
