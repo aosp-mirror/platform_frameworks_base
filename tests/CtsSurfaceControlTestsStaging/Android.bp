@@ -36,6 +36,7 @@ android_test {
         "androidx.test.rules",
         "compatibility-device-util-axt",
         "com.google.android.material_material",
+        "SurfaceFlingerProperties",
         "truth-prebuilt",
     ],
     resource_dirs: ["src/main/res"],

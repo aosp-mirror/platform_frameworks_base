@@ -30,6 +30,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.sysprop.SurfaceFlingerProperties;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
@@ -45,6 +46,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * An Activity to help with frame rate testing.
@@ -217,6 +219,27 @@ public class GraphicsActivity extends Activity {
             postBuffer();
         }
 
+        Surface getSurface() {
+            return mSurface;
+        }
+
+        SurfaceControl getSurfaceControl() {
+            return mSurfaceControl;
+        }
+
+        public int setFrameRate(float frameRate) {
+            Log.i(TAG,
+                    String.format("Setting frame rate for %s: frameRate=%.2f", mName, frameRate));
+
+            int rc = 0;
+            try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+                transaction.setFrameRate(
+                        mSurfaceControl, frameRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+                transaction.apply();
+            }
+            return rc;
+        }
+
         public int setFrameRateCategory(int category) {
             Log.i(TAG,
                     String.format(
@@ -225,6 +248,19 @@ public class GraphicsActivity extends Activity {
             int rc = 0;
             try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
                 transaction.setFrameRateCategory(mSurfaceControl, category);
+                transaction.apply();
+            }
+            return rc;
+        }
+
+        public int setFrameRateSelectionStrategy(int strategy) {
+            Log.i(TAG,
+                    String.format("Setting frame rate selection strategy for %s: strategy=%d",
+                            mName, strategy));
+
+            int rc = 0;
+            try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+                transaction.setFrameRateSelectionStrategy(mSurfaceControl, strategy);
                 transaction.apply();
             }
             return rc;
@@ -342,6 +378,11 @@ public class GraphicsActivity extends Activity {
                 uniqueFrameRates.add(frameRate);
             }
         }
+        Log.i(TAG,
+                "**** Available display refresh rates: "
+                        + uniqueFrameRates.stream()
+                                  .map(Object::toString)
+                                  .collect(Collectors.joining(", ")));
         return uniqueFrameRates;
     }
 
@@ -356,6 +397,10 @@ public class GraphicsActivity extends Activity {
         return roundedMultiple > 0
                 && Math.abs(roundedMultiple * lowerFrameRate - higherFrameRate)
                 <= FRAME_RATE_TOLERANCE;
+    }
+
+    private boolean frameRateEquals(float frameRate1, float frameRate2) {
+        return Math.abs(frameRate1 - frameRate2) <= FRAME_RATE_TOLERANCE;
     }
 
     // Waits until our SurfaceHolder has a surface and the activity is resumed.
@@ -447,9 +492,22 @@ public class GraphicsActivity extends Activity {
         verifyCompatibleAndStableFrameRate(0, surfaces);
     }
 
-    // Set expectedFrameRate to 0.0 to verify only stable frame rate.
+    private void verifyExactAndStableFrameRate(
+            float expectedFrameRate,
+            TestSurface... surfaces) throws InterruptedException {
+        verifyFrameRate(expectedFrameRate, false, surfaces);
+    }
+
     private void verifyCompatibleAndStableFrameRate(
-            float expectedFrameRate, TestSurface... surfaces) throws InterruptedException {
+            float expectedFrameRate,
+            TestSurface... surfaces) throws InterruptedException {
+        verifyFrameRate(expectedFrameRate, true, surfaces);
+    }
+
+    // Set expectedFrameRate to 0.0 to verify only stable frame rate.
+    private void verifyFrameRate(
+            float expectedFrameRate, boolean multiplesAllowed,
+            TestSurface... surfaces) throws InterruptedException {
         Log.i(TAG, "Verifying compatible and stable frame rate");
         long nowNanos = System.nanoTime();
         long gracePeriodEndTimeNanos =
@@ -457,9 +515,19 @@ public class GraphicsActivity extends Activity {
         while (true) {
             if (expectedFrameRate > FRAME_RATE_TOLERANCE) { // expectedFrameRate > 0
                 // Wait until we switch to a compatible frame rate.
-                while (!isFrameRateMultiple(mDeviceFrameRate, expectedFrameRate)
-                        && !waitForEvents(gracePeriodEndTimeNanos, surfaces)) {
-                    // Empty
+                Log.i(TAG,
+                        "Verifying expected frame rate: actual (device)=" + mDeviceFrameRate
+                                + " expected=" + expectedFrameRate);
+                if (multiplesAllowed) {
+                    while (!isFrameRateMultiple(mDeviceFrameRate, expectedFrameRate)
+                            && !waitForEvents(gracePeriodEndTimeNanos, surfaces)) {
+                        // Empty
+                    }
+                } else {
+                    while (!frameRateEquals(mDeviceFrameRate, expectedFrameRate)
+                            && !waitForEvents(gracePeriodEndTimeNanos, surfaces)) {
+                        // Empty
+                    }
                 }
                 nowNanos = System.nanoTime();
                 if (nowNanos >= gracePeriodEndTimeNanos) {
@@ -604,12 +672,65 @@ public class GraphicsActivity extends Activity {
                 "frame rate category=" + category);
     }
 
+    private void testSurfaceControlFrameRateSelectionStrategyInternal(int parentStrategy)
+            throws InterruptedException {
+        Log.i(TAG,
+                "**** Running testSurfaceControlFrameRateSelectionStrategy for strategy "
+                        + parentStrategy);
+        TestSurface parent = null;
+        TestSurface child = null;
+        try {
+            parent = new TestSurface(mSurfaceView.getSurfaceControl(), mSurface,
+                    "testSurfaceParent", mSurfaceView.getHolder().getSurfaceFrame(),
+                    /*visible=*/true, Color.RED);
+            child = new TestSurface(parent.getSurfaceControl(), parent.getSurface(),
+                    "testSurfaceChild", mSurfaceView.getHolder().getSurfaceFrame(),
+                    /*visible=*/true, Color.BLUE);
+
+            // Test
+            Display display = getDisplay();
+            List<Float> frameRates = getRefreshRates(display.getMode(), display);
+            assumeTrue("**** SKIPPED due to frame rate override disabled",
+                    SurfaceFlingerProperties.enable_frame_rate_override().orElse(true));
+            float childFrameRate = Collections.max(frameRates);
+            float parentFrameRate = childFrameRate / 2;
+            int initialNumEvents = mModeChangedEvents.size();
+            parent.setFrameRate(parentFrameRate);
+            parent.setFrameRateSelectionStrategy(parentStrategy);
+            child.setFrameRate(childFrameRate);
+
+            // Verify
+            float expectedFrameRate =
+                    parentStrategy == SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN
+                    ? parentFrameRate
+                    : childFrameRate;
+            verifyExactAndStableFrameRate(expectedFrameRate, parent, child);
+            verifyModeSwitchesDontChangeResolution(initialNumEvents, mModeChangedEvents.size());
+        } finally {
+            if (parent != null) {
+                parent.release();
+            }
+            if (child != null) {
+                child.release();
+            }
+        }
+    }
+
+    public void testSurfaceControlFrameRateSelectionStrategy(int parentStrategy)
+            throws InterruptedException {
+        runTestsWithPreconditions(
+                () -> testSurfaceControlFrameRateSelectionStrategyInternal(parentStrategy),
+                "frame rate strategy=" + parentStrategy);
+    }
+
     private float getExpectedFrameRate(int category) {
         Display display = getDisplay();
         List<Float> frameRates = getRefreshRates(display.getMode(), display);
 
-        if (category == Surface.FRAME_RATE_CATEGORY_DEFAULT
-                || category == Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE) {
+        if (category == Surface.FRAME_RATE_CATEGORY_DEFAULT) {
+            // Max due to default vote and no other frame rate specifications.
+            return Collections.max(frameRates);
+        } else if (category == Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE) {
             return Collections.min(frameRates);
         }
 
