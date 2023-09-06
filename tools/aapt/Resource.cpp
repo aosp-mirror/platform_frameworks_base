@@ -781,7 +781,7 @@ static void fullyQualifyClassName(const String8& package, const sp<XMLNode>& nod
         if (kIsDebug) {
             printf("Qualifying class '%s' to '%s'", name.c_str(), className.c_str());
         }
-        attr->string.setTo(String16(className));
+        attr->string = String16(className);
     }
 }
 
@@ -971,7 +971,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
             return UNKNOWN_ERROR;
         }
         String8 origPackage(attr->string);
-        attr->string.setTo(String16(manifestPackageNameOverride));
+        attr->string = String16(manifestPackageNameOverride);
         if (kIsDebug) {
             printf("Overriding package '%s' to be '%s'\n", origPackage.c_str(),
                     manifestPackageNameOverride);
@@ -1009,7 +1009,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
                 XMLNode::attribute_entry* attr = child->editAttribute(
                         String16(RESOURCES_ANDROID_NAMESPACE), String16("targetPackage"));
                 if (attr != NULL) {
-                    attr->string.setTo(String16(instrumentationPackageNameOverride));
+                    attr->string = String16(instrumentationPackageNameOverride);
                 }
             }
         }

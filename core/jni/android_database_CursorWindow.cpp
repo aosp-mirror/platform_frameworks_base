@@ -89,7 +89,7 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring nameObj, jint curso
     CursorWindow* window;
 
     const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-    name.setTo(nameStr);
+    name = nameStr;
     env->ReleaseStringUTFChars(nameObj, nameStr);
 
     if (cursorWindowSize < 0) {

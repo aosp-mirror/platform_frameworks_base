@@ -1010,7 +1010,7 @@ static bool readFile(ZipFileRO* zip, const char* name, String8& outString) {
         return false;
     }
 
-    outString.setTo((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
+    outString = String8((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
     delete entryMap;
     return true;
 }
@@ -1304,7 +1304,7 @@ bool BootAnimation::preloadZip(Animation& animation) {
                                     part.audioData = (uint8_t *)map->getDataPtr();
                                     part.audioLength = map->getDataLength();
                                 } else if (leaf == "trim.txt") {
-                                    part.trimData.setTo((char const*)map->getDataPtr(),
+                                    part.trimData = String8((char const*)map->getDataPtr(),
                                                         map->getDataLength());
                                 } else {
                                     Animation::Frame frame;
@@ -1394,7 +1394,7 @@ bool BootAnimation::movie() {
     if (!exts) {
         glGetError();
     } else {
-        gl_extensions.setTo(exts);
+        gl_extensions = exts;
         if ((gl_extensions.find("GL_ARB_texture_non_power_of_two") != -1) ||
             (gl_extensions.find("GL_OES_texture_npot") != -1)) {
             mUseNpotTextures = true;
