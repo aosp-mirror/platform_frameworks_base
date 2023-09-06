@@ -186,7 +186,7 @@ class HandleMenu {
         // More Actions pill setup.
         final View moreActionsPillView = mMoreActionsPill.mWindowViewHost.getView();
         final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
-        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+        if (shouldShowCloseButton()) {
             closeBtn.setVisibility(View.GONE);
         } else {
             closeBtn.setVisibility(View.VISIBLE);
@@ -324,7 +324,11 @@ class HandleMenu {
                 R.dimen.desktop_mode_handle_menu_app_info_pill_height);
         mWindowingPillHeight = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_windowing_pill_height);
-        mMoreActionsPillHeight = shouldShowCloseButton(resources);
+        mMoreActionsPillHeight = shouldShowCloseButton()
+                ? loadDimensionPixelSize(resources,
+                        R.dimen.desktop_mode_handle_menu_more_actions_pill_freeform_height)
+                : loadDimensionPixelSize(resources,
+                        R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
         mShadowRadius = loadDimensionPixelSize(resources,
                 R.dimen.desktop_mode_handle_menu_shadow_radius);
         mCornerRadius = loadDimensionPixelSize(resources,
@@ -338,12 +342,8 @@ class HandleMenu {
         return resources.getDimensionPixelSize(resourceId);
     }
 
-    private int shouldShowCloseButton(Resources resources) {
-        return (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM)
-                ? loadDimensionPixelSize(resources,
-                R.dimen.desktop_mode_handle_menu_more_actions_pill_freeform_height)
-                : loadDimensionPixelSize(resources,
-                        R.dimen.desktop_mode_handle_menu_more_actions_pill_height);
+    private boolean shouldShowCloseButton() {
+        return mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
     }
 
     void close() {
