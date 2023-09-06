@@ -84,7 +84,7 @@ import java.util.function.Predicate;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class VolumeDialogImplTest extends SysuiTestCase {
     VolumeDialogImpl mDialog;
     View mActiveRinger;
@@ -141,6 +141,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         getContext().addMockSystemService(KeyguardManager.class, mKeyguard);
 
         mTestableLooper = TestableLooper.get(this);
+        allowTestableLooperAsMainThread();
 
         when(mPostureController.getDevicePosture())
                 .thenReturn(DevicePostureController.DEVICE_POSTURE_CLOSED);

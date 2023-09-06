@@ -112,7 +112,7 @@ object Flags {
     val BUILDER_EXTRAS_OVERRIDE =
         sysPropBooleanFlag(
             "persist.sysui.notification.builder_extras_override",
-            default = true
+            default = false
         )
 
     /** Only notify group expansion listeners when a change happens. */

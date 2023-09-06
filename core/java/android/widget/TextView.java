@@ -12888,6 +12888,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * @return true if this TextView could be filled by an Autofill service. Note that disabled
+     * fields can still be filled.
+     */
+    @UnsupportedAppUsage
+    boolean isTextAutofillable() {
+        return mText instanceof Editable && onCheckIsTextEditor();
+    }
+
+    /**
      * Returns true, only while processing a touch gesture, if the initial
      * touch down event caused focus to move to the text view and as a result
      * its selection changed.  Only valid while processing the touch gesture
@@ -13610,7 +13619,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public void autofill(AutofillValue value) {
-        if (!isTextEditable()) {
+        if (!isTextAutofillable()) {
             Log.w(LOG_TAG, "cannot autofill non-editable TextView: " + this);
             return;
         }
@@ -13626,7 +13635,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public @AutofillType int getAutofillType() {
-        return isTextEditable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
+        return isTextAutofillable() ? AUTOFILL_TYPE_TEXT : AUTOFILL_TYPE_NONE;
     }
 
     /**
@@ -13640,7 +13649,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     @Nullable
     public AutofillValue getAutofillValue() {
-        if (isTextEditable()) {
+        if (isTextAutofillable()) {
             final CharSequence text = TextUtils.trimToParcelableSize(getText());
             return AutofillValue.forText(text);
         }
