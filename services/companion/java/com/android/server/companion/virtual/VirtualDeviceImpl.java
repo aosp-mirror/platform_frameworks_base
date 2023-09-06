@@ -19,7 +19,9 @@ package com.android.server.companion.virtual;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
+import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -831,22 +833,31 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private GenericWindowPolicyController createWindowPolicyController(
             @NonNull Set<String> displayCategories) {
-        final GenericWindowPolicyController gwpc =
-                new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                        getAllowedUserHandles(),
-                        mParams.getAllowedCrossTaskNavigations(),
-                        mParams.getBlockedCrossTaskNavigations(),
-                        mParams.getAllowedActivities(),
-                        mParams.getBlockedActivities(),
-                        mParams.getDefaultActivityPolicy(),
-                        createListenerAdapter(),
-                        this::onEnteringPipBlocked,
-                        this::onActivityBlocked,
-                        this::onSecureWindowShown,
-                        this::shouldInterceptIntent,
-                        displayCategories,
-                        mParams.getDevicePolicy(POLICY_TYPE_RECENTS) == DEVICE_POLICY_DEFAULT);
+        final boolean activityLaunchAllowedByDefault =
+                mParams.getDefaultActivityPolicy() == ACTIVITY_POLICY_DEFAULT_ALLOWED;
+        final boolean crossTaskNavigationAllowedByDefault =
+                mParams.getDefaultNavigationPolicy() == NAVIGATION_POLICY_DEFAULT_ALLOWED;
+        final boolean showTasksInHostDeviceRecents =
+                mParams.getDevicePolicy(POLICY_TYPE_RECENTS) == DEVICE_POLICY_DEFAULT;
+
+        final GenericWindowPolicyController gwpc = new GenericWindowPolicyController(
+                FLAG_SECURE,
+                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                getAllowedUserHandles(),
+                activityLaunchAllowedByDefault,
+                /*activityPolicyExceptions=*/activityLaunchAllowedByDefault
+                        ? mParams.getBlockedActivities() : mParams.getAllowedActivities(),
+                crossTaskNavigationAllowedByDefault,
+                /*crossTaskNavigationExceptions=*/crossTaskNavigationAllowedByDefault
+                        ? mParams.getBlockedCrossTaskNavigations()
+                        : mParams.getAllowedCrossTaskNavigations(),
+                createListenerAdapter(),
+                this::onEnteringPipBlocked,
+                this::onActivityBlocked,
+                this::onSecureWindowShown,
+                this::shouldInterceptIntent,
+                displayCategories,
+                showTasksInHostDeviceRecents);
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
     }
