@@ -2667,7 +2667,8 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void setUserRestrictionInner(int userId, @NonNull String key, boolean value) {
+    @VisibleForTesting
+    void setUserRestrictionInner(int userId, @NonNull String key, boolean value) {
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             Slog.e(LOG_TAG, "Setting invalid restriction " + key);
             return;
@@ -4277,11 +4278,11 @@ public class UserManagerService extends IUserManager.Stub {
 
             UserRestrictionsUtils.writeRestrictions(serializer,
                     mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL),
-                    TAG_DEVICE_POLICY_RESTRICTIONS);
+                    TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS);
 
             UserRestrictionsUtils.writeRestrictions(serializer,
                     mDevicePolicyUserRestrictions.getRestrictions(userInfo.id),
-                    TAG_DEVICE_POLICY_RESTRICTIONS);
+                    TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS);
         }
 
         if (userData.account != null) {
