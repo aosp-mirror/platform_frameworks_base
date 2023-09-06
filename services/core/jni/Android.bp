@@ -41,6 +41,7 @@ cc_library_static {
         "com_android_server_companion_virtual_InputController.cpp",
         "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_display_DisplayControl.cpp",
+        "com_android_server_display_SmallAreaDetectionController.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_gpu_GpuService.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",

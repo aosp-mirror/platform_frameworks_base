@@ -5377,6 +5377,13 @@
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
 
+    <!-- The list of packages to automatically opt in to refresh rate suppressing by small area
+    detection. Format of this array should be packageName:threshold and threshold value should
+     be between 0 to 1-->
+    <string-array name="config_smallAreaDetectionAllowlist" translatable="false">
+        <!-- Add packages:threshold here -->
+    </string-array>
+
     <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
     <string-array name="config_forceSlowJpegModeList" translatable="false">
         <!-- Add packages here -->

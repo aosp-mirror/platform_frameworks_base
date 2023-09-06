@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
 import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -86,6 +88,48 @@ public interface TimeDetectorStrategy extends Dumpable {
      * successful (i.e. the time matched), {@code false} otherwise.
      */
     boolean confirmTime(@NonNull UnixEpochTime confirmationTime);
+
+    /**
+     * Adds a listener that will be triggered when something changes that could affect the result
+     * of the {@link #getCapabilitiesAndConfig} call for the <em>current user only</em>. This
+     * includes the current user changing. This is exposed so that (indirect) users like SettingsUI
+     * can monitor for changes to data derived from {@link TimeCapabilitiesAndConfig} and update
+     * the UI accordingly.
+     */
+    void addChangeListener(@NonNull StateChangeListener listener);
+
+    /**
+     * Returns a {@link TimeCapabilitiesAndConfig} object for the specified user.
+     *
+     * <p>The strategy is dependent on device state like current user, settings and device config.
+     * These updates are usually handled asynchronously, so callers should expect some delay between
+     * a change being made directly to services like settings and the strategy becoming aware of
+     * them. Changes made via {@link #updateConfiguration} will be visible immediately.
+     *
+     * @param userId the user ID to retrieve the information for
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    TimeCapabilitiesAndConfig getCapabilitiesAndConfig(
+            @UserIdInt int userId, boolean bypassUserPolicyChecks);
+
+    /**
+     * Updates the configuration properties that control a device's time behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     *
+     * <p>See {@link #getCapabilitiesAndConfig} for guarantees about visibility of updates to
+     * subsequent calls.
+     *
+     * @param userId the current user ID, supplied to make sure that the asynchronous process
+     *   that happens when users switch is completed when the call is made
+     * @param configuration the configuration changes
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    boolean updateConfiguration(@UserIdInt int userId,
+            @NonNull TimeConfiguration configuration, boolean bypassUserPolicyChecks);
 
     /** Processes the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion suggestion);
