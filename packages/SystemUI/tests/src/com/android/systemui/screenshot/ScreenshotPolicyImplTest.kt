@@ -140,7 +140,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
     private val pipTask = RootTaskInfo().apply {
         configuration.windowConfiguration.apply {
             windowingMode = WINDOWING_MODE_PINNED
-            bounds = Rect(628, 1885, 1038, 2295)
+            setBounds(Rect(628, 1885, 1038, 2295))
             activityType = ACTIVITY_TYPE_STANDARD
         }
         displayId = DISPLAY_ID
@@ -164,7 +164,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
     private val fullScreenWorkProfileTask = RootTaskInfo().apply {
         configuration.windowConfiguration.apply {
             windowingMode = WINDOWING_MODE_FULLSCREEN
-            bounds = Rect(0, 0, 1080, 2400)
+            setBounds(Rect(0, 0, 1080, 2400))
             activityType = ACTIVITY_TYPE_STANDARD
         }
         displayId = DISPLAY_ID
@@ -188,7 +188,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
     private val launcherTask = RootTaskInfo().apply {
         configuration.windowConfiguration.apply {
             windowingMode = WINDOWING_MODE_FULLSCREEN
-            bounds = Rect(0, 0, 1080, 2400)
+            setBounds(Rect(0, 0, 1080, 2400))
             activityType = ACTIVITY_TYPE_HOME
         }
         displayId = DISPLAY_ID
@@ -212,7 +212,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
     private val emptyTask = RootTaskInfo().apply {
         configuration.windowConfiguration.apply {
             windowingMode = WINDOWING_MODE_FULLSCREEN
-            bounds = Rect(0, 0, 1080, 2400)
+            setBounds(Rect(0, 0, 1080, 2400))
             activityType = ACTIVITY_TYPE_UNDEFINED
         }
         displayId = DISPLAY_ID

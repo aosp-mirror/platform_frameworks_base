@@ -76,7 +76,7 @@ class DragPositioningCallbackUtilityTest {
             minHeight = MIN_HEIGHT
             defaultMinSize = DEFAULT_MIN
             displayId = DISPLAY_ID
-            configuration.windowConfiguration.bounds = STARTING_BOUNDS
+            configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
         }
         mockWindowDecoration.mDisplay = mockDisplay
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
