@@ -435,6 +435,12 @@ final class DeletePackageHelper {
         }
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
+        if (outInfo != null) {
+            // Remember which users are affected, before the installed states are modified
+            outInfo.mRemovedUsers = (systemApp || userId == UserHandle.USER_ALL)
+                    ? ps.queryInstalledUsers(allUserHandles, /* installed= */true)
+                    : new int[]{userId};
+        }
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
                 && userId != UserHandle.USER_ALL) {
@@ -630,7 +636,6 @@ final class DeletePackageHelper {
             // Preserve data by setting flag
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
-
         synchronized (mPm.mInstallLock) {
             deleteInstalledPackageLIF(deletedPs, true, flags, allUserHandles, outInfo,
                     writeSettings);

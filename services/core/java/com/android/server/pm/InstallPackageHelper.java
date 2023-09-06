@@ -3556,7 +3556,7 @@ final class InstallPackageHelper {
                 logCriticalInfo(Log.WARN, "System package " + packageName
                         + " no longer exists; its data will be wiped");
                 mInjector.getHandler().post(
-                        () -> mRemovePackageHelper.removePackageData(ps, userIds, null, 0, false));
+                        () -> mRemovePackageHelper.removePackageData(ps, userIds));
                 expectingBetter.put(ps.getPackageName(), ps.getPath());
             } else {
                 // we still have a disabled system package, but, it still might have
@@ -3631,7 +3631,7 @@ final class InstallPackageHelper {
             // partition], completely remove the package data.
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
             if (ps != null && mPm.mPackages.get(packageName) == null) {
-                mRemovePackageHelper.removePackageData(ps, userIds, null, 0, false);
+                mRemovePackageHelper.removePackageData(ps, userIds);
             }
             logCriticalInfo(Log.WARN, msg);
         }
