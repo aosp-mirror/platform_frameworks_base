@@ -137,6 +137,7 @@ fun FooterActions(
             )
         }
 
+    val horizontalPadding = dimensionResource(R.dimen.qs_content_horizontal_padding)
     Row(
         modifier
             .fillMaxWidth()
@@ -150,6 +151,8 @@ fun FooterActions(
             .padding(
                 top = dimensionResource(R.dimen.qs_footer_actions_top_padding),
                 bottom = dimensionResource(R.dimen.qs_footer_actions_bottom_padding),
+                start = horizontalPadding,
+                end = horizontalPadding,
             )
             .layout { measurable, constraints ->
                 // All buttons have a 4dp padding to increase their touch size. To be consistent
