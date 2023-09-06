@@ -104,7 +104,6 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             FakeFeatureFlags().apply {
                 set(Flags.FACE_AUTH_REFACTOR, false)
                 set(Flags.DELAY_BOUNCER, false)
-                set(Flags.SCENE_CONTAINER, false)
             }
         trustRepository = FakeTrustRepository()
         powerRepository = FakePowerRepository()

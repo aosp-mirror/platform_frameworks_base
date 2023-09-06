@@ -164,8 +164,7 @@ final class PackageRemovedInfo {
         }
     }
 
-    public void populateUsers(int[] userIds, PackageSetting deletedPackageSetting) {
-        mRemovedUsers = userIds;
+    public void populateBroadcastUsers(PackageSetting deletedPackageSetting) {
         if (mRemovedUsers == null) {
             mBroadcastUsers = null;
             return;
@@ -173,8 +172,8 @@ final class PackageRemovedInfo {
 
         mBroadcastUsers = EMPTY_INT_ARRAY;
         mInstantUserIds = EMPTY_INT_ARRAY;
-        for (int i = userIds.length - 1; i >= 0; --i) {
-            final int userId = userIds[i];
+        for (int i = mRemovedUsers.length - 1; i >= 0; --i) {
+            final int userId = mRemovedUsers[i];
             if (deletedPackageSetting.getInstantApp(userId)) {
                 mInstantUserIds = ArrayUtils.appendInt(mInstantUserIds, userId);
             } else {

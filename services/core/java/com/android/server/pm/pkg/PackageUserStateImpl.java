@@ -685,6 +685,10 @@ public class PackageUserStateImpl extends WatchableImpl implements PackageUserSt
         return false;
     }
 
+    @Override
+    public boolean dataExists() {
+        return getCeDataInode() > 0;
+    }
 
 
 

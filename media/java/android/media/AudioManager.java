@@ -4945,7 +4945,9 @@ public class AudioManager {
             synchronized (this) {
                 while (!mQuit) {
                     final long timeToWait = timeOutTime - java.lang.System.currentTimeMillis();
-                    if (timeToWait < 0) { break; }
+                    if (timeToWait <= 0) {
+                        break;
+                    }
                     this.wait(timeToWait);
                 }
             }

@@ -26,13 +26,12 @@ import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.DisplayId
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -66,7 +65,7 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
-    private val featureFlags: FeatureFlags,
+    private val flags: SceneContainerFlags,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
     private val sceneLogger: SceneLogger,
@@ -74,14 +73,17 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+        if (flags.isEnabled()) {
             sceneLogger.logFrameworkEnabled(isEnabled = true)
             hydrateVisibility()
             automaticallySwitchScenes()
             hydrateSystemUiState()
             collectFalsingSignals()
         } else {
-            sceneLogger.logFrameworkEnabled(isEnabled = false)
+            sceneLogger.logFrameworkEnabled(
+                isEnabled = false,
+                reason = flags.requirementDescription(),
+            )
         }
     }
 

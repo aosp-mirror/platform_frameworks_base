@@ -196,4 +196,9 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     public ArchiveState getArchiveState() {
         return null;
     }
+
+    @Override
+    public boolean dataExists() {
+        return true;
+    }
 }

@@ -166,7 +166,9 @@ public abstract class SysuiTestCase {
         }
         disallowTestableLooperAsMainThread();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
-        mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+        if (mFakeBroadcastDispatcher != null) {
+            mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
+        }
     }
 
     @AfterClass

@@ -31,7 +31,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
@@ -67,11 +68,8 @@ class SceneTestUtils(
 ) {
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
-    val featureFlags =
-        FakeFeatureFlags().apply {
-            set(Flags.SCENE_CONTAINER, true)
-            set(Flags.FACE_AUTH_REFACTOR, false)
-        }
+    val featureFlags = FakeFeatureFlagsClassic().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
+    val sceneContainerFlags = FakeSceneContainerFlags().apply { enabled = true }
     private val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
@@ -164,6 +162,7 @@ class SceneTestUtils(
             repository = repository,
             commandQueue = FakeCommandQueue(),
             featureFlags = featureFlags,
+            sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
             configurationRepository = FakeConfigurationRepository(),
             shadeRepository = FakeShadeRepository(),
@@ -181,7 +180,7 @@ class SceneTestUtils(
             repository = BouncerRepository(),
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
-            featureFlags = featureFlags,
+            flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
         )
     }
@@ -195,7 +194,7 @@ class SceneTestUtils(
             applicationScope = applicationScope(),
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
-            featureFlags = featureFlags,
+            flags = sceneContainerFlags,
         )
     }
 

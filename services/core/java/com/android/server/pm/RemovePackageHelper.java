@@ -295,25 +295,24 @@ final class RemovePackageHelper {
             outInfo.mInstallerPackageName = ps.getInstallSource().mInstallerPackageName;
             outInfo.mIsStaticSharedLib = pkg != null && pkg.getStaticSharedLibraryName() != null;
             outInfo.mRemovedAppId = ps.getAppId();
-            outInfo.mRemovedUsers = userIds;
-            outInfo.mBroadcastUsers = userIds;
+            outInfo.mBroadcastUsers = outInfo.mRemovedUsers;
             outInfo.mIsExternal = ps.isExternalStorage();
             outInfo.mRemovedPackageVersionCode = ps.getVersionCode();
         }
     }
 
     // Called to clean up disabled system packages
-    public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles,
-            PackageRemovedInfo outInfo, int flags, boolean writeSettings) {
+    public void removePackageData(final PackageSetting deletedPs, @NonNull int[] allUserHandles) {
         synchronized (mPm.mInstallLock) {
-            removePackageDataLIF(deletedPs, allUserHandles, outInfo, flags, writeSettings);
+            removePackageDataLIF(deletedPs, allUserHandles, /* outInfo= */ null,
+                    /* flags= */ 0, /* writeSettings= */ false);
         }
     }
 
     /*
      * This method deletes the package from internal data structures. If the DELETE_KEEP_DATA
      * flag is not set, the data directory is removed as well.
-     * make sure this flag is set for partially installed apps. If not its meaningless to
+     * make sure this flag is set for partially installed apps. If not it's meaningless to
      * delete a partially installed application.
      */
     @GuardedBy("mPm.mInstallLock")
@@ -328,8 +327,7 @@ final class RemovePackageHelper {
             outInfo.mInstallerPackageName = deletedPs.getInstallSource().mInstallerPackageName;
             outInfo.mIsStaticSharedLib = deletedPkg != null
                     && deletedPkg.getStaticSharedLibraryName() != null;
-            outInfo.populateUsers(deletedPs.queryInstalledUsers(
-                    mUserManagerInternal.getUserIds(), true), deletedPs);
+            outInfo.populateBroadcastUsers(deletedPs);
             outInfo.mIsExternal = deletedPs.isExternalStorage();
             outInfo.mRemovedPackageVersionCode = deletedPs.getVersionCode();
         }

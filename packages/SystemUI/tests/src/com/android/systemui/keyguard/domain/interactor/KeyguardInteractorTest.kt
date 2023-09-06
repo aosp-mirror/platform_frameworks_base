@@ -29,7 +29,6 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
-import com.android.systemui.flags.Flags.SCENE_CONTAINER
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -70,11 +69,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(FACE_AUTH_REFACTOR, true)
-                set(SCENE_CONTAINER, true)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
         commandQueue = FakeCommandQueue()
         val sceneTestUtils = SceneTestUtils(this)
         testScope = sceneTestUtils.testScope
@@ -90,6 +85,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
                 repository = repository,
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
+                sceneContainerFlags = sceneTestUtils.sceneContainerFlags,
                 bouncerRepository = bouncerRepository,
                 configurationRepository = configurationRepository,
                 shadeRepository = shadeRepository,

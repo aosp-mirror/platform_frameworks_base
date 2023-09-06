@@ -934,4 +934,12 @@
 
     <!-- Flag controlling whether visual query attention detection has been enabled. -->
     <bool name="config_enableVisualQueryAttentionDetection">false</bool>
+
+    <!--
+    Whether the scene container framework is enabled.
+
+    The scene container framework is a newer (2023) way to organize the various "scenes" between the
+    bouncer, lockscreen, shade, and quick settings.
+    -->
+    <bool name="config_sceneContainerFrameworkEnabled">true</bool>
 </resources>

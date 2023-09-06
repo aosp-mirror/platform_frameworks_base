@@ -115,7 +115,7 @@ object Flags {
     val BUILDER_EXTRAS_OVERRIDE =
         sysPropBooleanFlag(
             "persist.sysui.notification.builder_extras_override",
-            default = true
+            default = false
         )
 
     /** Only notify group expansion listeners when a change happens. */
@@ -643,7 +643,22 @@ object Flags {
      */
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
-    @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
+    @Deprecated(
+        message = """
+            Do not use this flag directly. Please use
+            [com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled].
+
+            (Not really deprecated but using this as a simple way to bring attention to the above).
+        """,
+        replaceWith = ReplaceWith(
+            "com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
+    @JvmField val SCENE_CONTAINER = resourceBooleanFlag(
+        R.bool.config_sceneContainerFrameworkEnabled,
+        "scene_container",
+    )
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
