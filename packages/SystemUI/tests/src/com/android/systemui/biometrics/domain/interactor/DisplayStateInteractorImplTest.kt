@@ -3,7 +3,8 @@ package com.android.systemui.biometrics.domain.interactor
 import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
@@ -37,7 +38,7 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope(StandardTestDispatcher())
-    private lateinit var rearDisplayStateRepository: FakeRearDisplayStateRepository
+    private lateinit var displayStateRepository: FakeDisplayStateRepository
     private lateinit var displayRepository: FakeDisplayRepository
 
     @Mock private lateinit var screenSizeFoldProvider: ScreenSizeFoldProvider
@@ -45,14 +46,14 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        rearDisplayStateRepository = FakeRearDisplayStateRepository()
+        displayStateRepository = FakeDisplayStateRepository()
         displayRepository = FakeDisplayRepository()
         interactor =
             DisplayStateInteractorImpl(
                 testScope.backgroundScope,
                 mContext,
                 fakeExecutor,
-                rearDisplayStateRepository,
+                displayStateRepository,
                 displayRepository,
             )
         interactor.setScreenSizeFoldProvider(screenSizeFoldProvider)
@@ -61,27 +62,39 @@ class DisplayStateInteractorImplTest : SysuiTestCase() {
     @Test
     fun isInRearDisplayModeChanges() =
         testScope.runTest {
-            val isInRearDisplayMode = collectLastValue(interactor.isInRearDisplayMode)
+            val isInRearDisplayMode by collectLastValue(interactor.isInRearDisplayMode)
 
-            rearDisplayStateRepository.setIsInRearDisplayMode(false)
-            assertThat(isInRearDisplayMode()).isFalse()
+            displayStateRepository.setIsInRearDisplayMode(false)
+            assertThat(isInRearDisplayMode).isFalse()
 
-            rearDisplayStateRepository.setIsInRearDisplayMode(true)
-            assertThat(isInRearDisplayMode()).isTrue()
+            displayStateRepository.setIsInRearDisplayMode(true)
+            assertThat(isInRearDisplayMode).isTrue()
+        }
+
+    @Test
+    fun currentRotationChanges() =
+        testScope.runTest {
+            val currentRotation by collectLastValue(interactor.currentRotation)
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_180)
+            assertThat(currentRotation).isEqualTo(DisplayRotation.ROTATION_180)
+
+            displayStateRepository.setCurrentRotation(DisplayRotation.ROTATION_90)
+            assertThat(currentRotation).isEqualTo(DisplayRotation.ROTATION_90)
         }
 
     @Test
     fun isFoldedChanges() =
         testScope.runTest {
-            val isFolded = collectLastValue(interactor.isFolded)
+            val isFolded by collectLastValue(interactor.isFolded)
             runCurrent()
             val callback = screenSizeFoldProvider.captureCallback()
 
             callback.onFoldUpdated(isFolded = true)
-            assertThat(isFolded()).isTrue()
+            assertThat(isFolded).isTrue()
 
             callback.onFoldUpdated(isFolded = false)
-            assertThat(isFolded()).isFalse()
+            assertThat(isFolded).isFalse()
         }
 
     @Test

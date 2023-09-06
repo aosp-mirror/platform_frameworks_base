@@ -18,7 +18,14 @@ package com.android.systemui.biometrics.data.repository
 
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
+import android.hardware.display.DisplayManager
+import android.hardware.display.DisplayManager.DisplayListener
+import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+import android.os.Handler
+import android.view.DisplayInfo
 import com.android.internal.util.ArrayUtils
+import com.android.systemui.biometrics.shared.model.DisplayRotation
+import com.android.systemui.biometrics.shared.model.toDisplayRotation
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -32,21 +39,26 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
-/** Provide current rear display state. */
-interface RearDisplayStateRepository {
+/** Repository for the current state of the display */
+interface DisplayStateRepository {
     /** Provides the current rear display state. */
     val isInRearDisplayMode: StateFlow<Boolean>
+
+    /** Provides the current display rotation */
+    val currentRotation: StateFlow<DisplayRotation>
 }
 
 @SysUISingleton
-class RearDisplayStateRepositoryImpl
+class DisplayStateRepositoryImpl
 @Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    @Application context: Context,
+    @Application val context: Context,
     deviceStateManager: DeviceStateManager,
+    displayManager: DisplayManager,
+    @Main handler: Handler,
     @Main mainExecutor: Executor
-) : RearDisplayStateRepository {
+) : DisplayStateRepository {
     override val isInRearDisplayMode: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val sendRearDisplayStateUpdate = { state: Boolean ->
@@ -79,7 +91,43 @@ constructor(
                 initialValue = false,
             )
 
+    private fun getDisplayRotation(): DisplayRotation {
+        val cachedDisplayInfo = DisplayInfo()
+        context.display?.getDisplayInfo(cachedDisplayInfo)
+        return cachedDisplayInfo.rotation.toDisplayRotation()
+    }
+
+    override val currentRotation: StateFlow<DisplayRotation> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : DisplayListener {
+                        override fun onDisplayRemoved(displayId: Int) {}
+
+                        override fun onDisplayAdded(displayId: Int) {}
+
+                        override fun onDisplayChanged(displayId: Int) {
+                            val rotation = getDisplayRotation()
+                            trySendWithFailureLogging(
+                                rotation,
+                                TAG,
+                                "Error sending display rotation to $rotation"
+                            )
+                        }
+                    }
+                displayManager.registerDisplayListener(
+                    callback,
+                    handler,
+                    EVENT_FLAG_DISPLAY_CHANGED
+                )
+                awaitClose { displayManager.unregisterDisplayListener(callback) }
+            }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = getDisplayRotation(),
+            )
+
     companion object {
-        const val TAG = "RearDisplayStateRepositoryImpl"
+        const val TAG = "DisplayStateRepositoryImpl"
     }
 }

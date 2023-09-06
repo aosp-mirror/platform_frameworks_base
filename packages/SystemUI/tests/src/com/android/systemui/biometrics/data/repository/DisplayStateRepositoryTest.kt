@@ -17,13 +17,21 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.hardware.devicestate.DeviceStateManager
+import android.hardware.display.DisplayManager
+import android.os.Handler
+import android.view.Display
+import android.view.DisplayInfo
+import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepositoryImpl
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.data.repository.DisplayStateRepositoryImpl
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -38,8 +46,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.same
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
@@ -50,16 +60,19 @@ private const val REAR_DISPLAY_MODE_DEVICE_STATE = 3
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-class RearDisplayStateRepositoryTest : SysuiTestCase() {
+class DisplayStateRepositoryTest : SysuiTestCase() {
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
     @Mock private lateinit var deviceStateManager: DeviceStateManager
-    private lateinit var underTest: RearDisplayStateRepository
+    @Mock private lateinit var displayManager: DisplayManager
+    @Mock private lateinit var handler: Handler
+    @Mock private lateinit var display: Display
+    private lateinit var underTest: DisplayStateRepository
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     @Captor
-    private lateinit var callbackCaptor: ArgumentCaptor<DeviceStateManager.DeviceStateCallback>
+    private lateinit var displayListenerCaptor: ArgumentCaptor<DisplayManager.DisplayListener>
 
     @Before
     fun setUp() {
@@ -69,11 +82,16 @@ class RearDisplayStateRepositoryTest : SysuiTestCase() {
             rearDisplayDeviceStates
         )
 
+        mContext = spy(mContext)
+        whenever(mContext.display).thenReturn(display)
+
         underTest =
-            RearDisplayStateRepositoryImpl(
+            DisplayStateRepositoryImpl(
                 testScope.backgroundScope,
                 mContext,
                 deviceStateManager,
+                displayManager,
+                handler,
                 fakeExecutor
             )
     }
@@ -81,16 +99,46 @@ class RearDisplayStateRepositoryTest : SysuiTestCase() {
     @Test
     fun updatesIsInRearDisplayMode_whenRearDisplayStateChanges() =
         testScope.runTest {
-            val isInRearDisplayMode = collectLastValue(underTest.isInRearDisplayMode)
+            val isInRearDisplayMode by collectLastValue(underTest.isInRearDisplayMode)
             runCurrent()
 
             val callback = deviceStateManager.captureCallback()
 
             callback.onStateChanged(NORMAL_DISPLAY_MODE_DEVICE_STATE)
-            assertThat(isInRearDisplayMode()).isFalse()
+            assertThat(isInRearDisplayMode).isFalse()
 
             callback.onStateChanged(REAR_DISPLAY_MODE_DEVICE_STATE)
-            assertThat(isInRearDisplayMode()).isTrue()
+            assertThat(isInRearDisplayMode).isTrue()
+        }
+
+    @Test
+    fun updatesCurrentRotation_whenDisplayStateChanges() =
+        testScope.runTest {
+            val currentRotation by collectLastValue(underTest.currentRotation)
+            runCurrent()
+
+            verify(displayManager)
+                .registerDisplayListener(
+                    displayListenerCaptor.capture(),
+                    same(handler),
+                    eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED)
+                )
+
+            whenever(display.getDisplayInfo(any())).then {
+                val info = it.getArgument<DisplayInfo>(0)
+                info.rotation = Surface.ROTATION_90
+                return@then true
+            }
+            displayListenerCaptor.value.onDisplayChanged(Surface.ROTATION_90)
+            assertThat(currentRotation).isEqualTo(DisplayRotation.ROTATION_90)
+
+            whenever(display.getDisplayInfo(any())).then {
+                val info = it.getArgument<DisplayInfo>(0)
+                info.rotation = Surface.ROTATION_180
+                return@then true
+            }
+            displayListenerCaptor.value.onDisplayChanged(Surface.ROTATION_180)
+            assertThat(currentRotation).isEqualTo(DisplayRotation.ROTATION_180)
         }
 }
 
