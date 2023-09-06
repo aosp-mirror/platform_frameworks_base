@@ -594,8 +594,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxPartitions() {
-        enforceCallingPermissionForManagement();
-
         synchronized (mLock) {
             return sPartitionMaxCount;
         }
@@ -628,8 +626,6 @@ public final class AutofillManagerService
 
     // Called by Shell command.
     int getMaxVisibleDatasets() {
-        enforceCallingPermissionForManagement();
-
         synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
