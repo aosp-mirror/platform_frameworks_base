@@ -222,10 +222,10 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.util.Compile;
-import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -618,7 +618,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mLockscreenToDreamingTransitionTranslationY;
     private int mGoneToDreamingTransitionTranslationY;
     private int mLockscreenToOccludedTransitionTranslationY;
-
+    private SplitShadeStateController mSplitShadeStateController;
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
     private final Runnable mAnimateKeyguardBottomAreaInvisibleEndRunnable =
@@ -776,7 +776,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ActivityStarter activityStarter,
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
             KeyguardViewConfigurator keyguardViewConfigurator,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            SplitShadeStateController splitShadeStateController) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -872,8 +873,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mFragmentService = fragmentService;
         mStatusBarService = statusBarService;
         mSettingsChangeObserver = new SettingsChangeObserver(handler);
+        mSplitShadeStateController = splitShadeStateController;
         mSplitShadeEnabled =
-                LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+                mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG_DRAWABLE);
         mShadeHeaderController = shadeHeaderController;
         mLayoutInflater = layoutInflater;
@@ -1293,7 +1295,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @Override
     public void updateResources() {
         final boolean newSplitShadeEnabled =
-                LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
+                mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         final boolean splitShadeChanged = mSplitShadeEnabled != newSplitShadeEnabled;
         mSplitShadeEnabled = newSplitShadeEnabled;
         mQsController.updateResources();

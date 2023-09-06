@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import javax.inject.Named
@@ -55,6 +55,7 @@ constructor(
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
     configurationController: ConfigurationController,
+    private val splitShadeStateController: SplitShadeStateController
 ) {
 
     init {
@@ -108,7 +109,7 @@ constructor(
     }
 
     private fun updateResources() {
-        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     @VisibleForTesting

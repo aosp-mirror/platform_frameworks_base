@@ -18,7 +18,6 @@ package com.android.systemui.shade.transition
 
 import android.content.Context
 import android.content.res.Configuration
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
@@ -31,6 +30,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -45,6 +45,7 @@ constructor(
     private val context: Context,
     private val scrimShadeTransitionController: ScrimShadeTransitionController,
     private val statusBarStateController: SysuiStatusBarStateController,
+    private val splitShadeStateController: SplitShadeStateController
 ) {
 
     lateinit var shadeViewController: ShadeViewController
@@ -73,7 +74,7 @@ constructor(
     }
 
     private fun updateResources() {
-        inSplitShade = context.resources.getBoolean(R.bool.config_use_split_notification_shade)
+        inSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     private fun onPanelStateChanged(@PanelState state: Int) {

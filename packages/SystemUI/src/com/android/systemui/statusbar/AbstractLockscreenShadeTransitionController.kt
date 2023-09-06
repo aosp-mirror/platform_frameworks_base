@@ -6,14 +6,15 @@ import android.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.LargeScreenUtils
+import com.android.systemui.statusbar.policy.SplitShadeStateController
 import java.io.PrintWriter
 
 /** An abstract implementation of a class that controls the lockscreen to shade transition. */
 abstract class AbstractLockscreenShadeTransitionController(
     protected val context: Context,
     configurationController: ConfigurationController,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val splitShadeStateController: SplitShadeStateController
 ) : Dumpable {
 
     protected var useSplitShade = false
@@ -44,7 +45,8 @@ abstract class AbstractLockscreenShadeTransitionController(
     }
 
     private fun updateResourcesInternal() {
-        useSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = splitShadeStateController
+                .shouldUseSplitNotificationShade(context.resources)
         updateResources()
     }
 

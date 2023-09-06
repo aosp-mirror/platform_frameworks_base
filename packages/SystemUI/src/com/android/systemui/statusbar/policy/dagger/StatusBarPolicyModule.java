@@ -60,6 +60,8 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
+import com.android.systemui.statusbar.policy.SplitShadeStateController;
+import com.android.systemui.statusbar.policy.SplitShadeStateControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.WalletController;
@@ -110,6 +112,11 @@ public interface StatusBarPolicyModule {
     /** */
     @Binds
     KeyguardStateController provideKeyguardMonitor(KeyguardStateControllerImpl controllerImpl);
+
+    /** */
+    @Binds
+    SplitShadeStateController provideSplitShadeStateController(
+            SplitShadeStateControllerImpl splitShadeStateControllerImpl);
 
     /** */
     @Binds

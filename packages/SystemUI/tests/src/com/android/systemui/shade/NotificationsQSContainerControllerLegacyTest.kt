@@ -39,6 +39,7 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.whenever
@@ -118,6 +119,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
 
         overrideResource(R.dimen.split_shade_notifications_scrim_margin_bottom, SCRIM_MARGIN)
@@ -474,6 +476,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
                 delayableExecutor,
                 featureFlags,
                 notificationStackScrollLayoutController,
+                ResourcesSplitShadeStateController()
             )
         controller.updateConstraints()
 

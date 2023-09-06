@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFl
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
@@ -72,6 +73,7 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
         SharedNotificationContainerInteractor(
             configurationRepository,
             mContext,
+            ResourcesSplitShadeStateController()
         )
 
     private lateinit var detector: AuthDialogPanelInteractionDetector

@@ -23,6 +23,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -43,6 +44,7 @@ class SharedNotificationContainerInteractorTest : SysuiTestCase() {
             SharedNotificationContainerInteractor(
                 configurationRepository,
                 mContext,
+                ResourcesSplitShadeStateController()
             )
     }
 
