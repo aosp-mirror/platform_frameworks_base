@@ -71,7 +71,6 @@ filegroup {
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
         ":framework-identity-sources",
-        ":framework-location-sources",
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
@@ -183,7 +182,6 @@ java_defaults {
             "graphics/java",
             "identity/java",
             "keystore/java",
-            "location/java",
             "media/java",
             "media/mca/effect/java",
             "media/mca/filterfw/java",
@@ -293,7 +291,6 @@ java_defaults {
             ":framework-jobscheduler-sources",
             ":framework-keystore-sources",
             ":framework-identity-sources",
-            ":framework-location-sources",
             ":framework-mca-effect-sources",
             ":framework-mca-filterfw-sources",
             ":framework-mca-filterpacks-sources",
