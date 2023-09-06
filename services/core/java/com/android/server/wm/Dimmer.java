@@ -22,6 +22,7 @@ import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -178,6 +179,7 @@ class Dimmer {
         mSurfaceAnimatorStarter = surfaceAnimatorStarter;
     }
 
+    @NonNull
     WindowContainer<?> getHost() {
         return mHost;
     }
@@ -199,13 +201,6 @@ class Dimmer {
             try {
                 final SurfaceControl ctl = makeDimLayer();
                 mDimState = new DimState(ctl);
-                /**
-                 * See documentation on {@link #dimAbove} to understand lifecycle management of
-                 * Dim's via state resetting for Dim's with containers.
-                 */
-                if (container == null) {
-                    mDimState.mDontReset = true;
-                }
             } catch (Surface.OutOfResourcesException e) {
                 Log.w(TAG, "OutOfResourcesException creating dim surface");
             }
@@ -241,7 +236,7 @@ class Dimmer {
      * @param container The container which to dim above. Should be a child of our host.
      * @param alpha     The alpha at which to Dim.
      */
-    void dimAbove(WindowContainer container, float alpha) {
+    void dimAbove(@NonNull WindowContainer container, float alpha) {
         dim(container, 1, alpha, 0);
     }
 
@@ -253,7 +248,7 @@ class Dimmer {
      * @param blurRadius The amount of blur added to the Dim.
      */
 
-    void dimBelow(WindowContainer container, float alpha, int blurRadius) {
+    void dimBelow(@NonNull WindowContainer container, float alpha, int blurRadius) {
         dim(container, -1, alpha, blurRadius);
     }
 
@@ -316,7 +311,12 @@ class Dimmer {
             if (!mDimState.isVisible) {
                 mDimState.isVisible = true;
                 t.show(mDimState.mDimLayer);
-                startDimEnter(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+                // Skip enter animation while starting window is on top of its activity
+                final WindowState ws = mLastRequestedDimContainer.asWindowState();
+                if (ws == null || ws.mActivityRecord == null
+                        || ws.mActivityRecord.mStartingData == null) {
+                    startDimEnter(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+                }
             }
             return true;
         }
