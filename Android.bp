@@ -621,6 +621,7 @@ metalava_framework_docs_args = "" +
     "--api-lint-ignore-prefix org. " +
     "--error NoSettingsProvider " +
     "--error UnhiddenSystemApi " +
+    "--error UnflaggedApi " +
     "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
     "--hide BroadcastBehavior " +
     "--hide CallbackInterface " +
