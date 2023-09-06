@@ -247,6 +247,22 @@ public class VirtualDeviceInternal {
         }
     }
 
+    void addActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.addActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
+        try {
+            mVirtualDevice.removeActivityPolicyExemption(componentName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @NonNull
     VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
         try {

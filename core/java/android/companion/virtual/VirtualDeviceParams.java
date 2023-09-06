@@ -22,12 +22,14 @@ import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.companion.virtual.flags.Flags;
 import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorCallback;
@@ -144,7 +146,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
-            POLICY_TYPE_RECENTS})
+            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -155,7 +157,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * @see VirtualDeviceManager.VirtualDevice#setDevicePolicy
      * @hide
      */
-    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS})
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface DynamicPolicyType {}
@@ -195,19 +197,35 @@ public final class VirtualDeviceParams implements Parcelable {
      *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities launched on VirtualDisplays owned by this
      *     device will appear in the host device recents.
      *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities launched on VirtualDisplays owned by this
-     *      *     device will not appear in recents.
+     *     device will not appear in recents.
      * </ul>
      */
     public static final int POLICY_TYPE_RECENTS = 2;
+
+    /**
+     * Tells the activity manager what the default launch behavior for activities on this device is.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities are allowed to be launched on displays
+     *     owned by this device, unless explicitly blocked by the device.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities are blocked from launching on displays
+     *     owned by this device, unless explicitly allowed by the device.
+     * </ul>
+     *
+     * @see VirtualDeviceManager.VirtualDevice#addActivityPolicyExemption
+     * @see VirtualDeviceManager.VirtualDevice#removeActivityPolicyExemption
+     */
+    @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
+    public static final int POLICY_TYPE_ACTIVITY = 3;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
     @NavigationPolicy
     private final int mDefaultNavigationPolicy;
-    @NonNull private final ArraySet<ComponentName> mCrossTaskNavigationExceptions;
+    @NonNull private final ArraySet<ComponentName> mCrossTaskNavigationExemptions;
     @ActivityPolicy
     private final int mDefaultActivityPolicy;
-    @NonNull private final ArraySet<ComponentName> mActivityPolicyExceptions;
+    @NonNull private final ArraySet<ComponentName> mActivityPolicyExemptions;
     @Nullable private final String mName;
     // Mapping of @PolicyType to @DevicePolicy
     @NonNull private final SparseIntArray mDevicePolicies;
@@ -220,9 +238,9 @@ public final class VirtualDeviceParams implements Parcelable {
             @LockState int lockState,
             @NonNull Set<UserHandle> usersWithMatchingAccounts,
             @NavigationPolicy int defaultNavigationPolicy,
-            @NonNull Set<ComponentName> crossTaskNavigationExceptions,
+            @NonNull Set<ComponentName> crossTaskNavigationExemptions,
             @ActivityPolicy int defaultActivityPolicy,
-            @NonNull Set<ComponentName> activityPolicyExceptions,
+            @NonNull Set<ComponentName> activityPolicyExemptions,
             @Nullable String name,
             @NonNull SparseIntArray devicePolicies,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
@@ -233,11 +251,11 @@ public final class VirtualDeviceParams implements Parcelable {
         mUsersWithMatchingAccounts =
                 new ArraySet<>(Objects.requireNonNull(usersWithMatchingAccounts));
         mDefaultNavigationPolicy = defaultNavigationPolicy;
-        mCrossTaskNavigationExceptions =
-                new ArraySet<>(Objects.requireNonNull(crossTaskNavigationExceptions));
+        mCrossTaskNavigationExemptions =
+                new ArraySet<>(Objects.requireNonNull(crossTaskNavigationExemptions));
         mDefaultActivityPolicy = defaultActivityPolicy;
-        mActivityPolicyExceptions =
-                new ArraySet<>(Objects.requireNonNull(activityPolicyExceptions));
+        mActivityPolicyExemptions =
+                new ArraySet<>(Objects.requireNonNull(activityPolicyExemptions));
         mName = name;
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
@@ -251,9 +269,9 @@ public final class VirtualDeviceParams implements Parcelable {
         mLockState = parcel.readInt();
         mUsersWithMatchingAccounts = (ArraySet<UserHandle>) parcel.readArraySet(null);
         mDefaultNavigationPolicy = parcel.readInt();
-        mCrossTaskNavigationExceptions = (ArraySet<ComponentName>) parcel.readArraySet(null);
+        mCrossTaskNavigationExemptions = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mDefaultActivityPolicy = parcel.readInt();
-        mActivityPolicyExceptions = (ArraySet<ComponentName>) parcel.readArraySet(null);
+        mActivityPolicyExemptions = (ArraySet<ComponentName>) parcel.readArraySet(null);
         mName = parcel.readString8();
         mDevicePolicies = parcel.readSparseIntArray();
         mVirtualSensorConfigs = new ArrayList<>();
@@ -295,7 +313,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public Set<ComponentName> getAllowedCrossTaskNavigations() {
         return mDefaultNavigationPolicy == NAVIGATION_POLICY_DEFAULT_ALLOWED
                 ? Collections.emptySet()
-                : Collections.unmodifiableSet(mCrossTaskNavigationExceptions);
+                : Collections.unmodifiableSet(mCrossTaskNavigationExemptions);
     }
 
     /**
@@ -310,7 +328,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public Set<ComponentName> getBlockedCrossTaskNavigations() {
         return mDefaultNavigationPolicy == NAVIGATION_POLICY_DEFAULT_BLOCKED
                 ? Collections.emptySet()
-                : Collections.unmodifiableSet(mCrossTaskNavigationExceptions);
+                : Collections.unmodifiableSet(mCrossTaskNavigationExemptions);
     }
 
     /**
@@ -336,7 +354,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public Set<ComponentName> getAllowedActivities() {
         return mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_ALLOWED
                 ? Collections.emptySet()
-                : Collections.unmodifiableSet(mActivityPolicyExceptions);
+                : Collections.unmodifiableSet(mActivityPolicyExemptions);
     }
 
     /**
@@ -349,7 +367,7 @@ public final class VirtualDeviceParams implements Parcelable {
     public Set<ComponentName> getBlockedActivities() {
         return mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_BLOCKED
                 ? Collections.emptySet()
-                : Collections.unmodifiableSet(mActivityPolicyExceptions);
+                : Collections.unmodifiableSet(mActivityPolicyExemptions);
     }
 
     /**
@@ -440,9 +458,9 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeInt(mLockState);
         dest.writeArraySet(mUsersWithMatchingAccounts);
         dest.writeInt(mDefaultNavigationPolicy);
-        dest.writeArraySet(mCrossTaskNavigationExceptions);
+        dest.writeArraySet(mCrossTaskNavigationExemptions);
         dest.writeInt(mDefaultActivityPolicy);
-        dest.writeArraySet(mActivityPolicyExceptions);
+        dest.writeArraySet(mActivityPolicyExemptions);
         dest.writeString8(mName);
         dest.writeSparseIntArray(mDevicePolicies);
         dest.writeTypedList(mVirtualSensorConfigs);
@@ -476,9 +494,9 @@ public final class VirtualDeviceParams implements Parcelable {
         return mLockState == that.mLockState
                 && mUsersWithMatchingAccounts.equals(that.mUsersWithMatchingAccounts)
                 && Objects.equals(
-                        mCrossTaskNavigationExceptions, that.mCrossTaskNavigationExceptions)
+                        mCrossTaskNavigationExemptions, that.mCrossTaskNavigationExemptions)
                 && mDefaultNavigationPolicy == that.mDefaultNavigationPolicy
-                && Objects.equals(mActivityPolicyExceptions, that.mActivityPolicyExceptions)
+                && Objects.equals(mActivityPolicyExemptions, that.mActivityPolicyExemptions)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
                 && Objects.equals(mName, that.mName)
                 && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
@@ -488,8 +506,8 @@ public final class VirtualDeviceParams implements Parcelable {
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(
-                mLockState, mUsersWithMatchingAccounts, mCrossTaskNavigationExceptions,
-                mDefaultNavigationPolicy, mActivityPolicyExceptions, mDefaultActivityPolicy, mName,
+                mLockState, mUsersWithMatchingAccounts, mCrossTaskNavigationExemptions,
+                mDefaultNavigationPolicy, mActivityPolicyExemptions, mDefaultActivityPolicy, mName,
                 mDevicePolicies, mAudioPlaybackSessionId, mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
@@ -505,9 +523,9 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mLockState=" + mLockState
                 + " mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts
                 + " mDefaultNavigationPolicy=" + mDefaultNavigationPolicy
-                + " mCrossTaskNavigationExceptions=" + mCrossTaskNavigationExceptions
+                + " mCrossTaskNavigationExemptions=" + mCrossTaskNavigationExemptions
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
-                + " mActivityPolicyExceptions=" + mActivityPolicyExceptions
+                + " mActivityPolicyExemptions=" + mActivityPolicyExemptions
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
@@ -524,9 +542,9 @@ public final class VirtualDeviceParams implements Parcelable {
         pw.println(prefix + "mLockState=" + mLockState);
         pw.println(prefix + "mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts);
         pw.println(prefix + "mDefaultNavigationPolicy=" + mDefaultNavigationPolicy);
-        pw.println(prefix + "mCrossTaskNavigationExceptions=" + mCrossTaskNavigationExceptions);
+        pw.println(prefix + "mCrossTaskNavigationExemptions=" + mCrossTaskNavigationExemptions);
         pw.println(prefix + "mDefaultActivityPolicy=" + mDefaultActivityPolicy);
-        pw.println(prefix + "mActivityPolicyExceptions=" + mActivityPolicyExceptions);
+        pw.println(prefix + "mActivityPolicyExemptions=" + mActivityPolicyExemptions);
         pw.println(prefix + "mDevicePolicies=" + mDevicePolicies);
         pw.println(prefix + "mVirtualSensorConfigs=" + mVirtualSensorConfigs);
         pw.println(prefix + "mAudioPlaybackSessionId=" + mAudioPlaybackSessionId);
@@ -552,11 +570,11 @@ public final class VirtualDeviceParams implements Parcelable {
 
         private @LockState int mLockState = LOCK_STATE_DEFAULT;
         @NonNull private Set<UserHandle> mUsersWithMatchingAccounts = Collections.emptySet();
-        @NonNull private Set<ComponentName> mCrossTaskNavigationExceptions = Collections.emptySet();
+        @NonNull private Set<ComponentName> mCrossTaskNavigationExemptions = Collections.emptySet();
         @NavigationPolicy
         private int mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_ALLOWED;
         private boolean mDefaultNavigationPolicyConfigured = false;
-        @NonNull private Set<ComponentName> mActivityPolicyExceptions = Collections.emptySet();
+        @NonNull private Set<ComponentName> mActivityPolicyExemptions = Collections.emptySet();
         @ActivityPolicy
         private int mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
         private boolean mDefaultActivityPolicyConfigured = false;
@@ -700,7 +718,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_BLOCKED;
             mDefaultNavigationPolicyConfigured = true;
-            mCrossTaskNavigationExceptions = Objects.requireNonNull(allowedCrossTaskNavigations);
+            mCrossTaskNavigationExemptions = Objects.requireNonNull(allowedCrossTaskNavigations);
             return this;
         }
 
@@ -731,7 +749,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultNavigationPolicy = NAVIGATION_POLICY_DEFAULT_ALLOWED;
             mDefaultNavigationPolicyConfigured = true;
-            mCrossTaskNavigationExceptions = Objects.requireNonNull(blockedCrossTaskNavigations);
+            mCrossTaskNavigationExemptions = Objects.requireNonNull(blockedCrossTaskNavigations);
             return this;
         }
 
@@ -757,7 +775,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_BLOCKED;
             mDefaultActivityPolicyConfigured = true;
-            mActivityPolicyExceptions = Objects.requireNonNull(allowedActivities);
+            mActivityPolicyExemptions = Objects.requireNonNull(allowedActivities);
             return this;
         }
 
@@ -783,7 +801,7 @@ public final class VirtualDeviceParams implements Parcelable {
             }
             mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
             mDefaultActivityPolicyConfigured = true;
-            mActivityPolicyExceptions = Objects.requireNonNull(blockedActivities);
+            mActivityPolicyExemptions = Objects.requireNonNull(blockedActivities);
             return this;
         }
 
@@ -956,6 +974,35 @@ public final class VirtualDeviceParams implements Parcelable {
                         mVirtualSensorDirectChannelCallback);
             }
 
+            if (Flags.dynamicPolicy()) {
+                switch (mDevicePolicies.get(POLICY_TYPE_ACTIVITY, -1)) {
+                    case DEVICE_POLICY_DEFAULT:
+                        if (mDefaultActivityPolicyConfigured
+                                && mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_BLOCKED) {
+                            throw new IllegalArgumentException(
+                                    "DEVICE_POLICY_DEFAULT is explicitly configured for "
+                                            + "POLICY_TYPE_ACTIVITY, which is exclusive with "
+                                            + "setAllowedActivities.");
+                        }
+                        break;
+                    case DEVICE_POLICY_CUSTOM:
+                        if (mDefaultActivityPolicyConfigured
+                                && mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_ALLOWED) {
+                            throw new IllegalArgumentException(
+                                    "DEVICE_POLICY_CUSTOM is explicitly configured for "
+                                            + "POLICY_TYPE_ACTIVITY, which is exclusive with "
+                                            + "setBlockedActivities.");
+                        }
+                        break;
+                    default:
+                        if (mDefaultActivityPolicyConfigured
+                                && mDefaultActivityPolicy == ACTIVITY_POLICY_DEFAULT_BLOCKED) {
+                            mDevicePolicies.put(POLICY_TYPE_ACTIVITY, DEVICE_POLICY_CUSTOM);
+                        }
+                        break;
+                }
+            }
+
             if ((mAudioPlaybackSessionId != AUDIO_SESSION_ID_GENERATE
                     || mAudioRecordingSessionId != AUDIO_SESSION_ID_GENERATE)
                     && mDevicePolicies.get(POLICY_TYPE_AUDIO, DEVICE_POLICY_DEFAULT)
@@ -964,7 +1011,7 @@ public final class VirtualDeviceParams implements Parcelable {
                         + "required for configuration of device-specific audio session ids.");
             }
 
-            SparseArray<Set<String>> sensorNameByType = new SparseArray();
+            SparseArray<Set<String>> sensorNameByType = new SparseArray<>();
             for (int i = 0; i < mVirtualSensorConfigs.size(); ++i) {
                 VirtualSensorConfig config = mVirtualSensorConfigs.get(i);
                 Set<String> sensorNames = sensorNameByType.get(config.getType(), new ArraySet<>());
@@ -979,9 +1026,9 @@ public final class VirtualDeviceParams implements Parcelable {
                     mLockState,
                     mUsersWithMatchingAccounts,
                     mDefaultNavigationPolicy,
-                    mCrossTaskNavigationExceptions,
+                    mCrossTaskNavigationExemptions,
                     mDefaultActivityPolicy,
-                    mActivityPolicyExceptions,
+                    mActivityPolicyExemptions,
                     mName,
                     mDevicePolicies,
                     mVirtualSensorConfigs,
