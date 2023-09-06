@@ -50,3 +50,46 @@ android_app {
         proguard_compatibility: false,
     },
 }
+
+android_app {
+    name: "ClockworkCredentialManager",
+    defaults: ["platform_app_defaults"],
+    certificate: "platform",
+    manifest: "wear/AndroidManifest.xml",
+    srcs: ["wear/src/**/*.kt"],
+    resource_dirs: ["wear/res"],
+
+    dex_preopt: {
+        profile_guided: true,
+        profile: "wear/profile.txt.prof",
+    },
+
+    static_libs: [
+        "PlatformComposeCore",
+        "androidx.activity_activity-compose",
+        "androidx.appcompat_appcompat",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.foundation_foundation-layout",
+        "androidx.compose.material_material-icons-core",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.ui_ui",
+        "androidx.core_core-ktx",
+        "androidx.credentials_credentials",
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-viewmodel-compose",
+        "androidx.wear.compose_compose-foundation",
+        "androidx.wear.compose_compose-material",
+        "kotlinx-coroutines-core",
+    ],
+
+    platform_apis: true,
+    privileged: true,
+
+    kotlincflags: ["-Xjvm-default=all"],
+
+    optimize: {
+        proguard_compatibility: false,
+    },
+}
