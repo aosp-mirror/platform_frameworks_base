@@ -32,7 +32,7 @@ narayan@google.com
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 per-file *Voice* = file:/core/java/android/service/voice/OWNERS
 
-per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com
+per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com
 
 per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
 
