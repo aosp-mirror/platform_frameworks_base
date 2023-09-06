@@ -743,9 +743,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Set of activities in foreground size compat mode. */
     private Set<ActivityRecord> mActiveSizeCompatActivities = new ArraySet<>();
 
-    // Used in updating the display size
-    private Point mTmpDisplaySize = new Point();
-
     // Used in updating override configurations
     private final Configuration mTempConfig = new Configuration();
 
@@ -4795,25 +4792,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             pw.println(subPrefix + "Window #" + index[0] + ": " + wAnim);
             index[0] = index[0] + 1;
         }, false /* traverseTopToBottom */);
-    }
-
-    /**
-     * Starts the Keyguard exit animation on all windows that don't belong to an app token.
-     */
-    void startKeyguardExitOnNonAppWindows(boolean onWallpaper, boolean goingToShade,
-            boolean subtle) {
-        final WindowManagerPolicy policy = mWmService.mPolicy;
-        forAllWindows(w -> {
-            if (w.mActivityRecord == null && w.canBeHiddenByKeyguard()
-                    && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
-                w.startAnimation(policy.createHiddenByKeyguardExit(
-                        onWallpaper, goingToShade, subtle));
-            }
-        }, true /* traverseTopToBottom */);
-        for (int i = mShellRoots.size() - 1; i >= 0; --i) {
-            mShellRoots.valueAt(i).startAnimation(policy.createHiddenByKeyguardExit(
-                    onWallpaper, goingToShade, subtle));
-        }
     }
 
     /** @return {@code true} if there is window to wait before enabling the screen. */
