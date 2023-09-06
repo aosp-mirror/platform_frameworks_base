@@ -22,7 +22,6 @@ java_defaults {
         ":android.os.flags-aconfig-java{.generated_srcjars}",
         ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
         ":android.security.flags-aconfig-java{.generated_srcjars}",
-        ":android.media.flags-aconfig-java{.generated_srcjars}",
         ":camera_platform_flags_core_java_lib{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
@@ -170,18 +169,5 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.os.vibrator.flags-aconfig-java",
     aconfig_declarations: "android.os.vibrator.flags-aconfig",
-    defaults: ["framework-minus-apex-aconfig-java-defaults"],
-}
-
-// Media
-aconfig_declarations {
-    name: "android.media.flags-aconfig",
-    package: "android.media",
-    srcs: ["media/java/android/media/*.aconfig"],
-}
-
-java_aconfig_library {
-    name: "android.media.flags-aconfig-java",
-    aconfig_declarations: "android.media.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
