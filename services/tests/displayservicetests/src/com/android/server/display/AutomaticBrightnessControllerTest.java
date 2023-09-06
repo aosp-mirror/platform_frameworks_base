@@ -267,7 +267,8 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // There should be a user data point added to the mapper.
-        verify(mBrightnessMappingStrategy).addUserDataPoint(1000f, 0.5f);
+        verify(mBrightnessMappingStrategy).addUserDataPoint(/* lux= */ 1000f,
+                /* brightness= */ 0.5f);
     }
 
     @Test
@@ -295,7 +296,8 @@ public class AutomaticBrightnessControllerTest {
         mController.recalculateSplines(true, adjustments);
         verify(mBrightnessMappingStrategy).clearUserDataPoints();
         verify(mBrightnessMappingStrategy).recalculateSplines(true, adjustments);
-        verify(mBrightnessMappingStrategy, times(2)).addUserDataPoint(currentLux, 0.5f);
+        verify(mBrightnessMappingStrategy, times(2)).addUserDataPoint(currentLux,
+                /* brightness= */ 0.5f);
 
         clearInvocations(mBrightnessMappingStrategy);
 
@@ -342,7 +344,7 @@ public class AutomaticBrightnessControllerTest {
         // Verify only happens on the first configure. (i.e. not again when switching back)
         // Intentionally using any() to ensure it's not called whatsoever.
         verify(mBrightnessMappingStrategy, times(1))
-                .addUserDataPoint(123.0f, 0.5f);
+                .addUserDataPoint(/* lux= */ 123.0f, /* brightness= */ 0.5f);
         verify(mBrightnessMappingStrategy, times(1))
                 .addUserDataPoint(anyFloat(), anyFloat());
     }
@@ -385,7 +387,7 @@ public class AutomaticBrightnessControllerTest {
         // Verify that we add the data point once when the user sets it, and again when we return
         // interactive mode.
         verify(mBrightnessMappingStrategy, times(2))
-                .addUserDataPoint(123.0f, 0.51f);
+                .addUserDataPoint(/* lux= */ 123.0f, /* brightness= */ 0.51f);
     }
 
     @Test
@@ -428,7 +430,7 @@ public class AutomaticBrightnessControllerTest {
         // Verify only happens on the first configure. (i.e. not again when switching back)
         // Intentionally using any() to ensure it's not called whatsoever.
         verify(mBrightnessMappingStrategy, times(1))
-                .addUserDataPoint(123.0f, 0.5f);
+                .addUserDataPoint(/* lux= */ 123.0f, /* brightness= */ 0.5f);
         verify(mBrightnessMappingStrategy, times(1))
                 .addUserDataPoint(anyFloat(), anyFloat());
     }
@@ -474,7 +476,7 @@ public class AutomaticBrightnessControllerTest {
         // Verify this happens on the first configure and again when switching back
         // Intentionally using any() to ensure it's not called any other times whatsoever.
         verify(mBrightnessMappingStrategy, times(2))
-                .addUserDataPoint(123.0f, 0.5f);
+                .addUserDataPoint(/* lux= */ 123.0f, /* brightness= */ 0.5f);
         verify(mBrightnessMappingStrategy, times(2))
                 .addUserDataPoint(anyFloat(), anyFloat());
     }
@@ -533,7 +535,8 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // There should be a user data point added to the mapper.
-        verify(mBrightnessMappingStrategy, times(1)).addUserDataPoint(1000f, 0.5f);
+        verify(mBrightnessMappingStrategy, times(1)).addUserDataPoint(/* lux= */ 1000f,
+                /* brightness= */ 0.5f);
         verify(mBrightnessMappingStrategy, times(2)).setBrightnessConfiguration(any());
         verify(mBrightnessMappingStrategy, times(3)).getBrightness(anyFloat(), any(), anyInt());
 
@@ -559,7 +562,8 @@ public class AutomaticBrightnessControllerTest {
                 /* shouldResetShortTermModel= */ true);
 
         // Ensure we use the correct mapping strategy
-        verify(mIdleBrightnessMappingStrategy, times(1)).addUserDataPoint(1000f, 0.5f);
+        verify(mIdleBrightnessMappingStrategy, times(1)).addUserDataPoint(/* lux= */ 1000f,
+                /* brightness= */ 0.5f);
     }
 
     @Test
