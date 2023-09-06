@@ -655,7 +655,10 @@ object Flags {
         ),
         level = DeprecationLevel.WARNING,
     )
-    @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
+    @JvmField val SCENE_CONTAINER = resourceBooleanFlag(
+        R.bool.config_sceneContainerFrameworkEnabled,
+        "scene_container",
+    )
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
