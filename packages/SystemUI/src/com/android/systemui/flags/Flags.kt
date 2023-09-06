@@ -308,11 +308,6 @@ object Flags {
     val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
             unreleasedFlag("keyguard_wm_state_refactor")
 
-    /** Stop running face auth when the display state changes to OFF. */
-    // TODO(b/294221702): Tracking bug.
-    @JvmField val STOP_FACE_AUTH_ON_DISPLAY_OFF = resourceBooleanFlag(
-            R.bool.flag_stop_face_auth_on_display_off, "stop_face_auth_on_display_off")
-
     /** Flag to disable the face scanning animation pulsing. */
     // TODO(b/295245791): Tracking bug.
     @JvmField val STOP_PULSING_FACE_SCANNING_ANIMATION = resourceBooleanFlag(

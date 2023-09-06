@@ -160,8 +160,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
@@ -416,7 +414,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final ActiveUnlockConfig mActiveUnlockConfig;
     private final IDreamManager mDreamManager;
     private final TelephonyManager mTelephonyManager;
-    private final FeatureFlags mFeatureFlags;
     @Nullable
     private final FingerprintManager mFpm;
     @Nullable
@@ -2364,7 +2361,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FaceWakeUpTriggersConfig faceWakeUpTriggersConfig,
             DevicePostureController devicePostureController,
             Optional<FingerprintInteractiveToAuthProvider> interactiveToAuthProvider,
-            FeatureFlags featureFlags,
             TaskStackChangeListeners taskStackChangeListeners,
             IActivityTaskManager activityTaskManagerService,
             DisplayTracker displayTracker) {
@@ -2399,7 +2395,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mPackageManager = packageManager;
         mFpm = fingerprintManager;
         mFaceManager = faceManager;
-        mFeatureFlags = featureFlags;
         mActiveUnlockConfig.setKeyguardUpdateMonitor(this);
         mFaceAcquiredInfoIgnoreList = Arrays.stream(
                 mContext.getResources().getIntArray(
@@ -2416,9 +2411,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mTaskStackChangeListeners = taskStackChangeListeners;
         mActivityTaskManager = activityTaskManagerService;
         mDisplayTracker = displayTracker;
-        if (mFeatureFlags.isEnabled(Flags.STOP_FACE_AUTH_ON_DISPLAY_OFF)) {
-            mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
-        }
+        mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
 
         mHandler = new Handler(mainLooper) {
             @Override
