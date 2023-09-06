@@ -72,7 +72,7 @@ class GrantAndRevokeTrustTest {
         trustAgentRule.agent.grantTrust(GRANT_MESSAGE, 10000, 0) {}
         uiDevice.sleep()
 
-        lockStateTrackingRule.assertUnlocked()
+        lockStateTrackingRule.assertUnlockedAndTrusted()
     }
 
     @Test
