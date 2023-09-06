@@ -21,7 +21,6 @@ import android.os.Trace
 import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
@@ -37,26 +36,20 @@ class KeyguardBlueprintViewBinder {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
                         viewModel.blueprint.collect { blueprint ->
+                            val prevBluePrint = viewModel.currentBluePrint
                             Trace.beginSection("KeyguardBlueprint#applyBlueprint")
                             Log.d(TAG, "applying blueprint: $blueprint")
-                            if (blueprint != viewModel.currentBluePrint) {
-                                viewModel.currentBluePrint?.onDestroy()
+                            // Add and remove views of sections that are not contained by the other.
+                            prevBluePrint?.removeViews(blueprint, constraintLayout)
+                            blueprint.addViews(prevBluePrint, constraintLayout)
+
+                            ConstraintSet().apply {
+                                clone(constraintLayout)
+                                val emptyLayout = ConstraintSet.Layout()
+                                knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
+                                blueprint.applyConstraints(this)
+                                applyTo(constraintLayout)
                             }
-                            val constraintSet =
-                                ConstraintSet().apply {
-                                    clone(constraintLayout)
-                                    val emptyLayout = ConstraintSet.Layout()
-                                    knownIds.forEach {
-                                        getConstraint(it).layout.copyFrom(emptyLayout)
-                                    }
-                                    blueprint.addViews(constraintLayout)
-                                    blueprint.applyConstraints(this)
-                                    applyTo(constraintLayout)
-                                }
-                            // Remove all unconstrained views.
-                            constraintLayout.children
-                                .filterNot { constraintSet.knownIds.contains(it.id) }
-                                .forEach { constraintLayout.removeView(it) }
 
                             viewModel.currentBluePrint = blueprint
                             Trace.endSection()

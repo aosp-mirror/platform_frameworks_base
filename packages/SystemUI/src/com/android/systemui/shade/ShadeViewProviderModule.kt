@@ -77,7 +77,9 @@ abstract class ShadeViewProviderModule {
             layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
             return if (
-                featureFlags.isEnabled(Flags.SCENE_CONTAINER) && ComposeFacade.isComposeAvailable()
+                Flags.SCENE_CONTAINER_ENABLED &&
+                    featureFlags.isEnabled(Flags.SCENE_CONTAINER) &&
+                    ComposeFacade.isComposeAvailable()
             ) {
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView

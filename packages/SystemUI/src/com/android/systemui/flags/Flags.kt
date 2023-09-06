@@ -636,7 +636,13 @@ object Flags {
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
+    /**
+     * Whether the scene container (Flexiglass) is enabled. Note that [SCENE_CONTAINER] should be
+     * checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can remove
+     * unused code from our APK at compile time.
+     */
     // TODO(b/283300105): Tracking Bug
+    @JvmField val SCENE_CONTAINER_ENABLED = false
     @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
 
     // 1900
@@ -673,6 +679,10 @@ object Flags {
 
     // TODO:(b/283203305): Tracking bug
     @JvmField val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag("trim_font_caches_on_unlock")
+
+    // TODO(b/298380520): Tracking Bug
+    @JvmField
+    val USER_TRACKER_BACKGROUND_CALLBACKS = unreleasedFlag("user_tracker_background_callbacks")
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
@@ -764,7 +774,7 @@ object Flags {
 
     /** Enable the Compose implementation of the PeopleSpaceActivity. */
     @JvmField
-    val COMPOSE_PEOPLE_SPACE = unreleasedFlag("compose_people_space")
+    val COMPOSE_PEOPLE_SPACE = releasedFlag("compose_people_space")
 
     /** Enable the Compose implementation of the Quick Settings footer actions. */
     @JvmField

@@ -22,17 +22,34 @@ import androidx.constraintlayout.widget.ConstraintSet
 /** Determines the constraints for the ConstraintSet in the lockscreen root view. */
 interface KeyguardBlueprint {
     val id: String
-    val sections: Array<KeyguardSection>
+    val sections: Set<KeyguardSection>
 
-    fun addViews(constraintLayout: ConstraintLayout) {
-        sections.forEach { it.addViews(constraintLayout) }
+    /**
+     * Add views to new blueprint.
+     *
+     * Finds sections that did not exist in the previous blueprint and add the corresponding views.
+     *
+     * @param previousBluePrint: KeyguardBlueprint the blueprint we are transitioning from.
+     */
+    fun addViews(previousBlueprint: KeyguardBlueprint?, constraintLayout: ConstraintLayout) {
+        sections.subtract((previousBlueprint?.sections ?: setOf()).toSet()).forEach {
+            it.addViews(constraintLayout)
+            it.bindData(constraintLayout)
+        }
+    }
+
+    /**
+     * Remove views of old blueprint.
+     *
+     * Finds sections that are no longer in the next blueprint and remove the corresponding views.
+     *
+     * @param nextBluePrint: KeyguardBlueprint the blueprint we will transition to.
+     */
+    fun removeViews(nextBlueprint: KeyguardBlueprint, constraintLayout: ConstraintLayout) {
+        sections.subtract(nextBlueprint.sections).forEach { it.removeViews(constraintLayout) }
     }
 
     fun applyConstraints(constraintSet: ConstraintSet) {
         sections.forEach { it.applyConstraints(constraintSet) }
-    }
-
-    fun onDestroy() {
-        sections.forEach { it.onDestroy() }
     }
 }

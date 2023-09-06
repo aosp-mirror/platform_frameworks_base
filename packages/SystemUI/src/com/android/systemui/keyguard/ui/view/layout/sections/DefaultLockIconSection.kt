@@ -47,19 +47,23 @@ constructor(
     private val notificationPanelView: NotificationPanelView,
     private val featureFlags: FeatureFlags,
     private val lockIconViewController: LockIconViewController,
-) : KeyguardSection {
+) : KeyguardSection() {
     private val lockIconViewId = R.id.lock_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
-            notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
-                notificationPanelView.removeView(it)
-            }
-            if (constraintLayout.findViewById<View>(R.id.lock_icon_view) == null) {
-                val view = LockIconView(context, null).apply { id = R.id.lock_icon_view }
-                constraintLayout.addView(view)
-                lockIconViewController.setLockIconView(view)
-            }
+        if (!featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            return
+        }
+        notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
+            notificationPanelView.removeView(it)
+        }
+        val view = LockIconView(context, null).apply { id = R.id.lock_icon_view }
+        constraintLayout.addView(view)
+    }
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
+        constraintLayout.findViewById<LockIconView?>(R.id.lock_icon_view)?.let {
+            lockIconViewController.setLockIconView(it)
         }
     }
 
@@ -90,6 +94,10 @@ constructor(
                 constraintSet,
             )
         }
+    }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        constraintLayout.removeView(R.id.lock_icon_view)
     }
 
     @VisibleForTesting

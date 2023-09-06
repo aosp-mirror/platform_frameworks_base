@@ -10,6 +10,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -29,6 +30,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
@@ -102,6 +104,11 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
     private val disableFlagsRepository = FakeDisableFlagsRepository()
     private val keyguardRepository = FakeKeyguardRepository()
+    private val configurationRepository = FakeConfigurationRepository()
+    private val sharedNotificationContainerInteractor = SharedNotificationContainerInteractor(
+        configurationRepository,
+        mContext,
+    )
     private val shadeInteractor =
         ShadeInteractor(
             testScope.backgroundScope,
@@ -110,6 +117,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
             userSetupRepository = FakeUserSetupRepository(),
             deviceProvisionedController = mock(),
             userInteractor = mock(),
+            sharedNotificationContainerInteractor,
             repository = FakeShadeRepository(),
         )
     private val powerInteractor =

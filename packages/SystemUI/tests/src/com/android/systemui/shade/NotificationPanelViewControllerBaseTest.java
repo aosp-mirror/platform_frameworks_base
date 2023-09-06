@@ -626,6 +626,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 mShadeExpansionStateManager,
+                mShadeRepository,
                 mSysUIUnfoldComponent,
                 mSysUiState,
                 () -> mKeyguardBottomAreaViewController,

@@ -163,6 +163,7 @@ import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.InteractionJankMonitorWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -350,6 +351,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final Interpolator mBounceInterpolator;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
+    private final ShadeRepository mShadeRepository;
     private final FalsingTapListener mFalsingTapListener = this::falsingAdditionalTapRequired;
     private final AccessibilityDelegate mAccessibilityDelegate = new ShadeAccessibilityDelegate();
     private final NotificationGutsManager mGutsManager;
@@ -710,7 +712,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker,
             PowerManager powerManager,
-            AccessibilityManager accessibilityManager, @DisplayId int displayId,
+            AccessibilityManager accessibilityManager,
+            @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             MetricsLogger metricsLogger,
             ShadeLogger shadeLogger,
@@ -746,6 +749,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             ShadeExpansionStateManager shadeExpansionStateManager,
+            ShadeRepository shadeRepository,
             Optional<SysUIUnfoldComponent> unfoldComponent,
             SysUiState sysUiState,
             Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
@@ -788,6 +792,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mShadeExpansionStateManager = shadeExpansionStateManager;
+        mShadeRepository = shadeRepository;
         mShadeLog = shadeLogger;
         mGutsManager = gutsManager;
         mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
@@ -3952,6 +3957,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
+            mShadeRepository.setLegacyShadeExpansion(mExpandedFraction);
             mQsController.setShadeExpansion(mExpandedHeight, mExpandedFraction);
             mExpansionDragDownAmountPx = h;
             mAmbientState.setExpansionFraction(mExpandedFraction);

@@ -6183,6 +6183,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageReplaced(ApplicationInfo aInfo) {
             synchronized (mGlobalLock) {
+                // In case if setWindowManager hasn't been called yet when booting.
+                if (mRootWindowContainer == null) return;
                 mRootWindowContainer.updateActivityApplicationInfo(aInfo);
             }
         }

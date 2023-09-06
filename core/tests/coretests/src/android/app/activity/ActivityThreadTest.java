@@ -67,7 +67,6 @@ import android.view.View;
 import android.window.WindowContextInfo;
 import android.window.WindowTokenClientController;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -254,15 +253,9 @@ public class ActivityThreadTest {
 
             // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
             // the config should not be scaled again.
-            final Configuration currentConfig = activity.getResources().getConfiguration();
-            final ClientTransaction localTransaction =
-                    newTransaction(activityThread, activity.getActivityToken());
-            localTransaction.addCallback(ActivityRelaunchItem.obtain(
-                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                    new MergedConfiguration(currentConfig, currentConfig),
-                    true /* preserveWindow */));
             InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                    () -> activityThread.executeTransaction(localTransaction));
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
 
             assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
         } finally {
@@ -630,7 +623,6 @@ public class ActivityThreadTest {
         });
     }
 
-    @FlakyTest(bugId = 298331121)
     @Test
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());

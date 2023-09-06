@@ -42,9 +42,12 @@ constructor(
     private val communalWidgetViewModel: CommunalWidgetViewModel,
     private val communalWidgetViewAdapter: CommunalWidgetViewAdapter,
     private val keyguardBlueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
-) : KeyguardSection {
+) : KeyguardSection() {
     private val widgetAreaViewId = R.id.communal_widget_wrapper
-    override fun addViews(constraintLayout: ConstraintLayout) {
+
+    override fun addViews(constraintLayout: ConstraintLayout) {}
+
+    override fun bindData(constraintLayout: ConstraintLayout) {
         if (!featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
             return
         }
@@ -65,4 +68,6 @@ constructor(
             connect(widgetAreaViewId, END, PARENT_ID, END)
         }
     }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {}
 }

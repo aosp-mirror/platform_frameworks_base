@@ -121,18 +121,33 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun updateShadeExpansion() =
+    fun updateDragDownAmount() =
         testScope.runTest {
-            assertThat(underTest.shadeExpansion.value).isEqualTo(0f)
+            assertThat(underTest.lockscreenShadeExpansion.value).isEqualTo(0f)
 
-            underTest.setShadeExpansion(.5f)
-            assertThat(underTest.shadeExpansion.value).isEqualTo(.5f)
+            underTest.setLockscreenShadeExpansion(.5f)
+            assertThat(underTest.lockscreenShadeExpansion.value).isEqualTo(.5f)
 
-            underTest.setShadeExpansion(.82f)
-            assertThat(underTest.shadeExpansion.value).isEqualTo(.82f)
+            underTest.setLockscreenShadeExpansion(.82f)
+            assertThat(underTest.lockscreenShadeExpansion.value).isEqualTo(.82f)
 
-            underTest.setShadeExpansion(1f)
-            assertThat(underTest.shadeExpansion.value).isEqualTo(1f)
+            underTest.setLockscreenShadeExpansion(1f)
+            assertThat(underTest.lockscreenShadeExpansion.value).isEqualTo(1f)
+        }
+
+    @Test
+    fun updateLegacyShadeExpansion() =
+        testScope.runTest {
+            assertThat(underTest.legacyShadeExpansion.value).isEqualTo(0f)
+
+            underTest.setLegacyShadeExpansion(.5f)
+            assertThat(underTest.legacyShadeExpansion.value).isEqualTo(.5f)
+
+            underTest.setLegacyShadeExpansion(.82f)
+            assertThat(underTest.legacyShadeExpansion.value).isEqualTo(.82f)
+
+            underTest.setLegacyShadeExpansion(1f)
+            assertThat(underTest.legacyShadeExpansion.value).isEqualTo(1f)
         }
 
     @Test

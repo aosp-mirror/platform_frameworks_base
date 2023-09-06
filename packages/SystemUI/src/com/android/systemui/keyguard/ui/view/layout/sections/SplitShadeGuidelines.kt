@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.ui.view.layout.sections
 
-import android.content.Context
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.VERTICAL
@@ -25,8 +24,10 @@ import com.android.systemui.R
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import javax.inject.Inject
 
-class SplitShadeGuidelines @Inject constructor(private val context: Context) : KeyguardSection {
+class SplitShadeGuidelines @Inject constructor() : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {}
+
+    override fun bindData(constraintLayout: ConstraintLayout) {}
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
         constraintSet.apply {
@@ -36,4 +37,6 @@ class SplitShadeGuidelines @Inject constructor(private val context: Context) : K
             setGuidelinePercent(R.id.split_shade_guideline, 0.5f)
         }
     }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {}
 }

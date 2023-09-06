@@ -37,6 +37,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -61,6 +62,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
@@ -174,6 +176,9 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                         new FakeUserSetupRepository(),
                         mDeviceProvisionedController,
                         mUserInteractor,
+                        new SharedNotificationContainerInteractor(
+                                new FakeConfigurationRepository(),
+                                mContext),
                         mShadeRepository
                 );
 
