@@ -6,3 +6,10 @@ flag {
     description: "Feature flag for fs-verity API"
     bug: "285185747"
 }
+
+flag {
+    name: "fix_unlocked_device_required_keys"
+    namespace: "hardware_backed_security"
+    description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"
+    bug: "296464083"
+}
