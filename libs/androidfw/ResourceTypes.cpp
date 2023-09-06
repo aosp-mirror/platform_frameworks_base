@@ -6291,13 +6291,13 @@ bool ResTable::collectString(String16* outString,
         if (append) {
             outString->append(tmp);
         } else {
-            outString->setTo(tmp);
+            *outString = tmp;
         }
     } else {
         if (append) {
             outString->append(String16(s, len));
         } else {
-            outString->setTo(s, len);
+            *outString = String16(s, len);
         }
     }
 
@@ -7500,10 +7500,10 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
         *pOverlayCrc = dtohl(map[3]);
     }
     if (pTargetPath) {
-        pTargetPath->setTo(reinterpret_cast<const char*>(map + 4));
+        *pTargetPath = reinterpret_cast<const char*>(map + 4);
     }
     if (pOverlayPath) {
-        pOverlayPath->setTo(reinterpret_cast<const char*>(map + 4 + 256 / sizeof(uint32_t)));
+        *pOverlayPath = reinterpret_cast<const char*>(map + 4 + 256 / sizeof(uint32_t));
     }
     return true;
 }

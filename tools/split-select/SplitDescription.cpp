@@ -134,10 +134,10 @@ bool SplitDescription::parse(const String8& str, SplitDescription* outSplit) {
     String8 configStr;
     String8 extensionStr;
     if (index >= 0) {
-        configStr.setTo(str.c_str(), index);
-        extensionStr.setTo(str.c_str() + index + 1);
+        configStr = String8(str.c_str(), index);
+        extensionStr = (str.c_str() + index + 1);
     } else {
-        configStr.setTo(str);
+        configStr = str;
     }
 
     SplitDescription split;
