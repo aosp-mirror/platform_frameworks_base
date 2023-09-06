@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.IntentSender;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -492,7 +493,8 @@ public class PackageInfo implements Parcelable {
     /**
      * Whether the package is currently in an archived state.
      *
-     * <p>Packages can be archived through {@link PackageArchiver} and do not have any APKs stored
+     * <p>Packages can be archived through
+     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
      * on the device, but do keep the data directory.
      * @hide
      */

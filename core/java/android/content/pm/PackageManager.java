@@ -1238,8 +1238,9 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter to also retrieve some information about archived packages.
-     * Packages can be archived through {@link PackageArchiver} and do not have any APKs stored on
-     * the device, but do keep the data directory.
+     * Packages can be archived through
+     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
+     * on the device, but do keep the data directory.
      * <p> Note: Archived apps are a subset of apps returned by {@link #MATCH_UNINSTALLED_PACKAGES}.
      * <p> Note: this flag may cause less information about currently installed
      * applications to be returned.
@@ -9957,16 +9958,6 @@ public abstract class PackageManager {
      */
     public abstract @NonNull PackageInstaller getPackageInstaller();
 
-    /**
-     * {@link PackageArchiver} can be used to archive and restore archived packages.
-     *
-     * @hide
-     */
-    @SystemApi
-    public @NonNull PackageArchiver getPackageArchiver() {
-        throw new UnsupportedOperationException(
-                "getPackageArchiver not implemented in subclass");
-    }
     /**
      * Adds a {@code CrossProfileIntentFilter}. After calling this method all
      * intents sent from the user with id sourceUserId can also be be resolved

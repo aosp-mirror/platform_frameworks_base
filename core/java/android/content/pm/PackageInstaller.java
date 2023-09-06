@@ -34,6 +34,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -346,6 +347,28 @@ public class PackageInstaller {
     @SystemApi
     public static final String EXTRA_RESOLVED_BASE_PATH =
             "android.content.pm.extra.RESOLVED_BASE_PATH";
+
+    /**
+     * Extra field for the package name of a package that is requested to be unarchived. Sent as
+     * part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE} intent.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_PACKAGE_NAME =
+            "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
+
+    /**
+     * If true, the requestor of the unarchival has specified that the app should be unarchived
+     * for {@link android.os.UserHandle#ALL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_ALL_USERS =
+            "android.content.pm.extra.UNARCHIVE_ALL_USERS";
 
     /**
      * Streaming installation pending.
@@ -2156,6 +2179,72 @@ public class PackageInstaller {
             throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
         }
         return new InstallInfo(result);
+    }
+
+    /**
+     * Requests to archive a package which is currently installed.
+     *
+     * <p> During the archival process, the apps APKs and cache are removed from the device while
+     * the user data is kept. Through the {@link #requestUnarchive(String)} call, apps can be
+     * restored again through their responsible installer.
+     *
+     * <p> Archived apps are returned as displayable apps through the {@link LauncherApps} APIs and
+     * will be displayed to users with UI treatment to highlight that said apps are archived. If
+     * a user taps on an archived app, the app will be unarchived and the restoration process is
+     * communicated.
+     *
+     * @param statusReceiver Callback used to notify when the operation is completed.
+     * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
+     *                                              available to the caller or isn't archived.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.REQUEST_DELETE_PACKAGES})
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
+            throws PackageManager.NameNotFoundException {
+        try {
+            mInstaller.requestArchive(packageName, mInstallerPackageName, statusReceiver,
+                    new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests to unarchive a currently archived package.
+     *
+     * <p> Sends a request to unarchive an app to the responsible installer. The installer is
+     * determined by {@link InstallSourceInfo#getUpdateOwnerPackageName()}, or
+     * {@link InstallSourceInfo#getInstallingPackageName()} if the former value is null.
+     *
+     * <p> The installation will happen asynchronously and can be observed through
+     * {@link android.content.Intent#ACTION_PACKAGE_ADDED}.
+     *
+     * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
+     *                                              visible to the caller or if the package has no
+     *                                              installer on the device anymore to unarchive it.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.REQUEST_INSTALL_PACKAGES})
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public void requestUnarchive(@NonNull String packageName)
+            throws PackageManager.NameNotFoundException {
+        try {
+            mInstaller.requestUnarchive(packageName, mInstallerPackageName,
+                    new UserHandle(mUserId));
+        } catch (ParcelableException e) {
+            e.maybeRethrow(PackageManager.NameNotFoundException.class);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     // (b/239722738) This class serves as a bridge between the PackageLite class, which

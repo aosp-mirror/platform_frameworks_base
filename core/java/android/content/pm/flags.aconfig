@@ -1,0 +1,15 @@
+package: "android.content.pm"
+
+flag {
+    name: "quarantined_enabled"
+    namespace: "package_manager_service"
+    description: "Feature flag for Quarantined state"
+    bug: "269127435"
+}
+
+flag {
+    name: "archiving"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the archiving feature."
+    bug: "278553670"
+}
