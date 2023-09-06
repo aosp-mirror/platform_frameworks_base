@@ -468,7 +468,7 @@ TEST_P(ResTableParameterizedTest, ShouldLoadSparseEntriesSuccessfully) {
   String16 name(u"com.android.sparse:integer/foo_9");
   uint32_t flags;
   uint32_t resid =
-      table.identifierForName(name.string(), name.size(), nullptr, 0, nullptr, 0, &flags);
+      table.identifierForName(name.c_str(), name.size(), nullptr, 0, nullptr, 0, &flags);
   ASSERT_NE(0u, resid);
 
   Res_value val;
