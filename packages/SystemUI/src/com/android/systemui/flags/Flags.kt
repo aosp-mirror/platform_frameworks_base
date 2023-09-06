@@ -215,7 +215,7 @@ object Flags {
     /** Inflate and bind views upon emitting a blueprint value . */
     // TODO(b/297365780): Tracking Bug
     @JvmField
-    val LAZY_INFLATE_KEYGUARD = unreleasedFlag("lazy_inflate_keyguard", teamfood = true)
+    val LAZY_INFLATE_KEYGUARD = releasedFlag("lazy_inflate_keyguard")
 
     /** Enables UI updates for AI wallpapers in the wallpaper picker. */
     // TODO(b/267722622): Tracking Bug
