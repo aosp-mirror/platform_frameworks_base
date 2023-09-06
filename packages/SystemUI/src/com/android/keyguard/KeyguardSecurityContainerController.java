@@ -371,11 +371,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
                 @Override
                 public void onOrientationChanged(int orientation) {
-                    if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
-                        // TODO(b/295603468)
-                        // Fix reinflation of views when flag is enabled.
-                        KeyguardSecurityContainerController.this
-                            .onDensityOrFontScaleOrOrientationChanged();
+                    if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
+                            && getResources().getBoolean(R.bool.update_bouncer_constraints)) {
+                        mSecurityViewFlipperController.updateConstraints(orientation);
                     }
                 }
             };

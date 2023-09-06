@@ -64,6 +64,11 @@ public abstract class KeyguardInputView extends LinearLayout {
         return false;
     }
 
+    /** Change motion layout constraint set based on orientation */
+    protected void updateConstraints(int orientation) {
+        //Unless overridden, never update constrains (keeping default portrait constraints)
+    }
+
     protected AnimatorListenerAdapter getAnimationListener(int cuj) {
         return new AnimatorListenerAdapter() {
             private boolean mIsCancel;
