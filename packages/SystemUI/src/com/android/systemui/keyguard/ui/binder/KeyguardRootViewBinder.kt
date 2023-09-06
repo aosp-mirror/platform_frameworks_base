@@ -59,20 +59,18 @@ object KeyguardRootViewBinder {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
-                        launch {
-                            occludingAppDeviceEntryMessageViewModel.message.collect {
-                                biometricMessage ->
-                                if (biometricMessage?.message != null) {
-                                    chipbarCoordinator.displayView(
-                                        createChipbarInfo(
-                                            biometricMessage.message,
-                                            R.drawable.ic_lock,
-                                        )
+                    launch {
+                        occludingAppDeviceEntryMessageViewModel.message.collect { biometricMessage
+                            ->
+                            if (biometricMessage?.message != null) {
+                                chipbarCoordinator.displayView(
+                                    createChipbarInfo(
+                                        biometricMessage.message,
+                                        R.drawable.ic_lock,
                                     )
-                                } else {
-                                    chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
-                                }
+                                )
+                            } else {
+                                chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
                             }
                         }
                     }

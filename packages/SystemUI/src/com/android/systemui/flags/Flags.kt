@@ -268,10 +268,6 @@ object Flags {
     val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
         unreleasedFlag("migrate_split_keyguard_bottom_area", teamfood = true)
 
-    /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
-    // TODO(b/283260512): Tracking bug.
-    @JvmField val FP_LISTEN_OCCLUDING_APPS = releasedFlag("fp_listen_occluding_apps")
-
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
     @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag("keyguard_talkback_fix")

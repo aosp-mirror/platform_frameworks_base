@@ -35,7 +35,6 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.CHARGING_POLICY_DEFAULT;
 import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
-
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -4205,21 +4204,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onTaskStackChangedBackground() {
             try {
-                if (mFeatureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
-                    RootTaskInfo standardTask = mActivityTaskManager.getRootTaskInfo(
-                            WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-                    final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
-                    mAllowFingerprintOnCurrentOccludingActivity =
-                            standardTask.topActivity != null
-                                    && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
-                                    && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
-                                            standardTask.topActivity.getPackageName())
-                                    && standardTask.visible;
-                    if (mAllowFingerprintOnCurrentOccludingActivity != previousState) {
-                        mLogger.allowFingerprintOnCurrentOccludingActivityChanged(
-                                mAllowFingerprintOnCurrentOccludingActivity);
-                        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
-                    }
+                RootTaskInfo standardTask = mActivityTaskManager.getRootTaskInfo(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+                final boolean previousState = mAllowFingerprintOnCurrentOccludingActivity;
+                mAllowFingerprintOnCurrentOccludingActivity =
+                        standardTask.topActivity != null
+                                && !TextUtils.isEmpty(standardTask.topActivity.getPackageName())
+                                && mAllowFingerprintOnOccludingActivitiesFromPackage.contains(
+                                        standardTask.topActivity.getPackageName())
+                                && standardTask.visible;
+                if (mAllowFingerprintOnCurrentOccludingActivity != previousState) {
+                    mLogger.allowFingerprintOnCurrentOccludingActivityChanged(
+                            mAllowFingerprintOnCurrentOccludingActivity);
+                    updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
                 }
 
                 RootTaskInfo assistantTask = mActivityTaskManager.getRootTaskInfo(

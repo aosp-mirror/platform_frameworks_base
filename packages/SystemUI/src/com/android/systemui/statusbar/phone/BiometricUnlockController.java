@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-
-import static com.android.systemui.flags.Flags.FP_LISTEN_OCCLUDING_APPS;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.UNKNOWN_LAST_WAKE_TIME;
 
@@ -702,8 +700,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
 
         final boolean screenOff = !mUpdateMonitor.isDeviceInteractive();
-        if (!mVibratorHelper.hasVibrator() && (screenOff || (mUpdateMonitor.isDreaming()
-                && !mFeatureFlags.isEnabled(FP_LISTEN_OCCLUDING_APPS)))) {
+        if (!mVibratorHelper.hasVibrator() && screenOff) {
             mLogger.d("wakeup device on authentication failure (device doesn't have a vibrator)");
             startWakeAndUnlock(MODE_ONLY_WAKE);
         } else if (biometricSourceType == BiometricSourceType.FINGERPRINT
