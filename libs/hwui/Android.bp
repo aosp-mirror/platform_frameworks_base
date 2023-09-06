@@ -720,7 +720,6 @@ cc_test {
     ],
     shared_libs: [
         "libmemunreachable",
-        "server_configurable_flags",
     ],
     srcs: [
         "tests/unit/main.cpp",
