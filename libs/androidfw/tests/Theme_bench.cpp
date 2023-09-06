@@ -28,14 +28,14 @@ constexpr const static uint32_t kStyleId = 0x01030237u;  // android:style/Theme.
 constexpr const static uint32_t kAttrId = 0x01010030u;   // android:attr/colorForeground
 
 static void BM_ThemeApplyStyleFramework(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
+  auto apk = ApkAssets::Load(kFrameworkPath);
   if (apk == nullptr) {
     state.SkipWithError("Failed to load assets");
     return;
   }
 
   AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
+  assets.SetApkAssets({apk});
 
   while (state.KeepRunning()) {
     auto theme = assets.NewTheme();
@@ -62,10 +62,10 @@ static void BM_ThemeApplyStyleFrameworkOld(benchmark::State& state) {
 BENCHMARK(BM_ThemeApplyStyleFrameworkOld);
 
 static void BM_ThemeGetAttribute(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
+  auto apk = ApkAssets::Load(kFrameworkPath);
 
   AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
+  assets.SetApkAssets({apk});
 
   auto theme = assets.NewTheme();
   theme->ApplyStyle(kStyleId, false /* force */);

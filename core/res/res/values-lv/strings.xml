@@ -2324,13 +2324,13 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Ļauj palīglietotnei sākt priekšplāna pakalpojumus no fona."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofons ir pieejams."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofons ir bloķēts."</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Divu ekrānu režīms"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ieslēgts divu ekrānu režīms"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen režīms"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ieslēgts Dual Screen režīms"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> satura rādīšanai izmanto abus displejus."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Ierīce ir pārāk sakarsusi"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Divu ekrānu režīms nav pieejams, jo tālrunis sāk pārāk sakarst."</string>
-    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Divu ekrānu režīms nav pieejams"</string>
-    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Divu ekrānu režīms nav pieejams, jo ir ieslēgts akumulatora enerģijas taupīšanas režīms. To var izslēgt iestatījumos."</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen režīms nav pieejams, jo tālrunis sāk pārāk sakarst."</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen režīms nav pieejams"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen režīms nav pieejams, jo ir ieslēgts akumulatora enerģijas taupīšanas režīms. To var izslēgt iestatījumos."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Atvērt iestatījumus"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Izslēgt"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ir konfigurēta"</string>

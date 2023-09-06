@@ -62,7 +62,7 @@ public final class StringBlock implements Closeable {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = false;
 
-    private final long mNative;
+    private long mNative;   // final, but gets modified when closed
     private final boolean mUseSparse;
     private final boolean mOwnsNative;
 
@@ -207,6 +207,7 @@ public final class StringBlock implements Closeable {
                 if (mOwnsNative) {
                     nativeDestroy(mNative);
                 }
+                mNative = 0;
             }
         }
     }

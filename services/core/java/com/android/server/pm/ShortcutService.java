@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 
 import android.Manifest.permission;
@@ -24,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.IUriGrantsManager;
@@ -35,6 +37,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -1925,9 +1928,30 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         if (shortcut.getIcon() != null) {
             ShortcutInfo.validateIcon(shortcut.getIcon());
+            validateIconURI(shortcut);
         }
 
         shortcut.replaceFlags(shortcut.getFlags() & ShortcutInfo.FLAG_LONG_LIVED);
+    }
+
+    // Validates the calling process has permission to access shortcut icon's image uri
+    private void validateIconURI(@NonNull final ShortcutInfo si) {
+        final int callingUid = injectBinderCallingUid();
+        final Icon icon = si.getIcon();
+        if (icon == null) {
+            // There's no icon in this shortcut, nothing to validate here.
+            return;
+        }
+        int iconType = icon.getType();
+        if (iconType != Icon.TYPE_URI && iconType != Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            // The icon is not URI-based, nothing to validate.
+            return;
+        }
+        final Uri uri = icon.getUri();
+        mUriGrantsManagerInternal.checkGrantUriPermission(callingUid, si.getPackage(),
+                ContentProvider.getUriWithoutUserId(uri),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(callingUid)));
     }
 
     private void fixUpIncomingShortcutInfo(@NonNull ShortcutInfo shortcut, boolean forUpdate) {
@@ -4407,8 +4431,11 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
         try {
+            ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentBackgroundActivityStartMode(
+                            MODE_BACKGROUND_ACTIVITY_START_DENIED);
             intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null);
+                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }

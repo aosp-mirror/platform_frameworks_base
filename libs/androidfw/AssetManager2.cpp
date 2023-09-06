@@ -91,13 +91,14 @@ struct FindEntryResult {
   StringPoolRef entry_string_ref;
 };
 
-AssetManager2::AssetManager2() {
-  memset(&configuration_, 0, sizeof(configuration_));
+AssetManager2::AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration)
+    : configuration_(configuration) {
+  // Don't invalidate caches here as there's nothing cached yet.
+  SetApkAssets(apk_assets, false);
 }
 
-bool AssetManager2::SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool invalidate_caches) {
-  apk_assets_ = std::move(apk_assets);
-  BuildDynamicRefTable();
+bool AssetManager2::SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches) {
+  BuildDynamicRefTable(apk_assets);
   RebuildFilterList();
   if (invalidate_caches) {
     InvalidateCaches(static_cast<uint32_t>(-1));
@@ -105,7 +106,21 @@ bool AssetManager2::SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool 
   return true;
 }
 
-void AssetManager2::BuildDynamicRefTable() {
+bool AssetManager2::SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets,
+                                 bool invalidate_caches) {
+  return SetApkAssets(ApkAssetsList(apk_assets.begin(), apk_assets.size()), invalidate_caches);
+}
+
+void AssetManager2::BuildDynamicRefTable(ApkAssetsList apk_assets) {
+  auto op = StartOperation();
+
+  apk_assets_.resize(apk_assets.size());
+  for (size_t i = 0; i != apk_assets.size(); ++i) {
+    apk_assets_[i].first = apk_assets[i];
+    // Let's populate the locked assets right away as we're going to need them here later.
+    apk_assets_[i].second = apk_assets[i];
+  }
+
   package_groups_.clear();
   package_ids_.fill(0xff);
 
@@ -116,16 +131,19 @@ void AssetManager2::BuildDynamicRefTable() {
 
   // Overlay resources are not directly referenced by an application so their resource ids
   // can change throughout the application's lifetime. Assign overlay package ids last.
-  std::vector<const ApkAssets*> sorted_apk_assets(apk_assets_);
-  std::stable_partition(sorted_apk_assets.begin(), sorted_apk_assets.end(), [](const ApkAssets* a) {
-    return !a->IsOverlay();
-  });
+  std::vector<const ApkAssets*> sorted_apk_assets;
+  sorted_apk_assets.reserve(apk_assets.size());
+  for (auto& asset : apk_assets) {
+    sorted_apk_assets.push_back(asset.get());
+  }
+  std::stable_partition(sorted_apk_assets.begin(), sorted_apk_assets.end(),
+                        [](auto a) { return !a->IsOverlay(); });
 
   // The assets cookie must map to the position of the apk assets in the unsorted apk assets list.
   std::unordered_map<const ApkAssets*, ApkAssetsCookie> apk_assets_cookies;
-  apk_assets_cookies.reserve(apk_assets_.size());
-  for (size_t i = 0, n = apk_assets_.size(); i < n; i++) {
-    apk_assets_cookies[apk_assets_[i]] = static_cast<ApkAssetsCookie>(i);
+  apk_assets_cookies.reserve(apk_assets.size());
+  for (size_t i = 0, n = apk_assets.size(); i < n; i++) {
+    apk_assets_cookies[apk_assets[i].get()] = static_cast<ApkAssetsCookie>(i);
   }
 
   // 0x01 is reserved for the android package.
@@ -240,9 +258,11 @@ void AssetManager2::BuildDynamicRefTable() {
 void AssetManager2::DumpToLog() const {
   LOG(INFO) << base::StringPrintf("AssetManager2(this=%p)", this);
 
+  auto op = StartOperation();
   std::string list;
-  for (const auto& apk_assets : apk_assets_) {
-    base::StringAppendF(&list, "%s,", apk_assets->GetDebugName().c_str());
+  for (size_t i = 0; i < apk_assets_.size(); ++i) {
+    const auto& assets = GetApkAssets(i);
+    base::StringAppendF(&list, "%s,", assets ? assets->GetDebugName().c_str() : "nullptr");
   }
   LOG(INFO) << "ApkAssets: " << list;
 
@@ -279,7 +299,9 @@ const ResStringPool* AssetManager2::GetStringPoolForCookie(ApkAssetsCookie cooki
   if (cookie < 0 || static_cast<size_t>(cookie) >= apk_assets_.size()) {
     return nullptr;
   }
-  return apk_assets_[cookie]->GetLoadedArsc()->GetStringPool();
+  auto op = StartOperation();
+  const auto& assets = GetApkAssets(cookie);
+  return assets ? assets->GetLoadedArsc()->GetStringPool() : nullptr;
 }
 
 const DynamicRefTable* AssetManager2::GetDynamicRefTableForPackage(uint32_t package_id) const {
@@ -329,9 +351,14 @@ const std::unordered_map<std::string, std::string>*
 
 bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
                                             std::string* out) const {
+  auto op = StartOperation();
   uint8_t package_id = 0U;
-  for (const auto& apk_assets : apk_assets_) {
-    const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
+  for (size_t i = 0; i != apk_assets_.size(); ++i) {
+    const auto& assets = GetApkAssets(i);
+    if (!assets) {
+      continue;
+    }
+    const LoadedArsc* loaded_arsc = assets->GetLoadedArsc();
     if (loaded_arsc == nullptr) {
       continue;
     }
@@ -384,8 +411,14 @@ bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
 }
 
 bool AssetManager2::ContainsAllocatedTable() const {
-  return std::find_if(apk_assets_.begin(), apk_assets_.end(),
-                      std::mem_fn(&ApkAssets::IsTableAllocated)) != apk_assets_.end();
+  auto op = StartOperation();
+  for (size_t i = 0; i != apk_assets_.size(); ++i) {
+    const auto& assets = GetApkAssets(i);
+    if (assets && assets->IsTableAllocated()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
@@ -398,8 +431,8 @@ void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   }
 }
 
-std::set<const ApkAssets*> AssetManager2::GetNonSystemOverlays() const {
-  std::set<const ApkAssets*> non_system_overlays;
+std::set<AssetManager2::ApkAssetsPtr> AssetManager2::GetNonSystemOverlays() const {
+  std::set<ApkAssetsPtr> non_system_overlays;
   for (const PackageGroup& package_group : package_groups_) {
     bool found_system_package = false;
     for (const ConfiguredPackage& package : package_group.packages_) {
@@ -410,8 +443,11 @@ std::set<const ApkAssets*> AssetManager2::GetNonSystemOverlays() const {
     }
 
     if (!found_system_package) {
+      auto op = StartOperation();
       for (const ConfiguredOverlay& overlay : package_group.overlays_) {
-        non_system_overlays.insert(apk_assets_[overlay.cookie]);
+        if (const auto& asset = GetApkAssets(overlay.cookie)) {
+          non_system_overlays.insert(std::move(asset));
+        }
       }
     }
   }
@@ -422,22 +458,27 @@ std::set<const ApkAssets*> AssetManager2::GetNonSystemOverlays() const {
 base::expected<std::set<ResTable_config>, IOError> AssetManager2::GetResourceConfigurations(
     bool exclude_system, bool exclude_mipmap) const {
   ATRACE_NAME("AssetManager::GetResourceConfigurations");
+  auto op = StartOperation();
+
   const auto non_system_overlays =
-      (exclude_system) ? GetNonSystemOverlays() : std::set<const ApkAssets*>();
+      exclude_system ? GetNonSystemOverlays() : std::set<ApkAssetsPtr>();
 
   std::set<ResTable_config> configurations;
   for (const PackageGroup& package_group : package_groups_) {
     for (size_t i = 0; i < package_group.packages_.size(); i++) {
       const ConfiguredPackage& package = package_group.packages_[i];
-      if (exclude_system && package.loaded_package_->IsSystem()) {
-        continue;
-      }
-
-      auto apk_assets = apk_assets_[package_group.cookies_[i]];
-      if (exclude_system && apk_assets->IsOverlay() &&
-          non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
-        // Exclude overlays that target system resources.
-        continue;
+      if (exclude_system) {
+        if (package.loaded_package_->IsSystem()) {
+          continue;
+        }
+        if (!non_system_overlays.empty()) {
+          // Exclude overlays that target only system resources.
+          const auto& apk_assets = GetApkAssets(package_group.cookies_[i]);
+          if (apk_assets && apk_assets->IsOverlay() &&
+              non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
+            continue;
+          }
+        }
       }
 
       auto result = package.loaded_package_->CollectConfigurations(exclude_mipmap, &configurations);
@@ -452,22 +493,27 @@ base::expected<std::set<ResTable_config>, IOError> AssetManager2::GetResourceCon
 std::set<std::string> AssetManager2::GetResourceLocales(bool exclude_system,
                                                         bool merge_equivalent_languages) const {
   ATRACE_NAME("AssetManager::GetResourceLocales");
+  auto op = StartOperation();
+
   std::set<std::string> locales;
   const auto non_system_overlays =
-      (exclude_system) ? GetNonSystemOverlays() : std::set<const ApkAssets*>();
+      exclude_system ? GetNonSystemOverlays() : std::set<ApkAssetsPtr>();
 
   for (const PackageGroup& package_group : package_groups_) {
     for (size_t i = 0; i < package_group.packages_.size(); i++) {
       const ConfiguredPackage& package = package_group.packages_[i];
-      if (exclude_system && package.loaded_package_->IsSystem()) {
-        continue;
-      }
-
-      auto apk_assets = apk_assets_[package_group.cookies_[i]];
-      if (exclude_system && apk_assets->IsOverlay() &&
-          non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
-        // Exclude overlays that target system resources.
-        continue;
+      if (exclude_system) {
+        if (package.loaded_package_->IsSystem()) {
+          continue;
+        }
+        if (!non_system_overlays.empty()) {
+          // Exclude overlays that target only system resources.
+          const auto& apk_assets = GetApkAssets(package_group.cookies_[i]);
+          if (apk_assets && apk_assets->IsOverlay() &&
+              non_system_overlays.find(apk_assets) == non_system_overlays.end()) {
+            continue;
+          }
+        }
       }
 
       package.loaded_package_->CollectLocales(merge_equivalent_languages, &locales);
@@ -490,15 +536,15 @@ std::unique_ptr<Asset> AssetManager2::Open(const std::string& filename, ApkAsset
 
 std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) const {
   ATRACE_NAME("AssetManager::OpenDir");
+  auto op = StartOperation();
 
   std::string full_path = "assets/" + dirname;
-  std::unique_ptr<SortedVector<AssetDir::FileInfo>> files =
-      util::make_unique<SortedVector<AssetDir::FileInfo>>();
+  auto files = util::make_unique<SortedVector<AssetDir::FileInfo>>();
 
   // Start from the back.
-  for (auto iter = apk_assets_.rbegin(); iter != apk_assets_.rend(); ++iter) {
-    const ApkAssets* apk_assets = *iter;
-    if (apk_assets->IsOverlay()) {
+  for (size_t i = apk_assets_.size(); i > 0; --i) {
+    const auto& apk_assets = GetApkAssets(i - 1);
+    if (!apk_assets || apk_assets->IsOverlay()) {
       continue;
     }
 
@@ -526,15 +572,17 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
 std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
                                                    Asset::AccessMode mode,
                                                    ApkAssetsCookie* out_cookie) const {
-  for (int32_t i = apk_assets_.size() - 1; i >= 0; i--) {
+  auto op = StartOperation();
+  for (size_t i = apk_assets_.size(); i > 0; i--) {
+    const auto& assets = GetApkAssets(i - 1);
     // Prevent RRO from modifying assets and other entries accessed by file
     // path. Explicitly asking for a path in a given package (denoted by a
     // cookie) is still OK.
-    if (apk_assets_[i]->IsOverlay()) {
+    if (!assets || assets->IsOverlay()) {
       continue;
     }
 
-    std::unique_ptr<Asset> asset = apk_assets_[i]->GetAssetsProvider()->Open(filename, mode);
+    std::unique_ptr<Asset> asset = assets->GetAssetsProvider()->Open(filename, mode);
     if (asset) {
       if (out_cookie != nullptr) {
         *out_cookie = i;
@@ -555,7 +603,9 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
   if (cookie < 0 || static_cast<size_t>(cookie) >= apk_assets_.size()) {
     return {};
   }
-  return apk_assets_[cookie]->GetAssetsProvider()->Open(filename, mode);
+  auto op = StartOperation();
+  const auto& assets = GetApkAssets(cookie);
+  return assets ? assets->GetAssetsProvider()->Open(filename, mode) : nullptr;
 }
 
 base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
@@ -567,6 +617,8 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     ResetResourceResolution();
     last_resolution_.resid = resid;
   }
+
+  auto op = StartOperation();
 
   // Might use this if density_override != 0.
   ResTable_config density_override_config;
@@ -603,90 +655,97 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
   }
 
   bool overlaid = false;
-  if (!stop_at_first_match && !ignore_configuration && !apk_assets_[result->cookie]->IsLoader()) {
-    for (const auto& id_map : package_group.overlays_) {
-      auto overlay_entry = id_map.overlay_res_maps_.Lookup(resid);
-      if (!overlay_entry) {
-        // No id map entry exists for this target resource.
-        continue;
-      }
-      if (overlay_entry.IsInlineValue()) {
-        // The target resource is overlaid by an inline value not represented by a resource.
-        ConfigDescription best_frro_config;
-        Res_value best_frro_value;
-        bool frro_found = false;
-        for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
-          if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
-              && config.match(*desired_config)) {
-            frro_found = true;
-            best_frro_config = config;
-            best_frro_value = value;
-          }
-        }
-        if (!frro_found) {
+  if (!stop_at_first_match && !ignore_configuration) {
+    const auto& assets = GetApkAssets(result->cookie);
+    if (!assets) {
+      ALOGE("Found expired ApkAssets #%d for resource ID 0x%08x.", result->cookie, resid);
+      return base::unexpected(std::nullopt);
+    }
+    if (!assets->IsLoader()) {
+      for (const auto& id_map : package_group.overlays_) {
+        auto overlay_entry = id_map.overlay_res_maps_.Lookup(resid);
+        if (!overlay_entry) {
+          // No id map entry exists for this target resource.
           continue;
         }
-        result->entry = best_frro_value;
+        if (overlay_entry.IsInlineValue()) {
+          // The target resource is overlaid by an inline value not represented by a resource.
+          ConfigDescription best_frro_config;
+          Res_value best_frro_value;
+          bool frro_found = false;
+          for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
+            if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
+                && config.match(*desired_config)) {
+              frro_found = true;
+              best_frro_config = config;
+              best_frro_value = value;
+            }
+          }
+          if (!frro_found) {
+            continue;
+          }
+          result->entry = best_frro_value;
+          result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
+          result->cookie = id_map.cookie;
+
+          if (UNLIKELY(logging_enabled)) {
+            last_resolution_.steps.push_back(
+                Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, String8(), result->cookie});
+            if (auto path = assets->GetPath()) {
+              const std::string overlay_path = path->data();
+              if (IsFabricatedOverlay(overlay_path)) {
+                // FRRO don't have package name so we use the creating package here.
+                String8 frro_name = String8("FRRO");
+                // Get the first part of it since the expected one should be like
+                // {overlayPackageName}-{overlayName}-{4 alphanumeric chars}.frro
+                // under /data/resource-cache/.
+                const std::string name = overlay_path.substr(overlay_path.rfind('/') + 1);
+                const size_t end = name.find('-');
+                if (frro_name.size() != overlay_path.size() && end != std::string::npos) {
+                  frro_name.append(base::StringPrintf(" created by %s",
+                                                      name.substr(0 /* pos */,
+                                                                  end).c_str()).c_str());
+                }
+                last_resolution_.best_package_name = frro_name;
+              } else {
+                last_resolution_.best_package_name = result->package_name->c_str();
+              }
+            }
+            overlaid = true;
+          }
+          continue;
+        }
+
+        auto overlay_result = FindEntry(overlay_entry.GetResourceId(), density_override,
+                                        false /* stop_at_first_match */,
+                                        false /* ignore_configuration */);
+        if (UNLIKELY(IsIOError(overlay_result))) {
+          return base::unexpected(overlay_result.error());
+        }
+        if (!overlay_result.has_value()) {
+          continue;
+        }
+
+        if (!overlay_result->config.isBetterThan(result->config, desired_config)
+            && overlay_result->config.compare(result->config) != 0) {
+          // The configuration of the entry for the overlay must be equal to or better than the target
+          // configuration to be chosen as the better value.
+          continue;
+        }
+
+        result->cookie = overlay_result->cookie;
+        result->entry = overlay_result->entry;
+        result->config = overlay_result->config;
         result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
-        result->cookie = id_map.cookie;
 
         if (UNLIKELY(logging_enabled)) {
           last_resolution_.steps.push_back(
-              Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, String8(), result->cookie});
-          if (auto path = apk_assets_[result->cookie]->GetPath()) {
-            const std::string overlay_path = path->data();
-            if (IsFabricatedOverlay(overlay_path)) {
-              // FRRO don't have package name so we use the creating package here.
-              String8 frro_name = String8("FRRO");
-              // Get the first part of it since the expected one should be like
-              // {overlayPackageName}-{overlayName}-{4 alphanumeric chars}.frro
-              // under /data/resource-cache/.
-              const std::string name = overlay_path.substr(overlay_path.rfind('/') + 1);
-              const size_t end = name.find('-');
-              if (frro_name.size() != overlay_path.size() && end != std::string::npos) {
-                frro_name.append(base::StringPrintf(" created by %s",
-                                                    name.substr(0 /* pos */,
-                                                                end).c_str()).c_str());
-              }
-              last_resolution_.best_package_name = frro_name;
-            } else {
-              last_resolution_.best_package_name = result->package_name->c_str();
-            }
-          }
+              Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->config.toString(),
+                               overlay_result->cookie});
+          last_resolution_.best_package_name =
+              overlay_result->package_name->c_str();
           overlaid = true;
         }
-        continue;
-      }
-
-      auto overlay_result = FindEntry(overlay_entry.GetResourceId(), density_override,
-                                      false /* stop_at_first_match */,
-                                      false /* ignore_configuration */);
-      if (UNLIKELY(IsIOError(overlay_result))) {
-        return base::unexpected(overlay_result.error());
-      }
-      if (!overlay_result.has_value()) {
-        continue;
-      }
-
-      if (!overlay_result->config.isBetterThan(result->config, desired_config)
-          && overlay_result->config.compare(result->config) != 0) {
-        // The configuration of the entry for the overlay must be equal to or better than the target
-        // configuration to be chosen as the better value.
-        continue;
-      }
-
-      result->cookie = overlay_result->cookie;
-      result->entry = overlay_result->entry;
-      result->config = overlay_result->config;
-      result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
-
-      if (UNLIKELY(logging_enabled)) {
-        last_resolution_.steps.push_back(
-            Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->config.toString(),
-                             overlay_result->cookie});
-        last_resolution_.best_package_name =
-            overlay_result->package_name->c_str();
-        overlaid = true;
       }
     }
   }
@@ -839,13 +898,7 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
 }
 
 void AssetManager2::ResetResourceResolution() const {
-  last_resolution_.cookie = kInvalidCookie;
-  last_resolution_.resid = 0;
-  last_resolution_.steps.clear();
-  last_resolution_.type_string_ref = StringPoolRef();
-  last_resolution_.entry_string_ref = StringPoolRef();
-  last_resolution_.best_config_name.clear();
-  last_resolution_.best_package_name.clear();
+  last_resolution_ = Resolution{};
 }
 
 void AssetManager2::SetResourceResolutionLoggingEnabled(bool enabled) {
@@ -867,8 +920,12 @@ std::string AssetManager2::GetLastResourceResolution() const {
     return {};
   }
 
+  auto op = StartOperation();
+
   const uint32_t resid = last_resolution_.resid;
-  const auto package = apk_assets_[cookie]->GetLoadedArsc()->GetPackageById(get_package_id(resid));
+  const auto& assets = GetApkAssets(cookie);
+  const auto package =
+      assets ? assets->GetLoadedArsc()->GetPackageById(get_package_id(resid)) : nullptr;
 
   std::string resource_name_string;
   if (package != nullptr) {
@@ -898,8 +955,9 @@ std::string AssetManager2::GetLastResourceResolution() const {
     if (prefix == kStepStrings.end()) {
       continue;
     }
-
-    log_stream << "\n\t" << prefix->second << ": " << apk_assets_[step.cookie]->GetDebugName();
+    const auto& assets = GetApkAssets(step.cookie);
+    log_stream << "\n\t" << prefix->second << ": " 
+               << (assets ? assets->GetDebugName() : "<null>") << " #" << step.cookie;
     if (!step.config_name.isEmpty()) {
       log_stream << " - " << step.config_name;
     }
@@ -1429,6 +1487,37 @@ void AssetManager2::ForEachPackage(base::function_ref<bool(const std::string&, u
   }
 }
 
+AssetManager2::ScopedOperation AssetManager2::StartOperation() const {
+  ++number_of_running_scoped_operations_;
+  return ScopedOperation(*this);
+}
+
+void AssetManager2::FinishOperation() const {
+  if (number_of_running_scoped_operations_ < 1) {
+    ALOGW("Invalid FinishOperation() call when there's none happening");
+    return;
+  }
+  if (--number_of_running_scoped_operations_ == 0) {
+    for (auto&& [_, assets] : apk_assets_) {
+      assets.clear();
+    }
+  }
+}
+
+const AssetManager2::ApkAssetsPtr& AssetManager2::GetApkAssets(ApkAssetsCookie cookie) const {
+  DCHECK(number_of_running_scoped_operations_ > 0) << "Must have an operation running";
+
+  if (cookie < 0 || cookie >= apk_assets_.size()) {
+    static const ApkAssetsPtr empty{};
+    return empty;
+  }
+  auto& [wptr, res] = apk_assets_[cookie];
+  if (!res) {
+    res = wptr.promote();
+  }
+  return res;
+}
+
 Theme::Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {
 }
 
@@ -1561,14 +1650,16 @@ base::expected<std::monostate, IOError> Theme::SetTo(const Theme& source) {
     using SourceToDestinationRuntimePackageMap = std::unordered_map<int, int>;
     std::unordered_map<ApkAssetsCookie, SourceToDestinationRuntimePackageMap> src_asset_cookie_id_map;
 
-    // Determine which ApkAssets are loaded in both theme AssetManagers.
-    const auto& src_assets = source.asset_manager_->GetApkAssets();
-    for (size_t i = 0; i < src_assets.size(); i++) {
-      const ApkAssets* src_asset = src_assets[i];
+    auto op_src = source.asset_manager_->StartOperation();
+    auto op_dst = asset_manager_->StartOperation();
 
-      const auto& dest_assets = asset_manager_->GetApkAssets();
-      for (size_t j = 0; j < dest_assets.size(); j++) {
-        const ApkAssets* dest_asset = dest_assets[j];
+    for (size_t i = 0; i < source.asset_manager_->GetApkAssetsCount(); i++) {
+      const auto& src_asset = source.asset_manager_->GetApkAssets(i);
+      if (!src_asset) {
+        continue;
+      }
+      for (int j = 0; j < asset_manager_->GetApkAssetsCount(); j++) {
+        const auto& dest_asset = asset_manager_->GetApkAssets(j);
         if (src_asset != dest_asset) {
           // ResourcesManager caches and reuses ApkAssets when the same apk must be present in
           // multiple AssetManagers. Two ApkAssets point to the same version of the same resources
@@ -1692,6 +1783,13 @@ void Theme::Dump() const {
                                     res_id, entry.value.data, entry.value.dataType,
                                     entry.cookie);
   }
+}
+
+AssetManager2::ScopedOperation::ScopedOperation(const AssetManager2& am) : am_(am) {
+}
+
+AssetManager2::ScopedOperation::~ScopedOperation() {
+  am_.FinishOperation();
 }
 
 }  // namespace android
