@@ -17,10 +17,10 @@
 package com.android.systemui.biometrics;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -78,11 +78,12 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
     public void setUp() throws ExecutionException, InterruptedException {
         mContext.addMockSystemService(FingerprintManager.class, mFingerprintManager);
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
+        mContextSpy = spy(mContext);
 
         when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        doNothing().when(mContextSpy).startActivity(any());
 
-        mContextSpy = spy(mContext);
         mDialogFactory = new BiometricNotificationDialogFactory();
     }
 
