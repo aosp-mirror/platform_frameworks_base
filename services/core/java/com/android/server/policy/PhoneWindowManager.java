@@ -5333,11 +5333,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
-        if (theaterModeEnabled) {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.THEATER_MODE_ON, 0);
-        }
-
         mPowerManager.wakeUp(wakeTime, reason, details);
         return true;
     }
