@@ -348,6 +348,12 @@ filegroup {
         "tests/src/com/android/systemui/dreams/DreamOverlayStateControllerTest.java",
         "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarItemsProviderTest.java",
         "tests/src/com/android/systemui/dreams/DreamOverlayStatusBarViewControllerTest.java",
+
+        /* Smartspace tests */
+        "tests/src/com/android/systemui/smartspace/BcSmartspaceConfigProviderTest.kt",
+        "tests/src/com/android/systemui/smartspace/DreamSmartspaceControllerTest.kt",
+        "tests/src/com/android/systemui/smartspace/LockscreenAndDreamTargetFilterTest.kt",
+        "tests/src/com/android/systemui/smartspace/LockscreenPreconditionTest.kt",
     ],
     path: "tests/src",
 }
