@@ -62,6 +62,7 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
@@ -7153,6 +7154,24 @@ public class UserManagerService extends IUserManager.Stub {
         public @NonNull int[] getProfileIds(@UserIdInt int userId, boolean enabledOnly) {
             synchronized (mUsersLock) {
                 return getProfileIdsLU(userId, null /* userType */, enabledOnly).toArray();
+            }
+        }
+
+        @Override
+        public @Nullable LauncherUserInfo getLauncherUserInfo(@UserIdInt int userId) {
+            UserInfo userInfo;
+            synchronized (mUsersLock) {
+                userInfo = getUserInfoLU(userId);
+            }
+            if (userInfo != null) {
+                final UserTypeDetails userDetails = getUserTypeDetails(userInfo);
+                final LauncherUserInfo uiInfo = new LauncherUserInfo.Builder(
+                        userDetails.getName(),
+                        userInfo.serialNumber)
+                        .build();
+                return uiInfo;
+            } else {
+                return null;
             }
         }
 

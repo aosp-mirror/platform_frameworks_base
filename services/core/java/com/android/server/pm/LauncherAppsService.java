@@ -65,6 +65,7 @@ import android.content.pm.IncrementalStatesInfo;
 import android.content.pm.LauncherActivityInfoInternal;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
@@ -1367,6 +1368,25 @@ public class LauncherAppsService extends SystemService {
                         FLAG_MUTABLE, null /* opts */, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public @Nullable LauncherUserInfo getLauncherUserInfo(@NonNull UserHandle user) {
+            // Only system launchers, which have access to recents should have access to this API.
+            // TODO(b/303803157): Add the new permission check if we decide to have one.
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
+            }
+            if (!canAccessProfile(user.getIdentifier(),
+                    "Can't access LauncherUserInfo for another user")) {
+                return null;
+            }
+            long ident = injectClearCallingIdentity();
+            try {
+                return mUserManagerInternal.getLauncherUserInfo(user.getIdentifier());
+            } finally {
+                injectRestoreCallingIdentity(ident);
             }
         }
 
