@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -27,6 +28,8 @@ import android.hardware.camera2.utils.TypeReference;
 import android.os.Build;
 import android.util.Log;
 import android.util.Rational;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.util.List;
 
