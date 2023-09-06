@@ -227,7 +227,7 @@ public final class BinderProxy implements IBinder {
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
                         + " total = " + totalSize);
                 mWarnBucketSize += WARN_INCREMENT;
-                if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
+                if (totalSize >= CRASH_AT_SIZE) {
                     // Use the number of uncleared entries to determine whether we should
                     // really report a histogram and crash. We don't want to fundamentally
                     // change behavior for a debuggable process, so we GC only if we are
