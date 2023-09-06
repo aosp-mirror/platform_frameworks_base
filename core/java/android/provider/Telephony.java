@@ -4915,6 +4915,14 @@ public final class Telephony {
         public static final String COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER =
                 "satellite_attach_enabled_for_carrier";
 
+        /**
+         * TelephonyProvider column name to identify eSIM profile of a non-terrestrial network.
+         * By default, it's disabled.
+         *
+         * @hide
+         */
+        public static final String COLUMN_IS_NTN = "is_ntn";
+
         /** All columns in {@link SimInfo} table. */
         private static final List<String> ALL_COLUMNS = List.of(
                 COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
@@ -4985,7 +4993,8 @@ public final class Telephony {
                 COLUMN_TP_MESSAGE_REF,
                 COLUMN_USER_HANDLE,
                 COLUMN_SATELLITE_ENABLED,
-                COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER
+                COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER,
+                COLUMN_IS_NTN
         );
 
         /**

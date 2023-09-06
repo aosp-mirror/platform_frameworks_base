@@ -190,6 +190,11 @@
     </string-array>
     <java-symbol type="array" name="config_satellite_services_supported_by_providers" />
 
+    <!-- The identifier of the satellite's eSIM profile preloaded on the device. The identifier is
+    composed of MCC and MNC of the satellite PLMN with the format "mccmnc". -->
+    <string name="config_satellite_esim_identifier" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_esim_identifier" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
