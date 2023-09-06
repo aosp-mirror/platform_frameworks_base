@@ -1592,7 +1592,7 @@
     <string name="data_usage_restricted_body" msgid="5338694433686077733">"Ketuk untuk menghapus batasan."</string>
     <string name="data_usage_rapid_title" msgid="2950192123248740375">"Penggunaan data seluler tinggi"</string>
     <string name="data_usage_rapid_body" msgid="3886676853263693432">"Aplikasi Anda menggunakan lebih banyak kuota daripada biasanya"</string>
-    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> menggunakan lebih banyak kuota daripada biasanya"</string>
+    <string name="data_usage_rapid_app_body" msgid="5425779218506513861">"<xliff:g id="APP">%s</xliff:g> menggunakan lebih banyak data daripada biasanya"</string>
     <string name="ssl_certificate" msgid="5690020361307261997">"Sertifikat keamanan"</string>
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"Sertifikat ini valid."</string>
     <string name="issued_to" msgid="5975877665505297662">"Diterbitkan ke:"</string>
@@ -1639,7 +1639,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"Sedang digunakan"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Layar Built-In"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"Layar HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Hamparan #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"Overlay #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", aman"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Lupa Pola?"</string>
@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Mengizinkan aplikasi pendamping memulai layanan latar depan dari latar belakang."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon tersedia"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon diblokir"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Layar ganda"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen aktif"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> menggunakan kedua layar untuk menampilkan konten"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Suhu perangkat terlalu panas"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Layar ganda tidak tersedia karena suhu ponsel terlalu panas"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen tidak tersedia karena suhu ponsel terlalu panas"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen tidak tersedia"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen tidak tersedia karena Penghemat Baterai aktif. Anda dapat menonaktifkannya di Setelan."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Buka Setelan"</string>

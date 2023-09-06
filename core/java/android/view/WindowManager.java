@@ -3723,6 +3723,7 @@ public interface WindowManager extends ViewManager {
          * @see #ROTATION_ANIMATION_ROTATE
          * @see #ROTATION_ANIMATION_CROSSFADE
          * @see #ROTATION_ANIMATION_JUMPCUT
+         * @see #ROTATION_ANIMATION_SEAMLESS
          */
         public int rotationAnimation = ROTATION_ANIMATION_ROTATE;
 

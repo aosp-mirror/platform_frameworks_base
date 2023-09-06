@@ -38,7 +38,7 @@ class ResourceUtilsTests : public Idmap2Tests {
     apk_assets_ = ApkAssets::Load(GetTargetApkPath());
     ASSERT_THAT(apk_assets_, NotNull());
 
-    am_.SetApkAssets({apk_assets_.get()});
+    am_.SetApkAssets({apk_assets_});
   }
 
   const AssetManager2& GetAssetManager() {
@@ -47,7 +47,7 @@ class ResourceUtilsTests : public Idmap2Tests {
 
  private:
   AssetManager2 am_;
-  std::unique_ptr<const ApkAssets> apk_assets_;
+  AssetManager2::ApkAssetsPtr apk_assets_;
 };
 
 TEST_F(ResourceUtilsTests, ResToTypeEntryName) {

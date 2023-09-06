@@ -174,18 +174,18 @@
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Oplåsning med fingeraftryk kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
-    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfigurer ansigtslås igen"</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ansigtslås"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfigurer ansigtslås"</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Hvis du vil konfigurere ansigtslås igen, bliver din nuværende ansigtsmodel slettet.\n\nDu skal konfigurere funktionen igen for at bruge ansigtsgenkendelse til at låse din telefon op."</string>
-    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Ansigtslås kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfigurer ansigtsoplåsning igen"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ansigtsoplåsning"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfigurer ansigtsoplåsning"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Hvis du vil konfigurere ansigtsoplåsning igen, bliver din nuværende ansigtsmodel slettet.\n\nDu skal konfigurere funktionen igen for at bruge ansigtsgenkendelse til at låse din telefon op."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Ansigtsoplåsning kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykssensoren"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansigtet kan ikke genkendes. Brug fingeraftryk i stedet."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Ansigt kan ikke genkendes"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Brug fingeraftryk i stedet"</string>
-    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansigtslås er utilgængelig"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansigtsoplåsning er utilgængelig"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth tilsluttet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriniveauet er ukendt."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Tilsluttet <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
