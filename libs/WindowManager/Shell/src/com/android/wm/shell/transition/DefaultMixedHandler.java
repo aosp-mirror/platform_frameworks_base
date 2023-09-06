@@ -21,7 +21,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
@@ -43,6 +45,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -74,6 +77,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private final KeyguardTransitionHandler mKeyguardHandler;
     private DesktopTasksController mDesktopTasksController;
     private UnfoldTransitionHandler mUnfoldHandler;
+    private ActivityEmbeddingController mActivityEmbeddingController;
 
     private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
@@ -93,8 +97,11 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         /** Recents Transition while in desktop mode. */
         static final int TYPE_RECENTS_DURING_DESKTOP = 6;
 
-        /** Fuld/Unfold transition. */
+        /** Fold/Unfold transition. */
         static final int TYPE_UNFOLD = 7;
+
+        /** Enter pip from one of the Activity Embedding windows. */
+        static final int TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING = 8;
 
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
@@ -150,7 +157,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             Optional<RecentsTransitionHandler> recentsHandlerOptional,
             KeyguardTransitionHandler keyguardHandler,
             Optional<DesktopTasksController> desktopTasksControllerOptional,
-            Optional<UnfoldTransitionHandler> unfoldHandler) {
+            Optional<UnfoldTransitionHandler> unfoldHandler,
+            Optional<ActivityEmbeddingController> activityEmbeddingController) {
         mPlayer = player;
         mKeyguardHandler = keyguardHandler;
         if (Transitions.ENABLE_SHELL_TRANSITIONS
@@ -170,6 +178,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 }
                 mDesktopTasksController = desktopTasksControllerOptional.orElse(null);
                 mUnfoldHandler = unfoldHandler.orElse(null);
+                mActivityEmbeddingController = activityEmbeddingController.orElse(null);
             }, this);
         }
     }
@@ -191,6 +200,16 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             WindowContainerTransaction out = new WindowContainerTransaction();
             mPipHandler.augmentRequest(transition, request, out);
             mSplitHandler.addEnterOrExitIfNeeded(request, out);
+            return out;
+        } else if (request.getType() == TRANSIT_PIP
+                && (request.getFlags() & FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY) != 0 && (
+                mActivityEmbeddingController != null)) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    " Got a PiP-enter request from an Activity Embedding split");
+            mActiveTransitions.add(new MixedTransition(
+                    MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING, transition));
+            // Postpone transition splitting to later.
+            WindowContainerTransaction out = new WindowContainerTransaction();
             return out;
         } else if (request.getRemoteTransition() != null
                 && TransitionUtil.isOpeningType(request.getType())
@@ -355,6 +374,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
             return animateEnterPipFromSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
+        } else if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING) {
+            return animateEnterPipFromActivityEmbedding(mixed, info, startTransaction,
+                    finishTransaction, finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
@@ -398,6 +420,58 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
                     + mixed.mType);
         }
+    }
+
+    private boolean animateEnterPipFromActivityEmbedding(@NonNull MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animating a mixed transition for "
+                + "entering PIP from an Activity Embedding window");
+        // Split into two transitions (wct)
+        TransitionInfo.Change pipChange = null;
+        final TransitionInfo everythingElse = subCopy(info, TRANSIT_TO_BACK, true /* changes */);
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (mPipHandler.isEnteringPip(change, info.getType())) {
+                if (pipChange != null) {
+                    throw new IllegalStateException("More than 1 pip-entering changes in one"
+                            + " transition? " + info);
+                }
+                pipChange = change;
+                // going backwards, so remove-by-index is fine.
+                everythingElse.getChanges().remove(i);
+            }
+        }
+
+        final Transitions.TransitionFinishCallback finishCB = (wct) -> {
+            --mixed.mInFlightSubAnimations;
+            mixed.joinFinishArgs(wct);
+            if (mixed.mInFlightSubAnimations > 0) return;
+            mActiveTransitions.remove(mixed);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT);
+        };
+
+        if (!mActivityEmbeddingController.shouldAnimate(everythingElse)) {
+            // Fallback to dispatching to other handlers.
+            return false;
+        }
+
+        // PIP window should always be on the highest Z order.
+        if (pipChange != null) {
+            mixed.mInFlightSubAnimations = 2;
+            mPipHandler.startEnterAnimation(
+                    pipChange, startTransaction.setLayer(pipChange.getLeash(), Integer.MAX_VALUE),
+                    finishTransaction,
+                    finishCB);
+        } else {
+            mixed.mInFlightSubAnimations = 1;
+        }
+
+        mActivityEmbeddingController.startAnimation(mixed.mTransition, everythingElse,
+                startTransaction, finishTransaction, finishCB);
+        return true;
     }
 
     private boolean animateOpenIntentWithRemoteAndPip(@NonNull MixedTransition mixed,
@@ -811,6 +885,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 } else {
                     mPipHandler.end();
                 }
+            } else if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING) {
+                mPipHandler.end();
+                mActivityEmbeddingController.mergeAnimation(transition, info, t, mergeTarget,
+                        finishCallback);
             } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
                 mPipHandler.end();
                 if (mixed.mLeftoversHandler != null) {
@@ -851,6 +929,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (mixed == null) return;
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
             mPipHandler.onTransitionConsumed(transition, aborted, finishT);
+        } else if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING) {
+            mPipHandler.onTransitionConsumed(transition, aborted, finishT);
+            mActivityEmbeddingController.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
