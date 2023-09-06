@@ -64,6 +64,16 @@ interface IVirtualDevice {
     String getPersistentDeviceId();
 
     /**
+     * Returns the IDs of all virtual displays of this device.
+     */
+    int[] getDisplayIds();
+
+    /**
+     * Returns the device policy for the given policy type.
+     */
+    int getDevicePolicy(int policyType);
+
+    /**
      * Closes the virtual device and frees all associated resources.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")

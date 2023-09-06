@@ -41,6 +41,7 @@ import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
@@ -170,6 +171,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Nullable
     private LocaleList mLocaleList = null;
 
+    @NonNull
+    private final VirtualDevice mPublicVirtualDeviceObject;
+
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
 
@@ -288,6 +292,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             throw e.rethrowFromSystemServer();
         }
         mVirtualDeviceLog.logCreated(deviceId, mOwnerUid);
+
+        mPublicVirtualDeviceObject = new VirtualDevice(
+                this, getDeviceId(), getPersistentDeviceId(), mParams.getName());
     }
 
     @VisibleForTesting
@@ -317,9 +324,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mAssociationInfo.getDisplayName();
     }
 
-    /** Returns the optional name of the device. */
-    String getDeviceName() {
-        return mParams.getName();
+    /** Returns the public representation of the device. */
+    VirtualDevice getPublicVirtualDeviceObject() {
+        return mPublicVirtualDeviceObject;
     }
 
     /** Returns the locale of the device. */
@@ -329,7 +336,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    /** Returns the policy specified for this policy type */
+    @Override  // Binder call
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             @VirtualDeviceParams.PolicyType int policyType) {
         if (Flags.dynamicPolicy()) {
@@ -756,8 +763,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             synchronized (mVirtualDeviceLock) {
                 mDefaultShowPointerIcon = showPointerIcon;
             }
-            getDisplayIds().forEach(
-                    displayId -> mInputController.setShowPointerIcon(showPointerIcon, displayId));
+            final int[] displayIds = getDisplayIds();
+            for (int i = 0; i < displayIds.length; ++i) {
+                mInputController.setShowPointerIcon(showPointerIcon, displayIds[i]);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1029,14 +1038,15 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mOwnerUid;
     }
 
-    ArraySet<Integer> getDisplayIds() {
+    @Override  // Binder call
+    public int[] getDisplayIds() {
         synchronized (mVirtualDeviceLock) {
             final int size = mVirtualDisplays.size();
-            ArraySet<Integer> arraySet = new ArraySet<>(size);
+            int[] displayIds = new int[size];
             for (int i = 0; i < size; i++) {
-                arraySet.append(mVirtualDisplays.keyAt(i));
+                displayIds[i] = mVirtualDisplays.keyAt(i);
             }
-            return arraySet;
+            return displayIds;
         }
     }
 

@@ -30,6 +30,7 @@ import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.IVirtualDeviceListener;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
@@ -49,6 +50,7 @@ import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -70,6 +72,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +80,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 @SuppressLint("LongLogTag")
@@ -102,6 +106,9 @@ public class VirtualDeviceManagerService extends SystemService {
                     syncVirtualDevicesToCdmAssociations(associations);
                 }
             };
+
+    private final RemoteCallbackList<IVirtualDeviceListener> mVirtualDeviceListeners =
+            new RemoteCallbackList<>();
 
     /**
      * Mapping from device IDs to virtual devices.
@@ -223,6 +230,17 @@ public class VirtualDeviceManagerService extends SystemService {
 
             mAppsOnVirtualDevices.remove(deviceId);
             mVirtualDevices.remove(deviceId);
+        }
+
+        if (Flags.vdmPublicApis()) {
+            mVirtualDeviceListeners.broadcast(listener -> {
+                try {
+                    listener.onVirtualDeviceClosed(deviceId);
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to invoke onVirtualDeviceClosed listener: "
+                            + e.getMessage());
+                }
+            });
         }
 
         Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
@@ -376,6 +394,17 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
                 mVirtualDevices.put(deviceId, virtualDevice);
             }
+
+            if (Flags.vdmPublicApis()) {
+                mVirtualDeviceListeners.broadcast(listener -> {
+                    try {
+                        listener.onVirtualDeviceCreated(deviceId);
+                    } catch (RemoteException e) {
+                        Slog.i(TAG, "Failed to invoke onVirtualDeviceCreated listener: "
+                                + e.getMessage());
+                    }
+                });
+            }
             return virtualDevice;
         }
 
@@ -415,12 +444,29 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 for (int i = 0; i < mVirtualDevices.size(); i++) {
                     final VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    virtualDevices.add(
-                            new VirtualDevice(device.getDeviceId(), device.getPersistentDeviceId(),
-                                    device.getDeviceName()));
+                    virtualDevices.add(device.getPublicVirtualDeviceObject());
                 }
             }
             return virtualDevices;
+        }
+
+        @Override // Binder call
+        public VirtualDevice getVirtualDevice(int deviceId) {
+            VirtualDeviceImpl device;
+            synchronized (mVirtualDeviceManagerLock) {
+                device = mVirtualDevices.get(deviceId);
+            }
+            return device == null ? null : device.getPublicVirtualDeviceObject();
+        }
+
+        @Override // Binder call
+        public void registerVirtualDeviceListener(IVirtualDeviceListener listener) {
+            mVirtualDeviceListeners.register(listener);
+        }
+
+        @Override // Binder call
+        public void unregisterVirtualDeviceListener(IVirtualDeviceListener listener) {
+            mVirtualDeviceListeners.unregister(listener);
         }
 
         @Override // BinderCall
@@ -705,7 +751,9 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 virtualDevice = mVirtualDevices.get(deviceId);
             }
-            return virtualDevice == null ? new ArraySet<>() : virtualDevice.getDisplayIds();
+            return virtualDevice == null ? new ArraySet<>()
+                    : Arrays.stream(virtualDevice.getDisplayIds()).boxed()
+                            .collect(Collectors.toCollection(ArraySet::new));
         }
 
         @Override

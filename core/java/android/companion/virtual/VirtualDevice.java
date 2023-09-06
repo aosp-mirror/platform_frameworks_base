@@ -16,13 +16,17 @@
 
 package android.companion.virtual;
 
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.companion.virtual.flags.Flags;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Objects;
+import android.os.RemoteException;
 
 /**
  * Details of a particular virtual device.
@@ -31,9 +35,12 @@ import java.util.Objects;
  *
  * <p class="note">Not to be confused with {@link VirtualDeviceManager.VirtualDevice}, which is used
  * by the virtual device creator and allows them to manage the device.
+ *
+ * @see VirtualDeviceManager#registerVirtualDeviceListener
  */
 public final class VirtualDevice implements Parcelable {
 
+    private final @NonNull IVirtualDevice mVirtualDevice;
     private final int mId;
     private final @Nullable String mPersistentId;
     private final @Nullable String mName;
@@ -44,17 +51,20 @@ public final class VirtualDevice implements Parcelable {
      *
      * @hide
      */
-    public VirtualDevice(int id, @Nullable String persistentId, @Nullable String name) {
+    public VirtualDevice(@NonNull IVirtualDevice virtualDevice, int id,
+            @Nullable String persistentId, @Nullable String name) {
         if (id <= Context.DEVICE_ID_DEFAULT) {
             throw new IllegalArgumentException("VirtualDevice ID must be greater than "
                     + Context.DEVICE_ID_DEFAULT);
         }
+        mVirtualDevice = virtualDevice;
         mId = id;
         mPersistentId = persistentId;
         mName = name;
     }
 
     private VirtualDevice(@NonNull Parcel parcel) {
+        mVirtualDevice = IVirtualDevice.Stub.asInterface(parcel.readStrongBinder());
         mId = parcel.readInt();
         mPersistentId = parcel.readString8();
         mName = parcel.readString8();
@@ -101,6 +111,40 @@ public final class VirtualDevice implements Parcelable {
         return mName;
     }
 
+    /**
+     * Returns the IDs of all virtual displays that belong to this device, if any.
+     *
+     * <p>The actual {@link android.view.Display} objects can be obtained by passing the returned
+     * IDs to {@link android.hardware.display.DisplayManager#getDisplay(int)}.</p>
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public @NonNull int[] getDisplayIds() {
+        try {
+            return mVirtualDevice.getDisplayIds();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether this device may have custom sensors.
+     *
+     * <p>Returning {@code true} does not necessarily mean that this device has sensors, it only
+     * means that a {@link android.hardware.SensorManager} instance created from a {@link Context}
+     * associated with this device will return this device's sensors, if any.</p>
+     *
+     * @see Context#getDeviceId()
+     * @see Context#createDeviceContext(int)
+     */
+    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
+    public boolean hasCustomSensorSupport() {
+        try {
+            return mVirtualDevice.getDevicePolicy(POLICY_TYPE_SENSORS) == DEVICE_POLICY_CUSTOM;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -108,28 +152,10 @@ public final class VirtualDevice implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeStrongBinder(mVirtualDevice.asBinder());
         dest.writeInt(mId);
         dest.writeString8(mPersistentId);
         dest.writeString8(mName);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof VirtualDevice)) {
-            return false;
-        }
-        VirtualDevice that = (VirtualDevice) o;
-        return mId == that.mId
-                && Objects.equals(mPersistentId, that.mPersistentId)
-                && Objects.equals(mName, that.mName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(mId, mPersistentId, mName);
     }
 
     @Override
