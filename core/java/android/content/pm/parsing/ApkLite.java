@@ -140,11 +140,6 @@ public class ApkLite {
     private final boolean mIsSdkLibrary;
 
     /**
-     * Indicates whether this application's data will be cleared on a failed restore.
-     */
-    private final boolean mClearUserDataAllowed;
-
-    /**
      *  Set to <code>false</code> if the application does not wish to permit any OS-driven
      *  backups of its data; <code>true</code> otherwise.
      */
@@ -219,7 +214,6 @@ public class ApkLite {
         mRollbackDataPolicy = rollbackDataPolicy;
         mHasDeviceAdminReceiver = hasDeviceAdminReceiver;
         mIsSdkLibrary = isSdkLibrary;
-        mClearUserDataAllowed = clearUserDataAllowed;
         mBackupAllowed = backupAllowed;
         mDefaultToDeviceProtectedStorage = defaultToDeviceProtectedStorage;
         mRequestLegacyExternalStorage = requestLegacyExternalStorage;
@@ -261,7 +255,6 @@ public class ApkLite {
         mRollbackDataPolicy = 0;
         mHasDeviceAdminReceiver = false;
         mIsSdkLibrary = false;
-        mClearUserDataAllowed = archivedPackage.clearUserDataAllowed;
         mBackupAllowed = archivedPackage.backupAllowed;
         mDefaultToDeviceProtectedStorage = archivedPackage.defaultToDeviceProtectedStorage;
         mRequestLegacyExternalStorage = archivedPackage.requestLegacyExternalStorage;
@@ -576,14 +569,6 @@ public class ApkLite {
     }
 
     /**
-     * Indicates whether this application's data will be cleared on a failed restore.
-     */
-    @DataClass.Generated.Member
-    public boolean isClearUserDataAllowed() {
-        return mClearUserDataAllowed;
-    }
-
-    /**
      *  Set to <code>false</code> if the application does not wish to permit any OS-driven
      *  backups of its data; <code>true</code> otherwise.
      */
@@ -627,10 +612,10 @@ public class ApkLite {
     }
 
     @DataClass.Generated(
-            time = 1693422809896L,
+            time = 1693513509013L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/ApkLite.java",
-            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\nprivate final  boolean mHasDeviceAdminReceiver\nprivate final  boolean mIsSdkLibrary\nprivate final  boolean mClearUserDataAllowed\nprivate final  boolean mBackupAllowed\nprivate final  boolean mDefaultToDeviceProtectedStorage\nprivate final  boolean mRequestLegacyExternalStorage\nprivate final  boolean mUserDataFragile\nprivate final  boolean mClearUserDataOnFailedRestoreAllowed\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
+            inputSignatures = "private final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.NonNull java.lang.String mPath\nprivate final @android.annotation.Nullable java.lang.String mSplitName\nprivate final @android.annotation.Nullable java.lang.String mUsesSplitName\nprivate final @android.annotation.Nullable java.lang.String mConfigForSplit\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mRequiredSplitTypes\nprivate final @android.annotation.Nullable java.util.Set<java.lang.String> mSplitTypes\nprivate final  int mVersionCodeMajor\nprivate final  int mVersionCode\nprivate final  int mRevisionCode\nprivate final  int mInstallLocation\nprivate final  int mMinSdkVersion\nprivate final  int mTargetSdkVersion\nprivate final @android.annotation.NonNull android.content.pm.VerifierInfo[] mVerifiers\nprivate final @android.annotation.NonNull android.content.pm.SigningDetails mSigningDetails\nprivate final  boolean mFeatureSplit\nprivate final  boolean mIsolatedSplits\nprivate final  boolean mSplitRequired\nprivate final  boolean mCoreApp\nprivate final  boolean mDebuggable\nprivate final  boolean mProfileableByShell\nprivate final  boolean mMultiArch\nprivate final  boolean mUse32bitAbi\nprivate final  boolean mExtractNativeLibs\nprivate final  boolean mUseEmbeddedDex\nprivate final @android.annotation.Nullable java.lang.String mTargetPackageName\nprivate final  boolean mOverlayIsStatic\nprivate final  int mOverlayPriority\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyName\nprivate final @android.annotation.Nullable java.lang.String mRequiredSystemPropertyValue\nprivate final  int mRollbackDataPolicy\nprivate final  boolean mHasDeviceAdminReceiver\nprivate final  boolean mIsSdkLibrary\nprivate final  boolean mBackupAllowed\nprivate final  boolean mDefaultToDeviceProtectedStorage\nprivate final  boolean mRequestLegacyExternalStorage\nprivate final  boolean mUserDataFragile\nprivate final  boolean mClearUserDataOnFailedRestoreAllowed\npublic  long getLongVersionCode()\nprivate  boolean hasAnyRequiredSplitTypes()\nclass ApkLite extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

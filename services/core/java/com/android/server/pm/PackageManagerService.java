@@ -36,7 +36,6 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
-
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_INIT_TIME;
 import static com.android.server.pm.DexOptHelper.useArtService;
@@ -6323,7 +6322,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             archPkg.targetSdkVersion = apk.getTargetSdkVersion();
 
             // These get translated in flags important for user data management.
-            archPkg.clearUserDataAllowed = apk.isClearUserDataAllowed();
             archPkg.backupAllowed = apk.isBackupAllowed();
             archPkg.defaultToDeviceProtectedStorage =
                     apk.isDefaultToDeviceProtectedStorage();

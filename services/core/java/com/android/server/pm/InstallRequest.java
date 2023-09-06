@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.Process.INVALID_UID;
-
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.TAG;
 
@@ -325,6 +324,10 @@ final class InstallRequest {
 
     public boolean isUpdate() {
         return mRemovedInfo != null && mRemovedInfo.mRemovedPackage != null;
+    }
+
+    public boolean isArchived() {
+        return PackageInstallerSession.isArchivedInstallation(getInstallFlags());
     }
 
     @Nullable
