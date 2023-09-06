@@ -75,7 +75,7 @@ public:
     void onDisplayInfosChangedLocked(const std::vector<gui::DisplayInfo>& displayInfos)
             REQUIRES(getLock());
 
-    void dump(std::string& dump);
+    std::string dump();
 
 protected:
     using WindowListenerConsumer =

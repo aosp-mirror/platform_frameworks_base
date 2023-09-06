@@ -354,13 +354,12 @@ const ui::Transform& PointerController::getTransformForDisplayLocked(int display
     return it != di.end() ? it->transform : kIdentityTransform;
 }
 
-void PointerController::dump(std::string& dump) {
+std::string PointerController::dump() {
     if (!mEnabled) {
-        dump += INDENT "PointerController: DISABLED due to ongoing PointerChoreographer refactor\n";
-        return;
+        return INDENT "PointerController: DISABLED due to ongoing PointerChoreographer refactor\n";
     }
 
-    dump += INDENT "PointerController:\n";
+    std::string dump = INDENT "PointerController:\n";
     std::scoped_lock lock(getLock());
     dump += StringPrintf(INDENT2 "Presentation: %s\n",
                          ftl::enum_string(mLocked.presentation).c_str());
@@ -373,6 +372,7 @@ void PointerController::dump(std::string& dump) {
     for (const auto& [_, spotController] : mLocked.spotControllers) {
         spotController.dump(dump, INDENT3);
     }
+    return dump;
 }
 
 } // namespace android
