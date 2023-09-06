@@ -234,10 +234,12 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
         mMenuAnimationController.springMenuWith(DynamicAnimation.TRANSLATION_X, new SpringForce()
                 .setStiffness(stiffness)
-                .setDampingRatio(dampingRatio), velocity, finalPosition);
+                .setDampingRatio(dampingRatio), velocity, finalPosition,
+                /* writeToPosition = */ true);
         mMenuAnimationController.springMenuWith(DynamicAnimation.TRANSLATION_Y, new SpringForce()
                 .setStiffness(stiffness)
-                .setDampingRatio(dampingRatio), velocity, finalPosition);
+                .setDampingRatio(dampingRatio), velocity, finalPosition,
+                /* writeToPosition = */ true);
     }
 
     private void skipAnimationToEnd(DynamicAnimation animation) {
