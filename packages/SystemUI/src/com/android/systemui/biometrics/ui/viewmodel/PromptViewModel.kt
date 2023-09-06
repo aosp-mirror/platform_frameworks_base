@@ -15,16 +15,21 @@
  */
 package com.android.systemui.biometrics.ui.viewmodel
 
+import android.content.Context
+import android.graphics.Rect
 import android.hardware.biometrics.BiometricPrompt
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.android.systemui.biometrics.AuthBiometricView
+import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.model.BiometricModalities
 import com.android.systemui.biometrics.shared.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.PromptKind
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
@@ -49,6 +54,7 @@ constructor(
     private val displayStateInteractor: DisplayStateInteractor,
     private val promptSelectorInteractor: PromptSelectorInteractor,
     private val vibrator: VibratorHelper,
+    @Application context: Context,
     private val featureFlags: FeatureFlags,
 ) {
     /** Models UI of [BiometricPromptLayout.iconView] */
@@ -133,6 +139,23 @@ constructor(
     val isConfirmationRequired: Flow<Boolean> =
         combine(_isOverlayTouched, size) { isOverlayTouched, size ->
             !isOverlayTouched && size.isNotSmall
+        }
+
+    /** Padding for prompt UI elements */
+    val promptPadding: Flow<Rect> =
+        combine(size, displayStateInteractor.currentRotation) { size, rotation ->
+            if (size != PromptSize.LARGE) {
+                val navBarInsets = Utils.getNavbarInsets(context)
+                if (rotation == DisplayRotation.ROTATION_90) {
+                    Rect(0, 0, navBarInsets.right, 0)
+                } else if (rotation == DisplayRotation.ROTATION_270) {
+                    Rect(navBarInsets.left, 0, 0, 0)
+                } else {
+                    Rect(0, 0, 0, navBarInsets.bottom)
+                }
+            } else {
+                Rect(0, 0, 0, 0)
+            }
         }
 
     /** Title for the prompt. */

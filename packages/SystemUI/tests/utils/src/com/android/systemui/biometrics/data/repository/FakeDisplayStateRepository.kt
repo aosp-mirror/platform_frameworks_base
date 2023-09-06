@@ -17,15 +17,23 @@
 
 package com.android.systemui.biometrics.data.repository
 
+import com.android.systemui.biometrics.shared.model.DisplayRotation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeRearDisplayStateRepository : RearDisplayStateRepository {
+class FakeDisplayStateRepository : DisplayStateRepository {
     private val _isInRearDisplayMode = MutableStateFlow<Boolean>(false)
     override val isInRearDisplayMode: StateFlow<Boolean> = _isInRearDisplayMode.asStateFlow()
 
+    private val _currentRotation = MutableStateFlow<DisplayRotation>(DisplayRotation.ROTATION_0)
+    override val currentRotation: StateFlow<DisplayRotation> = _currentRotation.asStateFlow()
+
     fun setIsInRearDisplayMode(isInRearDisplayMode: Boolean) {
         _isInRearDisplayMode.value = isInRearDisplayMode
+    }
+
+    fun setCurrentRotation(currentRotation: DisplayRotation) {
+        _currentRotation.value = currentRotation
     }
 }

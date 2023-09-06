@@ -25,8 +25,8 @@ import com.android.systemui.biometrics.data.repository.FingerprintPropertyReposi
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
-import com.android.systemui.biometrics.data.repository.RearDisplayStateRepositoryImpl
+import com.android.systemui.biometrics.data.repository.DisplayStateRepository
+import com.android.systemui.biometrics.data.repository.DisplayStateRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -65,9 +65,10 @@ interface BiometricsModule {
     @SysUISingleton
     fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
             FingerprintPropertyRepository
+
     @Binds
     @SysUISingleton
-    fun rearDisplayStateRepository(impl: RearDisplayStateRepositoryImpl): RearDisplayStateRepository
+    fun displayStateRepository(impl: DisplayStateRepositoryImpl): DisplayStateRepository
 
     @Binds
     @SysUISingleton
