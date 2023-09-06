@@ -121,9 +121,9 @@ public:
         if (name) {
             const char* lastPeriod = strrchr(name, '.');
             if (lastPeriod) {
-                mName.setTo(lastPeriod + 1);
+                mName = (lastPeriod + 1);
             } else {
-                mName.setTo(name);
+                mName = name;
             }
         }
     }

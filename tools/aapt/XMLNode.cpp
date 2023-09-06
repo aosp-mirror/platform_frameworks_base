@@ -334,9 +334,9 @@ moveon:
             String16 spanTag;
             ssize_t semi = span.name.findFirst(';');
             if (semi >= 0) {
-                spanTag.setTo(span.name.c_str(), semi);
+                spanTag = String16(span.name.c_str(), semi);
             } else {
-                spanTag.setTo(span.name);
+                spanTag = span.name;
             }
             if (strcmp16(inXml->getElementName(&len), spanTag.c_str()) != 0) {
                 SourcePos(String8(fileName), inXml->getLineNumber()).error(
@@ -393,7 +393,7 @@ moveon:
         // later as part of the overall type conversion.  Return to the
         // client the raw unprocessed text.
         rawString.append(curString);
-        outString->setTo(rawString);
+        *outString = rawString;
     }
 
     return NO_ERROR;
