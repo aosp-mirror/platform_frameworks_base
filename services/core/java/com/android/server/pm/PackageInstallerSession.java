@@ -3641,6 +3641,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void maybeStageFsveritySignatureLocked(File origFile, File targetFile,
             boolean fsVerityRequired) throws PackageManagerException {
+        if (com.android.server.security.Flags.deprecateFsvSig()) {
+            return;
+        }
         final File originalSignature = new File(
                 VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
         if (originalSignature.exists()) {

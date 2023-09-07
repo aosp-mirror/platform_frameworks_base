@@ -90,6 +90,13 @@ public class FileIntegrityService extends SystemService {
                 @NonNull String packageName) {
             checkCallerPermission(packageName);
 
+            if (Flags.deprecateFsvSig()) {
+                // When deprecated, stop telling the caller that any app source certificate is
+                // trusted on the current device. This behavior is also consistent with devices
+                // without this feature support.
+                return false;
+            }
+
             try {
                 if (!VerityUtils.isFsVeritySupported()) {
                     return false;
