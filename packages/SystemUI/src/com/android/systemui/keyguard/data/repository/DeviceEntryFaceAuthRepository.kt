@@ -26,6 +26,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -161,6 +162,7 @@ constructor(
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val displayStateInteractor: DisplayStateInteractor,
     private val featureFlags: FeatureFlags,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
@@ -362,6 +364,16 @@ constructor(
 
     private fun gatingConditionsForAuthAndDetect(): Array<Pair<Flow<Boolean>, String>> {
         return arrayOf(
+            Pair(
+                and(
+                        displayStateInteractor.isDefaultDisplayOff,
+                        keyguardRepository.wakefulness.map { it.isAwake() },
+                    )
+                    .isFalse(),
+                // this can happen if an app is requesting for screen off, the display can
+                // turn off without wakefulness.isStartingToSleepOrAsleep calls
+                "displayIsNotOffWhileAwake",
+            ),
             Pair(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
                 "isFaceAuthEnrolledAndEnabled"

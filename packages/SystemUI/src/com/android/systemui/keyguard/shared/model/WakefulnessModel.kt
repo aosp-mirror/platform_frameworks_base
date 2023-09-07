@@ -36,7 +36,7 @@ data class WakefulnessModel(
 
     private fun isAsleep() = state == ASLEEP
 
-    private fun isAwake() = state == AWAKE
+    fun isAwake() = state == AWAKE
 
     fun isStartingToWakeOrAwake() = isStartingToWake() || isAwake()
 

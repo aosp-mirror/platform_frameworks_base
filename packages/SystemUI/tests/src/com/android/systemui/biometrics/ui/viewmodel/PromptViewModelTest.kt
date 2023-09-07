@@ -28,6 +28,7 @@ import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractorImpl
@@ -38,6 +39,7 @@ import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.statusbar.VibratorHelper
@@ -77,17 +79,12 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val testScope = TestScope()
-    private val fingerprintRepository = FakeFingerprintPropertyRepository()
-    private val promptRepository = FakePromptRepository()
-    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
 
-    private val displayStateInteractor =
-        DisplayStateInteractorImpl(
-            testScope.backgroundScope,
-            mContext,
-            fakeExecutor,
-            rearDisplayStateRepository
-        )
+    private lateinit var fingerprintRepository: FakeFingerprintPropertyRepository
+    private lateinit var promptRepository: FakePromptRepository
+    private lateinit var rearDisplayStateRepository: FakeRearDisplayStateRepository
+    private lateinit var displayRepository: FakeDisplayRepository
+    private lateinit var displayStateInteractor: DisplayStateInteractor
 
     private lateinit var selector: PromptSelectorInteractor
     private lateinit var viewModel: PromptViewModel
@@ -95,6 +92,18 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
 
     @Before
     fun setup() {
+        fingerprintRepository = FakeFingerprintPropertyRepository()
+        promptRepository = FakePromptRepository()
+        rearDisplayStateRepository = FakeRearDisplayStateRepository()
+        displayRepository = FakeDisplayRepository()
+        displayStateInteractor =
+            DisplayStateInteractorImpl(
+                testScope.backgroundScope,
+                mContext,
+                fakeExecutor,
+                rearDisplayStateRepository,
+                displayRepository,
+            )
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
