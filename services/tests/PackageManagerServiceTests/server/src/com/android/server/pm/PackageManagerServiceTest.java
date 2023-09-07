@@ -17,12 +17,9 @@
 package com.android.server.pm;
 
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
-
 import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
-
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -99,7 +96,7 @@ public class PackageManagerServiceTest {
 
             public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
                     boolean sendBootComplete, boolean includeStopped, int appId,
-                    int[] userIds, int[] instantUserIds, int dataLoaderType) {
+                    int[] userIds, int[] instantUserIds, boolean isArchived, int dataLoaderType) {
             }
 
             @Override

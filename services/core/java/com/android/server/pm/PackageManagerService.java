@@ -3044,7 +3044,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void sendPackageAddedForUser(@NonNull Computer snapshot, String packageName,
-            @NonNull PackageStateInternal packageState, int userId, int dataLoaderType) {
+            @NonNull PackageStateInternal packageState, int userId, boolean isArchived,
+            int dataLoaderType) {
         final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
         final boolean isSystem = packageState.isSystem();
         final boolean isInstantApp = userState.isInstantApp();
@@ -3052,7 +3053,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final int[] instantUserIds = isInstantApp ? new int[] { userId } : EMPTY_INT_ARRAY;
         sendPackageAddedForNewUsers(snapshot, packageName, isSystem /*sendBootCompleted*/,
                 false /*startReceiver*/, packageState.getAppId(), userIds, instantUserIds,
-                dataLoaderType);
+                isArchived, dataLoaderType);
 
         // Send a session commit broadcast
         final PackageInstaller.SessionInfo info = new PackageInstaller.SessionInfo();
@@ -3064,17 +3065,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     @Override
     public void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
             boolean sendBootCompleted, boolean includeStopped, @AppIdInt int appId, int[] userIds,
-            int[] instantUserIds, int dataLoaderType) {
+            int[] instantUserIds, boolean isArchived, int dataLoaderType) {
         if (ArrayUtils.isEmpty(userIds) && ArrayUtils.isEmpty(instantUserIds)) {
             return;
         }
         SparseArray<int[]> broadcastAllowList = mAppsFilter.getVisibilityAllowList(snapshot,
                 snapshot.getPackageStateInternal(packageName, Process.SYSTEM_UID),
                 userIds, snapshot.getPackageStates());
-        mHandler.post(() -> mBroadcastHelper.sendPackageAddedForNewUsers(
-                packageName, appId, userIds, instantUserIds, dataLoaderType, broadcastAllowList));
+        mHandler.post(
+                () -> mBroadcastHelper.sendPackageAddedForNewUsers(packageName, appId, userIds,
+                        instantUserIds, isArchived, dataLoaderType, broadcastAllowList));
         mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(packageName, appId, userIds,
-                instantUserIds, dataLoaderType, broadcastAllowList);
+                instantUserIds, isArchived, dataLoaderType, broadcastAllowList);
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
@@ -3095,7 +3097,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         info.mBroadcastUsers = new int[] {userId};
         info.mUid = UserHandle.getUid(userId, packageState.getAppId());
         info.mRemovedPackageVersionCode = packageState.getVersionCode();
-        info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/);
+        info.sendPackageRemovedBroadcasts(true /*killApp*/, false /*removedBySystem*/,
+                false /*isArchived*/);
     }
 
     boolean isUserRestricted(int userId, String restrictionKey) {
@@ -5772,7 +5775,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     sendApplicationHiddenForUser(packageName, newPackageState, userId);
                 } else {
                     sendPackageAddedForUser(newSnapshot, packageName, newPackageState, userId,
-                            DataLoaderType.NONE);
+                            false /* isArchived */, DataLoaderType.NONE);
                 }
 
                 scheduleWritePackageRestrictions(userId);
