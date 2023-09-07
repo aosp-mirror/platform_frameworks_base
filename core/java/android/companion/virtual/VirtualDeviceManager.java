@@ -197,7 +197,11 @@ public final class VirtualDeviceManager {
      * Returns the details of all available virtual devices.
      *
      * <p>The returned objects are read-only representations that expose the properties of all
-     * existing virtual devices.
+     * existing virtual devices.</p>
+     *
+     * <p>Note that if a virtual device is closed and becomes invalid, the returned objects will
+     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
+     * time updates of the availability of virtual devices.</p>
      */
     @NonNull
     public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
@@ -217,6 +221,13 @@ public final class VirtualDeviceManager {
      *
      * <p>The returned object is a read-only representation of the virtual device that expose its
      * properties.</p>
+     *
+     * <p>Note that if the virtual device is closed and becomes invalid, the returned object will
+     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
+     * time updates of the availability of virtual devices.</p>
+     *
+     * @return the virtual device with the requested ID, or {@code null} if no such device exists or
+     *   it has already been closed.
      */
     @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     @Nullable
@@ -968,6 +979,8 @@ public final class VirtualDeviceManager {
 
     /**
      * Listener for changes in the available virtual devices.
+     *
+     * @see #registerVirtualDeviceListener
      */
     @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public interface VirtualDeviceListener {
