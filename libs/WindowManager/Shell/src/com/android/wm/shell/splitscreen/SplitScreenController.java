@@ -43,6 +43,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.TaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -814,21 +815,22 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         final String packageName1 = SplitScreenUtils.getPackageName(intent);
         final String packageName2 = getPackageName(reverseSplitPosition(position));
         final int userId2 = getUserId(reverseSplitPosition(position));
+        final ComponentName component = intent.getIntent().getComponent();
+
+        // To prevent accumulating large number of instances in the background, reuse task
+        // in the background. If we don't explicitly reuse, new may be created even if the app
+        // isn't multi-instance because WM won't automatically remove/reuse the previous instance
+        final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
+                .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
+                .orElse(null);
+        if (taskInfo != null) {
+            startTask(taskInfo.taskId, position, options);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                    "Start task in background");
+            return;
+        }
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
             if (supportMultiInstancesSplit(packageName1)) {
-                // To prevent accumulating large number of instances in the background, reuse task
-                // in the background with priority.
-                final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
-                        .map(recentTasks -> recentTasks.findTaskInBackground(
-                                intent.getIntent().getComponent(), userId1))
-                        .orElse(null);
-                if (taskInfo != null) {
-                    startTask(taskInfo.taskId, position, options);
-                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                            "Start task in background");
-                    return;
-                }
-
                 // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of
                 // the split and there is no reusable background task.
                 fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
