@@ -328,7 +328,7 @@
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"ಬಾಡಿ ಸೆನ್ಸರ್‌"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <string name="permgrouplab_notifications" msgid="5472972361980668884">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="permgrouplab_notifications" msgid="5472972361980668884">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
@@ -2128,7 +2128,7 @@
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ಹೋಮ್"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"ಹಿಂದಕ್ಕೆ"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳು"</string>
-    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ಪವರ್ ಡೈಲಾಗ್"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ಲಾಕ್ ಸ್ಕ್ರೀನ್"</string>
