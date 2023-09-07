@@ -27,11 +27,6 @@ import kotlinx.coroutines.flow.filterNotNull
 
 class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
 
-    private var _wasDisabled: Boolean = false
-
-    val wasDisabled: Boolean
-        get() = _wasDisabled
-
     override val isAuthenticated = MutableStateFlow(false)
     override val canRunFaceAuth = MutableStateFlow(false)
     private val _authenticationStatus = MutableStateFlow<FaceAuthenticationStatus?>(null)
@@ -57,8 +52,8 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
     override val isAuthRunning: StateFlow<Boolean> = _isAuthRunning
 
     override val isBypassEnabled = MutableStateFlow(false)
-    override fun lockoutFaceAuth() {
-        _wasDisabled = true
+    override fun setLockedOut(isLockedOut: Boolean) {
+        _isLockedOut.value = isLockedOut
     }
 
     private val faceAuthPaused = MutableStateFlow(false)
@@ -77,10 +72,6 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
     override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
         _runningAuthRequest.value = uiEvent to fallbackToDetection
         _isAuthRunning.value = true
-    }
-
-    fun setLockedOut(value: Boolean) {
-        _isLockedOut.value = value
     }
 
     override fun cancel() {

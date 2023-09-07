@@ -55,7 +55,7 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
     override val isBypassEnabled: Flow<Boolean>
         get() = emptyFlow()
 
-    override fun lockoutFaceAuth() = Unit
+    override fun setLockedOut(isLockedOut: Boolean) = Unit
     override fun pauseFaceAuth() = Unit
 
     override fun resumeFaceAuth() = Unit
