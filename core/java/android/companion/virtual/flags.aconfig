@@ -20,3 +20,11 @@ flag {
   description: "Enable public VDM API for device capabilities"
   bug: "297253526"
 }
+
+flag {
+    name: "virtual_camera"
+    namespace: "virtual_devices"
+    description: "Enable Virtual Camera"
+    bug: "270352264"
+}
+
