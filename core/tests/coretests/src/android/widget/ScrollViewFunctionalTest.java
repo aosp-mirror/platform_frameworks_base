@@ -17,7 +17,9 @@
 package android.widget;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 import android.util.PollingCheck;
 
@@ -31,6 +33,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -49,23 +54,43 @@ public class ScrollViewFunctionalTest {
     }
 
     @Test
-    public void testScrollAfterFlingTop() {
-        mScrollView.scrollTo(0, 100);
-        mScrollView.fling(-10000);
-        PollingCheck.waitFor(() -> mScrollView.mEdgeGlowTop.getDistance() > 0);
-        PollingCheck.waitFor(() -> mScrollView.mEdgeGlowTop.getDistance() == 0f);
+    public void testScrollAfterFlingTop() throws Throwable {
+        WatchedEdgeEffect edgeEffect = new WatchedEdgeEffect(mActivity);
+        mScrollView.mEdgeGlowTop = edgeEffect;
+        mActivityRule.runOnUiThread(() -> mScrollView.scrollTo(0, 100));
+        mActivityRule.runOnUiThread(() -> mScrollView.fling(-10000));
+        assertTrue(edgeEffect.onAbsorbLatch.await(1, TimeUnit.SECONDS));
+        mActivityRule.runOnUiThread(() -> {}); // let the absorb takes effect -- least one frame
+        PollingCheck.waitFor(() -> edgeEffect.getDistance() == 0f);
         assertEquals(0, mScrollView.getScrollY());
     }
 
     @Test
-    public void testScrollAfterFlingBottom() {
+    public void testScrollAfterFlingBottom() throws Throwable {
+        WatchedEdgeEffect edgeEffect = new WatchedEdgeEffect(mActivity);
+        mScrollView.mEdgeGlowBottom = edgeEffect;
         int childHeight = mScrollView.getChildAt(0).getHeight();
         int maxScroll = childHeight - mScrollView.getHeight();
-        mScrollView.scrollTo(0, maxScroll - 100);
-        mScrollView.fling(10000);
-        PollingCheck.waitFor(() -> mScrollView.mEdgeGlowBottom.getDistance() > 0);
-        PollingCheck.waitFor(() -> mScrollView.mEdgeGlowBottom.getDistance() == 0f);
+        mActivityRule.runOnUiThread(() -> mScrollView.scrollTo(0, maxScroll - 100));
+        mActivityRule.runOnUiThread(() -> mScrollView.fling(10000));
+        assertTrue(edgeEffect.onAbsorbLatch.await(1, TimeUnit.SECONDS));
+        mActivityRule.runOnUiThread(() -> {}); // let the absorb takes effect -- least one frame
+        PollingCheck.waitFor(() -> edgeEffect.getDistance() == 0f);
         assertEquals(maxScroll, mScrollView.getScrollY());
+    }
+
+    static class WatchedEdgeEffect extends EdgeEffect {
+        public CountDownLatch onAbsorbLatch = new CountDownLatch(1);
+
+        WatchedEdgeEffect(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onAbsorb(int velocity) {
+            super.onAbsorb(velocity);
+            onAbsorbLatch.countDown();
+        }
     }
 }
 
