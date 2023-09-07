@@ -81,4 +81,10 @@ class KeyguardBlueprintCommandListenerTest : SysuiTestCase() {
         command().execute(pw, listOf("fake"))
         verify(keyguardBlueprintInteractor).transitionToBlueprint("fake")
     }
+
+    @Test
+    fun testValidArg_Int() {
+        command().execute(pw, listOf("1"))
+        verify(keyguardBlueprintInteractor).transitionToBlueprint(1)
+    }
 }

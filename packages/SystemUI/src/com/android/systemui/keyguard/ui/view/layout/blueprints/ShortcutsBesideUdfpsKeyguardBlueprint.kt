@@ -58,6 +58,6 @@ constructor(
         )
 
     companion object {
-        const val SHORTCUTS_BESIDE_UDFPS = "shortcutsBesideUdfps"
+        const val SHORTCUTS_BESIDE_UDFPS = "shortcuts-besides-udfps"
     }
 }
