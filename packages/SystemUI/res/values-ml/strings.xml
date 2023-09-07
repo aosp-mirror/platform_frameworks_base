@@ -293,7 +293,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ഔദ്യോഗിക ആപ്പുകൾ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"നൈറ്റ് ലൈറ്റ്"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"സൂര്യാസ്‌തമയത്തിന്"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"അസ്‌തമയത്തിന്"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>

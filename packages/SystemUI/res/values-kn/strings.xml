@@ -227,7 +227,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"ಮೊಬೈಲ್ ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"ಡೇಟಾ ಬಳಕೆಯು ನೀವು ಹೊಂದಿಸಿರುವ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ. ಹೀಗಾಗಿ ನೀವು ಈಗ ಮೊಬೈಲ್ ಡೇಟಾ ಬಳಸುತ್ತಿಲ್ಲ.\n\nನೀವು ಮುಂದುವರಿದರೆ, ಡೇಟಾ ಬಳಕೆಗೆ ಶುಲ್ಕ ತೆರಬೇಕಾಗಬಹುದು."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸು"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"ಮುಂದುವರಿಸಿ"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ಸ್ಥಳ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ಸೆನ್ಸರ್‌ಗಳು ಆಫ್ ಆಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
@@ -493,7 +493,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು (ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ವಿಷಯ)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಬಹುದು(ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ಕಂಟೆಂಟ್‍)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ಪಿನ್ ಮಾಡಲಾದ ಆ್ಯಪ್ ಇತರ ಆ್ಯಪ್‌ಗಳನ್ನು ತೆರೆಯಬಹುದು."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
@@ -640,7 +640,7 @@
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ಮುಖಪುಟ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"ಇತ್ತೀಚಿನವುಗಳು"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"ಹಿಂದೆ"</string>
-    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ಕೀಬೋರ್ಡ್‌ ಲೇಔಟ್‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ಪಠ್ಯ ತೆರವುಗೊಳಿಸಿ"</string>
