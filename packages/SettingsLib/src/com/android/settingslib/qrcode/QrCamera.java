@@ -36,6 +36,7 @@ import androidx.annotation.VisibleForTesting;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
+import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
@@ -249,16 +250,10 @@ public class QrCamera extends Handler {
                     // Semaphore.acquire() blocking until permit is available, or the thread is
                     // interrupted.
                     imageGot.acquire();
-                    Result qrCode = null;
-                    try {
-                        qrCode =
-                                mReader.decodeWithState(
-                                        new BinaryBitmap(new HybridBinarizer(mImage)));
-                    } catch (ReaderException e) {
-                        // No logging since every time the reader cannot decode the
-                        // image, this ReaderException will be thrown.
-                    } finally {
-                        mReader.reset();
+                    Result qrCode = decodeQrCode(mImage);
+                    if (qrCode == null) {
+                        // Check color inversion QR code
+                        qrCode = decodeQrCode(mImage.invert());
                     }
                     if (qrCode != null) {
                         if (mScannerCallback.isValid(qrCode.getText())) {
@@ -270,6 +265,18 @@ public class QrCamera extends Handler {
                     return null;
                 }
             }
+        }
+
+        private Result decodeQrCode(LuminanceSource source) {
+            try {
+                return mReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
+            } catch (ReaderException e) {
+                // No logging since every time the reader cannot decode the
+                // image, this ReaderException will be thrown.
+            } finally {
+                mReader.reset();
+            }
+            return null;
         }
 
         @Override
