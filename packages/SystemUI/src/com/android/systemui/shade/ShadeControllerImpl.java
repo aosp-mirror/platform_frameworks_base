@@ -114,6 +114,11 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
+    public boolean isShadeEnabled() {
+        return true;
+    }
+
+    @Override
     public void instantExpandShade() {
         // Make our window larger and the panel expanded.
         makeExpandedVisible(true /* force */);

@@ -40,10 +40,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-
-import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,8 +67,6 @@ public class SystemActionsTest extends SysuiTestCase {
     @Mock
     private ShadeViewController mShadeViewController;
     @Mock
-    private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-    @Mock
     private Optional<Recents> mRecentsOptional;
     @Mock
     private TelecomManager mTelecomManager;
@@ -93,7 +88,6 @@ public class SystemActionsTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mShadeController,
                 () -> mShadeViewController,
-                mCentralSurfacesOptionalLazy,
                 mRecentsOptional,
                 mDisplayTracker);
     }

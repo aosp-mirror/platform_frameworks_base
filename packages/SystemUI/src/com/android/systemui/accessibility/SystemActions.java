@@ -56,7 +56,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
@@ -186,7 +185,6 @@ public class SystemActions implements CoreStartable {
     private final DisplayTracker mDisplayTracker;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeController mShadeController;
@@ -201,7 +199,6 @@ public class SystemActions implements CoreStartable {
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
             Lazy<ShadeViewController> shadeViewController,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional,
             DisplayTracker displayTracker) {
         mContext = context;
@@ -222,7 +219,6 @@ public class SystemActions implements CoreStartable {
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
                         panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override
@@ -310,8 +306,8 @@ public class SystemActions implements CoreStartable {
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
         mA11yManager.registerSystemAction(actionRecents, SYSTEM_ACTION_ID_RECENTS);
-        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            // These two actions require the CentralSurfaces instance.
+        if (mShadeController.isShadeEnabled()) {
+            // These two actions require the shade to be enabled.
             mA11yManager.registerSystemAction(actionNotifications, SYSTEM_ACTION_ID_NOTIFICATIONS);
             mA11yManager.registerSystemAction(actionQuickSettings, SYSTEM_ACTION_ID_QUICK_SETTINGS);
         }
