@@ -377,6 +377,7 @@ public class ViewConfiguration {
     private final int mSmartSelectionInitializedTimeout;
     private final int mSmartSelectionInitializingTimeout;
     private final boolean mPreferKeepClearForFocusEnabled;
+    private final boolean mViewBasedRotaryEncoderScrollHapticsEnabledConfig;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -401,6 +402,7 @@ public class ViewConfiguration {
         mMaximumRotaryEncoderFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mRotaryEncoderHapticScrollFeedbackEnabled = false;
         mRotaryEncoderHapticScrollFeedbackTickIntervalPixels = NO_HAPTIC_SCROLL_TICK_INTERVAL;
+        mViewBasedRotaryEncoderScrollHapticsEnabledConfig = false;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
         mHandwritingSlop = HANDWRITING_SLOP;
@@ -577,6 +579,9 @@ public class ViewConfiguration {
                 com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
         mPreferKeepClearForFocusEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_preferKeepClearForFocus);
+        mViewBasedRotaryEncoderScrollHapticsEnabledConfig =
+                res.getBoolean(
+                        com.android.internal.R.bool.config_viewBasedRotaryEncoderHapticsEnabled);
     }
 
     /**
@@ -592,8 +597,7 @@ public class ViewConfiguration {
     public static ViewConfiguration get(@NonNull @UiContext Context context) {
         StrictMode.assertConfigurationContext(context, "ViewConfiguration");
 
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        final int density = (int) (100.0f * metrics.density);
+        final int density = getDisplayDensity(context);
 
         ViewConfiguration configuration = sConfigurations.get(density);
         if (configuration == null) {
@@ -614,6 +618,16 @@ public class ViewConfiguration {
     @VisibleForTesting
     public static void resetCacheForTesting() {
         sConfigurations.clear();
+    }
+
+    /**
+     * Sets the ViewConfiguration cached instanc for a given Context for testing.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static void setInstanceForTesting(Context context, ViewConfiguration instance) {
+        sConfigurations.put(getDisplayDensity(context), instance);
     }
 
     /**
@@ -1325,6 +1339,20 @@ public class ViewConfiguration {
         return NO_HAPTIC_SCROLL_TICK_INTERVAL;
     }
 
+    /**
+     * Checks if the View-based haptic scroll feedback implementation is enabled for
+     * {@link InputDevice#SOURCE_ROTARY_ENCODER}s.
+     *
+     * <p>If this method returns {@code true}, the {@link HapticScrollFeedbackProvider} will be
+     * muted for rotary encoders in favor of View's scroll haptics implementation.
+     *
+     * @hide
+     */
+    public boolean isViewBasedRotaryEncoderHapticScrollFeedbackEnabled() {
+        return mViewBasedRotaryEncoderScrollHapticsEnabledConfig
+                && Flags.useViewBasedRotaryEncoderScrollHaptics();
+    }
+
     private static boolean isInputDeviceInfoValid(int id, int axis, int source) {
         InputDevice device = InputManagerGlobal.getInstance().getInputDevice(id);
         return device != null && device.getMotionRange(axis, source) != null;
@@ -1433,5 +1461,10 @@ public class ViewConfiguration {
     @TestApi
     public static int getHoverTooltipHideShortTimeout() {
         return HOVER_TOOLTIP_HIDE_SHORT_TIMEOUT;
+    }
+
+    private static final int getDisplayDensity(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return (int) (100.0f * metrics.density);
     }
 }
