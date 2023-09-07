@@ -241,6 +241,7 @@ import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 import static android.provider.Telephony.Carriers.INVALID_APN_ID;
 import static android.security.keystore.AttestationUtils.USE_INDIVIDUAL_ATTESTATION;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -11279,25 +11280,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void dumpPerUserData(IndentingPrintWriter pw) {
+    private void dumpPersonalAppInfoForSystemUserNoLock(IndentingPrintWriter pw) {
+        wtfIfInLock();
+        PersonalAppsSuspensionHelper.forUser(mContext, UserHandle.USER_SYSTEM).dump(pw);
+    }
+
+    private void dumpPerUserPolicyData(IndentingPrintWriter pw) {
         int userCount = mUserData.size();
         for (int i = 0; i < userCount; i++) {
             int userId = mUserData.keyAt(i);
             DevicePolicyData policy = getUserData(userId);
             policy.dump(pw);
             pw.println();
-
-            if (userId == UserHandle.USER_SYSTEM) {
-                pw.increaseIndent();
-                PersonalAppsSuspensionHelper.forUser(mContext, userId).dump(pw);
-                pw.decreaseIndent();
-                pw.println();
-            } else {
-                // pm.getUnsuspendablePackages() will fail if it's called for a different user;
-                // as this dump is mostly useful for system user anyways, we can just ignore the
-                // others (rather than changing the permission check in the PM method)
-                Slogf.d(LOG_TAG, "skipping PersonalAppsSuspensionHelper.dump() for user " + userId);
-            }
         }
     }
 
@@ -11315,7 +11309,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 pw.println();
                 mDeviceAdminServiceController.dump(pw);
                 pw.println();
-                dumpPerUserData(pw);
+                dumpPerUserPolicyData(pw);
                 pw.println();
                 mConstants.dump(pw);
                 pw.println();
@@ -11342,6 +11336,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mStateCache.dump(pw);
                 pw.println();
             }
+            dumpPersonalAppInfoForSystemUserNoLock(pw);
 
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);

@@ -16,15 +16,20 @@
 
 package com.android.inputmethodservice;
 
+import static android.view.WindowInsets.Type.captionBar;
+
 import static com.android.compatibility.common.util.SystemUtil.eventually;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.test.uiautomator.By;
@@ -32,6 +37,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+import android.view.WindowManagerGlobal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
@@ -590,6 +596,20 @@ public class InputMethodServiceTest {
         verifyFullscreenMode(() -> setOrientation(2),
                 false /* expected */,
                 false /* orientationPortrait */);
+    }
+
+    /**
+     * This checks that when the system navigation bar is not created (e.g. emulator),
+     * then the IME caption bar is also not created.
+     */
+    @Test
+    public void testNoNavigationBar_thenImeNoCaptionBar() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeFalse("Must not have a navigation bar", hasNavigationBar);
+
+        assertEquals(Insets.NONE, mInputMethodService.getWindow().getWindow().getDecorView()
+                .getRootWindowInsets().getInsetsIgnoringVisibility(captionBar()));
     }
 
     private void verifyInputViewStatus(
