@@ -37,12 +37,8 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
-import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.window.TransitionInfo.FLAGS_IS_NON_APP_WINDOW;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_WORK_THUMBNAIL;
@@ -338,10 +334,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         boolean isDisplayRotationAnimationStarted = false;
         final boolean isDreamTransition = isDreamTransition(info);
         final boolean isOnlyTranslucent = isOnlyTranslucent(info);
-        final boolean isActivityReplace = checkActivityReplacement(info, startTransaction);
-        // Some patterns (eg. activity "replacement") require us to re-interpret the type
-        @WindowManager.TransitionType final int transitType =
-                isActivityReplace ? TRANSIT_OPEN : info.getType();
 
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
@@ -438,8 +430,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(transitType, info, change, wallpaperTransit,
-                    isDreamTransition);
+            Animation a = loadAnimation(info, change, wallpaperTransit, isDreamTransition);
             if (a != null) {
                 if (isTask) {
                     final boolean isTranslucent = (change.getFlags() & FLAG_TRANSLUCENT) != 0;
@@ -613,53 +604,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return (translucentOpen + translucentClose) > 0;
     }
 
-    /**
-     * Checks for an edge-case where an activity calls finish() followed immediately by
-     * startActivity() to "replace" itself. If in this case, it will swap the layer of the
-     * close/open activities and return `true`. This way, we pretend like we are just "opening"
-     * the new activity.
-     */
-    private static boolean checkActivityReplacement(@NonNull TransitionInfo info,
-            SurfaceControl.Transaction t) {
-        if (info.getType() != TRANSIT_CLOSE) {
-            return false;
-        }
-        int closing = -1;
-        int opening = -1;
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if ((change.getTaskInfo() != null || change.hasFlags(FLAG_IS_DISPLAY))
-                    && !TransitionUtil.isOrderOnly(change)) {
-                // This isn't an activity-level transition.
-                return false;
-            }
-            if (change.getTaskInfo() != null
-                    && change.hasFlags(FLAG_IS_DISPLAY | FLAGS_IS_NON_APP_WINDOW)) {
-                // Ignore non-activity containers.
-                continue;
-            }
-            if (TransitionUtil.isClosingType(change.getMode())) {
-                closing = i;
-            } else if (change.getMode() == TRANSIT_OPEN) {
-                // OPEN implies that it is a new launch. If going "back" the opening app will be
-                // TO_FRONT
-                opening = i;
-            } else if (change.getMode() == TRANSIT_TO_FRONT) {
-                // Normal "going back", so not a replacement.
-                return false;
-            }
-        }
-        if (closing < 0 || opening < 0) {
-            return false;
-        }
-        // Swap the opening and closing z-orders since we're swapping the transit type.
-        final int numChanges = info.getChanges().size();
-        final int zSplitLine = numChanges + 1;
-        t.setLayer(info.getChanges().get(opening).getLeash(), zSplitLine + numChanges - opening);
-        t.setLayer(info.getChanges().get(closing).getLeash(), zSplitLine - closing);
-        return true;
-    }
-
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
@@ -712,11 +656,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Nullable
-    private Animation loadAnimation(int type, @NonNull TransitionInfo info,
+    private Animation loadAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, int wallpaperTransit,
             boolean isDreamTransition) {
         Animation a;
 
+        final int type = info.getType();
         final int flags = info.getFlags();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
@@ -771,8 +716,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // If there's a scene-transition, then jump-cut.
             return null;
         } else {
-            a = loadAttributeAnimation(type, info, change, wallpaperTransit, mTransitionAnimation,
-                    isDreamTransition);
+            a = loadAttributeAnimation(
+                    info, change, wallpaperTransit, mTransitionAnimation, isDreamTransition);
         }
 
         if (a != null) {

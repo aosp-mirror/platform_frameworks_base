@@ -516,7 +516,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationShadeWindowViewControllerLazy,
                 mNotificationShelfController,
                 mStackScrollerController,
-                mNotificationPresenter,
+                () -> mNotificationPresenter,
                 new NotificationExpansionRepository(),
                 mDozeParameters,
                 mScrimController,
