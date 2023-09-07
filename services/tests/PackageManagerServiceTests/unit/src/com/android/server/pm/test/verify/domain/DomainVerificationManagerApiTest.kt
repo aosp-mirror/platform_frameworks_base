@@ -44,6 +44,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.doReturn
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.assertFailsWith
@@ -555,12 +556,12 @@ class DomainVerificationManagerApiTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getUserStateOrDefault(0)) { pkgUserState0() }
         whenever(getUserStateOrDefault(1)) { pkgUserState1() }
-        whenever(userStates) {
+        doReturn(
             SparseArray<PackageUserStateInternal>().apply {
                 this[0] = pkgUserState0()
                 this[1] = pkgUserState1()
             }
-        }
+        ).whenever(this).userStates
         whenever(isSystem) { false }
     }
 

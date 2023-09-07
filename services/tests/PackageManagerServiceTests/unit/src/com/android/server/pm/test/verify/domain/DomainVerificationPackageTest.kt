@@ -1084,12 +1084,12 @@ class DomainVerificationPackageTest {
         whenever(this.domainSetId) { domainSetId }
         whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
         whenever(getUserStateOrDefault(10)) { PackageUserStateInternal.DEFAULT }
-        whenever(userStates) {
+        doReturn(
             SparseArray<PackageUserStateInternal>().apply {
                 this[0] = PackageUserStateInternal.DEFAULT
                 this[1] = PackageUserStateInternal.DEFAULT
             }
-        }
+        ).whenever(this).userStates
         whenever(isSystem) { isSystemApp }
 
         val mockSigningDetails = SigningDetails(arrayOf(spy(Signature(signature)) {
