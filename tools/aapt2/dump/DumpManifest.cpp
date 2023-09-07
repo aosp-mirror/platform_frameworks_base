@@ -116,9 +116,7 @@ class CommonFeatureGroup;
 
 class ManifestExtractor {
  public:
-
-  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
-      : apk_(apk), options_(options) { }
+  explicit ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options);
 
   class Element {
    public:
@@ -387,7 +385,7 @@ class ManifestExtractor {
   DumpManifestOptions& options_;
 
  private:
-  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_ = util::make_unique<CommonFeatureGroup>();
+  std::unique_ptr<CommonFeatureGroup> commonFeatureGroup_;
   std::map<std::string, ConfigDescription> locales_;
   std::map<uint16_t, ConfigDescription> densities_;
   std::vector<Element*> parent_stack_;
@@ -1968,6 +1966,12 @@ static void Print(ManifestExtractor::Element* el, text::Printer* printer) {
   for (auto &child : el->children()) {
     Print(child.get(), printer);
   }
+}
+
+// Define this constructor after the CommonFeatureGroup class definition to avoid errors with using
+// std::unique_ptr on an incomplete type.
+ManifestExtractor::ManifestExtractor(LoadedApk* apk, DumpManifestOptions& options)
+    : apk_(apk), options_(options), commonFeatureGroup_(util::make_unique<CommonFeatureGroup>()) {
 }
 
 bool ManifestExtractor::Dump(text::Printer* printer, IDiagnostics* diag) {
