@@ -40,6 +40,24 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"ስልኩን <xliff:g id="NUMBER">%d</xliff:g> ጊዜ ትክክል ባልሆነ መልኩ ለመክፈት ሞክረዋል። የስራ መገለጫው ይወገዳል፣ ይህም ሁሉንም የመገለጫ ውሂብ ይሰርዛል።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%2$d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ጡባዊዎን እንዲከፍቱ ይጠየቃሉ።\n\n ከ<xliff:g id="NUMBER_2">%3$d</xliff:g> ከሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%2$d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።\n\nእባክዎ ከ<xliff:g id="NUMBER_2">%3$d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"መሣሪያ በሙቀት ምክንያት ጠፍቷል"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"ጡባዊ በሙቀት ምክንያት ጠፍቷል"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"የእርስዎ ስልክ በመደበኛነት በማሄድ ላይ ነው።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"የእርስዎ ጡባዊ በመደበኛነት በማሄድ ላይ ነው።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"የእርስዎ ጡባዊ በመደበኛነት በማሄድ ላይ ነው።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"የእርስዎ ስልክ በጣም ግሎ ነበር ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኛነት በማሄድ ላይ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ ስልክ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪድዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትልልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"የእርስዎ መሣሪያ በጣም ግሎ ነበር ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ መሣሪያ አሁን በመደበኛነት በማሄድ ላይ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ መሣሪያ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪድዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትልልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• መሣሪያዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"የእርስዎ ጡባዊ በጣም ግሎ ነበር ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ጡባዊ አሁን በመደበኛነት በማሄድ ላይ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ ጡባዊ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪድዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትልልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ጡባዊዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"የስልክ ሙቀት እየጨመረ ነው"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"የመሣሪያ ሙቀት እየጨመረ ነው"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"የጡባዊ ሙቀት እየጨመረ ነው"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"ስልክ እየቀዘቀዘ ሳለ አንዳንድ ባህሪያት ይገደባሉ።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"መሣሪያ እየቀዘቀዘ ሳለ አንዳንድ ባህሪያት ይገደባሉ።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"ጡባዊ እየቀዘቀዘ ሳለ አንዳንድ ባህሪያት ይገደባሉ።\nለተጨማሪ መረጃ መታ ያድርጉ"</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"የእርስዎ ስልክ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ስልክዎን መጠቀም ይችላሉ ነገር ግን ቀትፋፋ ሆኖ ሊያሄድ ይችላል።\n\nአንዴ ስልክዎ ከቀዘቀዘ በኋላ በመደበኛነት ያሄዳል።"</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"መሣሪያዎ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም መሣሪያዎን መጠቀም ይችላሉ ነገር ግን ቀርፋፋ ሆኖ ሊያሄድ ይችላል።\n\nአንዴ መሣሪያዎ ከቀዘቀዘ በኋላ በመደበኛነት ያሄዳል"</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"ጡባዊዎ በራስ-ሰር ለመቀዝቀዝ ይሞክራል። አሁንም ጡባዊዎን መጠቀም ይችላሉ ነገር ግን ቀርፋፋ ሆኖ ሊያሄድ ይችላል።\n\nአንዴ ጡባዊዎ ከቀዘቀዘ በኋላ በመደበኛነት ያሄዳል።"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"የጣት አሻራ ዳሳሹ የማብሪያ/ማጥፊያ ቁልፉ ላይ ነው። በጡባዊው ጫፍ ላይ ከፍ ካለው የድምፅ አዝራር ቀጥሎ ያለው ጠፍጣፋ አዝራር ነው።"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"የጣት አሻራ ዳሳሹ የማብሪያ/ማጥፊያ ቁልፉ ላይ ነው። በመሣሪያው ጫፍ ላይ ከፍ ካለው የድምፅ አዝራር ቀጥሎ ያለው ጠፍጣፋ አዝራር ነው።"</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"የጣት አሻራ ዳሳሹ የማብሪያ/ማጥፊያ ቁልፉ ላይ ነው። በስልኩ ጫፍ ላይ ከፍ ካለው የድምፅ አዝራር ቀጥሎ ያለው ጠፍጣፋ አዝራር ነው።"</string>
