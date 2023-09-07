@@ -25,28 +25,31 @@ interface KeyguardBlueprint {
     val sections: Set<KeyguardSection>
 
     /**
-     * Add views to new blueprint.
+     * Removes views of old blueprint and add views of new blueprint.
      *
-     * Finds sections that did not exist in the previous blueprint and add the corresponding views.
+     * Finds sections that no longer exists in the next blueprint and removes those views. Finds
+     * sections that did not exist in the previous blueprint and add the corresponding views.
      *
-     * @param previousBluePrint: KeyguardBlueprint the blueprint we are transitioning from.
+     * @param previousBlueprint: KeyguardBlueprint the blueprint we are transitioning from.
+     * @param constraintLayout: The parent view.
+     * @param bindData: Whether to bind the data or not.
      */
-    fun addViews(previousBlueprint: KeyguardBlueprint?, constraintLayout: ConstraintLayout) {
+    fun replaceViews(
+        previousBlueprint: KeyguardBlueprint?,
+        constraintLayout: ConstraintLayout,
+        bindData: Boolean = true
+    ) {
+        previousBlueprint?.let { previousBlueprint ->
+            previousBlueprint.sections.subtract(sections).forEach {
+                it.removeViews(constraintLayout)
+            }
+        }
         sections.subtract((previousBlueprint?.sections ?: setOf()).toSet()).forEach {
             it.addViews(constraintLayout)
-            it.bindData(constraintLayout)
+            if (bindData) {
+                it.bindData(constraintLayout)
+            }
         }
-    }
-
-    /**
-     * Remove views of old blueprint.
-     *
-     * Finds sections that are no longer in the next blueprint and remove the corresponding views.
-     *
-     * @param nextBluePrint: KeyguardBlueprint the blueprint we will transition to.
-     */
-    fun removeViews(nextBlueprint: KeyguardBlueprint, constraintLayout: ConstraintLayout) {
-        sections.subtract(nextBlueprint.sections).forEach { it.removeViews(constraintLayout) }
     }
 
     fun applyConstraints(constraintSet: ConstraintSet) {

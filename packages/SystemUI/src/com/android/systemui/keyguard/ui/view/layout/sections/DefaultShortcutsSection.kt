@@ -171,15 +171,4 @@ constructor(
             }
         constraintLayout.addView(view)
     }
-
-    /** Method to add shortcuts without applying any data binding. */
-    fun addShortcutViews(constraintLayout: ConstraintLayout) {
-        addLeftShortcut(constraintLayout)
-        addRightShortcut(constraintLayout)
-        ConstraintSet().apply {
-            clone(constraintLayout)
-            applyConstraints(this)
-            applyTo(constraintLayout)
-        }
-    }
 }

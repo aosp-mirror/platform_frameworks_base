@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.os.Trace
-import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
@@ -27,18 +26,33 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import kotlinx.coroutines.launch
 
-class KeyguardBlueprintViewBinder {
+/**
+ * Binds the existing blueprint to the constraint layout that previews keyguard.
+ *
+ * This view binder should only inflate and add relevant views and apply the constraints. Actual
+ * data binding should be done in {@link KeyguardPreviewRenderer}
+ */
+class PreviewKeyguardBlueprintViewBinder {
     companion object {
-        private const val TAG = "KeyguardBlueprintViewBinder"
 
-        fun bind(constraintLayout: ConstraintLayout, viewModel: KeyguardBlueprintViewModel) {
+        /**
+         * Binds the existing blueprint to the constraint layout that previews keyguard.
+         *
+         * @param constraintLayout The root view to bind to
+         * @param viewModel The instance of the view model that contains flows we collect on.
+         * @param finishedAddViewCallback Called when we have finished inflating the views.
+         */
+        fun bind(
+            constraintLayout: ConstraintLayout,
+            viewModel: KeyguardBlueprintViewModel,
+            finishedAddViewCallback: () -> Unit
+        ) {
             constraintLayout.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     launch {
                         viewModel.blueprint.collect { blueprint ->
                             val prevBluePrint = viewModel.currentBluePrint
-                            Trace.beginSection("KeyguardBlueprint#applyBlueprint")
-                            Log.d(TAG, "applying blueprint: $blueprint")
+                            Trace.beginSection("PreviewKeyguardBlueprint#applyBlueprint")
 
                             ConstraintSet().apply {
                                 clone(constraintLayout)
@@ -47,11 +61,16 @@ class KeyguardBlueprintViewBinder {
                                 blueprint.applyConstraints(this)
                                 // Add and remove views of sections that are not contained by the
                                 // other.
-                                blueprint?.replaceViews(prevBluePrint, constraintLayout)
+                                blueprint.replaceViews(
+                                    prevBluePrint,
+                                    constraintLayout,
+                                    bindData = false
+                                )
                                 applyTo(constraintLayout)
                             }
 
                             viewModel.currentBluePrint = blueprint
+                            finishedAddViewCallback.invoke()
                             Trace.endSection()
                         }
                     }

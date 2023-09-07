@@ -33,7 +33,7 @@ class DefaultCommunalBlueprintTest : SysuiTestCase() {
     @Test
     fun addView() {
         val constraintLayout = ConstraintLayout(context, null)
-        blueprint.addViews(null, constraintLayout)
+        blueprint.replaceViews(null, constraintLayout)
         verify(widgetSection).addViews(constraintLayout)
     }
 
