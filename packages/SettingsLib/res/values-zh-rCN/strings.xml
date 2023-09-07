@@ -561,7 +561,7 @@
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
     <string name="help_label" msgid="3528360748637781274">"帮助和反馈"</string>
-    <string name="storage_category" msgid="2287342585424631813">"存储"</string>
+    <string name="storage_category" msgid="2287342585424631813">"存储空间"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"共享数据"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"查看和修改共享数据"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"此用户没有共享数据。"</string>

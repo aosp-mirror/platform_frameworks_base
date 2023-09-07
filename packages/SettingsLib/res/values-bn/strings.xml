@@ -174,7 +174,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"কিছু ডিফল্ট সেট করা রয়েছে"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"কোনও ডিফল্ট সেট করা নেই"</string>
     <string name="tts_settings" msgid="8130616705989351312">"পাঠ্য থেকে ভাষ্য আউটপুট সেটিংস"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"টেক্সট-টু-স্পিচ"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"টেক্সট-টু-স্পিচ আউটপুট"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"কথা বলার হার"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"পিচ"</string>
@@ -675,7 +675,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ফিজিক্যাল কীবোর্ড"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"কীবোর্ড লেআউট বেছে নিন"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ডিফল্ট"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্রিন চালু করুন"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"স্ক্রিন চালু করা"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"স্ক্রিন চালু করার অনুমতি দিন"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"অ্যাপকে স্ক্রিন চালু করার অনুমতি দিন। অনুমতি দেওয়া হলে, অ্যাপ আপনার এক্সপ্লিসিট ইনটেন্ট ছাড়াই যেকোনও সময় স্ক্রিন চালু করতে পারবে।"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
