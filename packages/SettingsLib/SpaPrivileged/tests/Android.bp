@@ -29,7 +29,7 @@ android_test {
         ":SpaPrivilegedLib_srcs",
         "src/**/*.kt",
     ],
-
+    use_resource_processor: true,
     static_libs: [
         "SpaLibTestUtils",
         "androidx.test.ext.junit",
