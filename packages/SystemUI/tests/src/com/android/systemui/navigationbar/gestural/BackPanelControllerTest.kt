@@ -67,7 +67,7 @@ class BackPanelControllerTest : SysuiTestCase() {
                 context,
                 windowManager,
                 ViewConfiguration.get(context),
-                Handler.createAsync(Looper.myLooper()),
+                Handler.createAsync(checkNotNull(Looper.myLooper())),
                 vibratorHelper,
                 configurationController,
                 latencyTracker

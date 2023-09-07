@@ -66,9 +66,9 @@ class ContrastDialog(
 
         contrastButtons =
             mapOf(
-                CONTRAST_LEVEL_STANDARD to findViewById(R.id.contrast_button_standard),
-                CONTRAST_LEVEL_MEDIUM to findViewById(R.id.contrast_button_medium),
-                CONTRAST_LEVEL_HIGH to findViewById(R.id.contrast_button_high)
+                CONTRAST_LEVEL_STANDARD to requireViewById(R.id.contrast_button_standard),
+                CONTRAST_LEVEL_MEDIUM to requireViewById(R.id.contrast_button_medium),
+                CONTRAST_LEVEL_HIGH to requireViewById(R.id.contrast_button_high)
             )
 
         contrastButtons.forEach { (contrastLevel, contrastButton) ->

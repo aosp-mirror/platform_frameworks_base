@@ -48,6 +48,7 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -351,12 +352,12 @@ class DomainVerificationEnforcerTest {
                 whenever(this.domainSetId) { domainSetId }
                 whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
                 whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
-                whenever(userStates) {
+                doReturn(
                     SparseArray<PackageUserStateInternal>().apply {
                         this[0] = PackageUserStateInternal.DEFAULT
                         this[1] = PackageUserStateInternal.DEFAULT
                     }
-                }
+                ).whenever(this).userStates
                 whenever(isSystem) { false }
                 whenever(signingDetails) { SigningDetails.UNKNOWN }
             }

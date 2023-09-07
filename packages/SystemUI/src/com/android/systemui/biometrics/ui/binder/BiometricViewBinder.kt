@@ -88,27 +88,27 @@ object BiometricViewBinder {
         val textColorHint =
             view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
 
-        val titleView = view.findViewById<TextView>(R.id.title)
-        val subtitleView = view.findViewById<TextView>(R.id.subtitle)
-        val descriptionView = view.findViewById<TextView>(R.id.description)
+        val titleView = view.requireViewById<TextView>(R.id.title)
+        val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
+        val descriptionView = view.requireViewById<TextView>(R.id.description)
 
         // set selected for marquee
         titleView.isSelected = true
         subtitleView.isSelected = true
         descriptionView.movementMethod = ScrollingMovementMethod()
 
-        val iconViewOverlay = view.findViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
-        val iconView = view.findViewById<LottieAnimationView>(R.id.biometric_icon)
-        val indicatorMessageView = view.findViewById<TextView>(R.id.indicator)
+        val iconViewOverlay = view.requireViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
+        val iconView = view.requireViewById<LottieAnimationView>(R.id.biometric_icon)
+        val indicatorMessageView = view.requireViewById<TextView>(R.id.indicator)
 
         // Negative-side (left) buttons
-        val negativeButton = view.findViewById<Button>(R.id.button_negative)
-        val cancelButton = view.findViewById<Button>(R.id.button_cancel)
-        val credentialFallbackButton = view.findViewById<Button>(R.id.button_use_credential)
+        val negativeButton = view.requireViewById<Button>(R.id.button_negative)
+        val cancelButton = view.requireViewById<Button>(R.id.button_cancel)
+        val credentialFallbackButton = view.requireViewById<Button>(R.id.button_use_credential)
 
         // Positive-side (right) buttons
-        val confirmationButton = view.findViewById<Button>(R.id.button_confirm)
-        val retryButton = view.findViewById<Button>(R.id.button_try_again)
+        val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
+        val retryButton = view.requireViewById<Button>(R.id.button_try_again)
 
         // TODO(b/251476085): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =

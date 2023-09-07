@@ -315,9 +315,6 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 )
                 .isFalse()
 
-            whenever(faceManager.sensorPropertiesInternal).thenReturn(null)
-            assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
-
             whenever(faceManager.sensorPropertiesInternal).thenReturn(listOf())
             assertThat(createDeviceEntryFaceAuthRepositoryImpl().isDetectionSupported).isFalse()
 
