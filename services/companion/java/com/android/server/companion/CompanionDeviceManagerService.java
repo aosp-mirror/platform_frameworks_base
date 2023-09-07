@@ -74,6 +74,7 @@ import android.companion.IOnAssociationsChangedListener;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.companion.utils.FeatureUtils;
 import android.content.ComponentName;
 import android.content.Context;
@@ -873,6 +874,24 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void enablePermissionsSync(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            mSystemDataTransferProcessor.enablePermissionsSync(associationId);
+        }
+
+        @Override
+        public void disablePermissionsSync(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            mSystemDataTransferProcessor.disablePermissionsSync(associationId);
+        }
+
+        @Override
+        public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+            getAssociationWithCallerChecks(associationId);
+            return mSystemDataTransferProcessor.getPermissionSyncRequest(associationId);
+        }
+
+        @Override
         @EnforcePermission(MANAGE_COMPANION_DEVICES)
         public void enableSecureTransport(boolean enabled) {
             enableSecureTransport_enforcePermission();
@@ -1041,7 +1060,7 @@ public class CompanionDeviceManagerService extends SystemService {
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
             new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
-                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferRequestStore,
+                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferProcessor,
                     mAssociationRequestsProcessor)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
