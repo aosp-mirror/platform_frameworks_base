@@ -36,6 +36,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -177,7 +178,7 @@ public final class CompanionDeviceManager {
     public @interface DataSyncTypes {}
 
     /**
-     * Used by {@link #enableSystemDataSync(int, int)}}.
+     * Used by {@link #enableSystemDataSyncForTypes(int, int)}}.
      * Sync call metadata like muting, ending and silencing a call.
      *
      */
@@ -523,6 +524,39 @@ public final class CompanionDeviceManager {
 
         try {
             mService.disableSystemDataSync(associationId, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void enablePermissionsSync(int associationId) {
+        try {
+            mService.enablePermissionsSync(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void disablePermissionsSync(int associationId) {
+        try {
+            mService.disablePermissionsSync(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public PermissionSyncRequest getPermissionSyncRequest(int associationId) {
+        try {
+            return mService.getPermissionSyncRequest(associationId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
