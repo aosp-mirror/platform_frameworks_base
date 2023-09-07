@@ -103,7 +103,7 @@ object Flags {
 
     // TODO(b/268005230): Tracking Bug
     @JvmField
-    val SENSITIVE_REVEAL_ANIM = unreleasedFlag("sensitive_reveal_anim", teamfood = true)
+    val SENSITIVE_REVEAL_ANIM = releasedFlag("sensitive_reveal_anim")
 
     // TODO(b/280783617): Tracking Bug
     @Keep
