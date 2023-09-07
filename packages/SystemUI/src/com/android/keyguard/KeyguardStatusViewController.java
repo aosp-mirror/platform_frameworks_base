@@ -444,7 +444,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         @Nullable
         @Override
-        public Animator createAnimator(ViewGroup sceneRoot, @Nullable TransitionValues startValues,
+        public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+                @Nullable TransitionValues startValues,
                 @Nullable TransitionValues endValues) {
             if (startValues == null || endValues == null) {
                 return null;
