@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源ボタン メニュー"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ロック画面"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"高熱で電源が OFF になりました"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"お使いのスマートフォンは現在、正常に動作しています。\nタップして詳細を表示"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"スマートフォンが熱すぎたため電源が OFF になりました。現在は正常に動作しています。\n\nスマートフォンは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"取り扱いに関する手順をご覧ください"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"スマートフォンの温度が上昇中"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"スマートフォンのクールダウン中は一部の機能が制限されます。\nタップして詳細を表示"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"デバイスを電源から外します"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電ポートの近くにデバイスを置くと、本体が熱くなります。デバイスが充電器や USB アクセサリに接続されている場合は外してください。ケーブルが熱くなっていることもあるので注意してください。"</string>

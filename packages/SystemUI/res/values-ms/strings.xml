@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu kuasa"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> daripada <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kunci skrin"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon dimatikan kerana panas"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon anda kini berjalan seperti biasa.\nKetik untuk mendapatkan maklumat lanjut"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon anda terlalu panas, jadi telefon itu telah dimatikan untuk menyejuk. Sekarang, telefon anda berjalan seperti biasa.\n\nTelefon anda mungkin menjadi terlalu panas jika anda:\n	• Menggunakan apl intensif sumber (seperti permainan, video atau apl navigasi)\n	• Memuat turun atau memuat naik fail besar\n	• Menggunakan telefon anda dalam suhu tinggi"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah penjagaan"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon semakin panas"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Sesetengah ciri adalah terhad semasa telefon menyejuk.\nKetik untuk mendapatkan maklumat lanjut"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon anda akan cuba menyejuk secara automatik. Anda masih dapat menggunakan telefon itu tetapi telefon tersebut mungkin berjalan lebih perlahan.\n\nSetelah telefon anda sejuk, telefon itu akan berjalan seperti biasa."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah penjagaan"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cabut palam peranti anda"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Peranti anda menjadi panas berdekatan port pengecasan. Jika peranti anda disambungkan ke pengecas atau aksesori USB, cabut palam peranti dan berhati-hati kerana kabel juga mungkin panas."</string>
@@ -896,7 +890,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kawalan ditambah.}other{# kawalan ditambah.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dialih keluar"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g>boleh memilih kawalan dan kandungan yang dipaparkan di sini."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> boleh memilih kawalan dan kandungan yang dipaparkan di sini."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Alih keluar kawalan untuk <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Digemari"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Digemari, kedudukan <xliff:g id="NUMBER">%d</xliff:g>"</string>

@@ -168,12 +168,12 @@
     <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Konfigurer"</string>
     <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ikke nu"</string>
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dette er påkrævet for at forbedre sikkerheden og ydeevnen"</string>
-    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer oplåsning med fingeraftryk igen"</string>
-    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer oplåsning med fingeraftryk"</string>
-    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere oplåsning med fingeraftryk igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere oplåsning med fingeraftryk igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Oplåsning med fingeraftryk kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Konfigurer fingeroplåsning igen"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Konfigurer fingeroplåsning"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Hvis du vil konfigurere fingeroplåsning igen, bliver dine nuværende fingeraftryksbilleder og -modeller slettet.\n\nNår de er slettet, skal du konfigurere fingeroplåsning igen for at bruge dit fingeraftryk til at låse din telefon op eller verificere din identitet."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Fingeroplåsning kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Konfigurer ansigtsoplåsning igen"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ansigtsoplåsning"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Konfigurer ansigtsoplåsning"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu for afbryderknappen"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskærm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonen slukkede pga. varme"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Din telefon kører nu normalt.\nTryk for at få flere oplysninger"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Din telefon var blevet for varm, så den slukkede for at køle ned. Din telefon kører nu igen normalt. \n\nDin telefon kan blive for varm, hvis du:\n	• Bruger ressourcekrævende apps (f.eks. spil, video eller navigation)\n	• Downloader eller uploader store filer\n	• Bruger din telefon i varme omgivelser"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefonen er ved at blive varm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nogle funktioner er begrænsede, mens telefonen køler ned.\nTryk for at få flere oplysninger"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Træk stikket ud af din enhed"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Din enhed er ved at blive varm i nærheden af opladningsporten. Hvis enheden er tilsluttet en oplader eller USB-enhed, skal du trække stikket ud. Vær opmærksom på, at stikket også kan være varmt."</string>

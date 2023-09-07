@@ -99,7 +99,7 @@
     <string name="screenrecord_title" msgid="4257171601439507792">"ဖန်သားပြင်ရိုက်ကူးစက်"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
-    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"စတင် ရိုက်သံဖမ်းမလား။"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ရိုက်သံဖမ်းခြင်း စတင်မလား။"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ရုပ်သံဖမ်းနေစဉ် Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"အက်ပ်တစ်ခုကို ရုပ်သံဖမ်းနေစဉ် Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ရုပ်သံ စဖမ်းရန်"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"သင့်ဖုန်းသည် ယခု ပုံမှန်အလုပ်လုပ်နေပါပြီ။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံးခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"ဖုန်း ပူနွေးလာပါပြီ"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"သင့်စက်ကို ပလတ်ဖြုတ်ပါ"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"သင့်စက်သည် အားသွင်းပို့တ်အနီးတွင် ပူနွေးလာသည်။ ၎င်းကို အားသွင်းကိရိယာ (သို့) USB ဆက်စပ်ပစ္စည်းနှင့် ချိတ်ဆက်ထားပါက ပလတ်ဖြုတ်ပါ။ ကြိုးကလည်း ပူနွေးနေနိုင်သဖြင့် ဂရုပြုပါ။"</string>

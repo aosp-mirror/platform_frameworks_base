@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"منوی روشن/خاموش"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"صفحه قفل"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"تلفن به علت گرم شدن خاموش شد"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"اکنون عملکرد تلفنتان به حالت عادی برگشته است.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"تلفنتان خیلی گرم شده بود، بنابراین خاموش شد تا خنک شود. اکنون تلفنتان عملکرد معمولش را دارد.\n\nتلفنتان خیلی گرم می‌شود، اگر:\n	• از برنامه‌های نیازمند پردازش زیاد (مانند بازی، برنامه‌های ویدیویی یا پیمایشی) استفاده کنید\n	• فایل‌های بزرگ بارگیری یا بارگذاری کنید\n	• در دماهای بالا از تلفنتان استفاده کنید"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"دیدن اقدامات محافظتی"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"تلفن درحال گرم شدن است"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"وقتی تلفن درحال خنک شدن است، بعضی از ویژگی‌ها محدود می‌شوند.\nبرای اطلاعات بیشتر ضربه بزنید"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"تلفنتان به‌طور خودکار سعی می‌کند خنک شود. همچنان می‌توانید از تلفنتان استفاده کنید، اما ممکن است کندتر عمل کند.\n\nوقتی تلفن خنک شد، عملکرد عادی‌اش از سرگرفته می‌شود."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"دیدن اقدامات محافظتی"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"دستگاه را جدا کنید"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"‏دستگاهتان کنار درگاه شارژ گرم شده است. اگر دستگاهتان به شارژر یا لوازم جانبی USB متصل است، آن را جدا کنید و مراقب باشید چون ممکن است کابل هم گرم باشد."</string>

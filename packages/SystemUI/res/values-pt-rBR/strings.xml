@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu liga/desliga"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Tela de bloqueio"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"O smartphone foi desligado devido ao aquecimento"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"O smartphone está funcionando normalmente agora.\nToque para saber mais"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O smartphone estava muito quente e foi desligado para resfriar. Agora, ele está sendo executado normalmente.\n\nO smartphone pode ficar quente demais se você:\n	• usar apps que consomem muitos recursos (como apps de jogos, vídeos ou navegação);\n	• fizer o download ou upload de arquivos grandes;\n	• usar o smartphone em temperaturas altas."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver etapas de cuidado"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"O smartphone está esquentando"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alguns recursos ficam limitados enquanto o smartphone é resfriado.\nToque para saber mais"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver etapas de cuidado"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desconecte seu dispositivo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Seu dispositivo está ficando quente perto da porta de carregamento. Desconecte qualquer carregador ou acessório USB que esteja conectado, mas tome cuidado, porque o cabo também pode estar quente."</string>
@@ -896,7 +890,7 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# controle adicionado.}one{# controle adicionado.}many{# de controles adicionados.}other{# controles adicionados.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Adicionar o app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"O app <xliff:g id="APPNAME">%s</xliff:g> pode escolher quais controles e conteúdos aparecem aqui."</string>
     <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Remover controles do app <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado como favorito"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionado como favorito (posição <xliff:g id="NUMBER">%d</xliff:g>)"</string>
@@ -1117,7 +1111,7 @@
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Permitir que o app <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acesse todos os registros do dispositivo?"</string>
-    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir o acesso único"</string>
+    <string name="log_access_confirmation_allow" msgid="752147861593202968">"Permitir acesso único"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Não permitir"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Os registros do dispositivo gravam o que acontece nele. Os apps podem usar esses registros para encontrar e corrigir problemas.\n\nAlguns registros podem conter informações sensíveis, então autorize o acesso a eles apenas para os apps em que você confia. \n\nSe você não permitir que esse app acesse todos os registros do dispositivo, ele ainda vai poder acessar os dele. O fabricante do dispositivo também pode ter acesso a alguns registros ou informações."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saiba mais"</string>

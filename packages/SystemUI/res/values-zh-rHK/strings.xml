@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源選單"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁 (共 <xliff:g id="ID_2">%2$d</xliff:g> 頁)"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"螢幕鎖定"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"手機因過熱而關上"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"你的手機現已正常運作。\n輕按即可瞭解詳情"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"你的手機之前因過熱而關上降溫。手機現已正常運作。\n\n以下情況可能會導致手機過熱：\n	• 使用耗用大量資源的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上載大型檔案\n	• 在高溫環境下使用手機"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看保養步驟"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"手機溫度正在上升"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"手機降溫時，部分功能會受限制。\n輕按即可瞭解詳情"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"手機會自動嘗試降溫。你仍可以使用手機，但手機的運作速度可能較慢。\n\n手機降溫後便會恢復正常。"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看保養步驟"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"拔除裝置"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"充電埠附近的裝置溫度正在上升。如裝置正連接充電器或 USB 配件，請拔除裝置並小心安全，因為電線的溫度可能也偏高。"</string>
