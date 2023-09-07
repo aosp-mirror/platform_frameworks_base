@@ -935,6 +935,9 @@
          without impacting power, performance, and app compatibility (e.g. protected content). -->
     <bool name="config_reduceBrightColorsAvailable">@bool/config_setColorTransformAccelerated</bool>
 
+    <!-- Whether to show Fold lock behavior setting feature in Settings App -->
+    <bool name="config_fold_lock_behavior">false</bool>
+
     <string-array name="config_reduceBrightColorsCoefficientsNonlinear">
         <!-- a-coefficient --> <item>-0.4429953456</item>
         <!-- b-coefficient --> <item>-0.2434077725</item>

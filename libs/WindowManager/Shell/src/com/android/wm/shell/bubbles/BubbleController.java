@@ -1991,13 +1991,20 @@ public class BubbleController implements ConfigurationChangeListener,
      * Description of current bubble state.
      */
     private void dump(PrintWriter pw, String prefix) {
-        pw.println("BubbleController state:");
+        pw.print(prefix); pw.println("BubbleController state:");
+        pw.print(prefix); pw.println("  currentUserId= " + mCurrentUserId);
+        pw.print(prefix); pw.println("  isStatusBarShade= " + mIsStatusBarShade);
+        pw.print(prefix); pw.println("  isShowingAsBubbleBar= " + isShowingAsBubbleBar());
+        pw.println();
+
         mBubbleData.dump(pw);
         pw.println();
+
         if (mStackView != null) {
             mStackView.dump(pw);
         }
         pw.println();
+
         mImpl.mCachedState.dump(pw);
     }
 
@@ -2246,8 +2253,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 pw.println("mIsStackExpanded: " + mIsStackExpanded);
                 pw.println("mSelectedBubbleKey: " + mSelectedBubbleKey);
 
-                pw.print("mSuppressedBubbleKeys: ");
-                pw.println(mSuppressedBubbleKeys.size());
+                pw.println("mSuppressedBubbleKeys: " + mSuppressedBubbleKeys.size());
                 for (String key : mSuppressedBubbleKeys) {
                     pw.println("   suppressing: " + key);
                 }

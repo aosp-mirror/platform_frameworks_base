@@ -21,15 +21,15 @@ import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
- * Standard class to handle class load hook.
+ * Standard class loader hook.
  *
- * We use this to initialize the environment necessary for some classes. (e.g. load native libs.)
+ * Currently, we use this class to load libandroid_runtime (if needed). In the future, we may
+ * load other JNI or do other set up here.
  */
 public class ClassLoadHook {
-    private static PrintStream out = System.out;
+    private static PrintStream sOut = System.out;
 
     /**
      * If true, we won't load `libandroid_runtime`
@@ -59,19 +59,18 @@ public class ClassLoadHook {
 
     /**
      * Called when classes with
-     * {@code @HostSideTestClassLoadHook("com.android.hoststubgen.runtimehelper.ClassLoadHook.onClassLoaded") }
+     * {@code @HostSideTestClassLoadHook(
+     * "com.android.hoststubgen.runtimehelper.LibandroidLoadingHook.onClassLoaded") }
      * are loaded.
      */
     public static void onClassLoaded(Class<?> clazz) {
         System.out.println("Framework class loaded: " + clazz.getCanonicalName());
 
-        if (android.util.Log.class == clazz) {
-            loadFrameworkNativeCode();
-        }
+        loadFrameworkNativeCode();
     }
 
     private static void log(String message) {
-        out.println("ClassLoadHook: " + message);
+        sOut.println("ClassLoadHook: " + message);
     }
 
     private static void log(String fmt, Object... args) {
@@ -148,19 +147,26 @@ public class ClassLoadHook {
     }
 
     /**
+     * Classes with native methods that are backed by `libandroid_runtime`.
+     *
+     * At runtime, we check if these classes have any methods, and if so, we'll have
+     * `libandroid_runtime` register the native functions.
+     */
+    private static final Class<?>[] sClassesWithLibandroidNativeMethods = {
+            android.util.Log.class,
+            android.os.Parcel.class,
+    };
+
+    /**
      * @return if a given method is a native method or not.
      */
-    private static boolean isNativeMethod(Class<?> clazz, String methodName, Class<?>... argTypes) {
-        try {
-            final var method = clazz.getMethod(methodName, argTypes);
-            return Modifier.isNative(method.getModifiers());
-        } catch (NoSuchMethodException e) {
-            throw new HostTestException(String.format(
-                    "Class %s doesn't have method %s with args %s",
-                    clazz.getCanonicalName(),
-                    methodName,
-                    Arrays.toString(argTypes)), e);
+    private static boolean hasNativeMethod(Class<?> clazz) {
+        for (var method : clazz.getDeclaredMethods()) {
+            if (Modifier.isNative(method.getModifiers())) {
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -172,9 +178,11 @@ public class ClassLoadHook {
     private static String getCoreNativeClassesToUse() {
         final var coreNativeClassesToLoad = new ArrayList<String>();
 
-        if (isNativeMethod(android.util.Log.class, "isLoggable",
-                String.class, int.class)) {
-            coreNativeClassesToLoad.add("android.util.Log");
+        for (var clazz : sClassesWithLibandroidNativeMethods) {
+            if (hasNativeMethod(clazz)) {
+                log("Class %s has native methods", clazz);
+                coreNativeClassesToLoad.add(clazz.getName());
+            }
         }
 
         return String.join(",", coreNativeClassesToLoad);

@@ -36,3 +36,26 @@ void convertToResPath([[maybe_unused]] String8& s) {
     }
 #endif
 }
+
+String8 walkPath(const String8& path, String8* outRemains) {
+    const char* cp;
+    const char* const str = path.c_str();
+    const char* buf = str;
+
+    cp = strchr(buf, OS_PATH_SEPARATOR);
+    if (cp == buf) {
+        // don't include a leading '/'.
+        buf = buf + 1;
+        cp = strchr(buf, OS_PATH_SEPARATOR);
+    }
+
+    if (cp == nullptr) {
+        String8 res = buf != str ? String8(buf) : path;
+        if (outRemains) *outRemains = String8();
+        return res;
+    }
+
+    String8 res(buf, cp - buf);
+    if (outRemains) *outRemains = String8(cp + 1);
+    return res;
+}

@@ -7,6 +7,7 @@
 #ifndef CACHE_UPDATER_H
 #define CACHE_UPDATER_H
 
+#include <androidfw/PathUtils.h>
 #include <utils/String8.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,6 +16,8 @@
 #ifdef _WIN32
 #include <direct.h>
 #endif
+
+#include "Utils.h"
 
 using namespace android;
 
@@ -72,14 +75,14 @@ public:
             do {
                 // As we remove the end of existsPath add it to
                 // the string of paths to create.
-                toCreate = existsPath.getPathLeaf().appendPath(toCreate);
-                existsPath = existsPath.getPathDir();
+                toCreate = appendPathCopy(getPathLeaf(existsPath), toCreate);
+                existsPath = getPathDir(existsPath);
             } while (stat(existsPath.c_str(),&s) == -1);
 
             // Walk forwards and build directories as we go
             do {
                 // Advance to the next segment of the path
-                existsPath.appendPath(toCreate.walkPath(&remains));
+                appendPath(existsPath, walkPath(toCreate, &remains));
                 toCreate = remains;
 #ifdef _WIN32
                 _mkdir(existsPath.c_str());
@@ -101,7 +104,7 @@ public:
     virtual void processImage(String8 source, String8 dest)
     {
         // Make sure we're trying to write to a directory that is extant
-        ensureDirectoriesExist(dest.getPathDir());
+        ensureDirectoriesExist(getPathDir(dest));
 
         preProcessImageToCache(bundle, source, dest);
     };

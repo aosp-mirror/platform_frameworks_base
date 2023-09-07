@@ -3543,11 +3543,6 @@ class Task extends TaskFragment {
                 ? null : new PictureInPictureParams(top.pictureInPictureArgs);
     }
 
-    private boolean shouldDockBigOverlays() {
-        final ActivityRecord topMostActivity = getTopMostActivity();
-        return topMostActivity != null && topMostActivity.shouldDockBigOverlays;
-    }
-
     Rect getDisplayCutoutInsets() {
         if (mDisplayContent == null || getDisplayInfo().displayCutout == null) return null;
         final WindowState w = getTopVisibleAppMainWindow();

@@ -18,9 +18,7 @@ package com.android.server.pm;
 
 import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -207,8 +205,7 @@ public class PackageArchiverServiceTest {
                 () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
                         UserHandle.CURRENT));
         assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
-        assertThat(e.getCause()).hasMessageThat().isEqualTo(
-                String.format("No installer found to archive app %s.", PACKAGE));
+        assertThat(e.getCause()).hasMessageThat().isEqualTo("No installer found");
     }
 
     @Test

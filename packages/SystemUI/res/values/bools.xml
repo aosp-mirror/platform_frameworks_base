@@ -51,4 +51,12 @@
          This configuration will only apply when config_remoteInsetsControllerControlsSystemBars.
          is set to true. -->
     <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
+
+    <!--  Do update bouncer constraints (port or land) on rotation.
+      Needed for bouncer refactor to use motion layout, because constraints should only be
+      changed on small screens. Only used when flag "lockscreen.enable_landscape" (b/293252410)
+      is enabled
+
+      True here so bouncers constraints are updated when rotating on small screens -->
+    <bool name="update_bouncer_constraints">true</bool>
 </resources>

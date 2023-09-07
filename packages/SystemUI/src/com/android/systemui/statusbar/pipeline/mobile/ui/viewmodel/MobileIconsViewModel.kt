@@ -20,7 +20,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -56,7 +55,6 @@ constructor(
     private val airplaneModeInteractor: AirplaneModeInteractor,
     private val constants: ConnectivityConstants,
     @Application private val scope: CoroutineScope,
-    private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
     @VisibleForTesting

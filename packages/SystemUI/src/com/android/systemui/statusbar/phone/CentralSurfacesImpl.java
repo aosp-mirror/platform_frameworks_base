@@ -606,8 +606,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
-    private final NotificationPresenter mPresenter;
-    private final NotificationActivityStarter mNotificationActivityStarter;
+    private final Lazy<NotificationPresenter> mPresenterLazy;
+    private final Lazy<NotificationActivityStarter> mNotificationActivityStarterLazy;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
     private final Lazy<NoteTaskController> mNoteTaskControllerLazy;
@@ -681,8 +681,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            NotificationPresenter notificationPresenter,
-            NotificationActivityStarter notificationActivityStarter,
+            // Lazys due to b/298099682.
+            Lazy<NotificationPresenter> notificationPresenterLazy,
+            Lazy<NotificationActivityStarter> notificationActivityStarterLazy,
             NotificationLaunchAnimatorControllerProvider notifLaunchAnimatorControllerProvider,
             NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
@@ -791,8 +792,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScrollerController = notificationStackScrollLayoutController;
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
-        mPresenter = notificationPresenter;
-        mNotificationActivityStarter = notificationActivityStarter;
+        mPresenterLazy = notificationPresenterLazy;
+        mNotificationActivityStarterLazy = notificationActivityStarterLazy;
         mNotificationAnimationProvider = notifLaunchAnimatorControllerProvider;
         mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
@@ -1509,15 +1510,16 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
         mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
-        mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
-        mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
-        mShadeController.setNotificationPresenter(mPresenter);
+        mStackScrollerController.setNotificationActivityStarter(
+                mNotificationActivityStarterLazy.get());
+        mGutsManager.setNotificationActivityStarter(mNotificationActivityStarterLazy.get());
+        mShadeController.setNotificationPresenter(mPresenterLazy.get());
         mNotificationsController.initialize(
-                mPresenter,
+                mPresenterLazy.get(),
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),
-                mNotificationActivityStarter);
-        mWindowRootViewVisibilityInteractor.setUp(mPresenter, mNotificationsController);
+                mNotificationActivityStarterLazy.get());
+        mWindowRootViewVisibilityInteractor.setUp(mPresenterLazy.get(), mNotificationsController);
     }
 
     /**
@@ -1710,7 +1712,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private void onExpandedInvisible() {
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
-        if (!mNotificationActivityStarter.isCollapsingToShowActivityOverLockscreen()) {
+        if (!mNotificationActivityStarterLazy.get().isCollapsingToShowActivityOverLockscreen()) {
             showBouncerOrLockScreenIfKeyguard();
         } else if (DEBUG) {
             Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
@@ -2036,7 +2038,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             String action = intent.getAction();
             if (ACTION_FAKE_ARTWORK.equals(action)) {
                 if (DEBUG_MEDIA_FAKE_ARTWORK) {
-                    mPresenter.updateMediaMetaData(true, true);
+                    mPresenterLazy.get().updateMediaMetaData(true, true);
                 }
             }
         }
@@ -2218,7 +2220,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
         mKeyguardStateController.setLaunchTransitionFadingAway(false);
-        mPresenter.updateMediaMetaData(true /* metaDataChanged */, true);
+        mPresenterLazy.get().updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
     /**
@@ -2242,7 +2244,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 beforeFading.run();
             }
             updateScrimController();
-            mPresenter.updateMediaMetaData(false, true);
+            mPresenterLazy.get().updateMediaMetaData(false, true);
             mShadeSurface.resetAlpha();
             mShadeSurface.fadeOut(
                     FADE_KEYGUARD_START_DELAY, FADE_KEYGUARD_DURATION,
@@ -3343,7 +3345,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     updateDozingState();
                     checkBarModes();
                     updateScrimController();
-                    mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
+                    mPresenterLazy.get()
+                            .updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
                     Trace.endSection();
                 }
 

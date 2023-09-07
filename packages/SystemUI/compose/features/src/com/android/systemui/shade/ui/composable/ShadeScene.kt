@@ -16,9 +16,9 @@
 
 package com.android.systemui.shade.ui.composable
 
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.Notifications
@@ -43,6 +44,9 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
+import com.android.systemui.statusbar.phone.StatusBarIconController
+import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -77,6 +81,9 @@ class ShadeScene
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: ShadeSceneViewModel,
+    private val tintedIconManagerFactory: TintedIconManager.Factory,
+    private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
+    private val statusBarIconController: StatusBarIconController,
 ) : ComposableScene {
     override val key = SceneKey.Shade
 
@@ -92,7 +99,14 @@ constructor(
     @Composable
     override fun SceneScope.Content(
         modifier: Modifier,
-    ) = ShadeScene(viewModel, modifier)
+    ) =
+        ShadeScene(
+            viewModel = viewModel,
+            createTintedIconManager = tintedIconManagerFactory::create,
+            createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
+            statusBarIconController = statusBarIconController,
+            modifier = modifier,
+        )
 
     private fun destinationScenes(
         up: SceneKey,
@@ -107,6 +121,9 @@ constructor(
 @Composable
 private fun SceneScope.ShadeScene(
     viewModel: ShadeSceneViewModel,
+    createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
+    createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
+    statusBarIconController: StatusBarIconController,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.element(Shade.Elements.Scrim)) {
@@ -116,16 +133,22 @@ private fun SceneScope.ShadeScene(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.scrim, shape = Shade.Shapes.Scrim)
         )
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier =
                 Modifier.fillMaxSize()
                     .clickable(onClick = { viewModel.onContentClicked() })
-                    .padding(horizontal = 16.dp, vertical = 48.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
         ) {
+            CollapsedShadeHeader(
+                viewModel = viewModel.shadeHeaderViewModel,
+                createTintedIconManager = createTintedIconManager,
+                createBatteryMeterViewController = createBatteryMeterViewController,
+                statusBarIconController = statusBarIconController,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             QuickSettings(modifier = Modifier.height(160.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Notifications(modifier = Modifier.weight(1f))
         }
     }

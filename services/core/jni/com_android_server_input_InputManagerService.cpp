@@ -372,7 +372,7 @@ public:
     virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position);
 
     /* --- PointerControllerPolicyInterface implementation --- */
-    virtual std::shared_ptr<PointerControllerInterface> createPointerController() override;
+    std::shared_ptr<PointerControllerInterface> createPointerController() override;
 
 private:
     sp<InputManagerInterface> mInputManager;
@@ -489,7 +489,7 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
                              mLocked.pointerCaptureRequest.enable ? "Enabled" : "Disabled",
                              mLocked.pointerCaptureRequest.seq);
-        forEachPointerControllerLocked([&dump](PointerController& pc) { pc.dump(dump); });
+        forEachPointerControllerLocked([&dump](PointerController& pc) { dump += pc.dump(); });
     } // release lock
     dump += "\n";
 
@@ -530,9 +530,8 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     { // acquire lock
         std::scoped_lock _l(mLock);
         mLocked.viewports = viewports;
-        forEachPointerControllerLocked([viewports = std::move(viewports)](PointerController& pc) {
-            pc.onDisplayViewportsUpdated(viewports);
-        });
+        forEachPointerControllerLocked(
+                [&viewports](PointerController& pc) { pc.onDisplayViewportsUpdated(viewports); });
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(

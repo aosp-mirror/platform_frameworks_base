@@ -25,10 +25,12 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.RotationUtils;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.UiContext;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Util class for both Sidecar and Extensions.
@@ -42,18 +44,41 @@ public final class ExtensionHelper {
     /**
      * Rotates the input rectangle specified in default display orientation to the current display
      * rotation.
+     *
+     * @param displayId the display id.
+     * @param rotation the target rotation relative to the default display orientation.
+     * @param inOutRect the input/output Rect as specified in the default display orientation.
      */
-    public static void rotateRectToDisplayRotation(int displayId, int rotation, Rect inOutRect) {
-        DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
-        DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
+    public static void rotateRectToDisplayRotation(
+            int displayId, @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
+        final DisplayManagerGlobal dmGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayInfo displayInfo = dmGlobal.getDisplayInfo(displayId);
 
-        boolean isSideRotation = rotation == ROTATION_90 || rotation == ROTATION_270;
-        int displayWidth = isSideRotation ? displayInfo.logicalHeight : displayInfo.logicalWidth;
-        int displayHeight = isSideRotation ? displayInfo.logicalWidth : displayInfo.logicalHeight;
+        rotateRectToDisplayRotation(displayInfo, rotation, inOutRect);
+    }
 
-        inOutRect.intersect(0, 0, displayWidth, displayHeight);
+    @VisibleForTesting
+    static void rotateRectToDisplayRotation(@NonNull DisplayInfo displayInfo,
+            @Surface.Rotation int rotation, @NonNull Rect inOutRect) {
+        // The inOutRect is specified in the default display orientation, so here we need to get
+        // the display width and height in the default orientation to perform the intersection and
+        // rotation.
+        final boolean isSideRotation =
+                displayInfo.rotation == ROTATION_90 || displayInfo.rotation == ROTATION_270;
+        final int baseDisplayWidth =
+                isSideRotation ? displayInfo.logicalHeight : displayInfo.logicalWidth;
+        final int baseDisplayHeight =
+                isSideRotation ? displayInfo.logicalWidth : displayInfo.logicalHeight;
 
-        RotationUtils.rotateBounds(inOutRect, displayWidth, displayHeight, rotation);
+        final boolean success = inOutRect.intersect(0, 0, baseDisplayWidth, baseDisplayHeight);
+        if (!success) {
+            throw new IllegalArgumentException("inOutRect must intersect with the display."
+                    + " inOutRect: " + inOutRect
+                    + ", baseDisplayWidth: " + baseDisplayWidth
+                    + ", baseDisplayHeight: " + baseDisplayHeight);
+        }
+
+        RotationUtils.rotateBounds(inOutRect, baseDisplayWidth, baseDisplayHeight, rotation);
     }
 
     /** Transforms rectangle from absolute coordinate space to the window coordinate space. */

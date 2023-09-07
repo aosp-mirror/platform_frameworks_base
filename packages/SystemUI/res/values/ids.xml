@@ -233,4 +233,7 @@
     removed later.
     -->
     <item type="id" name="tag_smartspace_view" />
+
+    <!-- Tag set on the Compose implementation of the QS footer actions. -->
+    <item type="id" name="tag_compose_qs_footer_actions" />
 </resources>

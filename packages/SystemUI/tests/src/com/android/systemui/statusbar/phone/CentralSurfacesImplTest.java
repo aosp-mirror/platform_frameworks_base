@@ -136,6 +136,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -491,8 +492,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationShadeWindowViewControllerLazy,
                 mNotificationShelfController,
                 mStackScrollerController,
-                mNotificationPresenter,
-                mNotificationActivityStarter,
+                (Lazy<NotificationPresenter>) () -> mNotificationPresenter,
+                (Lazy<NotificationActivityStarter>) () -> mNotificationActivityStarter,
                 mNotifLaunchAnimControllerProvider,
                 new NotificationExpansionRepository(),
                 mDozeParameters,

@@ -83,6 +83,14 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
         return "";
     }
 
+    /** Updates the keyguard view's constraints based on orientation */
+    public void updateConstraints(int orientation) {
+        KeyguardInputView securityView = getSecurityView();
+        if (securityView != null) {
+            securityView.updateConstraints(orientation);
+        }
+    }
+
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return p instanceof LayoutParams;

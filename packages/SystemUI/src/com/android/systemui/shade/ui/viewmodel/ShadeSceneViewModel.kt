@@ -36,6 +36,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     authenticationInteractor: AuthenticationInteractor,
     private val bouncerInteractor: BouncerInteractor,
+    val shadeHeaderViewModel: ShadeHeaderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =

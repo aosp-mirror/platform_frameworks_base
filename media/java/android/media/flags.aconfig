@@ -1,8 +1,0 @@
-package: "android.media"
-
-flag {
-    name: "haptics_customization_enabled"
-    namespace: "media"
-    description: "Enables the haptics customization feature"
-    bug: "241918098"
-}

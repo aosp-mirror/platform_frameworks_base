@@ -257,7 +257,7 @@ static int main(int argc, char** argv) {
                 usage();
                 return 1;
             }
-            targetConfigStr.setTo(*argv);
+            targetConfigStr = *argv;
         } else if (arg == "--split") {
             argc--;
             argv++;
@@ -281,7 +281,7 @@ static int main(int argc, char** argv) {
                 usage();
                 return 1;
             }
-            baseApkPath.setTo(*argv);
+            baseApkPath = *argv;
         } else if (arg == "--generate") {
             generateFlag = true;
         } else if (arg == "--help") {

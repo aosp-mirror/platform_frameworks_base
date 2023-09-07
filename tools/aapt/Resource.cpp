@@ -19,6 +19,8 @@
 #include "WorkQueue.h"
 #include "XMLNode.h"
 
+#include <androidfw/PathUtils.h>
+
 #include <algorithm>
 
 // STATUST: mingw does seem to redefine UNKNOWN_ERROR from our enum value, so a cast is necessary.
@@ -143,8 +145,8 @@ public:
                         mParams.inputFlags, mParams.navigation);
             }
             mPath = "res";
-            mPath.appendPath(file->getGroupEntry().toDirName(mResType));
-            mPath.appendPath(leaf);
+            appendPath(mPath, file->getGroupEntry().toDirName(mResType));
+            appendPath(mPath, leaf);
             mBaseName = parseResourceName(leaf);
             if (mBaseName == "") {
                 fprintf(stderr, "Error: malformed resource filename %s\n",
@@ -779,7 +781,7 @@ static void fullyQualifyClassName(const String8& package, const sp<XMLNode>& nod
         if (kIsDebug) {
             printf("Qualifying class '%s' to '%s'", name.c_str(), className.c_str());
         }
-        attr->string.setTo(String16(className));
+        attr->string = String16(className);
     }
 }
 
@@ -969,7 +971,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
             return UNKNOWN_ERROR;
         }
         String8 origPackage(attr->string);
-        attr->string.setTo(String16(manifestPackageNameOverride));
+        attr->string = String16(manifestPackageNameOverride);
         if (kIsDebug) {
             printf("Overriding package '%s' to be '%s'\n", origPackage.c_str(),
                     manifestPackageNameOverride);
@@ -1007,7 +1009,7 @@ status_t massageManifest(Bundle* bundle, ResourceTable* table, sp<XMLNode> root)
                 XMLNode::attribute_entry* attr = child->editAttribute(
                         String16(RESOURCES_ANDROID_NAMESPACE), String16("targetPackage"));
                 if (attr != NULL) {
-                    attr->string.setTo(String16(instrumentationPackageNameOverride));
+                    attr->string = String16(instrumentationPackageNameOverride);
                 }
             }
         }
@@ -1686,7 +1688,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         ResourceDirIterator it(fonts, String8("font"));
         while ((err=it.next()) == NO_ERROR) {
             // fonts can be resources other than xml.
-            if (it.getFile()->getPath().getPathExtension() == ".xml") {
+            if (getPathExtension(it.getFile()->getPath()) == ".xml") {
                 String8 src = it.getFile()->getPrintableSource();
                 err = compileXmlFile(bundle, assets, String16(it.getBaseName()),
                         it.getFile(), &table, xmlFlags);
@@ -1716,7 +1718,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                              workItem.file, &table, xmlCompilationFlags);
 
         if (err == NO_ERROR && workItem.file->hasData()) {
-            assets->addResource(workItem.resPath.getPathLeaf(),
+            assets->addResource(getPathLeaf(workItem.resPath),
                                 workItem.resPath,
                                 workItem.file,
                                 workItem.file->getResourceType());
@@ -2851,7 +2853,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
                 s++;
                 if (s > last && (*s == '.' || *s == 0)) {
                     String8 part(last, s-last);
-                    dest.appendPath(part);
+                    appendPath(dest, part);
 #ifdef _WIN32
                     _mkdir(dest.c_str());
 #else
@@ -2861,7 +2863,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
                 }
             } while (*s);
         }
-        dest.appendPath(className);
+        appendPath(dest, className);
         dest.append(".java");
         FILE* fp = fopen(dest.c_str(), "w+");
         if (fp == NULL) {
@@ -2892,7 +2894,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
 
         if (textSymbolsDest != NULL && R == className) {
             String8 textDest(textSymbolsDest);
-            textDest.appendPath(className);
+            appendPath(textDest, className);
             textDest.append(".txt");
 
             FILE* fp = fopen(textDest.c_str(), "w+");
@@ -2918,7 +2920,7 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         if (bundle->getGenDependencies() && R == className) {
             // Add this R.java to the dependency file
             String8 dependencyFile(bundle->getRClassDir());
-            dependencyFile.appendPath("R.java.d");
+            appendPath(dependencyFile, "R.java.d");
 
             FILE *fp = fopen(dependencyFile.c_str(), "a");
             fprintf(fp,"%s \\\n", dest.c_str());
