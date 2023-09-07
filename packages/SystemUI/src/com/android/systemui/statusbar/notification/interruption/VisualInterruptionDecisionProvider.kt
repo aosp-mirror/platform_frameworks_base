@@ -57,7 +57,7 @@ interface VisualInterruptionDecisionProvider {
      *
      * @param[suppressor] the suppressor to add
      */
-    fun addSuppressor(suppressor: NotificationInterruptSuppressor)
+    fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor)
 
     /**
      * Decides whether a [notification][entry] should display as heads-up or not, but does not log
