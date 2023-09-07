@@ -50,7 +50,6 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -97,7 +96,6 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var accessibilityManager: AccessibilityManager
     @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -145,13 +143,32 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
         block: () -> Unit
     ) {
         controllerOverlay = UdfpsControllerOverlay(
-            context, fingerprintManager, inflater, windowManager, accessibilityManager,
-            statusBarStateController, shadeExpansionStateManager, statusBarKeyguardViewManager,
-            keyguardUpdateMonitor, dialogManager, dumpManager, transitionController,
-            configurationController, keyguardStateController, unlockedScreenOffAnimationController,
-            udfpsDisplayMode, secureSettings, REQUEST_ID, reason,
-            controllerCallback, onTouch, activityLaunchAnimator, featureFlags,
-            primaryBouncerInteractor, alternateBouncerInteractor, isDebuggable, udfpsUtils,
+            context,
+            fingerprintManager,
+            inflater,
+            windowManager,
+            accessibilityManager,
+            statusBarStateController,
+            statusBarKeyguardViewManager,
+            keyguardUpdateMonitor,
+            dialogManager,
+            dumpManager,
+            transitionController,
+            configurationController,
+            keyguardStateController,
+            unlockedScreenOffAnimationController,
+            udfpsDisplayMode,
+            secureSettings,
+            REQUEST_ID,
+            reason,
+            controllerCallback,
+            onTouch,
+            activityLaunchAnimator,
+            featureFlags,
+            primaryBouncerInteractor,
+            alternateBouncerInteractor,
+            isDebuggable,
+            udfpsUtils,
             udfpsKeyguardAccessibilityDelegate,
             udfpsKeyguardViewModels,
         )
