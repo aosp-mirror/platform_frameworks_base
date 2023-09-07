@@ -131,6 +131,7 @@ public class BubbleStackView extends FrameLayout
 
     private static final int EXPANDED_VIEW_ALPHA_ANIMATION_DURATION = 150;
 
+    /** Should be kept in sync with value in TaskbarScrimViewController. */
     private static final float SCRIM_ALPHA = 0.32f;
 
     /** Minimum alpha value for scrim when alpha is being changed via drag */
