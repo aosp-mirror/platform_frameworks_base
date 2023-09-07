@@ -324,4 +324,7 @@
 
     <!-- Whether predictive back animation is enabled by default. -->
     <bool name="def_enable_back_animation">false</bool>
+
+    <!-- Whether wifi is always requested by default. -->
+    <bool name="def_enable_wifi_always_requested">false</bool>
 </resources>
