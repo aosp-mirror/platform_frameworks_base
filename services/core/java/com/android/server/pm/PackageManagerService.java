@@ -6322,13 +6322,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             archPkg.targetSdkVersion = apk.getTargetSdkVersion();
 
             // These get translated in flags important for user data management.
-            archPkg.backupAllowed = apk.isBackupAllowed();
-            archPkg.defaultToDeviceProtectedStorage =
-                    apk.isDefaultToDeviceProtectedStorage();
-            archPkg.requestLegacyExternalStorage = apk.isRequestLegacyExternalStorage();
-            archPkg.userDataFragile = apk.isUserDataFragile();
-            archPkg.clearUserDataOnFailedRestoreAllowed =
-                    apk.isClearUserDataOnFailedRestoreAllowed();
+            archPkg.backupAllowed = String.valueOf(apk.isBackupAllowed());
+            archPkg.defaultToDeviceProtectedStorage = String.valueOf(
+                    apk.isDefaultToDeviceProtectedStorage());
+            archPkg.requestLegacyExternalStorage = String.valueOf(
+                    apk.isRequestLegacyExternalStorage());
+            archPkg.userDataFragile = String.valueOf(apk.isUserDataFragile());
+            archPkg.clearUserDataOnFailedRestoreAllowed = String.valueOf(
+                    apk.isClearUserDataOnFailedRestoreAllowed());
 
             return archPkg;
         }

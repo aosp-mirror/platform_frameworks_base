@@ -23,9 +23,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
+import android.os.Build;
 
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
+import com.android.internal.util.XmlUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -255,11 +257,16 @@ public class ApkLite {
         mRollbackDataPolicy = 0;
         mHasDeviceAdminReceiver = false;
         mIsSdkLibrary = false;
-        mBackupAllowed = archivedPackage.backupAllowed;
-        mDefaultToDeviceProtectedStorage = archivedPackage.defaultToDeviceProtectedStorage;
-        mRequestLegacyExternalStorage = archivedPackage.requestLegacyExternalStorage;
-        mUserDataFragile = archivedPackage.userDataFragile;
-        mClearUserDataOnFailedRestoreAllowed = archivedPackage.clearUserDataOnFailedRestoreAllowed;
+        // @see ParsingPackageUtils#parseBaseAppBasicFlags
+        mBackupAllowed = XmlUtils.convertValueToBoolean(archivedPackage.backupAllowed, true);
+        mDefaultToDeviceProtectedStorage = XmlUtils.convertValueToBoolean(
+                archivedPackage.defaultToDeviceProtectedStorage, false);
+        mRequestLegacyExternalStorage = XmlUtils.convertValueToBoolean(
+                archivedPackage.requestLegacyExternalStorage,
+                mTargetSdkVersion < Build.VERSION_CODES.Q);
+        mUserDataFragile = XmlUtils.convertValueToBoolean(archivedPackage.userDataFragile, false);
+        mClearUserDataOnFailedRestoreAllowed = XmlUtils.convertValueToBoolean(
+                archivedPackage.clearUserDataOnFailedRestoreAllowed, true);
     }
 
     /**
