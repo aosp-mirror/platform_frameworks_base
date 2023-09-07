@@ -264,14 +264,8 @@ constructor(
             KeyguardPreviewSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
                 context.resources,
             )
-
         val startPadding: Int =
-            with(context.resources) {
-                getDimensionPixelSize(
-                    com.android.systemui.customization.R.dimen.clock_padding_start
-                ) + getDimensionPixelSize(R.dimen.below_clock_padding_start)
-            }
-
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
         val endPadding: Int =
             context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
 
