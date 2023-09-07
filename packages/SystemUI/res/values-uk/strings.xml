@@ -291,7 +291,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Робочі додатки"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Запуск увечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"До <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -740,7 +740,7 @@
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"вилучити опцію"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"додати опцію в кінець"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Перемістити опцію"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати опцію"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Додати панель"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Перемістити на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Додати на позицію <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Позиція <xliff:g id="POSITION">%1$d</xliff:g>"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки живлення"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокований екран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон перегрівся й вимкнувся"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Зараз телефон працює як зазвичай.\nНатисніть, щоб дізнатися більше"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон перегрівся, тому вимкнувся, щоб охолонути. Зараз він працює, як зазвичай.\n\nТелефон перегрівається, якщо ви:\n	• використовуєте ресурсомісткі додатки (ігри, відео, навігація)\n	• завантажуєте великі файли на телефон або з нього\n	• використовуєте телефон за високої температури"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Переглянути запобіжні заходи"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефон нагрівається"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Під час охолодження деякі функції обмежуються.\nНатисніть, щоб дізнатися більше"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ваш телефон охолоджуватиметься автоматично. Ви можете далі користуватися телефоном, але він може працювати повільніше.\n\nКоли телефон охолоне, він працюватиме належним чином."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Переглянути запобіжні заходи"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Від’єднайте пристрій"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Пристрій нагрівається біля зарядного порту. Якщо він під’єднаний до зарядного пристрою або USB-аксесуара, від’єднайте його, однак будьте обережні, оскільки кабель також може бути гарячий."</string>

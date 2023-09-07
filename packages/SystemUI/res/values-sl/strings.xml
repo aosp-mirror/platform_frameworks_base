@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni za vklop/izklop"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. stran od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaklenjen zaslon"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tel. izklopljen zaradi vročine"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon zdaj deluje normalno.\nDotaknite se za več informacij"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bil prevroč, zato se je izklopil, da se ohladi. Zdaj normalno deluje.\n\nTelefon lahko postane prevroč ob:\n	• uporabi aplikacij, ki intenzivno porabljajo sredstva (npr. za igranje iger, videoposnetke ali navigacijo)\n	• prenosu ali nalaganju velikih datotek\n	• uporabi telefona pri visokih temp."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Oglejte si navodila za ukrepanje"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon se segreva"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nekatere funkcije bodo med ohlajanjem telefona omejene.\nDotaknite se za več informacij"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se bo samodejno poskusil ohladiti. Še naprej ga lahko uporabljate, vendar bo morda deloval počasneje.\n\nKo se telefon ohladi, bo zopet deloval kot običajno."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Oglejte si navodila za ukrepanje"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Odklopite napravo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Naprava se segreva pri vratih za polnjenje. Če je priključena na polnilnik ali dodatek USB, ga odklopite in bodite tem previdni, saj je tudi kabel lahko topel."</string>

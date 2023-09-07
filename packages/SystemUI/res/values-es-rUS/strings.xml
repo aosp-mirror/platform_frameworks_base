@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menú de encendido"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantalla de bloqueo"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"El teléfono se apagó por calor"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Tu teléfono ahora se ejecuta con normalidad.\nPresiona para obtener más información"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Tu teléfono estaba muy caliente y se apagó para enfriarse. Ya funciona correctamente.\n\nTu teléfono puede calentarse en estos casos:\n	• Usas apps que consumen muchos recursos (como juegos, videos o navegación).\n	• Subes o descargas archivos grandes.\n	• Usas el teléfono en condiciones de temperatura alta."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver pasos de mantenimiento"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"El teléfono se está calentando"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Algunas funciones se limitan durante el enfriamiento del teléfono.\nPresiona para obtener más información"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Tu teléfono intentará enfriarse automáticamente. Podrás usarlo, pero es posible que funcione más lento.\n\nUna vez que se haya enfriado, volverá a funcionar correctamente."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver pasos de mantenimiento"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desenchufa el dispositivo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"El puerto de carga del dispositivo se está calentando. Si está conectado a un cargador o accesorio USB, desenchúfalo con cuidado, ya que el cable también puede estar caliente."</string>

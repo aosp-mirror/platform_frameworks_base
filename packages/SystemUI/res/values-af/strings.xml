@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Aan/af-kieslys"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Bladsy <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Sluitskerm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Foon afgeskakel weens hitte"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Jou foon werk nou normaal.\nTik vir meer inligting"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Jou foon was te warm en dit het afgeskakel om af te koel. Jou foon werk nou normaal.\n\nJou foon kan dalk te warm word as jy:\n	• Hulpbron-intensiewe programme (soos dobbel-, video- of navigasieprogramme) gebruik\n	• Groot lêers af- of oplaai\n	• Jou foon in hoë temperature gebruik"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Sien versorgingstappe"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Foon raak warm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Sommige kenmerke is beperk terwyl foon afkoel.\nTik vir meer inligting"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Sien versorgingstappe"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Prop jou toestel uit"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Jou toestel word tans warm naby die laaipoort. Prop dit uit as dit aan ’n laaier of USB-bykomstigheid gekoppel is. Wees versigtig, aangesien die kabel dalk ook warm is."</string>

@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu de l\'interrupteur"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> sur <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Écran de verrouillage"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tél. éteint car il surchauffait"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Votre téléphone fonctionne maintenant de manière normale.\nTouchez pour en savoir plus"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Votre téléphone s\'est éteint, car il surchauffait. Il s\'est refroidi et fonctionne normalement.\n\nIl peut surchauffer si vous :\n	• Util. des applis utilisant beaucoup de ressources (jeux, vidéo, navigation, etc.)\n	• Téléchargez ou téléversez de gros fichiers\n	• Utilisez téléphone dans des températures élevées"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Afficher les étapes d\'entretien"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Le téléphone commence à chauffer"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Fonctionnalités limitées pendant le refroidissement du téléphone.\nTouchez pour en savoir plus"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Votre téléphone va essayer de se refroidir automatiquement. Vous pouvez toujours l\'utiliser, mais il risque d\'être plus lent.\n\nUne fois refroidi, il fonctionnera normalement."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Afficher les étapes d\'entretien"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Débranchez votre appareil"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Votre appareil chauffe près du port de recharge. S\'il est connecté à un chargeur ou à un accessoire USB, débranchez-le en faisant attention : le câble pourrait également être chaud."</string>

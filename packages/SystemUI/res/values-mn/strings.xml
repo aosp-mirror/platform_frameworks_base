@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Асаах/унтраах цэс"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>-н <xliff:g id="ID_1">%1$d</xliff:g>-р хуудас"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Түгжээтэй дэлгэц"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Халснаас үүдэн утас унтарсан"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Таны утас одоо хэвийн ажиллаж байна.\nДэлгэрэнгүй мэдээлэл авах бол товшино уу"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Таны утас хэт халсан тул хөргөхөөр унтраасан болно. Таны утас одоо хэвийн ажиллаж байна.\n\nХэрэв та дараахыг хийвэл таны утас хэт халж болзошгүй:\n	• Их хэмжээний нөөц хэрэглээний апп (тоглоом, видео эсвэл шилжилтийн апп зэрэг)\n	• Багтаамж ихтэй файл татах, байршуулах\n	• Утсаа өндөр температурт ашиглах"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Хянамж болгоомжийн алхмыг харах"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Утас халж эхэлж байна"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Утсыг хөрөх үед зарим онцлогийг хязгаарлана.\nДэлгэрэнгүй мэдээлэл авах бол товшино уу"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Таны утас автоматаар хөрөх болно. Та утсаа ашиглаж болох хэдий ч удаан ажиллаж болзошгүй.\n\nТаны утас хөрсний дараагаар хэвийн ажиллана."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Хянамж болгоомжийн алхмыг харах"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Төхөөрөмжөө салгана уу"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Таны төхөөрөмж цэнэглэх портын ойролцоо халж байна. Хэрэв төхөөрөмжийг цэнэглэгч эсвэл USB дагалдах хэрэгсэлд холбосон бол төхөөрөмжийг салгаж, кабель нь халуун байж болзошгүй тул болгоомжтой байгаарай."</string>
