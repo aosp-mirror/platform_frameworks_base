@@ -91,7 +91,7 @@ abstract class EnterPipTransition(flicker: LegacyFlickerTest) : PipTransition(fl
     /** Checks that [pipApp] window becomes pinned */
     @Presubmit
     @Test
-    fun pipWindowBecomesPinned() {
+    open fun pipWindowBecomesPinned() {
         flicker.assertWm {
             invoke("pipWindowIsNotPinned") { it.isNotPinned(pipApp) }
                 .then()
@@ -102,7 +102,7 @@ abstract class EnterPipTransition(flicker: LegacyFlickerTest) : PipTransition(fl
     /** Checks [ComponentNameMatcher.LAUNCHER] layer remains visible throughout the animation */
     @Presubmit
     @Test
-    fun launcherLayerBecomesVisible() {
+    open fun launcherLayerBecomesVisible() {
         flicker.assertLayers {
             isInvisible(ComponentNameMatcher.LAUNCHER)
                 .then()
