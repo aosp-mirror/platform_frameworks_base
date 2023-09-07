@@ -101,18 +101,18 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             }
         }
         addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationCancel(animation: Animator?) {
+            override fun onAnimationCancel(animation: Animator) {
                 if (lightRevealScrim.revealEffect !is CircleReveal) {
                     lightRevealScrim.revealAmount = 1f
                 }
             }
 
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 lightRevealAnimationPlaying = false
                 interactionJankMonitor.end(CUJ_SCREEN_OFF)
             }
 
-            override fun onAnimationStart(animation: Animator?) {
+            override fun onAnimationStart(animation: Animator) {
                 interactionJankMonitor.begin(
                     mCentralSurfaces.notificationShadeWindowView, CUJ_SCREEN_OFF)
             }
@@ -339,7 +339,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // portrait. If we're in another orientation, disable the screen off animation so we don't
         // animate in the keyguard AOD UI sideways or upside down.
         if (!keyguardStateController.isKeyguardScreenRotationAllowed &&
-            context.display.rotation != Surface.ROTATION_0) {
+            context.display?.rotation != Surface.ROTATION_0) {
             return false
         }
 

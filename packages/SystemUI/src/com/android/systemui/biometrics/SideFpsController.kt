@@ -117,7 +117,7 @@ constructor(
     private var overlayView: View? = null
         set(value) {
             field?.let { oldView ->
-                val lottie = oldView.findViewById(R.id.sidefps_animation) as LottieAnimationView
+                val lottie = oldView.requireViewById(R.id.sidefps_animation) as LottieAnimationView
                 lottie.pauseAnimation()
                 windowManager.removeView(oldView)
                 orientationListener.disable()
@@ -262,7 +262,7 @@ constructor(
             }
         overlayOffsets = offsets
 
-        val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
+        val lottie = view.requireViewById(R.id.sidefps_animation) as LottieAnimationView
         view.rotation =
             display.asSideFpsAnimationRotation(
                 offsets.isYAligned(),
