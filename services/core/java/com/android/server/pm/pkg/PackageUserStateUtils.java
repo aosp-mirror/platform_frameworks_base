@@ -27,7 +27,6 @@ import android.os.Debug;
 import android.util.DebugUtils;
 import android.util.Slog;
 
-import com.android.server.pm.Flags;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 
 /** @hide */
@@ -92,9 +91,9 @@ public class PackageUserStateUtils {
      * {@link PackageManager#MATCH_ARCHIVED_PACKAGES} is requested;
      * <li> If MATCH_ANY_USER is requested, always return true, because the fact that
      * this object exists means that the package must be installed or has data on at least one user;
-     * <li> (When feature enabled) If it is not installed but still has data (i.e., it was
-     * previously uninstalled with {@link PackageManager#DELETE_KEEP_DATA}), return true if the
-     * caller requested {@link PackageManager#MATCH_UNINSTALLED_PACKAGES} or
+     * <li> If it is not installed but still has data (i.e., it was previously uninstalled with
+     * {@link PackageManager#DELETE_KEEP_DATA}), return true if the caller requested
+     * {@link PackageManager#MATCH_UNINSTALLED_PACKAGES} or
      * {@link PackageManager#MATCH_ARCHIVED_PACKAGES};
      * </ul><p>
      */
@@ -113,7 +112,7 @@ public class PackageUserStateUtils {
             } else return matchDataExists;
         } else {
             // not installed
-            return matchDataExists && Flags.newMatchUninstalledEnabled() && state.dataExists();
+            return matchDataExists && state.dataExists();
         }
     }
 
