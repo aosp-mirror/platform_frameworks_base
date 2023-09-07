@@ -132,7 +132,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK)
+        context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
@@ -730,13 +730,13 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     @Test
     fun testOnLocaleListChanged_playersAreAddedBack() {
-        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK, Locale.CANADA)
+        context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK, Locale.CANADA))
         testConfigurationChange(configListener.value::onLocaleListChanged)
 
         verify(pageIndicator, never()).tintList =
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
 
-        context.resources.configuration.locales = LocaleList(Locale.UK, Locale.US, Locale.CANADA)
+        context.resources.configuration.setLocales(LocaleList(Locale.UK, Locale.US, Locale.CANADA))
         testConfigurationChange(configListener.value::onLocaleListChanged)
 
         verify(pageIndicator).tintList =

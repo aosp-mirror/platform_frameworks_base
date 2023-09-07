@@ -206,8 +206,9 @@ constructor(
             return
         }
 
-        backgroundView = FrameLayout(launchContainer.context)
-        launchContainerOverlay.add(backgroundView)
+        backgroundView = FrameLayout(launchContainer.context).also {
+            launchContainerOverlay.add(it)
+        }
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
         // alpha will be set to 0 as soon as we start drawing the expanding background.
@@ -319,7 +320,7 @@ constructor(
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 
         GhostView.removeGhost(ghostedView)
-        launchContainerOverlay.remove(backgroundView)
+        backgroundView?.let { launchContainerOverlay.remove(it) }
 
         if (ghostedView is LaunchableView) {
             // Restore the ghosted view visibility.

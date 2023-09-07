@@ -223,11 +223,11 @@ class TransitionLayout @JvmOverloads constructor(
         }
     }
 
-    override fun dispatchDraw(canvas: Canvas?) {
-        canvas?.save()
-        canvas?.clipRect(boundsRect)
+    override fun dispatchDraw(canvas: Canvas) {
+        canvas.save()
+        canvas.clipRect(boundsRect)
         super.dispatchDraw(canvas)
-        canvas?.restore()
+        canvas.restore()
     }
 
     private fun updateBounds() {

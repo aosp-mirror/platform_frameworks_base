@@ -126,11 +126,11 @@ constructor(
     private lateinit var carrierIconSlots: List<String>
     private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
 
-    private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
-    private val clock: Clock = header.findViewById(R.id.clock)
-    private val date: TextView = header.findViewById(R.id.date)
-    private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
-    private val mShadeCarrierGroup: ShadeCarrierGroup = header.findViewById(R.id.carrier_group)
+    private val batteryIcon: BatteryMeterView = header.requireViewById(R.id.batteryRemainingIcon)
+    private val clock: Clock = header.requireViewById(R.id.clock)
+    private val date: TextView = header.requireViewById(R.id.date)
+    private val iconContainer: StatusIconContainer = header.requireViewById(R.id.statusIcons)
+    private val mShadeCarrierGroup: ShadeCarrierGroup = header.requireViewById(R.id.carrier_group)
 
     private var roundedCorners = 0
     private var cutout: DisplayCutout? = null
@@ -555,7 +555,7 @@ constructor(
     inner class CustomizerAnimationListener(
         private val enteringCustomizing: Boolean,
     ) : AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: Animator?) {
+        override fun onAnimationEnd(animation: Animator) {
             super.onAnimationEnd(animation)
             header.animate().setListener(null)
             if (enteringCustomizing) {
@@ -563,7 +563,7 @@ constructor(
             }
         }
 
-        override fun onAnimationStart(animation: Animator?) {
+        override fun onAnimationStart(animation: Animator) {
             super.onAnimationStart(animation)
             if (!enteringCustomizing) {
                 customizing = false
