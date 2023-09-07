@@ -143,6 +143,24 @@ public class DragPositioningCallbackUtility {
     }
 
     /**
+     * Calculates the new position of the top edge of the task and returns true if it is below the
+     * disallowed area.
+     *
+     * @param disallowedAreaForEndBoundsHeight the height of the area that where the task positioner
+     *                                         should not finalize the bounds using WCT#setBounds
+     * @param taskBoundsAtDragStart the bounds of the task on the first drag input event
+     * @param repositionStartPoint initial input coordinate
+     * @param y the y position of the motion event
+     * @return true if the top of the task is below the disallowed area
+     */
+    static boolean isBelowDisallowedArea(int disallowedAreaForEndBoundsHeight,
+            Rect taskBoundsAtDragStart, PointF repositionStartPoint, float y) {
+        final float deltaY = y - repositionStartPoint.y;
+        final float topPosition = taskBoundsAtDragStart.top + deltaY;
+        return topPosition > disallowedAreaForEndBoundsHeight;
+    }
+
+    /**
      * Updates repositionTaskBounds to the final bounds of the task after the drag is finished. If
      * the bounds are outside of the stable bounds, they are shifted to place task at the top of the
      * stable bounds.
