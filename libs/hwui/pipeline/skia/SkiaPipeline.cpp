@@ -18,6 +18,7 @@
 
 #include <include/android/SkSurfaceAndroid.h>
 #include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/encode/SkPngEncoder.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkColorSpace.h>
@@ -440,6 +441,13 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
                     return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
                 };
+                procs.fImageProc = [](SkImage* img, void* ctx) -> sk_sp<SkData> {
+                    GrDirectContext* dCtx = static_cast<GrDirectContext*>(ctx);
+                    return SkPngEncoder::Encode(dCtx,
+                                                img,
+                                                SkPngEncoder::Options{});
+                };
+                procs.fImageCtx = mRenderThread.getGrContext();
                 auto data = picture->serialize(&procs);
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
