@@ -2155,9 +2155,9 @@
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Pamja personale"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pamja e punës"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Bllokuar nga administratori yt i teknologjisë së informacionit"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione pune"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Kjo përmbajtje nuk mund të ndahet me aplikacione pune"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kjo përmbajtje nuk mund të hapet me aplikacione pune"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione personale"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kjo përmbajtje nuk mund të ndahet me aplikacione personale"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kjo përmbajtje nuk mund të hapet me aplikacione personale"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikacionet e punës janë vendosur në pauzë"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hiq nga pauza"</string>
