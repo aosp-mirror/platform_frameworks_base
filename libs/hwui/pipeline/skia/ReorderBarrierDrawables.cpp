@@ -27,7 +27,6 @@
 #include <SkRect.h>
 #include <SkScalar.h>
 #include <SkShadowUtils.h>
-#include <include/private/SkShadowFlags.h>
 
 namespace android {
 namespace uirenderer {
