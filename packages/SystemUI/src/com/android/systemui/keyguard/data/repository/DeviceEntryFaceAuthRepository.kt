@@ -107,7 +107,7 @@ interface DeviceEntryFaceAuthRepository {
     val isBypassEnabled: Flow<Boolean>
 
     /** Set whether face authentication should be locked out or not */
-    fun lockoutFaceAuth()
+    fun setLockedOut(isLockedOut: Boolean)
 
     /**
      * Cancel current face authentication and prevent it from running until [resumeFaceAuth] is
@@ -228,8 +228,8 @@ constructor(
         }
             ?: flowOf(false)
 
-    override fun lockoutFaceAuth() {
-        _isLockedOut.value = true
+    override fun setLockedOut(isLockedOut: Boolean) {
+        _isLockedOut.value = isLockedOut
     }
 
     private val faceLockoutResetCallback =

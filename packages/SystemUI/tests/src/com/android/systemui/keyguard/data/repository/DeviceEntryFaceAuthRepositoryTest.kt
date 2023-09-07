@@ -559,7 +559,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
     @Test
     fun authenticateDoesNotRunWhenFaceIsDisabled() =
-        testScope.runTest { testGatingCheckForFaceAuth { underTest.lockoutFaceAuth() } }
+        testScope.runTest { testGatingCheckForFaceAuth { underTest.setLockedOut(true) } }
 
     @Test
     fun authenticateDoesNotRunWhenUserIsCurrentlyTrusted() =
@@ -869,7 +869,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             initCollectors()
             assertThat(underTest.isLockedOut.value).isFalse()
 
-            underTest.lockoutFaceAuth()
+            underTest.setLockedOut(true)
             runCurrent()
 
             assertThat(underTest.isLockedOut.value).isTrue()
