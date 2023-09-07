@@ -1,0 +1,8 @@
+package: "android.security"
+
+flag {
+    name: "fsverity_api"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for fs-verity API"
+    bug: "285185747"
+}
