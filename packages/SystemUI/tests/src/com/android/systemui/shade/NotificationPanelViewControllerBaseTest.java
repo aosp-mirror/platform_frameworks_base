@@ -118,7 +118,7 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.qs.QSFragment;
+import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
@@ -291,7 +291,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock protected ShadeTransitionController mShadeTransitionController;
     @Mock protected QS mQs;
-    @Mock protected QSFragment mQSFragment;
+    @Mock protected QSFragmentLegacy mQSFragment;
     @Mock protected ViewGroup mQsHeader;
     @Mock protected ViewParent mViewParent;
     @Mock protected ViewTreeObserver mViewTreeObserver;
