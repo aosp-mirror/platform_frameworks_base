@@ -334,6 +334,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runRenameUser();
                 case "set-user-restriction":
                     return runSetUserRestriction();
+                case "get-user-restriction":
+                    return runGetUserRestriction();
                 case "supports-multiple-users":
                     return runSupportsMultipleUsers();
                 case "get-max-users":
@@ -3327,6 +3329,51 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetUserRestriction() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        int userId = UserHandle.USER_SYSTEM;
+        boolean getAllRestrictions = false;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--all":
+                    getAllRestrictions = true;
+                    if (getNextArg() != null) {
+                        throw new IllegalArgumentException("Argument unexpected after \"--all\"");
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown option " + opt);
+            }
+        }
+
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runGetUserRestriction");
+        final IUserManager um = IUserManager.Stub.asInterface(
+                ServiceManager.getService(Context.USER_SERVICE));
+
+        if (getAllRestrictions) {
+            final Bundle restrictions = um.getUserRestrictions(translatedUserId);
+            pw.println("All restrictions:");
+            pw.println(restrictions.toString());
+        } else {
+            String restriction = getNextArg();
+            if (restriction == null) {
+                throw new IllegalArgumentException("No restriction key specified");
+            }
+            String unexpectedArgument = getNextArg();
+            if (unexpectedArgument != null) {
+                throw new IllegalArgumentException("Argument unexpected after restriction key");
+            }
+            pw.println(um.hasUserRestriction(restriction, translatedUserId));
+        }
+        return 0;
+    }
+
     public int runSupportsMultipleUsers() {
         getOutPrintWriter().println("Is multiuser supported: "
                 + UserManager.supportsMultipleUsers());
@@ -4705,6 +4752,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Rename USER_ID with USER_NAME (or null when [USER_NAME] is not set)");
         pw.println("");
         pw.println("  set-user-restriction [--user USER_ID] RESTRICTION VALUE");
+        pw.println("");
+        pw.println("  get-user-restriction [--user USER_ID] [--all] RESTRICTION_KEY");
+        pw.println("    Display the value of restriction for the given restriction key if the");
+        pw.println("    given user is valid.");
+        pw.println("      --all: display all restrictions for the given user");
+        pw.println("          This option is used without restriction key");
         pw.println("");
         pw.println("  get-max-users");
         pw.println("");
