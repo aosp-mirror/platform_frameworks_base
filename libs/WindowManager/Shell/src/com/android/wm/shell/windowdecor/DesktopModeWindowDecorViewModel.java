@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FINAL_FREEFORM_SCALE;
@@ -69,6 +68,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
@@ -348,13 +348,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final int id = v.getId();
             if (id == R.id.close_window || id == R.id.close_button) {
                 mTaskOperations.closeTask(mTaskToken);
-                if (mSplitScreenController != null
-                        && mSplitScreenController.isSplitScreenVisible()) {
-                    int remainingTaskPosition = mTaskId == mSplitScreenController
-                            .getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT).taskId
-                            ? SPLIT_POSITION_BOTTOM_OR_RIGHT : SPLIT_POSITION_TOP_OR_LEFT;
-                    ActivityManager.RunningTaskInfo remainingTask = mSplitScreenController
-                            .getTaskInfo(remainingTaskPosition);
+                if (isTaskInSplitScreen(mTaskId)) {
+                    RunningTaskInfo remainingTask = getOtherSplitTask(mTaskId);
                     mSplitScreenController.moveTaskToFullscreen(remainingTask.taskId);
                 }
                 decoration.closeMaximizeMenu();
@@ -376,6 +371,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
                     decoration.incrementRelayoutBlock();
                     mDesktopTasksController.get().moveToDesktop(decoration, mTaskId, wct);
+                    closeOtherSplitTask(mTaskId);
                 }
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {
@@ -720,6 +716,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > statusBarHeight) {
                         if (mMoveToDesktopAnimator == null) {
+                            closeOtherSplitTask(relevantDecor.mTaskInfo.taskId);
                             mMoveToDesktopAnimator = new MoveToDesktopAnimator(
                                     mDragToDesktopAnimationStartBounds, relevantDecor.mTaskInfo,
                                     relevantDecor.mTaskSurface);
@@ -810,7 +807,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private DesktopModeWindowDecoration getRelevantWindowDecor(MotionEvent ev) {
         if (mSplitScreenController != null && mSplitScreenController.isSplitScreenVisible()) {
             // We can't look at focused task here as only one task will have focus.
-            return getSplitScreenDecor(ev);
+            DesktopModeWindowDecoration splitTaskDecor = getSplitScreenDecor(ev);
+            return splitTaskDecor == null ? getFocusedDecor() : splitTaskDecor;
         } else {
             return getFocusedDecor();
         }
@@ -940,6 +938,24 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDisplayController, mDragStartListener, mTransitions,
                     transitionAreaHeight);
         }
+    }
+
+    private RunningTaskInfo getOtherSplitTask(int taskId) {
+        @SplitPosition int remainingTaskPosition = mSplitScreenController
+                .getSplitPosition(taskId) == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                ? SPLIT_POSITION_TOP_OR_LEFT : SPLIT_POSITION_BOTTOM_OR_RIGHT;
+        return mSplitScreenController.getTaskInfo(remainingTaskPosition);
+    }
+
+    private void closeOtherSplitTask(int taskId) {
+        if (isTaskInSplitScreen(taskId)) {
+            mTaskOperations.closeTask(getOtherSplitTask(taskId).token);
+        }
+    }
+
+    private boolean isTaskInSplitScreen(int taskId) {
+        return mSplitScreenController != null
+                && mSplitScreenController.isTaskInSplitScreen(taskId);
     }
 
     private class DragStartListenerImpl

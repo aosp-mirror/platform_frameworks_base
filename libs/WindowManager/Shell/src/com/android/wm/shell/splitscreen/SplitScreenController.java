@@ -23,7 +23,6 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
-
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -131,6 +130,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     public static final int EXIT_REASON_RECREATE_SPLIT = 10;
     public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
+    public static final int EXIT_REASON_ENTER_DESKTOP = 12;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -144,6 +144,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
             EXIT_REASON_RECREATE_SPLIT,
             EXIT_REASON_FULLSCREEN_SHORTCUT,
+            EXIT_REASON_ENTER_DESKTOP
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -1011,6 +1012,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "CHILD_TASK_ENTER_PIP";
             case EXIT_REASON_RECREATE_SPLIT:
                 return "RECREATE_SPLIT";
+            case EXIT_REASON_ENTER_DESKTOP:
+                return "ENTER_DESKTOP";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
