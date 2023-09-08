@@ -1,4 +1,4 @@
-// Copyright (C) 2022 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,25 +22,24 @@ package {
 }
 
 java_library_host {
-    name: "AndroidGlobalLintChecker",
+    name: "AndroidUtilsLintChecker",
     srcs: ["checks/src/main/java/**/*.kt"],
     plugins: ["auto_service_plugin"],
     libs: [
         "auto_service_annotations",
         "lint_api",
     ],
-    static_libs: ["AndroidCommonLint"],
+    static_libs: [
+        "AndroidCommonLint",
+    ],
     kotlincflags: ["-Xjvm-default=all"],
-    dist: {
-        targets: ["droid"],
-    },
 }
 
 java_test_host {
-    name: "AndroidGlobalLintCheckerTest",
+    name: "AndroidUtilsLintCheckerTest",
     defaults: ["AndroidLintCheckerTestDefaults"],
     srcs: ["checks/src/test/java/**/*.kt"],
     static_libs: [
-        "AndroidGlobalLintChecker",
+        "AndroidUtilsLintChecker",
     ],
 }
