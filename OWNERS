@@ -28,7 +28,7 @@ per-file */TEST_MAPPING = *
 # Support bulk translation updates
 per-file */res*/values*/*.xml = byi@google.com, delphij@google.com
 
-per-file **.bp,**.mk = hansson@google.com, joeo@google.com
+per-file **.bp,**.mk = hansson@google.com, joeo@google.com, lamontjones@google.com
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 
