@@ -269,6 +269,8 @@ public class DisplayPolicy {
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
 
+    private @InsetsType int mForciblyShownTypes;
+
     private boolean mIsImmersiveMode;
 
     // The windows we were told about in focusChanged.
@@ -1402,6 +1404,7 @@ public class DisplayPolicy {
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
         mIsFreeformWindowOverlappingWithNavBar = false;
+        mForciblyShownTypes = 0;
     }
 
     /**
@@ -1457,6 +1460,10 @@ public class DisplayPolicy {
                     mBottomGestureHost = win;
                 }
             }
+        }
+
+        if (win.mSession.mCanForceShowingInsets) {
+            mForciblyShownTypes |= win.mAttrs.forciblyShownTypes;
         }
 
         if (!affectsSystemUi) {
@@ -1638,6 +1645,10 @@ public class DisplayPolicy {
         }
 
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
+    }
+
+    boolean areTypesForciblyShownTransiently(@InsetsType int types) {
+        return (mForciblyShownTypes & types) == types;
     }
 
     /**
