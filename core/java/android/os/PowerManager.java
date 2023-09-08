@@ -19,6 +19,7 @@ package android.os;
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -41,14 +42,17 @@ import android.view.Display;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -1179,6 +1183,8 @@ public final class PowerManager {
 
     private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
             mListenerMap = new ArrayMap<>();
+    private final Object mThermalHeadroomThresholdsLock = new Object();
+    private float[] mThermalHeadroomThresholds = null;
 
     /**
      * {@hide}
@@ -2634,6 +2640,7 @@ public final class PowerManager {
     public static final int THERMAL_STATUS_SHUTDOWN = Temperature.THROTTLING_SHUTDOWN;
 
     /** @hide */
+    @Target(ElementType.TYPE_USE)
     @IntDef(prefix = { "THERMAL_STATUS_" }, value = {
             THERMAL_STATUS_NONE,
             THERMAL_STATUS_LIGHT,
@@ -2792,6 +2799,63 @@ public final class PowerManager {
             float forecast = mThermalService.getThermalHeadroom(forecastSeconds);
             mLastHeadroomUpdate.set(SystemClock.elapsedRealtime());
             return forecast;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the thermal headroom thresholds for all available thermal throttling status above
+     * {@link #THERMAL_STATUS_NONE}.
+     * <p>
+     * A thermal status key in the returned map is only set if the device manufacturer has the
+     * corresponding threshold defined for at least one of its sensors. If it's set, one should
+     * expect to see that from {@link #getCurrentThermalStatus()} or
+     * {@link OnThermalStatusChangedListener#onThermalStatusChanged(int)}.
+     * <p>
+     * The headroom threshold is used to interpret the possible thermal throttling status based on
+     * the headroom prediction. For example, if the headroom threshold for
+     * {@link #THERMAL_STATUS_LIGHT} is 0.7, and a headroom prediction in 10s returns 0.75
+     * (or {@code getThermalHeadroom(10)=0.75}), one can expect that in 10 seconds the system could
+     * be in lightly throttled state if the workload remains the same. The app can consider
+     * taking actions according to the nearest throttling status the difference between the headroom
+     * and the threshold.
+     * <p>
+     * For new devices it's guaranteed to have a single sensor, but for older devices with multiple
+     * sensors reporting different threshold values, the minimum threshold is taken to be
+     * conservative on predictions. Thus, when reading real-time headroom, it's not guaranteed that
+     * a real-time value of 0.75 (or {@code getThermalHeadroom(0)}=0.75) exceeding the threshold of
+     * 0.7 above will always come with lightly throttled state
+     * (or {@code getCurrentThermalStatus()=THERMAL_STATUS_LIGHT}) but it can be lower
+     * (or {@code getCurrentThermalStatus()=THERMAL_STATUS_NONE}). While it's always guaranteed that
+     * the device won't be throttled heavier than the unmet threshold's state, so a real-time
+     * headroom of 0.75 will never come with {@link #THERMAL_STATUS_MODERATE} but lower, and 0.65
+     * will never come with {@link #THERMAL_STATUS_LIGHT} but {@link #THERMAL_STATUS_NONE}.
+     * <p>
+     * The returned map of thresholds will not change between calls to this function, so it's
+     * best to call this once on initialization. Modifying the result will not change the thresholds
+     * cached by the system, and a new call to the API will get a new copy.
+     *
+     * @return map from each thermal status to its thermal headroom
+     * @throws IllegalStateException if the thermal service is not ready
+     * @throws UnsupportedOperationException if the feature is not enabled
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_THERMAL_HEADROOM_THRESHOLDS)
+    public @NonNull Map<@ThermalStatus Integer, Float> getThermalHeadroomThresholds() {
+        try {
+            synchronized (mThermalHeadroomThresholdsLock) {
+                if (mThermalHeadroomThresholds == null) {
+                    mThermalHeadroomThresholds = mThermalService.getThermalHeadroomThresholds();
+                }
+                final ArrayMap<Integer, Float> ret = new ArrayMap<>(THERMAL_STATUS_SHUTDOWN);
+                for (int status = THERMAL_STATUS_LIGHT; status <= THERMAL_STATUS_SHUTDOWN;
+                        status++) {
+                    if (!Float.isNaN(mThermalHeadroomThresholds[status])) {
+                        ret.put(status, mThermalHeadroomThresholds[status]);
+                    }
+                }
+                return ret;
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
