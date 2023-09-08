@@ -42,6 +42,7 @@
 #include <android_view_VerifiedMotionEvent.h>
 #include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
 #include <binder/IServiceManager.h>
+#include <com_android_input_flags.h>
 #include <input/Input.h>
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
@@ -80,6 +81,8 @@ using android::os::InputEventInjectionSync;
 static constexpr std::chrono::duration MAX_VIBRATE_PATTERN_DELAY = 100s;
 static constexpr std::chrono::milliseconds MAX_VIBRATE_PATTERN_DELAY_MILLIS =
         std::chrono::duration_cast<std::chrono::milliseconds>(MAX_VIBRATE_PATTERN_DELAY);
+
+namespace input_flags = com::android::input::flags;
 
 namespace android {
 
@@ -733,7 +736,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerCon
         ensureSpriteControllerLocked();
 
         static const bool ENABLE_POINTER_CHOREOGRAPHER =
-                sysprop::InputProperties::enable_pointer_choreographer().value_or(false);
+                input_flags::enable_pointer_choreographer();
 
         // Disable the functionality of the legacy PointerController if PointerChoreographer is
         // enabled.
