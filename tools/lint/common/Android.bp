@@ -27,3 +27,30 @@ java_library_host {
     libs: ["lint_api"],
     kotlincflags: ["-Xjvm-default=all"],
 }
+
+java_defaults {
+    name: "AndroidLintCheckerTestDefaults",
+    srcs: ["checks/src/test/java/**/*.kt"],
+    static_libs: [
+        "junit",
+        "lint",
+        "lint_tests",
+    ],
+    test_options: {
+        unit_test: true,
+        tradefed_options: [
+            {
+                // lint bundles in some classes that were built with older versions
+                // of libraries, and no longer load. Since tradefed tries to load
+                // all classes in the jar to look for tests, it crashes loading them.
+                // Exclude these classes from tradefed's search.
+                name: "exclude-paths",
+                value: "org/apache",
+            },
+            {
+                name: "exclude-paths",
+                value: "META-INF",
+            },
+        ],
+    },
+}
