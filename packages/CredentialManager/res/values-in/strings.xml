@@ -54,7 +54,7 @@
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Simpan info login di perangkat lain?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Gunakan <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> untuk semua info login Anda?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Pengelola sandi untuk <xliff:g id="USERNAME">%1$s</xliff:g> ini akan menyimpan sandi dan kunci sandi guna membantu Anda login dengan mudah"</string>
-    <string name="set_as_default" msgid="4415328591568654603">"Setel sebagai default"</string>
+    <string name="set_as_default" msgid="4415328591568654603">"Jadikan default"</string>
     <string name="settings" msgid="6536394145760913145">"Setelan"</string>
     <string name="use_once" msgid="9027366575315399714">"Gunakan sekali"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> sandi • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> kunci sandi"</string>
