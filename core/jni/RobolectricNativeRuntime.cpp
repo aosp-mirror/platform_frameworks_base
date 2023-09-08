@@ -51,6 +51,9 @@ int AndroidRuntime::registerNativeMethods(JNIEnv* env, const char* className,
                                           const JNINativeMethod* gMethods, int numMethods) {
     std::string fullClassName = std::string(className);
     std::string classNameString = fullClassName.substr(fullClassName.find_last_of("/"));
+    // strip out inner class notation '$'
+    classNameString.erase(std::remove(classNameString.begin(), classNameString.end(), '$'),
+                          classNameString.end());
     std::string roboNativeBindingClass =
             "org/robolectric/nativeruntime" + classNameString + "Natives";
     jclass clazz = FindClassOrDie(env, roboNativeBindingClass.c_str());
