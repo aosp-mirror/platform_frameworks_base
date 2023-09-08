@@ -18,6 +18,7 @@ package android.service.voice;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.media.AudioFormat;
 import android.os.Parcel;
@@ -86,6 +87,7 @@ public final class HotwordTrainingAudio implements Parcelable {
          * Buffer of hotword audio data for training models. The data format is expected to match
          * {@link #getAudioFormat()}.
          */
+        @SuppressLint("UnflaggedApi")
         public @NonNull HotwordTrainingAudio.Builder setHotwordAudio(@NonNull byte[] value) {
             Objects.requireNonNull(value, "value should not be null");
             final HotwordTrainingAudio.Builder builder = (HotwordTrainingAudio.Builder) this;
@@ -366,10 +368,10 @@ public final class HotwordTrainingAudio implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1693937446033L,
+            time = 1694193905346L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/voice/HotwordTrainingAudio.java",
-            inputSignatures = "public static final  int HOTWORD_OFFSET_UNSET\nprivate final @android.annotation.NonNull byte[] mHotwordAudio\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull int mAudioType\nprivate  int mHotwordOffsetMillis\nprivate  java.lang.String hotwordAudioToString()\nprivate static  int defaultAudioType()\nclass HotwordTrainingAudio extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int HOTWORD_OFFSET_UNSET\nprivate final @android.annotation.NonNull byte[] mHotwordAudio\nprivate final @android.annotation.NonNull android.media.AudioFormat mAudioFormat\nprivate final @android.annotation.NonNull int mAudioType\nprivate  int mHotwordOffsetMillis\nprivate  java.lang.String hotwordAudioToString()\nprivate static  int defaultAudioType()\nclass HotwordTrainingAudio extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.service.voice.HotwordTrainingAudio.Builder setHotwordAudio(byte[])\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 
