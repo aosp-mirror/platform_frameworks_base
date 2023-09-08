@@ -214,3 +214,11 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
 }
+
+filegroup {
+    name: "libmedia_host_common",
+    srcs: [
+        "android_media_ImageReader.cpp",
+        "android_media_Utils.cpp",
+    ],
+}
