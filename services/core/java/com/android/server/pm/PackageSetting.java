@@ -35,6 +35,7 @@ import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.service.pm.PackageProto;
+import android.service.pm.PackageProto.UserInfoProto.ArchiveState.ArchiveActivityInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1161,18 +1162,15 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             long activityInfoToken = proto.start(
                     PackageProto.UserInfoProto.ArchiveState.ACTIVITY_INFOS);
-            proto.write(PackageProto.UserInfoProto.ArchiveState.ArchiveActivityInfo.TITLE,
-                    activityInfo.getTitle());
-            proto.write(
-                    PackageProto.UserInfoProto.ArchiveState.ArchiveActivityInfo.ICON_BITMAP_PATH,
-                    activityInfo.getIconBitmap().toAbsolutePath().toString());
-            proto.write(
-                    PackageProto
-                            .UserInfoProto
-                            .ArchiveState
-                            .ArchiveActivityInfo
-                            .MONOCHROME_ICON_BITMAP_PATH,
-                    activityInfo.getMonochromeIconBitmap().toAbsolutePath().toString());
+            proto.write(ArchiveActivityInfo.TITLE, activityInfo.getTitle());
+            if (activityInfo.getIconBitmap() != null) {
+                proto.write(ArchiveActivityInfo.ICON_BITMAP_PATH,
+                        activityInfo.getIconBitmap().toAbsolutePath().toString());
+            }
+            if (activityInfo.getMonochromeIconBitmap() != null) {
+                proto.write(ArchiveActivityInfo.MONOCHROME_ICON_BITMAP_PATH,
+                        activityInfo.getMonochromeIconBitmap().toAbsolutePath().toString());
+            }
             proto.end(activityInfoToken);
         }
 
