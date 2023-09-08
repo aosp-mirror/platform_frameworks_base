@@ -54,15 +54,15 @@ constructor(
         if (!featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
             return
         }
-        notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
+        notificationPanelView.findViewById<View>(lockIconViewId).let {
             notificationPanelView.removeView(it)
         }
-        val view = LockIconView(context, null).apply { id = R.id.lock_icon_view }
+        val view = LockIconView(context, null).apply { id = lockIconViewId }
         constraintLayout.addView(view)
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        constraintLayout.findViewById<LockIconView?>(R.id.lock_icon_view)?.let {
+        constraintLayout.findViewById<LockIconView?>(lockIconViewId)?.let {
             lockIconViewController.setLockIconView(it)
         }
     }
@@ -97,7 +97,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        constraintLayout.removeView(R.id.lock_icon_view)
+        constraintLayout.removeView(lockIconViewId)
     }
 
     @VisibleForTesting
