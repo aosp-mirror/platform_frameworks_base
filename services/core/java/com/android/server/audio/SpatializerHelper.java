@@ -564,7 +564,7 @@ public class SpatializerHelper {
         }
         if (updatedDevice != null) {
             onRoutingUpdated();
-            mDeviceBroker.persistAudioDeviceSettings();
+            mDeviceBroker.postPersistAudioDeviceSettings();
             logDeviceState(updatedDevice, "addCompatibleAudioDevice");
         }
     }
@@ -614,7 +614,7 @@ public class SpatializerHelper {
         if (deviceState != null && deviceState.isSAEnabled()) {
             deviceState.setSAEnabled(false);
             onRoutingUpdated();
-            mDeviceBroker.persistAudioDeviceSettings();
+            mDeviceBroker.postPersistAudioDeviceSettings();
             logDeviceState(deviceState, "removeCompatibleAudioDevice");
         }
     }
@@ -716,7 +716,7 @@ public class SpatializerHelper {
                             ada.getAddress());
             initSAState(deviceState);
             mDeviceBroker.addOrUpdateDeviceSAStateInInventory(deviceState);
-            mDeviceBroker.persistAudioDeviceSettings();
+            mDeviceBroker.postPersistAudioDeviceSettings();
             logDeviceState(deviceState, "addWirelessDeviceIfNew"); // may be updated later.
         }
     }
@@ -1206,7 +1206,7 @@ public class SpatializerHelper {
         }
         Log.i(TAG, "setHeadTrackerEnabled enabled:" + enabled + " device:" + ada);
         deviceState.setHeadTrackerEnabled(enabled);
-        mDeviceBroker.persistAudioDeviceSettings();
+        mDeviceBroker.postPersistAudioDeviceSettings();
         logDeviceState(deviceState, "setHeadTrackerEnabled");
 
         // check current routing to see if it affects the headtracking mode
@@ -1248,7 +1248,7 @@ public class SpatializerHelper {
         if (deviceState != null) {
             if (!deviceState.hasHeadTracker()) {
                 deviceState.setHasHeadTracker(true);
-                mDeviceBroker.persistAudioDeviceSettings();
+                mDeviceBroker.postPersistAudioDeviceSettings();
                 logDeviceState(deviceState, "setHasHeadTracker");
             }
             return deviceState.isHeadTrackerEnabled();
@@ -1631,25 +1631,33 @@ public class SpatializerHelper {
             return headHandle;
         }
         final AudioDeviceAttributes currentDevice = sRoutingDevices.get(0);
-        UUID routingDeviceUuid = mAudioService.getDeviceSensorUuid(currentDevice);
+        List<String> deviceAddresses = mAudioService.getDeviceAddresses(currentDevice);
+
         // We limit only to Sensor.TYPE_HEAD_TRACKER here to avoid confusion
         // with gaming sensors. (Note that Sensor.TYPE_ROTATION_VECTOR
         // and Sensor.TYPE_GAME_ROTATION_VECTOR are supported internally by
         // SensorPoseProvider).
         // Note: this is a dynamic sensor list right now.
         List<Sensor> sensors = mSensorManager.getDynamicSensorList(Sensor.TYPE_HEAD_TRACKER);
-        for (Sensor sensor : sensors) {
-            final UUID uuid = sensor.getUuid();
-            if (uuid.equals(routingDeviceUuid)) {
-                headHandle = sensor.getHandle();
-                if (!setHasHeadTracker(currentDevice)) {
-                    headHandle = -1;
+        for (String address : deviceAddresses) {
+            UUID routingDeviceUuid = UuidUtils.uuidFromAudioDeviceAttributes(
+                    new AudioDeviceAttributes(currentDevice.getInternalType(), address));
+            for (Sensor sensor : sensors) {
+                final UUID uuid = sensor.getUuid();
+                if (uuid.equals(routingDeviceUuid)) {
+                    headHandle = sensor.getHandle();
+                    if (!setHasHeadTracker(currentDevice)) {
+                        headHandle = -1;
+                    }
+                    break;
                 }
-                break;
+                if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
+                    headHandle = sensor.getHandle();
+                    // we do not break, perhaps we find a head tracker on device.
+                }
             }
-            if (uuid.equals(UuidUtils.STANDALONE_UUID)) {
-                headHandle = sensor.getHandle();
-                // we do not break, perhaps we find a head tracker on device.
+            if (headHandle != -1) {
+                break;
             }
         }
         return headHandle;

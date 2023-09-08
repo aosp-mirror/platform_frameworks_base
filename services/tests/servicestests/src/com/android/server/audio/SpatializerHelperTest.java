@@ -79,7 +79,7 @@ public class SpatializerHelperTest {
         final AudioDeviceAttributes dev3 =
                 new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, "R2:D2:bloop");
 
-        doNothing().when(mSpyDeviceBroker).persistAudioDeviceSettings();
+        doNothing().when(mSpyDeviceBroker).postPersistAudioDeviceSettings();
         mSpatHelper.initForTest(true /*binaural*/, true /*transaural*/);
 
         // test with single device

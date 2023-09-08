@@ -26,7 +26,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
+import android.bluetooth.BluetoothLeAudioCodecStatus;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
@@ -43,6 +45,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +60,11 @@ public class BtHelper {
     private static final String TAG = "AS.BtHelper";
 
     private final @NonNull AudioDeviceBroker mDeviceBroker;
+    private final @NonNull Context mContext;
 
-    BtHelper(@NonNull AudioDeviceBroker broker) {
+    BtHelper(@NonNull AudioDeviceBroker broker, Context context) {
         mDeviceBroker = broker;
+        mContext = context;
     }
 
     // BluetoothHeadset API to control SCO connection
@@ -498,6 +503,32 @@ public class BtHelper {
         }
     }
 
+    // BluetoothLeAudio callback used to update the list of addresses in the same group as a
+    // connected LE Audio device
+    MyLeAudioCallback mLeAudioCallback = null;
+
+    class MyLeAudioCallback implements BluetoothLeAudio.Callback {
+        @Override
+        public void onCodecConfigChanged(int groupId,
+                                  @NonNull BluetoothLeAudioCodecStatus status) {
+            // Do nothing
+        }
+
+        @Override
+        public void onGroupNodeAdded(@NonNull BluetoothDevice device, int groupId) {
+            mDeviceBroker.postUpdateLeAudioGroupAddresses(groupId);
+        }
+
+        @Override
+        public void onGroupNodeRemoved(@NonNull BluetoothDevice device, int groupId) {
+            mDeviceBroker.postUpdateLeAudioGroupAddresses(groupId);
+        }
+        @Override
+        public void onGroupStatusChanged(int groupId, int groupStatus) {
+            mDeviceBroker.postUpdateLeAudioGroupAddresses(groupId);
+        }
+    }
+
     // @GuardedBy("mDeviceBroker.mSetModeLock")
     @GuardedBy("AudioDeviceBroker.this.mDeviceStateLock")
     /*package*/ synchronized void onBtProfileConnected(int profile, BluetoothProfile proxy) {
@@ -519,6 +550,11 @@ public class BtHelper {
                 mHearingAid = (BluetoothHearingAid) proxy;
                 break;
             case BluetoothProfile.LE_AUDIO:
+                if (mLeAudio == null) {
+                    mLeAudioCallback = new MyLeAudioCallback();
+                    ((BluetoothLeAudio) proxy).registerCallback(
+                            mContext.getMainExecutor(), mLeAudioCallback);
+                }
                 mLeAudio = (BluetoothLeAudio) proxy;
                 break;
             case BluetoothProfile.A2DP_SINK:
@@ -975,6 +1011,28 @@ public class BtHelper {
         mDeviceBroker.handleFailureToConnectToBtHeadsetService(
                 result ? AudioDeviceBroker.BT_HEADSET_CNCT_TIMEOUT_MS : 0);
         return result;
+    }
+
+    /*package*/ int getLeAudioDeviceGroupId(BluetoothDevice device) {
+        if (mLeAudio == null || device == null) {
+            return BluetoothLeAudio.GROUP_ID_INVALID;
+        }
+        return mLeAudio.getGroupId(device);
+    }
+
+    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
+        List<String> addresses = new ArrayList<String>();
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null || mLeAudio == null) {
+            return addresses;
+        }
+        List<BluetoothDevice> activeDevices = adapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
+        for (BluetoothDevice device : activeDevices) {
+            if (device != null && mLeAudio.getGroupId(device) == groupId) {
+                addresses.add(device.getAddress());
+            }
+        }
+        return addresses;
     }
 
     /**
