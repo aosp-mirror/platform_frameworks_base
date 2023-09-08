@@ -319,7 +319,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder à vos activités physiques"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et filmer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"découvrir les appareils à proximité et s\'y connecter"</string>
