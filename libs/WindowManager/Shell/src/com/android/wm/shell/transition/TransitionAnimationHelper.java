@@ -45,7 +45,6 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.window.ScreenCapture;
@@ -62,10 +61,10 @@ public class TransitionAnimationHelper {
 
     /** Loads the animation that is defined through attribute id for the given transition. */
     @Nullable
-    public static Animation loadAttributeAnimation(@WindowManager.TransitionType int type,
-            @NonNull TransitionInfo info, @NonNull TransitionInfo.Change change,
-            int wallpaperTransit, @NonNull TransitionAnimation transitionAnimation,
-            boolean isDreamTransition) {
+    public static Animation loadAttributeAnimation(@NonNull TransitionInfo info,
+            @NonNull TransitionInfo.Change change, int wallpaperTransit,
+            @NonNull TransitionAnimation transitionAnimation, boolean isDreamTransition) {
+        final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
         final boolean enter = TransitionUtil.isOpeningType(changeMode);

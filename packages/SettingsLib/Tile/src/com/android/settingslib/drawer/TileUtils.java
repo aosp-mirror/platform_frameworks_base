@@ -344,7 +344,9 @@ public class TileUtils {
                 continue;
             }
             final ProviderInfo providerInfo = resolved.providerInfo;
-            final List<Bundle> entryData = getEntryDataFromProvider(context,
+            final List<Bundle> entryData = getEntryDataFromProvider(
+                    // Build new context so the entry data is retrieved for the queried user.
+                    context.createContextAsUser(user, 0 /* flags */),
                     providerInfo.authority);
             if (entryData == null || entryData.isEmpty()) {
                 continue;
