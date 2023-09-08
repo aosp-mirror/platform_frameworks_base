@@ -9543,6 +9543,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } else {
             worker.start();
+            if (process != null && process.mPid == MY_PID && "crash".equals(eventType)) {
+                // We're actually crashing, let's wait for up to 2 seconds before killing ourselves,
+                // so the data could be persisted into the dropbox.
+                try {
+                    worker.join(2000);
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
     }
 
