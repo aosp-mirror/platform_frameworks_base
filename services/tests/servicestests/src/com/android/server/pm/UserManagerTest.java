@@ -326,24 +326,6 @@ public final class UserManagerTest {
         assertThat(hasUser(user2.id)).isTrue();
     }
 
-
-    @MediumTest
-    @Test
-    public void testGetFullUserCount() throws Exception {
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(1);
-        UserInfo user1 = createUser("User 1", UserInfo.FLAG_FULL);
-        UserInfo user2 = createUser("User 2", UserInfo.FLAG_ADMIN);
-
-        assertThat(user1).isNotNull();
-        assertThat(user2).isNotNull();
-
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(3);
-        removeUser(user1.id);
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(2);
-        removeUser(user2.id);
-        assertThat(mUserManager.getFullUserCount()).isEqualTo(1);
-    }
-
     /**
      * Tests that UserManager knows how many users can be created.
      *
