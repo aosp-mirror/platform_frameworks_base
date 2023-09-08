@@ -1,0 +1,7 @@
+package: "com.android.server.accessibility"
+flag {
+    name: "proxy_use_apps_on_virtual_device_listener"
+    namespace: "accessibility"
+    description: "Fixes race condition described in b/286587811"
+    bug: "286587811"
+}
