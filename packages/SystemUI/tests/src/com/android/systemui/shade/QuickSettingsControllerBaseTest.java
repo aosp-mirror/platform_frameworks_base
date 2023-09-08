@@ -34,7 +34,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
@@ -48,6 +47,8 @@ import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
+import com.android.systemui.scene.SceneTestUtils;
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -99,7 +100,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
 
     protected QuickSettingsController mQsController;
 
-    protected TestScope mTestScope = TestScopeProvider.getTestScope();
+    protected SceneTestUtils mUtils = new SceneTestUtils(this);
+    protected TestScope mTestScope = mUtils.getTestScope();
 
     @Mock
     protected Resources mResources;
@@ -172,6 +174,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new ShadeInteractor(
                         mTestScope.getBackgroundScope(),
                         mDisableFlagsRepository,
+                        new FakeSceneContainerFlags(),
+                        () -> mUtils.sceneInteractor(),
                         mKeyguardRepository,
                         new FakeUserSetupRepository(),
                         mDeviceProvisionedController,

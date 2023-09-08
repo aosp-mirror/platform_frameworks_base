@@ -42,7 +42,7 @@ interface ShadeRepository {
 
     /**
      * The amount the lockscreen shade has dragged down by the user, [0-1]. 0 means fully collapsed,
-     * 1 means fully expanded.
+     * 1 means fully expanded. Value resets to 0 when the user finishes dragging.
      */
     val lockscreenShadeExpansion: StateFlow<Float>
 

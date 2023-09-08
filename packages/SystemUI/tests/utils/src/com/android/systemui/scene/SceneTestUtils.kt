@@ -127,6 +127,7 @@ class SceneTestUtils(
         )
     }
 
+    @JvmOverloads
     fun sceneInteractor(
         repository: SceneContainerRepository = fakeSceneContainerRepository()
     ): SceneInteractor {
