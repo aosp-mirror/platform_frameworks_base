@@ -40,7 +40,7 @@ constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val faceAuthInteractor: KeyguardFaceAuthInteractor,
 ) : View.AccessibilityDelegate() {
-    override fun onInitializeAccessibilityNodeInfo(host: View?, info: AccessibilityNodeInfo) {
+    override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(host, info)
         if (keyguardUpdateMonitor.shouldListenForFace()) {
             val clickActionToRetryFace =
@@ -52,7 +52,7 @@ constructor(
         }
     }
 
-    override fun performAccessibilityAction(host: View?, action: Int, args: Bundle?): Boolean {
+    override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
         return if (action == AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id) {
             keyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.ACCESSIBILITY_ACTION)
             faceAuthInteractor.onAccessibilityAction()
