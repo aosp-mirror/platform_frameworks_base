@@ -45,6 +45,23 @@ final class TestUtils {
     static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector,
             ProgramSelector.Identifier logicallyTunedTo,
             ProgramSelector.Identifier physicallyTunedTo, int signalQuality) {
+        if (logicallyTunedTo == null) {
+            logicallyTunedTo = selector.getPrimaryId();
+        }
+        if (physicallyTunedTo == null) {
+            if (selector.getPrimaryId().getType()
+                    == ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT) {
+                for (int i = 0; i < selector.getSecondaryIds().length; i++) {
+                    if (selector.getSecondaryIds()[i].getType()
+                            == ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY) {
+                        physicallyTunedTo = selector.getSecondaryIds()[i];
+                        break;
+                    }
+                }
+            } else {
+                physicallyTunedTo = selector.getPrimaryId();
+            }
+        }
         return new RadioManager.ProgramInfo(selector,
                 logicallyTunedTo, physicallyTunedTo, /* relatedContents= */ null,
                 /* infoFlags= */ 0, signalQuality,
@@ -52,14 +69,8 @@ final class TestUtils {
     }
 
     static RadioManager.ProgramInfo makeProgramInfo(ProgramSelector selector, int signalQuality) {
-        return makeProgramInfo(selector, selector.getPrimaryId(), selector.getPrimaryId(),
-                signalQuality);
-    }
-
-    static RadioManager.ProgramInfo makeProgramInfo(int programType,
-            ProgramSelector.Identifier identifier, int signalQuality) {
-        return makeProgramInfo(makeProgramSelector(programType, identifier),
-                /* logicallyTunedTo= */ null, /* physicallyTunedTo= */ null, signalQuality);
+        return makeProgramInfo(selector, /* logicallyTunedTo= */ null,
+                /* physicallyTunedTo= */ null, signalQuality);
     }
 
     static ProgramSelector makeFmSelector(long freq) {
@@ -70,8 +81,12 @@ final class TestUtils {
 
     static ProgramSelector makeProgramSelector(int programType,
             ProgramSelector.Identifier identifier) {
-        return new ProgramSelector(programType, identifier, /* secondaryIds= */ null,
-                /* vendorIds= */ null);
+        return makeProgramSelector(programType, identifier, /* secondaryIds= */ null);
+    }
+
+    static ProgramSelector makeProgramSelector(int programType,
+            ProgramSelector.Identifier primaryId, ProgramSelector.Identifier[] secondaryIds) {
+        return new ProgramSelector(programType, primaryId, secondaryIds, /* vendorIds= */ null);
     }
 
     static ProgramInfo programInfoToHal(RadioManager.ProgramInfo info) {
@@ -79,6 +94,21 @@ final class TestUtils {
         // function only copies fields that are set by makeProgramInfo().
         ProgramInfo hwInfo = new ProgramInfo();
         hwInfo.selector = Convert.programSelectorToHal(info.getSelector());
+        hwInfo.logicallyTunedTo = hwInfo.selector.primaryId;
+        if (info.getSelector().getPrimaryId().getType()
+                == ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT) {
+            for (int i = 0; i < info.getSelector().getSecondaryIds().length; i++) {
+                if (info.getSelector().getSecondaryIds()[i].getType()
+                        == ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY) {
+                    hwInfo.physicallyTunedTo = Convert.programIdentifierToHal(info.getSelector()
+                            .getSecondaryIds()[i]);
+                    break;
+                }
+            }
+        } else {
+            hwInfo.physicallyTunedTo = Convert.programIdentifierToHal(info.getSelector()
+                    .getPrimaryId());
+        }
         hwInfo.signalQuality = info.getSignalStrength();
         return hwInfo;
     }

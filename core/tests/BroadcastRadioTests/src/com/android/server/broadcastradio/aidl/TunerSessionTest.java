@@ -47,6 +47,7 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.Binder;
 import android.os.ParcelableException;
 import android.os.RemoteException;
@@ -97,6 +98,9 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     private static final ProgramSelector.Identifier TEST_RDS_PI_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI,
                     /* value= */ 15_019);
+
+    private static final UniqueProgramIdentifier TEST_RDS_PI_UNIQUE_ID =
+            new UniqueProgramIdentifier(TEST_RDS_PI_ID);
 
     private static final RadioManager.ProgramInfo TEST_FM_INFO = AidlTestUtils.makeProgramInfo(
             AidlTestUtils.makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM,
@@ -704,9 +708,10 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                 /* includeCategories= */ true, /* excludeModifications= */ false);
         ProgramFilter halFilter = ConversionUtils.filterToHalProgramFilter(filter);
         List<RadioManager.ProgramInfo> modified = List.of(TEST_FM_INFO, TEST_RDS_INFO);
-        List<ProgramSelector.Identifier> removed = new ArrayList<>();
+        List<ProgramSelector.Identifier> halRemoved = new ArrayList<>();
+        List<UniqueProgramIdentifier> removed = new ArrayList<>();
         ProgramListChunk halProgramList = AidlTestUtils.makeHalChunk(/* purge= */ true,
-                /* complete= */ true, modified, removed);
+                /* complete= */ true, modified, halRemoved);
         ProgramList.Chunk expectedProgramList =
                 AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ true, modified, removed);
 
@@ -735,7 +740,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
                 AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
-                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_UNIQUE_ID)));
     }
 
     @Test
@@ -753,7 +758,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
                 /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
                 AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
-                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_UNIQUE_ID)));
 
         mTunerSessions[0].startProgramListUpdates(filter);
 
@@ -781,7 +786,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onProgramListUpdated(
                 AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
-                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_ID)));
+                        List.of(TEST_FM_INFO_MODIFIED), List.of(TEST_RDS_PI_UNIQUE_ID)));
     }
 
     @Test

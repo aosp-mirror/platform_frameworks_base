@@ -74,18 +74,45 @@ public final class ProgramListTest {
     private static final ProgramSelector.Identifier DAB_ENSEMBLE_IDENTIFIER =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
                     /* value= */ 0x1013);
+    private static final ProgramSelector.Identifier DAB_FREQUENCY_IDENTIFIER_1 =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                    /* value= */ 222_064);
+    private static final ProgramSelector.Identifier DAB_FREQUENCY_IDENTIFIER_2 =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                    /* value= */ 220_352);
+
+    private static final ProgramSelector DAB_SELECTOR_1 = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_DAB, DAB_DMB_SID_EXT_IDENTIFIER,
+            new ProgramSelector.Identifier[]{DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER_1},
+            /* vendorIds= */ null);
+    private static final ProgramSelector DAB_SELECTOR_2 = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_DAB, DAB_DMB_SID_EXT_IDENTIFIER,
+            new ProgramSelector.Identifier[]{DAB_ENSEMBLE_IDENTIFIER, DAB_FREQUENCY_IDENTIFIER_2},
+            /* vendorIds= */ null);
+
+    private static final UniqueProgramIdentifier RDS_UNIQUE_IDENTIFIER =
+            new UniqueProgramIdentifier(RDS_IDENTIFIER);
+    private static final UniqueProgramIdentifier DAB_UNIQUE_IDENTIFIER_1 =
+            new UniqueProgramIdentifier(DAB_SELECTOR_1);
+    private static final UniqueProgramIdentifier DAB_UNIQUE_IDENTIFIER_2 =
+            new UniqueProgramIdentifier(DAB_SELECTOR_2);
+
     private static final RadioManager.ProgramInfo FM_PROGRAM_INFO = createFmProgramInfo(
             createProgramSelector(ProgramSelector.PROGRAM_TYPE_FM, FM_IDENTIFIER));
-    private static final RadioManager.ProgramInfo RDS_PROGRAM_INFO = createFmProgramInfo(
-            createProgramSelector(ProgramSelector.PROGRAM_TYPE_FM, RDS_IDENTIFIER));
+    private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO_1 = createDabProgramInfo(
+            DAB_SELECTOR_1);
+    private static final RadioManager.ProgramInfo DAB_PROGRAM_INFO_2 = createDabProgramInfo(
+            DAB_SELECTOR_2);
 
     private static final Set<Integer> FILTER_IDENTIFIER_TYPES = Set.of(
-            ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, ProgramSelector.IDENTIFIER_TYPE_RDS_PI);
-    private static final Set<ProgramSelector.Identifier> FILTER_IDENTIFIERS = Set.of(FM_IDENTIFIER);
+            ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
+            ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT);
+    private static final Set<ProgramSelector.Identifier> FILTER_IDENTIFIERS = Set.of(
+            FM_IDENTIFIER, DAB_DMB_SID_EXT_IDENTIFIER);
 
-    private static final ProgramList.Chunk FM_RDS_ADD_CHUNK = new ProgramList.Chunk(IS_PURGE,
-            IS_COMPLETE, Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-            Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
+    private static final ProgramList.Chunk FM_DAB_ADD_CHUNK = new ProgramList.Chunk(IS_PURGE,
+            IS_COMPLETE, Set.of(FM_PROGRAM_INFO, DAB_PROGRAM_INFO_1, DAB_PROGRAM_INFO_2),
+            Set.of(RDS_UNIQUE_IDENTIFIER));
     private static final ProgramList.Chunk FM_ADD_INCOMPLETE_CHUNK = new ProgramList.Chunk(IS_PURGE,
             /* complete= */ false, Set.of(FM_PROGRAM_INFO), new ArraySet<>());
     private static final ProgramList.Filter TEST_FILTER = new ProgramList.Filter(
@@ -213,58 +240,44 @@ public final class ProgramListTest {
 
     @Test
     public void isPurge_forChunk() {
-        ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
-                Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
-
-        assertWithMessage("Puring chunk").that(chunk.isPurge()).isEqualTo(IS_PURGE);
+        assertWithMessage("Puring chunk").that(FM_DAB_ADD_CHUNK.isPurge()).isEqualTo(IS_PURGE);
     }
 
     @Test
     public void isComplete_forChunk() {
-        ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
-                Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
-
-        assertWithMessage("Complete chunk").that(chunk.isComplete()).isEqualTo(IS_COMPLETE);
+        assertWithMessage("Complete chunk").that(FM_DAB_ADD_CHUNK.isComplete())
+                .isEqualTo(IS_COMPLETE);
     }
 
     @Test
     public void getModified_forChunk() {
-        ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
-                Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
-
         assertWithMessage("Modified program info in chunk")
-                .that(chunk.getModified()).containsExactly(FM_PROGRAM_INFO, RDS_PROGRAM_INFO);
+                .that(FM_DAB_ADD_CHUNK.getModified())
+                .containsExactly(FM_PROGRAM_INFO, DAB_PROGRAM_INFO_1, DAB_PROGRAM_INFO_2);
     }
 
     @Test
     public void getRemoved_forChunk() {
-        ProgramList.Chunk chunk = new ProgramList.Chunk(IS_PURGE, IS_COMPLETE,
-                Set.of(FM_PROGRAM_INFO, RDS_PROGRAM_INFO),
-                Set.of(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER));
-
-        assertWithMessage("Removed program identifiers in chunk").that(chunk.getRemoved())
-                .containsExactly(DAB_DMB_SID_EXT_IDENTIFIER, DAB_ENSEMBLE_IDENTIFIER);
+        assertWithMessage("Removed program identifiers in chunk")
+                .that(FM_DAB_ADD_CHUNK.getRemoved()).containsExactly(RDS_UNIQUE_IDENTIFIER);
     }
 
     @Test
     public void describeContents_forChunk() {
-        assertWithMessage("Chunk contents").that(FM_RDS_ADD_CHUNK.describeContents()).isEqualTo(0);
+        assertWithMessage("Chunk contents").that(FM_DAB_ADD_CHUNK.describeContents()).isEqualTo(0);
     }
 
     @Test
     public void writeToParcel_forChunk() {
         Parcel parcel = Parcel.obtain();
 
-        FM_RDS_ADD_CHUNK.writeToParcel(parcel, /* flags= */ 0);
+        FM_DAB_ADD_CHUNK.writeToParcel(parcel, /* flags= */ 0);
         parcel.setDataPosition(0);
 
         ProgramList.Chunk chunkFromParcel =
                 ProgramList.Chunk.CREATOR.createFromParcel(parcel);
         assertWithMessage("Chunk created from parcel")
-                .that(chunkFromParcel).isEqualTo(FM_RDS_ADD_CHUNK);
+                .that(chunkFromParcel).isEqualTo(FM_DAB_ADD_CHUNK);
     }
 
     @Test
@@ -336,37 +349,78 @@ public final class ProgramListTest {
     }
 
     @Test
-    public void onProgramListUpdated_withNewIdsAdded_invokesMockedCallbacks() throws Exception {
+    public void onProgramListUpdated_withNewIdsAdded_invokesCallbacks() throws Exception {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         registerListCallbacks(/* numCallbacks= */ 1);
         addOnCompleteListeners(/* numListeners= */ 1);
 
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemChanged(FM_IDENTIFIER);
-        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemChanged(RDS_IDENTIFIER);
+        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemChanged(DAB_DMB_SID_EXT_IDENTIFIER);
         verify(mOnCompleteListenerMocks[0], CALLBACK_TIMEOUT).onComplete();
-        assertWithMessage("Program info in program list after adding FM and RDS info")
-                .that(mProgramList.toList()).containsExactly(FM_PROGRAM_INFO, RDS_PROGRAM_INFO);
+        assertWithMessage("Program info in program list after adding FM and DAB info")
+                .that(mProgramList.toList()).containsExactly(FM_PROGRAM_INFO, DAB_PROGRAM_INFO_1,
+                        DAB_PROGRAM_INFO_2);
     }
 
     @Test
-    public void onProgramListUpdated_withIdsRemoved_invokesMockedCallbacks() throws Exception {
+    public void onProgramListUpdated_withFmIdsRemoved_invokesCallbacks() throws Exception {
+        UniqueProgramIdentifier fmUniqueId = new UniqueProgramIdentifier(FM_IDENTIFIER);
         ProgramList.Chunk fmRemovedChunk = new ProgramList.Chunk(/* purge= */ false,
-                /* complete= */ false, new ArraySet<>(), Set.of(FM_IDENTIFIER));
+                /* complete= */ false, new ArraySet<>(), Set.of(fmUniqueId));
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         registerListCallbacks(/* numCallbacks= */ 1);
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         mTunerCallback.onProgramListUpdated(fmRemovedChunk);
 
         verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(FM_IDENTIFIER);
         assertWithMessage("Program info in program list after removing FM id")
-                .that(mProgramList.toList()).containsExactly(RDS_PROGRAM_INFO);
-        assertWithMessage("Program info FM identifier")
-                .that(mProgramList.get(RDS_IDENTIFIER)).isEqualTo(RDS_PROGRAM_INFO);
+                .that(mProgramList.toList()).containsExactly(DAB_PROGRAM_INFO_1,
+                        DAB_PROGRAM_INFO_2);
+    }
+
+    @Test
+    public void onProgramListUpdated_withPartOfDabIdsRemoved_doesNotInvokeCallbacks()
+            throws Exception {
+        ProgramList.Chunk dabRemovedChunk1 = new ProgramList.Chunk(/* purge= */ false,
+                /* complete= */ false, new ArraySet<>(), Set.of(DAB_UNIQUE_IDENTIFIER_1));
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+        registerListCallbacks(/* numCallbacks= */ 1);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
+
+        mTunerCallback.onProgramListUpdated(dabRemovedChunk1);
+
+        verify(mListCallbackMocks[0], after(TIMEOUT_MS).never()).onItemRemoved(
+                DAB_DMB_SID_EXT_IDENTIFIER);
+        assertWithMessage("Program info in program list after removing part of DAB ids")
+                .that(mProgramList.toList()).containsExactly(FM_PROGRAM_INFO, DAB_PROGRAM_INFO_2);
+    }
+
+    @Test
+    public void onProgramListUpdated_withAllDabIdsRemoved_invokesCallbacks()
+            throws Exception {
+        ProgramList.Chunk dabRemovedChunk1 = new ProgramList.Chunk(/* purge= */ false,
+                /* complete= */ false, new ArraySet<>(), Set.of(DAB_UNIQUE_IDENTIFIER_1));
+        ProgramList.Chunk dabRemovedChunk2 = new ProgramList.Chunk(/* purge= */ false,
+                /* complete= */ false, new ArraySet<>(), Set.of(DAB_UNIQUE_IDENTIFIER_2));
+        createRadioTuner();
+        mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
+        registerListCallbacks(/* numCallbacks= */ 1);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(dabRemovedChunk1);
+        verify(mListCallbackMocks[0], after(TIMEOUT_MS).never()).onItemRemoved(
+                DAB_DMB_SID_EXT_IDENTIFIER);
+
+        mTunerCallback.onProgramListUpdated(dabRemovedChunk2);
+
+        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(DAB_DMB_SID_EXT_IDENTIFIER);
+        assertWithMessage("Program info in program list after removing all DAB ids")
+                .that(mProgramList.toList()).containsExactly(FM_PROGRAM_INFO);
     }
 
     @Test
@@ -388,18 +442,18 @@ public final class ProgramListTest {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         registerListCallbacks(/* numCallbacks= */ 1);
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         mTunerCallback.onProgramListUpdated(purgeChunk);
 
         verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(FM_IDENTIFIER);
-        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(RDS_IDENTIFIER);
+        verify(mListCallbackMocks[0], CALLBACK_TIMEOUT).onItemRemoved(DAB_DMB_SID_EXT_IDENTIFIER);
         assertWithMessage("Program list after purge chunk applied")
                 .that(mProgramList.toList()).isEmpty();
     }
 
     @Test
-    public void onProgramListUpdated_afterProgramListClosed_notInvokeMockedCallbacks()
+    public void onProgramListUpdated_afterProgramListClosed_notInvokeCallbacks()
             throws Exception {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
@@ -407,7 +461,7 @@ public final class ProgramListTest {
         addOnCompleteListeners(/* numListeners= */ 1);
         mProgramList.close();
 
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         verify(mListCallbackMocks[0], after(TIMEOUT_MS).never()).onItemChanged(any());
         verify(mListCallbackMocks[0], never()).onItemChanged(any());
@@ -462,7 +516,7 @@ public final class ProgramListTest {
             throws Exception {
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         mTunerCallback.onBackgroundScanComplete();
 
@@ -487,7 +541,7 @@ public final class ProgramListTest {
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
 
         mTunerCallback.onBackgroundScanComplete();
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         verify(mTunerCallbackMock, CALLBACK_TIMEOUT).onBackgroundScanComplete();
     }
@@ -512,7 +566,7 @@ public final class ProgramListTest {
                 mock(ProgramList.OnCompleteListener.class);
 
         mProgramList.addOnCompleteListener(mExecutor, onCompleteListenerMock);
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         verify(onCompleteListenerMock, CALLBACK_TIMEOUT).onComplete();
     }
@@ -524,7 +578,7 @@ public final class ProgramListTest {
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         addOnCompleteListeners(numListeners);
 
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         for (int index = 0; index < numListeners; index++) {
             verify(mOnCompleteListenerMocks[index], CALLBACK_TIMEOUT).onComplete();
@@ -538,7 +592,7 @@ public final class ProgramListTest {
         addOnCompleteListeners(/* numListeners= */ 1);
 
         mProgramList.removeOnCompleteListener(mOnCompleteListenerMocks[0]);
-        mTunerCallback.onProgramListUpdated(FM_RDS_ADD_CHUNK);
+        mTunerCallback.onProgramListUpdated(FM_DAB_ADD_CHUNK);
 
         verify(mOnCompleteListenerMocks[0], after(TIMEOUT_MS).never()).onComplete();
     }
@@ -562,6 +616,13 @@ public final class ProgramListTest {
     private static RadioManager.ProgramInfo createFmProgramInfo(ProgramSelector selector) {
         return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(),
                 selector.getPrimaryId(), /* relatedContents= */ null, /* infoFlags= */ 0,
+                /* signalQuality= */ 1, new RadioMetadata.Builder().build(),
+                /* vendorInfo= */ null);
+    }
+
+    private static RadioManager.ProgramInfo createDabProgramInfo(ProgramSelector selector) {
+        return new RadioManager.ProgramInfo(selector, selector.getPrimaryId(),
+                DAB_ENSEMBLE_IDENTIFIER, /* relatedContents= */ null, /* infoFlags= */ 0,
                 /* signalQuality= */ 1, new RadioMetadata.Builder().build(),
                 /* vendorInfo= */ null);
     }

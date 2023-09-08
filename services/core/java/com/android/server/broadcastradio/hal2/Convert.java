@@ -28,7 +28,6 @@ import android.hardware.broadcastradio.V2_0.MetadataKey;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
-import android.hardware.broadcastradio.V2_0.ProgramListChunk;
 import android.hardware.broadcastradio.V2_0.Properties;
 import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.broadcastradio.V2_0.VendorKeyValue;
@@ -423,16 +422,6 @@ class Convert {
         hwFilter.excludeModifications = filter.areModificationsExcluded();
 
         return hwFilter;
-    }
-
-    static @NonNull ProgramList.Chunk programListChunkFromHal(@NonNull ProgramListChunk chunk) {
-        Set<RadioManager.ProgramInfo> modified = chunk.modified.stream().
-                map(info -> programInfoFromHal(info)).collect(Collectors.toSet());
-        Set<ProgramSelector.Identifier> removed = chunk.removed.stream().
-                map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
-                collect(Collectors.toSet());
-
-        return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
     }
 
     public static @NonNull android.hardware.radio.Announcement announcementFromHal(

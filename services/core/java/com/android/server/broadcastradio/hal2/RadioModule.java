@@ -111,13 +111,11 @@ final class RadioModule {
         @Override
         public void onProgramListUpdated(ProgramListChunk programListChunk) {
             fireLater(() -> {
-                android.hardware.radio.ProgramList.Chunk chunk =
-                        Convert.programListChunkFromHal(programListChunk);
                 synchronized (mLock) {
-                    mProgramInfoCache.filterAndApplyChunk(chunk);
+                    mProgramInfoCache.filterAndApplyChunk(programListChunk);
 
                     for (TunerSession tunerSession : mAidlTunerSessions) {
-                        tunerSession.onMergedProgramListUpdateFromHal(chunk);
+                        tunerSession.onMergedProgramListUpdateFromHal(programListChunk);
                     }
                 }
             });
