@@ -25,6 +25,7 @@ java_defaults {
         ":android.view.flags-aconfig-java{.generated_srcjars}",
         ":camera_platform_flags_core_java_lib{.generated_srcjars}",
         ":com.android.window.flags.window-aconfig-java{.generated_srcjars}",
+        ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
         ":com.android.text.flags-aconfig-java{.generated_srcjars}",
         ":telecom_flags_core_java_lib{.generated_srcjars}",
         ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
@@ -67,6 +68,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.window.flags.window-aconfig-java",
     aconfig_declarations: "com.android.window.flags.window-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Input
+aconfig_declarations {
+    name: "com.android.hardware.input.input-aconfig",
+    package: "com.android.hardware.input",
+    srcs: ["core/java/android/hardware/input/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.hardware.input-aconfig-java",
+    aconfig_declarations: "com.android.hardware.input.input-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
