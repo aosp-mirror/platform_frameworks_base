@@ -112,6 +112,7 @@ import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.policy.SystemBarUtils;
@@ -2361,6 +2362,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 299220009)
     public void testUserOverrideAspectRatioNotEnabled() {
         setUpDisplaySizeWithApp(/* dw */ 1600, /* dh */ 1400);
 
