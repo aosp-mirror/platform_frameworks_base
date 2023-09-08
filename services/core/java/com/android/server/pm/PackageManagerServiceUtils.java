@@ -543,9 +543,6 @@ public class PackageManagerServiceUtils {
 
     /** Returns true if standard APK Verity is enabled. */
     static boolean isApkVerityEnabled() {
-        if (com.android.server.security.Flags.deprecateFsvSig()) {
-            return false;
-        }
         return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
                 || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
                         == FSVERITY_ENABLED;

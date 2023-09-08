@@ -180,7 +180,6 @@ java_library_static {
         "android.hardware.rebootescrow-V1-java",
         "android.hardware.power.stats-V2-java",
         "android.hidl.manager-V1.2-java",
-        "com.android.server.security.flags-aconfig-java",
         "cbor-java",
         "display_flags_lib",
         "icu4j_calendar_astronomer",
