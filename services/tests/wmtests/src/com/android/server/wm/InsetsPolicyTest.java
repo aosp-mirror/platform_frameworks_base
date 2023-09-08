@@ -23,8 +23,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
@@ -108,7 +106,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_forceStatusBarVisible() {
-        addStatusBar().mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
+        addStatusBar().mAttrs.forciblyShownTypes |= statusBars();
         addNavigationBar();
 
         final InsetsSourceControl[] controls = addAppWindowAndGetControlsForDispatch();
@@ -120,8 +118,8 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testControlsForDispatch_statusBarForceShowNavigation() {
-        addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade").mAttrs.privateFlags |=
-                PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+        addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade").mAttrs.forciblyShownTypes |=
+                navigationBars();
         addStatusBar();
         addNavigationBar();
 
@@ -135,7 +133,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @Test
     public void testControlsForDispatch_statusBarForceShowNavigation_butFocusedAnyways() {
         WindowState notifShade = addWindow(TYPE_NOTIFICATION_SHADE, "notificationShade");
-        notifShade.mAttrs.privateFlags |= PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
+        notifShade.mAttrs.forciblyShownTypes |= navigationBars();
         addNavigationBar();
 
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(notifShade);
