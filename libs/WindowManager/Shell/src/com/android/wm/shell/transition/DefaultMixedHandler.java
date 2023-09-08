@@ -19,10 +19,10 @@ package com.android.wm.shell.transition;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
-
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
@@ -239,9 +239,14 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     @Override
     public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
-        if (mRecentsHandler != null && (mSplitHandler.isSplitScreenVisible()
-                || DesktopModeStatus.isEnabled())) {
-            return this;
+        if (mRecentsHandler != null) {
+            if (mSplitHandler.isSplitScreenVisible()) {
+                return this;
+            } else if (mDesktopTasksController != null
+                    // Check on the default display. Recents/gesture nav is only available there
+                    && mDesktopTasksController.getVisibleTaskCount(DEFAULT_DISPLAY) > 0) {
+                return this;
+            }
         }
         return null;
     }
@@ -662,7 +667,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         if (!consumed) {
             return false;
         }
-        //Sync desktop mode state (proto 2)
         if (mDesktopTasksController != null) {
             mDesktopTasksController.syncSurfaceState(info, finishTransaction);
             return true;
