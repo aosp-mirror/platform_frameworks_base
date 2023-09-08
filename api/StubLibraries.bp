@@ -33,7 +33,7 @@ droidstubs {
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
     ],
-    args: metalava_framework_docs_args,
+    args: metalava_framework_docs_args + "--error UnflaggedApi ",
     check_api: {
         current: {
             api_file: ":non-updatable-current.txt",
