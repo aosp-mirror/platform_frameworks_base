@@ -830,6 +830,12 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private TrustState getUserTrustStateInner(int userId) {
+        synchronized (mUserTrustState) {
+            return mUserTrustState.get(userId, TrustState.UNTRUSTED);
+        }
+    }
+
     boolean isDeviceLockedInner(int userId) {
         synchronized (mDeviceLockedForUser) {
             return mDeviceLockedForUser.get(userId, true);
@@ -880,7 +886,12 @@ public class TrustManagerService extends SystemService {
                 continue;
             }
 
-            boolean trusted = aggregateIsTrusted(id);
+            final boolean trusted;
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+                trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
+            } else {
+                trusted = aggregateIsTrusted(id);
+            }
             boolean showingKeyguard = true;
             boolean biometricAuthenticated = false;
             boolean currentUserIsUnlocked = false;
@@ -1644,7 +1655,7 @@ public class TrustManagerService extends SystemService {
             if (isCurrent) {
                 fout.print(" (current)");
             }
-            fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
+            fout.print(": trustState=" + getUserTrustStateInner(user.id));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
             fout.print(", strongAuthRequired=" + dumpHex(
