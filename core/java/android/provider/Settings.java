@@ -19255,6 +19255,10 @@ public final class Settings {
              */
             public static final int TETHERED_CONFIG_TETHERED = 2;
 
+            /**
+             * Device is set in restricted mode.
+             */
+            public static final int TETHERED_CONFIG_RESTRICTED = 3;
 
             /**
              * Whether phone switching is supported.

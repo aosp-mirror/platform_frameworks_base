@@ -143,7 +143,7 @@ constructor(
                         private val connectedIds = mutableSetOf<Int>()
                         override fun onDisplayConnected(id: Int) {
                             if (DEBUG) {
-                                Log.d(TAG, "$id connected")
+                                Log.d(TAG, "display with id=$id connected.")
                             }
                             connectedIds += id
                             ignoredDisplayIds.value -= id
@@ -153,7 +153,7 @@ constructor(
                         override fun onDisplayDisconnected(id: Int) {
                             connectedIds -= id
                             if (DEBUG) {
-                                Log.d(TAG, "$id disconnected. Connected ids: $connectedIds")
+                                Log.d(TAG, "display with id=$id disconnected.")
                             }
                             ignoredDisplayIds.value -= id
                             trySend(connectedIds.toSet())
@@ -175,24 +175,35 @@ constructor(
                 initialValue = emptySet()
             )
 
+    private val connectedExternalDisplayIds: Flow<Set<Int>> =
+        connectedDisplayIds
+            .map { connectedDisplayIds ->
+                connectedDisplayIds
+                    .filter { id -> displayManager.getDisplay(id)?.type == Display.TYPE_EXTERNAL }
+                    .toSet()
+            }
+            .flowOn(backgroundCoroutineDispatcher)
+            .debugLog("connectedExternalDisplayIds")
+
     /**
      * Pending displays are the ones connected, but not enabled and not ignored. A connected display
      * is ignored after the user makes the decision to use it or not. For now, the initial decision
      * from the user is final and not reversible.
      */
     private val pendingDisplayIds: Flow<Set<Int>> =
-        combine(enabledDisplayIds, connectedDisplayIds, ignoredDisplayIds) {
+        combine(enabledDisplayIds, connectedExternalDisplayIds, ignoredDisplayIds) {
                 enabledDisplaysIds,
-                connectedDisplayIds,
+                connectedExternalDisplayIds,
                 ignoredDisplayIds ->
                 if (DEBUG) {
                     Log.d(
                         TAG,
-                        "combining enabled: $enabledDisplaysIds, " +
-                            "connected: $connectedDisplayIds, ignored: $ignoredDisplayIds"
+                        "combining enabled=$enabledDisplaysIds, " +
+                            "connectedExternalDisplayIds=$connectedExternalDisplayIds, " +
+                            "ignored=$ignoredDisplayIds"
                     )
                 }
-                connectedDisplayIds - enabledDisplaysIds - ignoredDisplayIds
+                connectedExternalDisplayIds - enabledDisplaysIds - ignoredDisplayIds
             }
             .debugLog("pendingDisplayIds")
 
@@ -204,6 +215,9 @@ constructor(
                     override val id = id
                     override suspend fun enable() {
                         traceSection("DisplayRepository#enable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Enabling display with id=$id")
+                            }
                             displayManager.enableConnectedDisplay(id)
                         }
                         // After the display has been enabled, it is automatically ignored.
@@ -219,6 +233,9 @@ constructor(
                     override suspend fun disable() {
                         ignore()
                         traceSection("DisplayRepository#disable($id)") {
+                            if (DEBUG) {
+                                Log.d(TAG, "Disabling display with id=$id")
+                            }
                             displayManager.disableConnectedDisplay(id)
                         }
                     }

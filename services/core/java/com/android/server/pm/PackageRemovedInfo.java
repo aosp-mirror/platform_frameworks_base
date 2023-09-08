@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
@@ -63,8 +62,9 @@ final class PackageRemovedInfo {
         mPackageSender = packageSender;
     }
 
-    void sendPackageRemovedBroadcasts(boolean killApp, boolean removedBySystem) {
-        sendPackageRemovedBroadcastInternal(killApp, removedBySystem);
+    void sendPackageRemovedBroadcasts(boolean killApp, boolean removedBySystem,
+            boolean isArchived) {
+        sendPackageRemovedBroadcastInternal(killApp, removedBySystem, isArchived);
     }
 
     void sendSystemPackageUpdatedBroadcasts() {
@@ -111,7 +111,8 @@ final class PackageRemovedInfo {
         return bOptions;
     }
 
-    private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem) {
+    private void sendPackageRemovedBroadcastInternal(boolean killApp, boolean removedBySystem,
+            boolean isArchived) {
         Bundle extras = new Bundle();
         final int removedUid = mRemovedAppId >= 0  ? mRemovedAppId : mUid;
         extras.putInt(Intent.EXTRA_UID, removedUid);
@@ -120,8 +121,11 @@ final class PackageRemovedInfo {
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, !killApp);
         extras.putBoolean(Intent.EXTRA_USER_INITIATED, !removedBySystem);
         final boolean isReplace = mIsUpdate || mIsRemovedPackageSystemUpdate;
-        if (isReplace) {
+        if (isReplace || isArchived) {
             extras.putBoolean(Intent.EXTRA_REPLACING, true);
+        }
+        if (isArchived) {
+            extras.putBoolean(Intent.EXTRA_ARCHIVAL, true);
         }
         extras.putBoolean(Intent.EXTRA_REMOVED_FOR_ALL_USERS, mRemovedForAllUsers);
 

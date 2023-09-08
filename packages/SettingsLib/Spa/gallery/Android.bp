@@ -22,7 +22,7 @@ android_app {
     name: "SpaLibGallery",
 
     srcs: ["src/**/*.kt"],
-
+    use_resource_processor: true,
     static_libs: [
         "SpaLib",
         "androidx.compose.runtime_runtime",

@@ -16,9 +16,13 @@
 
 package com.android.server.display.feature;
 
+import android.os.Build;
+import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.server.display.feature.flags.Flags;
+
+import java.util.function.Supplier;
 
 /**
  * Utility class to read the flags used in the display manager server.
@@ -26,9 +30,24 @@ import com.android.server.display.feature.flags.Flags;
 public class DisplayManagerFlags {
     private static final boolean DEBUG = false;
     private static final String TAG = "DisplayManagerFlags";
-    private static final boolean DEFAULT_IS_CONNECTED_DISPLAY_MANAGEMENT_ENABLED = false;
     private boolean mIsConnectedDisplayManagementEnabled = false;
     private boolean mIsConnectedDisplayManagementEnabledSet = false;
+
+    private boolean flagOrSystemProperty(Supplier<Boolean> flagFunction, String flagName) {
+        // TODO(b/299462337) Remove when the infrastructure is ready.
+        if ((Build.IS_ENG || Build.IS_USERDEBUG)
+                    && SystemProperties.getBoolean("persist.sys." + flagName, false)) {
+            return true;
+        }
+        try {
+            return flagFunction.get();
+        } catch (Throwable ex) {
+            if (DEBUG) {
+                Slog.i(TAG, "Flags not ready yet. Return false for " + flagName, ex);
+            }
+            return false;
+        }
+    }
 
     // TODO(b/297159910): Simplify using READ-ONLY flags when available.
     /** Returns whether connected display management is enabled or not. */
@@ -36,22 +55,16 @@ public class DisplayManagerFlags {
         if (mIsConnectedDisplayManagementEnabledSet) {
             if (DEBUG) {
                 Slog.d(TAG, "isConnectedDisplayManagementEnabled. Recall = "
-                        + mIsConnectedDisplayManagementEnabled);
+                                    + mIsConnectedDisplayManagementEnabled);
             }
             return mIsConnectedDisplayManagementEnabled;
         }
-        try {
-            mIsConnectedDisplayManagementEnabled = Flags.enableConnectedDisplayManagement();
-            if (DEBUG) {
-                Slog.d(TAG, "isConnectedDisplayManagementEnabled. Flag value = "
-                        + mIsConnectedDisplayManagementEnabled);
-            }
-        } catch (Throwable ex) {
-            if (DEBUG) {
-                Slog.i(TAG, "isConnectedDisplayManagementEnabled not available: set to "
-                        + DEFAULT_IS_CONNECTED_DISPLAY_MANAGEMENT_ENABLED, ex);
-            }
-            mIsConnectedDisplayManagementEnabled = DEFAULT_IS_CONNECTED_DISPLAY_MANAGEMENT_ENABLED;
+        mIsConnectedDisplayManagementEnabled =
+                flagOrSystemProperty(Flags::enableConnectedDisplayManagement,
+                        Flags.FLAG_ENABLE_CONNECTED_DISPLAY_MANAGEMENT);
+        if (DEBUG) {
+            Slog.d(TAG, "isConnectedDisplayManagementEnabled. Flag value = "
+                                + mIsConnectedDisplayManagementEnabled);
         }
         mIsConnectedDisplayManagementEnabledSet = true;
         return mIsConnectedDisplayManagementEnabled;

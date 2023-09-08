@@ -3876,7 +3876,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 221;
+            private static final int SETTINGS_VERSION = 222;
 
             private final int mUserId;
 
@@ -5983,6 +5983,23 @@ public class SettingsProvider extends ContentProvider {
                                 Settings.Global.ENABLE_BACK_ANIMATION, defEnableBackAnimation);
                     }
                     currentVersion = 221;
+                }
+
+                if (currentVersion == 221) {
+                    // Version 221: Set a default value for wifi always requested
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting enableWifiAlwaysRequested =
+                            globalSettings.getSettingLocked(Global.WIFI_ALWAYS_REQUESTED);
+                    if (enableWifiAlwaysRequested.isNull()) {
+                        final boolean defEnableWifiAlwaysRequested =
+                                getContext()
+                                        .getResources()
+                                        .getBoolean(R.bool.def_enable_wifi_always_requested);
+                        initGlobalSettingsDefaultValLocked(
+                                Settings.Global.WIFI_ALWAYS_REQUESTED,
+                                defEnableWifiAlwaysRequested);
+                    }
+                    currentVersion = 222;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Share
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.user.domain.interactor.UserInteractor
+import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -89,6 +90,18 @@ constructor(
      * report 0f.
      */
     val qsExpansion: StateFlow<Float> = repository.qsExpansion
+
+    /** The amount [0-1] either QS or the shade has been opened */
+    val anyExpansion: StateFlow<Float> =
+        combine(shadeExpansion, qsExpansion) { shadeExp, qsExp -> maxOf(shadeExp, qsExp) }
+            .stateIn(scope, SharingStarted.Eagerly, 0f)
+
+    /** Whether either the shade or QS is expanding from a fully collapsed state. */
+    val anyExpanding =
+        anyExpansion
+            .pairwise(1f)
+            .map { (prev, curr) -> curr > 0f && curr < 1f && prev < 1f }
+            .distinctUntilChanged()
 
     /** Emits true if the shade can be expanded from QQS to QS and false otherwise. */
     val isExpandToQsEnabled: Flow<Boolean> =

@@ -132,6 +132,11 @@ public class SettingsToPropertiesMapper {
         "responsible_apis",
         "rust",
         "pixel_biometrics",
+        "car_perception",
+        "car_security",
+        "car_telemetry",
+        "car_framework",
+        "android-nfc",
     };
 
     private final String[] mGlobalSettings;

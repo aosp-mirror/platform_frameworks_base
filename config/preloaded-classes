@@ -5657,6 +5657,7 @@ android.net.vcn.VcnTransportInfo
 android.net.vcn.VcnUnderlyingNetworkPolicy$1
 android.net.vcn.VcnUnderlyingNetworkPolicy
 android.net.wifi.SoftApConfToXmlMigrationUtil
+android.net.wifi.WifiConfiguration
 android.net.wifi.WifiMigration$1
 android.net.wifi.WifiMigration
 android.net.wifi.WifiNetworkScoreCache$CacheListener$1
@@ -12715,7 +12716,6 @@ com.android.internal.util.LatencyTracker$ActionProperties
 com.android.internal.util.LatencyTracker$FrameworkStatsLogEvent
 com.android.internal.util.LatencyTracker$Session$$ExternalSyntheticLambda0
 com.android.internal.util.LatencyTracker$Session
-com.android.internal.util.LatencyTracker
 com.android.internal.util.LineBreakBufferedWriter
 com.android.internal.util.LocalLog
 com.android.internal.util.MemInfoReader

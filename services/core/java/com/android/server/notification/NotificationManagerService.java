@@ -132,6 +132,7 @@ import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
+import static com.android.server.notification.Flags.expireBitmaps;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -203,6 +204,8 @@ import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -388,6 +391,8 @@ public class NotificationManagerService extends SystemService {
     static final int MESSAGE_LISTENER_NOTIFICATION_FILTER_CHANGED = 6;
     static final int MESSAGE_FINISH_TOKEN_TIMEOUT = 7;
     static final int MESSAGE_ON_PACKAGE_CHANGED = 8;
+
+    static final long BITMAP_EXPIRATION_TIME_MS = TimeUnit.HOURS.toMillis(24);
 
     // ranking thread messages
     private static final int MESSAGE_RECONSIDER_RANKING = 1000;
@@ -2822,6 +2827,9 @@ public class NotificationManagerService extends SystemService {
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
+            if (expireBitmaps()) {
+                NotificationBitmapJobService.scheduleJob(getContext());
+            }
             registerDeviceConfigChange();
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
@@ -6604,7 +6612,71 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mHistoryManager.cleanupHistoryFiles();
         }
+
+        @Override
+        public void removeBitmaps() {
+            // Check all NotificationRecords, remove expired bitmaps and icon URIs, repost silently.
+            synchronized (mNotificationLock) {
+                for (NotificationRecord r: mNotificationList) {
+
+                    // System#currentTimeMillis when posted
+                    final long timePostedMs = r.getSbn().getPostTime();
+                    final long timeNowMs = System.currentTimeMillis();
+
+                    if (isBitmapExpired(timePostedMs, timeNowMs, BITMAP_EXPIRATION_TIME_MS)) {
+                        removeBitmapAndRepost(r);
+                    }
+                }
+            }
+        }
     };
+
+    @VisibleForTesting
+    static boolean isBigPictureWithBitmapOrIcon(Notification n) {
+        final boolean isBigPicture = n.isStyle(Notification.BigPictureStyle.class);
+        if (!isBigPicture) {
+            return false;
+        }
+
+        final boolean hasBitmap = n.extras.containsKey(Notification.EXTRA_PICTURE);
+        if (hasBitmap) {
+            return true;
+        }
+
+        final boolean hasIcon = n.extras.containsKey(Notification.EXTRA_PICTURE_ICON);
+        if (hasIcon) {
+            return true;
+        }
+        return false;
+    }
+
+    @VisibleForTesting
+    // TODO(b/298414239) Unit test via public API
+    static boolean isBitmapExpired(long timePostedMs, long timeNowMs, long timeToLiveMs) {
+        final long timeDiff = timeNowMs - timePostedMs;
+        return timeDiff > timeToLiveMs;
+    }
+
+    @VisibleForTesting
+    void removeBitmapAndRepost(NotificationRecord r) {
+        if (!isBigPictureWithBitmapOrIcon(r.getNotification())) {
+            return;
+        }
+        // Remove Notification object's reference to picture bitmap or URI
+        r.getNotification().extras.remove(Notification.EXTRA_PICTURE);
+        r.getNotification().extras.remove(Notification.EXTRA_PICTURE_ICON);
+
+        // Make Notification silent
+        r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+
+        // Repost
+        enqueueNotificationInternal(r.getSbn().getPackageName(),
+                r.getSbn().getOpPkg(), r.getSbn().getUid(),
+                r.getSbn().getInitialPid(), r.getSbn().getTag(),
+                r.getSbn().getId(), r.getNotification(),
+                r.getSbn().getUserId(), /* postSilently= */ true,
+                /* byForegroundService= */ false);
+    }
 
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted) {
         return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted).getList()

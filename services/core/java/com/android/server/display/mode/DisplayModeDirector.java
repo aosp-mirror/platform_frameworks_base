@@ -1812,18 +1812,26 @@ public class DisplayModeDirector {
                 mRefreshRateChangeable = changeable;
                 updateSensorStatus();
                 if (!changeable) {
-                    // Revoke previous vote from BrightnessObserver
-                    mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE, null);
-                    mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, null);
+                    removeFlickerRefreshRateVotes();
                 }
             }
         }
 
-        private void onLowPowerModeEnabledLocked(boolean b) {
-            if (mLowPowerModeEnabled != b) {
-                mLowPowerModeEnabled = b;
+        @VisibleForTesting
+        void onLowPowerModeEnabledLocked(boolean enabled) {
+            if (mLowPowerModeEnabled != enabled) {
+                mLowPowerModeEnabled = enabled;
                 updateSensorStatus();
+                if (enabled) {
+                    removeFlickerRefreshRateVotes();
+                }
             }
+        }
+
+        private void removeFlickerRefreshRateVotes() {
+            // Revoke previous vote from BrightnessObserver
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE, null);
+            mVotesStorage.updateGlobalVote(Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH, null);
         }
 
         private void onDeviceConfigLowBrightnessThresholdsChanged(float[] displayThresholds,
@@ -2128,7 +2136,7 @@ public class DisplayModeDirector {
         }
 
         private void onBrightnessChangedLocked() {
-            if (!mRefreshRateChangeable) {
+            if (!mRefreshRateChangeable || mLowPowerModeEnabled) {
                 return;
             }
             Vote refreshRateVote = null;

@@ -1230,14 +1230,6 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
 
-    /**
-     * Returns the audio output device used for System Audio Mode.
-     */
-    AudioDeviceAttributes getSystemAudioOutputDevice() {
-        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
-    }
-
-
     @ServiceThreadOnly
     void handleRemoveActiveRoutingPath(int path) {
         assertRunOnServiceThread();

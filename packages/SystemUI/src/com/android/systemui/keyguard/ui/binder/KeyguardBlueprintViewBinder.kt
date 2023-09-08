@@ -39,15 +39,15 @@ class KeyguardBlueprintViewBinder {
                             val prevBluePrint = viewModel.currentBluePrint
                             Trace.beginSection("KeyguardBlueprint#applyBlueprint")
                             Log.d(TAG, "applying blueprint: $blueprint")
-                            // Add and remove views of sections that are not contained by the other.
-                            prevBluePrint?.removeViews(blueprint, constraintLayout)
-                            blueprint.addViews(prevBluePrint, constraintLayout)
 
                             ConstraintSet().apply {
                                 clone(constraintLayout)
                                 val emptyLayout = ConstraintSet.Layout()
                                 knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
                                 blueprint.applyConstraints(this)
+                                // Add and remove views of sections that are not contained by the
+                                // other.
+                                blueprint?.replaceViews(prevBluePrint, constraintLayout)
                                 applyTo(constraintLayout)
                             }
 

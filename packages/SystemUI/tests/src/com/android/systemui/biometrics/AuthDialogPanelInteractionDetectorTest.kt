@@ -16,84 +16,194 @@
 
 package com.android.systemui.biometrics
 
-import android.testing.AndroidTestingRunner
+import android.app.ActivityManager
+import android.os.UserManager
 import androidx.test.filters.SmallTest
-import androidx.test.filters.RequiresDevice
+import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shade.ShadeExpansionStateManager
-import org.junit.Assert
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
+import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.data.repository.FakeUserRepository
+import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
+import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
+import com.android.systemui.user.domain.interactor.UserInteractor
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
+import org.mockito.MockitoAnnotations
 
-@RequiresDevice
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
+    private val disableFlagsRepository = FakeDisableFlagsRepository()
+    private val featureFlags = FakeFeatureFlags()
+    private val keyguardRepository = FakeKeyguardRepository()
+    private val shadeRepository = FakeShadeRepository()
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+    private val userSetupRepository = FakeUserSetupRepository()
+    private val userRepository = FakeUserRepository()
+    private val configurationRepository = FakeConfigurationRepository()
+    private val sharedNotificationContainerInteractor =
+        SharedNotificationContainerInteractor(
+            configurationRepository,
+            mContext,
+        )
 
-    private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     private lateinit var detector: AuthDialogPanelInteractionDetector
+    private lateinit var shadeInteractor: ShadeInteractor
+    private lateinit var userInteractor: UserInteractor
 
     @Mock private lateinit var action: Runnable
-
-    @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
+    @Mock private lateinit var activityManager: ActivityManager
+    @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
+    @Mock private lateinit var guestInteractor: GuestUserInteractor
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     @Before
     fun setUp() {
-        shadeExpansionStateManager = ShadeExpansionStateManager()
-        detector =
-            AuthDialogPanelInteractionDetector(shadeExpansionStateManager, mContext.mainExecutor)
+        MockitoAnnotations.initMocks(this)
+
+        featureFlags.set(Flags.FACE_AUTH_REFACTOR, false)
+        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+
+        val refreshUsersScheduler =
+            RefreshUsersScheduler(
+                applicationScope = testScope.backgroundScope,
+                mainDispatcher = testDispatcher,
+                repository = userRepository,
+            )
+        userInteractor =
+            UserInteractor(
+                applicationContext = context,
+                repository = userRepository,
+                activityStarter = activityStarter,
+                keyguardInteractor =
+                    KeyguardInteractorFactory.create(featureFlags = featureFlags)
+                        .keyguardInteractor,
+                featureFlags = featureFlags,
+                manager = manager,
+                headlessSystemUserMode = headlessSystemUserMode,
+                applicationScope = testScope.backgroundScope,
+                telephonyInteractor =
+                    TelephonyInteractor(
+                        repository = FakeTelephonyRepository(),
+                    ),
+                broadcastDispatcher = fakeBroadcastDispatcher,
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
+                backgroundDispatcher = testDispatcher,
+                activityManager = activityManager,
+                refreshUsersScheduler = refreshUsersScheduler,
+                guestUserInteractor = guestInteractor,
+                uiEventLogger = uiEventLogger,
+            )
+        shadeInteractor =
+            ShadeInteractor(
+                testScope.backgroundScope,
+                disableFlagsRepository,
+                keyguardRepository,
+                userSetupRepository,
+                deviceProvisionedController,
+                userInteractor,
+                sharedNotificationContainerInteractor,
+                shadeRepository,
+            )
+        detector = AuthDialogPanelInteractionDetector(testScope, { shadeInteractor })
     }
 
     @Test
-    fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verify(action).run()
-    }
+    fun enableDetector_expand_shouldRunAction() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action was run
+            verify(action).run()
+        }
 
     @Test
-    fun testEnableDetector_trackOnly_shouldPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, false, true, 0f)
-        verify(action).run()
-    }
+    fun enableDetector_shadeExpandImmediate_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN shade expands fully instantly
+            shadeRepository.setLegacyShadeExpansion(1f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+
+            // Clean up job
+            detector.disable()
+        }
 
     @Test
-    fun testEnableDetector_expandOnly_shouldNotPostRunnable() {
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun disableDetector_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is closed and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(0f)
+            detector.enable(action)
+            runCurrent()
+
+            // WHEN detector is disabled and shade opens
+            detector.disable()
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
+
+            // THEN action not run
+            verifyZeroInteractions(action)
+        }
 
     @Test
-    fun testEnableDetector_expandWithoutFraction_shouldPostRunnable() {
-        detector.enable(action)
-        // simulate headsup notification
-        shadeExpansionStateManager.onPanelExpansionChanged(0.0f, true, false, 0f)
-        verifyZeroInteractions(action)
-    }
+    fun enableDetector_beginCollapse_shouldNotPostRunnable() =
+        testScope.runTest {
+            // GIVEN shade is open and detector is enabled
+            shadeRepository.setLegacyShadeExpansion(1f)
+            detector.enable(action)
+            runCurrent()
 
-    @Test
-    fun testEnableDetector_shouldNotPostRunnable() {
-        detector.enable(action)
-        detector.disable()
-        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
-        verifyZeroInteractions(action)
-    }
+            // WHEN shade begins to collapse
+            shadeRepository.setLegacyShadeExpansion(.5f)
+            runCurrent()
 
-    @Test
-    fun testFromOpenState_becomeStateClose_enableDetector_shouldNotPostRunnable() {
-        // STATE_OPEN is 2
-        shadeExpansionStateManager.updateState(2)
-        detector.enable(action)
-        shadeExpansionStateManager.onPanelExpansionChanged(0.5f, false, false, 0f)
-        verifyZeroInteractions(action)
-        Assert.assertEquals(true, shadeExpansionStateManager.isClosed())
-    }
+            // THEN action not run
+            verifyZeroInteractions(action)
+
+            // Clean up job
+            detector.disable()
+        }
 }

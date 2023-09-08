@@ -19,7 +19,6 @@ package com.android.server.pm;
 import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.safetylabel.SafetyLabelConstants.SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED;
-
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.PACKAGE_SCHEME;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -323,14 +322,17 @@ public final class BroadcastHelper {
         }
     }
 
-    public void sendPackageAddedForNewUsers(String packageName,
-            @AppIdInt int appId, int[] userIds, int[] instantUserIds,
-            int dataLoaderType, SparseArray<int[]> broadcastAllowlist) {
+    public void sendPackageAddedForNewUsers(String packageName, @AppIdInt int appId, int[] userIds,
+            int[] instantUserIds, boolean isArchived, int dataLoaderType,
+            SparseArray<int[]> broadcastAllowlist) {
         Bundle extras = new Bundle(1);
         // Set to UID of the first user, EXTRA_UID is automatically updated in sendPackageBroadcast
         final int uid = UserHandle.getUid(
                 (ArrayUtils.isEmpty(userIds) ? instantUserIds[0] : userIds[0]), appId);
         extras.putInt(Intent.EXTRA_UID, uid);
+        if (isArchived) {
+            extras.putBoolean(Intent.EXTRA_ARCHIVAL, true);
+        }
         extras.putInt(PackageInstaller.EXTRA_DATA_LOADER_TYPE, dataLoaderType);
 
         sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,

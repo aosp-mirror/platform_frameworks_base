@@ -7670,14 +7670,17 @@ public class Notification implements Parcelable
             }
             extras.putBoolean(EXTRA_SHOW_BIG_PICTURE_WHEN_COLLAPSED, mShowBigPictureWhenCollapsed);
 
-            // If the icon contains a bitmap, use the old extra so that listeners which look for
-            // that extra can still find the picture.  Don't include the new extra in that case,
-            // to avoid duplicating data.
-            if (mPictureIcon != null && mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+            if (mPictureIcon == null) {
+                extras.remove(EXTRA_PICTURE_ICON);
+                extras.remove(EXTRA_PICTURE);
+            } else if (mPictureIcon.getType() == Icon.TYPE_BITMAP) {
+                // If the icon contains a bitmap, use the old extra so that listeners which look
+                // for that extra can still find the picture. Don't include the new extra in
+                // that case, to avoid duplicating data.
                 extras.putParcelable(EXTRA_PICTURE, mPictureIcon.getBitmap());
-                extras.putParcelable(EXTRA_PICTURE_ICON, null);
+                extras.remove(EXTRA_PICTURE_ICON);
             } else {
-                extras.putParcelable(EXTRA_PICTURE, null);
+                extras.remove(EXTRA_PICTURE);
                 extras.putParcelable(EXTRA_PICTURE_ICON, mPictureIcon);
             }
         }

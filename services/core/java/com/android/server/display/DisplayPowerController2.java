@@ -1424,29 +1424,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // we broadcast this change through setting.
         final float unthrottledBrightnessState = brightnessState;
 
-        if (mBrightnessThrottler.isThrottled()) {
-            mTempBrightnessEvent.setThermalMax(mBrightnessThrottler.getBrightnessCap());
-            brightnessState = Math.min(brightnessState, mBrightnessThrottler.getBrightnessCap());
-            mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_THROTTLED);
-            if (!mAppliedThrottling) {
-                // Brightness throttling is needed, so do so quickly.
-                // Later, when throttling is removed, we let other mechanisms decide on speed.
-                slowChange = false;
-            }
-            mAppliedThrottling = true;
-        } else if (mAppliedThrottling) {
-            mAppliedThrottling = false;
-        }
-
-        if (updateScreenBrightnessSetting) {
-            // Tell the rest of the system about the new brightness in case we had to change it
-            // for things like auto-brightness or high-brightness-mode. Note that we do this
-            // before applying the low power or dim transformations so that the slider
-            // accurately represents the full possible range, even if they range changes what
-            // it means in absolute terms.
-            mDisplayBrightnessController.updateScreenBrightnessSetting(brightnessState);
-        }
-
         DisplayBrightnessState clampedState = mBrightnessClamperController.clamp(mPowerRequest,
                 brightnessState, slowChange);
 
@@ -1454,13 +1431,23 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         slowChange = clampedState.isSlowChange();
         mBrightnessReasonTemp.addModifier(clampedState.getBrightnessReason().getModifier());
 
+        if (updateScreenBrightnessSetting) {
+            // Tell the rest of the system about the new brightness in case we had to change it
+            // for things like auto-brightness or high-brightness-mode. Note that we do this
+            // only considering maxBrightness (ignroing brightness modifiers like low power or dim)
+            // so that the slider accurately represents the full possible range,
+            // even if they range changes what it means in absolute terms.
+            mDisplayBrightnessController.updateScreenBrightnessSetting(
+                    Math.min(unthrottledBrightnessState, clampedState.getMaxBrightness()));
+        }
+
         // The current brightness to use has been calculated at this point, and HbmController should
         // be notified so that it can accurately calculate HDR or HBM levels. We specifically do it
         // here instead of having HbmController listen to the brightness setting because certain
         // brightness sources (such as an app override) are not saved to the setting, but should be
         // reflected in HBM calculations.
         mBrightnessRangeController.onBrightnessChanged(brightnessState, unthrottledBrightnessState,
-                mBrightnessThrottler.getBrightnessMaxReason());
+                mBrightnessClamperController.getBrightnessMaxReason());
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
@@ -1562,9 +1549,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             // We save the brightness info *after* the brightness setting has been changed and
             // adjustments made so that the brightness info reflects the latest value.
-            brightnessAdjusted = saveBrightnessInfo(getScreenBrightnessSetting(), animateValue);
+            brightnessAdjusted = saveBrightnessInfo(getScreenBrightnessSetting(),
+                    animateValue, clampedState);
         } else {
-            brightnessAdjusted = saveBrightnessInfo(getScreenBrightnessSetting());
+            brightnessAdjusted = saveBrightnessInfo(getScreenBrightnessSetting(), clampedState);
         }
 
         // Only notify if the brightness adjustment is not temporary (i.e. slider has been released)
@@ -1783,17 +1771,21 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private boolean saveBrightnessInfo(float brightness) {
-        return saveBrightnessInfo(brightness, brightness);
+        return saveBrightnessInfo(brightness, /* state= */ null);
     }
 
-    private boolean saveBrightnessInfo(float brightness, float adjustedBrightness) {
+    private boolean saveBrightnessInfo(float brightness, @Nullable DisplayBrightnessState state) {
+        return saveBrightnessInfo(brightness, brightness, state);
+    }
+
+    private boolean saveBrightnessInfo(float brightness, float adjustedBrightness,
+            @Nullable DisplayBrightnessState state) {
         synchronized (mCachedBrightnessInfo) {
+            float stateMax = state != null ? state.getMaxBrightness() : PowerManager.BRIGHTNESS_MAX;
             final float minBrightness = Math.min(
-                    mBrightnessRangeController.getCurrentBrightnessMin(),
-                    mBrightnessThrottler.getBrightnessCap());
+                    mBrightnessRangeController.getCurrentBrightnessMin(), stateMax);
             final float maxBrightness = Math.min(
-                    mBrightnessRangeController.getCurrentBrightnessMax(),
-                    mBrightnessThrottler.getBrightnessCap());
+                    mBrightnessRangeController.getCurrentBrightnessMax(), stateMax);
             boolean changed = false;
 
             changed |=
@@ -1816,7 +1808,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                             mBrightnessRangeController.getTransitionPoint());
             changed |=
                     mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.brightnessMaxReason,
-                            mBrightnessThrottler.getBrightnessMaxReason());
+                            mBrightnessClamperController.getBrightnessMaxReason());
 
             return changed;
         }
@@ -2669,7 +2661,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT,
                     event.getHbmMode() == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR,
                     (modifier & BrightnessReason.MODIFIER_LOW_POWER) > 0,
-                    mBrightnessThrottler.getBrightnessMaxReason(),
+                    mBrightnessClamperController.getBrightnessMaxReason(),
                     (modifier & BrightnessReason.MODIFIER_DIMMED) > 0,
                     event.isRbcEnabled(),
                     (flags & BrightnessEvent.FLAG_INVALID_LUX) > 0,

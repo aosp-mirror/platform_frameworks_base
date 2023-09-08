@@ -33,7 +33,7 @@ interface PackageSender {
             @Nullable SparseArray<int[]> broadcastAllowList, @Nullable Bundle bOptions);
     void sendPackageAddedForNewUsers(@NonNull Computer snapshot, String packageName,
             boolean sendBootCompleted, boolean includeStopped, int appId, int[] userIds,
-            int[] instantUserIds, int dataLoaderType);
+            int[] instantUserIds, boolean isArchived, int dataLoaderType);
     void notifyPackageAdded(String packageName, int uid);
     void notifyPackageChanged(String packageName, int uid);
     void notifyPackageRemoved(String packageName, int uid);

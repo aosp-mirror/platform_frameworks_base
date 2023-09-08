@@ -244,15 +244,18 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         testScope.runTest {
             underTest.start()
 
-            // previously running
+            // User switching has started
+            fakeUserRepository.setSelectedUserInfo(primaryUser, SelectionStatus.SELECTION_COMPLETE)
             fakeUserRepository.setSelectedUserInfo(
                 primaryUser,
                 SelectionStatus.SELECTION_IN_PROGRESS
             )
             runCurrent()
-            bouncerRepository.setPrimaryShow(true)
+            assertThat(faceAuthRepository.isFaceAuthPaused()).isTrue()
 
-            facePropertyRepository.setLockoutMode(secondaryUser.id, LockoutMode.TIMED)
+            bouncerRepository.setPrimaryShow(true)
+            // New user is not locked out.
+            facePropertyRepository.setLockoutMode(secondaryUser.id, LockoutMode.NONE)
             fakeUserRepository.setSelectedUserInfo(
                 secondaryUser,
                 SelectionStatus.SELECTION_COMPLETE
@@ -260,7 +263,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(faceAuthRepository.isFaceAuthPaused()).isFalse()
-            assertThat(faceAuthRepository.wasDisabled).isTrue()
+            assertThat(faceAuthRepository.isLockedOut.value).isFalse()
 
             runCurrent()
             assertThat(faceAuthRepository.runningAuthRequest.value!!.first)
@@ -406,7 +409,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
             runCurrent()
 
-            assertThat(faceAuthRepository.wasDisabled).isTrue()
+            assertThat(faceAuthRepository.isLockedOut.value).isTrue()
         }
 
     companion object {

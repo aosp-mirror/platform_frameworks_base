@@ -132,7 +132,7 @@ constructor(
             .onEach {
                 if (it) {
                     faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
-                    repository.lockoutFaceAuth()
+                    repository.setLockedOut(true)
                 }
             }
             .launchIn(applicationScope)
@@ -148,9 +148,9 @@ constructor(
                     repository.pauseFaceAuth()
                 } else if (wasSwitching && !isSwitching) {
                     val lockoutMode = facePropertyRepository.getLockoutMode(curr.userInfo.id)
-                    if (lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED) {
-                        repository.lockoutFaceAuth()
-                    }
+                    repository.setLockedOut(
+                        lockoutMode == LockoutMode.PERMANENT || lockoutMode == LockoutMode.TIMED
+                    )
                     repository.resumeFaceAuth()
                     yield()
                     runFaceAuth(
