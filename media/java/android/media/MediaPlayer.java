@@ -931,8 +931,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, Uri uri, SurfaceHolder holder) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, uri, holder, null, s > 0 ? s : 0);
+        return create(context, uri, holder, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
@@ -994,8 +993,7 @@ public class MediaPlayer extends PlayerBase
      * @return a MediaPlayer object, or null if creation failed
      */
     public static MediaPlayer create(Context context, int resid) {
-        int s = AudioSystem.newAudioSessionId();
-        return create(context, resid, null, s > 0 ? s : 0);
+        return create(context, resid, null, AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**
