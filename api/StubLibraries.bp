@@ -47,6 +47,7 @@ droidstubs {
         api_lint: {
             enabled: true,
             new_since: ":android.api.public.latest",
+            baseline_file: ":non-updatable-lint-baseline.txt",
         },
     },
     dists: [
@@ -73,7 +74,8 @@ priv_apps_in_stubs = " --show-for-stub-purposes-annotation android.annotation.Sy
     "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
     "\\)"
 
-test = " --show-annotation android.annotation.TestApi"
+test = " --show-annotation android.annotation.TestApi" +
+    " --hide UnflaggedApi" // TODO(b/297362755): TestApi lint doesn't ignore existing APIs.
 
 module_libs = " --show-annotation android.annotation.SystemApi\\(" +
     "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
