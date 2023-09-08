@@ -34,7 +34,8 @@ class MirroringConfirmationDialog(
     context: Context,
     private val onStartMirroringClickListener: View.OnClickListener,
     private val onCancelMirroring: View.OnClickListener,
-) : Dialog(context, R.style.Theme_SystemUI_Dialog) {
+    theme: Int = R.style.Theme_SystemUI_Dialog,
+) : Dialog(context, theme) {
 
     private lateinit var mirrorButton: TextView
     private lateinit var dismissButton: TextView

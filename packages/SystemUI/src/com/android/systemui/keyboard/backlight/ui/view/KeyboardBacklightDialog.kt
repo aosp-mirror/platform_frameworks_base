@@ -44,7 +44,8 @@ class KeyboardBacklightDialog(
     context: Context,
     initialCurrentLevel: Int,
     initialMaxLevel: Int,
-) : Dialog(context, R.style.Theme_SystemUI_Dialog) {
+    theme: Int = R.style.Theme_SystemUI_Dialog,
+) : Dialog(context, theme) {
 
     private data class RootProperties(
         val cornerRadius: Float,

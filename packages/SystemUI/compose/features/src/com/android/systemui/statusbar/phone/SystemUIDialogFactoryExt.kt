@@ -48,10 +48,11 @@ import com.android.compose.theme.PlatformTheme
  */
 fun SystemUIDialogFactory.create(
     context: Context = this.applicationContext,
+    theme: Int = SystemUIDialog.DEFAULT_THEME,
     dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
     content: @Composable (SystemUIDialog) -> Unit,
 ): ComponentSystemUIDialog {
-    val dialog = create(context, dismissOnDeviceLock)
+    val dialog = create(context, theme, dismissOnDeviceLock)
 
     // Create the dialog so that it is properly constructed before we set the Compose content.
     // Otherwise, the ComposeView won't render properly.

@@ -48,13 +48,14 @@ constructor(
      */
     fun create(
         context: Context = this.applicationContext,
+        theme: Int = SystemUIDialog.DEFAULT_THEME,
         dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
     ): ComponentSystemUIDialog {
         Assert.isMainThread()
 
         return ComponentSystemUIDialog(
             context,
-            SystemUIDialog.DEFAULT_THEME,
+            theme,
             dismissOnDeviceLock,
             featureFlags,
             dialogManager,
