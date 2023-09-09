@@ -47,7 +47,9 @@ import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.platform.test.flag.junit.SetFlagsRule;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -90,8 +92,7 @@ public class ProxyManagerTest {
     private static final int STREAMED_CALLING_UID = 9876;
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
-
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock private Context mMockContext;
     @Mock private AccessibilitySecurityPolicy mMockSecurityPolicy;
@@ -115,8 +116,6 @@ public class ProxyManagerTest {
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         final Resources resources = InstrumentationRegistry.getContext().getResources();
-
-        mSetFlagsRule.enableFlags(Flags.FLAG_PROXY_USE_APPS_ON_VIRTUAL_DEVICE_LISTENER);
 
         mFocusStrokeWidthDefaultValue =
                 resources.getDimensionPixelSize(R.dimen.accessibility_focus_highlight_stroke_width);
@@ -230,6 +229,7 @@ public class ProxyManagerTest {
      * app changes to the proxy device.
      */
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_PROXY_USE_APPS_ON_VIRTUAL_DEVICE_LISTENER)
     public void testUpdateProxyOfRunningAppsChange_changedUidIsStreamedApp_propagatesChange() {
         final VirtualDeviceManagerInternal localVdm =
                 Mockito.mock(VirtualDeviceManagerInternal.class);
