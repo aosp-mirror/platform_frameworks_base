@@ -599,7 +599,7 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Setel kunci"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Beralih ke <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Membuat pengguna baru …"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Membuat tamu baru …"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Membuat tamu baru…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Gagal membuat pengguna baru"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Gagal membuat tamu baru"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nama panggilan"</string>
