@@ -18,7 +18,6 @@ package com.android.server.autofill;
 
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_RESULT;
-
 import static com.android.server.autofill.AutofillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
 
 import android.os.Bundle;
@@ -155,18 +154,29 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("");
         }
 
+        Method[] flagMethods = {};
+
         try {
-            Method[] flagMethods = Flags.class.getMethods();
-            // For some reason, unreferenced flags do not show up here
-            // Maybe compiler optomized them out of bytecode?
-            for (Method method : flagMethods) {
-                if (Modifier.isPublic(method.getModifiers())) {
-                    pw.println(method.getName() + ": " + method.invoke(null));
-                }
-            }
-        } catch (Exception ex) {
-            pw.println(ex);
+            flagMethods = Flags.class.getDeclaredMethods();
+        } catch (SecurityException ex) {
+            ex.printStackTrace(pw);
             return -1;
+        }
+
+        // For some reason, unreferenced flags do not show up here
+        // Maybe compiler optomized them out of bytecode?
+        for (Method method : flagMethods) {
+            if (!Modifier.isPublic(method.getModifiers())) {
+                continue;
+            }
+            try {
+                pw.print(method.getName() + ": ");
+                pw.print(method.invoke(null));
+            } catch (Exception ex) {
+                ex.printStackTrace(pw);
+            } finally {
+                pw.println("");
+            }
         }
 
         return 0;
