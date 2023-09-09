@@ -32,7 +32,6 @@ import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -69,7 +68,7 @@ interface PromptSelectorInteractor {
     val isConfirmationRequired: Flow<Boolean>
 
     /** Fingerprint sensor type */
-    val sensorType: StateFlow<FingerprintSensorType>
+    val sensorType: Flow<FingerprintSensorType>
 
     /** Use biometrics for authentication. */
     fun useBiometricsForAuthentication(
@@ -95,7 +94,7 @@ interface PromptSelectorInteractor {
 class PromptSelectorInteractorImpl
 @Inject
 constructor(
-    private val fingerprintPropertyRepository: FingerprintPropertyRepository,
+    fingerprintPropertyRepository: FingerprintPropertyRepository,
     private val promptRepository: PromptRepository,
     lockPatternUtils: LockPatternUtils,
 ) : PromptSelectorInteractor {
@@ -147,8 +146,7 @@ constructor(
             }
         }
 
-    override val sensorType: StateFlow<FingerprintSensorType> =
-        fingerprintPropertyRepository.sensorType
+    override val sensorType: Flow<FingerprintSensorType> = fingerprintPropertyRepository.sensorType
 
     override fun useBiometricsForAuthentication(
         promptInfo: PromptInfo,
