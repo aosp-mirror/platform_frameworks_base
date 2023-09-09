@@ -68,7 +68,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DREAM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -5629,6 +5628,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 activityRecord.unregisterCaptureObserver(observer);
             }
         }
+    }
+
+    void registerCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id,
+            @NonNull CompatScaleProvider provider) {
+        mCompatModePackages.registerCompatScaleProvider(id, provider);
+    }
+
+    void unregisterCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id) {
+        mCompatModePackages.unregisterCompatScaleProvider(id);
     }
 
     /**

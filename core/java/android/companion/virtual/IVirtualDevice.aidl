@@ -23,6 +23,7 @@ import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -84,6 +85,18 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void setDevicePolicy(int policyType, int devicePolicy);
+
+    /**
+     * Adds an exemption to the default activity launch policy.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void addActivityPolicyExemption(in ComponentName exemption);
+
+    /**
+     * Removes an exemption to the default activity launch policy.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void removeActivityPolicyExemption(in ComponentName exemption);
 
     /**
      * Notifies that an audio session being started.

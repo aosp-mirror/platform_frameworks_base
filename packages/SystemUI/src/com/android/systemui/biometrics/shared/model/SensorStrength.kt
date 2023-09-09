@@ -28,8 +28,8 @@ enum class SensorStrength {
 /** Convert [this] to corresponding [SensorStrength] */
 fun Int.toSensorStrength(): SensorStrength =
     when (this) {
-        0 -> SensorStrength.CONVENIENCE
-        1 -> SensorStrength.WEAK
-        2 -> SensorStrength.STRONG
+        SensorProperties.STRENGTH_CONVENIENCE -> SensorStrength.CONVENIENCE
+        SensorProperties.STRENGTH_WEAK -> SensorStrength.WEAK
+        SensorProperties.STRENGTH_STRONG -> SensorStrength.STRONG
         else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
     }

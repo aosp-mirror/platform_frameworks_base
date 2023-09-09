@@ -20,16 +20,12 @@ import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
 
-    private val _isInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isInitialized = _isInitialized.asStateFlow()
-
     private val _sensorId: MutableStateFlow<Int> = MutableStateFlow(-1)
-    override val sensorId: StateFlow<Int> = _sensorId.asStateFlow()
+    override val sensorId = _sensorId.asStateFlow()
 
     private val _strength: MutableStateFlow<SensorStrength> =
         MutableStateFlow(SensorStrength.CONVENIENCE)
@@ -37,12 +33,11 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
 
     private val _sensorType: MutableStateFlow<FingerprintSensorType> =
         MutableStateFlow(FingerprintSensorType.UNKNOWN)
-    override val sensorType: StateFlow<FingerprintSensorType> = _sensorType.asStateFlow()
+    override val sensorType = _sensorType.asStateFlow()
 
     private val _sensorLocations: MutableStateFlow<Map<String, SensorLocationInternal>> =
         MutableStateFlow(mapOf("" to SensorLocationInternal.DEFAULT))
-    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
-        _sensorLocations.asStateFlow()
+    override val sensorLocations = _sensorLocations.asStateFlow()
 
     fun setProperties(
         sensorId: Int,
@@ -54,6 +49,5 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
         _strength.value = strength
         _sensorType.value = sensorType
         _sensorLocations.value = sensorLocations
-        _isInitialized.value = true
     }
 }

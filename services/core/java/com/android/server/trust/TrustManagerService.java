@@ -159,10 +159,26 @@ public class TrustManagerService extends SystemService {
     private VirtualDeviceManagerInternal mVirtualDeviceManager;
 
     private enum TrustState {
-        UNTRUSTED, // the phone is not unlocked by any trustagents
-        TRUSTABLE, // the phone is in a semi-locked state that can be unlocked if
-        // FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE is passed and a trustagent is trusted
-        TRUSTED // the phone is unlocked
+        // UNTRUSTED means that TrustManagerService is currently *not* giving permission for the
+        // user's Keyguard to be dismissed, and grants of trust by trust agents are remembered in
+        // the corresponding TrustAgentWrapper but are not recognized until the device is unlocked
+        // for the user.  I.e., if the device is locked and the state is UNTRUSTED, it cannot be
+        // unlocked by a trust agent.  Automotive devices are an exception; grants of trust are
+        // always recognized on them.
+        UNTRUSTED,
+
+        // TRUSTABLE is the same as UNTRUSTED except that new grants of trust using
+        // FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE are recognized for moving to TRUSTED.  I.e., if
+        // the device is locked and the state is TRUSTABLE, it can be unlocked by a trust agent,
+        // provided that the trust agent chooses to use Active Unlock.  The TRUSTABLE state is only
+        // possible as a result of a downgrade from TRUSTED, after a trust agent used
+        // FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE in its most recent grant.
+        TRUSTABLE,
+
+        // TRUSTED means that TrustManagerService is currently giving permission for the user's
+        // Keyguard to be dismissed.  This implies that the device is unlocked for the user (where
+        // the case of Keyguard showing but dismissible just with swipe counts as "unlocked").
+        TRUSTED
     };
 
     @GuardedBy("mUserTrustState")
@@ -744,6 +760,12 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private TrustState getUserTrustStateInner(int userId) {
+        synchronized (mUserTrustState) {
+            return mUserTrustState.get(userId, TrustState.UNTRUSTED);
+        }
+    }
+
     boolean isDeviceLockedInner(int userId) {
         synchronized (mDeviceLockedForUser) {
             return mDeviceLockedForUser.get(userId, true);
@@ -806,7 +828,12 @@ public class TrustManagerService extends SystemService {
                 continue;
             }
 
-            boolean trusted = aggregateIsTrusted(id);
+            final boolean trusted;
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+                trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
+            } else {
+                trusted = aggregateIsTrusted(id);
+            }
             boolean showingKeyguard = true;
             boolean biometricAuthenticated = false;
             boolean currentUserIsUnlocked = false;
@@ -1627,7 +1654,7 @@ public class TrustManagerService extends SystemService {
             if (isCurrent) {
                 fout.print(" (current)");
             }
-            fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
+            fout.print(": trustState=" + getUserTrustStateInner(user.id));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
             fout.print(", isActiveUnlockRunning=" + dumpBool(
