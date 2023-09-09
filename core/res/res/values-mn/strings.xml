@@ -806,7 +806,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжих болон таблетын бүх датаг арилгана"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android TV төхөөрөмжийг түгжиж эсвэл үүний бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Дэлгэцийн түгжээг тайлахад буруу бичиж оруулсан нууц үгний тоог хянаж, инфотэйнмент системийг түгжих эсвэл хэт олон удаа нууц үгийг буруу бичиж оруулсан тохиолдолд инфотэйнмент системийн бүх өгөгдлийг устгана."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжих болон утасны бүх датаг арилгана"</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжиж эсвэл утасны бүх өгөгдлийг арилгана"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Дэлгэцийн түгжээг тайлахад оруулсан буруу нууц үгийн давтамжийг хянаж таблетыг түгжих эсвэл буруу нууц үгийг хэт олон удаа оруулсан тохиолдолд энэ хэрэглэгчийн мэдээллийг устгах."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android TV төхөөрөмжийг түгжиж эсвэл энэ хэрэглэгчийн бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Дэлгэцийн түгжээг тайлахад буруу бичиж оруулсан нууц үгний тоог хянаж, инфотэйнмент системийг түгжих эсвэл хэт олон удаа нууц үгийг буруу бичиж оруулсан тохиолдолд энэ профайлын бүх өгөгдлийг устгана."</string>
@@ -815,11 +815,11 @@
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Дэлгэцийн түгжээг өөрчлөх."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Дэлгэц түгжих"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Дэлгэц хэзээ яаж түгжихийг удирдах"</string>
-    <string name="policylab_wipeData" msgid="1359485247727537311">"Бүх датаг арилгах"</string>
+    <string name="policylab_wipeData" msgid="1359485247727537311">"Бүх өгөгдлийг арилгах"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Таны Android TV төхөөрөмжийн өгөгдлийг танд анхааруулалгүйгээр үйлдвэрээс гарсан төлөвт шилжүүлэн устгана."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Үйлдвэрийн өгөгдлийн төлөвт үйлдлийг гүйцэтгэснээр инфотэйнмент системийн өгөгдлийг сануулгагүйгээр устгана."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Сануулахгүйгээр утасны бүх мэдээллийг устгаж, үйлдвэрийн өгөгдмөл байдалд шилжүүлнэ"</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Сануулахгүйгээр утасны бүх өгөгдлийг арилгаж, үйлдвэрийн өгөгдлийн тохиргоонд шинэчилнэ"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Профайлын өгөгдлийг устгах"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Хэрэглэгчийн мэдээллийг арилгах"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ таблет дээрх мэдээллийг устгах."</string>
