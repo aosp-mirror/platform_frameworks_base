@@ -154,6 +154,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(Flags.NSSL_DEBUG_REMOVE_ANIMATION.getDefault());
         mFeatureFlags.set(Flags.NSSL_DEBUG_LINES, false);
         mFeatureFlags.set(Flags.NSSL_DEBUG_REMOVE_ANIMATION, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
 
         // Register the feature flags we use
         // TODO: Ideally we wouldn't need to set these unless a test actually reads them,

@@ -569,6 +569,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private boolean mShouldUseSplitNotificationShade;
     private boolean mHasFilteredOutSeenNotifications;
     @Nullable private SplitShadeStateController mSplitShadeStateController = null;
+    private boolean mIsSmallLandscapeLockscreenEnabled = false;
 
     /** Pass splitShadeStateController to view and update split shade */
     public void passSplitShadeStateController(SplitShadeStateController splitShadeStateController) {
@@ -628,6 +629,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         super(context, attrs, 0, 0);
         Resources res = getResources();
         FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
+        mIsSmallLandscapeLockscreenEnabled = featureFlags.isEnabled(
+                Flags.LOCKSCREEN_ENABLE_LANDSCAPE);
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
@@ -1054,6 +1057,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mOverflingDistance = configuration.getScaledOverflingDistance();
 
         Resources res = context.getResources();
+        boolean useSmallLandscapeLockscreenResources = mIsSmallLandscapeLockscreenEnabled
+                && res.getBoolean(R.bool.is_small_screen_landscape);
+        // TODO (b/293252410) remove condition here when flag is launched
+        //  Instead update the config_skinnyNotifsInLandscape to be false whenever
+        //  is_small_screen_landscape is true. Then, only use the config_skinnyNotifsInLandscape.
+        if (useSmallLandscapeLockscreenResources) {
+            mSkinnyNotifsInLandscape = false;
+        } else {
+            mSkinnyNotifsInLandscape = res.getBoolean(
+                    R.bool.config_skinnyNotifsInLandscape);
+        }
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mStackScrollAlgorithm.initView(context);
         mAmbientState.reload(context);
@@ -1065,7 +1079,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mBottomPadding = res.getDimensionPixelSize(R.dimen.notification_panel_padding_bottom);
         mMinimumPaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mQsTilePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_margin_horizontal);
-        mSkinnyNotifsInLandscape = res.getBoolean(R.bool.config_skinnyNotifsInLandscape);
         mSidePaddings = mMinimumPaddings;  // Updated in onMeasure by updateSidePadding()
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
