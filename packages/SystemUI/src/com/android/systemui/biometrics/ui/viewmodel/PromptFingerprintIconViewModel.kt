@@ -33,7 +33,7 @@ class PromptFingerprintIconViewModel
 @Inject
 constructor(
     private val displayStateInteractor: DisplayStateInteractor,
-    private val promptSelectorInteractor: PromptSelectorInteractor,
+    promptSelectorInteractor: PromptSelectorInteractor,
 ) {
     /** Current device rotation. */
     private var rotation: Int = Surface.ROTATION_0
