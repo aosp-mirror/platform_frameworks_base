@@ -257,6 +257,7 @@ public class Installer extends SystemService {
     private static CreateAppDataResult buildPlaceholderCreateAppDataResult() {
         final CreateAppDataResult result = new CreateAppDataResult();
         result.ceDataInode = -1;
+        result.deDataInode = -1;
         result.exceptionCode = 0;
         result.exceptionMessage = null;
         return result;
@@ -361,7 +362,7 @@ public class Installer extends SystemService {
         private boolean mExecuted;
 
         private final List<CreateAppDataArgs> mArgs = new ArrayList<>();
-        private final List<CompletableFuture<Long>> mFutures = new ArrayList<>();
+        private final List<CompletableFuture<CreateAppDataResult>> mFutures = new ArrayList<>();
 
         /**
          * Enqueue the given {@code installd} operation to be executed in the
@@ -371,11 +372,12 @@ public class Installer extends SystemService {
          * {@link Installer} object.
          */
         @NonNull
-        public synchronized CompletableFuture<Long> createAppData(CreateAppDataArgs args) {
+        public synchronized CompletableFuture<CreateAppDataResult> createAppData(
+                CreateAppDataArgs args) {
             if (mExecuted) {
                 throw new IllegalStateException();
             }
-            final CompletableFuture<Long> future = new CompletableFuture<>();
+            final CompletableFuture<CreateAppDataResult> future = new CompletableFuture<>();
             mArgs.add(args);
             mFutures.add(future);
             return future;
@@ -402,9 +404,9 @@ public class Installer extends SystemService {
                 final CreateAppDataResult[] results = installer.createAppDataBatched(args);
                 for (int j = 0; j < results.length; j++) {
                     final CreateAppDataResult result = results[j];
-                    final CompletableFuture<Long> future = mFutures.get(i + j);
+                    final CompletableFuture<CreateAppDataResult> future = mFutures.get(i + j);
                     if (result.exceptionCode == 0) {
-                        future.complete(result.ceDataInode);
+                        future.complete(result);
                     } else {
                         future.completeExceptionally(
                                 new InstallerException(result.exceptionMessage));

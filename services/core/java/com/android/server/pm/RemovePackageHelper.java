@@ -277,6 +277,7 @@ final class RemovePackageHelper {
                 mAppDataHelper.destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
                 ps.setCeDataInode(-1, nextUserId);
+                ps.setDeDataInode(-1, nextUserId);
             }
             mAppDataHelper.clearKeystoreData(nextUserId, ps.getAppId());
             preferredActivityHelper.clearPackagePreferredActivities(ps.getPackageName(),

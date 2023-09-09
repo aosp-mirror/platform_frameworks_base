@@ -569,6 +569,7 @@ final class DeletePackageHelper {
 
             ps.setUserState(nextUserId,
                     ps.getCeDataInode(nextUserId),
+                    ps.getDeDataInode(nextUserId),
                     COMPONENT_ENABLED_STATE_DEFAULT,
                     false /*installed*/,
                     true /*stopped*/,

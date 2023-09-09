@@ -86,6 +86,13 @@ public interface PackageUserState {
     long getCeDataInode();
 
     /**
+     * Device encrypted /data partition inode.
+     *
+     * @hide
+     */
+    long getDeDataInode();
+
+    /**
      * Fully qualified class names of components explicitly disabled.
      *
      * @hide

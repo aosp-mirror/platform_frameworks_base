@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
-
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.getPackageManagerLocal;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
@@ -228,7 +227,7 @@ public class AppDataHelper {
                 userId, flags, appId, seInfo, targetSdkVersion, usesSdk);
         args.previousAppId = previousAppId;
 
-        return batch.createAppData(args).whenComplete((ceDataInode, e) -> {
+        return batch.createAppData(args).whenComplete((createAppDataResult, e) -> {
             // Note: this code block is executed with the Installer lock
             // already held, since it's invoked as a side-effect of
             // executeBatchLI()
@@ -237,7 +236,7 @@ public class AppDataHelper {
                         + ", but trying to recover: " + e);
                 destroyAppDataLeafLIF(pkg, userId, flags);
                 try {
-                    ceDataInode = mInstaller.createAppData(args).ceDataInode;
+                    createAppDataResult = mInstaller.createAppData(args);
                     logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                 } catch (Installer.InstallerException e2) {
                     logCriticalInfo(Log.DEBUG, "Recovery failed!");
@@ -279,10 +278,17 @@ public class AppDataHelper {
                 }
             }
 
+            final long ceDataInode = createAppDataResult.ceDataInode;
+            final long deDataInode = createAppDataResult.deDataInode;
+
             if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
-                // TODO: mark this structure as dirty so we persist it!
                 synchronized (mPm.mLock) {
                     ps.setCeDataInode(ceDataInode, userId);
+                }
+            }
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && deDataInode != -1) {
+                synchronized (mPm.mLock) {
+                    ps.setDeDataInode(deDataInode, userId);
                 }
             }
 
@@ -609,7 +615,7 @@ public class AppDataHelper {
         destroyAppDataLeafLIF(pkg, userId, flags);
     }
 
-    public void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
+    private void destroyAppDataLeafLIF(AndroidPackage pkg, int userId, int flags) {
         final Computer snapshot = mPm.snapshotComputer();
         final PackageStateInternal packageStateInternal =
                 snapshot.getPackageStateInternal(pkg.getPackageName());
