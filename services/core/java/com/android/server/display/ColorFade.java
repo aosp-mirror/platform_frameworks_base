@@ -401,6 +401,12 @@ final class ColorFade {
         }
     }
 
+    void stop() {
+        if (mEglContext != null && mEglDisplay != null) {
+            EGL14.eglDestroyContext(mEglDisplay, mEglContext);
+        }
+    }
+
     /**
      * Draws an animation frame showing the color fade activated at the
      * specified level.
