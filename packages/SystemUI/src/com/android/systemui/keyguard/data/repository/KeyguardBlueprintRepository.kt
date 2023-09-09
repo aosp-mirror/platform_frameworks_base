@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule
 import java.io.PrintWriter
+import java.util.TreeMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -52,15 +53,30 @@ constructor(
     blueprints: Set<@JvmSuppressWildcards KeyguardBlueprint>,
     @Application private val applicationScope: CoroutineScope,
 ) {
-    private val blueprintIdMap: Map<String, KeyguardBlueprint> = blueprints.associateBy { it.id }
+    private val blueprintIdMap: TreeMap<String, KeyguardBlueprint> = TreeMap()
     private val _blueprint: MutableSharedFlow<KeyguardBlueprint> = MutableSharedFlow(replay = 1)
     val blueprint: Flow<KeyguardBlueprint> = _blueprint.asSharedFlow()
 
     init {
+        blueprintIdMap.putAll(blueprints.associateBy { it.id })
         applyBlueprint(blueprintIdMap[DEFAULT]!!)
         applicationScope.launch {
             configurationRepository.onAnyConfigurationChange.collect { refreshBlueprint() }
         }
+    }
+
+    /**
+     * Emits the blueprint value to the collectors.
+     *
+     * @param blueprintId
+     * @return whether the transition has succeeded.
+     */
+    fun applyBlueprint(index: Int): Boolean {
+        ArrayList(blueprintIdMap.values)[index]?.let {
+            applyBlueprint(it)
+            return true
+        }
+        return false
     }
 
     /**
@@ -89,6 +105,6 @@ constructor(
 
     /** Prints all available blueprints to the PrintWriter. */
     fun printBlueprints(pw: PrintWriter) {
-        blueprintIdMap.forEach { entry -> pw.println("${entry.key}") }
+        blueprintIdMap.onEachIndexed { index, entry -> pw.println("$index: ${entry.key}") }
     }
 }
