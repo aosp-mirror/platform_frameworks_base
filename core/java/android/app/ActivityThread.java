@@ -36,7 +36,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
-
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 
@@ -1286,8 +1285,13 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         private void updateCompatOverrideScale(CompatibilityInfo info) {
-            CompatibilityInfo.setOverrideInvertedScale(
-                    info.hasOverrideScaling() ? info.applicationInvertedScale : 1f);
+            if (info.hasOverrideScaling()) {
+                CompatibilityInfo.setOverrideInvertedScale(info.applicationInvertedScale,
+                        info.applicationDensityInvertedScale);
+            } else {
+                CompatibilityInfo.setOverrideInvertedScale(/* invertScale */ 1f,
+                        /* densityInvertScale */1f);
+            }
         }
 
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
