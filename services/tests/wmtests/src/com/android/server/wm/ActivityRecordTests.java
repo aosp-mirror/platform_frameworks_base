@@ -3117,7 +3117,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setSystemDecorations(true).build();
         // Add a decor insets provider window.
         final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
-        assertTrue(navbar.providesNonDecorInsets()
+        assertTrue(navbar.providesDisplayDecorInsets()
                 && squareDisplay.getDisplayPolicy().updateDecorInsetsInfo());
         squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
