@@ -18,14 +18,19 @@
 
 package com.android.systemui.scene.ui.composable
 
+import android.os.SystemProperties
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,6 +42,7 @@ import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.UserAction as SceneTransitionUserAction
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.systemui.ribbon.ui.composable.BottomRightCornerRibbon
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -75,52 +81,69 @@ fun SceneContainer(
     val currentDestinations: Map<UserAction, SceneModel> by
         currentScene.destinationScenes().collectAsState()
     val state = remember { SceneTransitionLayoutState(currentSceneKey.toTransitionSceneKey()) }
+    val isRibbonEnabled = remember { SystemProperties.getBoolean("flexi.ribbon", false) }
 
     DisposableEffect(viewModel, state) {
         viewModel.setTransitionState(state.observableTransitionState().map { it.toModel() })
         onDispose { viewModel.setTransitionState(null) }
     }
 
-    SceneTransitionLayout(
-        currentScene = currentSceneKey.toTransitionSceneKey(),
-        onChangeScene = viewModel::onSceneChanged,
-        transitions = SceneContainerTransitions,
-        state = state,
-        modifier =
-            modifier
-                .fillMaxSize()
-                .motionEventSpy { event -> viewModel.onMotionEvent(event) }
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            awaitPointerEvent(PointerEventPass.Final)
-                            viewModel.onMotionEventComplete()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        SceneTransitionLayout(
+            currentScene = currentSceneKey.toTransitionSceneKey(),
+            onChangeScene = viewModel::onSceneChanged,
+            transitions = SceneContainerTransitions,
+            state = state,
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .motionEventSpy { event -> viewModel.onMotionEvent(event) }
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                awaitPointerEvent(PointerEventPass.Final)
+                                viewModel.onMotionEventComplete()
+                            }
                         }
                     }
-                }
-    ) {
-        sceneByKey.forEach { (sceneKey, composableScene) ->
-            scene(
-                key = sceneKey.toTransitionSceneKey(),
-                userActions =
-                    if (sceneKey == currentSceneKey) {
-                            currentDestinations
-                        } else {
-                            composableScene.destinationScenes().value
-                        }
-                        .map { (userAction, destinationSceneModel) ->
-                            toTransitionModels(userAction, destinationSceneModel)
-                        }
-                        .toMap(),
-            ) {
-                with(composableScene) {
-                    this@scene.Content(
-                        modifier =
-                            Modifier.element(sceneKey.toTransitionSceneKey().rootElementKey)
-                                .fillMaxSize(),
-                    )
+        ) {
+            sceneByKey.forEach { (sceneKey, composableScene) ->
+                scene(
+                    key = sceneKey.toTransitionSceneKey(),
+                    userActions =
+                        if (sceneKey == currentSceneKey) {
+                                currentDestinations
+                            } else {
+                                composableScene.destinationScenes().value
+                            }
+                            .map { (userAction, destinationSceneModel) ->
+                                toTransitionModels(userAction, destinationSceneModel)
+                            }
+                            .toMap(),
+                ) {
+                    with(composableScene) {
+                        this@scene.Content(
+                            modifier =
+                                Modifier.element(sceneKey.toTransitionSceneKey().rootElementKey)
+                                    .fillMaxSize(),
+                        )
+                    }
                 }
             }
+        }
+
+        if (isRibbonEnabled) {
+            BottomRightCornerRibbon(
+                content = {
+                    Text(
+                        text = "flexi\uD83E\uDD43",
+                        color = Color.White,
+                    )
+                },
+                modifier = Modifier.align(Alignment.BottomEnd),
+            )
         }
     }
 }

@@ -102,18 +102,21 @@ public class RemoteInputController {
             mLogger.logRemoveRemoteInput(
                     entry.getKey() /* entryKey*/,
                     true /* remoteEditImeVisible */,
-                    true /* remoteEditImeAnimatingAway */);
+                    true /* remoteEditImeAnimatingAway */,
+                    isRemoteInputActive(entry) /* isRemoteInputActiveForEntry */,
+                    isRemoteInputActive() /* isRemoteInputActive */);
             return;
         }
         // If the view is being removed, this may be called even though we're not active
-        boolean remoteInputActive = isRemoteInputActive(entry);
+        boolean remoteInputActiveForEntry = isRemoteInputActive(entry);
         mLogger.logRemoveRemoteInput(
-                entry.getKey() /* entryKey*/,
+                entry.getKey() /* entryKey */,
                 entry.mRemoteEditImeVisible /* remoteEditImeVisible */,
                 entry.mRemoteEditImeAnimatingAway /* remoteEditImeAnimatingAway */,
-                remoteInputActive /* isRemoteInputActive */);
+                remoteInputActiveForEntry /* isRemoteInputActiveForEntry */,
+                isRemoteInputActive()/* isRemoteInputActive */);
 
-        if (!remoteInputActive) return;
+        if (!remoteInputActiveForEntry) return;
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 

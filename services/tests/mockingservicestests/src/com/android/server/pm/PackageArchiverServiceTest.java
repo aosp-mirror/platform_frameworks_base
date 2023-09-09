@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -34,11 +35,15 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageArchiver;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +67,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,9 +80,10 @@ public class PackageArchiverServiceTest {
     private static final String PACKAGE = "com.example";
     private static final String CALLER_PACKAGE = "com.caller";
     private static final String INSTALLER_PACKAGE = "com.installer";
+    private static final Path ICON_PATH = Path.of("icon.png");
 
     @Rule
-    public final MockSystemRule mMockSystem = new MockSystemRule();
+    public final MockSystemRule rule = new MockSystemRule();
 
     @Mock
     private IntentSender mIntentSender;
@@ -87,9 +94,13 @@ public class PackageArchiverServiceTest {
     @Mock
     private LauncherApps mLauncherApps;
     @Mock
+    private PackageManager mPackageManager;
+    @Mock
     private PackageInstallerService mInstallerService;
     @Mock
     private PackageStateInternal mPackageState;
+    @Mock
+    private Bitmap mIcon;
 
     private final InstallSource mInstallSource =
             InstallSource.create(
@@ -102,7 +113,6 @@ public class PackageArchiverServiceTest {
                     /* packageSource= */ 0);
 
     private final List<LauncherActivityInfo> mLauncherActivityInfos = createLauncherActivities();
-
     private final int mUserId = UserHandle.CURRENT.getIdentifier();
 
     private PackageUserStateImpl mUserState;
@@ -114,10 +124,10 @@ public class PackageArchiverServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mMockSystem.system().stageNominalSystemState();
-        when(mMockSystem.mocks().getInjector().getPackageInstallerService()).thenReturn(
+        rule.system().stageNominalSystemState();
+        when(rule.mocks().getInjector().getPackageInstallerService()).thenReturn(
                 mInstallerService);
-        PackageManagerService pm = spy(new PackageManagerService(mMockSystem.mocks().getInjector(),
+        PackageManagerService pm = spy(new PackageManagerService(rule.mocks().getInjector(),
                 /* factoryTest= */false,
                 MockSystem.Companion.getDEFAULT_VERSION_INFO().fingerprint,
                 /* isEngBuild= */ false,
@@ -132,18 +142,27 @@ public class PackageArchiverServiceTest {
         when(mPackageState.getPackageName()).thenReturn(PACKAGE);
         when(mPackageState.getInstallSource()).thenReturn(mInstallSource);
         mPackageSetting = createBasicPackageSetting();
-        when(mMockSystem.mocks().getSettings().getPackageLPr(eq(PACKAGE))).thenReturn(
+        when(rule.mocks().getSettings().getPackageLPr(eq(PACKAGE))).thenReturn(
                 mPackageSetting);
         mUserState = new PackageUserStateImpl().setInstalled(true);
         mPackageSetting.setUserState(mUserId, mUserState);
         when(mPackageState.getUserStateOrDefault(eq(mUserId))).thenReturn(mUserState);
+
         when(mContext.getSystemService(LauncherApps.class)).thenReturn(mLauncherApps);
         when(mLauncherApps.getActivityList(eq(PACKAGE), eq(UserHandle.CURRENT))).thenReturn(
                 mLauncherActivityInfos);
         doReturn(mComputer).when(pm).snapshotComputer();
         when(mComputer.getPackageUid(eq(CALLER_PACKAGE), eq(0L), eq(mUserId))).thenReturn(
                 Binder.getCallingUid());
-        mArchiveService = new PackageArchiverService(mContext, pm);
+
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getResourcesForApplication(eq(PACKAGE))).thenReturn(
+                mock(Resources.class));
+        when(mIcon.compress(eq(Bitmap.CompressFormat.PNG), eq(100), any())).thenReturn(true);
+
+        mArchiveService = spy(new PackageArchiverService(mContext, pm));
+        doReturn(ICON_PATH).when(mArchiveService).storeIcon(eq(PACKAGE),
+                any(LauncherActivityInfo.class), eq(mUserId));
     }
 
     @Test
@@ -175,15 +194,20 @@ public class PackageArchiverServiceTest {
     }
 
     @Test
-    public void archiveApp_packageNotInstalledForUser() {
+    public void archiveApp_packageNotInstalledForUser() throws IntentSender.SendIntentException {
         mPackageSetting.modifyUserState(UserHandle.CURRENT.getIdentifier()).setInstalled(false);
 
-        Exception e = assertThrows(
-                ParcelableException.class,
-                () -> mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender,
-                        UserHandle.CURRENT));
-        assertThat(e.getCause()).isInstanceOf(PackageManager.NameNotFoundException.class);
-        assertThat(e.getCause()).hasMessageThat().isEqualTo(
+        mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        rule.mocks().getHandler().flush();
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
+                any(), any());
+        Intent value = intentCaptor.getValue();
+        assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
+        assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(
+                PackageInstaller.STATUS_FAILURE);
+        assertThat(value.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)).isEqualTo(
                 String.format("Package %s not found.", PACKAGE));
     }
 
@@ -223,13 +247,34 @@ public class PackageArchiverServiceTest {
     }
 
     @Test
+    public void archiveApp_storeIconFails() throws IntentSender.SendIntentException, IOException {
+        IOException e = new IOException("IO");
+        doThrow(e).when(mArchiveService).storeIcon(eq(PACKAGE),
+                any(LauncherActivityInfo.class), eq(mUserId));
+
+        mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        rule.mocks().getHandler().flush();
+
+        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
+        verify(mIntentSender).sendIntent(any(), anyInt(), intentCaptor.capture(), any(), any(),
+                any(), any());
+        Intent value = intentCaptor.getValue();
+        assertThat(value.getStringExtra(PackageInstaller.EXTRA_PACKAGE_NAME)).isEqualTo(PACKAGE);
+        assertThat(value.getIntExtra(PackageInstaller.EXTRA_STATUS, 0)).isEqualTo(
+                PackageInstaller.STATUS_FAILURE);
+        assertThat(value.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)).isEqualTo(
+                e.toString());
+    }
+
+    @Test
     public void archiveApp_success() {
         mArchiveService.requestArchive(PACKAGE, CALLER_PACKAGE, mIntentSender, UserHandle.CURRENT);
+        rule.mocks().getHandler().flush();
 
         verify(mInstallerService).uninstall(
                 eq(new VersionedPackage(PACKAGE, PackageManager.VERSION_CODE_HIGHEST)),
                 eq(CALLER_PACKAGE), eq(DELETE_KEEP_DATA), eq(mIntentSender),
-                eq(UserHandle.CURRENT.getIdentifier()));
+                eq(UserHandle.CURRENT.getIdentifier()), anyInt());
         assertThat(mPackageSetting.readUserState(
                 UserHandle.CURRENT.getIdentifier()).getArchiveState()).isEqualTo(
                 createArchiveState());
@@ -305,7 +350,7 @@ public class PackageArchiverServiceTest {
         mUserState.setArchiveState(createArchiveState()).setInstalled(false);
 
         mArchiveService.requestUnarchive(PACKAGE, CALLER_PACKAGE, UserHandle.CURRENT);
-        mMockSystem.mocks().getHandler().flush();
+        rule.mocks().getHandler().flush();
 
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         verify(mContext).sendOrderedBroadcastAsUser(
@@ -331,20 +376,22 @@ public class PackageArchiverServiceTest {
     private static ArchiveState createArchiveState() {
         List<ArchiveState.ArchiveActivityInfo> activityInfos = new ArrayList<>();
         for (LauncherActivityInfo mainActivity : createLauncherActivities()) {
-            // TODO(b/278553670) Extract and store launcher icons
             ArchiveState.ArchiveActivityInfo activityInfo = new ArchiveState.ArchiveActivityInfo(
                     mainActivity.getLabel().toString(),
-                    Path.of("/TODO"), null);
+                    ICON_PATH, null);
             activityInfos.add(activityInfo);
         }
         return new ArchiveState(activityInfos, INSTALLER_PACKAGE);
     }
 
     private static List<LauncherActivityInfo> createLauncherActivities() {
+        ActivityInfo activityInfo = mock(ActivityInfo.class);
         LauncherActivityInfo activity1 = mock(LauncherActivityInfo.class);
         when(activity1.getLabel()).thenReturn("activity1");
+        when(activity1.getActivityInfo()).thenReturn(activityInfo);
         LauncherActivityInfo activity2 = mock(LauncherActivityInfo.class);
         when(activity2.getLabel()).thenReturn("activity2");
+        when(activity2.getActivityInfo()).thenReturn(activityInfo);
         return List.of(activity1, activity2);
     }
 

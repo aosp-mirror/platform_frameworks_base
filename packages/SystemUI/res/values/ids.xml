@@ -207,13 +207,14 @@
     <!-- keyboard backlight indicator-->
     <item type="id" name="backlight_icon" />
 
+    <!-- IDs for use in the keyguard/lockscreen scene -->
     <item type="id" name="keyguard_root_view" />
     <item type="id" name="keyguard_indication_area" />
     <item type="id" name="keyguard_indication_text" />
     <item type="id" name="keyguard_indication_text_bottom" />
     <item type="id" name="nssl_guideline" />
-    <item type="id" name="nssl_top_barrier" />
-    <item type="id" name="nssl_bottom_barrier" />
+    <item type="id" name="nssl_placeholder" />
+    <item type="id" name="aod_notification_icon_container" />
     <item type="id" name="split_shade_guideline" />
     <item type="id" name="lock_icon" />
     <item type="id" name="lock_icon_bg" />

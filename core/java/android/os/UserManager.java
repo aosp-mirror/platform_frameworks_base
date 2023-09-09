@@ -4663,26 +4663,6 @@ public class UserManager {
     }
 
     /**
-     * Returns number of full users on the device.
-     * @hide
-     */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS
-    })
-    public int getFullUserCount() {
-        List<UserInfo> users = getUsers(/* excludePartial= */ true, /* excludeDying= */ true,
-                /* excludePreCreated= */ true);
-        int count = 0;
-        for (UserInfo user : users) {
-            if (user.isFull()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
      * @deprecated use {@link #getAliveUsers()} for {@code getUsers(true)}, or
      * {@link #getUsers()} for @code getUsers(false)}.
      *

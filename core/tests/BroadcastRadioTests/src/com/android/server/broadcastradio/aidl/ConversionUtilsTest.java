@@ -25,7 +25,6 @@ import android.hardware.broadcastradio.DabTableEntry;
 import android.hardware.broadcastradio.IdentifierType;
 import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
-import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.Properties;
 import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
@@ -33,6 +32,7 @@ import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.ServiceSpecificException;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
@@ -103,12 +103,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     private static final ProgramIdentifier TEST_HAL_DAB_FREQUENCY_ID =
             AidlTestUtils.makeHalIdentifier(IdentifierType.DAB_FREQUENCY_KHZ,
                     TEST_DAB_FREQUENCY_VALUE);
-    private static final ProgramIdentifier TEST_HAL_FM_FREQUENCY_ID =
-            AidlTestUtils.makeHalIdentifier(IdentifierType.AMFM_FREQUENCY_KHZ,
-                    TEST_FM_FREQUENCY_VALUE);
-    private static final ProgramIdentifier TEST_HAL_VENDOR_ID =
-            AidlTestUtils.makeHalIdentifier(IdentifierType.VENDOR_START,
-                    TEST_VENDOR_ID_VALUE);
 
     private static final ProgramSelector TEST_DAB_SELECTOR = new ProgramSelector(
             ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_SID_EXT_ID,
@@ -116,6 +110,12 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
             /* vendorIds= */ null);
     private static final ProgramSelector TEST_FM_SELECTOR =
             AidlTestUtils.makeFmSelector(TEST_FM_FREQUENCY_VALUE);
+
+    private static final UniqueProgramIdentifier TEST_DAB_UNIQUE_ID = new UniqueProgramIdentifier(
+            TEST_DAB_SELECTOR);
+
+    private static final UniqueProgramIdentifier TEST_VENDOR_UNIQUE_ID =
+            new UniqueProgramIdentifier(TEST_VENDOR_ID);
 
     private static final int TEST_ENABLED_TYPE = Announcement.TYPE_EMERGENCY;
     private static final int TEST_ANNOUNCEMENT_FREQUENCY = FM_LOWER_LIMIT + FM_SPACING;
@@ -326,57 +326,6 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    public void chunkFromHalProgramListChunk_withValidChunk() {
-        boolean purge = false;
-        boolean complete = true;
-        android.hardware.broadcastradio.ProgramSelector halDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
-                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
-        ProgramInfo halDabInfo = AidlTestUtils.makeHalProgramInfo(halDabSelector,
-                TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_FREQUENCY_ID, TEST_SIGNAL_QUALITY);
-        RadioManager.ProgramInfo dabInfo =
-                ConversionUtils.programInfoFromHalProgramInfo(halDabInfo);
-        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(purge, complete,
-                new ProgramInfo[]{halDabInfo},
-                new ProgramIdentifier[]{TEST_HAL_VENDOR_ID, TEST_HAL_FM_FREQUENCY_ID});
-
-        ProgramList.Chunk chunk = ConversionUtils.chunkFromHalProgramListChunk(halChunk);
-
-        expect.withMessage("Purged state of the converted valid program list chunk")
-                .that(chunk.isPurge()).isEqualTo(purge);
-        expect.withMessage("Completion state of the converted valid program list chunk")
-                .that(chunk.isComplete()).isEqualTo(complete);
-        expect.withMessage("Modified program info in the converted valid program list chunk")
-                .that(chunk.getModified()).containsExactly(dabInfo);
-        expect.withMessage("Removed program ides in the converted valid program list chunk")
-                .that(chunk.getRemoved()).containsExactly(TEST_VENDOR_ID, TEST_FM_FREQUENCY_ID);
-    }
-
-    @Test
-    public void chunkFromHalProgramListChunk_withInvalidModifiedProgramInfo() {
-        boolean purge = true;
-        boolean complete = false;
-        android.hardware.broadcastradio.ProgramSelector halDabSelector =
-                AidlTestUtils.makeHalSelector(TEST_HAL_DAB_SID_EXT_ID, new ProgramIdentifier[]{
-                        TEST_HAL_DAB_ENSEMBLE_ID, TEST_HAL_DAB_FREQUENCY_ID});
-        ProgramInfo halDabInfo = AidlTestUtils.makeHalProgramInfo(halDabSelector,
-                TEST_HAL_DAB_SID_EXT_ID, TEST_HAL_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
-        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(purge, complete,
-                new ProgramInfo[]{halDabInfo}, new ProgramIdentifier[]{TEST_HAL_FM_FREQUENCY_ID});
-
-        ProgramList.Chunk chunk = ConversionUtils.chunkFromHalProgramListChunk(halChunk);
-
-        expect.withMessage("Purged state of the converted invalid program list chunk")
-                .that(chunk.isPurge()).isEqualTo(purge);
-        expect.withMessage("Completion state of the converted invalid program list chunk")
-                .that(chunk.isComplete()).isEqualTo(complete);
-        expect.withMessage("Modified program info in the converted invalid program list chunk")
-                .that(chunk.getModified()).isEmpty();
-        expect.withMessage("Removed program ids in the converted invalid program list chunk")
-                .that(chunk.getRemoved()).containsExactly(TEST_FM_FREQUENCY_ID);
-    }
-
-    @Test
     public void programSelectorMeetsSdkVersionRequirement_withLowerVersionId_returnsFalse() {
         expect.withMessage("Selector %s without required SDK version", TEST_DAB_SELECTOR)
                 .that(ConversionUtils.programSelectorMeetsSdkVersionRequirement(TEST_DAB_SELECTOR,
@@ -418,7 +367,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 TEST_SIGNAL_QUALITY);
         ProgramList.Chunk chunk = new ProgramList.Chunk(/* purge= */ true,
                 /* complete= */ true, Set.of(dabProgramInfo, fmProgramInfo),
-                Set.of(TEST_DAB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_VENDOR_ID));
+                Set.of(TEST_DAB_UNIQUE_ID, TEST_VENDOR_UNIQUE_ID));
 
         ProgramList.Chunk convertedChunk = ConversionUtils.convertChunkToTargetSdkVersion(chunk,
                 T_APP_UID);
@@ -434,8 +383,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 .that(convertedChunk.getModified()).containsExactly(fmProgramInfo);
         expect.withMessage(
                 "Removed program ids in the converted program list chunk with lower SDK version")
-                .that(convertedChunk.getRemoved())
-                .containsExactly(TEST_DAB_ENSEMBLE_ID, TEST_VENDOR_ID);
+                .that(convertedChunk.getRemoved()).containsExactly(TEST_VENDOR_UNIQUE_ID);
     }
 
     @Test
@@ -446,7 +394,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
                 TEST_SIGNAL_QUALITY);
         ProgramList.Chunk chunk = new ProgramList.Chunk(/* purge= */ true,
                 /* complete= */ true, Set.of(dabProgramInfo, fmProgramInfo),
-                Set.of(TEST_DAB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_VENDOR_ID));
+                Set.of(TEST_DAB_UNIQUE_ID, TEST_VENDOR_UNIQUE_ID));
 
         ProgramList.Chunk convertedChunk = ConversionUtils.convertChunkToTargetSdkVersion(chunk,
                 U_APP_UID);

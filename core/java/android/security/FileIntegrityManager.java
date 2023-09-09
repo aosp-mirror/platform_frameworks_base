@@ -133,13 +133,11 @@ public final class FileIntegrityManager {
      * also use this API to download the best signature on the running device.
      *
      * @return whether the certificate is trusted in the system
-     * @deprecated The feature is no longer supported, and this API now always returns false.
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.INSTALL_PACKAGES,
             android.Manifest.permission.REQUEST_INSTALL_PACKAGES
     })
-    @Deprecated
     public boolean isAppSourceCertificateTrusted(@NonNull X509Certificate certificate)
             throws CertificateEncodingException {
         try {

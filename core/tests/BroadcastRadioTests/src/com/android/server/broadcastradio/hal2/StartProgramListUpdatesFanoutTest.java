@@ -35,6 +35,7 @@ import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.RemoteException;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
@@ -72,22 +73,42 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
     private TunerSession[] mTunerSessions;
 
     // Data objects used during tests
-    private final ProgramSelector.Identifier mAmFmIdentifier =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, 88500);
-    private final RadioManager.ProgramInfo mAmFmInfo = TestUtils.makeProgramInfo(
-            ProgramSelector.PROGRAM_TYPE_FM, mAmFmIdentifier, 0);
-    private final RadioManager.ProgramInfo mModifiedAmFmInfo = TestUtils.makeProgramInfo(
-            ProgramSelector.PROGRAM_TYPE_FM, mAmFmIdentifier, 1);
+    private static final int TEST_QUALITY = 0;
+    private static final ProgramSelector.Identifier TEST_AM_FM_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
+                    /* value= */ 88_500);
+    private static final ProgramSelector TEST_AM_FM_SELECTOR = TestUtils.makeProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_FM, TEST_AM_FM_ID);
+    private static final RadioManager.ProgramInfo TEST_AM_FM_INFO = TestUtils.makeProgramInfo(
+            TEST_AM_FM_SELECTOR, TEST_QUALITY);
+    private static final RadioManager.ProgramInfo TEST_AM_FM_MODIFIED_INFO =
+            TestUtils.makeProgramInfo(TEST_AM_FM_SELECTOR, TEST_QUALITY + 1);
 
-    private final ProgramSelector.Identifier mRdsIdentifier =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI, 15019);
-    private final RadioManager.ProgramInfo mRdsInfo = TestUtils.makeProgramInfo(
-            ProgramSelector.PROGRAM_TYPE_FM, mRdsIdentifier, 0);
+    private static final ProgramSelector.Identifier TEST_RDS_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI,
+                    /* value= */ 15_019);
+    private static final ProgramSelector TEST_RDS_SELECTOR = TestUtils.makeProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_FM, TEST_RDS_ID);
 
-    private final ProgramSelector.Identifier mDabEnsembleIdentifier =
-            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, 1337);
-    private final RadioManager.ProgramInfo mDabEnsembleInfo = TestUtils.makeProgramInfo(
-            ProgramSelector.PROGRAM_TYPE_DAB, mDabEnsembleIdentifier, 0);
+    private static final UniqueProgramIdentifier TEST_RDS_UNIQUE_ID = new UniqueProgramIdentifier(
+            TEST_RDS_ID);
+    private static final RadioManager.ProgramInfo TEST_RDS_INFO = TestUtils.makeProgramInfo(
+            TEST_RDS_SELECTOR, TEST_QUALITY);
+
+    private static final ProgramSelector.Identifier TEST_DAB_SID_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT,
+                    /* value= */ 0xA000000111L);
+    private static final ProgramSelector.Identifier TEST_DAB_ENSEMBLE_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE,
+                    /* value= */ 0x1001);
+    private static final ProgramSelector.Identifier TEST_DAB_FREQUENCY_ID =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                    /* value= */ 220_352);
+    private static final ProgramSelector TEST_DAB_SELECTOR = TestUtils.makeProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_SID_ID,
+            new ProgramSelector.Identifier[]{TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID});
+    private static final RadioManager.ProgramInfo TEST_DAB_INFO = TestUtils.makeProgramInfo(
+            TEST_DAB_SELECTOR, TEST_QUALITY);
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
@@ -126,18 +147,18 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
 
         // Initiate a program list update from the HAL side and verify both connected AIDL clients
         // receive the update.
-        updateHalProgramInfo(true, Arrays.asList(mAmFmInfo, mRdsInfo), null);
+        updateHalProgramInfo(true, Arrays.asList(TEST_AM_FM_INFO, TEST_RDS_INFO), null);
         for (int i = 0; i < 2; i++) {
             verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[i], true, Arrays.asList(
-                    mAmFmInfo, mRdsInfo), null);
+                    TEST_AM_FM_INFO, TEST_RDS_INFO), null);
         }
 
         // Repeat with a non-purging update.
-        updateHalProgramInfo(false, Arrays.asList(mModifiedAmFmInfo),
-                Arrays.asList(mRdsIdentifier));
+        updateHalProgramInfo(false, Arrays.asList(TEST_AM_FM_MODIFIED_INFO),
+                Arrays.asList(TEST_RDS_ID));
         for (int i = 0; i < 2; i++) {
             verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[i], false,
-                    Arrays.asList(mModifiedAmFmInfo), Arrays.asList(mRdsIdentifier));
+                    Arrays.asList(TEST_AM_FM_MODIFIED_INFO), Arrays.asList(TEST_RDS_UNIQUE_ID));
         }
 
         // Now start updates on the 3rd client. Verify the HAL function has not been called again
@@ -145,19 +166,19 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
         mTunerSessions[2].startProgramListUpdates(aidlFilter);
         verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(any());
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[2], true,
-                Arrays.asList(mModifiedAmFmInfo), null);
+                Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
     }
 
     @Test
     public void testFiltering() throws RemoteException {
         // Open 4 clients that will use the following filters:
-        // [0]: ID mRdsIdentifier, modifications excluded
+        // [0]: ID TEST_RDS_ID, modifications excluded
         // [1]: No categories, modifications excluded
         // [2]: Type IDENTIFIER_TYPE_AMFM_FREQUENCY, modifications excluded
         // [3]: Type IDENTIFIER_TYPE_AMFM_FREQUENCY, modifications included
         openAidlClients(4);
         ProgramList.Filter idFilter = new ProgramList.Filter(new HashSet<Integer>(),
-                new HashSet<ProgramSelector.Identifier>(Arrays.asList(mRdsIdentifier)), true, true);
+                new HashSet<ProgramSelector.Identifier>(Arrays.asList(TEST_RDS_ID)), true, true);
         ProgramList.Filter categoryFilter = new ProgramList.Filter(new HashSet<Integer>(),
                 new HashSet<ProgramSelector.Identifier>(), false, true);
         ProgramList.Filter typeFilterWithoutModifications = new ProgramList.Filter(
@@ -188,41 +209,40 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
         halFilter.excludeModifications = false;
         verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(halFilter);
 
-        // Adding mRdsInfo should update clients [0] and [1].
-        updateHalProgramInfo(false, Arrays.asList(mRdsInfo), null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false, Arrays.asList(mRdsInfo),
-                null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], false, Arrays.asList(mRdsInfo),
-                null);
+        // Adding TEST_RDS_INFO should update clients [0] and [1].
+        updateHalProgramInfo(false, Arrays.asList(TEST_RDS_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false,
+                Arrays.asList(TEST_RDS_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], false,
+                Arrays.asList(TEST_RDS_INFO), null);
 
-        // Adding mAmFmInfo should update clients [1], [2], and [3].
-        updateHalProgramInfo(false, Arrays.asList(mAmFmInfo), null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], false, Arrays.asList(mAmFmInfo),
-                null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[2], false, Arrays.asList(mAmFmInfo),
-                null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[3], false, Arrays.asList(mAmFmInfo),
-                null);
-
-        // Modifying mAmFmInfo to mModifiedAmFmInfo should update only [3].
-        updateHalProgramInfo(false, Arrays.asList(mModifiedAmFmInfo), null);
+        // Adding TEST_AM_FM_INFO should update clients [1], [2], and [3].
+        updateHalProgramInfo(false, Arrays.asList(TEST_AM_FM_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], false,
+                Arrays.asList(TEST_AM_FM_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[2], false,
+                Arrays.asList(TEST_AM_FM_INFO), null);
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[3], false,
-                Arrays.asList(mModifiedAmFmInfo), null);
+                Arrays.asList(TEST_AM_FM_INFO), null);
 
-        // Adding mDabEnsembleInfo should not update any client.
-        updateHalProgramInfo(false, Arrays.asList(mDabEnsembleInfo), null);
+        // Modifying TEST_AM_FM_INFO to TEST_AM_FM_MODIFIED_INFO should update only [3].
+        updateHalProgramInfo(false, Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[3], false,
+                Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
+
+        updateHalProgramInfo(false, Arrays.asList(TEST_DAB_INFO), null);
         verify(mAidlTunerCallbackMocks[0], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
-        verify(mAidlTunerCallbackMocks[1], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
+        verify(mAidlTunerCallbackMocks[1], CB_TIMEOUT.times(3)).onProgramListUpdated(any());
         verify(mAidlTunerCallbackMocks[2], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
         verify(mAidlTunerCallbackMocks[3], CB_TIMEOUT.times(2)).onProgramListUpdated(any());
     }
 
     @Test
     public void testClientClosing() throws RemoteException {
-        // Open 2 clients that use different filters that are both sensitive to mAmFmIdentifier.
+        // Open 2 clients that use different filters that are both sensitive to TEST_AM_FM_ID.
         openAidlClients(2);
         ProgramList.Filter idFilter = new ProgramList.Filter(new HashSet<Integer>(),
-                new HashSet<ProgramSelector.Identifier>(Arrays.asList(mAmFmIdentifier)), true,
+                new HashSet<ProgramSelector.Identifier>(Arrays.asList(TEST_AM_FM_ID)), true,
                 false);
         ProgramList.Filter typeFilter = new ProgramList.Filter(
                 new HashSet<Integer>(Arrays.asList(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY)),
@@ -237,23 +257,24 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
         halFilter.identifiers.clear();
         verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(halFilter);
 
-        // Update the HAL with mAmFmInfo, and verify both clients are updated.
-        updateHalProgramInfo(true, Arrays.asList(mAmFmInfo), null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], true, Arrays.asList(mAmFmInfo),
-                null);
-        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], true, Arrays.asList(mAmFmInfo),
-                null);
+        // Update the HAL with TEST_AM_FM_INFO, and verify both clients are updated.
+        updateHalProgramInfo(true, Arrays.asList(TEST_AM_FM_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], true,
+                Arrays.asList(TEST_AM_FM_INFO), null);
+        verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], true,
+                Arrays.asList(TEST_AM_FM_INFO), null);
 
         // Stop updates on the first client and verify the HAL filter is updated.
         mTunerSessions[0].stopProgramListUpdates();
         verify(mHalTunerSessionMock, times(1)).startProgramListUpdates(Convert.programFilterToHal(
                 typeFilter));
 
-        // Update the HAL with mModifiedAmFmInfo, and verify only the remaining client is updated.
-        updateHalProgramInfo(true, Arrays.asList(mModifiedAmFmInfo), null);
+        // Update the HAL with TEST_AM_FM_MODIFIED_INFO, and verify only the remaining client is
+        // updated.
+        updateHalProgramInfo(true, Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
         verify(mAidlTunerCallbackMocks[0], CB_TIMEOUT.times(1)).onProgramListUpdated(any());
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[1], true,
-                Arrays.asList(mModifiedAmFmInfo), null);
+                Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
 
         // Close the other client without explicitly stopping updates, and verify HAL updates are
         // stopped as well.
@@ -269,15 +290,15 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
 
         // Verify the AIDL client receives all types of updates (e.g. a new program, an update to
         // that program, and a category).
-        updateHalProgramInfo(true, Arrays.asList(mAmFmInfo, mRdsInfo), null);
+        updateHalProgramInfo(true, Arrays.asList(TEST_AM_FM_INFO, TEST_RDS_INFO), null);
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], true, Arrays.asList(
-                mAmFmInfo, mRdsInfo), null);
-        updateHalProgramInfo(false, Arrays.asList(mModifiedAmFmInfo), null);
+                TEST_AM_FM_INFO, TEST_RDS_INFO), null);
+        updateHalProgramInfo(false, Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false,
-                Arrays.asList(mModifiedAmFmInfo), null);
-        updateHalProgramInfo(false, Arrays.asList(mDabEnsembleInfo), null);
+                Arrays.asList(TEST_AM_FM_MODIFIED_INFO), null);
+        updateHalProgramInfo(false, Arrays.asList(TEST_DAB_INFO), null);
         verifyAidlClientReceivedChunk(mAidlTunerCallbackMocks[0], false,
-                Arrays.asList(mDabEnsembleInfo), null);
+                Arrays.asList(TEST_DAB_INFO), null);
 
         // Verify closing the AIDL session also stops HAL updates.
         mTunerSessions[0].close();
@@ -313,12 +334,12 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
 
     private void verifyAidlClientReceivedChunk(android.hardware.radio.ITunerCallback clientMock,
             boolean purge, List<RadioManager.ProgramInfo> modified,
-            List<ProgramSelector.Identifier> removed) throws RemoteException {
+            List<UniqueProgramIdentifier> removed) throws RemoteException {
         HashSet<RadioManager.ProgramInfo> modifiedSet = new HashSet<>();
         if (modified != null) {
             modifiedSet.addAll(modified);
         }
-        HashSet<ProgramSelector.Identifier> removedSet = new HashSet<>();
+        HashSet<UniqueProgramIdentifier> removedSet = new HashSet<>();
         if (removed != null) {
             removedSet.addAll(removed);
         }

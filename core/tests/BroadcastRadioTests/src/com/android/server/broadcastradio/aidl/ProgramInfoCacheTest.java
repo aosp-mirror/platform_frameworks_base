@@ -22,6 +22,7 @@ import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.RemoteException;
 import android.util.ArraySet;
 
@@ -32,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +44,9 @@ import java.util.Set;
 public class ProgramInfoCacheTest {
 
     private static final int TEST_SIGNAL_QUALITY = 90;
+
+    private static final int TEST_MAX_NUM_MODIFIED_PER_CHUNK = 2;
+    private static final int TEST_MAX_NUM_REMOVED_PER_CHUNK = 2;
 
     private static final ProgramSelector.Identifier TEST_FM_FREQUENCY_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
@@ -58,6 +63,8 @@ public class ProgramInfoCacheTest {
     private static final ProgramSelector.Identifier TEST_AM_FREQUENCY_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
                     /* value= */ 1_700);
+    private static final UniqueProgramIdentifier TEST_AM_UNIQUE_ID = new UniqueProgramIdentifier(
+            TEST_AM_FREQUENCY_ID);
     private static final RadioManager.ProgramInfo TEST_AM_INFO = AidlTestUtils.makeProgramInfo(
             AidlTestUtils.makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM,
                     TEST_AM_FREQUENCY_ID), TEST_AM_FREQUENCY_ID, TEST_AM_FREQUENCY_ID,
@@ -66,6 +73,8 @@ public class ProgramInfoCacheTest {
     private static final ProgramSelector.Identifier TEST_RDS_PI_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_RDS_PI,
                     /* value= */ 15_019);
+    private static final UniqueProgramIdentifier TEST_RDS_PI_UNIQUE_ID =
+            new UniqueProgramIdentifier(TEST_RDS_PI_ID);
     private static final RadioManager.ProgramInfo TEST_RDS_INFO = AidlTestUtils.makeProgramInfo(
             AidlTestUtils.makeProgramSelector(ProgramSelector.PROGRAM_TYPE_FM, TEST_RDS_PI_ID),
             TEST_RDS_PI_ID, new ProgramSelector.Identifier(
@@ -81,11 +90,27 @@ public class ProgramInfoCacheTest {
     private static final ProgramSelector.Identifier TEST_DAB_FREQUENCY_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
                     /* value= */ 220_352);
-    private static final RadioManager.ProgramInfo TEST_DAB_INFO = AidlTestUtils.makeProgramInfo(
-            new ProgramSelector(ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_DMB_SID_EXT_ID,
-                    new ProgramSelector.Identifier[]{TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID},
-                    /* vendorIds= */ null), TEST_DAB_DMB_SID_EXT_ID, TEST_DAB_FREQUENCY_ID,
-            TEST_SIGNAL_QUALITY);
+    private static final ProgramSelector.Identifier TEST_DAB_FREQUENCY_ID_ALTERNATIVE =
+            new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY,
+                    /* value= */ 220_064);
+    private static final ProgramSelector TEST_DAB_SELECTOR = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_DMB_SID_EXT_ID,
+            new ProgramSelector.Identifier[]{TEST_DAB_FREQUENCY_ID, TEST_DAB_ENSEMBLE_ID},
+            /* vendorIds= */ null);
+    private static final ProgramSelector TEST_DAB_SELECTOR_ALTERNATIVE = new ProgramSelector(
+            ProgramSelector.PROGRAM_TYPE_DAB, TEST_DAB_DMB_SID_EXT_ID,
+            new ProgramSelector.Identifier[]{TEST_DAB_FREQUENCY_ID_ALTERNATIVE,
+                    TEST_DAB_ENSEMBLE_ID}, /* vendorIds= */ null);
+    private static final UniqueProgramIdentifier TEST_DAB_UNIQUE_ID = new UniqueProgramIdentifier(
+            TEST_DAB_SELECTOR);
+    private static final UniqueProgramIdentifier TEST_DAB_UNIQUE_ID_ALTERNATIVE =
+            new UniqueProgramIdentifier(TEST_DAB_SELECTOR_ALTERNATIVE);
+    private static final RadioManager.ProgramInfo TEST_DAB_INFO =
+            AidlTestUtils.makeProgramInfo(TEST_DAB_SELECTOR, TEST_DAB_DMB_SID_EXT_ID,
+                    TEST_DAB_FREQUENCY_ID, TEST_SIGNAL_QUALITY);
+    private static final RadioManager.ProgramInfo TEST_DAB_INFO_ALTERNATIVE =
+            AidlTestUtils.makeProgramInfo(TEST_DAB_SELECTOR_ALTERNATIVE, TEST_DAB_DMB_SID_EXT_ID,
+                    TEST_DAB_FREQUENCY_ID_ALTERNATIVE, TEST_SIGNAL_QUALITY);
 
     private static final ProgramSelector.Identifier TEST_VENDOR_ID =
             new ProgramSelector.Identifier(ProgramSelector.IDENTIFIER_TYPE_VENDOR_START,
@@ -95,8 +120,8 @@ public class ProgramInfoCacheTest {
                     TEST_VENDOR_ID), TEST_VENDOR_ID, TEST_VENDOR_ID, TEST_SIGNAL_QUALITY);
 
     private static final ProgramInfoCache FULL_PROGRAM_INFO_CACHE = new ProgramInfoCache(
-            /* filter= */ null, /* complete= */ true,
-            TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO, TEST_VENDOR_INFO);
+            /* filter= */ null, /* complete= */ true, TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO,
+            TEST_DAB_INFO, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
 
     @Rule
     public final Expect expect = Expect.create();
@@ -163,6 +188,22 @@ public class ProgramInfoCacheTest {
     }
 
     @Test
+    public void updateFromHalProgramListChunk_withInvalidChunk() {
+        RadioManager.ProgramInfo invalidDabInfo = AidlTestUtils.makeProgramInfo(TEST_DAB_SELECTOR,
+                TEST_DAB_DMB_SID_EXT_ID, TEST_DAB_ENSEMBLE_ID, TEST_SIGNAL_QUALITY);
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
+                /* complete= */ false);
+        ProgramListChunk chunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, new ProgramInfo[]{AidlTestUtils.programInfoToHalProgramInfo(
+                        invalidDabInfo)}, new ProgramIdentifier[]{});
+
+        cache.updateFromHalProgramListChunk(chunk);
+
+        expect.withMessage("Program cache updated with invalid chunk")
+                .that(cache.toProgramInfoList()).isEmpty();
+    }
+
+    @Test
     public void filterAndUpdateFromInternal_withNullFilter() {
         ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
                 /* complete= */ true);
@@ -172,7 +213,7 @@ public class ProgramInfoCacheTest {
         expect.withMessage("Program cache filtered by null filter")
                 .that(cache.toProgramInfoList())
                 .containsExactly(TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO,
-                        TEST_VENDOR_INFO);
+                        TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
     }
 
     @Test
@@ -186,21 +227,21 @@ public class ProgramInfoCacheTest {
         expect.withMessage("Program cache filtered by empty filter")
                 .that(cache.toProgramInfoList())
                 .containsExactly(TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO,
-                        TEST_VENDOR_INFO);
+                        TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
     }
 
     @Test
     public void filterAndUpdateFromInternal_withFilterByIdentifierType() {
         ProgramInfoCache cache = new ProgramInfoCache(
                 new ProgramList.Filter(Set.of(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY,
-                        ProgramSelector.IDENTIFIER_TYPE_RDS_PI), new ArraySet<>(),
+                        ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT), new ArraySet<>(),
                         /* includeCategories= */ true, /* excludeModifications= */ false));
 
         cache.filterAndUpdateFromInternal(FULL_PROGRAM_INFO_CACHE, /* purge= */ false);
 
         expect.withMessage("Program cache filtered by identifier type")
-                .that(cache.toProgramInfoList())
-                .containsExactly(TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO);
+                .that(cache.toProgramInfoList()).containsExactly(TEST_FM_INFO, TEST_AM_INFO,
+                        TEST_DAB_INFO, TEST_DAB_INFO_ALTERNATIVE);
     }
 
     @Test
@@ -208,20 +249,60 @@ public class ProgramInfoCacheTest {
         ProgramInfoCache cache = new ProgramInfoCache(new ProgramList.Filter(
                 new ArraySet<>(), Set.of(TEST_FM_FREQUENCY_ID, TEST_DAB_DMB_SID_EXT_ID),
                 /* includeCategories= */ true, /* excludeModifications= */ false));
-        int maxNumModifiedPerChunk = 2;
-        int maxNumRemovedPerChunk = 2;
 
         List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(
-                FULL_PROGRAM_INFO_CACHE, /* purge= */ true, maxNumModifiedPerChunk,
-                maxNumRemovedPerChunk);
+                FULL_PROGRAM_INFO_CACHE, /* purge= */ false, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
         expect.withMessage("Program cache filtered by identifier")
-                .that(cache.toProgramInfoList()).containsExactly(TEST_FM_INFO, TEST_DAB_INFO);
+                .that(cache.toProgramInfoList()).containsExactly(TEST_FM_INFO, TEST_DAB_INFO,
+                        TEST_DAB_INFO_ALTERNATIVE);
         verifyChunkListPurge(programListChunks, /* purge= */ true);
-        verifyChunkListComplete(programListChunks, FULL_PROGRAM_INFO_CACHE.isComplete());
+        verifyChunkListComplete(programListChunks, cache.isComplete());
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_FM_INFO,
+                TEST_DAB_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+    }
+
+    @Test
+    public void filterAndUpdateFromInternal_withPurging() {
+        ProgramInfoCache cache = new ProgramInfoCache(new ProgramList.Filter(new ArraySet<>(),
+                new ArraySet<>(), /* includeCategories= */ true, /* excludeModifications= */ false),
+                /* complete= */ true, TEST_RDS_INFO, TEST_DAB_INFO);
+        ProgramInfoCache otherCache = new ProgramInfoCache(/* filter= */ null, /* complete= */ true,
+                TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO_ALTERNATIVE);
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(otherCache,
+                /* purge= */ true, TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+
+        expect.withMessage("Program cache filtered with purging").that(cache.toProgramInfoList())
+                .containsExactly(TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListPurge(programListChunks, /* purge= */ true);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_FM_INFO,
+                TEST_RDS_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+    }
+
+    @Test
+    public void filterAndUpdateFromInternal_withoutPurging() {
+        ProgramInfoCache cache = new ProgramInfoCache(new ProgramList.Filter(new ArraySet<>(),
+                new ArraySet<>(), /* includeCategories= */ true, /* excludeModifications= */ false),
+                /* complete= */ true, TEST_RDS_INFO, TEST_DAB_INFO);
+        ProgramInfoCache otherCache = new ProgramInfoCache(/* filter= */ null, /* complete= */ true,
+                TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        int maxNumModifiedPerChunk = 1;
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(otherCache,
+                /* purge= */ false, maxNumModifiedPerChunk, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+
+        expect.withMessage("Program cache filtered without puring").that(cache.toProgramInfoList())
+                .containsExactly(TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListPurge(programListChunks, /* purge= */ false);
+        verifyChunkListComplete(programListChunks, cache.isComplete());
         verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_FM_INFO,
-                TEST_DAB_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk);
+                TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK,
+                TEST_DAB_UNIQUE_ID);
     }
 
     @Test
@@ -230,20 +311,19 @@ public class ProgramInfoCacheTest {
                 new ArraySet<>(), /* includeCategories= */ false,
                 /* excludeModifications= */ false));
         int maxNumModifiedPerChunk = 3;
-        int maxNumRemovedPerChunk = 2;
 
         List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(
                 FULL_PROGRAM_INFO_CACHE, /* purge= */ false, maxNumModifiedPerChunk,
-                maxNumRemovedPerChunk);
+                TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
         expect.withMessage("Program cache filtered by excluding categories")
-                .that(cache.toProgramInfoList())
-                .containsExactly(TEST_FM_INFO, TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
+                .that(cache.toProgramInfoList()).containsExactly(TEST_FM_INFO, TEST_AM_INFO,
+                        TEST_RDS_INFO, TEST_DAB_INFO, TEST_DAB_INFO_ALTERNATIVE);
         verifyChunkListPurge(programListChunks, /* purge= */ true);
-        verifyChunkListComplete(programListChunks, FULL_PROGRAM_INFO_CACHE.isComplete());
+        verifyChunkListComplete(programListChunks, cache.isComplete());
         verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_FM_INFO,
-                TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk);
+                TEST_AM_INFO, TEST_RDS_INFO, TEST_DAB_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK);
     }
 
     @Test
@@ -254,21 +334,21 @@ public class ProgramInfoCacheTest {
         ProgramInfoCache cache = new ProgramInfoCache(filterExcludingModifications,
                 /* complete= */ true, TEST_FM_INFO, TEST_RDS_INFO, TEST_AM_INFO, TEST_DAB_INFO);
         ProgramInfoCache halCache = new ProgramInfoCache(/* filter= */ null, /* complete= */ false,
-                TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO);
-        int maxNumModifiedPerChunk = 2;
-        int maxNumRemovedPerChunk = 2;
+                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
 
         List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(halCache,
-                /* purge= */ false, maxNumModifiedPerChunk, maxNumRemovedPerChunk);
+                /* purge= */ false, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
         expect.withMessage("Program cache filtered by excluding modifications")
                 .that(cache.toProgramInfoList())
-                .containsExactly(TEST_FM_INFO, TEST_VENDOR_INFO);
+                .containsExactly(TEST_FM_INFO, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
         verifyChunkListPurge(programListChunks, /* purge= */ false);
         verifyChunkListComplete(programListChunks, halCache.isComplete());
-        verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_VENDOR_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk, TEST_RDS_PI_ID,
-                TEST_AM_FREQUENCY_ID, TEST_DAB_DMB_SID_EXT_ID);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_VENDOR_INFO, TEST_DAB_INFO_ALTERNATIVE);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK,
+                TEST_RDS_PI_UNIQUE_ID, TEST_AM_UNIQUE_ID, TEST_DAB_UNIQUE_ID);
     }
 
     @Test
@@ -276,69 +356,88 @@ public class ProgramInfoCacheTest {
         ProgramInfoCache cache = new ProgramInfoCache(new ProgramList.Filter(new ArraySet<>(),
                 new ArraySet<>(), /* includeCategories= */ true,
                 /* excludeModifications= */ false),
-                /* complete= */ true, TEST_FM_INFO, TEST_RDS_INFO);
+                /* complete= */ true, TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
         ProgramInfoCache halCache = new ProgramInfoCache(/* filter= */ null, /* complete= */ false,
-                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO, TEST_VENDOR_INFO);
-        int maxNumModifiedPerChunk = 2;
-        int maxNumRemovedPerChunk = 2;
+                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
 
         List<ProgramList.Chunk> programListChunks = cache.filterAndUpdateFromInternal(halCache,
-                /* purge= */ true, maxNumModifiedPerChunk, maxNumRemovedPerChunk);
+                /* purge= */ true, TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
         expect.withMessage("Purged program cache").that(cache.toProgramInfoList())
-                .containsExactly(TEST_FM_INFO_MODIFIED, TEST_DAB_INFO, TEST_VENDOR_INFO);
+                .containsExactly(TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE,
+                        TEST_VENDOR_INFO);
         verifyChunkListPurge(programListChunks, /* purge= */ true);
         verifyChunkListComplete(programListChunks, halCache.isComplete());
-        verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_FM_INFO_MODIFIED,
-                TEST_DAB_INFO, TEST_VENDOR_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK);
     }
 
     @Test
-    public void filterAndApplyChunkInternal_withPurgingIncompleteChunk() throws RemoteException {
+    public void filterAndApplyChunkInternal_withPurgingAndIncompleteChunk() throws RemoteException {
         ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
-                /* complete= */ false, TEST_FM_INFO, TEST_DAB_INFO);
-        ProgramList.Chunk chunk = AidlTestUtils.makeChunk(/* purge= */ true, /* complete= */ false,
-                List.of(TEST_FM_INFO_MODIFIED, TEST_RDS_INFO, TEST_VENDOR_INFO),
-                List.of(TEST_DAB_DMB_SID_EXT_ID));
-        int maxNumModifiedPerChunk = 2;
-        int maxNumRemovedPerChunk = 2;
+                /* complete= */ false, TEST_FM_INFO, TEST_RDS_INFO, TEST_DAB_INFO);
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ true,
+                /* complete= */ false, List.of(TEST_FM_INFO_MODIFIED,
+                        TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO), new ArrayList<>());
 
-        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(chunk,
-                maxNumModifiedPerChunk, maxNumRemovedPerChunk);
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
-        expect.withMessage("Program cache applied with non-purging and complete chunk")
-                .that(cache.toProgramInfoList())
-                .containsExactly(TEST_FM_INFO_MODIFIED, TEST_RDS_INFO, TEST_VENDOR_INFO);
+        expect.withMessage("Program cache applied with purge-enabled and complete chunk")
+                .that(cache.toProgramInfoList()).containsExactly(TEST_FM_INFO_MODIFIED,
+                        TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
         verifyChunkListPurge(programListChunks, /* purge= */ true);
         verifyChunkListComplete(programListChunks, /* complete= */ false);
-        verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_FM_INFO_MODIFIED,
-                TEST_RDS_INFO, TEST_VENDOR_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK);
     }
 
     @Test
-    public void filterAndApplyChunk_withNonPurgingCompleteChunk() throws RemoteException {
-        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null,
-                /* complete= */ false, TEST_FM_INFO, TEST_RDS_INFO, TEST_AM_INFO, TEST_DAB_INFO);
-        ProgramList.Chunk chunk = AidlTestUtils.makeChunk(/* purge= */ false, /* complete= */ true,
-                List.of(TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO),
+    public void filterAndApplyChunk_withNonPurgingAndIncompleteChunk() throws RemoteException {
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null, /* complete= */ false,
+                TEST_FM_INFO, TEST_RDS_INFO, TEST_AM_INFO, TEST_DAB_INFO);
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ false, List.of(TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE,
+                        TEST_VENDOR_INFO), List.of(TEST_RDS_PI_ID, TEST_AM_FREQUENCY_ID));
+
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
+
+        expect.withMessage("Program cache applied with non-purging and incomplete chunk")
+                .that(cache.toProgramInfoList()).containsExactly(TEST_DAB_INFO,
+                        TEST_DAB_INFO_ALTERNATIVE, TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO);
+        verifyChunkListPurge(programListChunks, /* purge= */ false);
+        verifyChunkListComplete(programListChunks, /* complete= */ false);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_FM_INFO_MODIFIED, TEST_DAB_INFO_ALTERNATIVE, TEST_VENDOR_INFO);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK,
+                TEST_RDS_PI_UNIQUE_ID, TEST_AM_UNIQUE_ID);
+    }
+
+    @Test
+    public void filterAndApplyChunk_withNonPurgingAndCompleteChunk() throws RemoteException {
+        ProgramInfoCache cache = new ProgramInfoCache(/* filter= */ null, /* complete= */ false,
+                TEST_FM_INFO, TEST_RDS_INFO, TEST_AM_INFO, TEST_DAB_INFO,
+                TEST_DAB_INFO_ALTERNATIVE);
+        ProgramListChunk halChunk = AidlTestUtils.makeHalChunk(/* purge= */ false,
+                /* complete= */ true, List.of(TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO),
                 List.of(TEST_RDS_PI_ID, TEST_AM_FREQUENCY_ID, TEST_DAB_DMB_SID_EXT_ID));
-        int maxNumModifiedPerChunk = 2;
-        int maxNumRemovedPerChunk = 2;
 
-        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(chunk,
-                maxNumModifiedPerChunk, maxNumRemovedPerChunk);
+        List<ProgramList.Chunk> programListChunks = cache.filterAndApplyChunkInternal(halChunk,
+                TEST_MAX_NUM_MODIFIED_PER_CHUNK, TEST_MAX_NUM_REMOVED_PER_CHUNK);
 
-        expect.withMessage("Program cache applied with purge-enabled complete chunk")
+        expect.withMessage("Program cache applied with non-purging and complete chunk")
                 .that(cache.toProgramInfoList())
                 .containsExactly(TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO);
         verifyChunkListPurge(programListChunks, /* purge= */ false);
         verifyChunkListComplete(programListChunks, /* complete= */ true);
-        verifyChunkListModified(programListChunks, maxNumModifiedPerChunk, TEST_FM_INFO_MODIFIED,
-                TEST_VENDOR_INFO);
-        verifyChunkListRemoved(programListChunks, maxNumRemovedPerChunk, TEST_RDS_PI_ID,
-                TEST_AM_FREQUENCY_ID, TEST_DAB_DMB_SID_EXT_ID);
+        verifyChunkListModified(programListChunks, TEST_MAX_NUM_MODIFIED_PER_CHUNK,
+                TEST_FM_INFO_MODIFIED, TEST_VENDOR_INFO);
+        verifyChunkListRemoved(programListChunks, TEST_MAX_NUM_REMOVED_PER_CHUNK,
+                TEST_RDS_PI_UNIQUE_ID, TEST_AM_UNIQUE_ID, TEST_DAB_UNIQUE_ID,
+                TEST_DAB_UNIQUE_ID_ALTERNATIVE);
     }
 
     private void verifyChunkListPurge(List<ProgramList.Chunk> chunks, boolean purge) {
@@ -387,17 +486,17 @@ public class ProgramInfoCacheTest {
                 .that(actualSet).containsExactlyElementsIn(expectedProgramInfos);
     }
 
-    private void verifyChunkListRemoved(List<ProgramList.Chunk> chunks,
-            int maxRemovedPerChunk, ProgramSelector.Identifier... expectedIdentifiers) {
+    private void verifyChunkListRemoved(List<ProgramList.Chunk> chunks, int maxRemovedPerChunk,
+            UniqueProgramIdentifier... expectedIdentifiers) {
         if (chunks.isEmpty()) {
             expect.withMessage("Empty program info list")
                     .that(expectedIdentifiers.length).isEqualTo(0);
             return;
         }
 
-        ArraySet<ProgramSelector.Identifier> actualSet = new ArraySet<>();
+        ArraySet<UniqueProgramIdentifier> actualSet = new ArraySet<>();
         for (int i = 0; i < chunks.size(); i++) {
-            Set<ProgramSelector.Identifier> chunkRemoved = chunks.get(i).getRemoved();
+            Set<UniqueProgramIdentifier> chunkRemoved = chunks.get(i).getRemoved();
             actualSet.addAll(chunkRemoved);
 
             expect.withMessage("Chunk %s removed identifier array size ", i)

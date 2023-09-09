@@ -2062,8 +2062,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             if (tagName.equals(TAG_ARCHIVE_ACTIVITY_INFO)) {
                 String title = parser.getAttributeValue(null,
                         ATTR_ARCHIVE_ACTIVITY_TITLE);
-                Path iconPath = Path.of(parser.getAttributeValue(null,
-                        ATTR_ARCHIVE_ICON_PATH));
+                String iconAttribute = parser.getAttributeValue(null,
+                        ATTR_ARCHIVE_ICON_PATH);
+                Path iconPath = iconAttribute == null ? null : Path.of(iconAttribute);
                 String monochromeAttribute = parser.getAttributeValue(null,
                         ATTR_ARCHIVE_MONOCHROME_ICON_PATH);
                 Path monochromeIconPath = monochromeAttribute == null ? null : Path.of(
@@ -2447,8 +2448,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             serializer.startTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
             serializer.attribute(null, ATTR_ARCHIVE_ACTIVITY_TITLE, activityInfo.getTitle());
-            serializer.attribute(null, ATTR_ARCHIVE_ICON_PATH,
-                    activityInfo.getIconBitmap().toAbsolutePath().toString());
+            if (activityInfo.getIconBitmap() != null) {
+                serializer.attribute(null, ATTR_ARCHIVE_ICON_PATH,
+                        activityInfo.getIconBitmap().toAbsolutePath().toString());
+            }
             if (activityInfo.getMonochromeIconBitmap() != null) {
                 serializer.attribute(null, ATTR_ARCHIVE_MONOCHROME_ICON_PATH,
                         activityInfo.getMonochromeIconBitmap().toAbsolutePath().toString());

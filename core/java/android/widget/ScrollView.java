@@ -33,6 +33,7 @@ import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.FocusFinder;
+import android.view.HapticScrollFeedbackProvider;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -47,6 +48,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.inspector.InspectableProperty;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -205,6 +207,8 @@ public class ScrollView extends FrameLayout {
     private StrictMode.Span mFlingStrictSpan = null;
 
     private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
+    private HapticScrollFeedbackProvider mHapticScrollFeedbackProvider;
 
     /**
      * Sentinel value for no current active pointer.
@@ -604,6 +608,12 @@ public class ScrollView extends FrameLayout {
         }
     }
 
+    private void initHapticScrollFeedbackProviderIfNotExists() {
+        if (mHapticScrollFeedbackProvider == null) {
+            mHapticScrollFeedbackProvider = new HapticScrollFeedbackProvider(this);
+        }
+    }
+
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -967,7 +977,7 @@ public class ScrollView extends FrameLayout {
                     // Tracks whether or not we should attempt fling for this event.
                     // Fling should not be attempted if the view is already at the limit of scroll,
                     // since it conflicts with EdgeEffect.
-                    boolean shouldAttemptFling = true;
+                    boolean hitLimit = false;
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
                     int newScrollY = oldScrollY - delta;
@@ -986,7 +996,7 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = 0;
-                        shouldAttemptFling = false;
+                        hitLimit = true;
                     } else if (newScrollY > range) {
                         if (canOverscroll) {
                             mEdgeGlowBottom.onPullDistance(
@@ -996,11 +1006,21 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = range;
-                        shouldAttemptFling = false;
+                        hitLimit = true;
                     }
                     if (newScrollY != oldScrollY) {
                         super.scrollTo(mScrollX, newScrollY);
-                        if (shouldAttemptFling) {
+                        if (hitLimit) {
+                            if (Flags.platformWidgetHapticScrollFeedback()) {
+                                initHapticScrollFeedbackProviderIfNotExists();
+                                mHapticScrollFeedbackProvider.onScrollLimit(
+                                        event, axis, /* isStart= */ newScrollY == 0);
+                            }
+                        } else {
+                            if (Flags.platformWidgetHapticScrollFeedback()) {
+                                initHapticScrollFeedbackProviderIfNotExists();
+                                mHapticScrollFeedbackProvider.onScrollProgress(event, axis, delta);
+                            }
                             initDifferentialFlingHelperIfNotExists();
                             mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
                         }

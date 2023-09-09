@@ -74,10 +74,11 @@ public class SingleKeyGestureTests {
 
     @Before
     public void setUp() {
-        mInstrumentation.runOnMainSync(() -> {
-            mDetector = SingleKeyGestureDetector.get(mContext);
-            initSingleKeyGestureRules();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mDetector = SingleKeyGestureDetector.get(mContext);
+                    initSingleKeyGestureRules();
+                });
 
         mWaitTimeout = SingleKeyGestureDetector.MULTI_PRESS_TIMEOUT + 50;
         mLongPressTime = SingleKeyGestureDetector.sDefaultLongPressTimeout + 50;
@@ -85,84 +86,91 @@ public class SingleKeyGestureTests {
     }
 
     private void initSingleKeyGestureRules() {
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
-            @Override
-            boolean supportLongPress() {
-                return mLongPressOnPowerBehavior;
-            }
-            @Override
-            boolean supportVeryLongPress() {
-                return mVeryLongPressOnPowerBehavior;
-            }
-            @Override
-            int getMaxMultiPressCount() {
-                return mMaxMultiPressCount;
-            }
-            @Override
-            public void onPress(long downTime) {
-                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
-                    return;
-                }
-                mShortPressed.countDown();
-            }
+        mDetector.addRule(
+                new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
+                    @Override
+                    boolean supportLongPress() {
+                        return mLongPressOnPowerBehavior;
+                    }
 
-            @Override
-            void onLongPress(long downTime) {
-                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForLongPress) {
-                    return;
-                }
-                mLongPressed.countDown();
-            }
+                    @Override
+                    boolean supportVeryLongPress() {
+                        return mVeryLongPressOnPowerBehavior;
+                    }
 
-            @Override
-            void onVeryLongPress(long downTime) {
-                mVeryLongPressed.countDown();
-            }
+                    @Override
+                    int getMaxMultiPressCount() {
+                        return mMaxMultiPressCount;
+                    }
 
-            @Override
-            void onMultiPress(long downTime, int count) {
-                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
-                    return;
-                }
-                mMultiPressed.countDown();
-                assertTrue(mMaxMultiPressCount >= count);
-                assertEquals(mExpectedMultiPressCount, count);
-            }
-        });
+                    @Override
+                    public void onPress(long downTime) {
+                        if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                            return;
+                        }
+                        mShortPressed.countDown();
+                    }
 
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_BACK) {
-            @Override
-            boolean supportLongPress() {
-                return mLongPressOnBackBehavior;
-            }
-            @Override
-            int getMaxMultiPressCount() {
-                return mMaxMultiPressCount;
-            }
-            @Override
-            public void onPress(long downTime) {
-                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
-                    return;
-                }
-                mShortPressed.countDown();
-            }
+                    @Override
+                    void onLongPress(long downTime) {
+                        if (mDetector.beganFromNonInteractive()
+                                && !mAllowNonInteractiveForLongPress) {
+                            return;
+                        }
+                        mLongPressed.countDown();
+                    }
 
-            @Override
-            void onMultiPress(long downTime, int count) {
-                if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
-                    return;
-                }
-                mMultiPressed.countDown();
-                assertTrue(mMaxMultiPressCount >= count);
-                assertEquals(mExpectedMultiPressCount, count);
-            }
+                    @Override
+                    void onVeryLongPress(long downTime) {
+                        mVeryLongPressed.countDown();
+                    }
 
-            @Override
-            void onLongPress(long downTime) {
-                mLongPressed.countDown();
-            }
-        });
+                    @Override
+                    void onMultiPress(long downTime, int count) {
+                        if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                            return;
+                        }
+                        mMultiPressed.countDown();
+                        assertTrue(mMaxMultiPressCount >= count);
+                        assertEquals(mExpectedMultiPressCount, count);
+                    }
+                });
 
+        mDetector.addRule(
+                new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_BACK) {
+                    @Override
+                    boolean supportLongPress() {
+                        return mLongPressOnBackBehavior;
+                    }
+
+                    @Override
+                    int getMaxMultiPressCount() {
+                        return mMaxMultiPressCount;
+                    }
+
+                    @Override
+                    public void onPress(long downTime) {
+                        if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                            return;
+                        }
+                        mShortPressed.countDown();
+                    }
+
+                    @Override
+                    void onMultiPress(long downTime, int count) {
+                        if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
+                            return;
+                        }
+                        mMultiPressed.countDown();
+                        assertTrue(mMaxMultiPressCount >= count);
+                        assertEquals(mExpectedMultiPressCount, count);
+                    }
+
+                    @Override
+                    void onLongPress(long downTime) {
+                        mLongPressed.countDown();
+                    }
+                });
     }
 
     private void pressKey(int keyCode, long pressTime) {
@@ -176,8 +184,14 @@ public class SingleKeyGestureTests {
     private void pressKey(
             int keyCode, long pressTime, boolean interactive, boolean defaultDisplayOn) {
         long eventTime = SystemClock.uptimeMillis();
-        final KeyEvent keyDown = new KeyEvent(eventTime, eventTime, ACTION_DOWN,
-                keyCode, 0 /* repeat */, 0 /* metaState */);
+        final KeyEvent keyDown =
+                new KeyEvent(
+                        eventTime,
+                        eventTime,
+                        ACTION_DOWN,
+                        keyCode,
+                        0 /* repeat */,
+                        0 /* metaState */);
         mDetector.interceptKey(keyDown, interactive, defaultDisplayOn);
 
         // keep press down.
@@ -188,8 +202,14 @@ public class SingleKeyGestureTests {
         }
 
         eventTime += pressTime;
-        final KeyEvent keyUp = new KeyEvent(eventTime, eventTime, ACTION_UP,
-                keyCode, 0 /* repeat */, 0 /* metaState */);
+        final KeyEvent keyUp =
+                new KeyEvent(
+                        eventTime,
+                        eventTime,
+                        ACTION_UP,
+                        keyCode,
+                        0 /* repeat */,
+                        0 /* metaState */);
 
         mDetector.interceptKey(keyUp, interactive, defaultDisplayOn);
     }
@@ -252,10 +272,12 @@ public class SingleKeyGestureTests {
             // To make sure we won't get any crash while panic pressing keys.
             for (int i = 0; i < 100; i++) {
                 mShortPressed = new CountDownLatch(2);
-                newHandler.runWithScissors(() -> {
-                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
-                    pressKey(KEYCODE_BACK, 0 /* pressTime */);
-                }, mWaitTimeout);
+                newHandler.runWithScissors(
+                        () -> {
+                            pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                            pressKey(KEYCODE_BACK, 0 /* pressTime */);
+                        },
+                        mWaitTimeout);
                 assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
             }
         } finally {
@@ -274,15 +296,16 @@ public class SingleKeyGestureTests {
             for (int i = 0; i < 5; i++) {
                 mMultiPressed = new CountDownLatch(1);
                 mShortPressed = new CountDownLatch(1);
-                newHandler.runWithScissors(() -> {
-                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
-                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
-                }, mWaitTimeout);
+                newHandler.runWithScissors(
+                        () -> {
+                            pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                            pressKey(KEYCODE_POWER, 0 /* pressTime */);
+                        },
+                        mWaitTimeout);
                 assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
 
-                newHandler.runWithScissors(() -> {
-                    pressKey(KEYCODE_POWER, 0 /* pressTime */);
-                }, mWaitTimeout);
+                newHandler.runWithScissors(
+                        () -> pressKey(KEYCODE_POWER, 0 /* pressTime */), mWaitTimeout);
                 assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
             }
         } finally {

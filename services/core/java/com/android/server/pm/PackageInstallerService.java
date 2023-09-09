@@ -1240,8 +1240,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     @Override
     public void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
                 IntentSender statusReceiver, int userId) {
+        uninstall(
+                versionedPackage,
+                callerPackageName,
+                flags,
+                statusReceiver,
+                userId,
+                Binder.getCallingUid());
+    }
+
+    void uninstall(VersionedPackage versionedPackage, String callerPackageName, int flags,
+            IntentSender statusReceiver, int userId, int callingUid) {
         final Computer snapshot = mPm.snapshotComputer();
-        final int callingUid = Binder.getCallingUid();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
         if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
@@ -1257,7 +1267,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId);
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);

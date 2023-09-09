@@ -3067,6 +3067,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "643263584": {
+      "message": "Content Recording: Apply transformations of shift %d x %d, scale %f, crop %d x %d for display %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
     "644675193": {
       "message": "Real start recents",
       "level": "DEBUG",

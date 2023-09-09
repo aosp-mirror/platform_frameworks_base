@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.AlignShortcutsToUdfpsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
@@ -42,6 +43,7 @@ constructor(
     defaultStatusViewSection: DefaultStatusViewSection,
     splitShadeGuidelines: SplitShadeGuidelines,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
+    aodNotificationIconsSection: AodNotificationIconsSection,
 ) : KeyguardBlueprint {
     override val id: String = SHORTCUTS_BESIDE_UDFPS
 
@@ -55,6 +57,7 @@ constructor(
             defaultStatusViewSection,
             defaultNotificationStackScrollLayoutSection,
             splitShadeGuidelines,
+            aodNotificationIconsSection,
         )
 
     companion object {

@@ -1,0 +1,521 @@
+// Baseline format: 1.0
+UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INTERNAL_ERROR:
+    New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_INTERNAL_ERROR
+UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_INVALID:
+    New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_INVALID
+UnflaggedApi: android.accessibilityservice.AccessibilityService#OVERLAY_RESULT_SUCCESS:
+    New API must be flagged with @FlaggedApi: field android.accessibilityservice.AccessibilityService.OVERLAY_RESULT_SUCCESS
+UnflaggedApi: android.accessibilityservice.AccessibilityService#attachAccessibilityOverlayToDisplay(int, android.view.SurfaceControl, java.util.concurrent.Executor, java.util.function.IntConsumer):
+    New API must be flagged with @FlaggedApi: method android.accessibilityservice.AccessibilityService.attachAccessibilityOverlayToDisplay(int,android.view.SurfaceControl,java.util.concurrent.Executor,java.util.function.IntConsumer)
+UnflaggedApi: android.accessibilityservice.AccessibilityService#attachAccessibilityOverlayToWindow(int, android.view.SurfaceControl, java.util.concurrent.Executor, java.util.function.IntConsumer):
+    New API must be flagged with @FlaggedApi: method android.accessibilityservice.AccessibilityService.attachAccessibilityOverlayToWindow(int,android.view.SurfaceControl,java.util.concurrent.Executor,java.util.function.IntConsumer)
+UnflaggedApi: android.app.Activity#onRequestPermissionsResult(int, String[], int[], int):
+    New API must be flagged with @FlaggedApi: method android.app.Activity.onRequestPermissionsResult(int,String[],int[],int)
+UnflaggedApi: android.app.Activity#requestPermissions(String[], int, int):
+    New API must be flagged with @FlaggedApi: method android.app.Activity.requestPermissions(String[],int,int)
+UnflaggedApi: android.app.Activity#setAllowCrossUidActivitySwitchFromBelow(boolean):
+    New API must be flagged with @FlaggedApi: method android.app.Activity.setAllowCrossUidActivitySwitchFromBelow(boolean)
+UnflaggedApi: android.app.Activity#shouldShowRequestPermissionRationale(String, int):
+    New API must be flagged with @FlaggedApi: method android.app.Activity.shouldShowRequestPermissionRationale(String,int)
+UnflaggedApi: android.app.ActivityManager#addStartInfoTimestamp(int, long):
+    New API must be flagged with @FlaggedApi: method android.app.ActivityManager.addStartInfoTimestamp(int,long)
+UnflaggedApi: android.app.ActivityManager#clearApplicationStartInfoCompletionListener():
+    New API must be flagged with @FlaggedApi: method android.app.ActivityManager.clearApplicationStartInfoCompletionListener()
+UnflaggedApi: android.app.ActivityManager#getHistoricalProcessStartReasons(int):
+    New API must be flagged with @FlaggedApi: method android.app.ActivityManager.getHistoricalProcessStartReasons(int)
+UnflaggedApi: android.app.ActivityManager#setApplicationStartInfoCompletionListener(java.util.concurrent.Executor, java.util.function.Consumer<android.app.ApplicationStartInfo>):
+    New API must be flagged with @FlaggedApi: method android.app.ActivityManager.setApplicationStartInfoCompletionListener(java.util.concurrent.Executor,java.util.function.Consumer<android.app.ApplicationStartInfo>)
+UnflaggedApi: android.app.ApplicationStartInfo:
+    New API must be flagged with @FlaggedApi: class android.app.ApplicationStartInfo
+UnflaggedApi: android.app.ApplicationStartInfo#CREATOR:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.CREATOR
+UnflaggedApi: android.app.ApplicationStartInfo#LAUNCH_MODE_SINGLE_INSTANCE:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.LAUNCH_MODE_SINGLE_INSTANCE
+UnflaggedApi: android.app.ApplicationStartInfo#LAUNCH_MODE_SINGLE_INSTANCE_PER_TASK:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.LAUNCH_MODE_SINGLE_INSTANCE_PER_TASK
+UnflaggedApi: android.app.ApplicationStartInfo#LAUNCH_MODE_SINGLE_TASK:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.LAUNCH_MODE_SINGLE_TASK
+UnflaggedApi: android.app.ApplicationStartInfo#LAUNCH_MODE_SINGLE_TOP:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.LAUNCH_MODE_SINGLE_TOP
+UnflaggedApi: android.app.ApplicationStartInfo#LAUNCH_MODE_STANDARD:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.LAUNCH_MODE_STANDARD
+UnflaggedApi: android.app.ApplicationStartInfo#STARTUP_STATE_ERROR:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.STARTUP_STATE_ERROR
+UnflaggedApi: android.app.ApplicationStartInfo#STARTUP_STATE_FIRST_FRAME_DRAWN:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN
+UnflaggedApi: android.app.ApplicationStartInfo#STARTUP_STATE_STARTED:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.STARTUP_STATE_STARTED
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_ALARM:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_ALARM
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_BACKUP:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_BACKUP
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_BOOT_COMPLETE:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_BOOT_COMPLETE
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_BROADCAST:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_BROADCAST
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_CONTENT_PROVIDER:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_CONTENT_PROVIDER
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_JOB:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_JOB
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_LAUNCHER:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_LAUNCHER
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_LAUNCHER_RECENTS:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_LAUNCHER_RECENTS
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_OTHER:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_OTHER
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_PUSH:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_PUSH
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_SERVICE:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_SERVICE
+UnflaggedApi: android.app.ApplicationStartInfo#START_REASON_START_ACTIVITY:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_REASON_START_ACTIVITY
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_APPLICATION_ONCREATE:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_BIND_APPLICATION:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_FIRST_FRAME:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_FORK:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_FORK
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_FULLY_DRAWN:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_INITIAL_RENDERTHREAD_FRAME
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_LAUNCH:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_LAUNCH
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_DEVELOPER:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_SYSTEM:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_SYSTEM
+UnflaggedApi: android.app.ApplicationStartInfo#START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TIMESTAMP_SURFACEFLINGER_COMPOSITION_COMPLETE
+UnflaggedApi: android.app.ApplicationStartInfo#START_TYPE_COLD:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TYPE_COLD
+UnflaggedApi: android.app.ApplicationStartInfo#START_TYPE_HOT:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TYPE_HOT
+UnflaggedApi: android.app.ApplicationStartInfo#START_TYPE_WARM:
+    New API must be flagged with @FlaggedApi: field android.app.ApplicationStartInfo.START_TYPE_WARM
+UnflaggedApi: android.app.ApplicationStartInfo#describeContents():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.describeContents()
+UnflaggedApi: android.app.ApplicationStartInfo#getDefiningUid():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getDefiningUid()
+UnflaggedApi: android.app.ApplicationStartInfo#getIntent():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getIntent()
+UnflaggedApi: android.app.ApplicationStartInfo#getLaunchMode():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getLaunchMode()
+UnflaggedApi: android.app.ApplicationStartInfo#getPackageUid():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getPackageUid()
+UnflaggedApi: android.app.ApplicationStartInfo#getPid():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getPid()
+UnflaggedApi: android.app.ApplicationStartInfo#getProcessName():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getProcessName()
+UnflaggedApi: android.app.ApplicationStartInfo#getRealUid():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getRealUid()
+UnflaggedApi: android.app.ApplicationStartInfo#getReason():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getReason()
+UnflaggedApi: android.app.ApplicationStartInfo#getStartType():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getStartType()
+UnflaggedApi: android.app.ApplicationStartInfo#getStartupState():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getStartupState()
+UnflaggedApi: android.app.ApplicationStartInfo#getStartupTimestamps():
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.getStartupTimestamps()
+UnflaggedApi: android.app.ApplicationStartInfo#writeToParcel(android.os.Parcel, int):
+    New API must be flagged with @FlaggedApi: method android.app.ApplicationStartInfo.writeToParcel(android.os.Parcel,int)
+UnflaggedApi: android.app.Notification.TvExtender:
+    New API must be flagged with @FlaggedApi: class android.app.Notification.TvExtender
+UnflaggedApi: android.app.Notification.TvExtender#TvExtender():
+    New API must be flagged with @FlaggedApi: constructor android.app.Notification.TvExtender()
+UnflaggedApi: android.app.Notification.TvExtender#TvExtender(android.app.Notification):
+    New API must be flagged with @FlaggedApi: constructor android.app.Notification.TvExtender(android.app.Notification)
+UnflaggedApi: android.app.Notification.TvExtender#extend(android.app.Notification.Builder):
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.extend(android.app.Notification.Builder)
+UnflaggedApi: android.app.Notification.TvExtender#getChannelId():
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.getChannelId()
+UnflaggedApi: android.app.Notification.TvExtender#getContentIntent():
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.getContentIntent()
+UnflaggedApi: android.app.Notification.TvExtender#getDeleteIntent():
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.getDeleteIntent()
+UnflaggedApi: android.app.Notification.TvExtender#isAvailableOnTv():
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.isAvailableOnTv()
+UnflaggedApi: android.app.Notification.TvExtender#isSuppressShowOverApps():
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.isSuppressShowOverApps()
+UnflaggedApi: android.app.Notification.TvExtender#setChannelId(String):
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.setChannelId(String)
+UnflaggedApi: android.app.Notification.TvExtender#setContentIntent(android.app.PendingIntent):
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.setContentIntent(android.app.PendingIntent)
+UnflaggedApi: android.app.Notification.TvExtender#setDeleteIntent(android.app.PendingIntent):
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.setDeleteIntent(android.app.PendingIntent)
+UnflaggedApi: android.app.Notification.TvExtender#setSuppressShowOverApps(boolean):
+    New API must be flagged with @FlaggedApi: method android.app.Notification.TvExtender.setSuppressShowOverApps(boolean)
+UnflaggedApi: android.companion.AssociationInfo#getTag():
+    New API must be flagged with @FlaggedApi: method android.companion.AssociationInfo.getTag()
+UnflaggedApi: android.companion.CompanionDeviceManager#clearAssociationTag(int):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.clearAssociationTag(int)
+UnflaggedApi: android.companion.CompanionDeviceManager#setAssociationTag(int, String):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceManager.setAssociationTag(int,String)
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_BLE_APPEARED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_APPEARED
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_BLE_DISAPPEARED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_DISAPPEARED
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_BT_CONNECTED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_BT_CONNECTED
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_BT_DISCONNECTED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_BT_DISCONNECTED
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_SELF_MANAGED_APPEARED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_APPEARED
+UnflaggedApi: android.companion.CompanionDeviceService#DEVICE_EVENT_SELF_MANAGED_DISAPPEARED:
+    New API must be flagged with @FlaggedApi: field android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_DISAPPEARED
+UnflaggedApi: android.companion.CompanionDeviceService#onDeviceEvent(android.companion.AssociationInfo, int):
+    New API must be flagged with @FlaggedApi: method android.companion.CompanionDeviceService.onDeviceEvent(android.companion.AssociationInfo,int)
+UnflaggedApi: android.companion.virtual.VirtualDevice#getPersistentDeviceId():
+    New API must be flagged with @FlaggedApi: method android.companion.virtual.VirtualDevice.getPersistentDeviceId()
+UnflaggedApi: android.companion.virtual.VirtualDeviceManager.VirtualDeviceListener#onVirtualDeviceClosed(int):
+    New API must be flagged with @FlaggedApi: method android.companion.virtual.VirtualDeviceManager.VirtualDeviceListener.onVirtualDeviceClosed(int)
+UnflaggedApi: android.companion.virtual.VirtualDeviceManager.VirtualDeviceListener#onVirtualDeviceCreated(int):
+    New API must be flagged with @FlaggedApi: method android.companion.virtual.VirtualDeviceManager.VirtualDeviceListener.onVirtualDeviceCreated(int)
+UnflaggedApi: android.content.AttributionSource#getDeviceId():
+    New API must be flagged with @FlaggedApi: method android.content.AttributionSource.getDeviceId()
+UnflaggedApi: android.content.AttributionSource.Builder#setDeviceId(int):
+    New API must be flagged with @FlaggedApi: method android.content.AttributionSource.Builder.setDeviceId(int)
+UnflaggedApi: android.content.AttributionSource.Builder#setNextAttributionSource(android.content.AttributionSource):
+    New API must be flagged with @FlaggedApi: method android.content.AttributionSource.Builder.setNextAttributionSource(android.content.AttributionSource)
+UnflaggedApi: android.content.ContextParams#shouldRegisterAttributionSource():
+    New API must be flagged with @FlaggedApi: method android.content.ContextParams.shouldRegisterAttributionSource()
+UnflaggedApi: android.content.ContextParams.Builder#setShouldRegisterAttributionSource(boolean):
+    New API must be flagged with @FlaggedApi: method android.content.ContextParams.Builder.setShouldRegisterAttributionSource(boolean)
+UnflaggedApi: android.content.Intent#EXTRA_ARCHIVAL:
+    New API must be flagged with @FlaggedApi: field android.content.Intent.EXTRA_ARCHIVAL
+UnflaggedApi: android.content.om.FabricatedOverlay#setResourceValue(String, android.content.res.AssetFileDescriptor, String):
+    New API must be flagged with @FlaggedApi: method android.content.om.FabricatedOverlay.setResourceValue(String,android.content.res.AssetFileDescriptor,String)
+UnflaggedApi: android.content.pm.PackageManager#FEATURE_THREAD_NETWORK:
+    New API must be flagged with @FlaggedApi: field android.content.pm.PackageManager.FEATURE_THREAD_NETWORK
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#beginTransactionReadOnly():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.beginTransactionReadOnly()
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#beginTransactionWithListenerReadOnly(android.database.sqlite.SQLiteTransactionListener):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.beginTransactionWithListenerReadOnly(android.database.sqlite.SQLiteTransactionListener)
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#createRawStatement(String):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.createRawStatement(String)
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#getLastChangedRowCount():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.getLastChangedRowCount()
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#getLastInsertRowId():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.getLastInsertRowId()
+UnflaggedApi: android.database.sqlite.SQLiteDatabase#getTotalChangedRowCount():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteDatabase.getTotalChangedRowCount()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement:
+    New API must be flagged with @FlaggedApi: class android.database.sqlite.SQLiteRawStatement
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#SQLITE_DATA_TYPE_BLOB:
+    New API must be flagged with @FlaggedApi: field android.database.sqlite.SQLiteRawStatement.SQLITE_DATA_TYPE_BLOB
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#SQLITE_DATA_TYPE_FLOAT:
+    New API must be flagged with @FlaggedApi: field android.database.sqlite.SQLiteRawStatement.SQLITE_DATA_TYPE_FLOAT
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#SQLITE_DATA_TYPE_INTEGER:
+    New API must be flagged with @FlaggedApi: field android.database.sqlite.SQLiteRawStatement.SQLITE_DATA_TYPE_INTEGER
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#SQLITE_DATA_TYPE_NULL:
+    New API must be flagged with @FlaggedApi: field android.database.sqlite.SQLiteRawStatement.SQLITE_DATA_TYPE_NULL
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#SQLITE_DATA_TYPE_TEXT:
+    New API must be flagged with @FlaggedApi: field android.database.sqlite.SQLiteRawStatement.SQLITE_DATA_TYPE_TEXT
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindBlob(int, byte[]):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindBlob(int,byte[])
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindBlob(int, byte[], int, int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindBlob(int,byte[],int,int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindDouble(int, double):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindDouble(int,double)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindInt(int, int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindInt(int,int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindLong(int, long):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindLong(int,long)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindNull(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindNull(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#bindText(int, String):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.bindText(int,String)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#clearBindings():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.clearBindings()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#close():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.close()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnBlob(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnBlob(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnDouble(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnDouble(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnInt(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnInt(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnLength(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnLength(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnLong(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnLong(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnName(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnName(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnText(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnText(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getColumnType(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getColumnType(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getParameterCount():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getParameterCount()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getParameterIndex(String):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getParameterIndex(String)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getParameterName(int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getParameterName(int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#getResultColumnCount():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.getResultColumnCount()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#isOpen():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.isOpen()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#readColumnBlob(int, byte[], int, int, int):
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.readColumnBlob(int,byte[],int,int,int)
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#reset():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.reset()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#step():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.step()
+UnflaggedApi: android.database.sqlite.SQLiteRawStatement#toString():
+    New API must be flagged with @FlaggedApi: method android.database.sqlite.SQLiteRawStatement.toString()
+UnflaggedApi: android.graphics.Gainmap#Gainmap(android.graphics.Gainmap, android.graphics.Bitmap):
+    New API must be flagged with @FlaggedApi: constructor android.graphics.Gainmap(android.graphics.Gainmap,android.graphics.Bitmap)
+UnflaggedApi: android.graphics.Path#computeBounds(android.graphics.RectF):
+    New API must be flagged with @FlaggedApi: method android.graphics.Path.computeBounds(android.graphics.RectF)
+UnflaggedApi: android.graphics.fonts.FontFamily.Builder#buildVariableFamily():
+    New API must be flagged with @FlaggedApi: method android.graphics.fonts.FontFamily.Builder.buildVariableFamily()
+UnflaggedApi: android.graphics.text.LineBreakConfig#LINE_BREAK_STYLE_UNSPECIFIED:
+    New API must be flagged with @FlaggedApi: field android.graphics.text.LineBreakConfig.LINE_BREAK_STYLE_UNSPECIFIED
+UnflaggedApi: android.graphics.text.LineBreakConfig#LINE_BREAK_WORD_STYLE_UNSPECIFIED:
+    New API must be flagged with @FlaggedApi: field android.graphics.text.LineBreakConfig.LINE_BREAK_WORD_STYLE_UNSPECIFIED
+UnflaggedApi: android.graphics.text.LineBreakConfig#merge(android.graphics.text.LineBreakConfig):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.LineBreakConfig.merge(android.graphics.text.LineBreakConfig)
+UnflaggedApi: android.graphics.text.LineBreakConfig.Builder#merge(android.graphics.text.LineBreakConfig):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.LineBreakConfig.Builder.merge(android.graphics.text.LineBreakConfig)
+UnflaggedApi: android.graphics.text.LineBreaker.Builder#setUseBoundsForWidth(boolean):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.LineBreaker.Builder.setUseBoundsForWidth(boolean)
+UnflaggedApi: android.graphics.text.PositionedGlyphs#NO_OVERRIDE:
+    New API must be flagged with @FlaggedApi: field android.graphics.text.PositionedGlyphs.NO_OVERRIDE
+UnflaggedApi: android.graphics.text.PositionedGlyphs#getFakeBold(int):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getFakeBold(int)
+UnflaggedApi: android.graphics.text.PositionedGlyphs#getFakeItalic(int):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getFakeItalic(int)
+UnflaggedApi: android.graphics.text.PositionedGlyphs#getItalicOverride(int):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getItalicOverride(int)
+UnflaggedApi: android.graphics.text.PositionedGlyphs#getWeightOverride(int):
+    New API must be flagged with @FlaggedApi: method android.graphics.text.PositionedGlyphs.getWeightOverride(int)
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_CAR:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_CAR
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_COMPUTER:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_GAME_CONSOLE:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_SMARTPHONE:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_SMARTPHONE
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_SMARTWATCH:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_TABLET:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_TABLET
+UnflaggedApi: android.media.MediaRoute2Info#TYPE_REMOTE_TABLET_DOCKED:
+    New API must be flagged with @FlaggedApi: field android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED
+UnflaggedApi: android.media.midi.MidiUmpDeviceService:
+    New API must be flagged with @FlaggedApi: class android.media.midi.MidiUmpDeviceService
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#MidiUmpDeviceService():
+    New API must be flagged with @FlaggedApi: constructor android.media.midi.MidiUmpDeviceService()
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#SERVICE_INTERFACE:
+    New API must be flagged with @FlaggedApi: field android.media.midi.MidiUmpDeviceService.SERVICE_INTERFACE
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#getDeviceInfo():
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.getDeviceInfo()
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#getOutputPortReceivers():
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.getOutputPortReceivers()
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#onBind(android.content.Intent):
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onBind(android.content.Intent)
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#onClose():
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onClose()
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#onCreate():
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onCreate()
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#onDeviceStatusChanged(android.media.midi.MidiDeviceStatus):
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onDeviceStatusChanged(android.media.midi.MidiDeviceStatus)
+UnflaggedApi: android.media.midi.MidiUmpDeviceService#onGetInputPortReceivers():
+    New API must be flagged with @FlaggedApi: method android.media.midi.MidiUmpDeviceService.onGetInputPortReceivers()
+UnflaggedApi: android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM:
+    New API must be flagged with @FlaggedApi: field android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM
+UnflaggedApi: android.os.PerformanceHintManager.Session#setPreferPowerEfficiency(boolean):
+    New API must be flagged with @FlaggedApi: method android.os.PerformanceHintManager.Session.setPreferPowerEfficiency(boolean)
+UnflaggedApi: android.os.UserManager#DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO:
+    New API must be flagged with @FlaggedApi: field android.os.UserManager.DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO
+UnflaggedApi: android.provider.Settings#ACTION_CREDENTIAL_PROVIDER:
+    New API must be flagged with @FlaggedApi: field android.provider.Settings.ACTION_CREDENTIAL_PROVIDER
+UnflaggedApi: android.telecom.Call.Details#PROPERTY_IS_TRANSACTIONAL:
+    New API must be flagged with @FlaggedApi: field android.telecom.Call.Details.PROPERTY_IS_TRANSACTIONAL
+UnflaggedApi: android.telecom.Call.Details#getId():
+    New API must be flagged with @FlaggedApi: method android.telecom.Call.Details.getId()
+UnflaggedApi: android.telephony.CarrierConfigManager#KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE:
+    New API must be flagged with @FlaggedApi: field android.telephony.CarrierConfigManager.KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE
+UnflaggedApi: android.telephony.DisconnectCause#SATELLITE_ENABLED:
+    New API must be flagged with @FlaggedApi: field android.telephony.DisconnectCause.SATELLITE_ENABLED
+UnflaggedApi: android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS:
+    New API must be flagged with @FlaggedApi: field android.telephony.NetworkRegistrationInfo.SERVICE_TYPE_MMS
+UnflaggedApi: android.telephony.NetworkRegistrationInfo#isNonTerrestrialNetwork():
+    New API must be flagged with @FlaggedApi: method android.telephony.NetworkRegistrationInfo.isNonTerrestrialNetwork()
+UnflaggedApi: android.telephony.PhoneNumberUtils#isWpsCallNumber(String):
+    New API must be flagged with @FlaggedApi: method android.telephony.PhoneNumberUtils.isWpsCallNumber(String)
+UnflaggedApi: android.telephony.ServiceState#isUsingNonTerrestrialNetwork():
+    New API must be flagged with @FlaggedApi: method android.telephony.ServiceState.isUsingNonTerrestrialNetwork()
+UnflaggedApi: android.telephony.TelephonyManager#EVENT_DISPLAY_SOS_MESSAGE:
+    New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.EVENT_DISPLAY_SOS_MESSAGE
+UnflaggedApi: android.telephony.TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED:
+    New API must be flagged with @FlaggedApi: field android.telephony.TelephonyManager.PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
+UnflaggedApi: android.text.BoringLayout#computeDrawingBoundingBox():
+    New API must be flagged with @FlaggedApi: method android.text.BoringLayout.computeDrawingBoundingBox()
+UnflaggedApi: android.text.BoringLayout.Metrics#getDrawingBoundingBox():
+    New API must be flagged with @FlaggedApi: method android.text.BoringLayout.Metrics.getDrawingBoundingBox()
+UnflaggedApi: android.text.DynamicLayout#getLineBreakConfig():
+    New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.getLineBreakConfig()
+UnflaggedApi: android.text.DynamicLayout.Builder#setLineBreakConfig(android.graphics.text.LineBreakConfig):
+    New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.Builder.setLineBreakConfig(android.graphics.text.LineBreakConfig)
+UnflaggedApi: android.text.DynamicLayout.Builder#setUseBoundsForWidth(boolean):
+    New API must be flagged with @FlaggedApi: method android.text.DynamicLayout.Builder.setUseBoundsForWidth(boolean)
+UnflaggedApi: android.text.Layout#computeDrawingBoundingBox():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.computeDrawingBoundingBox()
+UnflaggedApi: android.text.Layout#getBreakStrategy():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getBreakStrategy()
+UnflaggedApi: android.text.Layout#getEllipsize():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getEllipsize()
+UnflaggedApi: android.text.Layout#getHyphenationFrequency():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getHyphenationFrequency()
+UnflaggedApi: android.text.Layout#getJustificationMode():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getJustificationMode()
+UnflaggedApi: android.text.Layout#getLeftIndents():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getLeftIndents()
+UnflaggedApi: android.text.Layout#getLineBreakConfig():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineBreakConfig()
+UnflaggedApi: android.text.Layout#getLineSpacingAmount():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineSpacingAmount()
+UnflaggedApi: android.text.Layout#getLineSpacingMultiplier():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getLineSpacingMultiplier()
+UnflaggedApi: android.text.Layout#getMaxLines():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getMaxLines()
+UnflaggedApi: android.text.Layout#getRightIndents():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getRightIndents()
+UnflaggedApi: android.text.Layout#getTextDirectionHeuristic():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getTextDirectionHeuristic()
+UnflaggedApi: android.text.Layout#getUseBoundsForWidth():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.getUseBoundsForWidth()
+UnflaggedApi: android.text.Layout#isFontPaddingIncluded():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.isFontPaddingIncluded()
+UnflaggedApi: android.text.Layout.Builder:
+    New API must be flagged with @FlaggedApi: class android.text.Layout.Builder
+UnflaggedApi: android.text.Layout.Builder#Builder(CharSequence, int, int, android.text.TextPaint, int):
+    New API must be flagged with @FlaggedApi: constructor android.text.Layout.Builder(CharSequence,int,int,android.text.TextPaint,int)
+UnflaggedApi: android.text.Layout.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.build()
+UnflaggedApi: android.text.Layout.Builder#setAlignment(android.text.Layout.Alignment):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setAlignment(android.text.Layout.Alignment)
+UnflaggedApi: android.text.Layout.Builder#setBreakStrategy(int):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setBreakStrategy(int)
+UnflaggedApi: android.text.Layout.Builder#setEllipsize(android.text.TextUtils.TruncateAt):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setEllipsize(android.text.TextUtils.TruncateAt)
+UnflaggedApi: android.text.Layout.Builder#setEllipsizedWidth(int):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setEllipsizedWidth(int)
+UnflaggedApi: android.text.Layout.Builder#setFallbackLineSpacingEnabled(boolean):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setFallbackLineSpacingEnabled(boolean)
+UnflaggedApi: android.text.Layout.Builder#setFontPaddingIncluded(boolean):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setFontPaddingIncluded(boolean)
+UnflaggedApi: android.text.Layout.Builder#setHyphenationFrequency(int):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setHyphenationFrequency(int)
+UnflaggedApi: android.text.Layout.Builder#setJustificationMode(int):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setJustificationMode(int)
+UnflaggedApi: android.text.Layout.Builder#setLeftIndents(int[]):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setLeftIndents(int[])
+UnflaggedApi: android.text.Layout.Builder#setLineBreakConfig(android.graphics.text.LineBreakConfig):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setLineBreakConfig(android.graphics.text.LineBreakConfig)
+UnflaggedApi: android.text.Layout.Builder#setLineSpacingAmount(float):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setLineSpacingAmount(float)
+UnflaggedApi: android.text.Layout.Builder#setLineSpacingMultiplier(float):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setLineSpacingMultiplier(float)
+UnflaggedApi: android.text.Layout.Builder#setMaxLines(int):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setMaxLines(int)
+UnflaggedApi: android.text.Layout.Builder#setRightIndents(int[]):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setRightIndents(int[])
+UnflaggedApi: android.text.Layout.Builder#setTextDirectionHeuristic(android.text.TextDirectionHeuristic):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setTextDirectionHeuristic(android.text.TextDirectionHeuristic)
+UnflaggedApi: android.text.Layout.Builder#setUseBoundsForWidth(boolean):
+    New API must be flagged with @FlaggedApi: method android.text.Layout.Builder.setUseBoundsForWidth(boolean)
+UnflaggedApi: android.text.StaticLayout#computeDrawingBoundingBox():
+    New API must be flagged with @FlaggedApi: method android.text.StaticLayout.computeDrawingBoundingBox()
+UnflaggedApi: android.text.StaticLayout.Builder#setUseBoundsForWidth(boolean):
+    New API must be flagged with @FlaggedApi: method android.text.StaticLayout.Builder.setUseBoundsForWidth(boolean)
+UnflaggedApi: android.text.style.LineBreakConfigSpan:
+    New API must be flagged with @FlaggedApi: class android.text.style.LineBreakConfigSpan
+UnflaggedApi: android.text.style.LineBreakConfigSpan#LineBreakConfigSpan(android.graphics.text.LineBreakConfig):
+    New API must be flagged with @FlaggedApi: constructor android.text.style.LineBreakConfigSpan(android.graphics.text.LineBreakConfig)
+UnflaggedApi: android.text.style.LineBreakConfigSpan#equals(Object):
+    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.equals(Object)
+UnflaggedApi: android.text.style.LineBreakConfigSpan#getLineBreakConfig():
+    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.getLineBreakConfig()
+UnflaggedApi: android.text.style.LineBreakConfigSpan#hashCode():
+    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.hashCode()
+UnflaggedApi: android.text.style.LineBreakConfigSpan#toString():
+    New API must be flagged with @FlaggedApi: method android.text.style.LineBreakConfigSpan.toString()
+UnflaggedApi: android.view.HapticScrollFeedbackProvider#HapticScrollFeedbackProvider(android.view.View):
+    New API must be flagged with @FlaggedApi: constructor android.view.HapticScrollFeedbackProvider(android.view.View)
+UnflaggedApi: android.view.HapticScrollFeedbackProvider#onScrollLimit(int, int, int, boolean):
+    New API must be flagged with @FlaggedApi: method android.view.HapticScrollFeedbackProvider.onScrollLimit(int,int,int,boolean)
+UnflaggedApi: android.view.HapticScrollFeedbackProvider#onScrollProgress(int, int, int, int):
+    New API must be flagged with @FlaggedApi: method android.view.HapticScrollFeedbackProvider.onScrollProgress(int,int,int,int)
+UnflaggedApi: android.view.HapticScrollFeedbackProvider#onSnapToItem(int, int, int):
+    New API must be flagged with @FlaggedApi: method android.view.HapticScrollFeedbackProvider.onSnapToItem(int,int,int)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollLimit(android.view.MotionEvent, int, boolean):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollLimit(android.view.MotionEvent,int,boolean)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollLimit(int, int, int, boolean):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollLimit(int,int,int,boolean)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollProgress(android.view.MotionEvent, int, int):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollProgress(android.view.MotionEvent,int,int)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onScrollProgress(int, int, int, int):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onScrollProgress(int,int,int,int)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onSnapToItem(android.view.MotionEvent, int):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onSnapToItem(android.view.MotionEvent,int)
+UnflaggedApi: android.view.ScrollFeedbackProvider#onSnapToItem(int, int, int):
+    New API must be flagged with @FlaggedApi: method android.view.ScrollFeedbackProvider.onSnapToItem(int,int,int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT:
+    New API must be flagged with @FlaggedApi: field android.view.accessibility.AccessibilityNodeInfo.ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo#isGranularScrollingSupported():
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.isGranularScrollingSupported()
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo#setGranularScrollingSupported(boolean):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.setGranularScrollingSupported(boolean)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#CollectionInfo(int, int, boolean, int, int, int):
+    New API must be flagged with @FlaggedApi: constructor android.view.accessibility.AccessibilityNodeInfo.CollectionInfo(int,int,boolean,int,int,int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#UNDEFINED:
+    New API must be flagged with @FlaggedApi: field android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.UNDEFINED
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#getImportantForAccessibilityItemCount():
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.getImportantForAccessibilityItemCount()
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo#getItemCount():
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.getItemCount()
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder:
+    New API must be flagged with @FlaggedApi: class android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#Builder():
+    New API must be flagged with @FlaggedApi: constructor android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder()
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#build():
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.build()
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setColumnCount(int):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setColumnCount(int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setHierarchical(boolean):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setHierarchical(boolean)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setImportantForAccessibilityItemCount(int):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setImportantForAccessibilityItemCount(int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setItemCount(int):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setItemCount(int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setRowCount(int):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setRowCount(int)
+UnflaggedApi: android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder#setSelectionMode(int):
+    New API must be flagged with @FlaggedApi: method android.view.accessibility.AccessibilityNodeInfo.CollectionInfo.Builder.setSelectionMode(int)
+UnflaggedApi: android.view.animation.AnimationUtils#getExpectedPresentationTimeMillis():
+    New API must be flagged with @FlaggedApi: method android.view.animation.AnimationUtils.getExpectedPresentationTimeMillis()
+UnflaggedApi: android.view.animation.AnimationUtils#getExpectedPresentationTimeNanos():
+    New API must be flagged with @FlaggedApi: method android.view.animation.AnimationUtils.getExpectedPresentationTimeNanos()
+UnflaggedApi: android.view.autofill.AutofillManager#clearAutofillRequestCallback():
+    New API must be flagged with @FlaggedApi: method android.view.autofill.AutofillManager.clearAutofillRequestCallback()
+UnflaggedApi: android.view.autofill.AutofillManager#setAutofillRequestCallback(java.util.concurrent.Executor, android.view.autofill.AutofillRequestCallback):
+    New API must be flagged with @FlaggedApi: method android.view.autofill.AutofillManager.setAutofillRequestCallback(java.util.concurrent.Executor,android.view.autofill.AutofillRequestCallback)
+UnflaggedApi: android.view.autofill.AutofillRequestCallback:
+    New API must be flagged with @FlaggedApi: class android.view.autofill.AutofillRequestCallback
+UnflaggedApi: android.view.autofill.AutofillRequestCallback#onFillRequest(android.view.inputmethod.InlineSuggestionsRequest, android.os.CancellationSignal, android.service.autofill.FillCallback):
+    New API must be flagged with @FlaggedApi: method android.view.autofill.AutofillRequestCallback.onFillRequest(android.view.inputmethod.InlineSuggestionsRequest,android.os.CancellationSignal,android.service.autofill.FillCallback)
+UnflaggedApi: android.view.inputmethod.InlineSuggestionsRequest.Builder#setClientSupported(boolean):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InlineSuggestionsRequest.Builder.setClientSupported(boolean)
+UnflaggedApi: android.view.inputmethod.InlineSuggestionsRequest.Builder#setServiceSupported(boolean):
+    New API must be flagged with @FlaggedApi: method android.view.inputmethod.InlineSuggestionsRequest.Builder.setServiceSupported(boolean)
+UnflaggedApi: android.widget.TextView#getUseBoundsForWidth():
+    New API must be flagged with @FlaggedApi: method android.widget.TextView.getUseBoundsForWidth()
+UnflaggedApi: android.widget.TextView#setUseBoundsForWidth(boolean):
+    New API must be flagged with @FlaggedApi: method android.widget.TextView.setUseBoundsForWidth(boolean)

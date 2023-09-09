@@ -72,6 +72,11 @@ constructor(
                     .inflate(R.layout.keyguard_status_view, constraintLayout, false)
                     as KeyguardStatusView)
                 .apply { clipChildren = false }
+
+        // This is diassembled and moved to [AodNotificationIconsSection]
+        keyguardStatusView.findViewById<View>(R.id.left_aligned_notification_icon_container)?.let {
+            it.setVisibility(View.GONE)
+        }
         constraintLayout.addView(keyguardStatusView)
     }
 

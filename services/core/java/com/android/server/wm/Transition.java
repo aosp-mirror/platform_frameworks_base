@@ -1487,6 +1487,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return;
         }
 
+        if (mState != STATE_STARTED) {
+            Slog.e(TAG, "Playing a Transition which hasn't started! #" + mSyncId + " This will "
+                    + "likely cause an exception in Shell");
+        }
+
         mState = STATE_PLAYING;
         mStartTransaction = transaction;
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();

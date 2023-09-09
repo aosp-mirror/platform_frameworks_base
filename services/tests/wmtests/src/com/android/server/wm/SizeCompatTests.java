@@ -112,6 +112,7 @@ import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.policy.SystemBarUtils;
@@ -2361,6 +2362,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 299220009)
     public void testUserOverrideAspectRatioNotEnabled() {
         setUpDisplaySizeWithApp(/* dw */ 1600, /* dh */ 1400);
 
@@ -2409,8 +2411,9 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setUid(android.os.Process.myUid())
                 .build();
         activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
-        activity.mWmService.mLetterboxConfiguration
-                .setUserAppAspectRatioSettingsOverrideEnabled(enabled);
+        spyOn(activity.mWmService.mLetterboxConfiguration);
+        doReturn(enabled).when(activity.mWmService.mLetterboxConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
         // Set user aspect ratio override
         final IPackageManager pm = mAtm.getPackageManager();
         try {
@@ -4249,6 +4252,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Set up a display in landscape with a fixed-orientation PORTRAIT app
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mWm.mLetterboxConfiguration.setIsAutomaticReachabilityInBookModeEnabled(false);
         mWm.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
         prepareUnresizable(mActivity, 1.75f, SCREEN_ORIENTATION_PORTRAIT);
 

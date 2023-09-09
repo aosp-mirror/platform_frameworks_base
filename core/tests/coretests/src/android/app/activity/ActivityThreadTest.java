@@ -99,7 +99,7 @@ public class ActivityThreadTest {
 
     // The first sequence number to try with. Use a large number to avoid conflicts with the first a
     // few sequence numbers the framework used to launch the test activity.
-    private static final int BASE_SEQ = 10000;
+    private static final int BASE_SEQ = 10000000;
 
     @Rule
     public final ActivityTestRule<TestActivity> mActivityTestRule =
