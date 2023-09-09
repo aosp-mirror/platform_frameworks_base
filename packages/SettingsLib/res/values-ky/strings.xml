@@ -351,10 +351,10 @@
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Мониторинг"</string>
     <string name="strict_mode" msgid="889864762140862437">"Катаал режим иштетилди"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Узак операцияларда экран күйүп-өчүп турат"</string>
-    <string name="pointer_location" msgid="7516929526199520173">"Көрсөткүчтүн жайгшкн жери"</string>
+    <string name="pointer_location" msgid="7516929526199520173">"Көрсөткүчтүн турган жери"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Басылган жерлер жана жаңсоолор экранда көрүнүп турат"</string>
     <string name="show_touches" msgid="8437666942161289025">"Басылган жерлерди көрсөтүү"</string>
-    <string name="show_touches_summary" msgid="3692861665994502193">"Экранда басылган жерлер көрүнүп турат"</string>
+    <string name="show_touches_summary" msgid="3692861665994502193">"Экрандын басылган жерлери көрүнүп турат"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"Баскычтардын басылганын көрсөтүү"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"Баскычтар басылганда визуалдык сигнал көрүнөт"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Экран жаңыруусун көрсөтүү"</string>

@@ -297,13 +297,13 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"कामसम्बन्धी एपहरू"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"पज गरिएको छ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Night Light"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"सूर्यास्तमा सक्रिय"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"सर्यास्त हुँदा अन हुन्छ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"सूर्योदयसम्म"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"अँध्यारो थिम"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"ब्याट्री सेभर"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"सूर्यास्तमा सक्रिय"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"सर्यास्त हुँदा अन हुन्छ"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"सूर्योदयसम्म"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
@@ -394,7 +394,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"हो, जारी राख्नुहोस्"</string>
     <string name="guest_notification_app_name" msgid="2110425506754205509">"अतिथि मोड"</string>
     <string name="guest_notification_session_active" msgid="5567273684713471450">"तपाईं अतिथि मोड चलाउँदै हुनुहुन्छ"</string>
-    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"तपाईंले नयाँ प्रयोगकर्ता थप्नुभयो भने तपाईं अतिथि मोडबाट बाहिरिनु हुने छ र हालको अतिथि सत्रका सबै एप तथा डेटा मेटिने छ।"</string>
+    <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"तपाईंले नयाँ प्रयोगकर्ता हाल्नुभयो भने तपाईं अतिथि मोडबाट बाहिरिनु हुने छ र हालको अतिथि सत्रका सबै एप तथा डेटा मेटिने छ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"प्रयोगकर्ताको सीमा पुग्यो"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{एउटा प्रोफाइल मात्र बनाउन सकिन्छ।}other{तपाईं बढीमा # जना प्रयोगकर्ता सामेल गराउन सक्नुहुन्छ।}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"प्रयोगकर्ता हटाउन चाहनुहुन्छ?"</string>

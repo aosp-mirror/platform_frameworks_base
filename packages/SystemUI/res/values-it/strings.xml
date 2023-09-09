@@ -254,7 +254,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotazione automatica dello schermo"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Geolocalizzazione"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Salvaschermo"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla fotocamera"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accesso alla videocamera"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accesso al microfono"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponibile"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloccato"</string>
@@ -1084,7 +1084,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Aggiungi riquadro"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non aggiungerlo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleziona utente"</string>
-    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{C\'è # app attiva}many{Ci sono # app attive}other{Ci sono # app attive}}"</string>
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app è attiva}many{# di app sono attive}other{# app sono attive}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuove informazioni"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"App attive"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Queste app sono attive e in esecuzione, anche quando non le utilizzi. Questo migliora la loro funzionalità, ma influisce sulla durata della batteria."</string>

@@ -763,7 +763,7 @@
     <string name="permlab_readNetworkUsageHistory" msgid="8470402862501573795">"тармактын колдонулуш таржымалын окуу"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="1112962304941637102">"Колдонмого белгилүү бир тармактарга жана колдонмолорго байланыштуу тармактын колдонулушу жөнүндө таржымалды окуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_manageNetworkPolicy" msgid="6872549423152175378">"тармак саясатын башкаруу"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"Колдонмого тармак саясаттарын башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="1865663268764673296">"Колдонмого тармак эрежелерин башкаруу жана колдонмого мүнөздүү эрежелерди белгилөө мүмкүнчүлүгүн берет."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="7448790834938749041">"тармактын колдонулуш эсеп-кысабын өзгөртүү"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5076042642247205390">"Колдонмого желени башка колдонмолордун пайдалануусун башкарган тууралоолорду киргизүү уруксатын берет. Жөнөкөй колдонмолор үчүн эмес."</string>
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"эскертүүлөр менен иштөө"</string>
@@ -1716,7 +1716,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Түстөрдү инверсиялоо"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Түстөрдү тууралоо"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бир кол режими"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дагы караңгы"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Кошумча караңгылатуу"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Угуу түзмөктөрү"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> күйгүзүлдү."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Үндү катуулатуу/акырындатуу баскычтары басылып, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өчүрүлдү."</string>
