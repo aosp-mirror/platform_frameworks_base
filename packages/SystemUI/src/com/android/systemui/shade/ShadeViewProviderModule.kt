@@ -76,7 +76,7 @@ abstract class ShadeViewProviderModule {
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
             layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
-            return if (sceneContainerFlags.isEnabled()) {
+            return if (Flags.SCENE_CONTAINER_ENABLED && sceneContainerFlags.isEnabled()) {
                 val sceneWindowRootView =
                     layoutInflater.inflate(R.layout.scene_window_root, null) as SceneWindowRootView
                 sceneWindowRootView.init(
