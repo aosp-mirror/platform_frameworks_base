@@ -2513,9 +2513,7 @@ public class OomAdjuster {
                             }
                         }
 
-                        if (schedGroup < SCHED_GROUP_TOP_APP
-                                && cr.hasFlag(Context.BIND_SCHEDULE_LIKE_TOP_APP)
-                                && clientIsSystem) {
+                        if (cr.hasFlag(Context.BIND_SCHEDULE_LIKE_TOP_APP) && clientIsSystem) {
                             schedGroup = SCHED_GROUP_TOP_APP;
                             scheduleLikeTopApp = true;
                         }
