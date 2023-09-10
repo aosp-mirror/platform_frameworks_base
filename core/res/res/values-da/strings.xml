@@ -673,7 +673,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Hvis du vil bruge ansigtsoplåsning, skal du aktivere "<b>"Kameraadgang"</b>" under Indstillinger &gt; Privatliv"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfigurer flere måder at låse op på"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Tryk for at tilføje et fingeraftryk"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Oplåsning med fingeraftryk"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingeroplåsning"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Fingeraftrykssensoren kan ikke bruges"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Få den repareret."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Din ansigtsmodel kan ikke oprettes. Prøv igen."</string>
