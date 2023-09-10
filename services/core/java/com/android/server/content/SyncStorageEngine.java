@@ -1754,7 +1754,7 @@ public class SyncStorageEngine {
                     eventType = parser.next();
                 } while (eventType != XmlPullParser.END_DOCUMENT);
             }
-        } catch (XmlPullParserException e) {
+        } catch (XmlPullParserException | ArrayIndexOutOfBoundsException e) {
             Slog.w(TAG, "Error reading accounts", e);
             return;
         } catch (java.io.IOException e) {
