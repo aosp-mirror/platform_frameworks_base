@@ -291,7 +291,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Paralajmërim për kufirin prej <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplikacionet e punës"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Drita e natës"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Në perëndim të diellit"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Aktiv në perëndim"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Deri në lindje të diellit"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Aktive në <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Deri në <xliff:g id="TIME">%s</xliff:g>"</string>
